@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>예약 조회 - GRAFFORD</title>
+    <link rel="stylesheet" href="css/style.css" />
+    <script src="js/booking-reservations.js" defer></script>
+  </head>
+  <body>
+    <nav class="site-nav top-right-nav">
+      <a href="index.html" class="nav-logo" aria-label="홈으로 이동">
+        <img src="images/LOGO.png" alt="GRAFFORD LOGO" />
+      </a>
+      <a href="STORY.html">STORY</a>
+      <a href="ROOMS.html">ROOMS</a>
+      <a href="FACILITIES.html">FACILITIES</a>
+      <a href="RESERVATION.html">RESERVATION</a>
+    </nav>
+
+    <main class="content-section confirm-page reserveinfo-page">
+      <h1 class="confirm-title">예약 조회</h1>
+      <p class="confirm-summary">
+        예약 시 입력하신 성함과 발급된 예약번호(주문번호)를 입력해 주세요.
+      </p>
+
+      <form class="reserveinfo-form checkout-form" id="reserveinfo-form" novalidate>
+        <label class="confirm-label">
+          성함
+          <input
+            type="text"
+            name="lookupName"
+            id="lookup-name"
+            required
+            autocomplete="name"
+            placeholder="예약 시 입력한 이름"
+          />
+        </label>
+        <label class="confirm-label">
+          예약번호
+          <input
+            type="text"
+            name="lookupOrder"
+            id="lookup-order"
+            required
+            autocomplete="off"
+            placeholder="예: GRF-20260419-XXXXXX"
+          />
+        </label>
+        <div class="confirm-actions">
+          <button type="submit" class="btn confirm-pay-submit">조회하기</button>
+        </div>
+      </form>
+
+      <div
+        class="reserveinfo-result reserveinfo-result--error"
+        id="reserveinfo-error"
+        hidden
+      ></div>
+      <div
+        class="reserveinfo-result reserveinfo-result--ok"
+        id="reserveinfo-ok"
+        hidden
+      >
+        <h2 class="reserveinfo-result-title">예약 정보</h2>
+        <dl class="reserveinfo-dl">
+          <dt>예약번호</dt>
+          <dd id="res-order"></dd>
+          <dt>성함</dt>
+          <dd id="res-name"></dd>
+          <dt>연락처</dt>
+          <dd id="res-contact"></dd>
+          <dt>객실</dt>
+          <dd id="res-room"></dd>
+          <dt>일정</dt>
+          <dd id="res-schedule"></dd>
+          <dt>숙박</dt>
+          <dd id="res-nights"></dd>
+          <dt>추가 인원</dt>
+          <dd id="res-extra"></dd>
+          <dt>결제 금액</dt>
+          <dd id="res-amount"></dd>
+          <dt>결제 수단</dt>
+          <dd id="res-pay"></dd>
+        </dl>
+      </div>
+
+      <p class="confirm-back">
+        <a href="RESERVATION.html">예약하기</a>
+      </p>
+      <footer class="site-footer">© 2026 GRAFFORD. all rights reserved.</footer>
+    </main>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        var R = window.GraffordReservations;
+        var ROOM_LABEL = { A: "객실 A", B: "객실 B", C: "객실 C", D: "객실 D" };
+        var form = document.getElementById("reserveinfo-form");
+        var errEl = document.getElementById("reserveinfo-error");
+        var okEl = document.getElementById("reserveinfo-ok");
+
+        var params = new URLSearchParams(window.location.search);
+        var preOrder = params.get("orderNo");
+        if (preOrder) {
+          document.getElementById("lookup-order").value = preOrder;
+        }
+
+        function formatKRW(n) {
+          return Number(n).toLocaleString("ko-KR") + "원";
+        }
+
+        function showError(msg) {
+          okEl.hidden = true;
+          errEl.textContent = msg;
+          errEl.hidden = false;
+        }
+
+        function hideResults() {
+          errEl.hidden = true;
+          okEl.hidden = true;
+        }
+
+        form.addEventListener("submit", function (e) {
+          e.preventDefault();
+          hideResults();
+          if (!form.checkValidity()) {
+            form.reportValidity();
+            return;
+          }
+          if (!R) {
+            showError("조회 기능을 불러올 수 없습니다. 페이지를 새로고침해 주세요.");
+            return;
+          }
+          var name = document.getElementById("lookup-name").value;
+          var order = document.getElementById("lookup-order").value;
+          var found = R.findByNameAndOrder(name, order);
+          if (!found) {
+            showError(
+              "일치하는 예약을 찾을 수 없습니다. 성함·예약번호를 다시 확인해 주세요.",
+            );
+            return;
+          }
+          errEl.hidden = true;
+          okEl.hidden = false;
+          document.getElementById("res-order").textContent = found.orderNumber;
+          document.getElementById("res-name").textContent = found.guestName;
+          document.getElementById("res-contact").textContent = found.contact || "—";
+          document.getElementById("res-room").textContent =
+            ROOM_LABEL[found.room] || found.room || "—";
+          document.getElementById("res-schedule").textContent =
+            (found.checkIn || "—") + " ~ " + (found.checkOut || "—");
+          document.getElementById("res-nights").textContent =
+            (found.nights || 0) + "박";
+          document.getElementById("res-extra").textContent =
+            (found.extraGuests || 0) + "명";
+          document.getElementById("res-amount").textContent = formatKRW(
+            found.totalAmount || 0,
+          );
+          document.getElementById("res-pay").textContent =
+            found.paymentMethod === "bank"
+              ? "무통장입금"
+              : found.paymentMethod || "—";
+        });
+      });
+    </script>
+  </body>
+</html>

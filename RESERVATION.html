@@ -5,86 +5,620 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>RESERVATION - GRAFFORD</title>
     <link rel="stylesheet" href="css/style.css" />
+    <script src="js/nav-hero.js" defer></script>
+    <script src="js/booking-pricing.js" defer></script>
   </head>
   <body class="home-page">
-    <nav class="site-nav top-right-nav">
-      <a href="index.html" class="nav-logo" aria-label="홈으로 이동">
+    <nav class="site-nav top-right-nav nav-hero-hidden">
+      <a href="index.html" class="nav-logo" aria-label="Home">
         <img src="images/LOGO.png" alt="GRAFFORD LOGO" />
       </a>
-      <a href="index.html">HOME</a>
-      <a href="ROOMS.html">ROOMS</a>
       <a href="STORY.html">STORY</a>
+      <a href="ROOMS.html">ROOMS</a>
       <a href="FACILITIES.html">FACILITIES</a>
+      <a href="RESERVATION.html">RESERVATION</a>
     </nav>
 
     <section class="hero-section fullpage-section" id="hero">
       <div class="hero-media" aria-hidden="true">
-        <img src="images/reservation.jpeg" alt="" class="hero-slide is-active" />
+        <img
+          src="images/reservation.jpeg"
+          alt=""
+          class="hero-slide is-active"
+        />
         <div class="hero-overlay"></div>
       </div>
       <header class="site-header hero-header">
         <h1>RESERVATION</h1>
         <p>Simple and smooth booking</p>
       </header>
-      <button class="scroll-down-btn" id="scroll-down-btn" aria-label="다음 섹션으로 이동">
+      <button
+        class="scroll-down-btn"
+        id="scroll-down-btn"
+        aria-label="Scroll to booking"
+      >
         <span></span>
       </button>
     </section>
 
     <main class="content-section fullpage-section" id="content">
-      <section class="features">
-        <article class="feature scroll-fade">
-          <img src="images/reservation.jpeg" alt="예약 방식 이미지" />
-          <div class="feature-text">
-            <h3>How to Reserve</h3>
-            <p>전화와 이메일로 간편하게 예약할 수 있으며 문의 응답도 빠르게 진행됩니다.</p>
+      <div class="reservation-booking scroll-fade">
+        <div class="room-type-row">
+          <div class="room-type-bar" role="tablist" aria-label="Room type">
+            <button type="button" class="room-type-btn is-active" data-room="A">
+              A
+            </button>
+            <button type="button" class="room-type-btn" data-room="B">B</button>
+            <button type="button" class="room-type-btn" data-room="C">C</button>
+            <button type="button" class="room-type-btn" data-room="D">D</button>
           </div>
-        </article>
-        <article class="feature scroll-fade">
-          <img src="images/rooms.jpeg" alt="객실 선택 이미지" />
-          <div class="feature-text">
-            <h3>Choose Your Room</h3>
-            <p>일정과 취향에 맞는 객실 타입을 선택하고 원하는 옵션을 함께 지정할 수 있습니다.</p>
+          <a
+            href="reserveinfo.html"
+            class="btn reservation-lookup-btn"
+            >예약조회</a
+          >
+        </div>
+
+        <div class="room-copy-blocks">
+          <p class="room-detail-intro room-copy is-visible" data-room="A">
+            <strong>Room A</strong> &mdash; Minimal lines, calm mood. Standard
+            room. Base 2 guests, max 2.
+          </p>
+          <p class="room-detail-intro room-copy" data-room="B" hidden>
+            <strong>Room B</strong> &mdash; Bright layout, relaxed space. Base
+            2, max 2.
+          </p>
+          <p class="room-detail-intro room-copy" data-room="C" hidden>
+            <strong>Room C</strong> &mdash; Private feel, warm interior. Base 2,
+            max 4 (추가 인원 최대 2명).
+          </p>
+          <p class="room-detail-intro room-copy" data-room="D" hidden>
+            <strong>Room D</strong> &mdash; Larger floor plan, longer stays.
+            Base 2, max 6 (추가 인원 최대 4명).
+          </p>
+        </div>
+
+        <div class="reservation-pricing-bar" id="reservation-pricing-bar">
+          <div class="reservation-rate-row">
+            <span class="reservation-rate-label">평일 1박 요금</span>
+            <strong
+              class="reservation-rate-amount"
+              id="reservation-weekday-display"
+            ></strong>
           </div>
-        </article>
-        <article class="feature scroll-fade">
-          <img src="images/story.jpeg" alt="예약 확인 이미지" />
-          <div class="feature-text">
-            <h3>Confirmation</h3>
-            <p>예약 완료 후 확인 메시지를 전달드리며 체크인 전 필요한 안내를 미리 제공합니다.</p>
+          <p class="reservation-rate-note">
+            금요일·토요일에 해당하는 숙박 박마다 30,000원이 추가됩니다. 인원
+            추가 시 1인당 박마다 30,000원이 추가됩니다.
+          </p>
+        </div>
+
+        <div class="reservation-split">
+          <div class="reservation-gallery">
+            <div class="gallery-main-wrap">
+              <button
+                type="button"
+                class="gallery-nav gallery-prev"
+                id="gallery-prev"
+                aria-label="Previous photo"
+              >
+                &#10094;
+              </button>
+              <img
+                class="gallery-main-img"
+                id="gallery-main-img"
+                src="images/A00.jpg"
+                alt="Room photo"
+              />
+              <button
+                type="button"
+                class="gallery-nav gallery-next"
+                id="gallery-next"
+                aria-label="Next photo"
+              >
+                &#10095;
+              </button>
+            </div>
+            <div class="gallery-thumbs" id="gallery-thumbs"></div>
           </div>
-        </article>
-      </section>
+
+          <div class="reservation-calendar-panel">
+            <div class="booking-calendar" id="booking-calendar">
+              <h3 class="cal-year-title" id="cal-year-label"></h3>
+              <div class="cal-header">
+                <button
+                  type="button"
+                  class="cal-nav"
+                  id="cal-prev"
+                  aria-label="Previous month"
+                >
+                  &#10094;
+                </button>
+                <span class="cal-month-label" id="cal-month-label"></span>
+                <button
+                  type="button"
+                  class="cal-nav"
+                  id="cal-next"
+                  aria-label="Next month"
+                >
+                  &#10095;
+                </button>
+              </div>
+              <div class="cal-weekdays">
+                <span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span
+                ><span>Thu</span><span>Fri</span><span>Sat</span>
+              </div>
+              <div class="cal-grid" id="cal-grid"></div>
+            </div>
+            <p class="cal-selection-summary">
+              Check-in <strong id="cal-checkin">&mdash;</strong> &middot;
+              Check-out <strong id="cal-checkout">&mdash;</strong>
+            </p>
+            <div class="reservation-extra-block">
+              <label class="reservation-extra-label" for="extra-guests-select"
+                >인원 추가</label
+              >
+              <select
+                id="extra-guests-select"
+                class="reservation-extra-select"
+                aria-describedby="extra-guests-hint"
+              ></select>
+              <p class="reservation-extra-hint" id="extra-guests-hint"></p>
+            </div>
+            <div class="reservation-price-summary" id="reservation-price-summary">
+              <p
+                class="reservation-price-placeholder"
+                id="reservation-price-placeholder"
+              >
+                체크인·체크아웃을 선택하면 요금이 계산됩니다.
+              </p>
+              <div
+                class="reservation-price-lines"
+                id="reservation-price-lines"
+                hidden
+              ></div>
+              <p class="reservation-price-total" id="reservation-price-total" hidden></p>
+            </div>
+            <p class="availability-note" id="availability-note">
+              Select check-in and check-out to see availability for this room.
+            </p>
+            <a
+              href="confirm.html"
+              class="btn reserve-cta"
+              id="reserve-confirm-link"
+              >예약하기</a
+            >
+          </div>
+        </div>
+      </div>
+
       <footer class="site-footer">© 2026 GRAFFORD. all rights reserved.</footer>
     </main>
 
     <script>
       document.addEventListener("DOMContentLoaded", function () {
-        const fadeTargets = document.querySelectorAll(".scroll-fade");
-        const scrollButton = document.getElementById("scroll-down-btn");
-        const nextSection = document.getElementById("content");
+        var scrollButton = document.getElementById("scroll-down-btn");
+        var nextSection = document.getElementById("content");
+        var fadeEl = document.querySelector(".reservation-booking.scroll-fade");
 
-        const observer = new IntersectionObserver(
-          function (entries) {
-            entries.forEach(function (entry) {
-              if (entry.isIntersecting) {
-                entry.target.classList.add("is-visible");
-                observer.unobserve(entry.target);
-              }
+        var roomImages = {
+          A: ["images/A00.jpg", "images/A01.jpg", "images/A02.jpg"],
+          B: ["images/B00.jpg", "images/B01.jpg", "images/B02.jpg"],
+          C: ["images/C00.jpg", "images/C01.jpg", "images/C02.jpg"],
+          D: ["images/D00.jpg", "images/D01.jpg", "images/D02.jpg"],
+        };
+
+        var currentRoom = "A";
+        var galleryIndex = 0;
+
+        var mainImg = document.getElementById("gallery-main-img");
+        var thumbsEl = document.getElementById("gallery-thumbs");
+        var btnPrev = document.getElementById("gallery-prev");
+        var btnNext = document.getElementById("gallery-next");
+        var typeButtons = document.querySelectorAll(".room-type-btn");
+        var confirmLink = document.getElementById("reserve-confirm-link");
+        var roomCopies = document.querySelectorAll(".room-copy");
+
+        var calYearLabel = document.getElementById("cal-year-label");
+        var calMonthLabel = document.getElementById("cal-month-label");
+        var calGrid = document.getElementById("cal-grid");
+        var calPrev = document.getElementById("cal-prev");
+        var calNext = document.getElementById("cal-next");
+        var calCheckinEl = document.getElementById("cal-checkin");
+        var calCheckoutEl = document.getElementById("cal-checkout");
+        var availabilityEl = document.getElementById("availability-note");
+        var P = window.GraffordBookingPricing;
+        var extraGuestsSelect = document.getElementById("extra-guests-select");
+        var extraGuestsHint = document.getElementById("extra-guests-hint");
+        var weekdayDisplay = document.getElementById("reservation-weekday-display");
+        var pricePlaceholder = document.getElementById("reservation-price-placeholder");
+        var priceLinesEl = document.getElementById("reservation-price-lines");
+        var priceTotalEl = document.getElementById("reservation-price-total");
+
+        var viewDate = new Date();
+        viewDate.setDate(1);
+        var checkIn = null;
+        var checkOut = null;
+
+        function pad(n) {
+          return n < 10 ? "0" + n : String(n);
+        }
+
+        function formatYMD(d) {
+          if (!d) return "";
+          return (
+            d.getFullYear() +
+            "-" +
+            pad(d.getMonth() + 1) +
+            "-" +
+            pad(d.getDate())
+          );
+        }
+
+        function formatDisplay(d) {
+          if (!d) return "\u2014";
+          return (
+            d.getFullYear() +
+            "." +
+            pad(d.getMonth() + 1) +
+            "." +
+            pad(d.getDate())
+          );
+        }
+
+        function formatKRW(n) {
+          return n.toLocaleString("ko-KR") + "\uc6d0";
+        }
+
+        function getExtraGuests() {
+          if (!extraGuestsSelect || extraGuestsSelect.disabled) {
+            return 0;
+          }
+          return parseInt(extraGuestsSelect.value, 10) || 0;
+        }
+
+        function rebuildExtraSelect() {
+          if (!P || !extraGuestsSelect) {
+            return;
+          }
+          var max = P.MAX_EXTRA_GUESTS[currentRoom];
+          var cur = getExtraGuests();
+          extraGuestsSelect.innerHTML = "";
+          for (var i = 0; i <= max; i++) {
+            var opt = document.createElement("option");
+            opt.value = String(i);
+            opt.textContent =
+              i === 0 ? "\ucd94\uac00 \uc5c6\uc74c (0\uba85)" : "\ucd94\uac00 " + i + "\uba85";
+            extraGuestsSelect.appendChild(opt);
+          }
+          if (cur > max) {
+            cur = max;
+          }
+          extraGuestsSelect.value = String(cur);
+          if (max === 0) {
+            if (extraGuestsHint) {
+              extraGuestsHint.textContent =
+                "A\xb7B\ub3d9\uc740 \uae30\uc900 \uc778\uc6d0 \uc678 \ucd94\uac00\uac00 \ubd88\uac00\ud569\ub2c8\ub2e4.";
+            }
+            extraGuestsSelect.disabled = true;
+          } else {
+            if (extraGuestsHint) {
+              extraGuestsHint.textContent =
+                "C\ub3d9 \ucd5c\ub300 2\uba85, D\ub3d9 \ucd5c\ub300 4\uba85\uae4c\uc9c0 \ucd94\uac00\ud560 \uc218 \uc788\uc2b5\ub2c8\ub2e4. (\ubc15\ub2f9 " +
+                formatKRW(P.EXTRA_PER_PERSON_PER_NIGHT) +
+                "/\uc778)";
+            }
+            extraGuestsSelect.disabled = false;
+          }
+        }
+
+        function updateWeekdayRateDisplay() {
+          if (!P || !weekdayDisplay) {
+            return;
+          }
+          weekdayDisplay.textContent = formatKRW(P.ROOM_WEEKDAY_BASE[currentRoom]);
+        }
+
+        function updatePricingSummary() {
+          if (!P || !pricePlaceholder || !priceLinesEl || !priceTotalEl) {
+            return;
+          }
+          var ci = checkIn ? formatYMD(checkIn) : "";
+          var co = checkOut ? formatYMD(checkOut) : "";
+          if (!checkIn || !checkOut || !P.countNights(ci, co)) {
+            pricePlaceholder.hidden = false;
+            priceLinesEl.hidden = true;
+            priceTotalEl.hidden = true;
+            priceLinesEl.innerHTML = "";
+            return;
+          }
+          var eg = P.clampExtra(currentRoom, getExtraGuests());
+          if (extraGuestsSelect) {
+            extraGuestsSelect.value = String(eg);
+          }
+          var q = P.computeStay(currentRoom, ci, co, eg);
+          pricePlaceholder.hidden = true;
+          priceLinesEl.hidden = false;
+          priceTotalEl.hidden = false;
+          priceLinesEl.innerHTML = "";
+          function line(text) {
+            var p = document.createElement("p");
+            p.className = "reservation-price-line";
+            p.textContent = text;
+            priceLinesEl.appendChild(p);
+          }
+          line(
+            "\uac15\uc2e4(\ud3c9\uc77c) " +
+              formatKRW(q.baseNightly) +
+              " \xd7 " +
+              q.nights +
+              "\ubc15 = " +
+              formatKRW(q.baseTotal),
+          );
+          if (q.weekendSurcharge > 0) {
+            line(
+              "\uc8fc\ub9d0 \ucd94\uac00 " +
+                formatKRW(P.WEEKEND_SURCHARGE_PER_NIGHT) +
+                " \xd7 " +
+                q.weekendNights +
+                "\ubc15 = " +
+                formatKRW(q.weekendSurcharge),
+            );
+          }
+          if (q.extraGuestTotal > 0) {
+            line(
+              "\uc778\uc6d0 \ucd94\uac00 " +
+                formatKRW(P.EXTRA_PER_PERSON_PER_NIGHT) +
+                " \xd7 " +
+                q.extraGuests +
+                "\uba85 \xd7 " +
+                q.nights +
+                "\ubc15 = " +
+                formatKRW(q.extraGuestTotal),
+            );
+          }
+          priceTotalEl.textContent =
+            "\ucd5c\uc885 \uc219\uc18c \uc694\uae08 " + formatKRW(q.grandTotal);
+        }
+
+        function updateConfirmLink() {
+          var params = new URLSearchParams();
+          params.set("room", currentRoom);
+          if (checkIn) params.set("checkIn", formatYMD(checkIn));
+          if (checkOut) params.set("checkOut", formatYMD(checkOut));
+          params.set("extraGuests", String(getExtraGuests()));
+          confirmLink.href = "confirm.html?" + params.toString();
+        }
+
+        function syncRoomCopy() {
+          roomCopies.forEach(function (el) {
+            var r = el.getAttribute("data-room");
+            if (r === currentRoom) {
+              el.hidden = false;
+              el.classList.add("is-visible");
+            } else {
+              el.hidden = true;
+              el.classList.remove("is-visible");
+            }
+          });
+        }
+
+        function renderGallery() {
+          var imgs = roomImages[currentRoom] || [];
+          var label = "Room " + currentRoom;
+          if (!imgs.length) {
+            mainImg.removeAttribute("src");
+            mainImg.alt = "No photos";
+            thumbsEl.innerHTML = "";
+            return;
+          }
+          galleryIndex = Math.min(galleryIndex, imgs.length - 1);
+          mainImg.src = imgs[galleryIndex];
+          mainImg.alt = label + " photo " + (galleryIndex + 1);
+          thumbsEl.innerHTML = "";
+          imgs.forEach(function (src, i) {
+            var b = document.createElement("button");
+            b.type = "button";
+            b.className =
+              "gallery-thumb" + (i === galleryIndex ? " is-active" : "");
+            b.setAttribute("aria-label", "Photo " + (i + 1));
+            var im = document.createElement("img");
+            im.src = src;
+            im.alt = "";
+            b.appendChild(im);
+            b.addEventListener("click", function () {
+              galleryIndex = i;
+              renderGallery();
             });
-          },
-          { threshold: 0.2 },
-        );
+            thumbsEl.appendChild(b);
+          });
+          updatePricingSummary();
+          updateConfirmLink();
+        }
 
-        fadeTargets.forEach(function (el) {
-          observer.observe(el);
+        function setRoom(room) {
+          currentRoom = room;
+          galleryIndex = 0;
+          typeButtons.forEach(function (btn) {
+            btn.classList.toggle(
+              "is-active",
+              btn.getAttribute("data-room") === room,
+            );
+          });
+          syncRoomCopy();
+          rebuildExtraSelect();
+          updateWeekdayRateDisplay();
+          renderGallery();
+        }
+
+        typeButtons.forEach(function (btn) {
+          btn.addEventListener("click", function () {
+            setRoom(btn.getAttribute("data-room"));
+          });
         });
+
+        if (extraGuestsSelect) {
+          extraGuestsSelect.addEventListener("change", function () {
+            updatePricingSummary();
+            updateConfirmLink();
+          });
+        }
+
+        btnPrev.addEventListener("click", function () {
+          var imgs = roomImages[currentRoom];
+          if (!imgs || !imgs.length) return;
+          galleryIndex = (galleryIndex - 1 + imgs.length) % imgs.length;
+          renderGallery();
+        });
+
+        btnNext.addEventListener("click", function () {
+          var imgs = roomImages[currentRoom];
+          if (!imgs || !imgs.length) return;
+          galleryIndex = (galleryIndex + 1) % imgs.length;
+          renderGallery();
+        });
+
+        function sameDay(a, b) {
+          return (
+            a &&
+            b &&
+            a.getFullYear() === b.getFullYear() &&
+            a.getMonth() === b.getMonth() &&
+            a.getDate() === b.getDate()
+          );
+        }
+
+        function renderCalendar() {
+          var y = viewDate.getFullYear();
+          var m = viewDate.getMonth();
+          if (calYearLabel) {
+            calYearLabel.textContent = y + "\uB144";
+          }
+          if (calMonthLabel) {
+            calMonthLabel.textContent = m + 1 + "\uC6D4";
+          }
+
+          var first = new Date(y, m, 1);
+          var startPad = first.getDay();
+          var lastDay = new Date(y, m + 1, 0).getDate();
+
+          calGrid.innerHTML = "";
+          for (var i = 0; i < startPad; i++) {
+            var empty = document.createElement("div");
+            empty.className = "cal-cell cal-empty";
+            calGrid.appendChild(empty);
+          }
+
+          var today = new Date();
+          today.setHours(0, 0, 0, 0);
+
+          for (var d = 1; d <= lastDay; d++) {
+            var cellDate = new Date(y, m, d);
+            var btn = document.createElement("button");
+            btn.type = "button";
+            btn.className = "cal-cell cal-day";
+            btn.textContent = String(d);
+
+            if (cellDate < today) {
+              btn.disabled = true;
+              btn.classList.add("cal-past");
+            }
+
+            if (checkIn && sameDay(cellDate, checkIn))
+              btn.classList.add("cal-checkin");
+            if (checkOut && sameDay(cellDate, checkOut))
+              btn.classList.add("cal-checkout");
+            if (
+              checkIn &&
+              checkOut &&
+              cellDate > checkIn &&
+              cellDate < checkOut
+            ) {
+              btn.classList.add("cal-range");
+            }
+
+            (function (dateCopy) {
+              btn.addEventListener("click", function () {
+                if (btn.disabled) return;
+                if (!checkIn || (checkIn && checkOut)) {
+                  checkIn = new Date(dateCopy);
+                  checkOut = null;
+                } else {
+                  if (dateCopy < checkIn) {
+                    checkOut = new Date(checkIn);
+                    checkIn = new Date(dateCopy);
+                  } else if (sameDay(dateCopy, checkIn)) {
+                    checkOut = null;
+                  } else {
+                    checkOut = new Date(dateCopy);
+                  }
+                }
+                calCheckinEl.textContent = formatDisplay(checkIn);
+                calCheckoutEl.textContent = checkOut
+                  ? formatDisplay(checkOut)
+                  : "\u2014";
+
+                if (checkIn && checkOut) {
+                  availabilityEl.textContent =
+                    "Available for Room " +
+                    currentRoom +
+                    " from " +
+                    formatDisplay(checkIn) +
+                    " to " +
+                    formatDisplay(checkOut) +
+                    ".";
+                  availabilityEl.classList.add("is-ok");
+                } else if (checkIn) {
+                  availabilityEl.textContent = "Select check-out date.";
+                  availabilityEl.classList.remove("is-ok");
+                } else {
+                  availabilityEl.textContent =
+                    "Select check-in and check-out to see availability for this room.";
+                  availabilityEl.classList.remove("is-ok");
+                }
+                updatePricingSummary();
+                updateConfirmLink();
+                renderCalendar();
+              });
+            })(cellDate);
+
+            calGrid.appendChild(btn);
+          }
+        }
+
+        calPrev.addEventListener("click", function () {
+          viewDate.setMonth(viewDate.getMonth() - 1);
+          renderCalendar();
+        });
+
+        calNext.addEventListener("click", function () {
+          viewDate.setMonth(viewDate.getMonth() + 1);
+          renderCalendar();
+        });
+
+        if (fadeEl) {
+          var obs = new IntersectionObserver(
+            function (entries) {
+              entries.forEach(function (e) {
+                if (e.isIntersecting) {
+                  e.target.classList.add("is-visible");
+                  obs.unobserve(e.target);
+                }
+              });
+            },
+            { threshold: 0.12 },
+          );
+          obs.observe(fadeEl);
+        }
 
         if (scrollButton && nextSection) {
           scrollButton.addEventListener("click", function () {
             nextSection.scrollIntoView({ behavior: "smooth", block: "start" });
           });
         }
+
+        setRoom("A");
+        renderCalendar();
+        updateConfirmLink();
       });
     </script>
   </body>

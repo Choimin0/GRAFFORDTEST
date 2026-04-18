@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>결제 진행 - GRAFFORD</title>
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
+  <body>
+    <nav class="site-nav top-right-nav">
+      <a href="index.html" class="nav-logo" aria-label="홈으로 이동">
+        <img src="images/LOGO.png" alt="GRAFFORD LOGO" />
+      </a>
+      <a href="STORY.html">STORY</a>
+      <a href="ROOMS.html">ROOMS</a>
+      <a href="FACILITIES.html">FACILITIES</a>
+      <a href="RESERVATION.html">RESERVATION</a>
+    </nav>
+
+    <main class="content-section confirm-page payment-page">
+      <h1 class="confirm-title">결제 진행</h1>
+      <p class="confirm-summary">실제 결제 모듈을 연결하기 전 단계의 데모 페이지입니다. 이전 화면에서 전달된 예약·결제 정보는 주소줄의 쿼리 문자열에서 확인할 수 있습니다.</p>
+      <div class="confirm-total-box payment-summary-box" id="payment-summary" hidden>
+        <p class="confirm-total-line" id="payment-order-line"></p>
+        <p class="confirm-total-line" id="payment-amount-line"></p>
+      </div>
+      <p class="confirm-back">
+        <a href="RESERVATION.html">예약으로</a>
+        ·
+        <a href="ROOMS.html">객실 안내</a>
+      </p>
+      <footer class="site-footer">© 2026 GRAFFORD. all rights reserved.</footer>
+    </main>
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        var params = new URLSearchParams(window.location.search);
+        var orderNo = params.get("orderNo");
+        var total = params.get("totalAmount");
+        var box = document.getElementById("payment-summary");
+        if (!orderNo && !total) {
+          return;
+        }
+        box.hidden = false;
+        if (orderNo) {
+          document.getElementById("payment-order-line").textContent =
+            "예약번호(서버 저장): " + orderNo;
+        }
+        if (total) {
+          document.getElementById("payment-amount-line").textContent =
+            "결제 금액: " +
+            Number(total).toLocaleString("ko-KR") +
+            "원";
+        }
+      });
+    </script>
+  </body>
+</html>
