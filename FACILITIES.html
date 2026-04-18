@@ -1,39 +1,107 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ko">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>FACILITIES - GRAFFORD</title>
-  <link rel="stylesheet" href="css/style.css">
-</head>
-<body>
-  <header class="site-header">
-    <h1>FACILITIES</h1>
-    <p>GRAFFORD 시설 안내</p>
-  </header>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>FACILITIES - GRAFFORD</title>
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
+  <body class="home-page">
+    <nav class="site-nav top-right-nav">
+      <a href="index.html" class="nav-logo" aria-label="홈으로 이동">
+        <img src="images/LOGO.png" alt="GRAFFORD LOGO" />
+      </a>
+      <a href="index.html">HOME</a>
+      <a href="STORY.html">STORY</a>
+      <a href="ROOMS.html">ROOMS</a>
+      <a href="RESERVATION.html">RESERVATION</a>
+    </nav>
 
-  <nav class="site-nav">
-    <a href="index.html">HOME</a>
-    <a href="ROOMS.html">ROOMS</a>
-    <a href="FACILITIES.html">FACILITIES</a>
-    <a href="LOCATION.html">LOCATION</a>
-    <a href="RESERVATION.html">RESERVATION</a>
-    <a href="CONTACT.html">CONTACT</a>
-  </nav>
-
-  <main>
-    <section>
-      <h2>시설 안내</h2>
-      <ul>
-        <li>무료 와이파이 및 주차</li>
-        <li>피트니스 센터, 실내 수영장</li>
-        <li>셀프 체크인 & 체크아웃 시스템</li>
-      </ul>
+    <section class="hero-section fullpage-section" id="hero">
+      <div class="hero-media" aria-hidden="true">
+        <img src="images/space.jpeg" alt="" class="hero-slide is-active" />
+        <div class="hero-overlay"></div>
+      </div>
+      <header class="site-header hero-header">
+        <h1>FACILITIES</h1>
+        <p>Complete comfort in one stay</p>
+      </header>
+      <button
+        class="scroll-down-btn"
+        id="scroll-down-btn"
+        aria-label="다음 섹션으로 이동"
+      >
+        <span></span>
+      </button>
     </section>
-  </main>
 
-  <footer class="site-footer">
-    © 2024 GRAFFORD. 모든 권리 보유.
-  </footer>
-</body>
+    <main class="content-section fullpage-section" id="content">
+      <section class="features">
+        <article class="feature scroll-fade">
+          <img src="images/space.jpeg" alt="공용 공간 이미지" />
+          <div class="feature-text">
+            <h3>Lounge</h3>
+            <p>
+              아늑한 라운지에서 커피 한 잔과 함께 편안한 시간을 보낼 수
+              있습니다. <br /><br />
+              운영시간 :<br />
+              월~금 17:00~21:00
+            </p>
+          </div>
+        </article>
+        <article class="feature scroll-fade">
+          <img src="images/mainimg2.jpg" alt="야외 시설 이미지" />
+          <div class="feature-text">
+            <h3>Outdoor Jacuzzi</h3>
+            <p>
+              탁 트인 분위기의 야외 자쿠지에서 하루의 피로를 편안하게 풀 수
+              있습니다.<br />
+              멋쟁이 토마토가 되어버려.
+            </p>
+          </div>
+        </article>
+        <article class="feature scroll-fade">
+          <img src="images/mainimg1.jpg" alt="부대 서비스 이미지" />
+          <div class="feature-text">
+            <h3>Extra Services</h3>
+            <p>
+              와이파이, 주차, 카페 이용 등 숙박에 필요한 편의 서비스를 함께
+              제공합니다.
+            </p>
+          </div>
+        </article>
+      </section>
+      <footer class="site-footer">© 2026 GRAFFORD. all rights reserved.</footer>
+    </main>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        const fadeTargets = document.querySelectorAll(".scroll-fade");
+        const scrollButton = document.getElementById("scroll-down-btn");
+        const nextSection = document.getElementById("content");
+
+        const observer = new IntersectionObserver(
+          function (entries) {
+            entries.forEach(function (entry) {
+              if (entry.isIntersecting) {
+                entry.target.classList.add("is-visible");
+                observer.unobserve(entry.target);
+              }
+            });
+          },
+          { threshold: 0.2 },
+        );
+
+        fadeTargets.forEach(function (el) {
+          observer.observe(el);
+        });
+
+        if (scrollButton && nextSection) {
+          scrollButton.addEventListener("click", function () {
+            nextSection.scrollIntoView({ behavior: "smooth", block: "start" });
+          });
+        }
+      });
+    </script>
+  </body>
 </html>

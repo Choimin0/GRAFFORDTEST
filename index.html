@@ -3,22 +3,31 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>GRAFFORD - 숙소 메인 홈페이지</title>
+    <title>GRAFFORD - 얄리얄리얄라셩</title>
     <link rel="stylesheet" href="css/style.css" />
   </head>
   <body class="home-page">
     <nav class="site-nav top-right-nav">
+      <a href="index.html" class="nav-logo" aria-label="홈으로 이동">
+        <img src="images/LOGO.png" alt="GRAFFORD LOGO" />
+      </a>
+      <a href="STORY.html">STORY</a>
       <a href="ROOMS.html">ROOMS</a>
       <a href="FACILITIES.html">FACILITIES</a>
-      <a href="LOCATION.html">LOCATION</a>
       <a href="RESERVATION.html">RESERVATION</a>
-      <a href="CONTACT.html">CONTACT</a>
     </nav>
 
     <section class="hero-section fullpage-section" id="hero">
+      <div class="hero-media" aria-hidden="true">
+        <img src="images/mainimg0.jpg" alt="" class="hero-slide is-active" />
+        <img src="images/reservation.jpeg" alt="" class="hero-slide" />
+        <img src="images/rooms.jpeg" alt="" class="hero-slide" />
+        <img src="images/story.jpeg" alt="" class="hero-slide" />
+        <div class="hero-overlay"></div>
+      </div>
       <header class="site-header hero-header">
         <h1>GRAFFORD</h1>
-        <p>thank you very much for your visit ipnida</p>
+        <p>The tranquility the earth conveys</p>
       </header>
       <button
         class="scroll-down-btn"
@@ -43,6 +52,7 @@
           </div>
         </article>
         <article class="feature scroll-fade">
+          <img src="images/mainimg2.jpg" alt="Private Terrace 이미지" />
           <div class="feature-text">
             <h3>Private Terrace</h3>
             <p>
@@ -50,34 +60,15 @@
               비록 사진은 암시롱거나 들여온 거지만요.
             </p>
           </div>
-          <img src="images/mainimg2.jpg" alt="Private Terrace 이미지" />
         </article>
         <article class="feature scroll-fade">
-          <div class="image-slider" id="variable-options-slider">
-            <button
-              class="slider-arrow prev"
-              id="slider-prev"
-              aria-label="이전 이미지"
-              type="button"
-            >
-              &#10094;
-            </button>
-            <img src="images/A.jpg" alt="Variable Options 이미지 A" id="slider-image" />
-            <button
-              class="slider-arrow next"
-              id="slider-next"
-              aria-label="다음 이미지"
-              type="button"
-            >
-              &#10095;
-            </button>
-          </div>
+          <img src="images/mainimg3.jpg" alt="Variable Options 이미지" />
           <div class="feature-text">
             <h3>Variable Options</h3>
             <p>
-              무려무려 4개의 동을 운영하는 바람에<br />
-              선택지가 왕왕킹왕짱이랍니다요.<br />
-              2동에서부터 5동까지 옵션 제공.
+              자랑거리를<br />
+              만들어보자<br />
+              옵션이미지!
             </p>
           </div>
         </article>
@@ -94,7 +85,9 @@
         const prevButton = document.getElementById("slider-prev");
         const nextButton = document.getElementById("slider-next");
         const sliderImages = ["images/A.jpg", "images/B.jpg", "images/C.jpg"];
+        const heroSlides = document.querySelectorAll(".hero-slide");
         let sliderIndex = 0;
+        let heroIndex = 0;
 
         const observer = new IntersectionObserver(
           function (entries) {
@@ -135,7 +128,8 @@
 
         if (prevButton) {
           prevButton.addEventListener("click", function () {
-            sliderIndex = (sliderIndex - 1 + sliderImages.length) % sliderImages.length;
+            sliderIndex =
+              (sliderIndex - 1 + sliderImages.length) % sliderImages.length;
             showSliderImage(sliderIndex);
           });
         }
@@ -145,6 +139,14 @@
             sliderIndex = (sliderIndex + 1) % sliderImages.length;
             showSliderImage(sliderIndex);
           });
+        }
+
+        if (heroSlides.length > 1) {
+          setInterval(function () {
+            heroSlides[heroIndex].classList.remove("is-active");
+            heroIndex = (heroIndex + 1) % heroSlides.length;
+            heroSlides[heroIndex].classList.add("is-active");
+          }, 5000);
         }
       });
     </script>
