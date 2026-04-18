@@ -4,6 +4,7 @@
   --grafford-dark-brown: #3a3531;
   --grafford-earthy-green: #53624d;
   --chocolate-brown: #866055;
+  --navigate: #cfb9a1;
 }
 
 * {
@@ -125,11 +126,7 @@ html {
   padding-left: clamp(3.25rem, 12vw, 5rem);
   min-height: calc(2 * (0.55rem + 1.5rem + 0.55rem));
   background-color: rgba(83, 98, 77, 0.88);
-  background-color: color-mix(
-    in srgb,
-    var(--grafford-earthy-green) 88%,
-    transparent
-  );
+  background-color: color-mix(in srgb, var(--navigate) 88%, transparent);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
   z-index: 1000;
@@ -606,32 +603,32 @@ iframe.map {
     font-size: 2rem;
   }
 
-  /* Mobile: logo in flow; links wrap with consistent spacing */
+  /* Mobile: logo stays left, menu links shift right */
   .top-right-nav {
     top: 0;
     left: 0;
     right: 0;
     width: 100%;
-    justify-content: flex-start;
+    justify-content: flex-end;
     align-items: center;
     align-content: center;
     flex-wrap: wrap;
     gap: 0.45rem 0.65rem;
     row-gap: 0.5rem;
     padding: 0.7rem 0.75rem;
-    padding-left: 0.75rem;
+    padding-left: 3.1rem;
     min-height: 0;
   }
 
   .top-right-nav .nav-logo,
   .site-nav.top-right-nav .nav-logo {
-    position: relative;
-    left: auto;
-    top: auto;
-    transform: none;
+    position: absolute;
+    left: 0.75rem;
+    top: 50%;
+    transform: translateY(-50%);
     flex-shrink: 0;
-    margin-right: 0.15rem;
-    align-self: center;
+    margin-right: 0;
+    align-self: auto;
   }
 
   .top-right-nav .nav-logo img {
@@ -671,6 +668,36 @@ iframe.map {
     order: 2;
   }
 
+  /* ROOMS mobile layout: image (100%) -> text -> reserve button */
+  .rooms-features .room-feature {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0;
+  }
+
+  .rooms-features .room-feature .room-image-slot {
+    order: 1;
+    width: 100%;
+  }
+
+  .rooms-features .room-feature .room-slot-gallery {
+    width: 100%;
+  }
+
+  .rooms-features .room-feature .feature-text {
+    order: 2;
+    width: 100%;
+    min-height: auto;
+    height: auto;
+    padding: 1rem 0.75rem 1.2rem;
+  }
+
+  .rooms-features .room-feature .reserve-btn {
+    margin-top: 0.7rem;
+    align-self: flex-start;
+  }
+
   .feature img {
     height: 180px;
   }
@@ -702,6 +729,7 @@ iframe.map {
   .top-right-nav {
     gap: 0.35rem 0.45rem;
     padding: 0.6rem 0.55rem;
+    padding-left: 2.55rem;
   }
 
   .top-right-nav > a:not(.nav-logo) {
@@ -713,6 +741,11 @@ iframe.map {
 
   .top-right-nav .nav-logo img {
     height: 12px;
+  }
+
+  .top-right-nav .nav-logo,
+  .site-nav.top-right-nav .nav-logo {
+    left: 0.55rem;
   }
 }
 
