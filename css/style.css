@@ -635,7 +635,7 @@ iframe.map {
   }
 
   .top-right-nav .nav-logo img {
-    height: 22px;
+    height: 13px;
   }
 
   .top-right-nav > a:not(.nav-logo) {
@@ -646,7 +646,7 @@ iframe.map {
     min-height: 44px;
     display: inline-flex;
     align-items: center;
-    padding: 0.2rem 0.28rem;
+    padding: 0.12rem 0.14rem;
     box-sizing: border-box;
   }
 
@@ -657,8 +657,18 @@ iframe.map {
 
   .feature {
     grid-template-columns: 1fr;
+    grid-template-rows: auto auto;
     margin: 3.5vh 0;
     min-height: auto;
+  }
+
+  .feature > img,
+  .feature > .image-slider {
+    order: 1;
+  }
+
+  .feature > .feature-text {
+    order: 2;
   }
 
   .feature img {
@@ -698,11 +708,11 @@ iframe.map {
     font-size: 0.76rem;
     letter-spacing: 0;
     min-height: 40px;
-    padding: 0.12rem 0.18rem;
+    padding: 0.08rem 0.1rem;
   }
 
   .top-right-nav .nav-logo img {
-    height: 20px;
+    height: 12px;
   }
 }
 
