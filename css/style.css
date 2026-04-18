@@ -637,7 +637,7 @@ iframe.map {
   .top-right-nav .nav-logo,
   .site-nav.top-right-nav .nav-logo {
     position: absolute;
-    left: 3rem;
+    left: 0.65rem;
     top: 50%;
     transform: translateY(-50%);
     flex-shrink: 0;
