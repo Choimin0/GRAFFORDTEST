@@ -3,6 +3,9 @@
   "private": true,
   "type": "module",
   "dependencies": {
-    "@vercel/postgres": "^0.10.0"
+    "pg": "^8.20.0"
+  },
+  "devDependencies": {
+    "vercel": "^51.7.0"
   }
 }

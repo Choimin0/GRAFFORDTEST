@@ -421,6 +421,9 @@
                 var msg =
                   (result.data && result.data.error) ||
                   "저장에 실패했습니다. (" + result.status + ")";
+                if (result.data && result.data.code) {
+                  msg += " [코드: " + result.data.code + "]";
+                }
                 throw new Error(msg);
               }
               var record = {

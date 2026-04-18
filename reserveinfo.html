@@ -21,7 +21,9 @@
     <main class="content-section confirm-page reserveinfo-page">
       <h1 class="confirm-title">예약 조회</h1>
       <p class="confirm-summary">
-        예약 시 입력하신 성함과 발급된 예약번호(주문번호)를 입력해 주세요.
+        예약 시 입력하신 성함과 발급된 예약번호(주문번호)를 입력해 주세요. 서버에
+        저장된 예약은 DB에서, 무통장 입금만 이 기기에 저장된 경우에는 브라우저
+        저장소에서 조회합니다.
       </p>
 
       <form class="reserveinfo-form checkout-form" id="reserveinfo-form" novalidate>
@@ -63,6 +65,7 @@
         hidden
       >
         <h2 class="reserveinfo-result-title">예약 정보</h2>
+        <p class="reserveinfo-source" id="reserveinfo-source" hidden></p>
         <dl class="reserveinfo-dl">
           <dt>예약번호</dt>
           <dd id="res-order"></dd>
@@ -98,6 +101,7 @@
         var form = document.getElementById("reserveinfo-form");
         var errEl = document.getElementById("reserveinfo-error");
         var okEl = document.getElementById("reserveinfo-ok");
+        var sourceEl = document.getElementById("reserveinfo-source");
 
         var params = new URLSearchParams(window.location.search);
         var preOrder = params.get("orderNo");
@@ -109,10 +113,77 @@
           return Number(n).toLocaleString("ko-KR") + "원";
         }
 
+        function lookupApiUrl(name, order) {
+          var base = "";
+          if (
+            typeof window !== "undefined" &&
+            window.__GRAFFORD_API_BASE__
+          ) {
+            base = String(window.__GRAFFORD_API_BASE__).replace(/\/$/, "");
+          }
+          return (
+            base +
+            "/api/reservations?guestName=" +
+            encodeURIComponent(name.trim()) +
+            "&reservationNumber=" +
+            encodeURIComponent(order.trim())
+          );
+        }
+
+        function payLabel(m) {
+          if (m === "bank") {
+            return "무통장입금";
+          }
+          if (m === "card") {
+            return "신용카드";
+          }
+          if (m === "naver") {
+            return "네이버페이";
+          }
+          return m || "—";
+        }
+
+        function showOk(
+          orderNumber,
+          guestName,
+          contact,
+          roomKey,
+          checkIn,
+          checkOut,
+          nightsText,
+          extraText,
+          amountNum,
+          payMethod,
+          sourceNote,
+        ) {
+          errEl.hidden = true;
+          okEl.hidden = false;
+          if (sourceEl) {
+            sourceEl.textContent = sourceNote || "";
+            sourceEl.hidden = !sourceNote;
+          }
+          document.getElementById("res-order").textContent = orderNumber;
+          document.getElementById("res-name").textContent = guestName;
+          document.getElementById("res-contact").textContent = contact || "—";
+          document.getElementById("res-room").textContent =
+            ROOM_LABEL[roomKey] || roomKey || "—";
+          document.getElementById("res-schedule").textContent =
+            (checkIn || "—") + " ~ " + (checkOut || "—");
+          document.getElementById("res-nights").textContent = nightsText;
+          document.getElementById("res-extra").textContent = extraText;
+          document.getElementById("res-amount").textContent = formatKRW(
+            amountNum || 0,
+          );
+          document.getElementById("res-pay").textContent = payLabel(payMethod);
+        }
+
         function showError(msg) {
           okEl.hidden = true;
           errEl.textContent = msg;
           errEl.hidden = false;
+          if (sourceEl) {
+            sourceEl.hidden = true;
+          }
         }
 
         function hideResults() {
@@ -127,39 +198,98 @@
             form.reportValidity();
             return;
           }
-          if (!R) {
-            showError("조회 기능을 불러올 수 없습니다. 페이지를 새로고침해 주세요.");
-            return;
-          }
           var name = document.getElementById("lookup-name").value;
           var order = document.getElementById("lookup-order").value;
-          var found = R.findByNameAndOrder(name, order);
-          if (!found) {
-            showError(
-              "일치하는 예약을 찾을 수 없습니다. 성함·예약번호를 다시 확인해 주세요.",
-            );
-            return;
-          }
-          errEl.hidden = true;
-          okEl.hidden = false;
-          document.getElementById("res-order").textContent = found.orderNumber;
-          document.getElementById("res-name").textContent = found.guestName;
-          document.getElementById("res-contact").textContent = found.contact || "—";
-          document.getElementById("res-room").textContent =
-            ROOM_LABEL[found.room] || found.room || "—";
-          document.getElementById("res-schedule").textContent =
-            (found.checkIn || "—") + " ~ " + (found.checkOut || "—");
-          document.getElementById("res-nights").textContent =
-            (found.nights || 0) + "박";
-          document.getElementById("res-extra").textContent =
-            (found.extraGuests || 0) + "명";
-          document.getElementById("res-amount").textContent = formatKRW(
-            found.totalAmount || 0,
-          );
-          document.getElementById("res-pay").textContent =
-            found.paymentMethod === "bank"
-              ? "무통장입금"
-              : found.paymentMethod || "—";
+
+          fetch(lookupApiUrl(name, order))
+            .then(function (resp) {
+              return resp.json().then(function (data) {
+                return { ok: resp.ok, status: resp.status, data: data };
+              });
+            })
+            .then(function (result) {
+              if (result.ok && result.data && result.data.ok && result.data.row) {
+                var row = result.data.row;
+                var nightsText =
+                  row.stayNights != null && row.stayNights !== ""
+                    ? String(row.stayNights) + "박"
+                    : "—";
+                var extraText =
+                  row.extraGuests != null && row.extraGuests !== ""
+                    ? String(row.extraGuests) + "명"
+                    : "—";
+                var note = "서버 DB에 저장된 예약입니다.";
+                if (result.data.warning) {
+                  note += " " + result.data.warning;
+                }
+                showOk(
+                  row.reservationNumber,
+                  row.guestName,
+                  row.contact,
+                  row.roomType,
+                  row.checkIn,
+                  row.checkOut,
+                  nightsText,
+                  extraText,
+                  row.totalAmount != null ? row.totalAmount : 0,
+                  row.paymentMethod,
+                  note,
+                );
+                return;
+              }
+              if (!R) {
+                showError(
+                  "서버에서 예약을 찾지 못했고, 이 페이지용 저장소 스크립트도 없습니다. 새로고침 후 다시 시도해 주세요.",
+                );
+                return;
+              }
+              var found = R.findByNameAndOrder(name, order);
+              if (!found) {
+                showError(
+                  "일치하는 예약을 찾을 수 없습니다. 성함·예약번호를 다시 확인하거나, 결제 완료 후 서버에 저장됐는지 확인해 주세요.",
+                );
+                return;
+              }
+              showOk(
+                found.orderNumber,
+                found.guestName,
+                found.contact,
+                found.room,
+                found.checkIn,
+                found.checkOut,
+                (found.nights || 0) + "박",
+                (found.extraGuests || 0) + "명",
+                found.totalAmount || 0,
+                found.paymentMethod,
+                "이 브라우저에만 저장된 예약입니다(무통장 입금 테스트). 서버에는 다른 행이 있을 수 있습니다.",
+              );
+            })
+            .catch(function () {
+              if (!R) {
+                showError("조회에 실패했습니다. 네트워크를 확인해 주세요.");
+                return;
+              }
+              var found = R.findByNameAndOrder(name, order);
+              if (!found) {
+                showError(
+                  "서버에 연결할 수 없고, 이 기기 저장소에도 없습니다. vercel dev 가 켜져 있는지 확인해 주세요.",
+                );
+                return;
+              }
+              showOk(
+                found.orderNumber,
+                found.guestName,
+                found.contact,
+                found.room,
+                found.checkIn,
+                found.checkOut,
+                (found.nights || 0) + "박",
+                (found.extraGuests || 0) + "명",
+                found.totalAmount || 0,
+                found.paymentMethod,
+                "서버 조회에 실패해, 이 브라우저에만 저장된 예약을 표시합니다.",
+              );
+            });
         });
       });
     </script>

@@ -1359,6 +1359,13 @@ iframe.map {
   color: var(--chocolate-brown);
 }
 
+.reserveinfo-source {
+  margin: 0 0 0.85rem;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  color: var(--grafford-mud);
+}
+
 .reserveinfo-dl {
   margin: 0;
   display: grid;
