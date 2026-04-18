@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="icon" type="image/png" href="images/LOGO-circle.png" />
+    <link rel="icon" href="images/LOGO-transparent.png" type="image/png" />
     <title>STORY - GRAFFORD</title>
     <link rel="stylesheet" href="css/style.css" />
     <script src="js/nav-hero.js" defer></script>
@@ -70,7 +70,11 @@
           </div>
         </article>
       </section>
-      <footer class="site-footer">© 2026 GRAFFORD. all rights reserved.</footer>
+      <footer
+        id="site-business-footer-mount"
+        class="site-footer site-business-footer"
+        hidden
+      ></footer>
     </main>
 
     <script>
@@ -100,6 +104,26 @@
             nextSection.scrollIntoView({ behavior: "smooth", block: "start" });
           });
         }
+      });
+    </script>
+    <script src="js/site-business-footer.js"></script>
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        window.initSiteBusinessFooter({
+          instagram: {
+            href: "https://www.instagram.com/p/DWaqvQKkzye/",
+            imgSrc: "images/insta.png",
+          },
+          lines: [
+            "대표 : GRAFFORD",
+            "주소 : 제주특별자치도 서귀포시 토산중앙로 22",
+            "사업자등록번호 : 123-45-67890",
+            "전화 : 010-1234-5678",
+            "이메일 : info@grafford.com",
+            " ",
+            "© 2026 GRAFFORD. all rights reserved.",
+          ],
+        });
       });
     </script>
   </body>

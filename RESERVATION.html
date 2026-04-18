@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="icon" type="image/png" href="images/LOGO-circle.png" />
+    <link rel="icon" href="images/LOGO-transparent.png" type="image/png" />
     <title>RESERVATION - GRAFFORD</title>
     <link rel="stylesheet" href="css/style.css" />
     <script src="js/nav-hero.js" defer></script>
@@ -43,7 +43,7 @@
     </section>
 
     <main class="content-section fullpage-section" id="content">
-      <div class="reservation-booking scroll-fade">
+      <div class="reservation-booking scroll-fade" id="reservation-booking">
         <div class="room-type-row">
           <div class="room-type-bar" role="tablist" aria-label="Room type">
             <button type="button" class="room-type-btn is-active" data-room="A">
@@ -53,44 +53,9 @@
             <button type="button" class="room-type-btn" data-room="C">C</button>
             <button type="button" class="room-type-btn" data-room="D">D</button>
           </div>
-          <a
-            href="reserveinfo.html"
-            class="btn reservation-lookup-btn"
+          <a href="reserveinfo.html" class="btn reservation-lookup-btn"
             >예약조회</a
           >
-        </div>
-
-        <div class="room-copy-blocks">
-          <p class="room-detail-intro room-copy is-visible" data-room="A">
-            <strong>Room A</strong> &mdash; Minimal lines, calm mood. Standard
-            room. Base 2 guests, max 2.
-          </p>
-          <p class="room-detail-intro room-copy" data-room="B" hidden>
-            <strong>Room B</strong> &mdash; Bright layout, relaxed space. Base
-            2, max 2.
-          </p>
-          <p class="room-detail-intro room-copy" data-room="C" hidden>
-            <strong>Room C</strong> &mdash; Private feel, warm interior. Base 2,
-            max 4 (추가 인원 최대 2명).
-          </p>
-          <p class="room-detail-intro room-copy" data-room="D" hidden>
-            <strong>Room D</strong> &mdash; Larger floor plan, longer stays.
-            Base 2, max 6 (추가 인원 최대 4명).
-          </p>
-        </div>
-
-        <div class="reservation-pricing-bar" id="reservation-pricing-bar">
-          <div class="reservation-rate-row">
-            <span class="reservation-rate-label">평일 1박 요금</span>
-            <strong
-              class="reservation-rate-amount"
-              id="reservation-weekday-display"
-            ></strong>
-          </div>
-          <p class="reservation-rate-note">
-            금요일·토요일에 해당하는 숙박 박마다 30,000원이 추가됩니다. 인원
-            추가 시 1인당 박마다 30,000원이 추가됩니다.
-          </p>
         </div>
 
         <div class="reservation-split">
@@ -120,6 +85,56 @@
               </button>
             </div>
             <div class="gallery-thumbs" id="gallery-thumbs"></div>
+            <div class="room-copy-blocks">
+              <p class="room-detail-intro room-copy is-visible" data-room="A">
+                <strong>A동</strong><br />
+                2인 기준의 아늑한 객실로, 휴식 중심의 미니멀한 동선을
+                제공합니다.<br /><br />
+                객실면적 : 20㎡<br />
+                침대 타입 : 퀸 침대 1개<br />
+                객실구성 : 침실 1개, 욕실 1개, 자쿠지 1개<br />
+                시설 : Room -Kitchen -Bathroom -Bedroom<br />
+                기준 2인, 최대 2인<br />
+                취사 불가능<br />
+                1박 20만원 · A동
+              </p>
+              <p class="room-detail-intro room-copy" data-room="B" hidden>
+                <strong>B동</strong><br />
+                채광이 좋은 구조와 넉넉한 공간 구성으로 여유로운 숙박에
+                적합합니다.<br /><br />
+                객실면적 : 20㎡<br />
+                침대 타입 : 퀸 침대 1개<br />
+                객실구성 : 침실 1개, 욕실 1개, 자쿠지 1개<br />
+                시설 : Room -Kitchen -Bathroom -Bedroom<br />
+                기준 2인, 최대 2인<br />
+                취사 불가능<br />
+                1박 20만원 · B동
+              </p>
+              <p class="room-detail-intro room-copy" data-room="C" hidden>
+                <strong>C동</strong><br />
+                프라이빗한 분위기와 감성적인 인테리어가 조화를 이루는
+                객실입니다.<br /><br />
+                객실면적 : 35㎡<br />
+                침대 타입 : 퀸 침대 1개, 더블 침대 1개<br />
+                객실구성 : 침실 1개, 욕실 1개, 자쿠지 1개<br />
+                시설 : Room -Kitchen -Bathroom -Bedroom<br />
+                기준 2인, 최대 4인<br />
+                취사 (불)가능<br />
+                1박 30만원 · C동
+              </p>
+              <p class="room-detail-intro room-copy" data-room="D" hidden>
+                <strong>D동</strong><br />
+                넓은 레이아웃과 쾌적한 컨디션을 갖춘 장기 숙박 친화형
+                객실입니다.<br /><br />
+                객실면적 : 60㎡<br />
+                침대 타입 : 퀸 침대 1개, 더블 침대 2개<br />
+                객실구성 : 침실 1개, 욕실 1개, 자쿠지 1개<br />
+                시설 : Room -Kitchen -Bathroom -Bedroom<br />
+                기준 2인, 최대 6인<br />
+                취사 (불)가능<br />
+                1박 50만원 · D동
+              </p>
+            </div>
           </div>
 
           <div class="reservation-calendar-panel">
@@ -155,17 +170,22 @@
               Check-out <strong id="cal-checkout">&mdash;</strong>
             </p>
             <div class="reservation-extra-block">
-              <label class="reservation-extra-label" for="extra-guests-select"
-                >인원 추가</label
-              >
-              <select
-                id="extra-guests-select"
-                class="reservation-extra-select"
-                aria-describedby="extra-guests-hint"
-              ></select>
+              <div class="reservation-extra-row">
+                <label class="reservation-extra-label" for="extra-guests-select"
+                  >인원 추가</label
+                >
+                <select
+                  id="extra-guests-select"
+                  class="reservation-extra-select"
+                  aria-describedby="extra-guests-hint"
+                ></select>
+              </div>
               <p class="reservation-extra-hint" id="extra-guests-hint"></p>
             </div>
-            <div class="reservation-price-summary" id="reservation-price-summary">
+            <div
+              class="reservation-price-summary"
+              id="reservation-price-summary"
+            >
               <p
                 class="reservation-price-placeholder"
                 id="reservation-price-placeholder"
@@ -177,7 +197,11 @@
                 id="reservation-price-lines"
                 hidden
               ></div>
-              <p class="reservation-price-total" id="reservation-price-total" hidden></p>
+              <p
+                class="reservation-price-total"
+                id="reservation-price-total"
+                hidden
+              ></p>
             </div>
             <p class="availability-note" id="availability-note">
               Select check-in and check-out to see availability for this room.
@@ -192,7 +216,11 @@
         </div>
       </div>
 
-      <footer class="site-footer">© 2026 GRAFFORD. all rights reserved.</footer>
+      <footer
+        id="site-business-footer-mount"
+        class="site-footer site-business-footer"
+        hidden
+      ></footer>
     </main>
 
     <script>
@@ -228,11 +256,17 @@
         var calCheckoutEl = document.getElementById("cal-checkout");
         var availabilityEl = document.getElementById("availability-note");
         var P = window.GraffordBookingPricing;
-        var extraGuestsBlock = document.querySelector(".reservation-extra-block");
+        var extraGuestsBlock = document.querySelector(
+          ".reservation-extra-block",
+        );
         var extraGuestsSelect = document.getElementById("extra-guests-select");
         var extraGuestsHint = document.getElementById("extra-guests-hint");
-        var weekdayDisplay = document.getElementById("reservation-weekday-display");
-        var pricePlaceholder = document.getElementById("reservation-price-placeholder");
+        var weekdayDisplay = document.getElementById(
+          "reservation-weekday-display",
+        );
+        var pricePlaceholder = document.getElementById(
+          "reservation-price-placeholder",
+        );
         var priceLinesEl = document.getElementById("reservation-price-lines");
         var priceTotalEl = document.getElementById("reservation-price-total");
 
@@ -289,7 +323,9 @@
             var opt = document.createElement("option");
             opt.value = String(i);
             opt.textContent =
-              i === 0 ? "\ucd94\uac00 \uc5c6\uc74c (0\uba85)" : "\ucd94\uac00 " + i + "\uba85";
+              i === 0
+                ? "\ucd94\uac00 \uc5c6\uc74c (0\uba85)"
+                : "\ucd94\uac00 " + i + "\uba85";
             extraGuestsSelect.appendChild(opt);
           }
           if (cur > max) {
@@ -311,10 +347,17 @@
               extraGuestsBlock.hidden = false;
             }
             if (extraGuestsHint) {
-              extraGuestsHint.textContent =
-                "C\ub3d9 \ucd5c\ub300 2\uba85, D\ub3d9 \ucd5c\ub300 4\uba85\uae4c\uc9c0 \ucd94\uac00\ud560 \uc218 \uc788\uc2b5\ub2c8\ub2e4. (\ubc15\ub2f9 " +
-                formatKRW(P.EXTRA_PER_PERSON_PER_NIGHT) +
-                "/\uc778)";
+              if (currentRoom === "C") {
+                extraGuestsHint.textContent =
+                  "C\ub3d9\uc740 \ucd5c\ub300 2\uc778 \ucd94\uac00 \uac00\ub2a5\ud569\ub2c8\ub2e4. (\ubc15\ub2f9 " +
+                  formatKRW(P.EXTRA_PER_PERSON_PER_NIGHT) +
+                  "/\uc778)";
+              } else {
+                extraGuestsHint.textContent =
+                  "D\ub3d9\uc740 \ucd5c\ub300 4\uc778 \ucd94\uac00 \uac00\ub2a5\ud569\ub2c8\ub2e4. (\ubc15\ub2f9 " +
+                  formatKRW(P.EXTRA_PER_PERSON_PER_NIGHT) +
+                  "/\uc778)";
+              }
             }
             extraGuestsSelect.disabled = false;
           }
@@ -324,7 +367,9 @@
           if (!P || !weekdayDisplay) {
             return;
           }
-          weekdayDisplay.textContent = formatKRW(P.ROOM_WEEKDAY_BASE[currentRoom]);
+          weekdayDisplay.textContent = formatKRW(
+            P.ROOM_WEEKDAY_BASE[currentRoom],
+          );
         }
 
         function updatePricingSummary() {
@@ -499,11 +544,25 @@
         function renderCalendar() {
           var y = viewDate.getFullYear();
           var m = viewDate.getMonth();
+          var monthNames = [
+            "JANUARY",
+            "FEBRUARY",
+            "MARCH",
+            "APRIL",
+            "MAY",
+            "JUNE",
+            "JULY",
+            "AUGUST",
+            "SEPTEMBER",
+            "OCTOBER",
+            "NOVEMBER",
+            "DECEMBER",
+          ];
           if (calYearLabel) {
             calYearLabel.textContent = y + "\uB144";
           }
           if (calMonthLabel) {
-            calMonthLabel.textContent = m + 1 + "\uC6D4";
+            calMonthLabel.textContent = monthNames[m];
           }
 
           var first = new Date(y, m, 1);
@@ -625,9 +684,47 @@
           });
         }
 
-        setRoom("A");
+        var allowedRooms = ["A", "B", "C", "D"];
+        var qsRoom = new URLSearchParams(window.location.search).get("room");
+        if (qsRoom) {
+          qsRoom = qsRoom.trim().toUpperCase();
+        }
+        var initialRoom =
+          qsRoom && allowedRooms.indexOf(qsRoom) !== -1 ? qsRoom : "A";
+        setRoom(initialRoom);
         renderCalendar();
         updateConfirmLink();
+        if (qsRoom && allowedRooms.indexOf(qsRoom) !== -1) {
+          var bookingAnchor = document.getElementById("reservation-booking");
+          if (bookingAnchor) {
+            requestAnimationFrame(function () {
+              bookingAnchor.scrollIntoView({
+                behavior: "smooth",
+                block: "start",
+              });
+            });
+          }
+        }
+      });
+    </script>
+    <script src="js/site-business-footer.js"></script>
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        window.initSiteBusinessFooter({
+          instagram: {
+            href: "https://www.instagram.com/p/DWaqvQKkzye/",
+            imgSrc: "images/insta.png",
+          },
+          lines: [
+            "대표 : GRAFFORD",
+            "주소 : 제주특별자치도 서귀포시 토산중앙로 22",
+            "사업자등록번호 : 123-45-67890",
+            "전화 : 010-1234-5678",
+            "이메일 : info@grafford.com",
+            " ",
+            "© 2026 GRAFFORD. all rights reserved.",
+          ],
+        });
       });
     </script>
   </body>

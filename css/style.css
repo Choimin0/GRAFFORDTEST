@@ -1,9 +1,9 @@
 :root {
-  --grafford-beige: #d3c7b1;
+  --grafford-beige: #e8e1d5;
   --grafford-mud: #6f675c;
   --grafford-dark-brown: #3a3531;
-  --grafford-earthy-green: #53624d;
-  --chocolate-brown: #866055;
+  --grafford-earthy-green: #8b7e6a;
+  --chocolate-brown: #d3c7b1;
   --navigate: #cfb9a1;
 }
 
@@ -28,7 +28,7 @@ body {
   font-weight: 350; /* 일반 굵기 */
   font-style: normal;
   background: var(--grafford-beige);
-  color: #222;
+  color: #5a5247;
   line-height: 1.6;
 }
 
@@ -365,12 +365,12 @@ main {
 }
 
 .feature-text h3 {
-  color: #fff;
+  color: #5a5247;
   margin-bottom: 0.5rem;
 }
 
 .feature-text p {
-  color: #fff;
+  color: #5a5247;
 }
 
 .feature-text {
@@ -612,6 +612,99 @@ iframe.map {
   padding: 1.5rem 0 1rem;
 }
 
+.site-business-footer {
+  text-align: left;
+  padding: 0 0 1.25rem;
+  margin-top: auto;
+}
+
+.site-business-footer__rule {
+  width: 100%;
+  height: 1px;
+  background: rgba(58, 53, 49, 0.22);
+  margin: 0 0 1.25rem;
+}
+
+.site-business-footer__inner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem 1.75rem;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+.site-business-footer__text {
+  flex: 1 1 220px;
+  min-width: 0;
+  font-size: 0.85rem;
+  line-height: 1.55;
+  color: var(--grafford-mud);
+}
+
+.site-business-footer__text--empty {
+  min-height: 0;
+}
+
+.site-business-footer__text-line {
+  margin: 0 0 0.35rem;
+}
+
+.site-business-footer__text-line:last-child {
+  margin-bottom: 0;
+}
+
+.site-business-footer__text-line--spacer {
+  margin: 0;
+  min-height: 0.35rem;
+}
+
+.site-business-footer__insta-line {
+  margin-bottom: 0.45rem;
+}
+
+.site-business-footer__insta-link {
+  display: inline-block;
+  line-height: 0;
+}
+
+.site-business-footer__insta-link:focus-visible {
+  outline: 2px solid rgba(83, 98, 77, 0.55);
+  outline-offset: 3px;
+}
+
+.site-business-footer__insta-icon {
+  display: block;
+  height: auto;
+  max-height: 28px;
+  width: auto;
+}
+
+.site-business-footer__logo-wrap {
+  flex: 0 0 auto;
+}
+
+.site-business-footer__logo {
+  display: block;
+  height: auto;
+  max-height: 72px;
+  width: auto;
+  object-fit: contain;
+}
+
+@media (max-width: 600px) {
+  .site-business-footer__inner {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .site-business-footer__logo-wrap {
+    align-self: flex-end;
+  }
+}
+
 @media (max-width: 768px) {
   .site-header h1 {
     font-size: 2rem;
@@ -831,7 +924,8 @@ iframe.map {
 }
 
 .room-copy-blocks {
-  margin-bottom: 1.5rem;
+  margin-top: 0.85rem;
+  margin-bottom: 0;
 }
 
 .room-detail-intro {
@@ -1088,22 +1182,28 @@ iframe.map {
   border-bottom: 1px solid rgba(58, 53, 49, 0.1);
 }
 
+.reservation-extra-row {
+  display: flex;
+  align-items: right;
+  gap: 0.7rem;
+}
+
 .reservation-extra-label {
-  display: block;
+  display: inline-block;
   font-size: 0.9rem;
   font-weight: 600;
   color: var(--chocolate-brown);
-  margin-bottom: 0.4rem;
+  margin: 0;
+  white-space: nowrap;
 }
 
 .reservation-extra-select {
   width: 100%;
-  max-width: 280px;
-  padding: 0.45rem 0.6rem;
+  max-width: 260px;
+  padding: 0.2rem 0.4rem;
   font-size: 0.95rem;
   border: 1px solid rgba(58, 53, 49, 0.25);
-  border-radius: 6px;
-  background: #fff;
+  background: #e2e2e2;
   color: var(--grafford-dark-brown);
   box-sizing: border-box;
 }

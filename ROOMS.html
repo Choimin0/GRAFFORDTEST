@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="icon" type="image/png" href="images/LOGO-circle.png" />
+    <link rel="icon" href="images/LOGO-transparent.png" type="image/png" />
     <title>ROOMS - GRAFFORD</title>
     <link rel="stylesheet" href="css/style.css" />
     <script src="js/nav-hero.js" defer></script>
@@ -45,7 +45,12 @@
             <p>
               2인 기준의 아늑한 객실로, 휴식 중심의 미니멀한 동선을 제공합니다.
               <br />
-              기준 2인, 최대 2인
+              객실면적 : 20㎡<br />
+              침대 타입 : 퀸 침대 1개<br />
+              객실구성 : 침실 1개, 욕실 1개, 자쿠지 1개<br />
+              시설 : Room -Kitchen -Bathroom -Bedroom<br />
+              기준 2인, 최대 2인<br />
+              취사 불가능<br />
             </p>
             <p class="room-rate">1박 20만원 · A동</p>
             <div
@@ -90,7 +95,9 @@
                 />
               </span>
             </div>
-            <a href="RESERVATION.html" class="btn reserve-btn">예약하기 ></a>
+            <a href="RESERVATION.html?room=A" class="btn reserve-btn"
+              >예약하기 ></a
+            >
           </div>
           <div
             class="room-image-slot room-image-slot--carousel"
@@ -129,7 +136,12 @@
             <p>
               채광이 좋은 구조와 넉넉한 공간 구성으로 여유로운 숙박에
               적합합니다. <br />
-              기준 2인, 최대 2인
+              객실면적 : 20㎡<br />
+              침대 타입 : 퀸 침대 1개<br />
+              객실구성 : 침실 1개, 욕실 1개, 자쿠지 1개<br />
+              시설 : Room -Kitchen -Bathroom -Bedroom<br />
+              기준 2인, 최대 2인<br />
+              취사 불가능<br />
             </p>
             <p class="room-rate">1박 20만원 · B동</p>
             <div
@@ -174,7 +186,9 @@
                 />
               </span>
             </div>
-            <a href="RESERVATION.html" class="btn reserve-btn">예약하기 ></a>
+            <a href="RESERVATION.html?room=B" class="btn reserve-btn"
+              >예약하기 ></a
+            >
           </div>
           <div
             class="room-image-slot room-image-slot--carousel"
@@ -213,7 +227,12 @@
             <p>
               프라이빗한 분위기와 감성적인 인테리어가 조화를 이루는
               객실입니다.<br />
-              기준 2인, 최대 4인
+              객실면적 : 35㎡<br />
+              침대 타입 : 퀸 침대 1개, 더블 침대 1개<br />
+              객실구성 : 침실 1개, 욕실 1개, 자쿠지 1개<br />
+              시설 : Room -Kitchen -Bathroom -Bedroom<br />
+              기준 2인, 최대 4인<br />
+              취사 (불)가능<br />
             </p>
             <p class="room-rate">1박 30만원 · C동</p>
             <div
@@ -258,7 +277,9 @@
                 />
               </span>
             </div>
-            <a href="RESERVATION.html" class="btn reserve-btn">예약하기 ></a>
+            <a href="RESERVATION.html?room=C" class="btn reserve-btn"
+              >예약하기 ></a
+            >
           </div>
           <div
             class="room-image-slot room-image-slot--carousel"
@@ -297,7 +318,12 @@
             <p>
               넓은 레이아웃과 쾌적한 컨디션을 갖춘 장기 숙박 친화형
               객실입니다.<br />
-              기준 2인, 최대 6인
+              객실면적 : 60㎡<br />
+              침대 타입 : 퀸 침대 1개, 더블 침대 2개<br />
+              객실구성 : 침실 1개, 욕실 1개, 자쿠지 1개<br />
+              시설 : Room -Kitchen -Bathroom -Bedroom<br />
+              기준 2인, 최대 6인<br />
+              취사 (불)가능 <br />
             </p>
             <p class="room-rate">1박 50만원 · D동</p>
             <div
@@ -342,7 +368,9 @@
                 />
               </span>
             </div>
-            <a href="RESERVATION.html" class="btn reserve-btn">예약하기 ></a>
+            <a href="RESERVATION.html?room=D" class="btn reserve-btn"
+              >예약하기 ></a
+            >
           </div>
           <div
             class="room-image-slot room-image-slot--carousel"
@@ -376,7 +404,11 @@
           </div>
         </article>
       </section>
-      <footer class="site-footer">© 2026 GRAFFORD. all rights reserved.</footer>
+      <footer
+        id="site-business-footer-mount"
+        class="site-footer site-business-footer"
+        hidden
+      ></footer>
     </main>
 
     <script>
@@ -513,6 +545,26 @@
           .forEach(function (slot, i) {
             startRoomSlotCarousel(slot, i * 400);
           });
+      });
+    </script>
+    <script src="js/site-business-footer.js"></script>
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        window.initSiteBusinessFooter({
+          instagram: {
+            href: "https://www.instagram.com/p/DWaqvQKkzye/",
+            imgSrc: "images/insta.png",
+          },
+          lines: [
+            "대표 : GRAFFORD",
+            "주소 : 제주특별자치도 서귀포시 토산중앙로 22",
+            "사업자등록번호 : 123-45-67890",
+            "전화 : 010-1234-5678",
+            "이메일 : info@grafford.com",
+            " ",
+            "© 2026 GRAFFORD. all rights reserved.",
+          ],
+        });
       });
     </script>
   </body>
