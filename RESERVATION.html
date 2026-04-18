@@ -227,6 +227,7 @@
         var calCheckoutEl = document.getElementById("cal-checkout");
         var availabilityEl = document.getElementById("availability-note");
         var P = window.GraffordBookingPricing;
+        var extraGuestsBlock = document.querySelector(".reservation-extra-block");
         var extraGuestsSelect = document.getElementById("extra-guests-select");
         var extraGuestsHint = document.getElementById("extra-guests-hint");
         var weekdayDisplay = document.getElementById("reservation-weekday-display");
@@ -295,12 +296,19 @@
           }
           extraGuestsSelect.value = String(cur);
           if (max === 0) {
+            if (extraGuestsBlock) {
+              extraGuestsBlock.hidden = true;
+            }
             if (extraGuestsHint) {
               extraGuestsHint.textContent =
                 "A\xb7B\ub3d9\uc740 \uae30\uc900 \uc778\uc6d0 \uc678 \ucd94\uac00\uac00 \ubd88\uac00\ud569\ub2c8\ub2e4.";
             }
+            extraGuestsSelect.value = "0";
             extraGuestsSelect.disabled = true;
           } else {
+            if (extraGuestsBlock) {
+              extraGuestsBlock.hidden = false;
+            }
             if (extraGuestsHint) {
               extraGuestsHint.textContent =
                 "C\ub3d9 \ucd5c\ub300 2\uba85, D\ub3d9 \ucd5c\ub300 4\uba85\uae4c\uc9c0 \ucd94\uac00\ud560 \uc218 \uc788\uc2b5\ub2c8\ub2e4. (\ubc15\ub2f9 " +
