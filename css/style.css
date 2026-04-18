@@ -606,26 +606,48 @@ iframe.map {
     font-size: 2rem;
   }
 
+  /* Mobile: logo in flow; links wrap with consistent spacing */
   .top-right-nav {
     top: 0;
     left: 0;
     right: 0;
     width: 100%;
-    justify-content: flex-end;
-    gap: 0.5rem 0.75rem;
-    padding: 1rem 0.65rem;
-    padding-left: clamp(3rem, 28vw, 4.5rem);
-    min-height: calc(2 * (0.5rem + 1.35rem + 0.5rem));
+    justify-content: flex-start;
+    align-items: center;
+    align-content: center;
+    flex-wrap: wrap;
+    gap: 0.45rem 0.65rem;
+    row-gap: 0.5rem;
+    padding: 0.7rem 0.75rem;
+    padding-left: 0.75rem;
+    min-height: 0;
   }
 
-  .site-nav .nav-logo {
-    left: 0.65rem;
-    top: 50%;
-    transform: translateY(-50%);
+  .top-right-nav .nav-logo,
+  .site-nav.top-right-nav .nav-logo {
+    position: relative;
+    left: auto;
+    top: auto;
+    transform: none;
+    flex-shrink: 0;
+    margin-right: 0.15rem;
+    align-self: center;
   }
 
-  .top-right-nav a {
-    font-size: 0.9rem;
+  .top-right-nav .nav-logo img {
+    height: 22px;
+  }
+
+  .top-right-nav > a:not(.nav-logo) {
+    font-size: 0.82rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    flex: 0 0 auto;
+    min-height: 44px;
+    display: inline-flex;
+    align-items: center;
+    padding: 0.2rem 0.28rem;
+    box-sizing: border-box;
   }
 
   .content-section {
@@ -663,6 +685,24 @@ iframe.map {
     width: 36px;
     height: 36px;
     font-size: 1.2rem;
+  }
+}
+
+@media (max-width: 400px) {
+  .top-right-nav {
+    gap: 0.35rem 0.45rem;
+    padding: 0.6rem 0.55rem;
+  }
+
+  .top-right-nav > a:not(.nav-logo) {
+    font-size: 0.76rem;
+    letter-spacing: 0;
+    min-height: 40px;
+    padding: 0.12rem 0.18rem;
+  }
+
+  .top-right-nav .nav-logo img {
+    height: 20px;
   }
 }
 
