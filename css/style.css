@@ -125,9 +125,13 @@ html {
   padding: 1.1rem 1rem;
   padding-left: clamp(3.25rem, 12vw, 5rem);
   min-height: calc(2 * (0.55rem + 1.5rem + 0.55rem));
-  background-color: rgba(83, 98, 77, 0.88);
-  background-color: color-mix(in srgb, var(--navigate) 88%, transparent);
-  backdrop-filter: blur(8px);
+  background-color: rgba(207, 185, 161, 0.66);
+  background-color: color-mix(
+    in srgb,
+    rgba(217, 217, 217, 0.66) 10%,
+    transparent
+  );
+  backdrop-filter: blur(3px);
   -webkit-backdrop-filter: blur(8px);
   z-index: 1000;
   box-sizing: border-box;
@@ -666,36 +670,6 @@ iframe.map {
 
   .feature > .feature-text {
     order: 2;
-  }
-
-  /* ROOMS mobile layout: image (100%) -> text -> reserve button */
-  .rooms-features .room-feature {
-    display: flex;
-    flex-direction: column;
-    align-items: stretch;
-    gap: 0;
-  }
-
-  .rooms-features .room-feature .room-image-slot {
-    order: 1;
-    width: 100%;
-  }
-
-  .rooms-features .room-feature .room-slot-gallery {
-    width: 100%;
-  }
-
-  .rooms-features .room-feature .feature-text {
-    order: 2;
-    width: 100%;
-    min-height: auto;
-    height: auto;
-    padding: 1rem 0.75rem 1.2rem;
-  }
-
-  .rooms-features .room-feature .reserve-btn {
-    margin-top: 0.7rem;
-    align-self: flex-start;
   }
 
   .feature img {
