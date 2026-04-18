@@ -1,53 +1,152 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ko">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>GRAFFORD - 숙소 메인 홈페이지</title>
-  <link rel="stylesheet" href="css/style.css">
-</head>
-<body>
-  <header class="site-header">
-    <h1>GRAFFORD</h1>
-    <p>thank you very much for your visit ipnida</p>
-  </header>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>GRAFFORD - 숙소 메인 홈페이지</title>
+    <link rel="stylesheet" href="css/style.css" />
+  </head>
+  <body class="home-page">
+    <nav class="site-nav top-right-nav">
+      <a href="ROOMS.html">ROOMS</a>
+      <a href="FACILITIES.html">FACILITIES</a>
+      <a href="LOCATION.html">LOCATION</a>
+      <a href="RESERVATION.html">RESERVATION</a>
+      <a href="CONTACT.html">CONTACT</a>
+    </nav>
 
-  <nav class="site-nav top-right-nav">
-    <a href="ROOMS.html">객실</a>
-    <a href="FACILITIES.html">시설 안내</a>
-    <a href="LOCATION.html">오시는 길</a>
-    <a href="RESERVATION.html">예약</a>
-    <a href="CONTACT.html">문의</a>
-  </nav>
-
-  <main>
-    <section class="intro">
-      <img src="mainimg.jpg" alt="숙소 메인 이미지">
-      <h2>GRAFFORD에서 잊지 못할 하루를</h2>
-      <p>
-        도심 속 휴식처, 자연과 함께하는 GRAFFORD 숙소에서<br>
-        안락함과 프라이빗한 공간을 경험해보세요.
-      </p>
+    <section class="hero-section fullpage-section" id="hero">
+      <header class="site-header hero-header">
+        <h1>GRAFFORD</h1>
+        <p>thank you very much for your visit ipnida</p>
+      </header>
+      <button
+        class="scroll-down-btn"
+        id="scroll-down-btn"
+        aria-label="다음 섹션으로 이동"
+      >
+        <span></span>
+      </button>
     </section>
 
-    <section class="features">
-      <div class="feature">
-        <h3>고품질 객실</h3>
-        <p>모던하고 아늑한 인테리어와 청결한 환경을 자랑합니다.</p>
-      </div>
-      <div class="feature">
-        <h3>다양한 편의 시설</h3>
-        <p>스파, 라운지, 조식 서비스 등 다양한 편의 시설을 제공합니다.</p>
-      </div>
-      <div class="feature">
-        <h3>최적의 위치</h3>
-        <p>교통이 편리한 위치에서 도심과 자연 모두를 누릴 수 있습니다.</p>
-      </div>
-    </section>
-  </main>
+    <main class="content-section fullpage-section" id="content">
+      <section class="features">
+        <article class="feature scroll-fade">
+          <img src="images/mainimg1.jpg" alt="High Quality 객실 이미지" />
+          <div class="feature-text">
+            <h3>High Quality</h3>
+            <p>
+              모던하고 아늑한 인테리어와 청결한 환경을 자랑합니다.<br />
+              어쩌고 저쩌고 블라블라 샬라샬라 얄라얄라.<br />
+              처음 문단이니까 뭔가 더 있어보이게 ! 멋지게 ! 길게 !
+            </p>
+          </div>
+        </article>
+        <article class="feature scroll-fade">
+          <div class="feature-text">
+            <h3>Private Terrace</h3>
+            <p>
+              프라이빗 테라스와 함께 조용한 휴식을 즐길 수 있습니다.<br />
+              비록 사진은 암시롱거나 들여온 거지만요.
+            </p>
+          </div>
+          <img src="images/mainimg2.jpg" alt="Private Terrace 이미지" />
+        </article>
+        <article class="feature scroll-fade">
+          <div class="image-slider" id="variable-options-slider">
+            <button
+              class="slider-arrow prev"
+              id="slider-prev"
+              aria-label="이전 이미지"
+              type="button"
+            >
+              &#10094;
+            </button>
+            <img src="images/A.jpg" alt="Variable Options 이미지 A" id="slider-image" />
+            <button
+              class="slider-arrow next"
+              id="slider-next"
+              aria-label="다음 이미지"
+              type="button"
+            >
+              &#10095;
+            </button>
+          </div>
+          <div class="feature-text">
+            <h3>Variable Options</h3>
+            <p>
+              무려무려 4개의 동을 운영하는 바람에<br />
+              선택지가 왕왕킹왕짱이랍니다요.<br />
+              2동에서부터 5동까지 옵션 제공.
+            </p>
+          </div>
+        </article>
+      </section>
+      <footer class="site-footer">© 2026 GRAFFORD. all rights reserved.</footer>
+    </main>
 
-  <footer class="site-footer">
-    © 2024 GRAFFORD. 모든 권리 보유.
-  </footer>
-</body>
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        const fadeTargets = document.querySelectorAll(".scroll-fade");
+        const scrollButton = document.getElementById("scroll-down-btn");
+        const nextSection = document.getElementById("content");
+        const sliderImage = document.getElementById("slider-image");
+        const prevButton = document.getElementById("slider-prev");
+        const nextButton = document.getElementById("slider-next");
+        const sliderImages = ["images/A.jpg", "images/B.jpg", "images/C.jpg"];
+        let sliderIndex = 0;
+
+        const observer = new IntersectionObserver(
+          function (entries) {
+            entries.forEach(function (entry) {
+              if (entry.isIntersecting) {
+                entry.target.classList.add("is-visible");
+                observer.unobserve(entry.target);
+              }
+            });
+          },
+          { threshold: 0.2 },
+        );
+
+        fadeTargets.forEach(function (el) {
+          observer.observe(el);
+        });
+
+        if (scrollButton && nextSection) {
+          scrollButton.addEventListener("click", function () {
+            nextSection.scrollIntoView({ behavior: "smooth", block: "start" });
+          });
+        }
+
+        function showSliderImage(nextIndex) {
+          if (!sliderImage) {
+            return;
+          }
+          sliderImage.classList.remove("is-active");
+          setTimeout(function () {
+            sliderImage.src = sliderImages[nextIndex];
+            sliderImage.classList.add("is-active");
+          }, 140);
+        }
+
+        if (sliderImage) {
+          sliderImage.classList.add("is-active");
+        }
+
+        if (prevButton) {
+          prevButton.addEventListener("click", function () {
+            sliderIndex = (sliderIndex - 1 + sliderImages.length) % sliderImages.length;
+            showSliderImage(sliderIndex);
+          });
+        }
+
+        if (nextButton) {
+          nextButton.addEventListener("click", function () {
+            sliderIndex = (sliderIndex + 1) % sliderImages.length;
+            showSliderImage(sliderIndex);
+          });
+        }
+      });
+    </script>
+  </body>
 </html>
