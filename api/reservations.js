@@ -82,10 +82,14 @@ function normalizeLookupName(s) {
 }
 
 function normalizeLookupOrder(s) {
-  return String(s || "")
+  var t = String(s || "")
     .trim()
     .replace(/\s+/g, "")
     .toUpperCase();
+  if (t.startsWith("GRF-")) {
+    t = t.slice(4);
+  }
+  return t;
 }
 
 function toYMD(v) {

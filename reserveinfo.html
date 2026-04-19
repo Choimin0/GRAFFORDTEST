@@ -9,6 +9,7 @@
     <script src="js/booking-reservations.js" defer></script>
   </head>
   <body>
+    <div id="grafford-react-fade-root"></div>
     <nav class="site-nav top-right-nav">
       <a href="index.html" class="nav-logo" aria-label="홈으로 이동">
         <img src="images/LOGO.png" alt="GRAFFORD LOGO" />
@@ -47,7 +48,7 @@
             id="lookup-order"
             required
             autocomplete="off"
-            placeholder="예: GRF-20260419-XXXXXX"
+            placeholder="예: 20260419-XXXXXX"
           />
         </label>
         <div class="confirm-actions">
@@ -298,6 +299,7 @@
         });
       });
     </script>
+    <script defer src="js/grafford-page-fade.js"></script>
     <script src="js/site-business-footer.js"></script>
     <script>
       document.addEventListener("DOMContentLoaded", function () {

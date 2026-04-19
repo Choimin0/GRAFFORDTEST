@@ -16,7 +16,7 @@
       pad2(d.getMonth() + 1) +
       pad2(d.getDate());
     var rnd = Math.random().toString(36).substring(2, 8).toUpperCase();
-    return "GRF-" + ymd + "-" + rnd;
+    return ymd + "-" + rnd;
   }
 
   function normalizeName(s) {
@@ -26,10 +26,14 @@
   }
 
   function normalizeOrderNo(s) {
-    return String(s || "")
+    var t = String(s || "")
       .trim()
       .replace(/\s+/g, "")
       .toUpperCase();
+    if (t.startsWith("GRF-")) {
+      t = t.slice(4);
+    }
+    return t;
   }
 
   function loadAll() {

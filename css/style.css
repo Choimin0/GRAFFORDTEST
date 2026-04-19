@@ -5,6 +5,7 @@
   --grafford-earthy-green: #8b7e6a;
   --chocolate-brown: #d3c7b1;
   --navigate: #cfb9a1;
+  --newmaincolor: #5a5247;
 }
 
 /* Apply custom font to Latin (English) glyphs only */
@@ -407,10 +408,11 @@ main {
   letter-spacing: 0.02em;
 }
 
+/*rooms 페이지 객실 사진 슬롯 */
 .room-image-slot {
   width: 100%;
   overflow: hidden;
-  background: var(--chocolate-brown);
+  background-color: var(--newmaincolor);
 }
 
 .room-image-slot--carousel {
@@ -419,10 +421,17 @@ main {
   border: none;
 }
 
+/*rooms 페이지 객실 사진 갤러리*/
 .room-slot-gallery {
   display: flex;
   flex-direction: column;
   width: 100%;
+  background-color: var(--newmaincolor);
+}
+
+/* ROOMS: 메인 사진 영역 배경 (예약 페이지 reservation-gallery 와 구분) */
+.room-image-slot .gallery-main-wrap {
+  background: var(--newmaincolor);
 }
 
 .room-image-slot .room-slot-main-img {
@@ -439,7 +448,7 @@ main {
 .room-image-slot .gallery-thumbs {
   margin-top: 0;
   padding: 0.5rem 0.45rem;
-  background: var(--grafford-dark-brown);
+  background: var(--newmaincolor);
   scrollbar-width: thin;
 }
 
@@ -1156,28 +1165,13 @@ iframe.map {
   color: var(--grafford-mud);
 }
 
-.reservation-price-lines {
-  margin: 0;
-}
-
-.reservation-price-line {
-  margin: 0 0 0.45rem;
-  font-size: 0.9rem;
-  color: var(--grafford-dark-brown);
-  line-height: 1.45;
-}
-
-.reservation-price-line:last-of-type {
-  margin-bottom: 0;
-}
-
 .reservation-price-total {
-  margin: 0.65rem 0 0;
-  padding-top: 0.55rem;
-  border-top: 1px solid rgba(58, 53, 49, 0.12);
+  margin: 0;
   font-size: 1rem;
   font-weight: 600;
   color: var(--chocolate-brown);
+  text-align: right;
+  letter-spacing: 0.02em;
 }
 
 .availability-note {
@@ -1517,6 +1511,14 @@ iframe.map {
   color: var(--grafford-mud);
 }
 
+.reserve-complete-order-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 0.5rem 0.65rem;
+}
+
 .reserve-complete-order {
   margin: 0;
   font-size: 1.35rem;
@@ -1524,6 +1526,33 @@ iframe.map {
   letter-spacing: 0.02em;
   color: var(--chocolate-brown);
   word-break: break-all;
+}
+
+.reserve-complete-copy-btn {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.35rem;
+  border: none;
+  border-radius: 6px;
+  background: rgba(134, 96, 85, 0.12);
+  color: var(--chocolate-brown);
+  cursor: pointer;
+  transition:
+    background 0.2s ease,
+    color 0.2s ease;
+}
+
+.reserve-complete-copy-btn:hover,
+.reserve-complete-copy-btn:focus-visible {
+  background: rgba(134, 96, 85, 0.22);
+  color: var(--grafford-dark-brown);
+  outline: none;
+}
+
+.reserve-complete-copy-btn:focus-visible {
+  box-shadow: 0 0 0 2px rgba(134, 96, 85, 0.45);
 }
 
 @keyframes floatDown {

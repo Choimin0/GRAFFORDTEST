@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="css/style.css" />
   </head>
   <body>
+    <div id="grafford-react-fade-root"></div>
     <nav class="site-nav top-right-nav">
       <a href="index.html" class="nav-logo" aria-label="홈으로 이동">
         <img src="images/LOGO.png" alt="GRAFFORD LOGO" />
@@ -26,7 +27,35 @@
       </p>
       <div class="confirm-total-box reserve-complete-order-box">
         <p class="reserve-complete-label">주문번호 · 예약번호</p>
-        <p class="reserve-complete-order" id="complete-order-no">—</p>
+        <div class="reserve-complete-order-row">
+          <p class="reserve-complete-order" id="complete-order-no">—</p>
+          <button
+            type="button"
+            class="reserve-complete-copy-btn"
+            id="complete-copy-btn"
+            aria-label="예약번호 복사"
+            title="복사"
+            hidden
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              aria-hidden="true"
+            >
+              <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+              <path
+                d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"
+              ></path>
+            </svg>
+          </button>
+        </div>
       </div>
       <p class="confirm-back">
         <a href="reserveinfo.html" id="complete-link-lookup">예약 조회</a>
@@ -44,8 +73,39 @@
       document.addEventListener("DOMContentLoaded", function () {
         var params = new URLSearchParams(window.location.search);
         var orderNo = params.get("orderNo") || "";
-        document.getElementById("complete-order-no").textContent =
-          orderNo || "번호를 확인할 수 없습니다.";
+        var orderEl = document.getElementById("complete-order-no");
+        var copyBtn = document.getElementById("complete-copy-btn");
+        orderEl.textContent = orderNo || "번호를 확인할 수 없습니다.";
+        if (orderNo && copyBtn) {
+          copyBtn.hidden = false;
+          copyBtn.addEventListener("click", function () {
+            function copiedFeedback() {
+              var prev = copyBtn.getAttribute("aria-label");
+              copyBtn.setAttribute("aria-label", "복사되었습니다");
+              copyBtn.title = "복사되었습니다";
+              window.setTimeout(function () {
+                copyBtn.setAttribute("aria-label", "예약번호 복사");
+                copyBtn.title = "복사";
+              }, 2000);
+            }
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+              navigator.clipboard.writeText(orderNo).then(copiedFeedback);
+            } else {
+              var ta = document.createElement("textarea");
+              ta.value = orderNo;
+              ta.setAttribute("readonly", "");
+              ta.style.position = "fixed";
+              ta.style.left = "-9999px";
+              document.body.appendChild(ta);
+              ta.select();
+              try {
+                document.execCommand("copy");
+                copiedFeedback();
+              } catch (e) {}
+              document.body.removeChild(ta);
+            }
+          });
+        }
         var lookupLink = document.getElementById("complete-link-lookup");
         if (lookupLink) {
           lookupLink.href = orderNo
@@ -54,6 +114,7 @@
         }
       });
     </script>
+    <script defer src="js/grafford-page-fade.js"></script>
     <script src="js/site-business-footer.js"></script>
     <script>
       document.addEventListener("DOMContentLoaded", function () {

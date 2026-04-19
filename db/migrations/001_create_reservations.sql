@@ -27,7 +27,7 @@ CREATE INDEX IF NOT EXISTS idx_reservations_created_at ON reservations (created_
 
 COMMENT ON TABLE reservations IS 'Lodging reservations: name, contact, room type, dates, guest count, reservation number';
 
--- Auto-generate reservation_number on INSERT when omitted (e.g. GRF-20260419-A1B2C3D4).
+-- Auto-generate reservation_number on INSERT when omitted (e.g. 20260419-A1B2C3D4).
 CREATE OR REPLACE FUNCTION reservations_assign_number()
 RETURNS TRIGGER
 LANGUAGE plpgsql
@@ -42,8 +42,7 @@ BEGIN
 
   LOOP
     candidate :=
-      'GRF-'
-      || to_char(timezone('UTC', now()), 'YYYYMMDD')
+      to_char(timezone('UTC', now()), 'YYYYMMDD')
       || '-'
       || upper(substr(replace(gen_random_uuid()::text, '-', ''), 1, 8));
 
@@ -69,7 +68,7 @@ CREATE TRIGGER trg_reservations_assign_number
   FOR EACH ROW
   EXECUTE PROCEDURE reservations_assign_number();
 
--- Example: omit reservation_number; trigger assigns GRF-YYYYMMDD-XXXXXXXX
+-- Example: omit reservation_number; trigger assigns YYYYMMDD-XXXXXXXX
 -- INSERT INTO reservations (guest_name, contact, room_type, check_in_date, check_out_date, guest_count)
 -- VALUES ('Hong Gildong', '010-1234-5678', 'A', '2026-05-01', '2026-05-03', 2)
 -- RETURNING id, reservation_number, created_at;

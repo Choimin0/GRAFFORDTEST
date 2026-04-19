@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="css/style.css" />
   </head>
   <body>
+    <div id="grafford-react-fade-root"></div>
     <nav class="site-nav top-right-nav">
       <a href="index.html" class="nav-logo" aria-label="홈으로 이동">
         <img src="images/LOGO.png" alt="GRAFFORD LOGO" />
@@ -81,7 +82,11 @@
               id="f-contact"
               required
               autocomplete="tel"
-              placeholder="010-0000-0000"
+              inputmode="numeric"
+              maxlength="13"
+              placeholder="010-1234-5678"
+              title="숫자 11자리 (010-1234-5678 형식)"
+              pattern="[0-9]{3}-[0-9]{4}-[0-9]{4}"
             />
           </label>
         </section>
@@ -328,6 +333,30 @@
 
         syncAllFromChildren();
 
+        var contactInput = document.getElementById("f-contact");
+        if (contactInput) {
+          function formatPhoneKRMobile(value) {
+            var d = String(value || "").replace(/\D/g, "").slice(0, 11);
+            if (d.length <= 3) {
+              return d;
+            }
+            if (d.length <= 7) {
+              return d.slice(0, 3) + "-" + d.slice(3);
+            }
+            return d.slice(0, 3) + "-" + d.slice(3, 7) + "-" + d.slice(7);
+          }
+          contactInput.addEventListener("input", function () {
+            var cur = contactInput.value;
+            var next = formatPhoneKRMobile(cur);
+            if (cur !== next) {
+              contactInput.value = next;
+            }
+          });
+          contactInput.addEventListener("blur", function () {
+            contactInput.value = formatPhoneKRMobile(contactInput.value);
+          });
+        }
+
         var confirmForm = document.getElementById("confirm-form");
         var paySubmitBtn = confirmForm.querySelector(".confirm-pay-submit");
         var R = window.GraffordReservations;
@@ -377,6 +406,12 @@
 
           var guestName = document.getElementById("f-name").value.trim();
           var contact = document.getElementById("f-contact").value.trim();
+          if (!/^\d{3}-\d{4}-\d{4}$/.test(contact)) {
+            window.alert(
+              "연락처는 010-1234-5678 형식(숫자 11자리)으로 입력해 주세요.",
+            );
+            return;
+          }
           var orderNumber = R.generateOrderNumber();
           var room = document.getElementById("f-room").value;
           var checkIn = document.getElementById("f-checkin").value;
@@ -473,6 +508,7 @@
         });
       });
     </script>
+    <script defer src="js/grafford-page-fade.js"></script>
     <script src="js/site-business-footer.js"></script>
     <script>
       document.addEventListener("DOMContentLoaded", function () {

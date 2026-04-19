@@ -10,6 +10,7 @@
     <script src="js/booking-pricing.js" defer></script>
   </head>
   <body class="home-page">
+    <div id="grafford-react-fade-root"></div>
     <nav class="site-nav top-right-nav nav-hero-hidden">
       <a href="index.html" class="nav-logo" aria-label="Home">
         <img src="images/LOGO.png" alt="GRAFFORD LOGO" />
@@ -192,11 +193,6 @@
               >
                 체크인·체크아웃을 선택하면 요금이 계산됩니다.
               </p>
-              <div
-                class="reservation-price-lines"
-                id="reservation-price-lines"
-                hidden
-              ></div>
               <p
                 class="reservation-price-total"
                 id="reservation-price-total"
@@ -267,7 +263,6 @@
         var pricePlaceholder = document.getElementById(
           "reservation-price-placeholder",
         );
-        var priceLinesEl = document.getElementById("reservation-price-lines");
         var priceTotalEl = document.getElementById("reservation-price-total");
 
         var viewDate = new Date();
@@ -275,7 +270,6 @@
         var checkIn = null;
         var checkOut = null;
         var occupiedNightSet = new Set();
-        var checkoutDaySet = new Set();
 
         function pad(n) {
           return n < 10 ? "0" + n : String(n);
@@ -375,16 +369,15 @@
         }
 
         function updatePricingSummary() {
-          if (!P || !pricePlaceholder || !priceLinesEl || !priceTotalEl) {
+          if (!P || !pricePlaceholder || !priceTotalEl) {
             return;
           }
           var ci = checkIn ? formatYMD(checkIn) : "";
           var co = checkOut ? formatYMD(checkOut) : "";
           if (!checkIn || !checkOut || !P.countNights(ci, co)) {
             pricePlaceholder.hidden = false;
-            priceLinesEl.hidden = true;
             priceTotalEl.hidden = true;
-            priceLinesEl.innerHTML = "";
+            priceTotalEl.textContent = "";
             return;
           }
           var eg = P.clampExtra(currentRoom, getExtraGuests());
@@ -393,47 +386,11 @@
           }
           var q = P.computeStay(currentRoom, ci, co, eg);
           pricePlaceholder.hidden = true;
-          priceLinesEl.hidden = false;
           priceTotalEl.hidden = false;
-          priceLinesEl.innerHTML = "";
-          function line(text) {
-            var p = document.createElement("p");
-            p.className = "reservation-price-line";
-            p.textContent = text;
-            priceLinesEl.appendChild(p);
-          }
-          line(
-            "\uac15\uc2e4(\ud3c9\uc77c) " +
-              formatKRW(q.baseNightly) +
-              " \xd7 " +
-              q.nights +
-              "\ubc15 = " +
-              formatKRW(q.baseTotal),
-          );
-          if (q.weekendSurcharge > 0) {
-            line(
-              "\uc8fc\ub9d0 \ucd94\uac00 " +
-                formatKRW(P.WEEKEND_SURCHARGE_PER_NIGHT) +
-                " \xd7 " +
-                q.weekendNights +
-                "\ubc15 = " +
-                formatKRW(q.weekendSurcharge),
-            );
-          }
-          if (q.extraGuestTotal > 0) {
-            line(
-              "\uc778\uc6d0 \ucd94\uac00 " +
-                formatKRW(P.EXTRA_PER_PERSON_PER_NIGHT) +
-                " \xd7 " +
-                q.extraGuests +
-                "\uba85 \xd7 " +
-                q.nights +
-                "\ubc15 = " +
-                formatKRW(q.extraGuestTotal),
-            );
-          }
           priceTotalEl.textContent =
-            "\ucd5c\uc885 \uc219\uc18c \uc694\uae08 " + formatKRW(q.grandTotal);
+            "TOTAL " +
+            q.grandTotal.toLocaleString("ko-KR") +
+            "\uc6d0";
         }
 
         function updateConfirmLink() {
@@ -611,15 +568,12 @@
             .then(function (data) {
               if (data && data.ok) {
                 occupiedNightSet = new Set(data.occupiedNights || []);
-                checkoutDaySet = new Set(data.checkoutDays || []);
               } else {
                 occupiedNightSet = new Set();
-                checkoutDaySet = new Set();
               }
             })
             .catch(function () {
               occupiedNightSet = new Set();
-              checkoutDaySet = new Set();
             });
         }
 
@@ -671,18 +625,12 @@
             var ymdStr = formatYMD(cellDate);
             var isPast = cellDate < today;
             var isOcc = occupiedNightSet.has(ymdStr);
-            var isCkOnly =
-              checkoutDaySet.has(ymdStr) && !occupiedNightSet.has(ymdStr);
             var pickingCheckIn = !checkIn || (checkIn && checkOut);
             var inCheckoutMode = checkIn && !checkOut;
 
             var disabled = false;
             if (isPast || isOcc) {
               disabled = true;
-            } else if (pickingCheckIn) {
-              if (isCkOnly) {
-                disabled = true;
-              }
             } else if (inCheckoutMode) {
               disabled = !canSelectCheckOut(checkIn, cellDate);
             }
@@ -691,7 +639,7 @@
 
             if (isPast) {
               btn.classList.add("cal-past");
-            } else if (isOcc || isCkOnly) {
+            } else if (isOcc) {
               btn.classList.add("cal-past", "cal-booked");
             }
 
@@ -713,13 +661,6 @@
                 if (btn.disabled) return;
                 if (!checkIn || (checkIn && checkOut)) {
                   if (dateCopy < today || occupiedNightSet.has(formatYMD(dateCopy))) {
-                    return;
-                  }
-                  var yd = formatYMD(dateCopy);
-                  if (
-                    checkoutDaySet.has(yd) &&
-                    !occupiedNightSet.has(yd)
-                  ) {
                     return;
                   }
                   checkIn = new Date(dateCopy);
@@ -822,6 +763,7 @@
         }
       });
     </script>
+    <script defer src="js/grafford-page-fade.js"></script>
     <script src="js/site-business-footer.js"></script>
     <script>
       document.addEventListener("DOMContentLoaded", function () {
