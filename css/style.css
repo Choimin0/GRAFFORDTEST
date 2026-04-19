@@ -1,4 +1,5 @@
 :root {
+  --hero-slide-fade: 1.5s;
   --grafford-beige: #e8e1d5;
   --grafford-mud: #6f675c;
   --grafford-dark-brown: #3a3531;
@@ -160,6 +161,19 @@ html {
   pointer-events: none;
 }
 
+/* 히어로 동기 페이지: 내비 opacity 전환을 .hero-slide와 동일 시간으로 */
+.page-hero-nav-sync .top-right-nav {
+  transition:
+    opacity var(--hero-slide-fade) ease,
+    visibility var(--hero-slide-fade) ease;
+}
+
+.page-hero-nav-sync .top-right-nav.nav-hero-sync-hidden {
+  opacity: 0;
+  visibility: visible;
+  pointer-events: none;
+}
+
 main {
   max-width: 960px;
   margin: 2rem auto;
@@ -201,11 +215,16 @@ main {
   height: 100%;
   object-fit: cover;
   opacity: 0;
-  transition: opacity 1.4s ease;
+  transition: opacity var(--hero-slide-fade) ease;
 }
 
 .hero-slide.is-active {
   opacity: 1;
+}
+
+/* 첫 로드: HTML에 이미 is-active가 있어도 0→1 페이드 (nav-hero.js가 hero-intro-visible 추가) */
+.hero-section:not(.hero-intro-visible) .hero-slide.is-active {
+  opacity: 0;
 }
 
 .hero-overlay {
@@ -368,6 +387,7 @@ main {
   justify-content: flex-start;
   align-items: flex-start;
   text-align: left;
+  color: var(--grafford-beige);
 }
 
 .rooms-features .room-feature .reserve-btn {
