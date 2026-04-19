@@ -1,54 +1,29 @@
-import { StrictMode, useLayoutEffect, useRef } from "react";
 import { createRoot } from "react-dom/client";
 import { motion } from "framer-motion";
 
-function PageFade() {
-  const ref = useRef(null);
-
-  useLayoutEffect(() => {
-    const r = ref.current;
-    if (!r) {
-      return;
-    }
-
-    const nav = document.querySelector("body > nav.site-nav");
-    const mainEl = document.querySelector("main");
-    const hero = document.getElementById("hero");
-
-    function appendIf(el) {
-      if (el && !r.contains(el)) {
-        r.appendChild(el);
-      }
-    }
-
-    if (mainEl && hero && mainEl.contains(hero)) {
-      appendIf(mainEl);
-      return;
-    }
-
-    if (nav && mainEl && !mainEl.contains(nav)) {
-      appendIf(nav);
-    }
-    appendIf(hero);
-    appendIf(mainEl);
-  }, []);
-
+/**
+ * 페이지 전환 시 1초 페이드 — 전체 화면 오버레이만 애니메이션합니다.
+ * (nav/main을 옮기지 않음 → Live Server 등에서 DOM 재구성으로 인한 무한 새로고침 방지)
+ */
+function PageFadeOverlay() {
   return (
     <motion.div
-      ref={ref}
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 1 }}
-      style={{ minHeight: "100%" }}
+      aria-hidden="true"
+      initial={{ opacity: 1 }}
+      animate={{ opacity: 0 }}
+      transition={{ duration: 1, ease: "easeInOut" }}
+      style={{
+        position: "fixed",
+        inset: 0,
+        zIndex: 99999,
+        background: "var(--grafford-beige, #e8e1d5)",
+        pointerEvents: "none",
+      }}
     />
   );
 }
 
 const mount = document.getElementById("grafford-react-fade-root");
 if (mount) {
-  createRoot(mount).render(
-    <StrictMode>
-      <PageFade />
-    </StrictMode>,
-  );
+  createRoot(mount).render(<PageFadeOverlay />);
 }

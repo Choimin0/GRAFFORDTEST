@@ -431,7 +431,7 @@ main {
 
 /* ROOMS: 메인 사진 영역 배경 (예약 페이지 reservation-gallery 와 구분) */
 .room-image-slot .gallery-main-wrap {
-  background: var(--newmaincolor);
+  background-color: var(--newmaincolor);
 }
 
 .room-image-slot .room-slot-main-img {
