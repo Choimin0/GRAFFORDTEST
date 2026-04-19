@@ -1,16 +1,24 @@
 (function () {
   function getScrollY() {
-    return (
-      window.scrollY ||
-      document.documentElement.scrollTop ||
-      document.body.scrollTop ||
-      0
+    var se = document.scrollingElement;
+    return Math.max(
+      window.scrollY || 0,
+      (se && se.scrollTop) || 0,
+      document.documentElement.scrollTop || 0,
+      document.body.scrollTop || 0
     );
   }
 
-  /** STORY / ROOMS / FACILITIES / RESERVATION: 히어로 페이드와 내비를 같이 */
+  /**
+   * STORY / ROOMS / FACILITIES / RESERVATION: 히어로 페이드와 내비를 같이.
+   * body 클래스만으로 판별하면 배포 HTML이 구버전일 때 깨지므로
+   * 마크업에 있는 .nav-hero-sync-hidden 으로도 판별합니다.
+   */
   function isHeroSyncPage() {
-    return document.body.classList.contains("page-hero-nav-sync");
+    if (document.body.classList.contains("page-hero-nav-sync")) {
+      return true;
+    }
+    return !!document.querySelector(".top-right-nav.nav-hero-sync-hidden");
   }
 
   function updateNavVisibility() {
@@ -70,6 +78,13 @@
   }
 
   document.addEventListener("DOMContentLoaded", function () {
+    /* 구 배포 HTML에 body 클래스만 빠진 경우: 내비 마크업으로 보정해 스크롤 시 다시 숨겨지지 않게 함 */
+    if (
+      document.querySelector(".top-right-nav.nav-hero-sync-hidden") &&
+      !document.body.classList.contains("page-hero-nav-sync")
+    ) {
+      document.body.classList.add("page-hero-nav-sync");
+    }
     enableHeroIntroFade();
     updateNavVisibility();
   });

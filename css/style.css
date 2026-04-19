@@ -207,6 +207,7 @@ main {
 .home-page {
   background: #111;
   scroll-snap-type: y mandatory;
+  overflow-x: hidden;
   overflow-y: auto;
   min-height: 100svh;
 }
@@ -276,6 +277,207 @@ main {
 
 .hero-header p {
   margin-top: 0.5rem;
+}
+
+/* index.html 전용: 히어로 로고 + 태그라인 가로 폭 일치 (PC / 모바일 분리) */
+.hero-header.hero-header--index-brand {
+  min-height: auto;
+  align-items: stretch;
+  box-sizing: border-box;
+}
+
+.hero-header.hero-header--index-brand .hero-title-logo {
+  margin: 0;
+  width: 100%;
+  font-size: 0;
+  line-height: 0;
+}
+
+.hero-header.hero-header--index-brand .hero-logo-img {
+  display: block;
+  width: 100%;
+  height: auto;
+  object-fit: contain;
+  object-position: center;
+}
+
+.hero-header.hero-header--index-brand .hero-tagline {
+  width: 100%;
+  margin-top: 0.75rem;
+  text-align: center;
+  box-sizing: border-box;
+}
+
+@media (min-width: 768px) {
+  .hero-header.hero-header--index-brand {
+    width: min(640px, 82%);
+    padding-left: 0;
+    padding-right: 0;
+  }
+
+  .hero-header.hero-header--index-brand .hero-logo-img {
+    max-height: clamp(3.75rem, 7.5vw, 6rem);
+  }
+
+  .hero-header.hero-header--index-brand .hero-tagline {
+    font-size: clamp(1rem, 1.35vw, 1.2rem);
+    letter-spacing: 0.02em;
+    padding: 0 0.25rem;
+  }
+}
+
+@media (max-width: 767px) {
+  .hero-header.hero-header--index-brand {
+    width: min(100%, 92vw);
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+  }
+
+  .hero-header.hero-header--index-brand .hero-logo-img {
+    max-height: clamp(2.5rem, 13vw, 4rem);
+  }
+
+  .hero-header.hero-header--index-brand .hero-tagline {
+    font-size: clamp(0.875rem, 3.8vw, 1rem);
+    line-height: 1.45;
+    padding: 0 0.35rem;
+  }
+}
+
+/* index.html features: 1번 1:1, 2·3번 전체 너비 60/40 교차 — 이미지는 잘리지 않게 contain + 세로(svh) 기준 */
+.features--index {
+  width: 100%;
+  --feature-index-img-max-h: min(46svh, 68vh);
+}
+
+@media (min-width: 768px) {
+  .features--index {
+    --feature-index-img-max-h: min(40svh, 58vh);
+  }
+}
+
+.features--index .feature-media {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  min-height: 0;
+  background: var(--chocolate-brown);
+}
+
+.features--index .feature .feature-image {
+  display: block;
+  width: auto;
+  max-width: 100%;
+  height: auto;
+  max-height: var(--feature-index-img-max-h);
+  object-fit: contain;
+  object-position: center;
+}
+
+.features--index .feature-index-1 {
+  display: grid;
+  gap: 0;
+  align-items: stretch;
+}
+
+.features--index .feature-index-1 .feature-media,
+.features--index .feature-index-1 .feature-text {
+  min-width: 0;
+}
+
+@media (min-width: 768px) {
+  .features--index .feature-index-1 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: center;
+  }
+
+  .features--index .feature-index-1 .feature-media {
+    padding: clamp(0.5rem, 2vw, 1.25rem);
+    box-sizing: border-box;
+  }
+}
+
+@media (max-width: 767px) {
+  .features--index .feature-index-1 {
+    grid-template-rows: auto auto;
+  }
+
+  .features--index .feature-index-1 .feature-media {
+    padding: 0.75rem 1rem 0;
+    box-sizing: border-box;
+  }
+}
+
+.features--index .feature-index-2,
+.features--index .feature-index-3 {
+  display: grid;
+  gap: 0;
+  align-items: center;
+  box-sizing: border-box;
+  width: 100vw;
+  margin-left: calc(50% - 50vw);
+  margin-right: calc(50% - 50vw);
+}
+
+.features--index .feature-index-2 .feature-media,
+.features--index .feature-index-2 .feature-text,
+.features--index .feature-index-3 .feature-media,
+.features--index .feature-index-3 .feature-text {
+  min-width: 0;
+}
+
+/* index 마지막 feature: ROOMS와 동일 갤러리 — flex·패딩 제거 */
+.features--index .feature-index-3 .feature-media.feature-media--index-gallery {
+  display: block;
+  padding: 0;
+  background: transparent;
+}
+
+@media (min-width: 768px) {
+  .features--index .feature-index-2 {
+    grid-template-columns: minmax(0, 40%) minmax(0, 60%);
+  }
+
+  .features--index .feature-index-3 {
+    grid-template-columns: minmax(0, 60%) minmax(0, 40%);
+  }
+
+  .features--index .feature-index-2 .feature-media,
+  .features--index .feature-index-3 .feature-media {
+    padding: clamp(0.5rem, 1.5vw, 1.25rem);
+    box-sizing: border-box;
+  }
+}
+
+@media (max-width: 767px) {
+  .features--index .feature-index-2,
+  .features--index .feature-index-3 {
+    grid-template-columns: minmax(0, 1fr);
+    grid-auto-rows: auto;
+  }
+
+  .features--index .feature-index-2 .feature-text {
+    order: 1;
+  }
+
+  .features--index .feature-index-2 .feature-media {
+    order: 2;
+  }
+
+  .features--index .feature-index-3 .feature-media {
+    order: 1;
+  }
+
+  .features--index .feature-index-3 .feature-text {
+    order: 2;
+  }
+
+  .features--index .feature-index-2 .feature-media,
+  .features--index .feature-index-3 .feature-media {
+    padding: 0.75rem 1rem;
+    box-sizing: border-box;
+  }
 }
 
 /* 메인페이지 첫 화면 화살표 버튼 */
