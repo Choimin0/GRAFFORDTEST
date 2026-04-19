@@ -1,3 +1,7 @@
+/**
+ * 레거시 React+Framer 빌드용 (npm run build → js/grafford-page-fade.react.js).
+ * 실제 사이트는 js/grafford-page-fade.js 바닐라 스크립트 + CSS를 사용합니다.
+ */
 import { createRoot } from "react-dom/client";
 import { motion } from "framer-motion";
 

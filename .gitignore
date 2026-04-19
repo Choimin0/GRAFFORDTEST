@@ -3,3 +3,6 @@
 .env.*.local
 .vercel
 .env*.local
+
+# Vite로 빌드되는 React 페이드 번들 (사이트는 js/grafford-page-fade.js 바닐라 사용)
+js/grafford-page-fade.react.js

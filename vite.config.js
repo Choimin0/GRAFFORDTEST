@@ -8,7 +8,8 @@ export default defineConfig({
       entry: "src/page-fade.jsx",
       name: "GraffordPageFade",
       formats: ["iife"],
-      fileName: () => "grafford-page-fade.js",
+      /* 배포용 페이드는 js/grafford-page-fade.js (바닐라). 이 빌드는 덮어쓰지 않음 */
+      fileName: () => "grafford-page-fade.react.js",
     },
     outDir: "js",
     emptyOutDir: false,

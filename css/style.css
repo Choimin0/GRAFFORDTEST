@@ -1,5 +1,7 @@
 :root {
   --hero-slide-fade: 1.5s;
+  /* 페이지 진입 전체 오버레이 페이드 (Framer/React 없이 동작) */
+  --page-overlay-fade: 1s;
   --grafford-beige: #e8e1d5;
   --grafford-mud: #6f675c;
   --grafford-dark-brown: #3a3531;
@@ -7,6 +9,27 @@
   --chocolate-brown: #d3c7b1;
   --navigate: #cfb9a1;
   --newmaincolor: #5a5247;
+}
+
+/* 전역 진입 페이드: 외부 JS·React 로드 전에도 style.css만 있으면 베이지 레이어가 깔림 */
+#grafford-react-fade-root {
+  position: fixed;
+  inset: 0;
+  z-index: 99999;
+  background: var(--grafford-beige);
+  pointer-events: none;
+  opacity: 1;
+  transition: opacity var(--page-overlay-fade) ease-in-out;
+}
+
+#grafford-react-fade-root.grafford-page-fade-done {
+  opacity: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #grafford-react-fade-root {
+    transition-duration: 0.01ms;
+  }
 }
 
 /* Apply custom font to Latin (English) glyphs only */
