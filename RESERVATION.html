@@ -191,7 +191,7 @@
                 class="reservation-price-placeholder"
                 id="reservation-price-placeholder"
               >
-                체크인·체크아웃을 선택하면 요금이 계산됩니다.
+                TOTAL 0원
               </p>
               <p
                 class="reservation-price-total"
@@ -199,9 +199,6 @@
                 hidden
               ></p>
             </div>
-            <p class="availability-note" id="availability-note">
-              Select check-in and check-out to see availability for this room.
-            </p>
             <a
               href="confirm.html"
               class="btn reserve-cta"
@@ -388,9 +385,7 @@
           pricePlaceholder.hidden = true;
           priceTotalEl.hidden = false;
           priceTotalEl.textContent =
-            "TOTAL " +
-            q.grandTotal.toLocaleString("ko-KR") +
-            "\uc6d0";
+            "TOTAL " + q.grandTotal.toLocaleString("ko-KR") + "\uc6d0";
         }
 
         function updateConfirmLink() {
@@ -537,16 +532,8 @@
           if (!ci || !co || !dateLT(ci, co)) {
             return false;
           }
-          var cur = new Date(
-            ci.getFullYear(),
-            ci.getMonth(),
-            ci.getDate(),
-          );
-          var end = new Date(
-            co.getFullYear(),
-            co.getMonth(),
-            co.getDate(),
-          );
+          var cur = new Date(ci.getFullYear(), ci.getMonth(), ci.getDate());
+          var end = new Date(co.getFullYear(), co.getMonth(), co.getDate());
           while (cur < end) {
             if (occupiedNightSet.has(formatYMD(cur))) {
               return false;
@@ -660,7 +647,10 @@
               btn.addEventListener("click", function () {
                 if (btn.disabled) return;
                 if (!checkIn || (checkIn && checkOut)) {
-                  if (dateCopy < today || occupiedNightSet.has(formatYMD(dateCopy))) {
+                  if (
+                    dateCopy < today ||
+                    occupiedNightSet.has(formatYMD(dateCopy))
+                  ) {
                     return;
                   }
                   checkIn = new Date(dateCopy);

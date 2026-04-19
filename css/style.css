@@ -68,11 +68,7 @@
       calc((100svh - 4 * var(--site-nav-height) - 7rem) * 1.3),
       260px
     );
-    --feature-ref-media-min-h: min(
-      39svh,
-      var(--feature-image-area-max),
-      364px
-    );
+    --feature-ref-media-min-h: min(39svh, var(--feature-image-area-max), 364px);
     --feature-ref-image-min-h: min(
       33.8svh,
       var(--feature-gallery-img-min),
@@ -202,6 +198,13 @@ html {
   height: 25px;
   width: auto;
   display: block;
+}
+
+/* PC: 내비 로고를 수직 중앙 대비 약 2px 위로 */
+@media (min-width: 769px) {
+  .site-nav .nav-logo {
+    transform: translateY(calc(-50% - 2px));
+  }
 }
 
 .site-nav .nav-logo::after {
@@ -560,7 +563,8 @@ main {
 }
 
 .features--index .feature-index-2,
-.features--index .feature-index-3 {
+.features--index .feature-index-3,
+.features--index .feature-index-4 {
   display: grid;
   gap: 0;
   align-items: stretch;
@@ -573,7 +577,9 @@ main {
 .features--index .feature-index-2 .feature-media,
 .features--index .feature-index-2 .feature-text,
 .features--index .feature-index-3 .feature-media,
-.features--index .feature-index-3 .feature-text {
+.features--index .feature-index-3 .feature-text,
+.features--index .feature-index-4 .feature-media,
+.features--index .feature-index-4 .feature-text {
   min-width: 0;
 }
 
@@ -593,7 +599,8 @@ main {
 
 @media (min-width: 768px) {
   /* STORY 첫 feature와 동일: 이미지|텍스트 60/40, 텍스트|이미지 40/60 */
-  .features--index .feature-index-2 {
+  .features--index .feature-index-2,
+  .features--index .feature-index-4 {
     grid-template-columns: var(--feature-ref-grid-text-img);
   }
 
@@ -601,7 +608,8 @@ main {
     grid-template-columns: var(--feature-ref-grid-img-text);
   }
 
-  .features--index .feature-index-2 .feature-media {
+  .features--index .feature-index-2 .feature-media,
+  .features--index .feature-index-4 .feature-media {
     padding: 0;
     box-sizing: border-box;
   }
@@ -609,13 +617,15 @@ main {
 
 @media (max-width: 767px) {
   .features--index .feature-index-2,
-  .features--index .feature-index-3 {
+  .features--index .feature-index-3,
+  .features--index .feature-index-4 {
     grid-template-columns: minmax(0, 1fr);
     grid-auto-rows: auto;
   }
 
   .features--index .feature-index-2 .feature-media,
-  .features--index .feature-index-3 .feature-media {
+  .features--index .feature-index-3 .feature-media,
+  .features--index .feature-index-4 .feature-media {
     padding: 0;
     box-sizing: border-box;
   }
@@ -1109,18 +1119,24 @@ main {
   }
 }
 
-/* FACILITIES 등: STORY 첫 feature와 동일 60/40·이미지 열 */
+/* FACILITIES: 60:40, 1·3번 이미지 왼쪽 / 2·4번 이미지 오른쪽 */
 @media (min-width: 768px) {
-  .content-section
-    .features:not(.features--index):not(.features--story):not(.rooms-features)
-    .feature {
+  .content-section .features--facilities .facilities-feature-1,
+  .content-section .features--facilities .facilities-feature-3 {
     grid-template-columns: var(--feature-ref-grid-img-text) !important;
     gap: 0 !important;
     min-height: unset !important;
   }
 
+  .content-section .features--facilities .facilities-feature-2,
+  .content-section .features--facilities .facilities-feature-4 {
+    grid-template-columns: var(--feature-ref-grid-text-img) !important;
+    gap: 0 !important;
+    min-height: unset !important;
+  }
+
   .content-section
-    .features:not(.features--index):not(.features--story):not(.rooms-features)
+    .features--facilities
     .feature
     .feature-media:has(.feature-image) {
     align-self: stretch;
@@ -1130,10 +1146,7 @@ main {
     padding: 0;
   }
 
-  .content-section
-    .features:not(.features--index):not(.features--story):not(.rooms-features)
-    .feature
-    .feature-image {
+  .content-section .features--facilities .feature .feature-image {
     width: 100%;
     flex: 1 1 auto;
     min-height: var(--feature-ref-image-min-h);
@@ -1864,21 +1877,24 @@ iframe.map {
 .reservation-price-summary {
   margin-bottom: 1rem;
   padding: 0.85rem 1rem;
-  background: rgba(134, 96, 85, 0.06);
+  background-color: transparent;
   border-radius: 8px;
 }
 
 .reservation-price-placeholder {
   margin: 0;
-  font-size: 0.9rem;
+  font-size: 1.3rem;
+  font-weight: 600;
   color: var(--grafford-mud);
+  text-align: right;
+  letter-spacing: 0.02em;
 }
 
 .reservation-price-total {
   margin: 0;
-  font-size: 1.5rem;
+  font-size: 1.3rem;
   font-weight: 600;
-  color: var(--chocolate-brown);
+  color: var(--grafford-mud);
   text-align: right;
   letter-spacing: 0.02em;
 }
