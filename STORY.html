@@ -6,6 +6,24 @@
     <link rel="icon" href="images/LOGO-transparent.png" type="image/png" />
     <title>STORY - GRAFFORD</title>
     <link rel="stylesheet" href="css/style.css" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            screens: { md: "768px" },
+            colors: {
+              grafford: {
+                beige: "#e8e1d5",
+                mud: "#5a5247",
+                dark: "#3a3531",
+                chocolate: "#d3c7b1",
+              },
+            },
+          },
+        },
+      };
+    </script>
     <script src="js/nav-hero.js" defer></script>
   </head>
   <body class="home-page">
@@ -39,31 +57,79 @@
 
     <main class="content-section fullpage-section" id="content">
       <section class="features">
-        <article class="feature scroll-fade">
-          <img src="images/story.jpeg" alt="GRAFFORD 시작 이야기" />
-          <div class="feature-text">
-            <h3>Beginning</h3>
-            <p>
+        <article
+          class="feature scroll-fade my-[8vh] flex flex-col bg-[var(--chocolate-brown)] text-[var(--grafford-beige)] md:my-[8vh] md:grid md:min-h-[36svh] md:grid-cols-[minmax(0,0.4fr)_minmax(0,1fr)] md:items-stretch md:gap-6"
+        >
+          <div class="feature-media w-full shrink-0 overflow-hidden">
+            <img
+              src="images/story.jpeg"
+              alt="GRAFFORD 시작 이야기"
+              class="feature-image block h-52 w-full object-cover md:h-[min(32vh,260px)] md:max-h-[260px]"
+            />
+          </div>
+          <div
+            class="feature-text flex min-h-0 flex-col justify-center gap-3 px-4 py-6 text-left md:px-[clamp(1.25rem,3vw,3rem)] md:py-8"
+          >
+            <h3
+              class="feature-heading text-lg font-semibold tracking-wide text-grafford-dark md:text-3xl md:font-medium"
+            >
+              Beginning
+            </h3>
+            <p
+              class="feature-body text-sm leading-relaxed text-grafford-mud md:text-base md:leading-relaxed"
+            >
               GRAFFORD의 시작은 조용한 휴식 공간을 만들고 싶다는 작은 생각에서
               출발했습니다.
             </p>
           </div>
         </article>
-        <article class="feature scroll-fade">
-          <img src="images/rooms.jpeg" alt="객실 공간 이야기" />
-          <div class="feature-text">
-            <h3>Designing Spaces</h3>
-            <p>
+        <article
+          class="feature scroll-fade my-[8vh] flex flex-col bg-[var(--chocolate-brown)] text-[var(--grafford-beige)] md:my-[8vh] md:grid md:min-h-[36svh] md:grid-cols-[minmax(0,0.4fr)_minmax(0,1fr)] md:items-stretch md:gap-6"
+        >
+          <div class="feature-media w-full shrink-0 overflow-hidden">
+            <img
+              src="images/rooms.jpeg"
+              alt="객실 공간 이야기"
+              class="feature-image block h-52 w-full object-cover md:h-[min(32vh,260px)] md:max-h-[260px]"
+            />
+          </div>
+          <div
+            class="feature-text flex min-h-0 flex-col justify-center gap-3 px-4 py-6 text-left md:px-[clamp(1.25rem,3vw,3rem)] md:py-8"
+          >
+            <h3
+              class="feature-heading text-lg font-semibold tracking-wide text-grafford-dark md:text-3xl md:font-medium"
+            >
+              Designing Spaces
+            </h3>
+            <p
+              class="feature-body text-sm leading-relaxed text-grafford-mud md:text-base md:leading-relaxed"
+            >
               머무는 모든 순간이 편안하도록 객실 동선과 분위기를 세심하게
               구성했습니다.
             </p>
           </div>
         </article>
-        <article class="feature scroll-fade">
-          <img src="images/reservation.jpeg" alt="운영과 서비스 이야기" />
-          <div class="feature-text">
-            <h3>Hospitality</h3>
-            <p>
+        <article
+          class="feature scroll-fade my-[8vh] flex flex-col bg-[var(--chocolate-brown)] text-[var(--grafford-beige)] md:my-[8vh] md:grid md:min-h-[36svh] md:grid-cols-[minmax(0,0.4fr)_minmax(0,1fr)] md:items-stretch md:gap-6"
+        >
+          <div class="feature-media w-full shrink-0 overflow-hidden">
+            <img
+              src="images/reservation.jpeg"
+              alt="운영과 서비스 이야기"
+              class="feature-image block h-52 w-full object-cover md:h-[min(32vh,260px)] md:max-h-[260px]"
+            />
+          </div>
+          <div
+            class="feature-text flex min-h-0 flex-col justify-center gap-3 px-4 py-6 text-left md:px-[clamp(1.25rem,3vw,3rem)] md:py-8"
+          >
+            <h3
+              class="feature-heading text-lg font-semibold tracking-wide text-grafford-dark md:text-3xl md:font-medium"
+            >
+              Hospitality
+            </h3>
+            <p
+              class="feature-body text-sm leading-relaxed text-grafford-mud md:text-base md:leading-relaxed"
+            >
               예약부터 체크아웃까지, 방문자 한 분 한 분의 경험이 자연스럽고
               따뜻하게 이어지도록 운영합니다.
             </p>

@@ -6,6 +6,24 @@
     <link rel="icon" href="images/LOGO-transparent.png" type="image/png" />
     <title>GRAFFORD</title>
     <link rel="stylesheet" href="css/style.css" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            screens: { md: "768px" },
+            colors: {
+              grafford: {
+                beige: "#e8e1d5",
+                mud: "#5a5247",
+                dark: "#3a3531",
+                chocolate: "#d3c7b1",
+              },
+            },
+          },
+        },
+      };
+    </script>
     <script src="js/nav-hero.js" defer></script>
   </head>
   <body class="home-page">
@@ -42,20 +60,44 @@
 
     <main class="content-section fullpage-section" id="content">
       <section class="features">
-        <article class="feature scroll-fade">
-          <img src="images/mainimg1.jpg" alt="High Quality 객실 이미지" />
-          <div class="feature-text">
-            <p>
+        <article
+          class="feature scroll-fade my-[8vh] flex flex-col bg-[var(--chocolate-brown)] text-[var(--grafford-beige)] md:my-[8vh] md:grid md:min-h-[36svh] md:grid-cols-[minmax(0,0.4fr)_minmax(0,1fr)] md:items-stretch md:gap-6"
+        >
+          <div class="feature-media w-full shrink-0 overflow-hidden">
+            <img
+              src="images/mainimg1.jpg"
+              alt="High Quality 객실 이미지"
+              class="feature-image block h-52 w-full object-cover md:h-[min(32vh,260px)] md:max-h-[260px]"
+            />
+          </div>
+          <div
+            class="feature-text flex min-h-0 flex-col justify-center gap-3 px-4 py-6 text-left md:px-[clamp(1.25rem,3vw,3rem)] md:py-8"
+          >
+            <p
+              class="feature-body text-[0.9375rem] leading-relaxed text-grafford-mud md:text-lg md:leading-[1.65]"
+            >
               발끝으로 대지를 밟는 순간, 묵직한 안도감이 스며들었습니다.<br />
               흘러가는 물 속에서도 나를 붙잡아 주는 든든한 중심 같달까요.<br />
               그라포드의 이야기는 바로 이 단단함에서 비롯되는 듯합니다.
             </p>
           </div>
         </article>
-        <article class="feature scroll-fade">
-          <img src="images/mainimg2.jpg" alt="Private Terrace 이미지" />
-          <div class="feature-text">
-            <p>
+        <article
+          class="feature scroll-fade my-[8vh] flex flex-col bg-[var(--chocolate-brown)] text-[var(--grafford-beige)] md:my-[8vh] md:grid md:min-h-[36svh] md:grid-cols-[minmax(0,0.4fr)_minmax(0,1fr)] md:items-stretch md:gap-6"
+        >
+          <div class="feature-media w-full shrink-0 overflow-hidden">
+            <img
+              src="images/mainimg2.jpg"
+              alt="Private Terrace 이미지"
+              class="feature-image block h-52 w-full object-cover md:h-[min(32vh,260px)] md:max-h-[260px]"
+            />
+          </div>
+          <div
+            class="feature-text flex min-h-0 flex-col justify-center gap-3 px-4 py-6 text-left md:px-[clamp(1.25rem,3vw,3rem)] md:py-8"
+          >
+            <p
+              class="feature-body text-[0.9375rem] leading-relaxed text-grafford-mud md:text-lg md:leading-[1.65]"
+            >
               흔들림 없이 사람을 지지해 주는 땅, 자연스럽게 이어지며 잠시 쉬어
               갈 수 있는 여울길.<br />
               이 두 단어가 만난 그라포드는 땅의 묵직함과 여울의 부드러움을
@@ -65,10 +107,22 @@
             </p>
           </div>
         </article>
-        <article class="feature scroll-fade">
-          <img src="images/mainimg3.jpg" alt="Variable Options 이미지" />
-          <div class="feature-text">
-            <p>
+        <article
+          class="feature scroll-fade my-[8vh] flex flex-col bg-[var(--chocolate-brown)] text-[var(--grafford-beige)] md:my-[8vh] md:grid md:min-h-[36svh] md:grid-cols-[minmax(0,0.4fr)_minmax(0,1fr)] md:items-stretch md:gap-6"
+        >
+          <div class="feature-media w-full shrink-0 overflow-hidden">
+            <img
+              src="images/mainimg3.jpg"
+              alt="Variable Options 이미지"
+              class="feature-image block h-52 w-full object-cover md:h-[min(32vh,260px)] md:max-h-[260px]"
+            />
+          </div>
+          <div
+            class="feature-text flex min-h-0 flex-col justify-center gap-3 px-4 py-6 text-left md:px-[clamp(1.25rem,3vw,3rem)] md:py-8"
+          >
+            <p
+              class="feature-body text-[0.9375rem] leading-relaxed text-grafford-mud md:text-lg md:leading-[1.65]"
+            >
               가만히 몸을 맡기면 대지가 전하는 평온함이 마음 한켠을 감싸고,<br />
               다시금 앞으로 나아갈 힘이 되어줍니다.<br />
               삶이 소란스러워질 때마다, 대지가 전하는 고요함 속에서<br />

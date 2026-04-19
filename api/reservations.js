@@ -105,6 +105,44 @@ function toYMD(v) {
   return y + "-" + m + "-" + day;
 }
 
+/** Postgres DATE / 문자열 → YYYY-MM-DD */
+function rowDateToYMD(v) {
+  if (v == null || v === "") {
+    return "";
+  }
+  if (typeof v === "string") {
+    return v.slice(0, 10);
+  }
+  if (v instanceof Date && !isNaN(v.getTime())) {
+    var y = v.getUTCFullYear();
+    var m = String(v.getUTCMonth() + 1).padStart(2, "0");
+    var day = String(v.getUTCDate()).padStart(2, "0");
+    return y + "-" + m + "-" + day;
+  }
+  return "";
+}
+
+function addOneDayYMD(ymd) {
+  var p = ymd.split("-");
+  var dt = new Date(Number(p[0]), Number(p[1]) - 1, Number(p[2]));
+  dt.setDate(dt.getDate() + 1);
+  var y = dt.getFullYear();
+  var m = String(dt.getMonth() + 1).padStart(2, "0");
+  var day = String(dt.getDate()).padStart(2, "0");
+  return y + "-" + m + "-" + day;
+}
+
+/** [check_in, check_out) 구간의 숙박일(밤) — check_out 아침 퇴실 전날 밤까지 */
+function expandOccupiedNights(ciYmd, coYmd) {
+  var out = [];
+  var cur = ciYmd;
+  while (cur < coYmd) {
+    out.push(cur);
+    cur = addOneDayYMD(cur);
+  }
+  return out;
+}
+
 function readBody(req) {
   return new Promise(function (resolve, reject) {
     var chunks = [];
@@ -161,6 +199,53 @@ export default async function handler(req, res) {
   if (req.method === "GET") {
     var parsed = parseUrl(req.url || "", true);
     var q = parsed.query || {};
+
+    if (q.availability === "1" || q.availability === "true") {
+      var roomForCal = String(q.room || "")
+        .trim()
+        .toUpperCase();
+      if (!ALLOWED_ROOMS.has(roomForCal)) {
+        json(res, 400, { ok: false, error: "Invalid room" });
+        return;
+      }
+      try {
+        var calRows = await pool.query(
+          `SELECT check_in_date, check_out_date
+           FROM reservations
+           WHERE room_type = $1 AND check_out_date IS NOT NULL
+           ORDER BY check_in_date`,
+          [roomForCal],
+        );
+        var occupied = Object.create(null);
+        var checkouts = Object.create(null);
+        (calRows.rows || []).forEach(function (row) {
+          var ci = rowDateToYMD(row.check_in_date);
+          var co = rowDateToYMD(row.check_out_date);
+          if (!ci || !co || ci >= co) {
+            return;
+          }
+          expandOccupiedNights(ci, co).forEach(function (n) {
+            occupied[n] = true;
+          });
+          checkouts[co] = true;
+        });
+        json(res, 200, {
+          ok: true,
+          room: roomForCal,
+          occupiedNights: Object.keys(occupied).sort(),
+          checkoutDays: Object.keys(checkouts).sort(),
+        });
+      } catch (e) {
+        console.error("reservations availability", e);
+        json(res, 500, {
+          ok: false,
+          error: humanDbError(e),
+          code: e.code || null,
+        });
+      }
+      return;
+    }
+
     var guestParam = String(q.guestName || q.name || "").trim();
     var orderParam = String(
       q.reservationNumber || q.orderNo || q.number || "",

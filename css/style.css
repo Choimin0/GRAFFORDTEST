@@ -291,26 +291,19 @@ main {
   gap: 0;
 }
 
+/* 카드 배경·텍스트 색: 레이아웃·간격·타이포는 HTML의 Tailwind 유틸로 제어 */
 .feature {
-  display: grid;
-  grid-template-columns: 0.4fr 1fr;
-  align-items: center;
-  gap: 1.2rem;
   background: var(--chocolate-brown);
   color: var(--grafford-beige);
-  margin: 8vh 0;
-  min-height: 36svh;
 }
 
 .feature > img,
 .feature > .image-slider {
   width: 100%;
-  height: min(32vh, 260px);
 }
 
 .feature img {
   width: 100%;
-  height: 100%;
   object-fit: cover;
 }
 
@@ -364,39 +357,16 @@ main {
   color: #59130e;
 }
 
-.feature-text h3 {
-  color: #5a5247;
-  margin-bottom: 0.5rem;
-}
-
-.feature-text p {
-  color: #5a5247;
-}
+/* 제목(feature-heading)·본문(feature-body) 스타일은 마크업의 Tailwind 클래스로 구분 */
 
 .feature-text {
-  min-height: 100%;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: flex-start;
-  text-align: left;
-  padding: clamp(1.25rem, 3vw, 3rem);
-}
-
-.rooms-features .room-feature {
-  grid-template-columns: 1fr 1fr;
-  align-items: stretch;
+  box-sizing: border-box;
 }
 
 .room-feature .feature-text {
   justify-content: flex-start;
   align-items: flex-start;
   text-align: left;
-  gap: 0.85rem;
-  padding-top: 1.6rem;
-  min-height: 100%;
-  height: 100%;
-  box-sizing: border-box;
 }
 
 .rooms-features .room-feature .reserve-btn {
@@ -458,7 +428,6 @@ main {
 .room-image-slot .room-slot-main-img {
   display: block;
   width: 100%;
-  height: min(72vh, 420px);
   object-fit: cover;
   transition: opacity 0.65s ease;
 }
@@ -488,11 +457,6 @@ main {
   display: inline-block;
   position: relative;
   overflow: hidden;
-}
-
-.feature:nth-child(even) .feature-text {
-  align-items: flex-start;
-  text-align: left;
 }
 
 .feature-text .scroll-down-btn {
@@ -757,67 +721,6 @@ iframe.map {
   .content-section {
     width: 100%;
     padding: 1.2rem;
-  }
-
-  .feature {
-    grid-template-columns: 1fr;
-    grid-template-rows: auto auto;
-    margin: 3.5vh 0;
-    min-height: auto;
-  }
-
-  .feature > img,
-  .feature > .image-slider {
-    order: 1;
-  }
-
-  .feature > .feature-text {
-    order: 2;
-  }
-
-  .feature img {
-    height: 180px;
-  }
-
-  .feature-text {
-    min-height: auto;
-    align-items: flex-start;
-    text-align: left;
-    padding: 1rem 0.2rem 1.2rem;
-  }
-
-  .feature > img,
-  .feature > .image-slider {
-    height: 220px;
-  }
-
-  .room-image-slot .room-slot-main-img {
-    height: min(40vh, 320px);
-  }
-
-  /* ROOMS page mobile: image top, text below, reserve button at bottom */
-  .rooms-features .room-feature {
-    display: flex;
-    flex-direction: column;
-    align-items: stretch;
-    gap: 0;
-  }
-
-  .rooms-features .room-feature .room-image-slot {
-    order: 1;
-    width: 100%;
-  }
-
-  .rooms-features .room-feature .room-slot-gallery {
-    width: 100%;
-  }
-
-  .rooms-features .room-feature .feature-text {
-    order: 2;
-    width: 100%;
-    min-height: auto;
-    height: auto;
-    padding: 1rem 0.75rem 1.2rem;
   }
 
   .rooms-features .room-feature .reserve-btn {
@@ -1156,6 +1059,26 @@ iframe.map {
 .cal-cell.cal-past {
   opacity: 0.35;
   cursor: not-allowed;
+}
+
+/* DB 예약 점유일·타인 체크아웃일 — 과거(cal-past)와 동일 톤, 체크아웃만 가능한 날은 :not(:disabled)로 구분 */
+.cal-cell.cal-booked:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+
+.cal-cell.cal-booked:not(:disabled) {
+  opacity: 0.42;
+  cursor: pointer;
+}
+
+.cal-cell.cal-booked:not(:disabled):hover {
+  opacity: 0.52;
+}
+
+.cal-cell.cal-past.cal-booked:not(:disabled) {
+  opacity: 0.42;
+  cursor: pointer;
 }
 
 .cal-cell.cal-checkin,

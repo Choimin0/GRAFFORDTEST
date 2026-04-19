@@ -274,6 +274,8 @@
         viewDate.setDate(1);
         var checkIn = null;
         var checkOut = null;
+        var occupiedNightSet = new Set();
+        var checkoutDaySet = new Set();
 
         function pad(n) {
           return n < 10 ? "0" + n : String(n);
@@ -492,6 +494,19 @@
         function setRoom(room) {
           currentRoom = room;
           galleryIndex = 0;
+          checkIn = null;
+          checkOut = null;
+          if (calCheckinEl) {
+            calCheckinEl.textContent = "\u2014";
+          }
+          if (calCheckoutEl) {
+            calCheckoutEl.textContent = "\u2014";
+          }
+          if (availabilityEl) {
+            availabilityEl.textContent =
+              "Select check-in and check-out to see availability for this room.";
+            availabilityEl.classList.remove("is-ok");
+          }
           typeButtons.forEach(function (btn) {
             btn.classList.toggle(
               "is-active",
@@ -502,6 +517,14 @@
           rebuildExtraSelect();
           updateWeekdayRateDisplay();
           renderGallery();
+          renderCalendar();
+          updatePricingSummary();
+          updateConfirmLink();
+          loadAvailability(room).then(function () {
+            renderCalendar();
+            updatePricingSummary();
+            updateConfirmLink();
+          });
         }
 
         typeButtons.forEach(function (btn) {
@@ -539,6 +562,65 @@
             a.getMonth() === b.getMonth() &&
             a.getDate() === b.getDate()
           );
+        }
+
+        function dateLT(a, b) {
+          var ay = a.getFullYear();
+          var am = a.getMonth();
+          var ad = a.getDate();
+          var by = b.getFullYear();
+          var bm = b.getMonth();
+          var bd = b.getDate();
+          if (ay !== by) return ay < by;
+          if (am !== bm) return am < bm;
+          return ad < bd;
+        }
+
+        function canSelectCheckOut(ci, co) {
+          if (!ci || !co || !dateLT(ci, co)) {
+            return false;
+          }
+          var cur = new Date(
+            ci.getFullYear(),
+            ci.getMonth(),
+            ci.getDate(),
+          );
+          var end = new Date(
+            co.getFullYear(),
+            co.getMonth(),
+            co.getDate(),
+          );
+          while (cur < end) {
+            if (occupiedNightSet.has(formatYMD(cur))) {
+              return false;
+            }
+            cur.setDate(cur.getDate() + 1);
+          }
+          return true;
+        }
+
+        function loadAvailability(room) {
+          return fetch(
+            "/api/reservations?room=" +
+              encodeURIComponent(room) +
+              "&availability=1",
+          )
+            .then(function (r) {
+              return r.json();
+            })
+            .then(function (data) {
+              if (data && data.ok) {
+                occupiedNightSet = new Set(data.occupiedNights || []);
+                checkoutDaySet = new Set(data.checkoutDays || []);
+              } else {
+                occupiedNightSet = new Set();
+                checkoutDaySet = new Set();
+              }
+            })
+            .catch(function () {
+              occupiedNightSet = new Set();
+              checkoutDaySet = new Set();
+            });
         }
 
         function renderCalendar() {
@@ -586,9 +668,31 @@
             btn.className = "cal-cell cal-day";
             btn.textContent = String(d);
 
-            if (cellDate < today) {
-              btn.disabled = true;
+            var ymdStr = formatYMD(cellDate);
+            var isPast = cellDate < today;
+            var isOcc = occupiedNightSet.has(ymdStr);
+            var isCkOnly =
+              checkoutDaySet.has(ymdStr) && !occupiedNightSet.has(ymdStr);
+            var pickingCheckIn = !checkIn || (checkIn && checkOut);
+            var inCheckoutMode = checkIn && !checkOut;
+
+            var disabled = false;
+            if (isPast || isOcc) {
+              disabled = true;
+            } else if (pickingCheckIn) {
+              if (isCkOnly) {
+                disabled = true;
+              }
+            } else if (inCheckoutMode) {
+              disabled = !canSelectCheckOut(checkIn, cellDate);
+            }
+
+            btn.disabled = disabled;
+
+            if (isPast) {
               btn.classList.add("cal-past");
+            } else if (isOcc || isCkOnly) {
+              btn.classList.add("cal-past", "cal-booked");
             }
 
             if (checkIn && sameDay(cellDate, checkIn))
@@ -608,9 +712,22 @@
               btn.addEventListener("click", function () {
                 if (btn.disabled) return;
                 if (!checkIn || (checkIn && checkOut)) {
+                  if (dateCopy < today || occupiedNightSet.has(formatYMD(dateCopy))) {
+                    return;
+                  }
+                  var yd = formatYMD(dateCopy);
+                  if (
+                    checkoutDaySet.has(yd) &&
+                    !occupiedNightSet.has(yd)
+                  ) {
+                    return;
+                  }
                   checkIn = new Date(dateCopy);
                   checkOut = null;
                 } else {
+                  if (!canSelectCheckOut(checkIn, dateCopy)) {
+                    return;
+                  }
                   if (dateCopy < checkIn) {
                     checkOut = new Date(checkIn);
                     checkIn = new Date(dateCopy);
@@ -692,8 +809,6 @@
         var initialRoom =
           qsRoom && allowedRooms.indexOf(qsRoom) !== -1 ? qsRoom : "A";
         setRoom(initialRoom);
-        renderCalendar();
-        updateConfirmLink();
         if (qsRoom && allowedRooms.indexOf(qsRoom) !== -1) {
           var bookingAnchor = document.getElementById("reservation-booking");
           if (bookingAnchor) {

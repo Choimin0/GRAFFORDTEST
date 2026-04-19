@@ -6,6 +6,24 @@
     <link rel="icon" href="images/LOGO-transparent.png" type="image/png" />
     <title>ROOMS - GRAFFORD</title>
     <link rel="stylesheet" href="css/style.css" />
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+      tailwind.config = {
+        theme: {
+          extend: {
+            screens: { md: "768px" },
+            colors: {
+              grafford: {
+                beige: "#e8e1d5",
+                mud: "#5a5247",
+                dark: "#3a3531",
+                chocolate: "#d3c7b1",
+              },
+            },
+          },
+        },
+      };
+    </script>
     <script src="js/nav-hero.js" defer></script>
   </head>
   <body class="home-page">
@@ -39,10 +57,46 @@
 
     <main class="content-section fullpage-section" id="content">
       <section class="features rooms-features">
-        <article class="feature room-feature scroll-fade">
-          <div class="feature-text">
-            <h3>A</h3>
-            <p>
+        <article
+          class="feature room-feature scroll-fade my-[8vh] flex flex-col gap-0 bg-[var(--chocolate-brown)] text-[var(--grafford-beige)] md:my-[8vh] md:grid md:min-h-[36svh] md:grid-cols-2 md:items-stretch md:gap-0"
+        >
+          <div
+            class="room-image-slot room-image-slot--carousel w-full shrink-0"
+            data-room="A"
+            aria-label="Room A photos"
+          >
+            <div class="room-slot-gallery">
+              <div class="gallery-main-wrap">
+                <button
+                  type="button"
+                  class="gallery-nav gallery-prev room-slot-nav-prev"
+                  aria-label="이전 사진"
+                >
+                  &#10094;
+                </button>
+                <img
+                  class="room-slot-main-img h-[min(40vh,280px)] w-full md:h-[min(72vh,420px)]"
+                  src="images/A00.jpg"
+                  alt="Room A"
+                />
+                <button
+                  type="button"
+                  class="gallery-nav gallery-next room-slot-nav-next"
+                  aria-label="다음 사진"
+                >
+                  &#10095;
+                </button>
+              </div>
+              <div class="gallery-thumbs room-slot-thumbs"></div>
+            </div>
+          </div>
+          <div
+            class="feature-text flex h-full min-h-0 w-full flex-col justify-start gap-3 px-4 py-6 md:gap-[0.85rem] md:px-[clamp(1.25rem,3vw,3rem)] md:pb-6 md:pt-[1.6rem]"
+          >
+            <h3 class="feature-heading text-2xl font-semibold tracking-wide text-white/95 md:text-4xl">
+              A
+            </h3>
+            <p class="feature-body text-sm leading-relaxed text-[#e8e1d5]/95 md:text-[0.95rem] md:leading-relaxed">
               2인 기준의 아늑한 객실로, 휴식 중심의 미니멀한 동선을 제공합니다.
               <br />
               객실면적 : 20㎡<br />
@@ -99,10 +153,14 @@
               >예약하기 ></a
             >
           </div>
+        </article>
+        <article
+          class="feature room-feature scroll-fade my-[8vh] flex flex-col gap-0 bg-[var(--chocolate-brown)] text-[var(--grafford-beige)] md:my-[8vh] md:grid md:min-h-[36svh] md:grid-cols-2 md:items-stretch md:gap-0"
+        >
           <div
-            class="room-image-slot room-image-slot--carousel"
-            data-room="A"
-            aria-label="Room A photos"
+            class="room-image-slot room-image-slot--carousel w-full shrink-0"
+            data-room="B"
+            aria-label="Room B photos"
           >
             <div class="room-slot-gallery">
               <div class="gallery-main-wrap">
@@ -114,9 +172,9 @@
                   &#10094;
                 </button>
                 <img
-                  class="room-slot-main-img"
-                  src="images/A00.jpg"
-                  alt="Room A"
+                  class="room-slot-main-img h-[min(40vh,280px)] w-full md:h-[min(72vh,420px)]"
+                  src="images/B00.jpg"
+                  alt="Room B"
                 />
                 <button
                   type="button"
@@ -129,11 +187,13 @@
               <div class="gallery-thumbs room-slot-thumbs"></div>
             </div>
           </div>
-        </article>
-        <article class="feature room-feature scroll-fade">
-          <div class="feature-text">
-            <h3>B</h3>
-            <p>
+          <div
+            class="feature-text flex h-full min-h-0 w-full flex-col justify-start gap-3 px-4 py-6 md:gap-[0.85rem] md:px-[clamp(1.25rem,3vw,3rem)] md:pb-6 md:pt-[1.6rem]"
+          >
+            <h3 class="feature-heading text-2xl font-semibold tracking-wide text-white/95 md:text-4xl">
+              B
+            </h3>
+            <p class="feature-body text-sm leading-relaxed text-[#e8e1d5]/95 md:text-[0.95rem] md:leading-relaxed">
               채광이 좋은 구조와 넉넉한 공간 구성으로 여유로운 숙박에
               적합합니다. <br />
               객실면적 : 20㎡<br />
@@ -190,10 +250,14 @@
               >예약하기 ></a
             >
           </div>
+        </article>
+        <article
+          class="feature room-feature scroll-fade my-[8vh] flex flex-col gap-0 bg-[var(--chocolate-brown)] text-[var(--grafford-beige)] md:my-[8vh] md:grid md:min-h-[36svh] md:grid-cols-2 md:items-stretch md:gap-0"
+        >
           <div
-            class="room-image-slot room-image-slot--carousel"
-            data-room="B"
-            aria-label="Room B photos"
+            class="room-image-slot room-image-slot--carousel w-full shrink-0"
+            data-room="C"
+            aria-label="Room C photos"
           >
             <div class="room-slot-gallery">
               <div class="gallery-main-wrap">
@@ -205,9 +269,9 @@
                   &#10094;
                 </button>
                 <img
-                  class="room-slot-main-img"
-                  src="images/B00.jpg"
-                  alt="Room B"
+                  class="room-slot-main-img h-[min(40vh,280px)] w-full md:h-[min(72vh,420px)]"
+                  src="images/C00.jpg"
+                  alt="Room C"
                 />
                 <button
                   type="button"
@@ -220,11 +284,13 @@
               <div class="gallery-thumbs room-slot-thumbs"></div>
             </div>
           </div>
-        </article>
-        <article class="feature room-feature scroll-fade">
-          <div class="feature-text">
-            <h3>C</h3>
-            <p>
+          <div
+            class="feature-text flex h-full min-h-0 w-full flex-col justify-start gap-3 px-4 py-6 md:gap-[0.85rem] md:px-[clamp(1.25rem,3vw,3rem)] md:pb-6 md:pt-[1.6rem]"
+          >
+            <h3 class="feature-heading text-2xl font-semibold tracking-wide text-white/95 md:text-4xl">
+              C
+            </h3>
+            <p class="feature-body text-sm leading-relaxed text-[#e8e1d5]/95 md:text-[0.95rem] md:leading-relaxed">
               프라이빗한 분위기와 감성적인 인테리어가 조화를 이루는
               객실입니다.<br />
               객실면적 : 35㎡<br />
@@ -281,10 +347,14 @@
               >예약하기 ></a
             >
           </div>
+        </article>
+        <article
+          class="feature room-feature scroll-fade my-[8vh] flex flex-col gap-0 bg-[var(--chocolate-brown)] text-[var(--grafford-beige)] md:my-[8vh] md:grid md:min-h-[36svh] md:grid-cols-2 md:items-stretch md:gap-0"
+        >
           <div
-            class="room-image-slot room-image-slot--carousel"
-            data-room="C"
-            aria-label="Room C photos"
+            class="room-image-slot room-image-slot--carousel w-full shrink-0"
+            data-room="D"
+            aria-label="Room D photos"
           >
             <div class="room-slot-gallery">
               <div class="gallery-main-wrap">
@@ -296,9 +366,9 @@
                   &#10094;
                 </button>
                 <img
-                  class="room-slot-main-img"
-                  src="images/C00.jpg"
-                  alt="Room C"
+                  class="room-slot-main-img h-[min(40vh,280px)] w-full md:h-[min(72vh,420px)]"
+                  src="images/D00.jpg"
+                  alt="Room D"
                 />
                 <button
                   type="button"
@@ -311,11 +381,13 @@
               <div class="gallery-thumbs room-slot-thumbs"></div>
             </div>
           </div>
-        </article>
-        <article class="feature room-feature scroll-fade">
-          <div class="feature-text">
-            <h3>D</h3>
-            <p>
+          <div
+            class="feature-text flex h-full min-h-0 w-full flex-col justify-start gap-3 px-4 py-6 md:gap-[0.85rem] md:px-[clamp(1.25rem,3vw,3rem)] md:pb-6 md:pt-[1.6rem]"
+          >
+            <h3 class="feature-heading text-2xl font-semibold tracking-wide text-white/95 md:text-4xl">
+              D
+            </h3>
+            <p class="feature-body text-sm leading-relaxed text-[#e8e1d5]/95 md:text-[0.95rem] md:leading-relaxed">
               넓은 레이아웃과 쾌적한 컨디션을 갖춘 장기 숙박 친화형
               객실입니다.<br />
               객실면적 : 60㎡<br />
@@ -371,36 +443,6 @@
             <a href="RESERVATION.html?room=D" class="btn reserve-btn"
               >예약하기 ></a
             >
-          </div>
-          <div
-            class="room-image-slot room-image-slot--carousel"
-            data-room="D"
-            aria-label="Room D photos"
-          >
-            <div class="room-slot-gallery">
-              <div class="gallery-main-wrap">
-                <button
-                  type="button"
-                  class="gallery-nav gallery-prev room-slot-nav-prev"
-                  aria-label="이전 사진"
-                >
-                  &#10094;
-                </button>
-                <img
-                  class="room-slot-main-img"
-                  src="images/D00.jpg"
-                  alt="Room D"
-                />
-                <button
-                  type="button"
-                  class="gallery-nav gallery-next room-slot-nav-next"
-                  aria-label="다음 사진"
-                >
-                  &#10095;
-                </button>
-              </div>
-              <div class="gallery-thumbs room-slot-thumbs"></div>
-            </div>
           </div>
         </article>
       </section>
