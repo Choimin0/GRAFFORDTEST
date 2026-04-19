@@ -138,7 +138,7 @@
                     &#10094;
                   </button>
                   <img
-                    class="room-slot-main-img h-[min(40vh,280px)] w-full md:h-[min(72vh,420px)]"
+                    class="room-slot-main-img w-full min-h-0 object-cover"
                     src="images/A00.jpg"
                     alt="객실 사진"
                   />
@@ -261,6 +261,7 @@
           "images/D00.jpg",
           "images/D01.jpg",
           "images/D02.jpg",
+          "images/D03.jpg",
         ];
 
         function startIndexAllRoomsGallery(slot) {
@@ -356,7 +357,9 @@
           }, 400);
         }
 
-        var indexGallerySlot = document.getElementById("index-all-rooms-gallery");
+        var indexGallerySlot = document.getElementById(
+          "index-all-rooms-gallery",
+        );
         if (indexGallerySlot) {
           startIndexAllRoomsGallery(indexGallerySlot);
         }

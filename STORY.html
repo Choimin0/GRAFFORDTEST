@@ -57,15 +57,15 @@
     </section>
 
     <main class="content-section fullpage-section" id="content">
-      <section class="features">
+      <section class="features features--story">
         <article
-          class="feature scroll-fade my-[8vh] flex flex-col bg-[var(--chocolate-brown)] text-[var(--grafford-beige)] md:my-[8vh] md:grid md:min-h-[36svh] md:grid-cols-[minmax(0,0.4fr)_minmax(0,1fr)] md:items-stretch md:gap-6"
+          class="feature feature-story-1 scroll-fade my-[8vh] bg-[var(--chocolate-brown)] text-[var(--grafford-beige)] md:my-[8vh]"
         >
-          <div class="feature-media w-full shrink-0 overflow-hidden">
+          <div class="feature-media w-full min-h-0 shrink-0">
             <img
               src="images/story.jpeg"
               alt="GRAFFORD 시작 이야기"
-              class="feature-image block h-52 w-full object-cover md:h-[min(32vh,260px)] md:max-h-[260px]"
+              class="feature-image block max-w-full"
             />
           </div>
           <div
@@ -79,21 +79,18 @@
             <p
               class="feature-body text-sm leading-relaxed text-grafford-mud md:text-base md:leading-relaxed"
             >
-              GRAFFORD의 시작은 조용한 휴식 공간을 만들고 싶다는 작은 생각에서
-              출발했습니다.
+              흔들림 없이 사람을 지지해 주는 땅, 자연스럽게 이어지며 잠시 쉬어
+              갈 수 있는 여울길.<br />
+              이 두 단어가 만난 그라포드는 땅의 묵직함과 여울의 부드러움을
+              동시에 품은 공간입니다.<br />
+              바쁜 일상 속에서 잠시 멈춰 쉴 수 있는 든든한 바탕. <br />
+              그라포드가 추구하는 가치입니다.
             </p>
           </div>
         </article>
         <article
-          class="feature scroll-fade my-[8vh] flex flex-col bg-[var(--chocolate-brown)] text-[var(--grafford-beige)] md:my-[8vh] md:grid md:min-h-[36svh] md:grid-cols-[minmax(0,0.4fr)_minmax(0,1fr)] md:items-stretch md:gap-6"
+          class="feature feature-story-2 scroll-fade my-[8vh] bg-[var(--chocolate-brown)] text-[var(--grafford-beige)] md:my-[8vh]"
         >
-          <div class="feature-media w-full shrink-0 overflow-hidden">
-            <img
-              src="images/rooms.jpeg"
-              alt="객실 공간 이야기"
-              class="feature-image block h-52 w-full object-cover md:h-[min(32vh,260px)] md:max-h-[260px]"
-            />
-          </div>
           <div
             class="feature-text flex min-h-0 flex-col justify-center gap-3 px-4 py-6 text-left md:px-[clamp(1.25rem,3vw,3rem)] md:py-8"
           >
@@ -105,35 +102,48 @@
             <p
               class="feature-body text-sm leading-relaxed text-grafford-mud md:text-base md:leading-relaxed"
             >
-              머무는 모든 순간이 편안하도록 객실 동선과 분위기를 세심하게
-              구성했습니다.
+              GRAffORD는 로스터리 카페를 함께 하는 스테이입니다.<br />
+              우리가 추구하는 커피는 화려한 기술보다 불편함을 정제하는 과정에
+              집중합니다. <br />
+              혀끝을 찌르는 과한 산미, 입안에 남는 텁텁함, 마음을 조급하게
+              만드는 서두름.<br />
+              그라포드는 커피가 줄 수 있는 모든 불편한 감각들을 섬세하게
+              걸러내어, 오직 부드러운 몰입의 시간만을 드리기 위해 노력합니다.
             </p>
-          </div>
-        </article>
-        <article
-          class="feature scroll-fade my-[8vh] flex flex-col bg-[var(--chocolate-brown)] text-[var(--grafford-beige)] md:my-[8vh] md:grid md:min-h-[36svh] md:grid-cols-[minmax(0,0.4fr)_minmax(0,1fr)] md:items-stretch md:gap-6"
-        >
-          <div class="feature-media w-full shrink-0 overflow-hidden">
-            <img
-              src="images/reservation.jpeg"
-              alt="운영과 서비스 이야기"
-              class="feature-image block h-52 w-full object-cover md:h-[min(32vh,260px)] md:max-h-[260px]"
-            />
           </div>
           <div
-            class="feature-text flex min-h-0 flex-col justify-center gap-3 px-4 py-6 text-left md:px-[clamp(1.25rem,3vw,3rem)] md:py-8"
+            class="feature-media feature-media--story-gallery w-full min-h-0 shrink-0"
           >
-            <h3
-              class="feature-heading text-lg font-semibold tracking-wide text-grafford-dark md:text-3xl md:font-medium"
+            <div
+              class="room-image-slot room-image-slot--carousel w-full shrink-0"
+              id="story-cafe-gallery"
+              aria-label="로스터리 카페 사진"
             >
-              Hospitality
-            </h3>
-            <p
-              class="feature-body text-sm leading-relaxed text-grafford-mud md:text-base md:leading-relaxed"
-            >
-              예약부터 체크아웃까지, 방문자 한 분 한 분의 경험이 자연스럽고
-              따뜻하게 이어지도록 운영합니다.
-            </p>
+              <div class="room-slot-gallery">
+                <div class="gallery-main-wrap">
+                  <button
+                    type="button"
+                    class="gallery-nav gallery-prev room-slot-nav-prev"
+                    aria-label="이전 사진"
+                  >
+                    &#10094;
+                  </button>
+                  <img
+                    class="room-slot-main-img w-full min-h-0 object-cover"
+                    src="images/cafe01.jpg"
+                    alt="카페 사진"
+                  />
+                  <button
+                    type="button"
+                    class="gallery-nav gallery-next room-slot-nav-next"
+                    aria-label="다음 사진"
+                  >
+                    &#10095;
+                  </button>
+                </div>
+                <div class="gallery-thumbs room-slot-thumbs"></div>
+              </div>
+            </div>
           </div>
         </article>
       </section>
@@ -170,6 +180,113 @@
           scrollButton.addEventListener("click", function () {
             nextSection.scrollIntoView({ behavior: "smooth", block: "start" });
           });
+        }
+
+        var storyCafeImages = [
+          "images/cafe01.jpg",
+          "images/cafe02.jpg",
+          "images/cafe03.jpg",
+          "images/cafe04.jpg",
+          "images/cafe05.jpg",
+          "images/cafe06.jpg",
+        ];
+
+        function startStoryCafeGallery(slot) {
+          var imgs = storyCafeImages;
+          var imgEl = slot.querySelector(".room-slot-main-img");
+          var thumbsEl = slot.querySelector(".room-slot-thumbs");
+          var btnPrev = slot.querySelector(".room-slot-nav-prev");
+          var btnNext = slot.querySelector(".room-slot-nav-next");
+          if (!imgs.length || !imgEl || !thumbsEl) {
+            return;
+          }
+          var index = 0;
+          var fadeMs = 650;
+          var intervalMs = 5000;
+          var autoTimer = null;
+          var label = "카페";
+
+          function renderThumbs() {
+            thumbsEl.innerHTML = "";
+            imgs.forEach(function (src, i) {
+              var b = document.createElement("button");
+              b.type = "button";
+              b.className = "gallery-thumb" + (i === index ? " is-active" : "");
+              b.setAttribute("aria-label", label + " 사진 " + (i + 1));
+              var im = document.createElement("img");
+              im.src = src;
+              im.alt = "";
+              b.appendChild(im);
+              b.addEventListener("click", function () {
+                if (i === index) {
+                  return;
+                }
+                goToIndex(i);
+                resetAutoTimer();
+              });
+              thumbsEl.appendChild(b);
+            });
+          }
+
+          function goToIndex(newIndex) {
+            newIndex = ((newIndex % imgs.length) + imgs.length) % imgs.length;
+            if (newIndex === index) {
+              return;
+            }
+            index = newIndex;
+            renderThumbs();
+            imgEl.classList.add("is-switching");
+            window.setTimeout(function () {
+              imgEl.src = imgs[index];
+              imgEl.alt = label + " 사진 " + (index + 1);
+              var onLoad = function () {
+                imgEl.removeEventListener("load", onLoad);
+                window.requestAnimationFrame(function () {
+                  imgEl.classList.remove("is-switching");
+                });
+              };
+              imgEl.addEventListener("load", onLoad);
+              if (imgEl.complete) {
+                window.requestAnimationFrame(function () {
+                  imgEl.classList.remove("is-switching");
+                });
+              }
+            }, fadeMs);
+          }
+
+          function goNext() {
+            goToIndex(index + 1);
+          }
+
+          function resetAutoTimer() {
+            if (autoTimer) {
+              window.clearInterval(autoTimer);
+            }
+            autoTimer = window.setInterval(goNext, intervalMs);
+          }
+
+          renderThumbs();
+          if (btnPrev) {
+            btnPrev.addEventListener("click", function () {
+              goToIndex(index - 1);
+              resetAutoTimer();
+            });
+          }
+          if (btnNext) {
+            btnNext.addEventListener("click", function () {
+              goToIndex(index + 1);
+              resetAutoTimer();
+            });
+          }
+
+          window.setTimeout(function () {
+            resetAutoTimer();
+          }, 400);
+        }
+
+        var storyCafeSlot = document.getElementById("story-cafe-gallery");
+        if (storyCafeSlot) {
+          startStoryCafeGallery(storyCafeSlot);
         }
       });
     </script>

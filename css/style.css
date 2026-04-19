@@ -2,6 +2,40 @@
   --hero-slide-fade: 1.5s;
   /* 페이지 진입 전체 오버레이 페이드 (Framer/React 없이 동작) */
   --page-overlay-fade: 1s;
+  /* 상단 고정 내비(.top-right-nav)와 동일 기준 — feature 상하 여백·높이 예산에 사용 */
+  --site-nav-height: calc(2.2rem + (2 * (0.55rem + 1.5rem + 0.55rem)));
+  /* 한 화면 안에 이미지 열이 들어가도록 상한 (고정 내비 + .features padding-block 2배 + 섹션 패딩 여유) */
+  --feature-image-area-max: min(
+    30svh,
+    calc(100svh - 4 * var(--site-nav-height) - 5rem),
+    280px
+  );
+  --feature-gallery-main-max: min(
+    26svh,
+    calc(100svh - 4 * var(--site-nav-height) - 6rem),
+    240px
+  );
+  --feature-gallery-img-min: min(
+    22svh,
+    calc(100svh - 4 * var(--site-nav-height) - 7rem),
+    200px
+  );
+  /* STORY .feature-story-1 기준 — 모든 feature 열 비율·이미지 영역 통일 */
+  --feature-ref-grid-img-text: minmax(0, 60%) minmax(0, 40%);
+  --feature-ref-grid-text-img: minmax(0, 40%) minmax(0, 60%);
+  --feature-ref-media-min-h: min(30svh, var(--feature-image-area-max), 280px);
+  --feature-ref-image-min-h: min(26svh, var(--feature-gallery-img-min), 240px);
+  --feature-ref-img-contain-max-h: min(
+    36svh,
+    calc(100svh - 4 * var(--site-nav-height) - 6rem),
+    58vh
+  );
+  /* feature·갤러리 블록 세로 상한 — 한 화면(또는 내비 제외 영역) 밖으로 밀리지 않게 */
+  --feature-viewport-max-block: min(
+    78svh,
+    calc(100svh - 2 * var(--site-nav-height) - 6rem),
+    900px
+  );
   --grafford-beige: #e8e1d5;
   --grafford-mud: #6f675c;
   --grafford-dark-brown: #3a3531;
@@ -9,6 +43,47 @@
   --chocolate-brown: #d3c7b1;
   --navigate: #cfb9a1;
   --newmaincolor: #5a5247;
+}
+
+@media (min-width: 768px) {
+  :root {
+    --feature-ref-img-contain-max-h: min(
+      30svh,
+      calc(100svh - 4 * var(--site-nav-height) - 5rem),
+      50vh
+    );
+    /* PC: feature 이미지·갤러리 열 높이 1.3배 (모바일은 :root 기본값 유지) */
+    --feature-image-area-max: min(
+      39svh,
+      calc((100svh - 4 * var(--site-nav-height) - 5rem) * 1.3),
+      364px
+    );
+    --feature-gallery-main-max: min(
+      33.8svh,
+      calc((100svh - 4 * var(--site-nav-height) - 6rem) * 1.3),
+      312px
+    );
+    --feature-gallery-img-min: min(
+      28.6svh,
+      calc((100svh - 4 * var(--site-nav-height) - 7rem) * 1.3),
+      260px
+    );
+    --feature-ref-media-min-h: min(
+      39svh,
+      var(--feature-image-area-max),
+      364px
+    );
+    --feature-ref-image-min-h: min(
+      33.8svh,
+      var(--feature-gallery-img-min),
+      312px
+    );
+    --feature-viewport-max-block: min(
+      92svh,
+      calc((100svh - 2 * var(--site-nav-height) - 6rem) * 1.3),
+      1170px
+    );
+  }
 }
 
 /* 전역 진입 페이드: 외부 JS·React 로드 전에도 style.css만 있으면 베이지 레이어가 깔림 */
@@ -42,6 +117,17 @@
   unicode-range: U+0000-00FF, U+0100-024F, U+1E00-1EFF;
 }
 
+/* 한글·한글 자모 (프로젝트 루트 AstaSans-Medium.ttf) */
+@font-face {
+  font-family: "AstaSansKR";
+  src: url("../AstaSans-Medium.ttf") format("truetype");
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  unicode-range:
+    U+AC00-D7A3, U+1100-11FF, U+3130-318F, U+A960-A97F, U+D7B0-D7FB;
+}
+
 * {
   margin: 0;
   padding: 0;
@@ -49,7 +135,7 @@
 }
 
 body {
-  font-family: "OfficialLatin", "asta-sans", sans-serif;
+  font-family: "OfficialLatin", "AstaSansKR", "asta-sans", sans-serif;
   font-weight: 350; /* 일반 굵기 */
   font-style: normal;
   background: var(--grafford-beige);
@@ -344,16 +430,9 @@ main {
   }
 }
 
-/* index.html features: 1번 1:1, 2·3번 전체 너비 60/40 교차 — 이미지는 잘리지 않게 contain + 세로(svh) 기준 */
+/* index.html features — STORY .feature-story-1 과 동일 열 비율·이미지 높이 */
 .features--index {
   width: 100%;
-  --feature-index-img-max-h: min(46svh, 68vh);
-}
-
-@media (min-width: 768px) {
-  .features--index {
-    --feature-index-img-max-h: min(40svh, 58vh);
-  }
 }
 
 .features--index .feature-media {
@@ -365,14 +444,85 @@ main {
   background: var(--chocolate-brown);
 }
 
+@media (min-width: 768px) {
+  .features--index .feature-media {
+    align-items: stretch;
+    justify-content: flex-start;
+  }
+}
+
 .features--index .feature .feature-image {
   display: block;
-  width: auto;
-  max-width: 100%;
-  height: auto;
-  max-height: var(--feature-index-img-max-h);
-  object-fit: contain;
   object-position: center;
+}
+
+@media (max-width: 767px) {
+  .features--index .feature .feature-image {
+    width: auto;
+    max-width: 100%;
+    height: auto;
+    max-height: var(--feature-ref-img-contain-max-h);
+    object-fit: contain;
+  }
+}
+
+@media (min-width: 768px) {
+  /* PC: STORY 첫 feature와 동일 이미지 열 min-height + cover */
+  .features--index .feature-index-1 .feature-media,
+  .features--index .feature-index-2 .feature-media {
+    align-self: stretch;
+    min-height: var(--feature-ref-media-min-h);
+    padding: 0;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .features--index .feature-index-1 .feature-image,
+  .features--index .feature-index-2 .feature-image {
+    flex: 1 1 auto;
+    width: 100%;
+    height: 100%;
+    min-height: var(--feature-ref-image-min-h);
+    max-height: var(--feature-viewport-max-block);
+    max-width: none;
+    object-fit: cover;
+  }
+
+  .features--index .feature-index-3 .feature-media--index-gallery {
+    align-self: stretch;
+    min-height: var(--feature-ref-media-min-h);
+    display: flex;
+    flex-direction: column;
+  }
+
+  .features--index .feature-index-3 .room-image-slot {
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    min-height: var(--feature-ref-media-min-h);
+    height: 100%;
+  }
+
+  .features--index .feature-index-3 .room-slot-gallery {
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+  }
+
+  .features--index .feature-index-3 .gallery-main-wrap {
+    flex: 1 1 auto;
+    min-height: var(--feature-ref-image-min-h);
+  }
+
+  .features--index .feature-index-3 .room-slot-main-img {
+    width: 100% !important;
+    height: auto !important;
+    min-height: var(--feature-ref-image-min-h) !important;
+    max-height: var(--feature-viewport-max-block) !important;
+    object-fit: cover !important;
+  }
 }
 
 .features--index .feature-index-1 {
@@ -388,12 +538,12 @@ main {
 
 @media (min-width: 768px) {
   .features--index .feature-index-1 {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    align-items: center;
+    grid-template-columns: var(--feature-ref-grid-img-text);
+    align-items: stretch;
   }
 
   .features--index .feature-index-1 .feature-media {
-    padding: clamp(0.5rem, 2vw, 1.25rem);
+    padding: 0;
     box-sizing: border-box;
   }
 }
@@ -404,7 +554,7 @@ main {
   }
 
   .features--index .feature-index-1 .feature-media {
-    padding: 0.75rem 1rem 0;
+    padding: 0;
     box-sizing: border-box;
   }
 }
@@ -413,7 +563,7 @@ main {
 .features--index .feature-index-3 {
   display: grid;
   gap: 0;
-  align-items: center;
+  align-items: stretch;
   box-sizing: border-box;
   width: 100vw;
   margin-left: calc(50% - 50vw);
@@ -427,25 +577,32 @@ main {
   min-width: 0;
 }
 
-/* index 마지막 feature: ROOMS와 동일 갤러리 — flex·패딩 제거 */
+/* index 마지막 feature: ROOMS와 동일 갤러리 — 패딩 제거(PC는 위쪽 @media에서 flex) */
 .features--index .feature-index-3 .feature-media.feature-media--index-gallery {
-  display: block;
   padding: 0;
   background: transparent;
 }
 
+@media (max-width: 767px) {
+  .features--index
+    .feature-index-3
+    .feature-media.feature-media--index-gallery {
+    display: block;
+  }
+}
+
 @media (min-width: 768px) {
+  /* STORY 첫 feature와 동일: 이미지|텍스트 60/40, 텍스트|이미지 40/60 */
   .features--index .feature-index-2 {
-    grid-template-columns: minmax(0, 40%) minmax(0, 60%);
+    grid-template-columns: var(--feature-ref-grid-text-img);
   }
 
   .features--index .feature-index-3 {
-    grid-template-columns: minmax(0, 60%) minmax(0, 40%);
+    grid-template-columns: var(--feature-ref-grid-img-text);
   }
 
-  .features--index .feature-index-2 .feature-media,
-  .features--index .feature-index-3 .feature-media {
-    padding: clamp(0.5rem, 1.5vw, 1.25rem);
+  .features--index .feature-index-2 .feature-media {
+    padding: 0;
     box-sizing: border-box;
   }
 }
@@ -457,26 +614,167 @@ main {
     grid-auto-rows: auto;
   }
 
-  .features--index .feature-index-2 .feature-text {
-    order: 1;
-  }
-
-  .features--index .feature-index-2 .feature-media {
-    order: 2;
-  }
-
-  .features--index .feature-index-3 .feature-media {
-    order: 1;
-  }
-
-  .features--index .feature-index-3 .feature-text {
-    order: 2;
-  }
-
   .features--index .feature-index-2 .feature-media,
   .features--index .feature-index-3 .feature-media {
-    padding: 0.75rem 1rem;
+    padding: 0;
     box-sizing: border-box;
+  }
+}
+
+/* STORY 페이지: feature 2개 — 100vw, 첫 feature와 동일 60/40·40/60 */
+.features--story {
+  width: 100%;
+}
+
+.features--story .feature-media {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  min-height: 0;
+  background: var(--chocolate-brown);
+}
+
+@media (min-width: 768px) {
+  .features--story .feature-media {
+    align-items: stretch;
+    justify-content: flex-start;
+  }
+}
+
+.features--story .feature-story-1 .feature-image {
+  display: block;
+  object-position: center;
+}
+
+@media (max-width: 767px) {
+  .features--story .feature-story-1 .feature-image {
+    width: auto;
+    max-width: 100%;
+    height: auto;
+    max-height: var(--feature-ref-img-contain-max-h);
+    object-fit: contain;
+  }
+}
+
+.features--story .feature-story-1,
+.features--story .feature-story-2 {
+  display: grid;
+  gap: 0;
+  align-items: stretch;
+  box-sizing: border-box;
+  width: 100vw;
+  margin-left: calc(50% - 50vw);
+  margin-right: calc(50% - 50vw);
+}
+
+.features--story .feature-story-1 .feature-media,
+.features--story .feature-story-1 .feature-text,
+.features--story .feature-story-2 .feature-media,
+.features--story .feature-story-2 .feature-text {
+  min-width: 0;
+}
+
+@media (min-width: 768px) {
+  .features--story .feature-story-1 {
+    grid-template-columns: minmax(0, 60%) minmax(0, 40%);
+  }
+
+  .features--story .feature-story-2 {
+    grid-template-columns: minmax(0, 40%) minmax(0, 60%);
+  }
+
+  .features--story .feature-story-1 .feature-media,
+  .features--story .feature-story-2 .feature-media {
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  .features--story .feature-story-1 .feature-media {
+    align-self: stretch;
+    min-height: var(--feature-ref-media-min-h);
+    display: flex;
+    flex-direction: column;
+  }
+
+  .features--story .feature-story-1 .feature-image {
+    flex: 1 1 auto;
+    width: 100%;
+    height: 100%;
+    min-height: var(--feature-ref-image-min-h);
+    max-height: var(--feature-viewport-max-block);
+    max-width: none;
+    object-fit: cover;
+  }
+
+  .features--story .feature-story-2 .feature-media--story-gallery {
+    align-self: stretch;
+    min-height: var(--feature-ref-media-min-h);
+    display: flex;
+    flex-direction: column;
+    padding: 0;
+  }
+
+  .features--story .feature-story-2 .room-image-slot {
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    min-height: var(--feature-ref-media-min-h);
+    height: 100%;
+  }
+
+  .features--story .feature-story-2 .room-slot-gallery {
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+  }
+
+  .features--story .feature-story-2 .gallery-main-wrap {
+    flex: 1 1 auto;
+    min-height: var(--feature-ref-image-min-h);
+  }
+
+  .features--story .feature-story-2 .room-slot-main-img {
+    width: 100% !important;
+    height: auto !important;
+    min-height: var(--feature-ref-image-min-h) !important;
+    max-height: var(--feature-viewport-max-block) !important;
+    object-fit: cover !important;
+  }
+}
+
+@media (max-width: 767px) {
+  .features--story .feature-story-1,
+  .features--story .feature-story-2 {
+    grid-template-columns: minmax(0, 1fr);
+    grid-auto-rows: auto;
+  }
+
+  .features--story .feature-story-1 .feature-media,
+  .features--story .feature-story-2 .feature-media {
+    padding: 0;
+    box-sizing: border-box;
+  }
+
+  .features--story
+    .feature-story-2
+    .feature-media.feature-media--story-gallery {
+    padding: 0;
+  }
+}
+
+/* STORY 2번 feature: 갤러리 — 패딩 제거(PC는 flex는 위쪽 @media에서) */
+.features--story .feature-story-2 .feature-media.feature-media--story-gallery {
+  padding: 0;
+  background: transparent;
+}
+
+@media (max-width: 767px) {
+  .features--story
+    .feature-story-2
+    .feature-media.feature-media--story-gallery {
+    display: block;
   }
 }
 
@@ -529,6 +827,12 @@ main {
   box-shadow: 0 6px 25px rgba(40, 70, 180, 0.05);
 }
 
+@media (min-width: 768px) {
+  .content-section {
+    overflow-x: clip;
+  }
+}
+
 /* 메인페이지 n번째 페이지 컴포넌트 */
 .features {
   display: flex;
@@ -536,10 +840,41 @@ main {
   gap: 0;
 }
 
+.content-section .features {
+  padding-block: var(--site-nav-height);
+}
+
+/* PC: feature 카드 간 세로 간격 — 이전 clamp 대비 2배 */
+@media (min-width: 768px) {
+  main.content-section.fullpage-section .feature.scroll-fade {
+    margin-top: clamp(0.5rem, 3vh, 2rem) !important;
+    margin-bottom: clamp(0.5rem, 3vh, 2rem) !important;
+  }
+}
+
+/* 모바일: 모든 feature — 사진(또는 갤러리 슬롯) 위, 텍스트 아래 */
+@media (max-width: 767px) {
+  .content-section .features .feature .feature-media,
+  .content-section .features .feature .room-image-slot {
+    order: 1;
+  }
+
+  .content-section .features .feature .feature-text {
+    order: 2;
+  }
+}
+
 /* 카드 배경·텍스트 색: 레이아웃·간격·타이포는 HTML의 Tailwind 유틸로 제어 */
 .feature {
   background: var(--chocolate-brown);
   color: var(--grafford-beige);
+}
+
+@media (min-width: 768px) {
+  .content-section .features .feature .feature-media {
+    max-height: var(--feature-viewport-max-block);
+    min-height: 0;
+  }
 }
 
 .feature > img,
@@ -653,7 +988,7 @@ main {
   letter-spacing: 0.02em;
 }
 
-/*rooms 페이지 객실 사진 슬롯 */
+/*rooms 페이지 객실 사진 슬롯 — 모바일: 단순 / PC: 플렉스·높이 상한 */
 .room-image-slot {
   width: 100%;
   overflow: hidden;
@@ -686,6 +1021,39 @@ main {
   transition: opacity 0.65s ease;
 }
 
+@media (max-width: 767px) {
+  .room-image-slot .room-slot-main-img {
+    max-height: min(40vh, 280px);
+    height: auto;
+  }
+}
+
+@media (min-width: 768px) {
+  .room-image-slot {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    max-height: var(--feature-viewport-max-block);
+  }
+
+  .room-slot-gallery {
+    flex: 1 1 auto;
+    min-height: 0;
+    max-height: 100%;
+  }
+
+  .room-image-slot .gallery-main-wrap {
+    flex: 1 1 auto;
+    min-height: 0;
+    max-height: 100%;
+    overflow: hidden;
+  }
+
+  .room-image-slot .room-slot-main-img {
+    max-height: var(--feature-viewport-max-block);
+  }
+}
+
 .room-image-slot .room-slot-main-img.is-switching {
   opacity: 0;
 }
@@ -703,6 +1071,77 @@ main {
 
 .room-image-slot .gallery-thumb.is-active {
   border-color: var(--grafford-beige);
+}
+
+/* ROOMS: PC — STORY .feature-story-1 과 동일 60/40·이미지 열 높이 */
+@media (min-width: 768px) {
+  .rooms-features .room-feature {
+    align-items: stretch;
+    grid-template-columns: var(--feature-ref-grid-img-text) !important;
+    min-height: unset !important;
+  }
+
+  .rooms-features .room-image-slot {
+    align-self: stretch;
+    min-height: var(--feature-ref-media-min-h);
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+  }
+
+  .rooms-features .room-slot-gallery {
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+  }
+
+  .rooms-features .gallery-main-wrap {
+    flex: 1 1 auto;
+    min-height: var(--feature-ref-image-min-h);
+  }
+
+  .rooms-features .room-slot-main-img {
+    width: 100% !important;
+    height: auto !important;
+    min-height: var(--feature-ref-image-min-h) !important;
+    max-height: var(--feature-viewport-max-block) !important;
+  }
+}
+
+/* FACILITIES 등: STORY 첫 feature와 동일 60/40·이미지 열 */
+@media (min-width: 768px) {
+  .content-section
+    .features:not(.features--index):not(.features--story):not(.rooms-features)
+    .feature {
+    grid-template-columns: var(--feature-ref-grid-img-text) !important;
+    gap: 0 !important;
+    min-height: unset !important;
+  }
+
+  .content-section
+    .features:not(.features--index):not(.features--story):not(.rooms-features)
+    .feature
+    .feature-media:has(.feature-image) {
+    align-self: stretch;
+    min-height: var(--feature-ref-media-min-h);
+    display: flex;
+    flex-direction: column;
+    padding: 0;
+  }
+
+  .content-section
+    .features:not(.features--index):not(.features--story):not(.rooms-features)
+    .feature
+    .feature-image {
+    width: 100%;
+    flex: 1 1 auto;
+    min-height: var(--feature-ref-image-min-h);
+    height: auto !important;
+    max-height: var(--feature-viewport-max-block) !important;
+    object-fit: cover;
+    object-position: center;
+  }
 }
 
 .reserve-btn {
@@ -1166,6 +1605,13 @@ iframe.map {
   object-fit: cover;
 }
 
+@media (min-width: 768px) {
+  .gallery-main-img {
+    height: auto;
+    max-height: min(72vh, 420px, var(--feature-viewport-max-block));
+  }
+}
+
 .gallery-nav {
   position: absolute;
   top: 50%;
@@ -1430,7 +1876,7 @@ iframe.map {
 
 .reservation-price-total {
   margin: 0;
-  font-size: 1rem;
+  font-size: 1.5rem;
   font-weight: 600;
   color: var(--chocolate-brown);
   text-align: right;
