@@ -900,6 +900,24 @@ iframe.map {
   width: auto;
 }
 
+.site-business-footer__map-link {
+  color: inherit;
+  text-decoration: underline;
+  text-decoration-color: rgba(90, 82, 71, 0.45);
+  text-underline-offset: 0.15em;
+}
+
+.site-business-footer__map-link:hover,
+.site-business-footer__map-link:focus-visible {
+  text-decoration-color: var(--newmaincolor, #5a5247);
+}
+
+.site-business-footer__map-link:focus-visible {
+  outline: 2px solid rgba(83, 98, 77, 0.45);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
 .site-business-footer__logo-wrap {
   flex: 0 0 auto;
 }

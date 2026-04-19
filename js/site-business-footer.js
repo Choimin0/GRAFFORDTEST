@@ -7,6 +7,7 @@
  * @param {{ href: string, imgSrc?: string }} [options.instagram] - 첫 줄 위에 인스타 아이콘 링크
  * @param {string} [options.logoSrc='images/LOGO-circle.png'] - 오른쪽 로고 이미지 경로
  * @param {string} [options.logoAlt='GRAFFORD'] - 로고 alt 텍스트
+ * @param {boolean} [options.naverMapAddress=false] - true이면 `주소 : …` 줄에서 콜론 뒤만 네이버 지도 검색으로 연결
  */
 function initSiteBusinessFooter(options) {
   var root = document.getElementById("site-business-footer-mount");
@@ -47,6 +48,14 @@ function initSiteBusinessFooter(options) {
       "</a></p>";
   }
 
+  var naverMapAddr = options.naverMapAddress === true;
+
+  function naverSearchUrl(query) {
+    return (
+      "https://map.naver.com/v5/search/" + encodeURIComponent(String(query).trim())
+    );
+  }
+
   var textParts = [];
   for (var i = 0; i < lines.length; i++) {
     var line = lines[i];
@@ -57,6 +66,22 @@ function initSiteBusinessFooter(options) {
       continue;
     }
     if (line == null || String(line).trim() === "") {
+      continue;
+    }
+    var lineStr = String(line);
+    var addrMatch = /^\s*주소\s*:\s*(.+)$/.exec(lineStr);
+    if (naverMapAddr && addrMatch) {
+      var addrRight = addrMatch[1].trim();
+      var mapHref = naverSearchUrl(addrRight);
+      textParts.push(
+        '<p class="site-business-footer__text-line site-business-footer__text-line--address">' +
+          '<span class="site-business-footer__addr-label">주소 : </span>' +
+          '<a class="site-business-footer__map-link" href="' +
+          escapeHtml(mapHref) +
+          '" target="_blank" rel="noopener noreferrer">' +
+          escapeHtml(addrRight) +
+          "</a></p>",
+      );
       continue;
     }
     textParts.push(
