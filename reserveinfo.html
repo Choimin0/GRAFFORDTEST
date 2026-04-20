@@ -128,7 +128,12 @@
     <script>
       document.addEventListener("DOMContentLoaded", function () {
         var R = window.GraffordReservations;
-        var ROOM_LABEL = { A: "객실 A", B: "객실 B", C: "객실 C", D: "객실 D" };
+        var ROOM_LABEL = {
+          G1: "객실 G1",
+          G2: "객실 G2",
+          G3: "객실 G3",
+          G4: "객실 G4",
+        };
         var form = document.getElementById("reserveinfo-form");
         var errEl = document.getElementById("reserveinfo-error");
         var okEl = document.getElementById("reserveinfo-ok");

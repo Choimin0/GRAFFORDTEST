@@ -311,18 +311,18 @@
       document.addEventListener("DOMContentLoaded", function () {
         var P = window.GraffordBookingPricing;
         var ROOM_LABEL = {
-          A: "객실 A",
-          B: "객실 B",
-          C: "객실 C",
-          D: "객실 D",
+          G1: "객실 G1",
+          G2: "객실 G2",
+          G3: "객실 G3",
+          G4: "객실 G4",
         };
 
         var params = new URLSearchParams(window.location.search);
-        var roomRaw = (params.get("room") || "A").toUpperCase();
+        var roomRaw = (params.get("room") || "G1").toUpperCase();
         if (!P) {
-          roomRaw = "A";
+          roomRaw = "G1";
         } else if (!P.ROOM_WEEKDAY_BASE.hasOwnProperty(roomRaw)) {
-          roomRaw = "A";
+          roomRaw = "G1";
         }
         var checkIn = params.get("checkIn") || "";
         var checkOut = params.get("checkOut") || "";

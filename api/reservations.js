@@ -3,7 +3,9 @@ import pg from "pg";
 
 const { Pool } = pg;
 
-const ALLOWED_ROOMS = new Set(["A", "B", "C", "D"]);
+const ALLOWED_ROOMS = new Set(["G1", "G2", "G3", "G4"]);
+const LEGACY_TO_ROOM = { A: "G1", B: "G2", C: "G3", D: "G4" };
+const ROOM_TO_LEGACY = { G1: "A", G2: "B", G3: "C", G4: "D" };
 const ALLOWED_PAY = new Set(["card", "naver", "bank"]);
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 const MAX_NAME = 255;
@@ -91,6 +93,16 @@ function normalizeLookupOrder(s) {
     t = t.slice(4);
   }
   return t;
+}
+
+function normalizeRoomType(raw) {
+  var room = String(raw || "")
+    .trim()
+    .toUpperCase();
+  if (ALLOWED_ROOMS.has(room)) {
+    return room;
+  }
+  return LEGACY_TO_ROOM[room] || "";
 }
 
 function toYMD(v) {
@@ -206,20 +218,19 @@ export default async function handler(req, res) {
     var q = parsed.query || {};
 
     if (q.availability === "1" || q.availability === "true") {
-      var roomForCal = String(q.room || "")
-        .trim()
-        .toUpperCase();
+      var roomForCal = normalizeRoomType(q.room || "");
       if (!ALLOWED_ROOMS.has(roomForCal)) {
         json(res, 400, { ok: false, error: "Invalid room" });
         return;
       }
       try {
+        var roomForCalLegacy = ROOM_TO_LEGACY[roomForCal] || "";
         var calRows = await pool.query(
           `SELECT check_in_date, check_out_date
            FROM reservations
-           WHERE room_type = $1 AND check_out_date IS NOT NULL
+           WHERE room_type = ANY($1::text[]) AND check_out_date IS NOT NULL
            ORDER BY check_in_date`,
-          [roomForCal],
+          [[roomForCal, roomForCalLegacy]],
         );
         var occupied = Object.create(null);
         var checkouts = Object.create(null);
@@ -302,7 +313,7 @@ export default async function handler(req, res) {
           reservationNumber: dbRow.reservation_number,
           guestName: dbRow.guest_name,
           contact: dbRow.contact,
-          roomType: dbRow.room_type,
+          roomType: normalizeRoomType(dbRow.room_type) || dbRow.room_type,
           checkIn: toYMD(dbRow.check_in_date),
           checkOut: toYMD(dbRow.check_out_date),
           guestCount: dbRow.guest_count,
@@ -352,7 +363,7 @@ export default async function handler(req, res) {
               reservationNumber: br.reservation_number,
               guestName: br.guest_name,
               contact: br.contact,
-              roomType: br.room_type,
+              roomType: normalizeRoomType(br.room_type) || br.room_type,
               checkIn: toYMD(br.check_in_date),
               checkOut: toYMD(br.check_out_date),
               guestCount: br.guest_count,
@@ -401,7 +412,7 @@ export default async function handler(req, res) {
   var reservationNumber = String(body.reservationNumber || "").trim();
   var guestName = String(body.guestName || "").trim();
   var contact = String(body.contact || "").trim();
-  var roomType = String(body.roomType || "").trim().toUpperCase();
+  var roomType = normalizeRoomType(body.roomType || "");
   var checkIn = String(body.checkIn || "").trim();
   var checkOut = String(body.checkOut || "").trim();
   var stayNights = Number(body.stayNights);

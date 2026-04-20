@@ -70,12 +70,12 @@
       <div class="reservation-booking scroll-fade" id="reservation-booking">
         <div class="room-type-row">
           <div class="room-type-bar" role="tablist" aria-label="Room type">
-            <button type="button" class="room-type-btn is-active" data-room="A">
-              A
+            <button type="button" class="room-type-btn is-active" data-room="G1">
+              G1
             </button>
-            <button type="button" class="room-type-btn" data-room="B">B</button>
-            <button type="button" class="room-type-btn" data-room="C">C</button>
-            <button type="button" class="room-type-btn" data-room="D">D</button>
+            <button type="button" class="room-type-btn" data-room="G2">G2</button>
+            <button type="button" class="room-type-btn" data-room="G3">G3</button>
+            <button type="button" class="room-type-btn" data-room="G4">G4</button>
           </div>
           <a href="reserveinfo.html" class="btn reservation-lookup-btn"
             >예약조회</a
@@ -110,8 +110,8 @@
               <div class="gallery-thumbs" id="gallery-thumbs"></div>
             </div>
             <div class="room-copy-blocks">
-              <p class="room-detail-intro room-copy is-visible" data-room="A">
-                <strong>A동</strong><br />
+              <p class="room-detail-intro room-copy is-visible" data-room="G1">
+                <strong>G1</strong><br />
                 2인 기준의 아늑한 객실로, 휴식 중심의 미니멀한 동선을
                 제공합니다.<br /><br />
                 객실면적 : 20㎡<br />
@@ -120,10 +120,10 @@
                 시설 : Room -Kitchen -Bathroom -Bedroom<br />
                 기준 2인, 최대 2인<br />
                 취사 불가능<br />
-                1박 20만원 · A동
+                1박 20만원 · G1
               </p>
-              <p class="room-detail-intro room-copy" data-room="B" hidden>
-                <strong>B동</strong><br />
+              <p class="room-detail-intro room-copy" data-room="G2" hidden>
+                <strong>G2</strong><br />
                 채광이 좋은 구조와 넉넉한 공간 구성으로 여유로운 숙박에
                 적합합니다.<br /><br />
                 객실면적 : 20㎡<br />
@@ -132,10 +132,10 @@
                 시설 : Room -Kitchen -Bathroom -Bedroom<br />
                 기준 2인, 최대 2인<br />
                 취사 불가능<br />
-                1박 20만원 · B동
+                1박 20만원 · G2
               </p>
-              <p class="room-detail-intro room-copy" data-room="C" hidden>
-                <strong>C동</strong><br />
+              <p class="room-detail-intro room-copy" data-room="G3" hidden>
+                <strong>G3</strong><br />
                 프라이빗한 분위기와 감성적인 인테리어가 조화를 이루는
                 객실입니다.<br /><br />
                 객실면적 : 35㎡<br />
@@ -144,10 +144,10 @@
                 시설 : Room -Kitchen -Bathroom -Bedroom<br />
                 기준 2인, 최대 4인<br />
                 취사 (불)가능<br />
-                1박 30만원 · C동
+                1박 30만원 · G3
               </p>
-              <p class="room-detail-intro room-copy" data-room="D" hidden>
-                <strong>D동</strong><br />
+              <p class="room-detail-intro room-copy" data-room="G4" hidden>
+                <strong>G4</strong><br />
                 넓은 레이아웃과 쾌적한 컨디션을 갖춘 장기 숙박 친화형
                 객실입니다.<br /><br />
                 객실면적 : 60㎡<br />
@@ -156,7 +156,7 @@
                 시설 : Room -Kitchen -Bathroom -Bedroom<br />
                 기준 2인, 최대 6인<br />
                 취사 (불)가능<br />
-                1박 50만원 · D동
+                1박 50만원 · G4
               </p>
             </div>
           </div>
@@ -246,13 +246,13 @@
         var fadeEl = document.querySelector(".reservation-booking.scroll-fade");
 
         var roomImages = {
-          A: ["images/A00.jpg", "images/A01.jpg", "images/A02.jpg"],
-          B: ["images/B00.jpg", "images/B01.jpg", "images/B02.jpg"],
-          C: ["images/C00.jpg", "images/C01.jpg", "images/C02.jpg"],
-          D: ["images/D00.jpg", "images/D01.jpg", "images/D02.jpg"],
+          G1: ["images/A00.jpg", "images/A01.jpg", "images/A02.jpg"],
+          G2: ["images/B00.jpg", "images/B01.jpg", "images/B02.jpg"],
+          G3: ["images/C00.jpg", "images/C01.jpg", "images/C02.jpg"],
+          G4: ["images/D00.jpg", "images/D01.jpg", "images/D02.jpg"],
         };
 
-        var currentRoom = "A";
+        var currentRoom = "G1";
         var galleryIndex = 0;
         var galleryFadeMs = 650;
 
@@ -357,7 +357,7 @@
             }
             if (extraGuestsHint) {
               extraGuestsHint.textContent =
-                "A\xb7B\ub3d9\uc740 \uae30\uc900 \uc778\uc6d0 \uc678 \ucd94\uac00\uac00 \ubd88\uac00\ud569\ub2c8\ub2e4.";
+                "G1\xb7G2\ub294 \uae30\uc900 \uc778\uc6d0 \uc678 \ucd94\uac00\uac00 \ubd88\uac00\ud569\ub2c8\ub2e4.";
             }
             extraGuestsSelect.value = "0";
             extraGuestsSelect.disabled = true;
@@ -366,14 +366,14 @@
               extraGuestsBlock.hidden = false;
             }
             if (extraGuestsHint) {
-              if (currentRoom === "C") {
+              if (currentRoom === "G3") {
                 extraGuestsHint.textContent =
-                  "C\ub3d9\uc740 \ucd5c\ub300 2\uc778 \ucd94\uac00 \uac00\ub2a5\ud569\ub2c8\ub2e4. (\ubc15\ub2f9 " +
+                  "G3\ub294 \ucd5c\ub300 2\uc778 \ucd94\uac00 \uac00\ub2a5\ud569\ub2c8\ub2e4. (\ubc15\ub2f9 " +
                   formatKRW(P.EXTRA_PER_PERSON_PER_NIGHT) +
                   "/\uc778)";
               } else {
                 extraGuestsHint.textContent =
-                  "D\ub3d9\uc740 \ucd5c\ub300 4\uc778 \ucd94\uac00 \uac00\ub2a5\ud569\ub2c8\ub2e4. (\ubc15\ub2f9 " +
+                  "G4\ub294 \ucd5c\ub300 4\uc778 \ucd94\uac00 \uac00\ub2a5\ud569\ub2c8\ub2e4. (\ubc15\ub2f9 " +
                   formatKRW(P.EXTRA_PER_PERSON_PER_NIGHT) +
                   "/\uc778)";
               }
@@ -830,13 +830,13 @@
           });
         }
 
-        var allowedRooms = ["A", "B", "C", "D"];
+        var allowedRooms = ["G1", "G2", "G3", "G4"];
         var qsRoom = new URLSearchParams(window.location.search).get("room");
         if (qsRoom) {
           qsRoom = qsRoom.trim().toUpperCase();
         }
         var initialRoom =
-          qsRoom && allowedRooms.indexOf(qsRoom) !== -1 ? qsRoom : "A";
+          qsRoom && allowedRooms.indexOf(qsRoom) !== -1 ? qsRoom : "G1";
         setRoom(initialRoom);
         if (qsRoom && allowedRooms.indexOf(qsRoom) !== -1) {
           var bookingAnchor = document.getElementById("reservation-booking");

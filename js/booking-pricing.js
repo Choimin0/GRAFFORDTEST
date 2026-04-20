@@ -3,11 +3,16 @@
  * Exposes window.GraffordBookingPricing
  */
 (function (root) {
-  var ROOM_WEEKDAY_BASE = { A: 200000, B: 200000, C: 300000, D: 500000 };
+  var ROOM_WEEKDAY_BASE = {
+    G1: 200000,
+    G2: 200000,
+    G3: 300000,
+    G4: 500000,
+  };
   var EXTRA_PER_PERSON_PER_NIGHT = 30000;
   var WEEKEND_SURCHARGE_PER_NIGHT = 30000;
   /** 추가 투숙 가능 인원 (기준 인원 외) */
-  var MAX_EXTRA_GUESTS = { A: 0, B: 0, C: 2, D: 4 };
+  var MAX_EXTRA_GUESTS = { G1: 0, G2: 0, G3: 2, G4: 4 };
 
   function parseYMD(str) {
     if (!str || !/^\d{4}-\d{2}-\d{2}$/.test(str)) {
@@ -60,15 +65,15 @@
   }
 
   /**
-   * @param {string} room A–D
+   * @param {string} room G1–G4
    * @param {string} checkInStr YYYY-MM-DD
    * @param {string} checkOutStr YYYY-MM-DD
    * @param {number} extraGuests 추가 인원 수 (박당 3만원)
    */
   function computeStay(room, checkInStr, checkOutStr, extraGuests) {
-    room = String(room || "A").toUpperCase();
+    room = String(room || "G1").toUpperCase();
     if (!ROOM_WEEKDAY_BASE.hasOwnProperty(room)) {
-      room = "A";
+      room = "G1";
     }
     var nightsArr = eachNightDate(checkInStr, checkOutStr);
     var nights = nightsArr.length;
