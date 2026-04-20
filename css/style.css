@@ -1836,11 +1836,11 @@ iframe.map {
 .booking-calendar {
   margin-bottom: 0.75rem;
   opacity: 1;
-  transition: opacity 2s ease;
+  transition: opacity 0.9s ease;
 }
 
 .booking-calendar.is-month-fading {
-  opacity: 0.35;
+  opacity: 0.1;
 }
 
 .cal-year-title {
@@ -1915,6 +1915,11 @@ iframe.map {
 
 .cal-cell.cal-day:hover:not(:disabled) {
   background: var(--grafford-beige);
+}
+
+/* 체크아웃 첫 선택 단계에서는 hover 강조를 숨겨 선택 혼선을 줄임 */
+.cal-grid.is-selecting-checkout .cal-cell.cal-day:hover:not(:disabled) {
+  background: transparent;
 }
 
 .cal-cell.cal-past {

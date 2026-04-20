@@ -671,6 +671,10 @@
 
           var today = new Date();
           today.setHours(0, 0, 0, 0);
+          var inCheckoutMode = !!(checkIn && !checkOut);
+          if (calGrid) {
+            calGrid.classList.toggle("is-selecting-checkout", inCheckoutMode);
+          }
 
           for (var d = 1; d <= lastDay; d++) {
             var cellDate = new Date(y, m, d);
@@ -683,8 +687,20 @@
             var isPast = cellDate < today;
             var isOcc = occupiedNightSet.has(ymdStr);
             var disabled = false;
-            if (isPast || isOcc) {
+            if (isPast) {
               disabled = true;
+            } else if (isOcc) {
+              /* 체크아웃 선택 모드에서는 "점유일"도 체크아웃 후보로 허용 (당일 퇴실) */
+              if (
+                !(
+                  inCheckoutMode &&
+                  checkIn &&
+                  dateLT(checkIn, cellDate) &&
+                  canSelectCheckOut(checkIn, cellDate)
+                )
+              ) {
+                disabled = true;
+              }
             }
 
             btn.disabled = disabled;
@@ -733,7 +749,8 @@
                     checkOut = null;
                   } else if (
                     dateCopy < today ||
-                    occupiedNightSet.has(formatYMD(dateCopy))
+                    (occupiedNightSet.has(formatYMD(dateCopy)) &&
+                      !canSelectCheckOut(checkIn, dateCopy))
                   ) {
                     checkIn = null;
                     checkOut = null;
