@@ -1488,7 +1488,7 @@ iframe.map {
     backdrop-filter: blur(4px);
     -webkit-backdrop-filter: blur(4px);
     transform: translateX(100%);
-    transition: transform 0.28s ease;
+    transition: transform 0.46s ease;
     z-index: 1099;
     box-sizing: border-box;
   }

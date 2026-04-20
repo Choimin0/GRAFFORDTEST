@@ -25,6 +25,7 @@
       };
     </script>
     <script src="js/nav-hero.js" defer></script>
+    <script src="js/mobile-nav.js" defer></script>
   </head>
   <body class="home-page">
     <div id="grafford-react-fade-root"></div>
@@ -240,9 +241,6 @@
         const nextButton = document.getElementById("slider-next");
         const sliderImages = ["images/A.jpg", "images/B.jpg", "images/C.jpg"];
         const heroSlides = document.querySelectorAll(".hero-slide");
-        const mobileMenuBtn = document.querySelector(".mobile-menu-btn");
-        const mobileNavDrawer = document.getElementById("mobile-nav-drawer");
-        const mobileNavBackdrop = document.querySelector(".mobile-nav-backdrop");
         let sliderIndex = 0;
         let heroIndex = 0;
 
@@ -304,37 +302,6 @@
             heroIndex = (heroIndex + 1) % heroSlides.length;
             heroSlides[heroIndex].classList.add("is-active");
           }, 5000);
-        }
-
-        if (mobileMenuBtn && mobileNavDrawer && mobileNavBackdrop) {
-          function setMobileMenuOpen(isOpen) {
-            mobileMenuBtn.setAttribute("aria-expanded", String(isOpen));
-            mobileNavDrawer.setAttribute("aria-hidden", String(!isOpen));
-            mobileNavDrawer.classList.toggle("is-open", isOpen);
-            mobileNavBackdrop.hidden = !isOpen;
-            document.body.classList.toggle("mobile-nav-open", isOpen);
-          }
-
-          mobileMenuBtn.addEventListener("click", function () {
-            var isOpen = mobileMenuBtn.getAttribute("aria-expanded") === "true";
-            setMobileMenuOpen(!isOpen);
-          });
-
-          mobileNavBackdrop.addEventListener("click", function () {
-            setMobileMenuOpen(false);
-          });
-
-          mobileNavDrawer.querySelectorAll("a").forEach(function (link) {
-            link.addEventListener("click", function () {
-              setMobileMenuOpen(false);
-            });
-          });
-
-          window.addEventListener("keydown", function (event) {
-            if (event.key === "Escape") {
-              setMobileMenuOpen(false);
-            }
-          });
         }
 
         var indexAllRoomImages = [

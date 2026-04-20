@@ -6,6 +6,7 @@
     <link rel="icon" href="images/LOGO-transparent.png" type="image/png" />
     <title>예약 완료 - GRAFFORD</title>
     <link rel="stylesheet" href="css/style.css" />
+    <script src="js/mobile-nav.js" defer></script>
   </head>
   <body>
     <div id="grafford-react-fade-root"></div>
@@ -13,10 +14,32 @@
       <a href="index.html" class="nav-logo" aria-label="홈으로 이동">
         <img src="images/LOGO.png" alt="GRAFFORD LOGO" />
       </a>
-      <a href="STORY.html">STORY</a>
-      <a href="ROOMS.html">ROOMS</a>
-      <a href="FACILITIES.html">FACILITIES</a>
-      <a href="RESERVATION.html">RESERVATION</a>
+      <button
+        type="button"
+        class="mobile-menu-btn"
+        aria-label="메뉴 열기"
+        aria-controls="mobile-nav-drawer"
+        aria-expanded="false"
+      >
+        MENU
+      </button>
+      <div class="mobile-nav-backdrop" hidden></div>
+      <aside
+        id="mobile-nav-drawer"
+        class="mobile-nav-drawer"
+        aria-hidden="true"
+      >
+        <a href="STORY.html">STORY</a>
+        <a href="ROOMS.html">ROOMS</a>
+        <a href="FACILITIES.html">FACILITIES</a>
+        <a href="RESERVATION.html">RESERVATION</a>
+      </aside>
+      <div class="desktop-nav-links" aria-label="데스크톱 메뉴">
+        <a href="STORY.html">STORY</a>
+        <a href="ROOMS.html">ROOMS</a>
+        <a href="FACILITIES.html">FACILITIES</a>
+        <a href="RESERVATION.html">RESERVATION</a>
+      </div>
     </nav>
 
     <main class="content-section confirm-page reserve-complete-page">
