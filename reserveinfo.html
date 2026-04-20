@@ -110,6 +110,8 @@
           <dd id="res-amount"></dd>
           <dt>결제 수단</dt>
           <dd id="res-pay"></dd>
+          <dt>요청사항</dt>
+          <dd id="res-request"></dd>
         </dl>
       </div>
 
@@ -183,6 +185,7 @@
           extraText,
           amountNum,
           payMethod,
+          requestText,
           sourceNote,
         ) {
           errEl.hidden = true;
@@ -204,6 +207,7 @@
             amountNum || 0,
           );
           document.getElementById("res-pay").textContent = payLabel(payMethod);
+          document.getElementById("res-request").textContent = requestText || "—";
         }
 
         function showError(msg) {
@@ -262,6 +266,7 @@
                   extraText,
                   row.totalAmount != null ? row.totalAmount : 0,
                   row.paymentMethod,
+                  row.guestRequest || "",
                   note,
                 );
                 return;
@@ -290,6 +295,7 @@
                 (found.extraGuests || 0) + "명",
                 found.totalAmount || 0,
                 found.paymentMethod,
+                found.guestRequest || "",
                 "이 브라우저에만 저장된 예약입니다(무통장 입금 테스트). 서버에는 다른 행이 있을 수 있습니다.",
               );
             })
@@ -316,6 +322,7 @@
                 (found.extraGuests || 0) + "명",
                 found.totalAmount || 0,
                 found.paymentMethod,
+                found.guestRequest || "",
                 "서버 조회에 실패해, 이 브라우저에만 저장된 예약을 표시합니다.",
               );
             });

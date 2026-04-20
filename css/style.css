@@ -312,7 +312,7 @@ main {
 }
 
 .home-page {
-  background: #111;
+  background: var(--grafford-beige);
   scroll-snap-type: y mandatory;
   overflow-x: hidden;
   overflow-y: auto;
@@ -1553,6 +1553,33 @@ iframe.map {
   }
 }
 
+.room-bridge-copy {
+  margin: 2rem 0;
+  padding: 2rem 1rem;
+  text-align: center;
+  color: var(--newmaincolor);
+  background-color: var(--grafford-beige);
+}
+
+.room-bridge-copy p {
+  margin: 0;
+  text-align: center;
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+@media (min-width: 768px) {
+  .room-bridge-copy {
+    margin: 3.5rem 0;
+    padding: 2.75rem 1.5rem;
+  }
+
+  .room-bridge-copy p {
+    font-size: clamp(0.5rem, 5vw, 1rem);
+    line-height: 1.22;
+  }
+}
+
 @media (max-width: 400px) {
   .top-right-nav {
     gap: 0.35rem 0.45rem;
@@ -2075,9 +2102,15 @@ iframe.map {
 }
 
 .confirm-page {
-  margin: 5rem auto 2rem;
-  max-width: 640px;
-  padding: 2rem 1.5rem 3rem;
+  width: 100vw;
+  max-width: 100%;
+  min-height: 100svh;
+  margin-top: 0;
+  margin-bottom: 0;
+  margin-left: calc(50% - 50vw);
+  margin-right: calc(50% - 50vw);
+  padding: calc(var(--site-nav-height) + 1.25rem) clamp(1rem, 4vw, 3rem) 3rem;
+  box-sizing: border-box;
 }
 
 .payment-page {
@@ -2091,9 +2124,30 @@ iframe.map {
 
 .confirm-title {
   color: var(--chocolate-brown);
-  margin-bottom: 1.25rem;
+  margin: 0;
   font-size: 1.5rem;
   text-align: center;
+  flex: 1 1 auto;
+}
+
+.confirm-topbar {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  margin-bottom: 2.5rem;
+}
+
+.confirm-back-inline {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.5rem;
+  min-height: 1.5rem;
+  color: var(--chocolate-brown);
+  text-decoration: none;
+  font-size: 1.1rem;
+  font-weight: 600;
+  line-height: 1;
 }
 
 .confirm-summary {
@@ -2117,6 +2171,31 @@ iframe.map {
   max-width: 100%;
 }
 
+.confirm-layout-grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 1.25rem;
+}
+
+.confirm-layout-col {
+  min-width: 0;
+}
+
+@media (min-width: 900px) {
+  .confirm-layout-grid {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 1.5rem;
+    align-items: start;
+  }
+
+  /* Confirm: keep left column flow, right column follows viewport */
+  .confirm-layout-col--right {
+    position: sticky;
+    top: calc(var(--site-nav-height) + 1rem);
+    align-self: start;
+  }
+}
+
 .confirm-section {
   margin-bottom: 1.75rem;
   padding-bottom: 1.5rem;
@@ -2125,6 +2204,13 @@ iframe.map {
 
 .confirm-section:last-of-type {
   border-bottom: none;
+}
+
+.confirm-section--error {
+  border: 1px solid rgba(196, 54, 54, 0.72);
+  border-radius: 8px;
+  padding: 0.9rem 0.9rem 1.35rem;
+  box-shadow: 0 0 0 1px rgba(196, 54, 54, 0.28) inset;
 }
 
 .confirm-section-title {
@@ -2178,6 +2264,32 @@ iframe.map {
   margin: 0 0 1rem;
 }
 
+.confirm-guide-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.confirm-guide-item {
+  display: block;
+}
+
+.confirm-guide-subtitle {
+  display: block;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--grafford-dark-brown);
+  margin-bottom: 0.35rem;
+}
+
+.confirm-guide-content {
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.6;
+  color: var(--grafford-mud);
+}
+
 .confirm-label {
   display: block;
   margin-bottom: 0.85rem;
@@ -2193,6 +2305,24 @@ iframe.map {
   border: 1px solid rgba(58, 53, 49, 0.25);
   border-radius: 6px;
   font-size: 1rem;
+  box-sizing: border-box;
+}
+
+.confirm-input-error {
+  border: 1px solid rgba(196, 54, 54, 0.72) !important;
+}
+
+.confirm-textarea {
+  display: block;
+  width: 100%;
+  margin-top: 0.35rem;
+  padding: 0.55rem 0.6rem;
+  border: 1px solid rgba(58, 53, 49, 0.25);
+  border-radius: 6px;
+  font-size: 0.95rem;
+  font-family: inherit;
+  line-height: 1.5;
+  resize: vertical;
   box-sizing: border-box;
 }
 
@@ -2267,6 +2397,48 @@ iframe.map {
   margin-bottom: 0.5rem;
 }
 
+.confirm-check-item {
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-start;
+  gap: 0.25rem;
+}
+
+.confirm-check-toggle {
+  border: none;
+  background: transparent;
+  color: var(--chocolate-brown);
+  cursor: pointer;
+  font-size: 0.9rem;
+  line-height: 1;
+  padding: 0.15rem 0.1rem;
+}
+
+.confirm-check-detail {
+  margin: 0.2rem 0 0.55rem 1.55rem;
+  padding: 0 0.6rem;
+  border-left: 2px solid rgba(90, 82, 71, 0.25);
+  color: var(--grafford-mud);
+  font-size: 0.86rem;
+  line-height: 1.55;
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+  transform-origin: top;
+  transition:
+    opacity 0.22s ease,
+    max-height 0.22s ease,
+    padding-top 0.22s ease,
+    padding-bottom 0.22s ease;
+}
+
+.confirm-check-detail.is-open {
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+  max-height: 12rem;
+  opacity: 1;
+}
+
 .confirm-check input {
   margin-top: 0.2rem;
   width: 1.05rem;
@@ -2277,9 +2449,9 @@ iframe.map {
 
 .confirm-check--all {
   font-weight: 600;
-  margin-bottom: 0.65rem;
-  padding-bottom: 0.65rem;
-  border-bottom: 1px dashed rgba(58, 53, 49, 0.2);
+  margin-bottom: 0.35rem;
+  padding-bottom: 0;
+  border-bottom: none;
 }
 
 .confirm-agree-list {
@@ -2302,15 +2474,6 @@ iframe.map {
   color: var(--grafford-mud);
   margin-top: 1rem;
   line-height: 1.5;
-}
-
-.confirm-back {
-  margin-top: 1.5rem;
-}
-
-.confirm-back a {
-  color: var(--chocolate-brown);
-  font-weight: 600;
 }
 
 /* 예약 조회 (reserveinfo.html) */

@@ -43,13 +43,22 @@
     </nav>
 
     <main class="content-section confirm-page">
-      <h1 class="confirm-title">결제하기</h1>
+      <div class="confirm-topbar">
+        <a
+          href="RESERVATION.html"
+          class="confirm-back-inline"
+          aria-label="예약으로 돌아가기"
+          >&lt;</a
+        >
+        <h1 class="confirm-title">결제하기</h1>
+      </div>
 
       <form
         class="confirm-form checkout-form"
         id="confirm-form"
         action="payment.html"
         method="get"
+        novalidate
       >
         <input type="hidden" name="room" id="f-room" />
         <input type="hidden" name="checkIn" id="f-checkin" />
@@ -58,132 +67,236 @@
         <input type="hidden" name="extraGuests" id="f-extra-guests" value="0" />
         <input type="hidden" name="totalAmount" id="f-total-amount" value="0" />
 
-        <section class="confirm-section" aria-labelledby="sec-booking">
-          <h2 class="confirm-section-title" id="sec-booking">예약 정보</h2>
-          <div class="confirm-booking-card">
-            <img
-              class="confirm-room-thumb"
-              id="booking-room-img"
-              src="images/A00.jpg"
-              alt=""
-              width="120"
-              height="90"
-              decoding="async"
-            />
-            <div class="confirm-booking-details">
-              <p class="confirm-room-name" id="booking-room-name"></p>
-              <p class="confirm-schedule" id="booking-schedule"></p>
-              <p class="confirm-line-price" id="booking-line-price"></p>
-            </div>
+        <div class="confirm-layout-grid">
+          <div class="confirm-layout-col">
+            <section class="confirm-section" aria-labelledby="sec-guide">
+              <h2 class="confirm-section-title" id="sec-guide">
+                게스트 안내사항
+              </h2>
+              <div class="confirm-guide-list">
+                <div class="confirm-guide-item">
+                  <span class="confirm-guide-subtitle"
+                    >예약인원 기준 명시 및 인원 규정 위반에 대한 책임</span
+                  >
+                  <p class="confirm-guide-content">본문 텍스트를 입력해 주세요.</p>
+                </div>
+                <div class="confirm-guide-item">
+                  <span class="confirm-guide-subtitle">금연 및 화재 예방</span>
+                  <p class="confirm-guide-content">본문 텍스트를 입력해 주세요.</p>
+                </div>
+                <div class="confirm-guide-item">
+                  <span class="confirm-guide-subtitle">변상 규정</span>
+                  <p class="confirm-guide-content">본문 텍스트를 입력해 주세요.</p>
+                </div>
+                <div class="confirm-guide-item">
+                  <span class="confirm-guide-subtitle">미성년자 투숙 기준</span>
+                  <p class="confirm-guide-content">본문 텍스트를 입력해 주세요.</p>
+                </div>
+                <div class="confirm-guide-item">
+                  <span class="confirm-guide-subtitle"
+                    >영유아 및 아동 투숙 인원 포함 사항</span
+                  >
+                  <p class="confirm-guide-content">본문 텍스트를 입력해 주세요.</p>
+                </div>
+                <div class="confirm-guide-item">
+                  <span class="confirm-guide-subtitle">반려동물 출입 불가</span>
+                  <p class="confirm-guide-content">본문 텍스트를 입력해 주세요.</p>
+                </div>
+                <div class="confirm-guide-item">
+                  <span class="confirm-guide-subtitle">객실 내 취사 관련</span>
+                  <p class="confirm-guide-content">본문 텍스트를 입력해 주세요.</p>
+                </div>
+                <div class="confirm-guide-item">
+                  <span class="confirm-guide-subtitle">카페 이용 규칙</span>
+                  <p class="confirm-guide-content">본문 텍스트를 입력해 주세요.</p>
+                </div>
+                <div class="confirm-guide-item">
+                  <span class="confirm-guide-subtitle"
+                    >벌레 유입 및 방역에 대한 규정</span
+                  >
+                  <p class="confirm-guide-content">본문 텍스트를 입력해 주세요.</p>
+                </div>
+                <div class="confirm-guide-item">
+                  <span class="confirm-guide-subtitle">상업적 이용 불가</span>
+                  <p class="confirm-guide-content">본문 텍스트를 입력해 주세요.</p>
+                </div>
+                <div class="confirm-guide-item">
+                  <span class="confirm-guide-subtitle">숙박권 양도 안내</span>
+                  <p class="confirm-guide-content">본문 텍스트를 입력해 주세요.</p>
+                </div>
+                <div class="confirm-guide-item">
+                  <span class="confirm-guide-subtitle">안전 유의</span>
+                  <p class="confirm-guide-content">본문 텍스트를 입력해 주세요.</p>
+                </div>
+                <div class="confirm-guide-item">
+                  <span class="confirm-guide-subtitle">환불 규정</span>
+                  <p class="confirm-guide-content">본문 텍스트를 입력해 주세요.</p>
+                </div>
+                <div class="confirm-guide-item">
+                  <span class="confirm-guide-subtitle">특약 사항</span>
+                  <p class="confirm-guide-content">본문 텍스트를 입력해 주세요.</p>
+                </div>
+              </div>
+              <label class="confirm-check confirm-check--all">
+                <input type="checkbox" id="agree-all" />
+                전체 동의
+              </label>
+            </section>
+
+            <section class="confirm-section" aria-labelledby="sec-request">
+              <h2 class="confirm-section-title" id="sec-request">요청사항</h2>
+              <label class="confirm-label">
+                <textarea
+                  name="guestRequest"
+                  class="confirm-textarea"
+                  rows="4"
+                ></textarea>
+              </label>
+            </section>
           </div>
-        </section>
 
-        <section class="confirm-section" aria-labelledby="sec-guest">
-          <h2 class="confirm-section-title" id="sec-guest">예약자 정보</h2>
-          <p class="confirm-info-text">
-            예약 확정 및 안내를 위해 정확한 이름과 연락 가능한 번호를 입력해
-            주세요.<br />
-            입력하신 정보는 예약 처리·고객 응대 목적으로만 사용되며,<br />
-            결제 완료 후 변경은 고객센터로 문의해 주세요.
-          </p>
-          <label class="confirm-label">
-            성함
-            <input
-              type="text"
-              name="guestName"
-              id="f-name"
-              required
-              autocomplete="name"
-              placeholder="명탐정코난"
-            />
-          </label>
-          <label class="confirm-label">
-            연락처
-            <input
-              type="tel"
-              name="contact"
-              id="f-contact"
-              required
-              autocomplete="tel"
-              inputmode="numeric"
-              maxlength="13"
-              placeholder="010-1234-5678"
-              title="숫자 11자리 (010-1234-5678 형식)"
-              pattern="[0-9]{3}-[0-9]{4}-[0-9]{4}"
-            />
-          </label>
-        </section>
+          <div class="confirm-layout-col confirm-layout-col--right">
+            <section class="confirm-section" aria-labelledby="sec-booking">
+              <h2 class="confirm-section-title" id="sec-booking">
+                예약 사항 정보
+              </h2>
+              <div class="confirm-booking-card">
+                <img
+                  class="confirm-room-thumb"
+                  id="booking-room-img"
+                  src="images/A00.jpg"
+                  alt=""
+                  width="120"
+                  height="90"
+                  decoding="async"
+                />
+                <div class="confirm-booking-details">
+                  <p class="confirm-room-name" id="booking-room-name"></p>
+                  <p class="confirm-schedule" id="booking-schedule"></p>
+                  <p class="confirm-line-price" id="booking-line-price"></p>
+                </div>
+              </div>
+            </section>
 
-        <section class="confirm-section" aria-labelledby="sec-total">
-          <h2 class="confirm-section-title" id="sec-total">최종 금액</h2>
-          <div class="confirm-total-box">
-            <div class="confirm-breakdown" id="confirm-breakdown"></div>
-            <p class="confirm-total-amount-wrap">
-              <span class="confirm-total-label">합계</span>
-              <strong class="confirm-total-amount" id="confirm-total-display"
-                >—</strong
-              >
-            </p>
+            <section class="confirm-section" aria-labelledby="sec-guest">
+              <h2 class="confirm-section-title" id="sec-guest">예약자 정보</h2>
+              <p class="confirm-info-text">
+                예약 확정 및 안내를 위해 정확한 이름과 연락 가능한 번호를 입력해
+                주세요.<br />
+                입력하신 정보는 예약 처리·고객 응대 목적으로만 사용되며,<br />
+                결제 완료 후 변경은 고객센터로 문의해 주세요.
+              </p>
+              <label class="confirm-label">
+                성함
+                <input
+                  type="text"
+                  name="guestName"
+                  id="f-name"
+                  required
+                  autocomplete="name"
+                  placeholder="명탐정코난"
+                />
+              </label>
+              <label class="confirm-label">
+                연락처
+                <input
+                  type="tel"
+                  name="contact"
+                  id="f-contact"
+                  required
+                  autocomplete="tel"
+                  inputmode="numeric"
+                  maxlength="13"
+                  placeholder="010-1234-5678"
+                  title="숫자 11자리 (010-1234-5678 형식)"
+                  pattern="[0-9]{3}-[0-9]{4}-[0-9]{4}"
+                />
+              </label>
+            </section>
+
+            <section class="confirm-section" aria-labelledby="sec-agree">
+              <h2 class="confirm-section-title" id="sec-agree">개별 동의</h2>
+              <div class="confirm-agree-list" id="agree-items">
+                <div class="confirm-check-item">
+                  <label class="confirm-check">
+                    <input
+                      type="checkbox"
+                      name="agreePrivacy"
+                      id="agree-privacy"
+                      value="1"
+                    />
+                    개인정보 수집 및 이용 동의
+                  </label>
+                  <button
+                    type="button"
+                    class="confirm-check-toggle"
+                    id="agree-privacy-toggle"
+                    aria-expanded="false"
+                    aria-controls="agree-privacy-detail"
+                    aria-label="개인정보 수집 및 이용 동의 상세 내용 펼치기"
+                  >
+                    ▼
+                  </button>
+                </div>
+                <div id="agree-privacy-detail" class="confirm-check-detail" hidden>
+                  개인정보는 예약 처리, 고객 안내 및 문의 응대를 위해 수집되며,
+                  관련 법령에서 정한 보관기간이 지나면 안전하게 삭제됩니다.
+                </div>
+                <label class="confirm-check">
+                  <input
+                    type="checkbox"
+                    name="agreePurchase"
+                    id="agree-purchase"
+                    value="1"
+                  />
+                  구매조건 확인 및 결제 진행 동의
+                </label>
+              </div>
+            </section>
+
+            <section class="confirm-section" aria-labelledby="sec-total">
+              <h2 class="confirm-section-title" id="sec-total">
+                최종 금액 산출 방법 및 최종 금액
+              </h2>
+              <div class="confirm-total-box">
+                <div class="confirm-breakdown" id="confirm-breakdown"></div>
+                <p class="confirm-total-amount-wrap">
+                  <span class="confirm-total-label">합계</span>
+                  <strong
+                    class="confirm-total-amount"
+                    id="confirm-total-display"
+                    >—</strong
+                  >
+                </p>
+              </div>
+            </section>
+
+            <section class="confirm-section" aria-labelledby="sec-pay">
+              <h2 class="confirm-section-title" id="sec-pay">결제하기</h2>
+              <fieldset class="confirm-fieldset">
+                <legend class="visually-hidden">결제 수단 선택</legend>
+                <label class="confirm-radio">
+                  <input type="radio" name="paymentMethod" value="card" />
+                  신용카드
+                </label>
+                <label class="confirm-radio">
+                  <input type="radio" name="paymentMethod" value="naver" />
+                  네이버페이
+                </label>
+                <label class="confirm-radio">
+                  <input type="radio" name="paymentMethod" value="bank" />
+                  무통장입금
+                </label>
+              </fieldset>
+              <div class="confirm-actions">
+                <button type="submit" class="btn confirm-pay-submit">
+                  결제하기
+                </button>
+              </div>
+            </section>
           </div>
-        </section>
-
-        <section class="confirm-section" aria-labelledby="sec-pay">
-          <h2 class="confirm-section-title" id="sec-pay">결제 수단</h2>
-          <fieldset class="confirm-fieldset">
-            <legend class="visually-hidden">결제 수단 선택</legend>
-            <label class="confirm-radio">
-              <input type="radio" name="paymentMethod" value="card" required />
-              신용카드
-            </label>
-            <label class="confirm-radio">
-              <input type="radio" name="paymentMethod" value="naver" />
-              네이버페이
-            </label>
-            <label class="confirm-radio">
-              <input type="radio" name="paymentMethod" value="bank" />
-              무통장입금
-            </label>
-          </fieldset>
-        </section>
-
-        <section class="confirm-section" aria-labelledby="sec-agree">
-          <h2 class="confirm-section-title" id="sec-agree">전체 동의</h2>
-          <label class="confirm-check confirm-check--all">
-            <input type="checkbox" id="agree-all" />
-            전체 동의
-          </label>
-          <div class="confirm-agree-list">
-            <label class="confirm-check">
-              <input
-                type="checkbox"
-                name="agreePrivacy"
-                id="agree-privacy"
-                value="1"
-                required
-              />
-              (필수) 개인정보 수집 및 이용 동의
-            </label>
-            <label class="confirm-check">
-              <input
-                type="checkbox"
-                name="agreePurchase"
-                id="agree-purchase"
-                value="1"
-                required
-              />
-              (필수) 구매조건 확인 및 결제 진행 동의
-            </label>
-          </div>
-        </section>
-
-        <div class="confirm-actions">
-          <button type="submit" class="btn confirm-pay-submit">결제하기</button>
         </div>
       </form>
-
-      <p class="confirm-back">
-        <a href="RESERVATION.html">예약으로 돌아가기</a>
-      </p>
 
       <footer
         id="site-business-footer-mount"
@@ -249,7 +362,9 @@
         document.getElementById("f-extra-guests").value = String(
           quote.extraGuests,
         );
-        document.getElementById("f-total-amount").value = String(quote.grandTotal);
+        document.getElementById("f-total-amount").value = String(
+          quote.grandTotal,
+        );
 
         var imgEl = document.getElementById("booking-room-img");
         imgEl.src = "images/" + roomRaw + "00.jpg";
@@ -335,31 +450,29 @@
         var agreeAll = document.getElementById("agree-all");
         var agreePrivacy = document.getElementById("agree-privacy");
         var agreePurchase = document.getElementById("agree-purchase");
-        var syncing = false;
-
-        function syncAllFromChildren() {
-          if (syncing) {
-            return;
-          }
-          agreeAll.checked = agreePrivacy.checked && agreePurchase.checked;
-        }
-
-        agreeAll.addEventListener("change", function () {
-          syncing = true;
-          agreePrivacy.checked = agreeAll.checked;
-          agreePurchase.checked = agreeAll.checked;
-          syncing = false;
-        });
-
-        agreePrivacy.addEventListener("change", syncAllFromChildren);
-        agreePurchase.addEventListener("change", syncAllFromChildren);
-
-        syncAllFromChildren();
-
+        var agreePrivacyToggle = document.getElementById("agree-privacy-toggle");
+        var agreePrivacyDetail = document.getElementById("agree-privacy-detail");
+        var agreeSection = document
+          .getElementById("sec-agree")
+          .closest("section");
+        var guideSection = document
+          .getElementById("sec-guide")
+          .closest("section");
+        var paySection = document.getElementById("sec-pay").closest("section");
+        var guestNameInput = document.getElementById("f-name");
         var contactInput = document.getElementById("f-contact");
+        var guestRequestInput = document.querySelector(
+          'textarea[name="guestRequest"]',
+        );
+        var hasTriedSubmit = false;
+
         if (contactInput) {
           function formatPhoneKRMobile(value) {
-            var d = String(value || "").replace(/\D/g, "").slice(0, 11);
+            var d = String(value || "").replace(/\D/g, "");
+            if (d.startsWith("82")) {
+              d = "0" + d.slice(2);
+            }
+            d = d.slice(0, 11);
             if (d.length <= 3) {
               return d;
             }
@@ -384,11 +497,22 @@
         var paySubmitBtn = confirmForm.querySelector(".confirm-pay-submit");
         var R = window.GraffordReservations;
 
+        function markSectionError(section, hasError) {
+          if (!section) {
+            return;
+          }
+          section.classList.toggle("confirm-section--error", !!hasError);
+        }
+
+        function markInputError(input, hasError) {
+          if (!input) {
+            return;
+          }
+          input.classList.toggle("confirm-input-error", !!hasError);
+        }
+
         function bookingApiUrl() {
-          if (
-            typeof window !== "undefined" &&
-            window.__GRAFFORD_API_BASE__
-          ) {
+          if (typeof window !== "undefined" && window.__GRAFFORD_API_BASE__) {
             return (
               String(window.__GRAFFORD_API_BASE__).replace(/\/$/, "") +
               "/api/reservations"
@@ -397,23 +521,95 @@
           return "/api/reservations";
         }
 
-        confirmForm.addEventListener("submit", function (e) {
-          e.preventDefault();
-          if (!confirmForm.checkValidity()) {
-            confirmForm.reportValidity();
+        function refreshConsentErrors() {
+          if (!hasTriedSubmit) {
             return;
           }
+          markSectionError(
+            agreeSection,
+            !(agreePrivacy.checked && agreePurchase.checked),
+          );
+          markSectionError(guideSection, !agreeAll.checked);
+        }
+
+        confirmForm.addEventListener("submit", function (e) {
+          e.preventDefault();
+          hasTriedSubmit = true;
+
+          var hasAgreeError = !(agreePrivacy.checked && agreePurchase.checked);
+          var hasGuideError = !agreeAll.checked;
+          var hasNameError = !guestNameInput.value.trim();
+          var normalizedContact = contactInput
+            ? formatPhoneKRMobile(contactInput.value)
+            : "";
+          if (contactInput) {
+            contactInput.value = normalizedContact;
+          }
+          var hasContactError = !/^\d{3}-\d{4}-\d{4}$/.test(normalizedContact);
+
           var payInput = confirmForm.querySelector(
             'input[name="paymentMethod"]:checked',
           );
-          if (!payInput) {
-            window.alert("결제 수단을 선택해 주세요.");
+          var hasPaymentError = !payInput;
+
+          markSectionError(agreeSection, hasAgreeError);
+          markSectionError(guideSection, hasGuideError);
+          markSectionError(paySection, hasPaymentError);
+          markInputError(guestNameInput, hasNameError);
+          markInputError(contactInput, hasContactError);
+
+          if (
+            hasAgreeError ||
+            hasGuideError ||
+            hasNameError ||
+            hasContactError ||
+            hasPaymentError
+          ) {
+            if (hasAgreeError && agreeSection) {
+              agreeSection.scrollIntoView({
+                behavior: "smooth",
+                block: "center",
+              });
+              return;
+            }
+            if (hasGuideError && guideSection) {
+              guideSection.scrollIntoView({
+                behavior: "smooth",
+                block: "center",
+              });
+              return;
+            }
+            if (hasNameError) {
+              guestNameInput.focus();
+              guestNameInput.scrollIntoView({
+                behavior: "smooth",
+                block: "center",
+              });
+              return;
+            }
+            if (hasContactError) {
+              contactInput.focus();
+              contactInput.scrollIntoView({
+                behavior: "smooth",
+                block: "center",
+              });
+              return;
+            }
+            if (hasPaymentError && paySection) {
+              paySection.scrollIntoView({
+                behavior: "smooth",
+                block: "center",
+              });
+            }
             return;
           }
-          var nights = parseInt(
-            document.getElementById("f-nights").value,
-            10,
-          );
+
+          markSectionError(agreeSection, false);
+          markSectionError(guideSection, false);
+          markSectionError(paySection, false);
+          markInputError(guestNameInput, false);
+          markInputError(contactInput, false);
+          var nights = parseInt(document.getElementById("f-nights").value, 10);
           if (!nights || nights < 1) {
             window.alert(
               "체크인·체크아웃이 올바르지 않습니다. 예약 페이지에서 다시 선택해 주세요.",
@@ -427,8 +623,8 @@
             return;
           }
 
-          var guestName = document.getElementById("f-name").value.trim();
-          var contact = document.getElementById("f-contact").value.trim();
+          var guestName = guestNameInput.value.trim();
+          var contact = normalizedContact;
           if (!/^\d{3}-\d{4}-\d{4}$/.test(contact)) {
             window.alert(
               "연락처는 010-1234-5678 형식(숫자 11자리)으로 입력해 주세요.",
@@ -440,21 +636,18 @@
           var checkIn = document.getElementById("f-checkin").value;
           var checkOut = document.getElementById("f-checkout").value;
           var extraGuests =
-            parseInt(
-              document.getElementById("f-extra-guests").value,
-              10,
-            ) || 0;
+            parseInt(document.getElementById("f-extra-guests").value, 10) || 0;
           var totalAmount =
-            parseInt(
-              document.getElementById("f-total-amount").value,
-              10,
-            ) || 0;
+            parseInt(document.getElementById("f-total-amount").value, 10) || 0;
           var guestCount = Math.min(50, Math.max(1, 2 + extraGuests));
 
           var payload = {
             reservationNumber: orderNumber,
             guestName: guestName,
             contact: contact,
+            guestRequest: guestRequestInput
+              ? guestRequestInput.value.trim()
+              : "",
             roomType: room,
             checkIn: checkIn,
             checkOut: checkOut,
@@ -493,6 +686,9 @@
                 orderNumber: orderNumber,
                 guestName: guestName,
                 contact: contact,
+                guestRequest: guestRequestInput
+                  ? guestRequestInput.value.trim()
+                  : "",
                 room: room,
                 checkIn: checkIn,
                 checkOut: checkOut,
@@ -512,8 +708,7 @@
                 var fd = new FormData(confirmForm);
                 var params = new URLSearchParams(fd);
                 params.set("orderNo", orderNumber);
-                window.location.href =
-                  "payment.html?" + params.toString();
+                window.location.href = "payment.html?" + params.toString();
               }
             })
             .catch(function (err) {
@@ -529,6 +724,60 @@
               }
             });
         });
+
+        [guestNameInput, contactInput].forEach(function (el) {
+          if (!el) {
+            return;
+          }
+          el.addEventListener("input", function () {
+            markInputError(guestNameInput, !guestNameInput.value.trim());
+            markInputError(
+              contactInput,
+              !/^\d{3}-\d{4}-\d{4}$/.test(contactInput.value.trim()),
+            );
+          });
+        });
+
+        confirmForm
+          .querySelectorAll('input[name="paymentMethod"]')
+          .forEach(function (el) {
+            el.addEventListener("change", function () {
+              markSectionError(paySection, false);
+            });
+          });
+
+        [agreeAll, agreePrivacy, agreePurchase].forEach(function (el) {
+          if (!el) {
+            return;
+          }
+          el.addEventListener("change", refreshConsentErrors);
+        });
+
+        if (agreePrivacyToggle && agreePrivacyDetail) {
+          var detailFadeMs = 220;
+          agreePrivacyToggle.addEventListener("click", function () {
+            var expanded =
+              agreePrivacyToggle.getAttribute("aria-expanded") === "true";
+            var next = !expanded;
+            agreePrivacyToggle.setAttribute("aria-expanded", String(next));
+            agreePrivacyToggle.textContent = next ? "▲" : "▼";
+            if (next) {
+              agreePrivacyDetail.hidden = false;
+              window.requestAnimationFrame(function () {
+                agreePrivacyDetail.classList.add("is-open");
+              });
+            } else {
+              agreePrivacyDetail.classList.remove("is-open");
+              window.setTimeout(function () {
+                if (
+                  agreePrivacyToggle.getAttribute("aria-expanded") === "false"
+                ) {
+                  agreePrivacyDetail.hidden = true;
+                }
+              }, detailFadeMs);
+            }
+          });
+        }
       });
     </script>
     <script defer src="js/grafford-page-fade.js"></script>

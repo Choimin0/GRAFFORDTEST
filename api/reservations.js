@@ -9,6 +9,7 @@ const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 const MAX_NAME = 255;
 const MAX_CONTACT = 120;
 const MAX_RESV = 32;
+const MAX_GUEST_REQUEST = 2000;
 
 /** Neon/Vercel에서 오는 URL 이름이 달라도 사용 (TCP — Neon's HTTP 404 회피) */
 function getDatabaseUrl() {
@@ -45,7 +46,7 @@ function humanDbError(e) {
   }
   var c = e.code;
   if (c === "42703") {
-    return "DB에 필요한 컬럼이 없습니다. db/migrations/002_reservations_booking_columns.sql 을 실행하세요.";
+    return "DB에 필요한 컬럼이 없습니다. db/migrations/002_reservations_booking_columns.sql 과 db/migrations/004_add_guest_request_to_reservations.sql 을 실행하세요.";
   }
   if (c === "42P01") {
     return "reservations 테이블이 없습니다. db/migrations/001_create_reservations.sql 을 실행하세요.";
@@ -277,6 +278,7 @@ export default async function handler(req, res) {
           stay_nights,
           extra_guests,
           total_amount,
+          guest_request,
           payment_method,
           created_at
         FROM reservations
@@ -310,6 +312,7 @@ export default async function handler(req, res) {
             dbRow.extra_guests != null ? Number(dbRow.extra_guests) : null,
           totalAmount:
             dbRow.total_amount != null ? Number(dbRow.total_amount) : null,
+          guestRequest: dbRow.guest_request || "",
           paymentMethod: dbRow.payment_method || null,
           createdAt: dbRow.created_at,
         },
@@ -404,6 +407,9 @@ export default async function handler(req, res) {
   var stayNights = Number(body.stayNights);
   var extraGuests = Number(body.extraGuests);
   var totalAmount = Number(body.totalAmount);
+  var guestRequest = String(body.guestRequest || "")
+    .trim()
+    .slice(0, MAX_GUEST_REQUEST);
   var paymentMethod = String(body.paymentMethod || "").trim().toLowerCase();
   var guestCount = Number(body.guestCount);
 
@@ -464,9 +470,10 @@ export default async function handler(req, res) {
       stay_nights,
       extra_guests,
       total_amount,
+      guest_request,
       payment_method
     ) VALUES (
-      $1, $2, $3, $4, $5::date, $6::date, $7, $8, $9, $10, $11
+      $1, $2, $3, $4, $5::date, $6::date, $7, $8, $9, $10, $11, $12
     )
     RETURNING id, reservation_number, created_at
   `;
@@ -482,6 +489,7 @@ export default async function handler(req, res) {
     sn,
     eg,
     ta,
+    guestRequest,
     paymentMethod,
   ];
 
