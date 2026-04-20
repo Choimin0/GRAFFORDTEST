@@ -10,7 +10,7 @@
     <script src="js/mobile-nav.js" defer></script>
     <script src="js/booking-pricing.js" defer></script>
   </head>
-  <body class="home-page page-hero-nav-sync">
+  <body class="home-page page-hero-nav-sync reservation-page">
     <div id="grafford-react-fade-root"></div>
     <nav class="site-nav top-right-nav nav-hero-sync-hidden">
       <a href="index.html" class="nav-logo" aria-label="Home">
@@ -110,54 +110,206 @@
               <div class="gallery-thumbs" id="gallery-thumbs"></div>
             </div>
             <div class="room-copy-blocks">
-              <p class="room-detail-intro room-copy is-visible" data-room="G1">
-                <strong>G1</strong><br />
-                2인 기준의 아늑한 객실로, 휴식 중심의 미니멀한 동선을
-                제공합니다.<br /><br />
-                객실면적 : 20㎡<br />
-                침대 타입 : 퀸 침대 1개<br />
-                객실구성 : 침실 1개, 욕실 1개, 자쿠지 1개<br />
-                시설 : Room -Kitchen -Bathroom -Bedroom<br />
-                기준 2인, 최대 2인<br />
-                취사 불가능<br />
-                1박 20만원 · G1
-              </p>
-              <p class="room-detail-intro room-copy" data-room="G2" hidden>
-                <strong>G2</strong><br />
-                채광이 좋은 구조와 넉넉한 공간 구성으로 여유로운 숙박에
-                적합합니다.<br /><br />
-                객실면적 : 20㎡<br />
-                침대 타입 : 퀸 침대 1개<br />
-                객실구성 : 침실 1개, 욕실 1개, 자쿠지 1개<br />
-                시설 : Room -Kitchen -Bathroom -Bedroom<br />
-                기준 2인, 최대 2인<br />
-                취사 불가능<br />
-                1박 20만원 · G2
-              </p>
-              <p class="room-detail-intro room-copy" data-room="G3" hidden>
-                <strong>G3</strong><br />
-                프라이빗한 분위기와 감성적인 인테리어가 조화를 이루는
-                객실입니다.<br /><br />
-                객실면적 : 35㎡<br />
-                침대 타입 : 퀸 침대 1개, 더블 침대 1개<br />
-                객실구성 : 침실 1개, 욕실 1개, 자쿠지 1개<br />
-                시설 : Room -Kitchen -Bathroom -Bedroom<br />
-                기준 2인, 최대 4인<br />
-                취사 (불)가능<br />
-                1박 30만원 · G3
-              </p>
-              <p class="room-detail-intro room-copy" data-room="G4" hidden>
-                <strong>G4</strong><br />
-                넓은 레이아웃과 쾌적한 컨디션을 갖춘 장기 숙박 친화형
-                객실입니다.<br /><br />
-                객실면적 : 60㎡<br />
-                침대 타입 : 퀸 침대 1개, 더블 침대 2개<br />
-                객실구성 : 침실 1개, 욕실 1개, 자쿠지 1개<br />
-                시설 : Room -Kitchen -Bathroom -Bedroom<br />
-                기준 2인, 최대 6인<br />
-                취사 (불)가능<br />
-                1박 50만원 · G4
-              </p>
+              <div class="room-detail-intro room-copy is-visible" data-room="G1">
+                <strong>G1</strong>
+                <p class="room-intro-desc">
+                  2인 기준의 아늑한 객실로, 휴식 중심의 미니멀한 동선을
+                  제공합니다.
+                </p>
+                <br />
+                <div class="room-meta-grid" role="list" aria-label="G1 객실 주요 정보">
+                  <div class="room-meta-item" role="listitem">
+                    <h4 class="room-meta-title">체크인/체크아웃</h4>
+                    <p class="room-meta-value">체크인 15:00 · 체크아웃 11:00</p>
+                  </div>
+                  <div class="room-meta-item" role="listitem">
+                    <h4 class="room-meta-title">투숙 가능 인원</h4>
+                    <p class="room-meta-value">기준 2인, 최대 2인</p>
+                  </div>
+                  <div class="room-meta-item" role="listitem">
+                    <h4 class="room-meta-title">유닛 구성</h4>
+                    <p class="room-meta-value">침실 1개, 욕실 1개, 자쿠지 1개</p>
+                  </div>
+                  <div class="room-meta-item" role="listitem">
+                    <h4 class="room-meta-title">면적</h4>
+                    <p class="room-meta-value">20㎡</p>
+                  </div>
+                </div>
+                <br />
+                <div class="room-facility">
+                  <h4 class="room-meta-title room-facility-title">유닛 시설 현황</h4>
+                  <div class="room-facility-list" role="list" aria-label="G1 유닛 시설 현황">
+                    <div class="room-facility-item" role="listitem">
+                      <p class="room-facility-name">Living room</p>
+                      <p class="room-facility-desc">TV, 소파</p>
+                    </div>
+                    <div class="room-facility-item" role="listitem">
+                      <p class="room-facility-name">Kitchen</p>
+                      <p class="room-facility-desc">취사 불가능</p>
+                    </div>
+                    <div class="room-facility-item" role="listitem">
+                      <p class="room-facility-name">Bathroom</p>
+                      <p class="room-facility-desc">
+                        샤워 어매니티, 핸드워시, 헤어드라이기
+                      </p>
+                    </div>
+                    <div class="room-facility-item" role="listitem">
+                      <p class="room-facility-name">Bedroom</p>
+                      <p class="room-facility-desc">퀸 침대 1개</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="room-detail-intro room-copy" data-room="G2" hidden>
+                <strong>G2</strong>
+                <p class="room-intro-desc">
+                  채광이 좋은 구조와 넉넉한 공간 구성으로 여유로운 숙박에
+                  적합합니다.
+                </p>
+                <br />
+                <div class="room-meta-grid" role="list" aria-label="G2 객실 주요 정보">
+                  <div class="room-meta-item" role="listitem">
+                    <h4 class="room-meta-title">체크인/체크아웃</h4>
+                    <p class="room-meta-value">체크인 15:00 · 체크아웃 11:00</p>
+                  </div>
+                  <div class="room-meta-item" role="listitem">
+                    <h4 class="room-meta-title">투숙 가능 인원</h4>
+                    <p class="room-meta-value">기준 2인, 최대 2인</p>
+                  </div>
+                  <div class="room-meta-item" role="listitem">
+                    <h4 class="room-meta-title">유닛 구성</h4>
+                    <p class="room-meta-value">침실 1개, 욕실 1개, 자쿠지 1개</p>
+                  </div>
+                  <div class="room-meta-item" role="listitem">
+                    <h4 class="room-meta-title">면적</h4>
+                    <p class="room-meta-value">20㎡</p>
+                  </div>
+                </div>
+                <br />
+                <div class="room-facility">
+                  <h4 class="room-meta-title room-facility-title">유닛 시설 현황</h4>
+                  <div class="room-facility-list" role="list" aria-label="G2 유닛 시설 현황">
+                    <div class="room-facility-item" role="listitem">
+                      <p class="room-facility-name">Living room</p>
+                      <p class="room-facility-desc">TV, 소파</p>
+                    </div>
+                    <div class="room-facility-item" role="listitem">
+                      <p class="room-facility-name">Kitchen</p>
+                      <p class="room-facility-desc">취사 불가능</p>
+                    </div>
+                    <div class="room-facility-item" role="listitem">
+                      <p class="room-facility-name">Bathroom</p>
+                      <p class="room-facility-desc">
+                        샤워 어매니티, 핸드워시, 헤어드라이기
+                      </p>
+                    </div>
+                    <div class="room-facility-item" role="listitem">
+                      <p class="room-facility-name">Bedroom</p>
+                      <p class="room-facility-desc">퀸 침대 1개</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="room-detail-intro room-copy" data-room="G3" hidden>
+                <strong>G3</strong>
+                <p class="room-intro-desc">
+                  프라이빗한 분위기와 감성적인 인테리어가 조화를 이루는
+                  객실입니다.
+                </p>
+                <br />
+                <div class="room-meta-grid" role="list" aria-label="G3 객실 주요 정보">
+                  <div class="room-meta-item" role="listitem">
+                    <h4 class="room-meta-title">체크인/체크아웃</h4>
+                    <p class="room-meta-value">체크인 15:00 · 체크아웃 11:00</p>
+                  </div>
+                  <div class="room-meta-item" role="listitem">
+                    <h4 class="room-meta-title">투숙 가능 인원</h4>
+                    <p class="room-meta-value">기준 2인, 최대 4인</p>
+                  </div>
+                  <div class="room-meta-item" role="listitem">
+                    <h4 class="room-meta-title">유닛 구성</h4>
+                    <p class="room-meta-value">침실 1개, 욕실 1개, 자쿠지 1개</p>
+                  </div>
+                  <div class="room-meta-item" role="listitem">
+                    <h4 class="room-meta-title">면적</h4>
+                    <p class="room-meta-value">35㎡</p>
+                  </div>
+                </div>
+                <br />
+                <div class="room-facility">
+                  <h4 class="room-meta-title room-facility-title">유닛 시설 현황</h4>
+                  <div class="room-facility-list" role="list" aria-label="G3 유닛 시설 현황">
+                    <div class="room-facility-item" role="listitem">
+                      <p class="room-facility-name">Living room</p>
+                      <p class="room-facility-desc">TV, 소파</p>
+                    </div>
+                    <div class="room-facility-item" role="listitem">
+                      <p class="room-facility-name">Kitchen</p>
+                      <p class="room-facility-desc">취사 가능</p>
+                    </div>
+                    <div class="room-facility-item" role="listitem">
+                      <p class="room-facility-name">Bathroom</p>
+                      <p class="room-facility-desc">
+                        샤워 어매니티, 핸드워시, 헤어드라이기
+                      </p>
+                    </div>
+                    <div class="room-facility-item" role="listitem">
+                      <p class="room-facility-name">Bedroom</p>
+                      <p class="room-facility-desc">퀸 침대 1개, 더블 침대 1개</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="room-detail-intro room-copy" data-room="G4" hidden>
+                <strong>G4</strong>
+                <p class="room-intro-desc">
+                  넓은 레이아웃과 쾌적한 컨디션을 갖춘 장기 숙박 친화형
+                  객실입니다.
+                </p>
+                <br />
+                <div class="room-meta-grid" role="list" aria-label="G4 객실 주요 정보">
+                  <div class="room-meta-item" role="listitem">
+                    <h4 class="room-meta-title">체크인/체크아웃</h4>
+                    <p class="room-meta-value">체크인 15:00 · 체크아웃 11:00</p>
+                  </div>
+                  <div class="room-meta-item" role="listitem">
+                    <h4 class="room-meta-title">투숙 가능 인원</h4>
+                    <p class="room-meta-value">기준 2인, 최대 6인</p>
+                  </div>
+                  <div class="room-meta-item" role="listitem">
+                    <h4 class="room-meta-title">유닛 구성</h4>
+                    <p class="room-meta-value">침실 1개, 욕실 1개, 자쿠지 1개</p>
+                  </div>
+                  <div class="room-meta-item" role="listitem">
+                    <h4 class="room-meta-title">면적</h4>
+                    <p class="room-meta-value">60㎡</p>
+                  </div>
+                </div>
+                <br />
+                <div class="room-facility">
+                  <h4 class="room-meta-title room-facility-title">유닛 시설 현황</h4>
+                  <div class="room-facility-list" role="list" aria-label="G4 유닛 시설 현황">
+                    <div class="room-facility-item" role="listitem">
+                      <p class="room-facility-name">Living room</p>
+                      <p class="room-facility-desc">TV, 소파</p>
+                    </div>
+                    <div class="room-facility-item" role="listitem">
+                      <p class="room-facility-name">Kitchen</p>
+                      <p class="room-facility-desc">취사 가능</p>
+                    </div>
+                    <div class="room-facility-item" role="listitem">
+                      <p class="room-facility-name">Bathroom</p>
+                      <p class="room-facility-desc">
+                        샤워 어매니티, 핸드워시, 헤어드라이기
+                      </p>
+                    </div>
+                    <div class="room-facility-item" role="listitem">
+                      <p class="room-facility-name">Bedroom</p>
+                      <p class="room-facility-desc">퀸 침대 1개, 더블 침대 2개</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
 

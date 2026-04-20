@@ -989,7 +989,7 @@ main {
   justify-content: flex-start;
   align-items: flex-start;
   text-align: left;
-  color: var(--grafford-beige);
+  color: var(--grafford-earthy-green);
 }
 
 .rooms-features {
@@ -1046,6 +1046,90 @@ main {
   font-weight: 500;
   color: rgba(255, 255, 255, 0.92);
   letter-spacing: 0.02em;
+}
+
+.room-intro-layout {
+  margin: 0;
+  color: var(--newmaincolor);
+}
+
+.room-intro-desc {
+  margin: 0 0 0.85rem;
+}
+
+.room-meta-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.7rem 1rem;
+}
+
+.room-meta-item {
+  min-width: 0;
+}
+
+.room-meta-title {
+  margin: 0;
+  padding-bottom: 0.3rem;
+  font-size: 0.85em;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  border-bottom: 1px solid currentColor;
+  opacity: 0.9;
+}
+
+.room-meta-value {
+  margin: 0.4rem 0 0;
+  font-size: 0.82em;
+}
+
+.room-facility {
+  margin-top: 0.95rem;
+}
+
+.room-facility-title {
+  font-size: 0.85em;
+  border-bottom: 0;
+  padding-bottom: 0;
+}
+
+.room-facility-list {
+  margin-top: 0.6rem;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem 1rem;
+}
+
+.room-facility-item {
+  min-width: 0;
+}
+
+.room-facility-name {
+  margin: 0;
+  padding-bottom: 0.28rem;
+  font-size: 0.85em;
+  font-weight: 900;
+  border-bottom: 1px solid currentColor;
+  opacity: 0.9;
+}
+
+.room-facility-desc {
+  margin: 0.35rem 0 0;
+  font-size: 0.82em;
+}
+
+.room-intro-rate {
+  margin: 0.9rem 0 0;
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: var(--chocolate-brown);
+  letter-spacing: 0.02em;
+}
+
+@media (max-width: 767px) {
+  .room-meta-grid,
+  .room-facility-list {
+    grid-template-columns: 1fr;
+  }
 }
 
 /*rooms 페이지 객실 사진 슬롯 — 모바일: 단순 / PC: 플렉스·높이 상한 */
@@ -1659,6 +1743,11 @@ iframe.map {
   padding-bottom: 2rem;
 }
 
+/* RESERVATION 페이지에서만 hero/content 사이 간격 */
+.reservation-page .content-section#content {
+  margin-top: clamp(2rem, 8vh, 4rem);
+}
+
 /* 객실 타입 행: 타입 버튼 + 예약조회 */
 .room-type-row {
   display: flex;
@@ -1727,6 +1816,16 @@ iframe.map {
   color: var(--grafford-dark-brown);
   font-size: 1rem;
   line-height: 1.65;
+}
+
+.room-detail-intro .room-meta-title,
+.room-detail-intro .room-facility-name {
+  border-bottom-color: rgba(58, 53, 49, 0.22);
+}
+
+.feature-text .room-meta-title,
+.feature-text .room-facility-name {
+  border-bottom-color: rgba(255, 255, 255, 0.26);
 }
 
 .reservation-pricing-bar {
