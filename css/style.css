@@ -1942,6 +1942,16 @@ iframe.map {
   opacity: 0.52;
 }
 
+/* 체크아웃 선택 단계에서 허용된 점유일(체크아웃 후보)은 일반 가능일 글자 톤으로 표시 */
+.cal-grid.is-selecting-checkout .cal-cell.cal-booked:not(:disabled) {
+  opacity: 1;
+  color: var(--grafford-dark-brown);
+}
+
+.cal-grid.is-selecting-checkout .cal-cell.cal-booked:not(:disabled):hover {
+  opacity: 1;
+}
+
 .cal-cell.cal-past.cal-booked:not(:disabled) {
   opacity: 0.42;
   cursor: pointer;
