@@ -70,7 +70,11 @@
       calc((100svh - 4 * var(--site-nav-height) - 7rem) * 1.04),
       208px
     );
-    --feature-ref-media-min-h: min(31.2svh, var(--feature-image-area-max), 291px);
+    --feature-ref-media-min-h: min(
+      31.2svh,
+      var(--feature-image-area-max),
+      291px
+    );
     --feature-ref-image-min-h: min(
       27.04svh,
       var(--feature-gallery-img-min),
@@ -1831,6 +1835,12 @@ iframe.map {
 
 .booking-calendar {
   margin-bottom: 0.75rem;
+  opacity: 1;
+  transition: opacity 2s ease;
+}
+
+.booking-calendar.is-month-fading {
+  opacity: 0.35;
 }
 
 .cal-year-title {

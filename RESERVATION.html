@@ -267,6 +267,7 @@
         var calYearLabel = document.getElementById("cal-year-label");
         var calMonthLabel = document.getElementById("cal-month-label");
         var calGrid = document.getElementById("cal-grid");
+        var bookingCalendar = document.getElementById("booking-calendar");
         var calPrev = document.getElementById("cal-prev");
         var calNext = document.getElementById("cal-next");
         var calCheckinEl = document.getElementById("cal-checkin");
@@ -291,6 +292,7 @@
         var checkIn = null;
         var checkOut = null;
         var occupiedNightSet = new Set();
+        var monthFadeTimer = null;
 
         function pad(n) {
           return n < 10 ? "0" + n : String(n);
@@ -584,6 +586,33 @@
           return true;
         }
 
+        function isLastDayOfMonth(d) {
+          if (!d) {
+            return false;
+          }
+          var last = new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate();
+          return d.getDate() === last;
+        }
+
+        function shiftCalendarMonth(delta, withFade) {
+          if (!withFade || !bookingCalendar) {
+            viewDate.setMonth(viewDate.getMonth() + delta);
+            renderCalendar();
+            return;
+          }
+          if (monthFadeTimer) {
+            window.clearTimeout(monthFadeTimer);
+            monthFadeTimer = null;
+          }
+          bookingCalendar.classList.add("is-month-fading");
+          monthFadeTimer = window.setTimeout(function () {
+            viewDate.setMonth(viewDate.getMonth() + delta);
+            renderCalendar();
+            bookingCalendar.classList.remove("is-month-fading");
+            monthFadeTimer = null;
+          }, 180);
+        }
+
         function loadAvailability(room) {
           return fetch(
             "/api/reservations?room=" +
@@ -682,6 +711,7 @@
             (function (dateCopy) {
               btn.addEventListener("click", function () {
                 if (btn.disabled) return;
+                var shouldMoveToNextMonth = false;
                 if (!checkIn || (checkIn && checkOut)) {
                   if (
                     dateCopy < today ||
@@ -691,15 +721,25 @@
                   }
                   checkIn = new Date(dateCopy);
                   checkOut = null;
+                  if (isLastDayOfMonth(checkIn)) {
+                    shouldMoveToNextMonth = true;
+                  }
                 } else {
                   if (dateCopy < checkIn) {
                     checkIn = new Date(dateCopy);
                     checkOut = null;
                   } else if (sameDay(dateCopy, checkIn)) {
+                    checkIn = null;
+                    checkOut = null;
+                  } else if (
+                    dateCopy < today ||
+                    occupiedNightSet.has(formatYMD(dateCopy))
+                  ) {
+                    checkIn = null;
                     checkOut = null;
                   } else if (!canSelectCheckOut(checkIn, dateCopy)) {
-                    /* 예약 구간을 가로지르면 해당 날짜를 새 체크인으로 재시작 */
-                    checkIn = new Date(dateCopy);
+                    /* 예약 구간을 가로지르면 기존 체크인 선택 취소 */
+                    checkIn = null;
                     checkOut = null;
                   } else {
                     checkOut = new Date(dateCopy);
@@ -732,7 +772,11 @@
                 }
                 updatePricingSummary();
                 updateConfirmLink();
-                renderCalendar();
+                if (shouldMoveToNextMonth) {
+                  shiftCalendarMonth(1, true);
+                } else {
+                  renderCalendar();
+                }
               });
             })(cellDate);
 
@@ -741,13 +785,11 @@
         }
 
         calPrev.addEventListener("click", function () {
-          viewDate.setMonth(viewDate.getMonth() - 1);
-          renderCalendar();
+          shiftCalendarMonth(-1, false);
         });
 
         calNext.addEventListener("click", function () {
-          viewDate.setMonth(viewDate.getMonth() + 1);
-          renderCalendar();
+          shiftCalendarMonth(1, false);
         });
 
         if (fadeEl) {
