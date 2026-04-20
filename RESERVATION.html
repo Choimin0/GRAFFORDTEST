@@ -77,7 +77,7 @@
             <button type="button" class="room-type-btn" data-room="G3">G3</button>
             <button type="button" class="room-type-btn" data-room="G4">G4</button>
           </div>
-          <a href="reserveinfo.html" class="btn reservation-lookup-btn"
+          <a href="reserveinfo.html" class="btn reserve-btn reservation-lookup-btn"
             >예약조회</a
           >
         </div>
@@ -376,7 +376,7 @@
             </div>
             <a
               href="confirm.html"
-              class="btn reserve-cta"
+              class="btn reserve-btn reserve-cta"
               id="reserve-confirm-link"
               >예약하기</a
             >
@@ -821,8 +821,10 @@
             calGrid.appendChild(empty);
           }
 
-          var today = new Date();
+          var now = new Date();
+          var today = new Date(now.getTime());
           today.setHours(0, 0, 0, 0);
+          var isTodayAfterCutoff = now.getHours() >= 19;
           var inCheckoutMode = !!(checkIn && !checkOut);
           if (calGrid) {
             calGrid.classList.toggle("is-selecting-checkout", inCheckoutMode);
@@ -836,7 +838,9 @@
             btn.textContent = String(d);
 
             var ymdStr = formatYMD(cellDate);
-            var isPast = cellDate < today;
+            var isPast =
+              cellDate < today ||
+              (isTodayAfterCutoff && sameDay(cellDate, today));
             var isOcc = occupiedNightSet.has(ymdStr);
             var disabled = false;
             if (isPast) {
@@ -883,6 +887,7 @@
                 if (!checkIn || (checkIn && checkOut)) {
                   if (
                     dateCopy < today ||
+                    (isTodayAfterCutoff && sameDay(dateCopy, today)) ||
                     occupiedNightSet.has(formatYMD(dateCopy))
                   ) {
                     return;
@@ -901,6 +906,7 @@
                     checkOut = null;
                   } else if (
                     dateCopy < today ||
+                    (isTodayAfterCutoff && sameDay(dateCopy, today)) ||
                     (occupiedNightSet.has(formatYMD(dateCopy)) &&
                       !canSelectCheckOut(checkIn, dateCopy))
                   ) {
