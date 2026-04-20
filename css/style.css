@@ -2219,6 +2219,17 @@ iframe.map {
   text-align: center;
   text-decoration: none;
   box-sizing: border-box;
+  transition:
+    opacity 0.28s ease,
+    transform 0.28s ease,
+    filter 0.28s ease;
+}
+
+.reserve-cta.is-disabled {
+  opacity: 0.45;
+  pointer-events: none;
+  transform: translateY(0);
+  filter: saturate(0.72);
 }
 
 @media (max-width: 900px) {

@@ -316,6 +316,12 @@
           G3: "객실 G3",
           G4: "객실 G4",
         };
+        var ROOM_IMAGE_PREFIX = {
+          G1: "A",
+          G2: "B",
+          G3: "C",
+          G4: "D",
+        };
 
         var params = new URLSearchParams(window.location.search);
         var roomRaw = (params.get("room") || "G1").toUpperCase();
@@ -367,7 +373,8 @@
         );
 
         var imgEl = document.getElementById("booking-room-img");
-        imgEl.src = "images/" + roomRaw + "00.jpg";
+        var roomImagePrefix = ROOM_IMAGE_PREFIX[roomRaw] || "A";
+        imgEl.src = "images/" + roomImagePrefix + "00.jpg";
         imgEl.alt = ROOM_LABEL[roomRaw] + " 대표 이미지";
 
         document.getElementById("booking-room-name").textContent =

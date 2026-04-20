@@ -544,6 +544,7 @@
         }
 
         function updatePricingSummary() {
+          updateConfirmCtaState();
           if (!P || !pricePlaceholder || !priceTotalEl) {
             return;
           }
@@ -566,6 +567,32 @@
             "TOTAL " + q.grandTotal.toLocaleString("ko-KR") + "\uc6d0";
         }
 
+        function hasValidStaySelection() {
+          if (!checkIn || !checkOut) {
+            return false;
+          }
+          var ci = formatYMD(checkIn);
+          var co = formatYMD(checkOut);
+          if (P && typeof P.countNights === "function") {
+            return P.countNights(ci, co) > 0;
+          }
+          return checkOut > checkIn;
+        }
+
+        function updateConfirmCtaState() {
+          if (!confirmLink) {
+            return;
+          }
+          var isReady = hasValidStaySelection();
+          confirmLink.classList.toggle("is-disabled", !isReady);
+          confirmLink.setAttribute("aria-disabled", isReady ? "false" : "true");
+          if (isReady) {
+            confirmLink.removeAttribute("tabindex");
+          } else {
+            confirmLink.setAttribute("tabindex", "-1");
+          }
+        }
+
         function updateConfirmLink() {
           var params = new URLSearchParams();
           params.set("room", currentRoom);
@@ -573,6 +600,14 @@
           if (checkOut) params.set("checkOut", formatYMD(checkOut));
           params.set("extraGuests", String(getExtraGuests()));
           confirmLink.href = "confirm.html?" + params.toString();
+        }
+
+        if (confirmLink) {
+          confirmLink.addEventListener("click", function (e) {
+            if (confirmLink.classList.contains("is-disabled")) {
+              e.preventDefault();
+            }
+          });
         }
 
         function syncRoomCopy() {
