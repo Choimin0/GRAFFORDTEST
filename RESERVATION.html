@@ -653,14 +653,9 @@
             var ymdStr = formatYMD(cellDate);
             var isPast = cellDate < today;
             var isOcc = occupiedNightSet.has(ymdStr);
-            var pickingCheckIn = !checkIn || (checkIn && checkOut);
-            var inCheckoutMode = checkIn && !checkOut;
-
             var disabled = false;
             if (isPast || isOcc) {
               disabled = true;
-            } else if (inCheckoutMode) {
-              disabled = !canSelectCheckOut(checkIn, cellDate);
             }
 
             btn.disabled = disabled;
@@ -697,13 +692,14 @@
                   checkIn = new Date(dateCopy);
                   checkOut = null;
                 } else {
-                  if (!canSelectCheckOut(checkIn, dateCopy)) {
-                    return;
-                  }
                   if (dateCopy < checkIn) {
-                    checkOut = new Date(checkIn);
                     checkIn = new Date(dateCopy);
+                    checkOut = null;
                   } else if (sameDay(dateCopy, checkIn)) {
+                    checkOut = null;
+                  } else if (!canSelectCheckOut(checkIn, dateCopy)) {
+                    /* 예약 구간을 가로지르면 해당 날짜를 새 체크인으로 재시작 */
+                    checkIn = new Date(dateCopy);
                     checkOut = null;
                   } else {
                     checkOut = new Date(dateCopy);
@@ -714,23 +710,25 @@
                   ? formatDisplay(checkOut)
                   : "\u2014";
 
-                if (checkIn && checkOut) {
-                  availabilityEl.textContent =
-                    "Available for Room " +
-                    currentRoom +
-                    " from " +
-                    formatDisplay(checkIn) +
-                    " to " +
-                    formatDisplay(checkOut) +
-                    ".";
-                  availabilityEl.classList.add("is-ok");
-                } else if (checkIn) {
-                  availabilityEl.textContent = "Select check-out date.";
-                  availabilityEl.classList.remove("is-ok");
-                } else {
-                  availabilityEl.textContent =
-                    "Select check-in and check-out to see availability for this room.";
-                  availabilityEl.classList.remove("is-ok");
+                if (availabilityEl) {
+                  if (checkIn && checkOut) {
+                    availabilityEl.textContent =
+                      "Available for Room " +
+                      currentRoom +
+                      " from " +
+                      formatDisplay(checkIn) +
+                      " to " +
+                      formatDisplay(checkOut) +
+                      ".";
+                    availabilityEl.classList.add("is-ok");
+                  } else if (checkIn) {
+                    availabilityEl.textContent = "Select check-out date.";
+                    availabilityEl.classList.remove("is-ok");
+                  } else {
+                    availabilityEl.textContent =
+                      "Select check-in and check-out to see availability for this room.";
+                    availabilityEl.classList.remove("is-ok");
+                  }
                 }
                 updatePricingSummary();
                 updateConfirmLink();
