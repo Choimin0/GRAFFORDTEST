@@ -79,7 +79,11 @@
       </button>
     </section>
 
-    <section class="room-bridge-copy" aria-label="객실 소개 문구">
+    <section
+      id="rooms-bridge-copy"
+      class="room-bridge-copy"
+      aria-label="객실 소개 문구"
+    >
       <p>당신이 온전히 기댈 수 있는 대지, 그라운드를 제공합니다</p>
     </section>
 
@@ -485,7 +489,7 @@
       document.addEventListener("DOMContentLoaded", function () {
         const fadeTargets = document.querySelectorAll(".scroll-fade");
         const scrollButton = document.getElementById("scroll-down-btn");
-        const nextSection = document.getElementById("content");
+        const nextSection = document.getElementById("rooms-bridge-copy");
 
         const observer = new IntersectionObserver(
           function (entries) {
