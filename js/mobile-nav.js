@@ -11,6 +11,15 @@ document.addEventListener("DOMContentLoaded", function () {
     return;
   }
 
+  var reservationLink = drawer.querySelector('a[href="RESERVATION.html"]');
+  if (reservationLink && !drawer.querySelector(".mobile-nav-sub-link")) {
+    var reserveInfoLink = document.createElement("a");
+    reserveInfoLink.href = "reserveinfo.html";
+    reserveInfoLink.className = "mobile-nav-sub-link";
+    reserveInfoLink.textContent = "> 예약 조회";
+    reservationLink.insertAdjacentElement("afterend", reserveInfoLink);
+  }
+
   function setOpen(isOpen) {
     menuBtn.setAttribute("aria-expanded", String(isOpen));
     drawer.setAttribute("aria-hidden", String(!isOpen));
@@ -28,10 +37,11 @@ document.addEventListener("DOMContentLoaded", function () {
     setOpen(false);
   });
 
-  drawer.querySelectorAll("a").forEach(function (link) {
-    link.addEventListener("click", function () {
+  drawer.addEventListener("click", function (event) {
+    var target = event.target;
+    if (target && target.closest("a")) {
       setOpen(false);
-    });
+    }
   });
 
   document.addEventListener("click", function (event) {

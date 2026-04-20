@@ -107,8 +107,8 @@
               >
                 &#10095;
               </button>
+              <div class="gallery-thumbs" id="gallery-thumbs"></div>
             </div>
-            <div class="gallery-thumbs" id="gallery-thumbs"></div>
             <div class="room-copy-blocks">
               <p class="room-detail-intro room-copy is-visible" data-room="A">
                 <strong>A동</strong><br />
@@ -254,6 +254,7 @@
 
         var currentRoom = "A";
         var galleryIndex = 0;
+        var galleryFadeMs = 650;
 
         var mainImg = document.getElementById("gallery-main-img");
         var thumbsEl = document.getElementById("gallery-thumbs");
@@ -443,25 +444,42 @@
             return;
           }
           galleryIndex = Math.min(galleryIndex, imgs.length - 1);
-          mainImg.src = imgs[galleryIndex];
-          mainImg.alt = label + " photo " + (galleryIndex + 1);
+          thumbsEl.classList.add("is-switching");
           thumbsEl.innerHTML = "";
-          imgs.forEach(function (src, i) {
+          imgs.forEach(function (_, i) {
             var b = document.createElement("button");
             b.type = "button";
             b.className =
               "gallery-thumb" + (i === galleryIndex ? " is-active" : "");
             b.setAttribute("aria-label", "Photo " + (i + 1));
-            var im = document.createElement("img");
-            im.src = src;
-            im.alt = "";
-            b.appendChild(im);
             b.addEventListener("click", function () {
+              if (i === galleryIndex) {
+                return;
+              }
               galleryIndex = i;
               renderGallery();
             });
             thumbsEl.appendChild(b);
           });
+          mainImg.classList.add("is-switching");
+          window.setTimeout(function () {
+            mainImg.src = imgs[galleryIndex];
+            mainImg.alt = label + " photo " + (galleryIndex + 1);
+            var onLoad = function () {
+              mainImg.removeEventListener("load", onLoad);
+              window.requestAnimationFrame(function () {
+                mainImg.classList.remove("is-switching");
+                thumbsEl.classList.remove("is-switching");
+              });
+            };
+            mainImg.addEventListener("load", onLoad);
+            if (mainImg.complete) {
+              window.requestAnimationFrame(function () {
+                mainImg.classList.remove("is-switching");
+                thumbsEl.classList.remove("is-switching");
+              });
+            }
+          }, galleryFadeMs);
           updatePricingSummary();
           updateConfirmLink();
         }

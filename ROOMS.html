@@ -530,15 +530,11 @@
 
           function renderThumbs() {
             thumbsEl.innerHTML = "";
-            imgs.forEach(function (src, i) {
+            imgs.forEach(function (_, i) {
               var b = document.createElement("button");
               b.type = "button";
               b.className = "gallery-thumb" + (i === index ? " is-active" : "");
               b.setAttribute("aria-label", label + " 사진 " + (i + 1));
-              var im = document.createElement("img");
-              im.src = src;
-              im.alt = "";
-              b.appendChild(im);
               b.addEventListener("click", function () {
                 if (i === index) {
                   return;
@@ -556,6 +552,7 @@
               return;
             }
             index = newIndex;
+            thumbsEl.classList.add("is-switching");
             renderThumbs();
             imgEl.classList.add("is-switching");
             window.setTimeout(function () {
@@ -565,12 +562,14 @@
                 imgEl.removeEventListener("load", onLoad);
                 window.requestAnimationFrame(function () {
                   imgEl.classList.remove("is-switching");
+                  thumbsEl.classList.remove("is-switching");
                 });
               };
               imgEl.addEventListener("load", onLoad);
               if (imgEl.complete) {
                 window.requestAnimationFrame(function () {
                   imgEl.classList.remove("is-switching");
+                  thumbsEl.classList.remove("is-switching");
                 });
               }
             }, fadeMs);
