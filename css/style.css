@@ -56,30 +56,30 @@
     );
     /* PC: feature 이미지·갤러리 열 높이 1.3배 (모바일은 :root 기본값 유지) */
     --feature-image-area-max: min(
-      39svh,
-      calc((100svh - 4 * var(--site-nav-height) - 5rem) * 1.3),
-      364px
+      31.2svh,
+      calc((100svh - 4 * var(--site-nav-height) - 5rem) * 1.04),
+      291px
     );
     --feature-gallery-main-max: min(
-      33.8svh,
-      calc((100svh - 4 * var(--site-nav-height) - 6rem) * 1.3),
-      312px
+      27.04svh,
+      calc((100svh - 4 * var(--site-nav-height) - 6rem) * 1.04),
+      250px
     );
     --feature-gallery-img-min: min(
-      28.6svh,
-      calc((100svh - 4 * var(--site-nav-height) - 7rem) * 1.3),
-      260px
+      22.88svh,
+      calc((100svh - 4 * var(--site-nav-height) - 7rem) * 1.04),
+      208px
     );
-    --feature-ref-media-min-h: min(39svh, var(--feature-image-area-max), 364px);
+    --feature-ref-media-min-h: min(31.2svh, var(--feature-image-area-max), 291px);
     --feature-ref-image-min-h: min(
-      33.8svh,
+      27.04svh,
       var(--feature-gallery-img-min),
-      312px
+      250px
     );
     --feature-viewport-max-block: min(
-      92svh,
-      calc((100svh - 2 * var(--site-nav-height) - 6rem) * 1.3),
-      1170px
+      73.6svh,
+      calc((100svh - 2 * var(--site-nav-height) - 6rem) * 1.04),
+      936px
     );
   }
 }
