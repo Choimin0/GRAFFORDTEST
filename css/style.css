@@ -991,6 +991,19 @@ main {
   color: var(--grafford-beige);
 }
 
+.rooms-features {
+  width: 100vw;
+  max-width: 100vw;
+  margin-left: calc(50% - 50vw);
+  margin-right: calc(50% - 50vw);
+}
+
+.rooms-features .room-feature {
+  width: 100%;
+  margin-left: 0;
+  margin-right: 0;
+}
+
 .rooms-features .room-feature .reserve-btn {
   margin-top: auto;
   align-self: flex-start;
