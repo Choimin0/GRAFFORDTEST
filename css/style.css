@@ -2984,7 +2984,7 @@ iframe.map {
 .reserve-complete-room-name {
   margin: 0 0 0.65rem;
   color: var(--grafford-mud2);
-  font-size: 1rem;
+  font-size: 1.05rem;
   font-weight: 600;
 }
 
@@ -3017,6 +3017,30 @@ iframe.map {
   display: flex;
   justify-content: flex-start;
   gap: 0.85rem;
+}
+
+.reserve-complete-action-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 6.4rem;
+  padding: 0.45rem 0.95rem;
+  border: 1px solid rgba(58, 53, 49, 0.22);
+  border-radius: 6px;
+  text-decoration: none;
+  color: var(--grafford-dark-brown);
+  background: transparent;
+  transition:
+    background-color 0.22s ease,
+    color 0.22s ease,
+    border-color 0.22s ease;
+}
+
+.reserve-complete-action-link:hover,
+.reserve-complete-action-link:focus-visible {
+  background-color: var(--grafford-beige2);
+  color: #fff;
+  border-color: var(--grafford-beige2);
 }
 
 .reserve-complete-order-box {

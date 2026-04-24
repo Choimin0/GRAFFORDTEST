@@ -46,7 +46,6 @@
       <h1 class="confirm-title">
         대지가 내어주는 그라운드가 당신을 기다립니다
       </h1>
-      <p><br /></p>
       <div class="confirm-layout-grid">
         <div class="confirm-layout-col">
           <section
@@ -137,8 +136,10 @@
               <dd id="complete-request">—</dd>
             </dl>
             <div class="confirm-actions reserve-complete-actions">
-              <a href="reserveinfo.html" id="complete-link-lookup">예약 조회</a>
-              <a href="RESERVATION.html">예약 홈</a>
+              <a href="index.html" class="reserve-complete-action-link">메인으로</a>
+              <a href="reserve-delete.html" class="reserve-complete-action-link"
+                >예약취소</a
+              >
             </div>
           </section>
         </div>
@@ -226,12 +227,6 @@
           });
         }
 
-        var lookupLink = document.getElementById("complete-link-lookup");
-        if (lookupLink) {
-          lookupLink.href = orderNo
-            ? "reserveinfo.html?orderNo=" + encodeURIComponent(orderNo)
-            : "reserveinfo.html";
-        }
       });
     </script>
     <script defer src="js/grafford-page-fade.js"></script>
