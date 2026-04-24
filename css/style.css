@@ -2419,7 +2419,7 @@ iframe.map {
   display: grid;
   grid-template-columns: 1fr;
   gap: 1.25rem;
-  margin-top: 2rem;
+  margin-top: 4rem;
 }
 
 .confirm-layout-col {
@@ -3026,7 +3026,7 @@ iframe.map {
 .reserve-complete-actions {
   margin-top: 1rem;
   display: flex;
-  justify-content: flex-start;
+  justify-content: flex-end;
   gap: 0.85rem;
 }
 
@@ -3036,11 +3036,10 @@ iframe.map {
   justify-content: center;
   min-width: 6.4rem;
   padding: 0.45rem 0.95rem;
-  border: 1px solid rgba(58, 53, 49, 0.22);
-  border-radius: 6px;
+  border: 1px solid transparent;
   text-decoration: none;
-  color: var(--grafford-dark-brown);
-  background: transparent;
+  color: #fff;
+  background-color: var(--grafford-beige2);
   transition:
     background-color 0.22s ease,
     color 0.22s ease,
@@ -3049,9 +3048,13 @@ iframe.map {
 
 .reserve-complete-action-link:hover,
 .reserve-complete-action-link:focus-visible {
-  background-color: var(--grafford-beige2);
+  background-color: var(--grafford-mud);
   color: #fff;
-  border-color: var(--grafford-beige2);
+  border-color: var(--grafford-mud);
+}
+
+.reserve-complete-pin {
+  font-weight: 800;
 }
 
 .reserve-complete-order-box {

@@ -98,11 +98,7 @@
             <h2 class="confirm-section-title" id="complete-notice-2">
               비대면 체크인 안내사항
             </h2>
-            <p class="confirm-guide-content">
-              체크인 시 도어락 비밀번호 및 안내사항이 카카오톡으로 전달됩니다.
-              개인정보 확인을 위해 예약자 성함/연락처가 일치해야 하며, 도착 전
-              안내 문자를 반드시 확인해 주세요.
-            </p>
+            <p class="confirm-guide-content" id="complete-checkin-guide"></p>
           </section>
 
           <section class="confirm-section" aria-labelledby="complete-notice-3">
@@ -183,6 +179,16 @@
           contact || "—";
         document.getElementById("complete-request").textContent =
           guestRequest || "—";
+        var checkinGuideEl = document.getElementById("complete-checkin-guide");
+        if (checkinGuideEl) {
+          var contactDigits = String(contact || "").replace(/\D/g, "");
+          var contactLast4 =
+            contactDigits.length >= 4 ? contactDigits.slice(-4) : "----";
+          checkinGuideEl.innerHTML =
+            '체크인 당일 예약 시 기입된 연락처 뒷번호 4자리(<strong class="reserve-complete-pin">' +
+            contactLast4 +
+            "</strong>)로 설정될 예정입니다.<br />예약시 입력해주신 연락처를 통해 입실 당일 관련 안내 사항을 카카오톡 알림톡으로 발송해드리겠습니다.";
+        }
 
         var parsedGuestCount = parseInt(guestCount || "", 10);
         if (!parsedGuestCount || parsedGuestCount < 1) {
