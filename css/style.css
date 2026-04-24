@@ -2853,6 +2853,10 @@ iframe.map {
   color: var(--grafford-dark-brown);
 }
 
+.reserveinfo-actions {
+  margin-top: 1rem;
+}
+
 /* 무통장 입금 예약 완료 (reserve-complete.html) */
 .reserve-complete-order-box {
   text-align: center;
