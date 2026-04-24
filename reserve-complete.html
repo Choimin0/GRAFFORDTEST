@@ -204,26 +204,50 @@
         var prevBtn = document.getElementById("complete-gallery-prev");
         var nextBtn = document.getElementById("complete-gallery-next");
         var galleryIndex = 0;
-        function renderGallery() {
+        var galleryFadeMs = 280;
+        var galleryTimer = null;
+
+        function renderGallery(withFade) {
           if (!mainImg || !images.length) return;
           var src = images[galleryIndex];
-          mainImg.src = src;
-          mainImg.alt =
-            (ROOM_LABEL[room] || room) + " 사진 " + (galleryIndex + 1);
+          var altText = (ROOM_LABEL[room] || room) + " 사진 " + (galleryIndex + 1);
+          if (!withFade) {
+            mainImg.src = src;
+            mainImg.alt = altText;
+            return;
+          }
+
+          mainImg.classList.add("is-switching");
+          if (galleryTimer) {
+            window.clearTimeout(galleryTimer);
+            galleryTimer = null;
+          }
+          galleryTimer = window.setTimeout(function () {
+            mainImg.src = src;
+            mainImg.alt = altText;
+            var done = function () {
+              mainImg.removeEventListener("load", done);
+              mainImg.classList.remove("is-switching");
+            };
+            mainImg.addEventListener("load", done);
+            if (mainImg.complete) {
+              mainImg.classList.remove("is-switching");
+            }
+          }, galleryFadeMs);
         }
         if (mainImg) {
-          renderGallery();
+          renderGallery(false);
         }
         if (prevBtn) {
           prevBtn.addEventListener("click", function () {
             galleryIndex = (galleryIndex - 1 + images.length) % images.length;
-            renderGallery();
+            renderGallery(true);
           });
         }
         if (nextBtn) {
           nextBtn.addEventListener("click", function () {
             galleryIndex = (galleryIndex + 1) % images.length;
-            renderGallery();
+            renderGallery(true);
           });
         }
 

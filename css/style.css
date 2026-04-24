@@ -2993,6 +2993,17 @@ iframe.map {
   min-width: 0;
 }
 
+.reserve-complete-gallery .gallery-nav {
+  background: rgba(0, 0, 0, 0.48);
+  color: #fff;
+  z-index: 4;
+}
+
+.reserve-complete-gallery .gallery-nav:hover,
+.reserve-complete-gallery .gallery-nav:focus-visible {
+  background: rgba(0, 0, 0, 0.7);
+}
+
 .reserve-complete-dl {
   margin: 0;
   display: grid;
