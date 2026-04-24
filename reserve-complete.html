@@ -43,10 +43,7 @@
     </nav>
 
     <main class="content-section confirm-page reserve-complete-page">
-      <h1 class="confirm-title">예약이 완료되었습니다</h1>
-      <p class="confirm-summary">
-        예약 정보를 확인해 주세요. 입실 안내는 체크인 전 별도로 안내됩니다.
-      </p>
+      <h1 class="confirm-title">대지가 내어주는 그라운드가 당신을 기다립니다</h1>
 
       <div class="confirm-layout-grid">
         <div class="confirm-layout-col">
@@ -57,6 +54,14 @@
             <p class="reserve-complete-room-name" id="complete-room-name">—</p>
             <div class="reserve-complete-gallery">
               <div class="gallery-main-wrap reserve-complete-gallery-main-wrap">
+                <button
+                  type="button"
+                  class="gallery-nav gallery-prev"
+                  id="complete-gallery-prev"
+                  aria-label="이전 사진"
+                >
+                  &#10094;
+                </button>
                 <img
                   class="gallery-main-img"
                   id="complete-gallery-main"
@@ -65,11 +70,15 @@
                   loading="lazy"
                   decoding="async"
                 />
+                <button
+                  type="button"
+                  class="gallery-nav gallery-next"
+                  id="complete-gallery-next"
+                  aria-label="다음 사진"
+                >
+                  &#10095;
+                </button>
               </div>
-              <div
-                class="reserve-complete-gallery-thumbs"
-                id="complete-gallery-thumbs"
-              ></div>
             </div>
           </section>
 
@@ -189,37 +198,28 @@
           "images/" + prefix + "02.jpg",
         ];
         var mainImg = document.getElementById("complete-gallery-main");
-        var thumbsEl = document.getElementById("complete-gallery-thumbs");
-        if (mainImg) {
-          mainImg.src = images[0];
-          mainImg.alt = (ROOM_LABEL[room] || room) + " 대표 이미지";
+        var prevBtn = document.getElementById("complete-gallery-prev");
+        var nextBtn = document.getElementById("complete-gallery-next");
+        var galleryIndex = 0;
+        function renderGallery() {
+          if (!mainImg || !images.length) return;
+          var src = images[galleryIndex];
+          mainImg.src = src;
+          mainImg.alt = (ROOM_LABEL[room] || room) + " 사진 " + (galleryIndex + 1);
         }
-        if (thumbsEl) {
-          thumbsEl.innerHTML = "";
-          images.forEach(function (src, idx) {
-            var btn = document.createElement("button");
-            btn.type = "button";
-            btn.className =
-              "reserve-complete-gallery-thumb" + (idx === 0 ? " is-active" : "");
-            btn.setAttribute("aria-label", "객실 사진 " + (idx + 1));
-            var img = document.createElement("img");
-            img.src = src;
-            img.alt = "";
-            img.decoding = "async";
-            img.loading = "lazy";
-            btn.appendChild(img);
-            btn.addEventListener("click", function () {
-              if (!mainImg) return;
-              mainImg.src = src;
-              mainImg.alt = (ROOM_LABEL[room] || room) + " 사진 " + (idx + 1);
-              thumbsEl
-                .querySelectorAll(".reserve-complete-gallery-thumb")
-                .forEach(function (t) {
-                  t.classList.remove("is-active");
-                });
-              btn.classList.add("is-active");
-            });
-            thumbsEl.appendChild(btn);
+        if (mainImg) {
+          renderGallery();
+        }
+        if (prevBtn) {
+          prevBtn.addEventListener("click", function () {
+            galleryIndex = (galleryIndex - 1 + images.length) % images.length;
+            renderGallery();
+          });
+        }
+        if (nextBtn) {
+          nextBtn.addEventListener("click", function () {
+            galleryIndex = (galleryIndex + 1) % images.length;
+            renderGallery();
           });
         }
 
