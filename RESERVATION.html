@@ -184,6 +184,14 @@
                     </div>
                   </div>
                 </div>
+                <br />
+                <div class="room-plan-image-wrap">
+                  <img
+                    src="images/A-groundplan.png"
+                    alt="G1 객실 평면도"
+                    class="room-plan-image"
+                  />
+                </div>
               </div>
               <div class="room-detail-intro room-copy" data-room="G2" hidden>
                 <strong>G2</strong>
@@ -244,7 +252,15 @@
                     </div>
                   </div>
                 </div>
+                <div class="room-plan-image-wrap">
+                  <img
+                    src="images/B-groundplan.png"
+                    alt="G2 객실 평면도"
+                    class="room-plan-image"
+                  />
+                </div>
               </div>
+              <br />
               <div class="room-detail-intro room-copy" data-room="G3" hidden>
                 <strong>G3</strong>
                 <p class="room-intro-desc">
@@ -306,7 +322,15 @@
                     </div>
                   </div>
                 </div>
+                <div class="room-plan-image-wrap">
+                  <img
+                    src="images/C-groundplan.png"
+                    alt="G3 객실 평면도"
+                    class="room-plan-image"
+                  />
+                </div>
               </div>
+              <br />
               <div class="room-detail-intro room-copy" data-room="G4" hidden>
                 <strong>G4</strong>
                 <p class="room-intro-desc">
@@ -368,6 +392,13 @@
                     </div>
                   </div>
                 </div>
+                <div class="room-plan-image-wrap">
+                  <img
+                    src="images/D-groundplan.png"
+                    alt="G4 객실 평면도"
+                    class="room-plan-image"
+                  />
+                </div>
               </div>
             </div>
           </div>
@@ -400,20 +431,34 @@
               </div>
               <div class="cal-grid" id="cal-grid"></div>
             </div>
-            <p class="cal-selection-summary">
-              Check-in <strong id="cal-checkin">&mdash;</strong> &middot;
-              Check-out <strong id="cal-checkout">&mdash;</strong>
-            </p>
+
             <div class="reservation-extra-block">
               <div class="reservation-extra-row">
-                <label class="reservation-extra-label" for="extra-guests-select"
-                  >인원 추가</label
-                >
-                <select
-                  id="extra-guests-select"
-                  class="reservation-extra-select"
+                <span class="reservation-extra-label">인원 추가</span>
+                <div
+                  class="reservation-extra-stepper"
                   aria-describedby="extra-guests-hint"
-                ></select>
+                >
+                  <button
+                    type="button"
+                    class="reservation-extra-btn"
+                    id="extra-guests-minus"
+                    aria-label="추가 인원 감소"
+                  >
+                    ＜
+                  </button>
+                  <span class="reservation-extra-count" id="extra-guests-count"
+                    >0</span
+                  >
+                  <button
+                    type="button"
+                    class="reservation-extra-btn"
+                    id="extra-guests-plus"
+                    aria-label="추가 인원 증가"
+                  >
+                    ＞
+                  </button>
+                </div>
               </div>
               <p class="reservation-extra-hint" id="extra-guests-hint"></p>
             </div>
@@ -488,7 +533,9 @@
         var extraGuestsBlock = document.querySelector(
           ".reservation-extra-block",
         );
-        var extraGuestsSelect = document.getElementById("extra-guests-select");
+        var extraGuestsMinusBtn = document.getElementById("extra-guests-minus");
+        var extraGuestsPlusBtn = document.getElementById("extra-guests-plus");
+        var extraGuestsCountEl = document.getElementById("extra-guests-count");
         var extraGuestsHint = document.getElementById("extra-guests-hint");
         var weekdayDisplay = document.getElementById(
           "reservation-weekday-display",
@@ -504,6 +551,7 @@
         var checkOut = null;
         var occupiedNightSet = new Set();
         var monthFadeTimer = null;
+        var currentExtraGuests = 0;
 
         function pad(n) {
           return n < 10 ? "0" + n : String(n);
@@ -536,32 +584,62 @@
         }
 
         function getExtraGuests() {
-          if (!extraGuestsSelect || extraGuestsSelect.disabled) {
+          return currentExtraGuests;
+        }
+
+        function getMaxExtraGuests() {
+          if (!P || !P.MAX_EXTRA_GUESTS) {
             return 0;
           }
-          return parseInt(extraGuestsSelect.value, 10) || 0;
+          return P.MAX_EXTRA_GUESTS[currentRoom] || 0;
+        }
+
+        function renderExtraGuestsStepper() {
+          var max = getMaxExtraGuests();
+          var isUnavailable = max === 0;
+
+          if (extraGuestsCountEl) {
+            extraGuestsCountEl.textContent = String(currentExtraGuests);
+          }
+
+          if (extraGuestsMinusBtn) {
+            var cannotDecrease = isUnavailable || currentExtraGuests <= 0;
+            extraGuestsMinusBtn.disabled = cannotDecrease;
+            extraGuestsMinusBtn.setAttribute(
+              "aria-disabled",
+              cannotDecrease ? "true" : "false",
+            );
+          }
+
+          if (extraGuestsPlusBtn) {
+            var cannotIncrease = isUnavailable || currentExtraGuests >= max;
+            extraGuestsPlusBtn.disabled = cannotIncrease;
+            extraGuestsPlusBtn.setAttribute(
+              "aria-disabled",
+              cannotIncrease ? "true" : "false",
+            );
+          }
+        }
+
+        function setExtraGuests(nextValue) {
+          var max = getMaxExtraGuests();
+          var next = parseInt(nextValue, 10) || 0;
+          if (next < 0) {
+            next = 0;
+          }
+          if (next > max) {
+            next = max;
+          }
+          currentExtraGuests = next;
+          renderExtraGuestsStepper();
         }
 
         function rebuildExtraSelect() {
-          if (!P || !extraGuestsSelect) {
+          if (!P) {
             return;
           }
-          var max = P.MAX_EXTRA_GUESTS[currentRoom];
-          var cur = getExtraGuests();
-          extraGuestsSelect.innerHTML = "";
-          for (var i = 0; i <= max; i++) {
-            var opt = document.createElement("option");
-            opt.value = String(i);
-            opt.textContent =
-              i === 0
-                ? "\ucd94\uac00 \uc5c6\uc74c (0\uba85)"
-                : "\ucd94\uac00 " + i + "\uba85";
-            extraGuestsSelect.appendChild(opt);
-          }
-          if (cur > max) {
-            cur = max;
-          }
-          extraGuestsSelect.value = String(cur);
+          var max = getMaxExtraGuests();
+          setExtraGuests(Math.min(getExtraGuests(), max));
           if (max === 0) {
             if (extraGuestsBlock) {
               extraGuestsBlock.hidden = true;
@@ -570,8 +648,7 @@
               extraGuestsHint.textContent =
                 "G1\xb7G2\ub294 \uae30\uc900 \uc778\uc6d0 \uc678 \ucd94\uac00\uac00 \ubd88\uac00\ud569\ub2c8\ub2e4.";
             }
-            extraGuestsSelect.value = "0";
-            extraGuestsSelect.disabled = true;
+            setExtraGuests(0);
           } else {
             if (extraGuestsBlock) {
               extraGuestsBlock.hidden = false;
@@ -579,18 +656,14 @@
             if (extraGuestsHint) {
               if (currentRoom === "G3") {
                 extraGuestsHint.textContent =
-                  "G3\ub294 \ucd5c\ub300 2\uc778 \ucd94\uac00 \uac00\ub2a5\ud569\ub2c8\ub2e4. (\ubc15\ub2f9 " +
-                  formatKRW(P.EXTRA_PER_PERSON_PER_NIGHT) +
-                  "/\uc778)";
+                  "기준 인원 외 최대 2인 추가 가능합니다.(인원 추가 시 박당 30,000원/인)";
               } else {
                 extraGuestsHint.textContent =
-                  "G4\ub294 \ucd5c\ub300 4\uc778 \ucd94\uac00 \uac00\ub2a5\ud569\ub2c8\ub2e4. (\ubc15\ub2f9 " +
-                  formatKRW(P.EXTRA_PER_PERSON_PER_NIGHT) +
-                  "/\uc778)";
+                  "기준 인원 외 최대 4인 추가 가능합니다. (인원 추가 시 박당 30,000원/인)";
               }
             }
-            extraGuestsSelect.disabled = false;
           }
+          renderExtraGuestsStepper();
         }
 
         function updateWeekdayRateDisplay() {
@@ -616,9 +689,7 @@
             return;
           }
           var eg = P.clampExtra(currentRoom, getExtraGuests());
-          if (extraGuestsSelect) {
-            extraGuestsSelect.value = String(eg);
-          }
+          setExtraGuests(eg);
           var q = P.computeStay(currentRoom, ci, co, eg);
           pricePlaceholder.hidden = true;
           priceTotalEl.hidden = false;
@@ -774,8 +845,17 @@
           });
         });
 
-        if (extraGuestsSelect) {
-          extraGuestsSelect.addEventListener("change", function () {
+        if (extraGuestsMinusBtn) {
+          extraGuestsMinusBtn.addEventListener("click", function () {
+            setExtraGuests(getExtraGuests() - 1);
+            updatePricingSummary();
+            updateConfirmLink();
+          });
+        }
+
+        if (extraGuestsPlusBtn) {
+          extraGuestsPlusBtn.addEventListener("click", function () {
+            setExtraGuests(getExtraGuests() + 1);
             updatePricingSummary();
             updateConfirmLink();
           });

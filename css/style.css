@@ -39,12 +39,11 @@
     900px
   );
   --grafford-beige: #e8e1d5;
-  --grafford-mud: #6f675c;
-  --grafford-dark-brown: #3a3531;
-  --grafford-earthy-green: #8b7e6a;
-  --chocolate-brown: #d3c7b1;
-  --navigate: #cfb9a1;
+  --grafford-beige2: #d3c7b1;
+  --grafford-mud: #8b7e6a;
+  --grafford-mud2: #6f675c;
   --newmaincolor: #5a5247;
+  --grafford-dark-brown: #3a3531;
 }
 
 @media (min-width: 768px) {
@@ -153,7 +152,7 @@ html {
 
 /* 사이트 소개 바 */
 .site-header {
-  background: var(--chocolate-brown);
+  background: var(--grafford-beige2);
   color: #fff;
   text-align: center;
   padding: 2rem 1rem;
@@ -464,7 +463,7 @@ main {
   justify-content: center;
   min-width: 0;
   min-height: 0;
-  background: var(--chocolate-brown);
+  background: var(--grafford-beige2);
 }
 
 @media (min-width: 768px) {
@@ -675,7 +674,7 @@ main {
   justify-content: center;
   min-width: 0;
   min-height: 0;
-  background: var(--chocolate-brown);
+  background: var(--grafford-beige2);
 }
 
 @media (min-width: 768px) {
@@ -910,7 +909,7 @@ main {
 
 /* 카드 배경·텍스트 색: 레이아웃·간격·타이포는 HTML의 Tailwind 유틸로 제어 */
 .feature {
-  background: var(--chocolate-brown);
+  background: var(--grafford-beige2);
   color: var(--grafford-beige);
 }
 
@@ -991,7 +990,7 @@ main {
   justify-content: flex-start;
   align-items: flex-start;
   text-align: left;
-  color: var(--grafford-earthy-green);
+  color: var(--grafford-mud);
 }
 
 .rooms-features {
@@ -1119,11 +1118,22 @@ main {
   font-size: 0.82em;
 }
 
+.room-plan-image-wrap {
+  margin-top: 1rem;
+}
+
+.room-plan-image {
+  display: block;
+  width: 100%;
+  max-width: 560px;
+  height: auto;
+}
+
 .room-intro-rate {
   margin: 0.9rem 0 0;
   font-size: 0.95rem;
   font-weight: 500;
-  color: var(--chocolate-brown);
+  color: var(--grafford-beige2);
   letter-spacing: 0.02em;
 }
 
@@ -1350,7 +1360,7 @@ section ul li {
 }
 
 .btn {
-  background: var(--chocolate-brown);
+  background: var(--grafford-beige2);
   width: 90%;
   color: #fff;
   border: none;
@@ -1381,8 +1391,8 @@ section ul li {
 .btn.reserve-btn:hover,
 .btn.reserve-btn:focus-visible {
   color: #fff;
-  background-color: var(--grafford-earthy-green);
-  border-color: var(--grafford-earthy-green);
+  background-color: var(--grafford-mud);
+  border-color: var(--grafford-mud);
   animation: reserve-btn-shimmer 0.3s ease forwards;
 }
 
@@ -1392,16 +1402,16 @@ section ul li {
 
 .btn.reserve-btn:active {
   color: #fff;
-  background-color: var(--grafford-earthy-green);
-  border-color: var(--grafford-earthy-green);
+  background-color: var(--grafford-mud);
+  border-color: var(--grafford-mud);
   animation: reserve-btn-shimmer 0.6s ease forwards;
 }
 
-/* ROOMS 예약하기 버튼은 유지, 나머지 통일 버튼은 기본색 chocolate-brown */
+/* ROOMS 예약하기 버튼은 유지, 나머지 통일 버튼은 기본색 grafford-beige2 */
 .reservation-lookup-btn.btn.reserve-btn,
 .reserve-cta.btn.reserve-btn,
 .confirm-pay-submit.btn.reserve-btn {
-  background-color: var(--chocolate-brown);
+  background-color: var(--grafford-beige2);
   background-image: linear-gradient(
     110deg,
     transparent 0%,
@@ -1423,8 +1433,8 @@ section ul li {
 .confirm-pay-submit.btn.reserve-btn:hover,
 .confirm-pay-submit.btn.reserve-btn:focus-visible {
   color: #fff;
-  background-color: var(--grafford-earthy-green);
-  border-color: var(--grafford-earthy-green);
+  background-color: var(--grafford-mud);
+  border-color: var(--grafford-mud);
   animation: reserve-btn-shimmer 0.3s ease forwards;
 }
 
@@ -1432,8 +1442,8 @@ section ul li {
 .reserve-cta.btn.reserve-btn:active,
 .confirm-pay-submit.btn.reserve-btn:active {
   color: #fff;
-  background-color: var(--grafford-earthy-green);
-  border-color: var(--grafford-earthy-green);
+  background-color: var(--grafford-mud);
+  border-color: var(--grafford-mud);
   animation: reserve-btn-shimmer 0.6s ease forwards;
 }
 
@@ -1456,7 +1466,7 @@ iframe.map {
 
 .site-footer {
   text-align: center;
-  color: var(--grafford-mud);
+  color: var(--grafford-mud2);
   font-size: 0.95rem;
   padding: 1.5rem 0 1rem;
 }
@@ -1490,7 +1500,7 @@ iframe.map {
   min-width: 0;
   font-size: 0.85rem;
   line-height: 1.55;
-  color: var(--grafford-mud);
+  color: var(--grafford-mud2);
 }
 
 .site-business-footer__text--empty {
@@ -1828,24 +1838,43 @@ iframe.map {
   min-width: 3rem;
   padding: 0.45rem 1rem;
   background: var(--grafford-beige);
-  color: var(--grafford-dark-brown);
+  background-image: linear-gradient(
+    110deg,
+    transparent 0%,
+    transparent 38%,
+    rgba(255, 255, 255, 0.7) 50%,
+    transparent 62%,
+    transparent 100%
+  );
+  background-size: 260% 100%;
+  background-position: 200% 0;
+  background-repeat: no-repeat;
+  color: var(--grafford-mud2);
   border-color: transparent;
-  border-radius: 5px;
   font-weight: 500;
   cursor: pointer;
   transition:
-    background 0.5s ease,
-    color 0.5s ease;
+    color 0.35s ease,
+    background-color 0.35s ease;
 }
 
 .room-type-btn:hover,
 .room-type-btn:focus-visible {
-  background: var(--chocolate-brown);
+  background-color: var(--grafford-mud);
+  border-color: transparent;
   color: #fff;
+  animation: reserve-btn-shimmer 0.3s ease forwards;
+}
+
+.room-type-btn:active {
+  background-color: var(--grafford-mud);
+  border-color: transparent;
+  color: #fff;
+  animation: reserve-btn-shimmer 0.6s ease forwards;
 }
 
 .room-type-btn.is-active {
-  background: var(--chocolate-brown);
+  background: var(--grafford-beige2);
   color: #fff;
 }
 
@@ -1855,7 +1884,7 @@ iframe.map {
 }
 
 .room-detail-intro {
-  color: var(--grafford-dark-brown);
+  color: var(--grafford-mud2);
   font-size: 1rem;
   line-height: 1.65;
 }
@@ -1887,12 +1916,12 @@ iframe.map {
 
 .reservation-rate-label {
   font-size: 0.95rem;
-  color: var(--grafford-mud);
+  color: var(--grafford-mud2);
 }
 
 .reservation-rate-amount {
   font-size: 1.15rem;
-  color: var(--chocolate-brown);
+  color: var(--grafford-beige2);
 }
 
 .reservation-rate-note {
@@ -1918,7 +1947,7 @@ iframe.map {
 .gallery-main-wrap {
   position: relative;
   overflow: hidden;
-  background: var(--grafford-mud);
+  background: var(--grafford-mud2);
 }
 
 .gallery-main-img {
@@ -1995,7 +2024,7 @@ iframe.map {
   border-radius: 999px;
   overflow: hidden;
   cursor: pointer;
-  background-color: var(--chocolate-brown);
+  background-color: var(--grafford-beige2);
   opacity: 0.82;
   transition:
     opacity 0.65s ease,
@@ -2028,7 +2057,7 @@ iframe.map {
 
 .calendar-heading {
   font-size: 1.1rem;
-  color: var(--chocolate-brown);
+  color: var(--grafford-beige2);
   margin-bottom: 0.75rem;
 }
 
@@ -2047,9 +2076,9 @@ iframe.map {
   padding: 0;
   font-size: 1.35rem;
   font-weight: 500;
-  color: var(--chocolate-brown);
+  color: var(--grafford-mud2);
   line-height: 1.2;
-  text-align: left;
+  text-align: right;
 }
 
 .cal-header {
@@ -2088,7 +2117,7 @@ iframe.map {
   margin-bottom: 4px;
   font-size: 0.72rem;
   text-align: center;
-  color: var(--grafford-mud);
+  color: var(--grafford-mud2);
   font-weight: 600;
 }
 
@@ -2158,7 +2187,7 @@ iframe.map {
 
 .cal-cell.cal-checkin,
 .cal-cell.cal-checkout {
-  background: var(--chocolate-brown);
+  background: var(--grafford-beige2);
   color: #fff;
   font-weight: 400;
 }
@@ -2182,40 +2211,64 @@ iframe.map {
 
 .reservation-extra-row {
   display: flex;
-  align-items: right;
+  align-items: center;
+  justify-content: flex-end;
   gap: 0.7rem;
 }
 
 .reservation-extra-label {
-  display: inline-block;
+  display: inline-flex;
+  justify-content: flex-end;
   font-size: 0.9rem;
   font-weight: 600;
-  color: var(--chocolate-brown);
+  color: var(--grafford-mud2);
   margin: 0;
   white-space: nowrap;
+  text-align: right;
 }
 
-.reservation-extra-select {
-  width: 100%;
-  max-width: 260px;
-  padding: 0.2rem 0.4rem;
-  font-size: 0.95rem;
-  border: 1px solid rgba(58, 53, 49, 0.25);
-  background: #e2e2e2;
-  color: var(--grafford-dark-brown);
-  box-sizing: border-box;
+.reservation-extra-stepper {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
 }
 
-.reservation-extra-select:disabled {
-  opacity: 0.65;
+.reservation-extra-btn {
+  width: 2rem;
+  height: 2rem;
+  border-color: transparent;
+  background: transparent;
+  color: var(--grafford-mud2);
+  font-size: 1.3rem;
+  line-height: 1;
+  cursor: pointer;
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease;
+}
+
+.reservation-extra-btn:disabled {
+  background: transparent;
+  border-color: transparent;
+  color: #8f8f8f;
   cursor: not-allowed;
+}
+
+.reservation-extra-count {
+  min-width: 2.1rem;
+  text-align: center;
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--grafford-mud2);
 }
 
 .reservation-extra-hint {
   margin: 0.45rem 0 0;
   font-size: 0.82rem;
   line-height: 1.5;
-  color: var(--grafford-mud);
+  text-align: right;
+  color: var(--grafford-mud2);
 }
 
 .reservation-price-summary {
@@ -2229,7 +2282,7 @@ iframe.map {
   margin: 0;
   font-size: 1.3rem;
   font-weight: 600;
-  color: var(--grafford-mud);
+  color: var(--grafford-mud2);
   text-align: right;
   letter-spacing: 0.02em;
 }
@@ -2238,20 +2291,20 @@ iframe.map {
   margin: 0;
   font-size: 1.3rem;
   font-weight: 600;
-  color: var(--grafford-mud);
+  color: var(--grafford-mud2);
   text-align: right;
   letter-spacing: 0.02em;
 }
 
 .availability-note {
   font-size: 0.9rem;
-  color: var(--grafford-mud);
+  color: var(--grafford-mud2);
   margin-bottom: 1rem;
   min-height: 2.6em;
 }
 
 .availability-note.is-ok {
-  color: var(--grafford-earthy-green);
+  color: var(--grafford-mud);
   font-weight: 500;
 }
 
@@ -2306,7 +2359,7 @@ iframe.map {
 }
 
 .confirm-title {
-  color: var(--chocolate-brown);
+  color: var(--grafford-beige2);
   margin: 0;
   font-size: 1.5rem;
   text-align: center;
@@ -2329,7 +2382,7 @@ iframe.map {
   justify-content: center;
   min-width: 3rem;
   min-height: 3rem;
-  color: var(--chocolate-brown);
+  color: var(--grafford-beige2);
   text-decoration: none;
   font-size: 2.2rem;
   font-weight: 600;
@@ -2402,7 +2455,7 @@ iframe.map {
 .confirm-section-title {
   font-size: 1.05rem;
   font-weight: 600;
-  color: var(--chocolate-brown);
+  color: var(--grafford-beige2);
   margin: 0 0 0.85rem;
 }
 
@@ -2421,7 +2474,7 @@ iframe.map {
   height: 90px;
   object-fit: cover;
   border-radius: 6px;
-  background: var(--grafford-mud);
+  background: var(--grafford-mud2);
 }
 
 .confirm-booking-details {
@@ -2435,7 +2488,7 @@ iframe.map {
 .confirm-room-name {
   font-weight: 600;
   margin: 0 0 0.35rem;
-  color: var(--chocolate-brown);
+  color: var(--grafford-beige2);
 }
 
 .confirm-schedule,
@@ -2445,7 +2498,7 @@ iframe.map {
 
 .confirm-info-text {
   font-size: 0.9rem;
-  color: var(--grafford-mud);
+  color: var(--grafford-mud2);
   line-height: 1.6;
   margin: 0 0 1rem;
 }
@@ -2473,7 +2526,7 @@ iframe.map {
   margin: 0;
   font-size: 0.9rem;
   line-height: 1.6;
-  color: var(--grafford-mud);
+  color: var(--grafford-mud2);
 }
 
 .confirm-label {
@@ -2540,12 +2593,12 @@ iframe.map {
 
 .confirm-total-label {
   font-size: 0.95rem;
-  color: var(--grafford-mud);
+  color: var(--grafford-mud2);
 }
 
 .confirm-total-amount {
   font-size: 1.25rem;
-  color: var(--chocolate-brown);
+  color: var(--grafford-beige2);
 }
 
 .confirm-fieldset {
@@ -2569,7 +2622,7 @@ iframe.map {
 .confirm-radio input {
   width: 1.05rem;
   height: 1.05rem;
-  accent-color: var(--chocolate-brown);
+  accent-color: var(--grafford-beige2);
 }
 
 .confirm-check {
@@ -2593,7 +2646,7 @@ iframe.map {
 .confirm-check-toggle {
   border: none;
   background: transparent;
-  color: var(--chocolate-brown);
+  color: var(--grafford-beige2);
   cursor: pointer;
   font-size: 0.9rem;
   line-height: 1;
@@ -2604,7 +2657,7 @@ iframe.map {
   margin: 0.2rem 0 0.55rem 1.55rem;
   padding: 0 0.6rem;
   border-left: 2px solid rgba(90, 82, 71, 0.25);
-  color: var(--grafford-mud);
+  color: var(--grafford-mud2);
   font-size: 0.86rem;
   line-height: 1.55;
   max-height: 0;
@@ -2630,7 +2683,7 @@ iframe.map {
   width: 1.05rem;
   height: 1.05rem;
   flex-shrink: 0;
-  accent-color: var(--chocolate-brown);
+  accent-color: var(--grafford-beige2);
 }
 
 .confirm-check--all {
@@ -2657,7 +2710,7 @@ iframe.map {
 
 .confirm-form .confirm-hint {
   font-size: 0.8rem;
-  color: var(--grafford-mud);
+  color: var(--grafford-mud2);
   margin-top: 1rem;
   line-height: 1.5;
 }
@@ -2689,14 +2742,14 @@ iframe.map {
 .reserveinfo-result-title {
   margin: 0 0 0.75rem;
   font-size: 1.05rem;
-  color: var(--chocolate-brown);
+  color: var(--grafford-beige2);
 }
 
 .reserveinfo-source {
   margin: 0 0 0.85rem;
   font-size: 0.85rem;
   line-height: 1.5;
-  color: var(--grafford-mud);
+  color: var(--grafford-mud2);
 }
 
 .reserveinfo-dl {
@@ -2710,7 +2763,7 @@ iframe.map {
 .reserveinfo-dl dt {
   margin: 0;
   font-size: 0.85rem;
-  color: var(--grafford-mud);
+  color: var(--grafford-mud2);
 }
 
 .reserveinfo-dl dd {
@@ -2727,7 +2780,7 @@ iframe.map {
 .reserve-complete-label {
   margin: 0 0 0.5rem;
   font-size: 0.9rem;
-  color: var(--grafford-mud);
+  color: var(--grafford-mud2);
 }
 
 .reserve-complete-order-row {
@@ -2743,7 +2796,7 @@ iframe.map {
   font-size: 1.35rem;
   font-weight: 600;
   letter-spacing: 0.02em;
-  color: var(--chocolate-brown);
+  color: var(--grafford-beige2);
   word-break: keep-all;
   overflow-wrap: break-word;
 }
@@ -2757,7 +2810,7 @@ iframe.map {
   border: none;
   border-radius: 6px;
   background: rgba(134, 96, 85, 0.12);
-  color: var(--chocolate-brown);
+  color: var(--grafford-beige2);
   cursor: pointer;
   transition:
     background 0.2s ease,
