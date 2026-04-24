@@ -73,7 +73,7 @@ function json(res, status, body) {
   res.statusCode = status;
   res.setHeader("Content-Type", "application/json; charset=utf-8");
   res.setHeader("Access-Control-Allow-Origin", "*");
-  res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+  res.setHeader("Access-Control-Allow-Methods", "GET, POST, DELETE, OPTIONS");
   res.setHeader("Access-Control-Allow-Headers", "Content-Type");
   res.end(JSON.stringify(body));
 }
@@ -197,7 +197,7 @@ export default async function handler(req, res) {
   if (req.method === "OPTIONS") {
     res.statusCode = 204;
     res.setHeader("Access-Control-Allow-Origin", "*");
-    res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+    res.setHeader("Access-Control-Allow-Methods", "GET, POST, DELETE, OPTIONS");
     res.setHeader("Access-Control-Allow-Headers", "Content-Type");
     res.end();
     return;
@@ -271,7 +271,8 @@ export default async function handler(req, res) {
     if (!normName || !normOrder) {
       json(res, 400, {
         ok: false,
-        error: "guestName 과 reservationNumber(또는 orderNo) 쿼리가 필요합니다.",
+        error:
+          "guestName 과 reservationNumber(또는 orderNo) 쿼리가 필요합니다.",
       });
       return;
     }
@@ -396,6 +397,62 @@ export default async function handler(req, res) {
     return;
   }
 
+  if (req.method === "DELETE") {
+    var deleteBody;
+    try {
+      deleteBody = await getJsonBody(req);
+    } catch (e) {
+      json(res, 400, { ok: false, error: "Invalid JSON body" });
+      return;
+    }
+
+    var delReservationNumber = normalizeLookupOrder(
+      deleteBody.reservationNumber || deleteBody.orderNo || "",
+    );
+    var delGuestName = normalizeLookupName(deleteBody.guestName || "");
+    if (!delReservationNumber) {
+      json(res, 400, {
+        ok: false,
+        error: "reservationNumber(또는 orderNo)이 필요합니다.",
+      });
+      return;
+    }
+    if (!delGuestName) {
+      json(res, 400, {
+        ok: false,
+        error: "guestName이 필요합니다.",
+      });
+      return;
+    }
+
+    try {
+      var del = await pool.query(
+        `DELETE FROM reservations
+         WHERE reservation_number = $1
+           AND guest_name = $2
+         RETURNING id, reservation_number`,
+        [delReservationNumber, delGuestName],
+      );
+      if (!del.rows || !del.rows.length) {
+        json(res, 404, { ok: false, error: "삭제할 예약을 찾을 수 없습니다." });
+        return;
+      }
+      json(res, 200, {
+        ok: true,
+        deleted: true,
+        reservationNumber: del.rows[0].reservation_number,
+      });
+    } catch (e) {
+      console.error("reservations delete", e);
+      json(res, 500, {
+        ok: false,
+        error: humanDbError(e),
+        code: e.code || null,
+      });
+    }
+    return;
+  }
+
   if (req.method !== "POST") {
     json(res, 405, { ok: false, error: "Method not allowed" });
     return;
@@ -421,7 +478,9 @@ export default async function handler(req, res) {
   var guestRequest = String(body.guestRequest || "")
     .trim()
     .slice(0, MAX_GUEST_REQUEST);
-  var paymentMethod = String(body.paymentMethod || "").trim().toLowerCase();
+  var paymentMethod = String(body.paymentMethod || "")
+    .trim()
+    .toLowerCase();
   var guestCount = Number(body.guestCount);
 
   if (!reservationNumber || reservationNumber.length > MAX_RESV) {

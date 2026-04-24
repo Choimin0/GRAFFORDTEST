@@ -2975,6 +2975,48 @@ iframe.map {
 }
 
 /* 무통장 입금 예약 완료 (reserve-complete.html) */
+.reserve-complete-page .confirm-layout-col--right {
+  position: static;
+  top: auto;
+}
+
+.reserve-complete-room-name {
+  margin: 0 0 0.65rem;
+  color: var(--grafford-dark-brown);
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.reserve-complete-gallery {
+  margin-bottom: 0.35rem;
+}
+
+.reserve-complete-dl {
+  margin: 0;
+  display: grid;
+  grid-template-columns: 8rem 1fr;
+  gap: 0.35rem 0.75rem;
+  align-items: baseline;
+}
+
+.reserve-complete-dl dt {
+  margin: 0;
+  font-size: 0.86rem;
+  color: var(--grafford-mud2);
+}
+
+.reserve-complete-dl dd {
+  margin: 0;
+  color: var(--grafford-dark-brown);
+}
+
+.reserve-complete-actions {
+  margin-top: 1rem;
+  display: flex;
+  justify-content: flex-start;
+  gap: 0.85rem;
+}
+
 .reserve-complete-order-box {
   text-align: center;
   margin: 1.25rem 0;

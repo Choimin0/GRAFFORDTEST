@@ -210,6 +210,17 @@
           return Number(n || 0).toLocaleString("ko-KR") + "원";
         }
 
+        function reservationsApiUrl() {
+          var base = "";
+          if (
+            typeof window !== "undefined" &&
+            window.__GRAFFORD_API_BASE__
+          ) {
+            base = String(window.__GRAFFORD_API_BASE__).replace(/\/$/, "");
+          }
+          return base + "/api/reservations";
+        }
+
         function parseYMD(s) {
           if (!/^\d{4}-\d{2}-\d{2}$/.test(s || "")) {
             return null;
@@ -280,7 +291,45 @@
           modal.hidden = true;
         });
         yesBtn.addEventListener("click", function () {
-          window.location.href = "delete-complete.html";
+          yesBtn.disabled = true;
+          noBtn.disabled = true;
+          fetch(reservationsApiUrl(), {
+            method: "DELETE",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              reservationNumber: orderNo,
+              guestName: name,
+            }),
+          })
+            .then(function (resp) {
+              return resp
+                .json()
+                .catch(function () {
+                  return {};
+                })
+                .then(function (data) {
+                  return { ok: resp.ok, status: resp.status, data: data };
+                });
+            })
+            .then(function (result) {
+              if (!result.ok || !result.data || !result.data.ok) {
+                var msg =
+                  (result.data && result.data.error) ||
+                  "예약 취소 처리에 실패했습니다. (" + result.status + ")";
+                throw new Error(msg);
+              }
+              window.location.href = "delete-complete.html";
+            })
+            .catch(function (err) {
+              window.alert(
+                "DB에서 예약을 삭제하지 못했습니다.\n" +
+                  (err && err.message ? err.message : "네트워크 오류"),
+              );
+            })
+            .finally(function () {
+              yesBtn.disabled = false;
+              noBtn.disabled = false;
+            });
         });
       });
     </script>

@@ -801,9 +801,18 @@
 
               if (payInput.value === "bank") {
                 R.save(record);
+                var completeParams = new URLSearchParams();
+                completeParams.set("orderNo", orderNumber);
+                completeParams.set("room", room);
+                completeParams.set("checkIn", checkIn);
+                completeParams.set("checkOut", checkOut);
+                completeParams.set("guestName", guestName);
+                completeParams.set("contact", contact);
+                completeParams.set("guestRequest", record.guestRequest || "");
+                completeParams.set("guestCount", String(guestCount));
+                completeParams.set("extraGuests", String(extraGuests));
                 window.location.href =
-                  "reserve-complete.html?orderNo=" +
-                  encodeURIComponent(orderNumber);
+                  "reserve-complete.html?" + completeParams.toString();
               } else {
                 var fd = new FormData(confirmForm);
                 var params = new URLSearchParams(fd);
