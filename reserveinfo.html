@@ -203,6 +203,8 @@
           p.set("guestRequest", data.guestRequest || "");
           p.set("guestCount", String(data.guestCount || ""));
           p.set("extraGuests", String(data.extraGuests || 0));
+          p.set("totalAmount", String(data.totalAmount || 0));
+          p.set("payMethod", data.payMethod || "");
           window.location.href = "reserve-complete.html?" + p.toString();
         }
 
@@ -266,6 +268,8 @@
                   guestRequest: row.guestRequest || "",
                   guestCount: row.guestCount || "",
                   extraGuests: row.extraGuests || 0,
+                  totalAmount: row.totalAmount || 0,
+                  payMethod: row.paymentMethod || "",
                 });
                 return;
               }
@@ -292,6 +296,8 @@
                 guestRequest: found.guestRequest || "",
                 guestCount: found.guestCount || "",
                 extraGuests: found.extraGuests || 0,
+                totalAmount: found.totalAmount || 0,
+                payMethod: found.paymentMethod || "",
               });
             })
             .catch(function () {
@@ -316,6 +322,8 @@
                 guestRequest: found.guestRequest || "",
                 guestCount: found.guestCount || "",
                 extraGuests: found.extraGuests || 0,
+                totalAmount: found.totalAmount || 0,
+                payMethod: found.paymentMethod || "",
               });
             });
         });

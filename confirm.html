@@ -811,6 +811,8 @@
                 completeParams.set("guestRequest", record.guestRequest || "");
                 completeParams.set("guestCount", String(guestCount));
                 completeParams.set("extraGuests", String(extraGuests));
+                completeParams.set("totalAmount", String(totalAmount));
+                completeParams.set("payMethod", payInput.value);
                 window.location.href =
                   "reserve-complete.html?" + completeParams.toString();
               } else {
