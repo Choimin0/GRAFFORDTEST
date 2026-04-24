@@ -56,7 +56,7 @@
           >
             <p class="reserve-complete-room-name" id="complete-room-name">—</p>
             <div class="reserve-complete-gallery">
-              <div class="gallery-main-wrap">
+              <div class="gallery-main-wrap reserve-complete-gallery-main-wrap">
                 <img
                   class="gallery-main-img"
                   id="complete-gallery-main"
@@ -66,7 +66,10 @@
                   decoding="async"
                 />
               </div>
-              <div class="gallery-thumbs" id="complete-gallery-thumbs"></div>
+              <div
+                class="reserve-complete-gallery-thumbs"
+                id="complete-gallery-thumbs"
+              ></div>
             </div>
           </section>
 
@@ -196,7 +199,8 @@
           images.forEach(function (src, idx) {
             var btn = document.createElement("button");
             btn.type = "button";
-            btn.className = "gallery-thumb" + (idx === 0 ? " is-active" : "");
+            btn.className =
+              "reserve-complete-gallery-thumb" + (idx === 0 ? " is-active" : "");
             btn.setAttribute("aria-label", "객실 사진 " + (idx + 1));
             var img = document.createElement("img");
             img.src = src;
@@ -208,9 +212,11 @@
               if (!mainImg) return;
               mainImg.src = src;
               mainImg.alt = (ROOM_LABEL[room] || room) + " 사진 " + (idx + 1);
-              thumbsEl.querySelectorAll(".gallery-thumb").forEach(function (t) {
-                t.classList.remove("is-active");
-              });
+              thumbsEl
+                .querySelectorAll(".reserve-complete-gallery-thumb")
+                .forEach(function (t) {
+                  t.classList.remove("is-active");
+                });
               btn.classList.add("is-active");
             });
             thumbsEl.appendChild(btn);

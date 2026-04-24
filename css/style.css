@@ -2989,6 +2989,43 @@ iframe.map {
 
 .reserve-complete-gallery {
   margin-bottom: 0.35rem;
+  min-width: 0;
+}
+
+.reserve-complete-gallery-main-wrap {
+  border-radius: 8px;
+}
+
+.reserve-complete-gallery-thumbs {
+  display: flex;
+  gap: 0.55rem;
+  margin-top: 0.6rem;
+  overflow-x: auto;
+  padding-bottom: 0.2rem;
+  scrollbar-width: thin;
+}
+
+.reserve-complete-gallery-thumb {
+  flex: 0 0 auto;
+  width: 82px;
+  height: 58px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  overflow: hidden;
+  background: transparent;
+  padding: 0;
+  cursor: pointer;
+}
+
+.reserve-complete-gallery-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.reserve-complete-gallery-thumb.is-active {
+  border-color: var(--grafford-beige2);
 }
 
 .reserve-complete-dl {
