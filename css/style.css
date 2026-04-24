@@ -2920,6 +2920,10 @@ iframe.map {
   box-sizing: border-box;
 }
 
+.reserve-delete-modal-backdrop[hidden] {
+  display: none !important;
+}
+
 .reserve-delete-modal {
   width: min(360px, 100%);
   background: #fff;
