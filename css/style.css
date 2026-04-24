@@ -1977,7 +1977,7 @@ iframe.map {
   height: 42px;
   border: none;
   border-radius: 999px;
-  background: rgba(0, 0, 0, 0.4);
+  background: transparent;
   color: #fff;
   font-size: 1.1rem;
   cursor: pointer;
@@ -2971,8 +2971,25 @@ iframe.map {
   margin-bottom: 0;
 }
 
+.reserve-delete-other-row {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  margin-bottom: 0.8rem;
+}
+
+.reserve-delete-other-row .confirm-check {
+  margin-bottom: 0;
+  white-space: nowrap;
+}
+
+.reserve-delete-other-label {
+  margin-bottom: 0;
+  flex: 1;
+}
+
 .reserve-delete-other-label input {
-  width: 70%;
+  width: 100%;
 }
 
 /* 무통장 입금 예약 완료 (reserve-complete.html) */
@@ -3056,6 +3073,7 @@ iframe.map {
 /* 비대면 체크인 안내사항 - 연락처 뒤 4자리 */
 .reserve-complete-pin {
   font-weight: 800;
+  font-size: 1.05rem;
 }
 
 .reserve-complete-order-box {

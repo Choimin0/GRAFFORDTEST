@@ -135,14 +135,19 @@
                 타숙소 예약
               </label>
             </div>
-            <label class="confirm-label reserve-delete-other-label">
-              기타
-              <input
-                type="text"
-                id="cancel-reason-other"
-                placeholder="기타 사유를 입력해 주세요."
-              />
-            </label>
+            <div class="reserve-delete-other-row">
+              <label class="confirm-check">
+                <input type="radio" name="cancelReason" value="other" />
+                기타
+              </label>
+              <label class="confirm-label reserve-delete-other-label">
+                <input
+                  type="text"
+                  id="cancel-reason-other"
+                  placeholder="기타 사유를 입력해 주세요."
+                />
+              </label>
+            </div>
             <div class="confirm-actions">
               <button
                 type="button"
@@ -283,6 +288,25 @@
         var openBtn = document.getElementById("cancel-submit-btn");
         var yesBtn = document.getElementById("cancel-modal-yes");
         var noBtn = document.getElementById("cancel-modal-no");
+        var reasonOtherInput = document.getElementById("cancel-reason-other");
+        var reasonInputs = document.querySelectorAll('input[name="cancelReason"]');
+
+        function syncOtherReasonState() {
+          if (!reasonOtherInput) {
+            return;
+          }
+          var selected = document.querySelector('input[name="cancelReason"]:checked');
+          var isOther = !!(selected && selected.value === "other");
+          reasonOtherInput.disabled = !isOther;
+          if (!isOther) {
+            reasonOtherInput.value = "";
+          }
+        }
+
+        reasonInputs.forEach(function (el) {
+          el.addEventListener("change", syncOtherReasonState);
+        });
+        syncOtherReasonState();
 
         openBtn.addEventListener("click", function () {
           modal.hidden = false;

@@ -112,16 +112,27 @@
         <div class="confirm-layout-col confirm-layout-col--right">
           <section
             class="confirm-section"
-            aria-labelledby="complete-info-title"
+            aria-labelledby="complete-booking-info-title"
           >
-            <h2 class="confirm-section-title" id="complete-info-title">
+            <h2 class="confirm-section-title" id="complete-booking-info-title">
               예약 정보
             </h2>
-            <dl class="reserve-complete-dl">
+            <dl class="reserve-delete-dl">
               <dt>예약 번호</dt>
               <dd id="complete-order-no">—</dd>
               <dt>체크인/체크아웃</dt>
               <dd id="complete-schedule">—</dd>
+            </dl>
+          </section>
+
+          <section
+            class="confirm-section"
+            aria-labelledby="complete-guest-info-title"
+          >
+            <h2 class="confirm-section-title" id="complete-guest-info-title">
+              예약자 정보
+            </h2>
+            <dl class="reserve-delete-dl">
               <dt>방문 인원</dt>
               <dd id="complete-guest-count">—</dd>
               <dt>예약자 성함</dt>
@@ -131,6 +142,9 @@
               <dt>요청사항</dt>
               <dd id="complete-request">—</dd>
             </dl>
+          </section>
+
+          <section class="confirm-section">
             <div class="confirm-actions reserve-complete-actions">
               <a href="index.html" class="reserve-complete-action-link">메인으로</a>
               <a
