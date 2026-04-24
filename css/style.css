@@ -2364,7 +2364,7 @@ iframe.map {
 }
 
 .confirm-title {
-  color: var(--grafford-beige2);
+  color: var(--grafford-mud2);
   margin: 0;
   font-size: 1.5rem;
   text-align: center;
@@ -2387,7 +2387,7 @@ iframe.map {
   justify-content: center;
   min-width: 3rem;
   min-height: 3rem;
-  color: var(--grafford-beige2);
+  color: var(--grafford-mud2);
   text-decoration: none;
   font-size: 2.2rem;
   font-weight: 600;
@@ -2460,7 +2460,7 @@ iframe.map {
 .confirm-section-title {
   font-size: 1.05rem;
   font-weight: 600;
-  color: var(--grafford-beige2);
+  color: var(--grafford-mud2);
   margin: 0 0 0.85rem;
 }
 
@@ -2493,12 +2493,16 @@ iframe.map {
 .confirm-room-name {
   font-weight: 600;
   margin: 0 0 0.35rem;
-  color: var(--grafford-beige2);
+  color: var(--grafford-mud2);
 }
 
 .confirm-schedule,
 .confirm-line-price {
   margin: 0.15rem 0;
+}
+
+.confirm-schedule {
+  white-space: pre-line;
 }
 
 .confirm-info-text {
@@ -2543,13 +2547,22 @@ iframe.map {
 
 .confirm-label input {
   display: block;
-  width: 100%;
+  width: 70%;
   margin-top: 0.35rem;
   padding: 0.5rem 0.6rem;
-  border: 1px solid rgba(58, 53, 49, 0.25);
-  border-radius: 6px;
+  border: none;
+  border-radius: 5px;
+  border-bottom: 1px solid var(--grafford-mud2);
+  background: transparent;
   font-size: 1rem;
   box-sizing: border-box;
+}
+
+.confirm-label input:focus,
+.confirm-label input:focus-visible {
+  outline: none;
+  box-shadow: none;
+  border-bottom: 2px solid #2563eb;
 }
 
 .confirm-input-error {
@@ -2558,11 +2571,13 @@ iframe.map {
 
 .confirm-textarea {
   display: block;
-  width: 100%;
+  width: 70%;
   margin-top: 0.35rem;
   padding: 0.55rem 0.6rem;
-  border: 1px solid rgba(58, 53, 49, 0.25);
-  border-radius: 6px;
+  border: none;
+  border-bottom: 1px solid var(--grafford-mud2);
+  border-radius: 0;
+  background: transparent;
   font-size: 0.95rem;
   font-family: inherit;
   line-height: 1.5;
@@ -2570,8 +2585,16 @@ iframe.map {
   box-sizing: border-box;
 }
 
+.confirm-textarea:focus,
+.confirm-textarea:focus-visible {
+  outline: none;
+  box-shadow: none;
+  border-bottom: 2px solid #2563eb;
+}
+
 .confirm-total-box {
   background: rgba(83, 98, 77, 0.08);
+  width: 70%;
   border-radius: 8px;
   padding: 1rem 1.1rem;
 }
@@ -2589,7 +2612,7 @@ iframe.map {
 .confirm-total-amount-wrap {
   display: flex;
   align-items: baseline;
-  justify-content: space-between;
+  justify-content: flex-start;
   gap: 1rem;
   margin: 0;
   padding-top: 0.5rem;
@@ -2603,7 +2626,7 @@ iframe.map {
 
 .confirm-total-amount {
   font-size: 1.25rem;
-  color: var(--grafford-beige2);
+  color: var(--grafford-mud2);
 }
 
 .confirm-fieldset {
@@ -2636,7 +2659,8 @@ iframe.map {
   gap: 0.5rem;
   cursor: pointer;
   font-size: 0.9rem;
-  color: var(--grafford-dark-brown);
+  background-color: transparent;
+  color: var(--grafford-mud2);
   line-height: 1.45;
   margin-bottom: 0.5rem;
 }
@@ -2651,7 +2675,7 @@ iframe.map {
 .confirm-check-toggle {
   border: none;
   background: transparent;
-  color: var(--grafford-beige2);
+  color: var(--grafford-mud2);
   cursor: pointer;
   font-size: 0.9rem;
   line-height: 1;
@@ -2688,7 +2712,39 @@ iframe.map {
   width: 1.05rem;
   height: 1.05rem;
   flex-shrink: 0;
-  accent-color: var(--grafford-beige2);
+}
+
+.confirm-agree-list .confirm-check input,
+.confirm-check--all input {
+  appearance: none;
+  -webkit-appearance: none;
+  border: 1px solid var(--grafford-mud2);
+  border-radius: 3px;
+  background: transparent;
+  display: inline-grid;
+  place-content: center;
+}
+
+.confirm-agree-list .confirm-check input::before,
+.confirm-check--all input::before {
+  content: "";
+  width: 0.55rem;
+  height: 0.55rem;
+  transform: scale(0);
+  transition: transform 0.12s ease-in-out;
+  box-shadow: inset 1em 1em var(--grafford-mud2);
+  clip-path: polygon(14% 44%, 0 59%, 43% 100%, 100% 18%, 84% 3%, 42% 62%);
+}
+
+.confirm-agree-list .confirm-check input:checked::before,
+.confirm-check--all input:checked::before {
+  transform: scale(1);
+}
+
+.confirm-agree-list .confirm-check input:focus-visible,
+.confirm-check--all input:focus-visible {
+  outline: 2px solid rgba(83, 98, 77, 0.45);
+  outline-offset: 2px;
 }
 
 .confirm-check--all {
@@ -2700,6 +2756,27 @@ iframe.map {
 
 .confirm-agree-list {
   padding-left: 0.15rem;
+}
+
+.confirm-refund-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 0.45rem;
+  font-size: 0.84rem;
+  text-align: center;
+  color: var(--grafford-mud2);
+}
+
+.confirm-refund-table td {
+  border: 1px solid rgba(58, 53, 49, 0.2);
+  padding: 0.38rem 0.5rem;
+  line-height: 1.4;
+}
+
+.confirm-refund-table td:last-child {
+  width: 50%;
+  text-align: center;
+  white-space: nowrap;
 }
 
 .confirm-actions {

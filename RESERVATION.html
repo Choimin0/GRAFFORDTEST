@@ -588,7 +588,7 @@
         }
 
         function formatDisplay(d) {
-          if (!d) return "\u2014";
+          if (!d) return "—";
           return (
             d.getFullYear() +
             "." +
@@ -599,7 +599,7 @@
         }
 
         function formatKRW(n) {
-          return n.toLocaleString("ko-KR") + "\uc6d0";
+          return n.toLocaleString("ko-KR") + "원";
         }
 
         function isSameMonth(a, b) {
@@ -694,7 +694,7 @@
             }
             if (extraGuestsHint) {
               extraGuestsHint.textContent =
-                "G1\xb7G2\ub294 \uae30\uc900 \uc778\uc6d0 \uc678 \ucd94\uac00\uac00 \ubd88\uac00\ud569\ub2c8\ub2e4.";
+                "G1·G2는 기준 인원 외 추가가 불가합니다.";
             }
             setExtraGuests(0);
           } else {
@@ -742,7 +742,7 @@
           pricePlaceholder.hidden = true;
           priceTotalEl.hidden = false;
           priceTotalEl.textContent =
-            "TOTAL " + q.grandTotal.toLocaleString("ko-KR") + "\uc6d0";
+            "TOTAL " + q.grandTotal.toLocaleString("ko-KR") + "원";
         }
 
         function hasValidStaySelection() {
@@ -857,10 +857,10 @@
           checkIn = null;
           checkOut = null;
           if (calCheckinEl) {
-            calCheckinEl.textContent = "\u2014";
+            calCheckinEl.textContent = "—";
           }
           if (calCheckoutEl) {
-            calCheckoutEl.textContent = "\u2014";
+            calCheckoutEl.textContent = "—";
           }
           if (availabilityEl) {
             availabilityEl.textContent =
@@ -1032,7 +1032,7 @@
             "DECEMBER",
           ];
           if (calYearLabel) {
-            calYearLabel.textContent = y + "\uB144";
+            calYearLabel.textContent = y + "년";
           }
           if (calMonthLabel) {
             calMonthLabel.textContent = monthNames[m];
@@ -1166,7 +1166,7 @@
                 if (calCheckoutEl) {
                   calCheckoutEl.textContent = checkOut
                     ? formatDisplay(checkOut)
-                    : "\u2014";
+                    : "—";
                 }
 
                 if (availabilityEl) {

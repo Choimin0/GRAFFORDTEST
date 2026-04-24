@@ -185,10 +185,37 @@
                 <div class="confirm-guide-item">
                   <span class="confirm-guide-subtitle">환불 규정</span>
                   <p class="confirm-guide-content">
-                    취소 시점별로 환불 위약금이 적용됩니다. (예: 10일 전 100%,
-                    7일 전 70% 등 숙소의 정책 입력). 예약 확정은 규정에 동의한
-                    것으로 간주되오니 신중하게 예약해 주시기 바랍니다.
+                    취소 시점별로 환불 위약금이 적용됩니다. 예약 확정은 규정에
+                    동의한 것으로 간주되오니 신중하게 예약해 주시기 바랍니다.
                   </p>
+                  <table class="confirm-refund-table" aria-label="환불 규정 표">
+                    <tbody>
+                      <tr>
+                        <td>입실일로부터 15일 전</td>
+                        <td>100%</td>
+                      </tr>
+                      <tr>
+                        <td>입실일로부터 12일 전</td>
+                        <td>80%</td>
+                      </tr>
+                      <tr>
+                        <td>입실일로부터 9일 전</td>
+                        <td>70%</td>
+                      </tr>
+                      <tr>
+                        <td>입실일로부터 7일 전</td>
+                        <td>60%</td>
+                      </tr>
+                      <tr>
+                        <td>입실일로부터 5일 전</td>
+                        <td>50%</td>
+                      </tr>
+                      <tr>
+                        <td>입실일로부터 5일 이내</td>
+                        <td>환불 불가</td>
+                      </tr>
+                    </tbody>
+                  </table>
                 </div>
                 <div class="confirm-guide-item">
                   <span class="confirm-guide-subtitle">특약 사항</span>
@@ -210,7 +237,7 @@
                 <textarea
                   name="guestRequest"
                   class="confirm-textarea"
-                  rows="2"
+                  rows="1"
                 ></textarea>
               </label>
             </section>
@@ -234,7 +261,6 @@
                 <div class="confirm-booking-details">
                   <p class="confirm-room-name" id="booking-room-name"></p>
                   <p class="confirm-schedule" id="booking-schedule"></p>
-                  <p class="confirm-line-price" id="booking-line-price"></p>
                 </div>
               </div>
             </section>
@@ -255,7 +281,7 @@
                   id="f-name"
                   required
                   autocomplete="name"
-                  placeholder="명탐정코난"
+                  placeholder="홍길동"
                 />
               </label>
               <label class="confirm-label">
@@ -296,7 +322,7 @@
                     aria-controls="agree-privacy-detail"
                     aria-label="개인정보 수집 및 이용 동의 상세 내용 펼치기"
                   >
-                    ▼
+                    ▽
                   </button>
                 </div>
                 <div
@@ -321,7 +347,7 @@
 
             <section class="confirm-section" aria-labelledby="sec-total">
               <h2 class="confirm-section-title" id="sec-total">
-                최종 금액 산출 방법 및 최종 금액
+                최종 결제 금액
               </h2>
               <div class="confirm-total-box">
                 <div class="confirm-breakdown" id="confirm-breakdown"></div>
@@ -379,10 +405,10 @@
       document.addEventListener("DOMContentLoaded", function () {
         var P = window.GraffordBookingPricing;
         var ROOM_LABEL = {
-          G1: "객실 G1",
-          G2: "객실 G2",
-          G3: "객실 G3",
-          G4: "객실 G4",
+          G1: "G1",
+          G2: "G2",
+          G3: "G3",
+          G4: "G4",
         };
         var ROOM_IMAGE_PREFIX = {
           G1: "A",
@@ -450,28 +476,23 @@
 
         var schedEl = document.getElementById("booking-schedule");
         if (checkIn && checkOut && quote.nights > 0) {
-          schedEl.textContent =
+          var scheduleLines = [
             "체크인 " +
-            formatDisplayYMD(checkIn) +
-            " · 체크아웃 " +
-            formatDisplayYMD(checkOut) +
-            " (" +
-            quote.nights +
-            "박" +
-            (quote.extraGuests > 0
-              ? " · 추가 인원 " + quote.extraGuests + "명"
-              : "") +
-            ")";
+              formatDisplayYMD(checkIn) +
+              " · 체크아웃 " +
+              formatDisplayYMD(checkOut),
+            "(" +
+              quote.nights +
+              "박, " +
+              "추가인원 " +
+              quote.extraGuests +
+              "명)",
+          ];
+          schedEl.textContent = scheduleLines.join("\n");
         } else {
           schedEl.textContent =
             "일정이 없습니다. 예약 페이지에서 일정을 선택한 후 다시 들어와 주세요.";
         }
-
-        document.getElementById("booking-line-price").textContent =
-          "평일 1박 " +
-          formatKRW(quote.baseNightly) +
-          " · 금·토 박당 +" +
-          formatKRW(P ? P.WEEKEND_SURCHARGE_PER_NIGHT : 30000);
 
         var breakdownEl = document.getElementById("confirm-breakdown");
         var totalDisplayEl = document.getElementById("confirm-total-display");
@@ -809,6 +830,9 @@
             return;
           }
           el.addEventListener("input", function () {
+            if (!hasTriedSubmit) {
+              return;
+            }
             markInputError(guestNameInput, !guestNameInput.value.trim());
             markInputError(
               contactInput,
@@ -839,7 +863,7 @@
               agreePrivacyToggle.getAttribute("aria-expanded") === "true";
             var next = !expanded;
             agreePrivacyToggle.setAttribute("aria-expanded", String(next));
-            agreePrivacyToggle.textContent = next ? "▲" : "▼";
+            agreePrivacyToggle.textContent = next ? "△" : "▽";
             if (next) {
               agreePrivacyDetail.hidden = false;
               window.requestAnimationFrame(function () {
