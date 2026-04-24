@@ -3053,6 +3053,7 @@ iframe.map {
   border-color: var(--grafford-mud);
 }
 
+/* 비대면 체크인 안내사항 - 연락처 뒤 4자리 */
 .reserve-complete-pin {
   font-weight: 800;
 }

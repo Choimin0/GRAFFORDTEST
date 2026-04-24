@@ -46,12 +46,16 @@
     <main class="content-section confirm-page reserveinfo-page">
       <h1 class="confirm-title">예약 조회</h1>
       <p class="confirm-summary">
-        예약 시 입력하신 성함과 발급된 예약번호(주문번호)를 입력해 주세요. 서버에
-        저장된 예약은 DB에서, 무통장 입금만 이 기기에 저장된 경우에는 브라우저
-        저장소에서 조회합니다.
+        예약 시 입력하신 성함과 발급된 예약번호(주문번호)를 입력해 주세요.
+        서버에 저장된 예약은 DB에서, 무통장 입금만 이 기기에 저장된 경우에는
+        브라우저 저장소에서 조회합니다.
       </p>
 
-      <form class="reserveinfo-form checkout-form" id="reserveinfo-form" novalidate>
+      <form
+        class="reserveinfo-form checkout-form"
+        id="reserveinfo-form"
+        novalidate
+      >
         <label class="confirm-label">
           성함
           <input
@@ -71,11 +75,13 @@
             id="lookup-order"
             required
             autocomplete="off"
-            placeholder="예: 20260419-XXXXXX"
+            placeholder="예: 연월일8자리-XXXXXX"
           />
         </label>
         <div class="confirm-actions">
-          <button type="submit" class="btn reserve-btn confirm-pay-submit">조회하기</button>
+          <button type="submit" class="btn reserve-btn confirm-pay-submit">
+            조회하기
+          </button>
         </div>
       </form>
 
@@ -161,10 +167,7 @@
 
         function lookupApiUrl(name, order) {
           var base = "";
-          if (
-            typeof window !== "undefined" &&
-            window.__GRAFFORD_API_BASE__
-          ) {
+          if (typeof window !== "undefined" && window.__GRAFFORD_API_BASE__) {
             base = String(window.__GRAFFORD_API_BASE__).replace(/\/$/, "");
           }
           return (
@@ -234,7 +237,12 @@
               });
             })
             .then(function (result) {
-              if (result.ok && result.data && result.data.ok && result.data.row) {
+              if (
+                result.ok &&
+                result.data &&
+                result.data.ok &&
+                result.data.row
+              ) {
                 var row = result.data.row;
                 var nightsText =
                   row.stayNights != null && row.stayNights !== ""
