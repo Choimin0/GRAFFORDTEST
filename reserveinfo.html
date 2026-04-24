@@ -189,6 +189,20 @@
           return m || "—";
         }
 
+        function goToReserveComplete(data) {
+          var p = new URLSearchParams();
+          p.set("orderNo", data.orderNo || "");
+          p.set("room", data.room || "");
+          p.set("checkIn", data.checkIn || "");
+          p.set("checkOut", data.checkOut || "");
+          p.set("guestName", data.guestName || "");
+          p.set("contact", data.contact || "");
+          p.set("guestRequest", data.guestRequest || "");
+          p.set("guestCount", String(data.guestCount || ""));
+          p.set("extraGuests", String(data.extraGuests || 0));
+          window.location.href = "reserve-complete.html?" + p.toString();
+        }
+
         function showOk(
           orderNumber,
           guestName,
@@ -297,6 +311,17 @@
                   row.guestRequest || "",
                   note,
                 );
+                goToReserveComplete({
+                  orderNo: row.reservationNumber,
+                  room: row.roomType,
+                  checkIn: row.checkIn,
+                  checkOut: row.checkOut,
+                  guestName: row.guestName,
+                  contact: row.contact,
+                  guestRequest: row.guestRequest || "",
+                  guestCount: row.guestCount || "",
+                  extraGuests: row.extraGuests || 0,
+                });
                 return;
               }
               if (!R) {
@@ -326,6 +351,17 @@
                 found.guestRequest || "",
                 "이 브라우저에만 저장된 예약입니다(무통장 입금 테스트). 서버에는 다른 행이 있을 수 있습니다.",
               );
+              goToReserveComplete({
+                orderNo: found.orderNumber,
+                room: found.room,
+                checkIn: found.checkIn,
+                checkOut: found.checkOut,
+                guestName: found.guestName,
+                contact: found.contact,
+                guestRequest: found.guestRequest || "",
+                guestCount: found.guestCount || "",
+                extraGuests: found.extraGuests || 0,
+              });
             })
             .catch(function () {
               if (!R) {
@@ -353,6 +389,17 @@
                 found.guestRequest || "",
                 "서버 조회에 실패해, 이 브라우저에만 저장된 예약을 표시합니다.",
               );
+              goToReserveComplete({
+                orderNo: found.orderNumber,
+                room: found.room,
+                checkIn: found.checkIn,
+                checkOut: found.checkOut,
+                guestName: found.guestName,
+                contact: found.contact,
+                guestRequest: found.guestRequest || "",
+                guestCount: found.guestCount || "",
+                extraGuests: found.extraGuests || 0,
+              });
             });
         });
       });

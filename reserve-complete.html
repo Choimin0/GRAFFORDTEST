@@ -50,8 +50,10 @@
 
       <div class="confirm-layout-grid">
         <div class="confirm-layout-col">
-          <section class="confirm-section" aria-labelledby="complete-room-title">
-            <h2 class="confirm-section-title" id="complete-room-title">객실이름</h2>
+          <section
+            class="confirm-section"
+            aria-labelledby="complete-room-title"
+          >
             <p class="reserve-complete-room-name" id="complete-room-name">—</p>
             <div class="reserve-complete-gallery">
               <div class="gallery-main-wrap">
@@ -73,8 +75,9 @@
               입실 전 유의사항
             </h2>
             <p class="confirm-guide-content">
-              입실 당일 오전에 체크인 안내 메시지가 발송됩니다. 기준 인원을 초과한
-              입실은 불가하며, 추가 인원은 사전 신청 내역 기준으로만 인정됩니다.
+              입실 당일 오전에 체크인 안내 메시지가 발송됩니다. 기준 인원을
+              초과한 입실은 불가하며, 추가 인원은 사전 신청 내역 기준으로만
+              인정됩니다.
             </p>
           </section>
 
@@ -83,24 +86,28 @@
               비대면 체크인 안내사항
             </h2>
             <p class="confirm-guide-content">
-              체크인 시 도어락 비밀번호 및 안내사항이 문자로 전달됩니다. 개인정보
-              확인을 위해 예약자 성함/연락처가 일치해야 하며, 도착 전 안내 문자를
-              반드시 확인해 주세요.
+              체크인 시 도어락 비밀번호 및 안내사항이 카카오톡으로 전달됩니다.
+              개인정보 확인을 위해 예약자 성함/연락처가 일치해야 하며, 도착 전
+              안내 문자를 반드시 확인해 주세요.
             </p>
           </section>
 
           <section class="confirm-section" aria-labelledby="complete-notice-3">
-            <h2 class="confirm-section-title" id="complete-notice-3">주차 안내</h2>
-            <p class="confirm-guide-content">
-              객실당 기본 1대 주차가 가능합니다. 추가 차량은 현장 상황에 따라
-              제한될 수 있으니 사전 문의 부탁드립니다.
-            </p>
+            <h2 class="confirm-section-title" id="complete-notice-3">
+              주차 안내
+            </h2>
+            <p class="confirm-guide-content">객실 당 1대 주차 가능합니다.</p>
           </section>
         </div>
 
         <div class="confirm-layout-col confirm-layout-col--right">
-          <section class="confirm-section" aria-labelledby="complete-info-title">
-            <h2 class="confirm-section-title" id="complete-info-title">예약 정보</h2>
+          <section
+            class="confirm-section"
+            aria-labelledby="complete-info-title"
+          >
+            <h2 class="confirm-section-title" id="complete-info-title">
+              예약 정보
+            </h2>
             <dl class="reserve-complete-dl">
               <dt>예약 번호</dt>
               <dd id="complete-order-no">—</dd>
@@ -131,7 +138,12 @@
 
     <script>
       document.addEventListener("DOMContentLoaded", function () {
-        var ROOM_LABEL = { G1: "객실 G1", G2: "객실 G2", G3: "객실 G3", G4: "객실 G4" };
+        var ROOM_LABEL = {
+          G1: "G1",
+          G2: "G2",
+          G3: "G3",
+          G4: "G4",
+        };
         var ROOM_IMAGE_PREFIX = { G1: "A", G2: "B", G3: "C", G4: "D" };
         var params = new URLSearchParams(window.location.search);
         var orderNo = params.get("orderNo") || "";
@@ -150,13 +162,19 @@
           ROOM_LABEL[room] || room || "객실 정보 없음";
         document.getElementById("complete-schedule").textContent =
           (checkIn || "—") + " ~ " + (checkOut || "—");
-        document.getElementById("complete-guest-name").textContent = guestName || "—";
-        document.getElementById("complete-contact").textContent = contact || "—";
-        document.getElementById("complete-request").textContent = guestRequest || "—";
+        document.getElementById("complete-guest-name").textContent =
+          guestName || "—";
+        document.getElementById("complete-contact").textContent =
+          contact || "—";
+        document.getElementById("complete-request").textContent =
+          guestRequest || "—";
 
         var parsedGuestCount = parseInt(guestCount || "", 10);
         if (!parsedGuestCount || parsedGuestCount < 1) {
-          parsedGuestCount = Math.max(1, 2 + (parseInt(extraGuests || "0", 10) || 0));
+          parsedGuestCount = Math.max(
+            1,
+            2 + (parseInt(extraGuests || "0", 10) || 0),
+          );
         }
         document.getElementById("complete-guest-count").textContent =
           String(parsedGuestCount) + "명";
