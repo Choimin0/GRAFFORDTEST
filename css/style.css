@@ -2857,6 +2857,119 @@ iframe.map {
   margin-top: 1rem;
 }
 
+.reserveinfo-bottom-actions {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.85rem;
+}
+
+.reserve-delete-page .confirm-layout-col--right {
+  position: static;
+  top: auto;
+}
+
+.reserve-delete-refund-box {
+  margin-top: 0.9rem;
+  padding: 0.9rem 1rem;
+  border: 1px solid rgba(58, 53, 49, 0.16);
+  border-radius: 8px;
+}
+
+.reserve-delete-refund-label {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--grafford-mud2);
+}
+
+.reserve-delete-refund-amount {
+  margin: 0.35rem 0 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: var(--grafford-dark-brown);
+}
+
+.reserve-delete-dl {
+  margin: 0;
+  display: grid;
+  grid-template-columns: 7rem 1fr;
+  gap: 0.35rem 0.75rem;
+  align-items: baseline;
+}
+
+.reserve-delete-dl dt {
+  margin: 0;
+  font-size: 0.85rem;
+  color: var(--grafford-mud2);
+}
+
+.reserve-delete-dl dd {
+  margin: 0;
+  color: var(--grafford-dark-brown);
+}
+
+.reserve-delete-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(26, 23, 20, 0.42);
+  z-index: 1200;
+  padding: 1rem;
+  box-sizing: border-box;
+}
+
+.reserve-delete-modal {
+  width: min(360px, 100%);
+  background: #fff;
+  border: 1px solid rgba(58, 53, 49, 0.18);
+  border-radius: 10px;
+  padding: 1rem;
+}
+
+.reserve-delete-modal-title {
+  margin: 0;
+  text-align: center;
+  color: var(--grafford-dark-brown);
+}
+
+.reserve-delete-modal-actions {
+  margin-top: 0.9rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.55rem;
+}
+
+.reserve-delete-modal-actions .btn {
+  min-width: 7rem;
+}
+
+.reserve-delete-modal-note {
+  margin: 0.75rem 0 0;
+  font-size: 0.78rem;
+  line-height: 1.45;
+  text-align: center;
+  color: var(--grafford-mud2);
+}
+
+.reserve-delete-reason-row {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.8rem;
+}
+
+.reserve-delete-reason-row .confirm-check {
+  margin-bottom: 0;
+}
+
+.reserve-delete-other-label input {
+  width: 70%;
+}
+
 /* 무통장 입금 예약 완료 (reserve-complete.html) */
 .reserve-complete-order-box {
   text-align: center;

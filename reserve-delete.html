@@ -3,7 +3,307 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title></title>
+    <link rel="icon" href="images/LOGO-transparent.png" type="image/png" />
+    <title>예약 취소 - GRAFFORD</title>
+    <link rel="stylesheet" href="css/style.css" />
+    <script src="js/mobile-nav.js" defer></script>
   </head>
-  <body></body>
+  <body>
+    <div id="grafford-react-fade-root"></div>
+    <nav class="site-nav top-right-nav">
+      <a href="index.html" class="nav-logo" aria-label="홈으로 이동">
+        <img src="images/LOGO.png" alt="GRAFFORD LOGO" />
+      </a>
+      <button
+        type="button"
+        class="mobile-menu-btn"
+        aria-label="메뉴 열기"
+        aria-controls="mobile-nav-drawer"
+        aria-expanded="false"
+      >
+        MENU
+      </button>
+      <div class="mobile-nav-backdrop" hidden></div>
+      <aside
+        id="mobile-nav-drawer"
+        class="mobile-nav-drawer"
+        aria-hidden="true"
+      >
+        <a href="STORY.html">STORY</a>
+        <a href="GROUND.html">GROUND</a>
+        <a href="FACILITIES.html">FACILITIES</a>
+        <a href="RESERVATION.html">RESERVATION</a>
+      </aside>
+      <div class="desktop-nav-links" aria-label="데스크톱 메뉴">
+        <a href="STORY.html">STORY</a>
+        <a href="GROUND.html">GROUND</a>
+        <a href="FACILITIES.html">FACILITIES</a>
+        <a href="RESERVATION.html">RESERVATION</a>
+      </div>
+    </nav>
+
+    <main class="content-section confirm-page reserve-delete-page">
+      <div class="confirm-topbar">
+        <a
+          href="reserveinfo.html"
+          class="confirm-back-inline"
+          aria-label="예약조회로 돌아가기"
+          >&lt;</a
+        >
+        <h1 class="confirm-title">예약 취소</h1>
+      </div>
+      <p class="confirm-summary">
+        예약 취소 전 환불 규정과 예상 환불 금액을 확인해 주세요.
+      </p>
+
+      <div class="confirm-layout-grid">
+        <div class="confirm-layout-col">
+          <section
+            class="confirm-section"
+            aria-labelledby="refund-policy-title"
+          >
+            <h2 class="confirm-section-title" id="refund-policy-title">
+              환불 규정
+            </h2>
+            <p class="confirm-guide-content">
+              입실일까지 남은 날짜(remain-date)에 따라 환불
+              수수료(refund-charge)가 적용됩니다. 예상 환불 금액은 결제 금액에서
+              환불 수수료를 차감한 금액입니다.
+            </p>
+            <p class="confirm-guide-content" id="refund-rule-summary"></p>
+            <div class="reserve-delete-refund-box">
+              <p class="reserve-delete-refund-label">예상 환불 금액</p>
+              <p class="reserve-delete-refund-amount" id="refund-amount">—</p>
+            </div>
+          </section>
+        </div>
+
+        <div class="confirm-layout-col confirm-layout-col--right">
+          <section
+            class="confirm-section"
+            aria-labelledby="cancel-booking-title"
+          >
+            <h2 class="confirm-section-title" id="cancel-booking-title">
+              예약 정보 확인
+            </h2>
+            <dl class="reserve-delete-dl">
+              <dt>예약번호</dt>
+              <dd id="cancel-order">—</dd>
+              <dt>객실</dt>
+              <dd id="cancel-room">—</dd>
+              <dt>일정</dt>
+              <dd id="cancel-schedule">—</dd>
+              <dt>결제 금액</dt>
+              <dd id="cancel-amount">—</dd>
+            </dl>
+          </section>
+
+          <section class="confirm-section" aria-labelledby="cancel-user-title">
+            <h2 class="confirm-section-title" id="cancel-user-title">
+              예약자 정보 확인
+            </h2>
+            <dl class="reserve-delete-dl">
+              <dt>성함</dt>
+              <dd id="cancel-name">—</dd>
+              <dt>연락처</dt>
+              <dd id="cancel-contact">—</dd>
+            </dl>
+          </section>
+
+          <section
+            class="confirm-section"
+            aria-labelledby="cancel-reason-title"
+          >
+            <h2 class="confirm-section-title" id="cancel-reason-title">
+              취소 사유
+            </h2>
+            <div class="confirm-agree-list reserve-delete-reason-row">
+              <label class="confirm-check">
+                <input type="radio" name="cancelReason" value="mind-change" />
+                단순 변심
+              </label>
+              <label class="confirm-check">
+                <input
+                  type="radio"
+                  name="cancelReason"
+                  value="schedule-change"
+                />
+                일정 변경
+              </label>
+              <label class="confirm-check">
+                <input type="radio" name="cancelReason" value="other-hotel" />
+                타숙소 예약
+              </label>
+            </div>
+            <label class="confirm-label reserve-delete-other-label">
+              기타
+              <input
+                type="text"
+                id="cancel-reason-other"
+                placeholder="기타 사유를 입력해 주세요."
+              />
+            </label>
+            <div class="confirm-actions">
+              <button
+                type="button"
+                class="btn reserve-btn confirm-pay-submit"
+                id="cancel-submit-btn"
+              >
+                예약 취소
+              </button>
+            </div>
+          </section>
+        </div>
+      </div>
+
+      <div class="reserve-delete-modal-backdrop" id="cancel-modal" hidden>
+        <div
+          class="reserve-delete-modal"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="cancel-modal-title"
+        >
+          <p id="cancel-modal-title" class="reserve-delete-modal-title">
+            예약을 취소하시겠습니까? <br />
+            취소 후에는 복구가 불가능합니다.
+          </p>
+          <div class="reserve-delete-modal-actions">
+            <button type="button" class="btn reserve-btn" id="cancel-modal-yes">
+              예
+            </button>
+            <button type="button" class="btn reserve-btn" id="cancel-modal-no">
+              아니오
+            </button>
+          </div>
+          <p class="reserve-delete-modal-note">
+            * 환불 소요 기간 안내 <br />
+            카드사에 따라 영업일 기준 3~5일 소요될 수 있습니다.
+          </p>
+        </div>
+      </div>
+
+      <footer
+        id="site-business-footer-mount"
+        class="site-footer site-business-footer"
+        hidden
+      ></footer>
+    </main>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        var ROOM_LABEL = {
+          G1: "객실 G1",
+          G2: "객실 G2",
+          G3: "객실 G3",
+          G4: "객실 G4",
+        };
+        var params = new URLSearchParams(window.location.search);
+        var orderNo = params.get("orderNo") || "—";
+        var name = params.get("name") || "—";
+        var contact = params.get("contact") || "—";
+        var room = params.get("room") || "";
+        var checkIn = params.get("checkIn") || "";
+        var checkOut = params.get("checkOut") || "";
+        var totalAmount = parseInt(params.get("amount") || "0", 10) || 0;
+
+        function formatKRW(n) {
+          return Number(n || 0).toLocaleString("ko-KR") + "원";
+        }
+
+        function parseYMD(s) {
+          if (!/^\d{4}-\d{2}-\d{2}$/.test(s || "")) {
+            return null;
+          }
+          var p = s.split("-");
+          return new Date(Number(p[0]), Number(p[1]) - 1, Number(p[2]));
+        }
+
+        var today = new Date();
+        var todayDate = new Date(
+          today.getFullYear(),
+          today.getMonth(),
+          today.getDate(),
+        );
+        var checkInDate = parseYMD(checkIn);
+        var remainDate = 0;
+        if (checkInDate) {
+          remainDate = Math.floor((checkInDate - todayDate) / 86400000);
+        }
+
+        var refundCharge = 100;
+        if (remainDate > 15) {
+          refundCharge = 0;
+        } else if (remainDate >= 12) {
+          refundCharge = 20;
+        } else if (remainDate >= 9) {
+          refundCharge = 30;
+        } else if (remainDate >= 7) {
+          refundCharge = 40;
+        } else if (remainDate >= 5) {
+          refundCharge = 50;
+        } else {
+          refundCharge = 100;
+        }
+
+        var refundAmount = Math.max(
+          0,
+          Math.round(totalAmount * ((100 - refundCharge) / 100)),
+        );
+
+        document.getElementById("cancel-order").textContent = orderNo;
+        document.getElementById("cancel-room").textContent =
+          ROOM_LABEL[room] || room || "—";
+        document.getElementById("cancel-schedule").textContent =
+          (checkIn || "—") + " ~ " + (checkOut || "—");
+        document.getElementById("cancel-amount").textContent =
+          formatKRW(totalAmount);
+        document.getElementById("cancel-name").textContent = name;
+        document.getElementById("cancel-contact").textContent = contact;
+        document.getElementById("refund-amount").textContent =
+          formatKRW(refundAmount);
+        document.getElementById("refund-rule-summary").textContent =
+          "remain-date " +
+          remainDate +
+          "일 기준, refund-charge " +
+          refundCharge +
+          "%가 적용됩니다.";
+
+        var modal = document.getElementById("cancel-modal");
+        var openBtn = document.getElementById("cancel-submit-btn");
+        var yesBtn = document.getElementById("cancel-modal-yes");
+        var noBtn = document.getElementById("cancel-modal-no");
+
+        openBtn.addEventListener("click", function () {
+          modal.hidden = false;
+        });
+        noBtn.addEventListener("click", function () {
+          modal.hidden = true;
+        });
+        yesBtn.addEventListener("click", function () {
+          window.location.href = "delete-complete.html";
+        });
+      });
+    </script>
+    <script defer src="js/grafford-page-fade.js"></script>
+    <script src="js/site-business-footer.js"></script>
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        window.initSiteBusinessFooter({
+          instagram: {
+            href: "https://www.instagram.com/p/DWaqvQKkzye/",
+            imgSrc: "images/insta.png",
+          },
+          lines: [
+            "대표 : GRAFFORD",
+            "주소 : 제주특별자치도 서귀포시 토산중앙로 22",
+            "사업자등록번호 : 123-45-67890",
+            "전화 : 010-1234-5678",
+            "이메일 : info@grafford.com",
+            " ",
+            "© 2026 GRAFFORD. all rights reserved.",
+          ],
+        });
+      });
+    </script>
+  </body>
 </html>
