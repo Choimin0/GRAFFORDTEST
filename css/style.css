@@ -2110,6 +2110,12 @@ iframe.map {
   opacity: 0.88;
 }
 
+.cal-nav:disabled {
+  color: #a9a9a9;
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 .cal-weekdays {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
@@ -2206,7 +2212,6 @@ iframe.map {
   margin-bottom: 1rem;
   padding: 0.85rem 0;
   border-top: 1px solid rgba(58, 53, 49, 0.1);
-  border-bottom: 1px solid rgba(58, 53, 49, 0.1);
 }
 
 .reservation-extra-row {

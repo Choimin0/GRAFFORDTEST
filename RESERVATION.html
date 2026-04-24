@@ -552,6 +552,25 @@
         var occupiedNightSet = new Set();
         var monthFadeTimer = null;
         var currentExtraGuests = 0;
+        var now = new Date();
+        var today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+
+        function addMonthsKeepingDay(baseDate, monthsToAdd) {
+          var y = baseDate.getFullYear();
+          var m = baseDate.getMonth() + monthsToAdd;
+          var d = baseDate.getDate();
+          var targetMonthLastDay = new Date(y, m + 1, 0).getDate();
+          return new Date(y, m, Math.min(d, targetMonthLastDay));
+        }
+
+        var minViewMonth = new Date(today.getFullYear(), today.getMonth() - 6, 1);
+        var maxBookableDate = addMonthsKeepingDay(today, 6);
+        var maxBookableYMD = formatYMD(maxBookableDate);
+        var maxViewMonth = new Date(
+          maxBookableDate.getFullYear(),
+          maxBookableDate.getMonth(),
+          1,
+        );
 
         function pad(n) {
           return n < 10 ? "0" + n : String(n);
@@ -581,6 +600,35 @@
 
         function formatKRW(n) {
           return n.toLocaleString("ko-KR") + "\uc6d0";
+        }
+
+        function isSameMonth(a, b) {
+          return (
+            a &&
+            b &&
+            a.getFullYear() === b.getFullYear() &&
+            a.getMonth() === b.getMonth()
+          );
+        }
+
+        function clampViewMonth(target) {
+          if (!target) {
+            return new Date(minViewMonth.getTime());
+          }
+          if (target < minViewMonth) {
+            return new Date(minViewMonth.getTime());
+          }
+          if (target > maxViewMonth) {
+            return new Date(maxViewMonth.getTime());
+          }
+          return new Date(target.getFullYear(), target.getMonth(), 1);
+        }
+
+        function isDateBeyondBookable(dateObj) {
+          if (!dateObj) {
+            return false;
+          }
+          return formatYMD(dateObj) > maxBookableYMD;
         }
 
         function getExtraGuests() {
@@ -921,8 +969,13 @@
         }
 
         function shiftCalendarMonth(delta, withFade) {
+          var nextView = new Date(viewDate.getFullYear(), viewDate.getMonth() + delta, 1);
+          var clampedNextView = clampViewMonth(nextView);
+          if (isSameMonth(clampedNextView, viewDate)) {
+            return;
+          }
           if (!withFade || !bookingCalendar) {
-            viewDate.setMonth(viewDate.getMonth() + delta);
+            viewDate = clampedNextView;
             renderCalendar();
             return;
           }
@@ -932,7 +985,7 @@
           }
           bookingCalendar.classList.add("is-month-fading");
           monthFadeTimer = window.setTimeout(function () {
-            viewDate.setMonth(viewDate.getMonth() + delta);
+            viewDate = clampedNextView;
             renderCalendar();
             bookingCalendar.classList.remove("is-month-fading");
             monthFadeTimer = null;
@@ -961,6 +1014,7 @@
         }
 
         function renderCalendar() {
+          viewDate = clampViewMonth(viewDate);
           var y = viewDate.getFullYear();
           var m = viewDate.getMonth();
           var monthNames = [
@@ -995,13 +1049,20 @@
             calGrid.appendChild(empty);
           }
 
-          var now = new Date();
-          var today = new Date(now.getTime());
-          today.setHours(0, 0, 0, 0);
           var isTodayAfterCutoff = now.getHours() >= 19;
           var inCheckoutMode = !!(checkIn && !checkOut);
           if (calGrid) {
             calGrid.classList.toggle("is-selecting-checkout", inCheckoutMode);
+          }
+          if (calPrev) {
+            var atMinMonth = isSameMonth(viewDate, minViewMonth);
+            calPrev.disabled = atMinMonth;
+            calPrev.setAttribute("aria-disabled", atMinMonth ? "true" : "false");
+          }
+          if (calNext) {
+            var atMaxMonth = isSameMonth(viewDate, maxViewMonth);
+            calNext.disabled = atMaxMonth;
+            calNext.setAttribute("aria-disabled", atMaxMonth ? "true" : "false");
           }
 
           for (var d = 1; d <= lastDay; d++) {
@@ -1015,9 +1076,12 @@
             var isPast =
               cellDate < today ||
               (isTodayAfterCutoff && sameDay(cellDate, today));
+            var isBeyondBookable = isDateBeyondBookable(cellDate);
             var isOcc = occupiedNightSet.has(ymdStr);
             var disabled = false;
             if (isPast) {
+              disabled = true;
+            } else if (isBeyondBookable) {
               disabled = true;
             } else if (isOcc) {
               /* 체크아웃 선택 모드에서는 "점유일"도 체크아웃 후보로 허용 (당일 퇴실) */
@@ -1035,7 +1099,7 @@
 
             btn.disabled = disabled;
 
-            if (isPast) {
+            if (isPast || isBeyondBookable) {
               btn.classList.add("cal-past");
             } else if (isOcc) {
               btn.classList.add("cal-past", "cal-booked");
@@ -1062,6 +1126,7 @@
                   if (
                     dateCopy < today ||
                     (isTodayAfterCutoff && sameDay(dateCopy, today)) ||
+                    isDateBeyondBookable(dateCopy) ||
                     occupiedNightSet.has(formatYMD(dateCopy))
                   ) {
                     return;
@@ -1081,6 +1146,7 @@
                   } else if (
                     dateCopy < today ||
                     (isTodayAfterCutoff && sameDay(dateCopy, today)) ||
+                    isDateBeyondBookable(dateCopy) ||
                     (occupiedNightSet.has(formatYMD(dateCopy)) &&
                       !canSelectCheckOut(checkIn, dateCopy))
                   ) {
@@ -1094,10 +1160,14 @@
                     checkOut = new Date(dateCopy);
                   }
                 }
-                calCheckinEl.textContent = formatDisplay(checkIn);
-                calCheckoutEl.textContent = checkOut
-                  ? formatDisplay(checkOut)
-                  : "\u2014";
+                if (calCheckinEl) {
+                  calCheckinEl.textContent = formatDisplay(checkIn);
+                }
+                if (calCheckoutEl) {
+                  calCheckoutEl.textContent = checkOut
+                    ? formatDisplay(checkOut)
+                    : "\u2014";
+                }
 
                 if (availabilityEl) {
                   if (checkIn && checkOut) {
