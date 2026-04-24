@@ -2716,6 +2716,7 @@ iframe.map {
 }
 
 .confirm-agree-list .confirm-check input,
+.reserve-delete-other-row .confirm-check input,
 .confirm-check--all input {
   appearance: none;
   -webkit-appearance: none;
@@ -2727,6 +2728,7 @@ iframe.map {
 }
 
 .confirm-agree-list .confirm-check input::before,
+.reserve-delete-other-row .confirm-check input::before,
 .confirm-check--all input::before {
   content: "";
   width: 0.55rem;
@@ -2738,11 +2740,13 @@ iframe.map {
 }
 
 .confirm-agree-list .confirm-check input:checked::before,
+.reserve-delete-other-row .confirm-check input:checked::before,
 .confirm-check--all input:checked::before {
   transform: scale(1);
 }
 
 .confirm-agree-list .confirm-check input:focus-visible,
+.reserve-delete-other-row .confirm-check input:focus-visible,
 .confirm-check--all input:focus-visible {
   outline: 2px solid rgba(83, 98, 77, 0.45);
   outline-offset: 2px;
@@ -2989,7 +2993,7 @@ iframe.map {
 }
 
 .reserve-delete-other-label input {
-  width: 100%;
+  width: 70%;
 }
 
 /* 무통장 입금 예약 완료 (reserve-complete.html) */

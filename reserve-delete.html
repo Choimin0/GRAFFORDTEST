@@ -66,9 +66,8 @@
               환불 규정
             </h2>
             <p class="confirm-guide-content">
-              입실일까지 남은 날짜(remain-date)에 따라 환불
-              수수료(refund-charge)가 적용됩니다. 예상 환불 금액은 결제 금액에서
-              환불 수수료를 차감한 금액입니다.
+              입실일까지 남은 날짜에 따라 환불 수수료가 차등 적용됩니다. 예상
+              환불 금액은 결제 금액에서 환불 수수료를 차감한 금액입니다.
             </p>
             <p class="confirm-guide-content" id="refund-rule-summary"></p>
             <div class="reserve-delete-refund-box">
@@ -217,10 +216,7 @@
 
         function reservationsApiUrl() {
           var base = "";
-          if (
-            typeof window !== "undefined" &&
-            window.__GRAFFORD_API_BASE__
-          ) {
+          if (typeof window !== "undefined" && window.__GRAFFORD_API_BASE__) {
             base = String(window.__GRAFFORD_API_BASE__).replace(/\/$/, "");
           }
           return base + "/api/reservations";
@@ -278,9 +274,9 @@
         document.getElementById("refund-amount").textContent =
           formatKRW(refundAmount);
         document.getElementById("refund-rule-summary").textContent =
-          "remain-date " +
+          "입실일로부터 남은 날짜 " +
           remainDate +
-          "일 기준, refund-charge " +
+          "일 기준, 환불 수수료 " +
           refundCharge +
           "%가 적용됩니다.";
 
@@ -289,13 +285,17 @@
         var yesBtn = document.getElementById("cancel-modal-yes");
         var noBtn = document.getElementById("cancel-modal-no");
         var reasonOtherInput = document.getElementById("cancel-reason-other");
-        var reasonInputs = document.querySelectorAll('input[name="cancelReason"]');
+        var reasonInputs = document.querySelectorAll(
+          'input[name="cancelReason"]',
+        );
 
         function syncOtherReasonState() {
           if (!reasonOtherInput) {
             return;
           }
-          var selected = document.querySelector('input[name="cancelReason"]:checked');
+          var selected = document.querySelector(
+            'input[name="cancelReason"]:checked',
+          );
           var isOther = !!(selected && selected.value === "other");
           reasonOtherInput.disabled = !isOther;
           if (!isOther) {
