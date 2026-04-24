@@ -203,55 +203,6 @@
           window.location.href = "reserve-complete.html?" + p.toString();
         }
 
-        function showOk(
-          orderNumber,
-          guestName,
-          contact,
-          roomKey,
-          checkIn,
-          checkOut,
-          nightsText,
-          extraText,
-          amountNum,
-          payMethod,
-          requestText,
-          sourceNote,
-        ) {
-          errEl.hidden = true;
-          okEl.hidden = false;
-          if (sourceEl) {
-            sourceEl.textContent = sourceNote || "";
-            sourceEl.hidden = !sourceNote;
-          }
-          document.getElementById("res-order").textContent = orderNumber;
-          document.getElementById("res-name").textContent = guestName;
-          document.getElementById("res-contact").textContent = contact || "—";
-          document.getElementById("res-room").textContent =
-            ROOM_LABEL[roomKey] || roomKey || "—";
-          document.getElementById("res-schedule").textContent =
-            (checkIn || "—") + " ~ " + (checkOut || "—");
-          document.getElementById("res-nights").textContent = nightsText;
-          document.getElementById("res-extra").textContent = extraText;
-          document.getElementById("res-amount").textContent = formatKRW(
-            amountNum || 0,
-          );
-          document.getElementById("res-pay").textContent = payLabel(payMethod);
-          document.getElementById("res-request").textContent = requestText || "—";
-          if (cancelLinkEl) {
-            var cancelParams = new URLSearchParams();
-            cancelParams.set("orderNo", orderNumber || "");
-            cancelParams.set("name", guestName || "");
-            cancelParams.set("contact", contact || "");
-            cancelParams.set("room", roomKey || "");
-            cancelParams.set("checkIn", checkIn || "");
-            cancelParams.set("checkOut", checkOut || "");
-            cancelParams.set("amount", String(amountNum || 0));
-            cancelParams.set("payMethod", payMethod || "");
-            cancelParams.set("request", requestText || "");
-            cancelLinkEl.href = "reserve-delete.html?" + cancelParams.toString();
-          }
-        }
-
         function showError(msg) {
           okEl.hidden = true;
           errEl.textContent = msg;
@@ -297,20 +248,6 @@
                 if (result.data.warning) {
                   note += " " + result.data.warning;
                 }
-                showOk(
-                  row.reservationNumber,
-                  row.guestName,
-                  row.contact,
-                  row.roomType,
-                  row.checkIn,
-                  row.checkOut,
-                  nightsText,
-                  extraText,
-                  row.totalAmount != null ? row.totalAmount : 0,
-                  row.paymentMethod,
-                  row.guestRequest || "",
-                  note,
-                );
                 goToReserveComplete({
                   orderNo: row.reservationNumber,
                   room: row.roomType,
@@ -337,20 +274,6 @@
                 );
                 return;
               }
-              showOk(
-                found.orderNumber,
-                found.guestName,
-                found.contact,
-                found.room,
-                found.checkIn,
-                found.checkOut,
-                (found.nights || 0) + "박",
-                (found.extraGuests || 0) + "명",
-                found.totalAmount || 0,
-                found.paymentMethod,
-                found.guestRequest || "",
-                "이 브라우저에만 저장된 예약입니다(무통장 입금 테스트). 서버에는 다른 행이 있을 수 있습니다.",
-              );
               goToReserveComplete({
                 orderNo: found.orderNumber,
                 room: found.room,
@@ -375,20 +298,6 @@
                 );
                 return;
               }
-              showOk(
-                found.orderNumber,
-                found.guestName,
-                found.contact,
-                found.room,
-                found.checkIn,
-                found.checkOut,
-                (found.nights || 0) + "박",
-                (found.extraGuests || 0) + "명",
-                found.totalAmount || 0,
-                found.paymentMethod,
-                found.guestRequest || "",
-                "서버 조회에 실패해, 이 브라우저에만 저장된 예약을 표시합니다.",
-              );
               goToReserveComplete({
                 orderNo: found.orderNumber,
                 room: found.room,

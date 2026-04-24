@@ -43,8 +43,10 @@
     </nav>
 
     <main class="content-section confirm-page reserve-complete-page">
-      <h1 class="confirm-title">대지가 내어주는 그라운드가 당신을 기다립니다</h1>
-
+      <h1 class="confirm-title">
+        대지가 내어주는 그라운드가 당신을 기다립니다
+      </h1>
+      <p><br /></p>
       <div class="confirm-layout-grid">
         <div class="confirm-layout-col">
           <section
@@ -205,7 +207,8 @@
           if (!mainImg || !images.length) return;
           var src = images[galleryIndex];
           mainImg.src = src;
-          mainImg.alt = (ROOM_LABEL[room] || room) + " 사진 " + (galleryIndex + 1);
+          mainImg.alt =
+            (ROOM_LABEL[room] || room) + " 사진 " + (galleryIndex + 1);
         }
         if (mainImg) {
           renderGallery();
