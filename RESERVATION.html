@@ -55,7 +55,6 @@
       </div>
       <header class="site-header hero-header">
         <h1>RESERVATION</h1>
-        <p>Simple and smooth booking</p>
       </header>
       <button
         class="scroll-down-btn"
@@ -563,7 +562,11 @@
           return new Date(y, m, Math.min(d, targetMonthLastDay));
         }
 
-        var minViewMonth = new Date(today.getFullYear(), today.getMonth() - 6, 1);
+        var minViewMonth = new Date(
+          today.getFullYear(),
+          today.getMonth() - 6,
+          1,
+        );
         var maxBookableDate = addMonthsKeepingDay(today, 6);
         var maxBookableYMD = formatYMD(maxBookableDate);
         var maxViewMonth = new Date(
@@ -973,7 +976,11 @@
         }
 
         function shiftCalendarMonth(delta, withFade) {
-          var nextView = new Date(viewDate.getFullYear(), viewDate.getMonth() + delta, 1);
+          var nextView = new Date(
+            viewDate.getFullYear(),
+            viewDate.getMonth() + delta,
+            1,
+          );
           var clampedNextView = clampViewMonth(nextView);
           if (isSameMonth(clampedNextView, viewDate)) {
             return;
@@ -1061,12 +1068,18 @@
           if (calPrev) {
             var atMinMonth = isSameMonth(viewDate, minViewMonth);
             calPrev.disabled = atMinMonth;
-            calPrev.setAttribute("aria-disabled", atMinMonth ? "true" : "false");
+            calPrev.setAttribute(
+              "aria-disabled",
+              atMinMonth ? "true" : "false",
+            );
           }
           if (calNext) {
             var atMaxMonth = isSameMonth(viewDate, maxViewMonth);
             calNext.disabled = atMaxMonth;
-            calNext.setAttribute("aria-disabled", atMaxMonth ? "true" : "false");
+            calNext.setAttribute(
+              "aria-disabled",
+              atMaxMonth ? "true" : "false",
+            );
           }
 
           for (var d = 1; d <= lastDay; d++) {
@@ -1237,12 +1250,16 @@
         }
 
         var allowedRooms = ["G1", "G2", "G3", "G4"];
-        var savedRoom = sessionStorage.getItem("graffordReservationSelectedRoom");
+        var savedRoom = sessionStorage.getItem(
+          "graffordReservationSelectedRoom",
+        );
         if (savedRoom) {
           savedRoom = savedRoom.trim().toUpperCase();
         }
         var initialRoom =
-          savedRoom && allowedRooms.indexOf(savedRoom) !== -1 ? savedRoom : "G1";
+          savedRoom && allowedRooms.indexOf(savedRoom) !== -1
+            ? savedRoom
+            : "G1";
         setRoom(initialRoom);
         if (savedRoom && allowedRooms.indexOf(savedRoom) !== -1) {
           var bookingAnchor = document.getElementById("reservation-booking");
