@@ -1410,7 +1410,8 @@ section ul li {
 /* ROOMS 예약하기 버튼은 유지, 나머지 통일 버튼은 기본색 grafford-beige2 */
 .reservation-lookup-btn.btn.reserve-btn,
 .reserve-cta.btn.reserve-btn,
-.confirm-pay-submit.btn.reserve-btn {
+.confirm-pay-submit.btn.reserve-btn,
+.rooms-features .room-feature .btn.reserve-btn {
   background-color: var(--grafford-beige2);
   background-image: linear-gradient(
     110deg,
