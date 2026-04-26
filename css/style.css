@@ -1016,6 +1016,10 @@ main {
   align-self: flex-start;
 }
 
+.rooms-features .room-feature .feature-heading {
+  color: var(--grafford-mud);
+}
+
 .room-service-icons {
   display: flex;
   flex-wrap: wrap;

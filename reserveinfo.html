@@ -205,7 +205,7 @@
           p.set("extraGuests", String(data.extraGuests || 0));
           p.set("totalAmount", String(data.totalAmount || 0));
           p.set("payMethod", data.payMethod || "");
-          window.location.href = "reserve-complete.html?" + p.toString();
+          window.location.href = "reserve-check.html?" + p.toString();
         }
 
         function showError(msg) {

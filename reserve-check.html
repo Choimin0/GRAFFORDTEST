@@ -1,0 +1,324 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" href="images/LOGO-transparent.png" type="image/png" />
+    <title>예약 조회 - GRAFFORD</title>
+    <link rel="stylesheet" href="css/style.css" />
+    <script src="js/mobile-nav.js" defer></script>
+  </head>
+  <body>
+    <div id="grafford-react-fade-root"></div>
+    <nav class="site-nav top-right-nav">
+      <a href="index.html" class="nav-logo" aria-label="홈으로 이동">
+        <img src="images/LOGO.png" alt="GRAFFORD LOGO" />
+      </a>
+      <button
+        type="button"
+        class="mobile-menu-btn"
+        aria-label="메뉴 열기"
+        aria-controls="mobile-nav-drawer"
+        aria-expanded="false"
+      >
+        MENU
+      </button>
+      <div class="mobile-nav-backdrop" hidden></div>
+      <aside
+        id="mobile-nav-drawer"
+        class="mobile-nav-drawer"
+        aria-hidden="true"
+      >
+        <a href="STORY.html">STORY</a>
+        <a href="GROUND.html">GROUND</a>
+        <a href="FACILITIES.html">FACILITIES</a>
+        <a href="RESERVATION.html">RESERVATION</a>
+      </aside>
+      <div class="desktop-nav-links" aria-label="데스크톱 메뉴">
+        <a href="STORY.html">STORY</a>
+        <a href="GROUND.html">GROUND</a>
+        <a href="FACILITIES.html">FACILITIES</a>
+        <a href="RESERVATION.html">RESERVATION</a>
+      </div>
+    </nav>
+
+    <main class="content-section confirm-page reserve-complete-page">
+      <h1 class="confirm-title">예약 조회</h1>
+      <section
+        id="complete-bridge-copy"
+        class="room-bridge-copy"
+        aria-label="완료 안내 문구"
+      >
+        <p>대지가 내어주는 그라운드가 당신을 기다립니다</p>
+      </section>
+      <div class="confirm-layout-grid">
+        <div class="confirm-layout-col">
+          <section
+            class="confirm-section"
+            aria-labelledby="complete-room-title"
+          >
+            <p class="reserve-complete-room-name" id="complete-room-name">—</p>
+            <div class="reserve-complete-gallery">
+              <div class="gallery-main-wrap reserve-complete-gallery-main-wrap">
+                <button
+                  type="button"
+                  class="gallery-nav gallery-prev"
+                  id="complete-gallery-prev"
+                  aria-label="이전 사진"
+                >
+                  &#10094;
+                </button>
+                <img
+                  class="gallery-main-img"
+                  id="complete-gallery-main"
+                  src="images/A00.jpg"
+                  alt="예약 객실 대표 이미지"
+                  loading="lazy"
+                  decoding="async"
+                />
+                <button
+                  type="button"
+                  class="gallery-nav gallery-next"
+                  id="complete-gallery-next"
+                  aria-label="다음 사진"
+                >
+                  &#10095;
+                </button>
+              </div>
+            </div>
+          </section>
+
+          <section class="confirm-section" aria-labelledby="complete-notice-1">
+            <h2 class="confirm-section-title" id="complete-notice-1">
+              입실 전 유의사항
+            </h2>
+            <p class="confirm-guide-content">
+              입실 당일 오전에 체크인 안내 메시지가 발송됩니다. 기준 인원을
+              초과한 입실은 불가하며, 추가 인원은 사전 신청 내역 기준으로만
+              인정됩니다.
+            </p>
+          </section>
+
+          <section class="confirm-section" aria-labelledby="complete-notice-2">
+            <h2 class="confirm-section-title" id="complete-notice-2">
+              비대면 체크인 안내사항
+            </h2>
+            <p class="confirm-guide-content" id="complete-checkin-guide"></p>
+          </section>
+
+          <section class="confirm-section" aria-labelledby="complete-notice-3">
+            <h2 class="confirm-section-title" id="complete-notice-3">
+              주차 안내
+            </h2>
+            <p class="confirm-guide-content">객실 당 1대 주차 가능합니다.</p>
+          </section>
+        </div>
+
+        <div class="confirm-layout-col confirm-layout-col--right">
+          <section
+            class="confirm-section"
+            aria-labelledby="complete-booking-info-title"
+          >
+            <h2 class="confirm-section-title" id="complete-booking-info-title">
+              예약 정보
+            </h2>
+            <dl class="reserve-delete-dl">
+              <dt>예약 번호</dt>
+              <dd id="complete-order-no">—</dd>
+              <dt>체크인/체크아웃</dt>
+              <dd id="complete-schedule">—</dd>
+            </dl>
+          </section>
+
+          <section
+            class="confirm-section"
+            aria-labelledby="complete-guest-info-title"
+          >
+            <h2 class="confirm-section-title" id="complete-guest-info-title">
+              예약자 정보
+            </h2>
+            <dl class="reserve-delete-dl">
+              <dt>방문 인원</dt>
+              <dd id="complete-guest-count">—</dd>
+              <dt>예약자 성함</dt>
+              <dd id="complete-guest-name">—</dd>
+              <dt>예약자 연락처</dt>
+              <dd id="complete-contact">—</dd>
+              <dt>요청사항</dt>
+              <dd id="complete-request">—</dd>
+            </dl>
+          </section>
+
+          <section class="confirm-section">
+            <div class="confirm-actions reserve-complete-actions">
+              <a href="index.html" class="reserve-complete-action-link"
+                >메인으로</a
+              >
+              <a
+                href="reserve-delete.html"
+                id="complete-link-cancel"
+                class="reserve-complete-action-link"
+                >예약취소</a
+              >
+            </div>
+          </section>
+        </div>
+      </div>
+      <footer
+        id="site-business-footer-mount"
+        class="site-footer site-business-footer"
+        hidden
+      ></footer>
+    </main>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        var ROOM_LABEL = {
+          G1: "G1",
+          G2: "G2",
+          G3: "G3",
+          G4: "G4",
+        };
+        var ROOM_IMAGE_PREFIX = { G1: "A", G2: "B", G3: "C", G4: "D" };
+        var params = new URLSearchParams(window.location.search);
+        var orderNo = params.get("orderNo") || "";
+        var room = (params.get("room") || "G1").toUpperCase();
+        var checkIn = params.get("checkIn") || "";
+        var checkOut = params.get("checkOut") || "";
+        var guestName = params.get("guestName") || "";
+        var contact = params.get("contact") || "";
+        var guestRequest = params.get("guestRequest") || "";
+        var guestCount = params.get("guestCount") || "";
+        var extraGuests = params.get("extraGuests") || "0";
+        var totalAmount = params.get("totalAmount") || "0";
+        var payMethod = params.get("payMethod") || "";
+        var orderEl = document.getElementById("complete-order-no");
+        orderEl.textContent = orderNo || "번호를 확인할 수 없습니다.";
+
+        document.getElementById("complete-room-name").textContent =
+          ROOM_LABEL[room] || room || "객실 정보 없음";
+        document.getElementById("complete-schedule").textContent =
+          (checkIn || "—") + " ~ " + (checkOut || "—");
+        document.getElementById("complete-guest-name").textContent =
+          guestName || "—";
+        document.getElementById("complete-contact").textContent = contact || "—";
+        document.getElementById("complete-request").textContent =
+          guestRequest || "—";
+        var checkinGuideEl = document.getElementById("complete-checkin-guide");
+        if (checkinGuideEl) {
+          var contactDigits = String(contact || "").replace(/\D/g, "");
+          var contactLast4 =
+            contactDigits.length >= 4 ? contactDigits.slice(-4) : "----";
+          checkinGuideEl.innerHTML =
+            '체크인 당일 예약 시 기입된 연락처 뒷번호 4자리(<strong class="reserve-complete-pin">' +
+            contactLast4 +
+            "</strong>)로 설정될 예정입니다.<br />예약시 입력해주신 연락처를 통해 입실 당일 관련 안내 사항을 카카오톡 알림톡으로 발송해드리겠습니다.";
+        }
+
+        var parsedGuestCount = parseInt(guestCount || "", 10);
+        if (!parsedGuestCount || parsedGuestCount < 1) {
+          parsedGuestCount = Math.max(
+            1,
+            2 + (parseInt(extraGuests || "0", 10) || 0),
+          );
+        }
+        document.getElementById("complete-guest-count").textContent =
+          String(parsedGuestCount) + "명";
+
+        var prefix = ROOM_IMAGE_PREFIX[room] || "A";
+        var images = [
+          "images/" + prefix + "00.jpg",
+          "images/" + prefix + "01.jpg",
+          "images/" + prefix + "02.jpg",
+        ];
+        var mainImg = document.getElementById("complete-gallery-main");
+        var prevBtn = document.getElementById("complete-gallery-prev");
+        var nextBtn = document.getElementById("complete-gallery-next");
+        var galleryIndex = 0;
+        var galleryFadeMs = 280;
+        var galleryTimer = null;
+
+        function renderGallery(withFade) {
+          if (!mainImg || !images.length) return;
+          var src = images[galleryIndex];
+          var altText =
+            (ROOM_LABEL[room] || room) + " 사진 " + (galleryIndex + 1);
+          if (!withFade) {
+            mainImg.src = src;
+            mainImg.alt = altText;
+            return;
+          }
+
+          mainImg.classList.add("is-switching");
+          if (galleryTimer) {
+            window.clearTimeout(galleryTimer);
+            galleryTimer = null;
+          }
+          galleryTimer = window.setTimeout(function () {
+            mainImg.src = src;
+            mainImg.alt = altText;
+            var done = function () {
+              mainImg.removeEventListener("load", done);
+              mainImg.classList.remove("is-switching");
+            };
+            mainImg.addEventListener("load", done);
+            if (mainImg.complete) {
+              mainImg.classList.remove("is-switching");
+            }
+          }, galleryFadeMs);
+        }
+        if (mainImg) {
+          renderGallery(false);
+        }
+        if (prevBtn) {
+          prevBtn.addEventListener("click", function () {
+            galleryIndex = (galleryIndex - 1 + images.length) % images.length;
+            renderGallery(true);
+          });
+        }
+        if (nextBtn) {
+          nextBtn.addEventListener("click", function () {
+            galleryIndex = (galleryIndex + 1) % images.length;
+            renderGallery(true);
+          });
+        }
+
+        var cancelLink = document.getElementById("complete-link-cancel");
+        if (cancelLink) {
+          var cancelParams = new URLSearchParams();
+          cancelParams.set("orderNo", orderNo || "");
+          cancelParams.set("name", guestName || "");
+          cancelParams.set("contact", contact || "");
+          cancelParams.set("room", room || "");
+          cancelParams.set("checkIn", checkIn || "");
+          cancelParams.set("checkOut", checkOut || "");
+          cancelParams.set("amount", String(totalAmount || "0"));
+          cancelParams.set("payMethod", payMethod || "");
+          cancelParams.set("request", guestRequest || "");
+          cancelLink.href = "reserve-delete.html?" + cancelParams.toString();
+        }
+      });
+    </script>
+    <script defer src="js/grafford-page-fade.js"></script>
+    <script src="js/site-business-footer.js"></script>
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        window.initSiteBusinessFooter({
+          instagram: {
+            href: "https://www.instagram.com/p/DWaqvQKkzye/",
+            imgSrc: "images/insta.png",
+          },
+          lines: [
+            "대표 : GRAFFORD",
+            "주소 : 제주특별자치도 서귀포시 토산중앙로 22",
+            "사업자등록번호 : 123-45-67890",
+            "전화 : 010-1234-5678",
+            "이메일 : info@grafford.com",
+            " ",
+            "© 2026 GRAFFORD. all rights reserved.",
+          ],
+        });
+      });
+    </script>
+  </body>
+</html>
