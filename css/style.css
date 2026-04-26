@@ -2422,7 +2422,7 @@ iframe.map {
 
 .checkout-form {
   margin-top: 2rem;
-  max-width: 70%;
+  max-width: 100%;
 }
 
 .confirm-layout-grid {
