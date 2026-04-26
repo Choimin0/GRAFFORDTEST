@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="css/style.css" />
     <style>
       .admin-page {
-        width: 100%;
+        max-width: 100%;
       }
       .admin-top-logo {
         height: 25px;
@@ -44,11 +44,20 @@
       .admin-password-toggle {
         border: 1px solid #d4cdc5;
         background: #fff;
-        color: var(--grafford-mud2);
-        padding: 0.33rem 0.55rem;
-        line-height: 1;
+        width: 2.15rem;
+        height: 2.15rem;
+        padding: 0;
+        line-height: 0;
         cursor: pointer;
-        white-space: nowrap;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .admin-password-toggle img {
+        width: 1.05rem;
+        height: 1.05rem;
+        object-fit: contain;
+        display: block;
       }
       .admin-table-wrap {
         margin-top: 1rem;
@@ -109,7 +118,7 @@
   <body>
     <main class="content-section confirm-page admin-page">
       <a href="index.html" class="admin-top-logo" aria-label="메인으로 이동">
-        <img src="images/LOGO.png" alt="GRAFFORD LOGO" />
+        <img src="images/LOGO-transparent.png" alt="GRAFFORD LOGO" />
       </a>
       <h1 class="confirm-title">관리자 페이지</h1>
       <section class="confirm-section" aria-labelledby="admin-login-title">
@@ -136,7 +145,7 @@
                 class="admin-password-toggle"
                 aria-label="비밀번호 보기"
               >
-                보기
+                <img src="images/view.png" alt="" />
               </button>
             </span>
           </label>
@@ -188,6 +197,7 @@
     <script>
       document.addEventListener("DOMContentLoaded", function () {
         var loginForm = document.getElementById("admin-login-form");
+        var loginTitleEl = document.getElementById("admin-login-title");
         var idInput = document.getElementById("admin-id");
         var pwInput = document.getElementById("admin-pw");
         var pwToggleBtn = document.getElementById("admin-pw-toggle");
@@ -366,6 +376,9 @@
                 throw new Error(result.data.error || "목록 조회 실패");
               }
               loginForm.hidden = true;
+              if (loginTitleEl) {
+                loginTitleEl.hidden = true;
+              }
               tableSection.hidden = false;
               latestRows = result.data.rows || [];
               renderRows(sortRows(latestRows));
@@ -435,7 +448,6 @@
           pwToggleBtn.addEventListener("click", function () {
             var showing = pwInput.type === "text";
             pwInput.type = showing ? "password" : "text";
-            pwToggleBtn.textContent = showing ? "보기" : "숨기기";
             pwToggleBtn.setAttribute(
               "aria-label",
               showing ? "비밀번호 보기" : "비밀번호 숨기기",
