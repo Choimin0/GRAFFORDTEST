@@ -1,0 +1,256 @@
+import pg from "pg";
+import crypto from "node:crypto";
+
+const { Pool } = pg;
+const LEGACY_TO_ROOM = { A: "G1", B: "G2", C: "G3", D: "G4" };
+const DEFAULT_CANCEL_TOKEN_TTL_MS = 10 * 60 * 1000;
+
+function getDatabaseUrl() {
+  return String(
+    process.env.POSTGRES_URL ||
+      process.env.POSTGRES_PRISMA_URL ||
+      process.env.POSTGRES_URL_NON_POOLING ||
+      process.env.DATABASE_URL ||
+      "",
+  ).trim();
+}
+
+var poolSingleton = null;
+
+function getPool() {
+  var databaseUrl = getDatabaseUrl();
+  if (!databaseUrl) {
+    return null;
+  }
+  if (!poolSingleton) {
+    poolSingleton = new Pool({
+      connectionString: databaseUrl,
+      max: 1,
+      connectionTimeoutMillis: 20000,
+      idleTimeoutMillis: 15000,
+    });
+  }
+  return poolSingleton;
+}
+
+function json(res, status, body) {
+  res.statusCode = status;
+  res.setHeader("Content-Type", "application/json; charset=utf-8");
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+  res.end(JSON.stringify(body));
+}
+
+function normalizeLookupName(s) {
+  return String(s || "")
+    .trim()
+    .replace(/\s+/g, " ");
+}
+
+function normalizeLookupOrder(s) {
+  var t = String(s || "")
+    .trim()
+    .replace(/\s+/g, "")
+    .toUpperCase();
+  if (t.startsWith("GRF-")) {
+    t = t.slice(4);
+  }
+  return t;
+}
+
+function normalizeRoomType(raw) {
+  var room = String(raw || "")
+    .trim()
+    .toUpperCase();
+  return LEGACY_TO_ROOM[room] || room;
+}
+
+function toYMD(v) {
+  if (v == null || v === "") {
+    return "";
+  }
+  if (typeof v === "string") {
+    return v.slice(0, 10);
+  }
+  var d = new Date(v);
+  if (isNaN(d.getTime())) {
+    return "";
+  }
+  var y = d.getUTCFullYear();
+  var m = String(d.getUTCMonth() + 1).padStart(2, "0");
+  var day = String(d.getUTCDate()).padStart(2, "0");
+  return y + "-" + m + "-" + day;
+}
+
+function readBody(req) {
+  return new Promise(function (resolve, reject) {
+    var chunks = [];
+    req.on("data", function (c) {
+      chunks.push(c);
+    });
+    req.on("end", function () {
+      try {
+        var raw = Buffer.concat(chunks).toString("utf8");
+        resolve(raw ? JSON.parse(raw) : {});
+      } catch (e) {
+        reject(e);
+      }
+    });
+    req.on("error", reject);
+  });
+}
+
+function getCancelTokenSecret() {
+  return String(
+    process.env.RESERVATION_CANCEL_TOKEN_SECRET ||
+      process.env.CANCEL_TOKEN_SECRET ||
+      getDatabaseUrl() ||
+      "",
+  ).trim();
+}
+
+function getCancelTokenTtlMs() {
+  var raw = String(
+    process.env.RESERVATION_CANCEL_TOKEN_TTL_MINUTES ||
+      process.env.CANCEL_TOKEN_TTL_MINUTES ||
+      "",
+  ).trim();
+  if (!raw) {
+    return DEFAULT_CANCEL_TOKEN_TTL_MS;
+  }
+  var mins = Number(raw);
+  if (!Number.isFinite(mins) || mins <= 0) {
+    return DEFAULT_CANCEL_TOKEN_TTL_MS;
+  }
+  mins = Math.min(1440, mins);
+  return Math.floor(mins * 60 * 1000);
+}
+
+function b64urlEncode(s) {
+  return Buffer.from(s, "utf8").toString("base64url");
+}
+
+function issueCancelToken(reservationNumber, guestName) {
+  var secret = getCancelTokenSecret();
+  var ttlMs = getCancelTokenTtlMs();
+  if (!secret) {
+    return "";
+  }
+  var payloadObj = {
+    reservationNumber: String(reservationNumber || ""),
+    guestName: normalizeLookupName(guestName || ""),
+    exp: Date.now() + ttlMs,
+    nonce: crypto.randomBytes(12).toString("hex"),
+  };
+  var payload = b64urlEncode(JSON.stringify(payloadObj));
+  var sig = crypto
+    .createHmac("sha256", secret)
+    .update(payload)
+    .digest("base64url");
+  return payload + "." + sig;
+}
+
+export default async function handler(req, res) {
+  if (req.method === "OPTIONS") {
+    res.statusCode = 204;
+    res.setHeader("Access-Control-Allow-Origin", "*");
+    res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
+    res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+    res.end();
+    return;
+  }
+
+  if (req.method !== "POST") {
+    json(res, 405, { ok: false, error: "Method not allowed" });
+    return;
+  }
+
+  var pool = getPool();
+  if (!pool) {
+    json(res, 503, {
+      ok: false,
+      error:
+        "DB 연결 정보가 없습니다. .env.local 에 POSTGRES_URL 등을 넣은 뒤 vercel dev 를 다시 실행하세요.",
+    });
+    return;
+  }
+
+  var body;
+  try {
+    body = await readBody(req);
+  } catch (e) {
+    json(res, 400, { ok: false, error: "Invalid JSON body" });
+    return;
+  }
+
+  var normName = normalizeLookupName(body.guestName || body.name || "");
+  var normOrder = normalizeLookupOrder(
+    body.reservationNumber || body.orderNo || body.number || "",
+  );
+  if (!normName || !normOrder) {
+    json(res, 400, {
+      ok: false,
+      error: "guestName 과 reservationNumber(또는 orderNo)가 필요합니다.",
+    });
+    return;
+  }
+
+  try {
+    var sel = await pool.query(
+      `SELECT
+        id,
+        reservation_number,
+        guest_name,
+        contact,
+        room_type,
+        check_in_date,
+        check_out_date,
+        guest_count,
+        stay_nights,
+        extra_guests,
+        total_amount,
+        guest_request,
+        payment_method,
+        created_at
+      FROM reservations
+      WHERE reservation_number = $1`,
+      [normOrder],
+    );
+    if (!sel.rows || !sel.rows.length) {
+      json(res, 404, { ok: false, error: "Not found" });
+      return;
+    }
+    var row = sel.rows[0];
+    if (normalizeLookupName(row.guest_name) !== normName) {
+      json(res, 404, { ok: false, error: "Not found" });
+      return;
+    }
+    json(res, 200, {
+      ok: true,
+      source: "database",
+      row: {
+        id: row.id,
+        reservationNumber: row.reservation_number,
+        guestName: row.guest_name,
+        contact: row.contact,
+        roomType: normalizeRoomType(row.room_type) || row.room_type,
+        checkIn: toYMD(row.check_in_date),
+        checkOut: toYMD(row.check_out_date),
+        guestCount: row.guest_count,
+        stayNights: row.stay_nights != null ? Number(row.stay_nights) : null,
+        extraGuests: row.extra_guests != null ? Number(row.extra_guests) : null,
+        totalAmount: row.total_amount != null ? Number(row.total_amount) : null,
+        guestRequest: row.guest_request || "",
+        paymentMethod: row.payment_method || null,
+        createdAt: row.created_at,
+      },
+      cancelToken: issueCancelToken(row.reservation_number, row.guest_name),
+    });
+  } catch (e) {
+    json(res, 500, {
+      ok: false,
+      error: String((e && e.message) || e || "Lookup failed"),
+    });
+  }
+}

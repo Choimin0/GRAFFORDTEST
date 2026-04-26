@@ -209,6 +209,7 @@
         var checkIn = params.get("checkIn") || "";
         var checkOut = params.get("checkOut") || "";
         var totalAmount = parseInt(params.get("amount") || "0", 10) || 0;
+        var cancelToken = params.get("cancelToken") || "";
 
         function formatKRW(n) {
           return Number(n || 0).toLocaleString("ko-KR") + "원";
@@ -370,6 +371,7 @@
             body: JSON.stringify({
               reservationNumber: orderNo,
               guestName: name,
+              cancelToken: cancelToken,
             }),
           })
             .then(function (resp) {

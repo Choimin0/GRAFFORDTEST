@@ -813,6 +813,10 @@
                 completeParams.set("extraGuests", String(extraGuests));
                 completeParams.set("totalAmount", String(totalAmount));
                 completeParams.set("payMethod", payInput.value);
+                completeParams.set(
+                  "cancelToken",
+                  (result.data && result.data.cancelToken) || "",
+                );
                 window.location.href =
                   "reserve-complete.html?" + completeParams.toString();
               } else {

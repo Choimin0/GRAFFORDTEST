@@ -1,5 +1,6 @@
 import { parse as parseUrl } from "node:url";
 import pg from "pg";
+import crypto from "node:crypto";
 
 const { Pool } = pg;
 
@@ -12,6 +13,7 @@ const MAX_NAME = 255;
 const MAX_CONTACT = 120;
 const MAX_RESV = 32;
 const MAX_GUEST_REQUEST = 2000;
+const DEFAULT_CANCEL_TOKEN_TTL_MS = 10 * 60 * 1000;
 
 /** Neon/Vercel에서 오는 URL 이름이 달라도 사용 (TCP — Neon's HTTP 404 회피) */
 function getDatabaseUrl() {
@@ -182,6 +184,97 @@ function readBody(req) {
   });
 }
 
+function getCancelTokenSecret() {
+  return String(
+    process.env.RESERVATION_CANCEL_TOKEN_SECRET ||
+      process.env.CANCEL_TOKEN_SECRET ||
+      getDatabaseUrl() ||
+      "",
+  ).trim();
+}
+
+function getCancelTokenTtlMs() {
+  var raw = String(
+    process.env.RESERVATION_CANCEL_TOKEN_TTL_MINUTES ||
+      process.env.CANCEL_TOKEN_TTL_MINUTES ||
+      "",
+  ).trim();
+  if (!raw) {
+    return DEFAULT_CANCEL_TOKEN_TTL_MS;
+  }
+  var mins = Number(raw);
+  if (!Number.isFinite(mins) || mins <= 0) {
+    return DEFAULT_CANCEL_TOKEN_TTL_MS;
+  }
+  // 상한 24시간(1440분)으로 제한해 과도한 장기 토큰 발급 방지
+  mins = Math.min(1440, mins);
+  return Math.floor(mins * 60 * 1000);
+}
+
+function b64urlEncode(s) {
+  return Buffer.from(s, "utf8").toString("base64url");
+}
+
+function b64urlDecode(s) {
+  return Buffer.from(String(s || ""), "base64url").toString("utf8");
+}
+
+function issueCancelToken(reservationNumber, guestName) {
+  var secret = getCancelTokenSecret();
+  var ttlMs = getCancelTokenTtlMs();
+  if (!secret) {
+    return "";
+  }
+  var payloadObj = {
+    reservationNumber: String(reservationNumber || ""),
+    guestName: normalizeLookupName(guestName || ""),
+    exp: Date.now() + ttlMs,
+    nonce: crypto.randomBytes(12).toString("hex"),
+  };
+  var payload = b64urlEncode(JSON.stringify(payloadObj));
+  var sig = crypto
+    .createHmac("sha256", secret)
+    .update(payload)
+    .digest("base64url");
+  return payload + "." + sig;
+}
+
+function verifyCancelToken(token, reservationNumber, guestName) {
+  var secret = getCancelTokenSecret();
+  if (!secret) {
+    return { ok: false, error: "토큰 검증 키가 설정되어 있지 않습니다." };
+  }
+  var parts = String(token || "").split(".");
+  if (parts.length !== 2) {
+    return { ok: false, error: "유효하지 않은 취소 토큰입니다." };
+  }
+  var payload = parts[0];
+  var sig = parts[1];
+  var expected = crypto
+    .createHmac("sha256", secret)
+    .update(payload)
+    .digest("base64url");
+  if (sig !== expected) {
+    return { ok: false, error: "취소 토큰 서명이 유효하지 않습니다." };
+  }
+  var obj;
+  try {
+    obj = JSON.parse(b64urlDecode(payload));
+  } catch (e) {
+    return { ok: false, error: "취소 토큰 형식이 올바르지 않습니다." };
+  }
+  if (!obj || !obj.exp || Date.now() > Number(obj.exp)) {
+    return { ok: false, error: "취소 토큰이 만료되었습니다." };
+  }
+  if (String(obj.reservationNumber || "") !== String(reservationNumber || "")) {
+    return { ok: false, error: "취소 토큰과 예약번호가 일치하지 않습니다." };
+  }
+  if (normalizeLookupName(obj.guestName) !== normalizeLookupName(guestName)) {
+    return { ok: false, error: "취소 토큰과 예약자명이 일치하지 않습니다." };
+  }
+  return { ok: true };
+}
+
 async function getJsonBody(req) {
   if (
     req.body != null &&
@@ -259,6 +352,15 @@ export default async function handler(req, res) {
           code: e.code || null,
         });
       }
+      return;
+    }
+
+    if (q.guestName || q.name || q.reservationNumber || q.orderNo || q.number) {
+      json(res, 405, {
+        ok: false,
+        error:
+          "보안 강화를 위해 예약 조회는 POST /api/reservations-lookup 만 허용됩니다.",
+      });
       return;
     }
 
@@ -410,6 +512,7 @@ export default async function handler(req, res) {
       deleteBody.reservationNumber || deleteBody.orderNo || "",
     );
     var delGuestName = normalizeLookupName(deleteBody.guestName || "");
+    var cancelToken = String(deleteBody.cancelToken || "").trim();
     if (!delReservationNumber) {
       json(res, 400, {
         ok: false,
@@ -422,6 +525,22 @@ export default async function handler(req, res) {
         ok: false,
         error: "guestName이 필요합니다.",
       });
+      return;
+    }
+    if (!cancelToken) {
+      json(res, 400, {
+        ok: false,
+        error: "cancelToken(1회용 토큰)이 필요합니다.",
+      });
+      return;
+    }
+    var verify = verifyCancelToken(
+      cancelToken,
+      delReservationNumber,
+      delGuestName,
+    );
+    if (!verify.ok) {
+      json(res, 401, { ok: false, error: verify.error });
       return;
     }
 
@@ -575,6 +694,7 @@ export default async function handler(req, res) {
       id: row.id,
       reservationNumber: row.reservation_number,
       createdAt: row.created_at,
+      cancelToken: issueCancelToken(reservationNumber, guestName),
     });
   } catch (e) {
     if (e && e.code === "23505") {

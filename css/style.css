@@ -2402,8 +2402,10 @@ iframe.map {
 }
 
 .confirm-summary {
+  margin-top: 0.25rem;
   margin-bottom: 1.25rem;
-  color: var(--grafford-dark-brown);
+  color: var(--grafford-mud);
+  text-align: center;
 }
 
 .visually-hidden {
@@ -2419,7 +2421,8 @@ iframe.map {
 }
 
 .checkout-form {
-  max-width: 100%;
+  margin-top: 2rem;
+  max-width: 70%;
 }
 
 .confirm-layout-grid {
@@ -2812,61 +2815,35 @@ iframe.map {
 /* 예약 조회 (reserveinfo.html) */
 .reserveinfo-form {
   margin-top: 0.5rem;
+  width: 100%;
+  margin-left: auto;
+  margin-right: auto;
 }
 
-.reserveinfo-result {
-  margin-top: 1.25rem;
-  padding: 1rem 1.1rem;
-  border-radius: 8px;
-  font-size: 0.95rem;
-  line-height: 1.55;
+.reserveinfo-form .confirm-label {
+  width: 100%;
+  max-width: 560px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
-.reserveinfo-result--error {
-  background: rgba(160, 70, 70, 0.1);
-  color: var(--grafford-dark-brown);
-  border: 1px solid rgba(160, 70, 70, 0.25);
+.reserveinfo-form .confirm-label input {
+  width: 100%;
 }
 
-.reserveinfo-result--ok {
-  background: rgba(83, 98, 77, 0.08);
-  border: 1px solid rgba(58, 53, 49, 0.1);
+.reserveinfo-form .confirm-actions {
+  margin-top: 1.2rem;
+  margin-bottom: 2rem;
+  padding-top: 0;
+  display: flex;
+  justify-content: center;
 }
 
-.reserveinfo-result-title {
-  margin: 0 0 0.75rem;
-  font-size: 1.05rem;
-  color: var(--grafford-beige2);
-}
-
-.reserveinfo-source {
-  margin: 0 0 0.85rem;
-  font-size: 0.85rem;
-  line-height: 1.5;
-  color: var(--grafford-mud2);
-}
-
-.reserveinfo-dl {
-  margin: 0;
-  display: grid;
-  grid-template-columns: 7rem 1fr;
-  gap: 0.35rem 0.75rem;
-  align-items: baseline;
-}
-
-.reserveinfo-dl dt {
-  margin: 0;
-  font-size: 0.85rem;
-  color: var(--grafford-mud2);
-}
-
-.reserveinfo-dl dd {
-  margin: 0;
-  color: var(--grafford-dark-brown);
-}
-
-.reserveinfo-actions {
-  margin-top: 1rem;
+.reserveinfo-form .confirm-pay-submit {
+  width: auto;
+  min-width: 9rem;
+  padding: 0.7rem 1.4rem;
+  font-size: 0.98rem;
 }
 
 .reserveinfo-bottom-actions {

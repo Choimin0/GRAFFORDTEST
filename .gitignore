@@ -3,6 +3,36 @@
 .env.*.local
 .vercel
 .env*.local
+!.env.example
+
+# Dependencies / build artifacts
+node_modules/
+dist/
+build/
+coverage/
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
+
+# Logs / temp
+*.log
+*.tmp
+*.temp
+
+# Security-sensitive files
+*.pem
+*.key
+*.p12
+*.pfx
+*.crt
+*.cer
+*.jks
+*.keystore
+*credentials*.json
+*service-account*.json
 
 # Vite로 빌드되는 React 페이드 번들 (사이트는 js/grafford-page-fade.js 바닐라 사용)
 js/grafford-page-fade.react.js

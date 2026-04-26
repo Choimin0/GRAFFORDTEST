@@ -47,8 +47,6 @@
       <h1 class="confirm-title">예약 조회</h1>
       <p class="confirm-summary">
         예약 시 입력하신 성함과 발급된 예약번호(주문번호)를 입력해 주세요.
-        서버에 저장된 예약은 DB에서, 무통장 입금만 이 기기에 저장된 경우에는
-        브라우저 저장소에서 조회합니다.
       </p>
 
       <form
@@ -85,54 +83,6 @@
         </div>
       </form>
 
-      <div
-        class="reserveinfo-result reserveinfo-result--error"
-        id="reserveinfo-error"
-        hidden
-      ></div>
-      <div
-        class="reserveinfo-result reserveinfo-result--ok"
-        id="reserveinfo-ok"
-        hidden
-      >
-        <h2 class="reserveinfo-result-title">예약 정보</h2>
-        <p class="reserveinfo-source" id="reserveinfo-source" hidden></p>
-        <dl class="reserveinfo-dl">
-          <dt>예약번호</dt>
-          <dd id="res-order"></dd>
-          <dt>성함</dt>
-          <dd id="res-name"></dd>
-          <dt>연락처</dt>
-          <dd id="res-contact"></dd>
-          <dt>객실</dt>
-          <dd id="res-room"></dd>
-          <dt>일정</dt>
-          <dd id="res-schedule"></dd>
-          <dt>숙박</dt>
-          <dd id="res-nights"></dd>
-          <dt>추가 인원</dt>
-          <dd id="res-extra"></dd>
-          <dt>결제 금액</dt>
-          <dd id="res-amount"></dd>
-          <dt>결제 수단</dt>
-          <dd id="res-pay"></dd>
-          <dt>요청사항</dt>
-          <dd id="res-request"></dd>
-        </dl>
-        <div class="confirm-actions reserveinfo-actions">
-          <a
-            href="reserve-delete.html"
-            id="reserve-cancel-link"
-            class="btn reserve-btn confirm-pay-submit"
-            >예약취소</a
-          >
-        </div>
-      </div>
-
-      <p class="confirm-back reserveinfo-bottom-actions">
-        <a href="RESERVATION.html">예약하기</a>
-        <a href="reserve-delete.html">예약취소</a>
-      </p>
       <footer
         id="site-business-footer-mount"
         class="site-footer site-business-footer"
@@ -143,17 +93,7 @@
     <script>
       document.addEventListener("DOMContentLoaded", function () {
         var R = window.GraffordReservations;
-        var ROOM_LABEL = {
-          G1: "객실 G1",
-          G2: "객실 G2",
-          G3: "객실 G3",
-          G4: "객실 G4",
-        };
         var form = document.getElementById("reserveinfo-form");
-        var errEl = document.getElementById("reserveinfo-error");
-        var okEl = document.getElementById("reserveinfo-ok");
-        var sourceEl = document.getElementById("reserveinfo-source");
-        var cancelLinkEl = document.getElementById("reserve-cancel-link");
 
         var params = new URLSearchParams(window.location.search);
         var preOrder = params.get("orderNo");
@@ -161,35 +101,12 @@
           document.getElementById("lookup-order").value = preOrder;
         }
 
-        function formatKRW(n) {
-          return Number(n).toLocaleString("ko-KR") + "원";
-        }
-
-        function lookupApiUrl(name, order) {
+        function lookupApiUrl() {
           var base = "";
           if (typeof window !== "undefined" && window.__GRAFFORD_API_BASE__) {
             base = String(window.__GRAFFORD_API_BASE__).replace(/\/$/, "");
           }
-          return (
-            base +
-            "/api/reservations?guestName=" +
-            encodeURIComponent(name.trim()) +
-            "&reservationNumber=" +
-            encodeURIComponent(order.trim())
-          );
-        }
-
-        function payLabel(m) {
-          if (m === "bank") {
-            return "무통장입금";
-          }
-          if (m === "card") {
-            return "신용카드";
-          }
-          if (m === "naver") {
-            return "네이버페이";
-          }
-          return m || "—";
+          return base + "/api/reservations-lookup";
         }
 
         function goToReserveComplete(data) {
@@ -205,26 +122,16 @@
           p.set("extraGuests", String(data.extraGuests || 0));
           p.set("totalAmount", String(data.totalAmount || 0));
           p.set("payMethod", data.payMethod || "");
+          p.set("cancelToken", data.cancelToken || "");
           window.location.href = "reserve-check.html?" + p.toString();
         }
 
         function showError(msg) {
-          okEl.hidden = true;
-          errEl.textContent = msg;
-          errEl.hidden = false;
-          if (sourceEl) {
-            sourceEl.hidden = true;
-          }
-        }
-
-        function hideResults() {
-          errEl.hidden = true;
-          okEl.hidden = true;
+          window.alert(msg);
         }
 
         form.addEventListener("submit", function (e) {
           e.preventDefault();
-          hideResults();
           if (!form.checkValidity()) {
             form.reportValidity();
             return;
@@ -232,7 +139,14 @@
           var name = document.getElementById("lookup-name").value;
           var order = document.getElementById("lookup-order").value;
 
-          fetch(lookupApiUrl(name, order))
+          fetch(lookupApiUrl(), {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              guestName: String(name || "").trim(),
+              reservationNumber: String(order || "").trim(),
+            }),
+          })
             .then(function (resp) {
               return resp.json().then(function (data) {
                 return { ok: resp.ok, status: resp.status, data: data };
@@ -246,18 +160,6 @@
                 result.data.row
               ) {
                 var row = result.data.row;
-                var nightsText =
-                  row.stayNights != null && row.stayNights !== ""
-                    ? String(row.stayNights) + "박"
-                    : "—";
-                var extraText =
-                  row.extraGuests != null && row.extraGuests !== ""
-                    ? String(row.extraGuests) + "명"
-                    : "—";
-                var note = "서버 DB에 저장된 예약입니다.";
-                if (result.data.warning) {
-                  note += " " + result.data.warning;
-                }
                 goToReserveComplete({
                   orderNo: row.reservationNumber,
                   room: row.roomType,
@@ -270,6 +172,7 @@
                   extraGuests: row.extraGuests || 0,
                   totalAmount: row.totalAmount || 0,
                   payMethod: row.paymentMethod || "",
+                  cancelToken: result.data.cancelToken || "",
                 });
                 return;
               }
@@ -298,6 +201,7 @@
                 extraGuests: found.extraGuests || 0,
                 totalAmount: found.totalAmount || 0,
                 payMethod: found.paymentMethod || "",
+                cancelToken: "",
               });
             })
             .catch(function () {
@@ -324,6 +228,7 @@
                 extraGuests: found.extraGuests || 0,
                 totalAmount: found.totalAmount || 0,
                 payMethod: found.paymentMethod || "",
+                cancelToken: "",
               });
             });
         });

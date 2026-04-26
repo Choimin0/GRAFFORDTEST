@@ -192,6 +192,7 @@
         var extraGuests = params.get("extraGuests") || "0";
         var totalAmount = params.get("totalAmount") || "0";
         var payMethod = params.get("payMethod") || "";
+        var cancelToken = params.get("cancelToken") || "";
         var orderEl = document.getElementById("complete-order-no");
         orderEl.textContent = orderNo || "번호를 확인할 수 없습니다.";
 
@@ -296,6 +297,7 @@
           cancelParams.set("amount", String(totalAmount || "0"));
           cancelParams.set("payMethod", payMethod || "");
           cancelParams.set("request", guestRequest || "");
+          cancelParams.set("cancelToken", cancelToken || "");
           cancelLink.href = "reserve-delete.html?" + cancelParams.toString();
         }
       });
