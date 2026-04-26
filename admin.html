@@ -8,9 +8,11 @@
     <link rel="stylesheet" href="css/style.css" />
     <style>
       .admin-page {
-        max-width: 1080px;
+        width: 100%;
       }
       .admin-top-logo {
+        height: 25px;
+        width: auto;
         display: inline-flex;
         margin-bottom: 1.2rem;
       }
@@ -25,12 +27,51 @@
         gap: 0.7rem;
         align-items: end;
       }
+      .admin-login-grid[hidden] {
+        display: none !important;
+      }
       .admin-login-grid .confirm-label {
         margin: 0;
+      }
+      .admin-password-wrap {
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+      }
+      .admin-password-wrap input {
+        flex: 1;
+      }
+      .admin-password-toggle {
+        border: 1px solid #d4cdc5;
+        background: #fff;
+        color: var(--grafford-mud2);
+        padding: 0.33rem 0.55rem;
+        line-height: 1;
+        cursor: pointer;
+        white-space: nowrap;
       }
       .admin-table-wrap {
         margin-top: 1rem;
         overflow-x: auto;
+      }
+      .admin-table-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.8rem;
+      }
+      .admin-sort-control {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.45rem;
+        font-size: 0.9rem;
+        color: var(--grafford-mud2);
+      }
+      .admin-sort-control select {
+        min-width: 180px;
+        border: 1px solid #d4cdc5;
+        background: #fff;
+        padding: 0.34rem 0.45rem;
       }
       .admin-table {
         width: 100%;
@@ -72,7 +113,9 @@
       </a>
       <h1 class="confirm-title">관리자 페이지</h1>
       <section class="confirm-section" aria-labelledby="admin-login-title">
-        <h2 class="confirm-section-title" id="admin-login-title">관리자 로그인</h2>
+        <h2 class="confirm-section-title" id="admin-login-title">
+          관리자 로그인
+        </h2>
         <form id="admin-login-form" class="admin-login-grid">
           <label class="confirm-label">
             <span>ID</span>
@@ -80,12 +123,22 @@
           </label>
           <label class="confirm-label">
             <span>PW</span>
-            <input
-              id="admin-pw"
-              type="password"
-              autocomplete="current-password"
-              required
-            />
+            <span class="admin-password-wrap">
+              <input
+                id="admin-pw"
+                type="password"
+                autocomplete="current-password"
+                required
+              />
+              <button
+                type="button"
+                id="admin-pw-toggle"
+                class="admin-password-toggle"
+                aria-label="비밀번호 보기"
+              >
+                보기
+              </button>
+            </span>
           </label>
           <button type="submit" class="btn reserve-btn">조회</button>
         </form>
@@ -98,7 +151,20 @@
         aria-labelledby="admin-table-title"
         hidden
       >
-        <h2 class="confirm-section-title" id="admin-table-title">무통장 예약 목록</h2>
+        <div class="admin-table-head">
+          <h2 class="confirm-section-title" id="admin-table-title">
+            무통장 예약 목록
+          </h2>
+          <label class="admin-sort-control" for="admin-sort-select">
+            정렬 기준
+            <select id="admin-sort-select">
+              <option value="checkin">입실일</option>
+              <option value="reservationDate">예약일</option>
+              <option value="pendingFirst">입금상태(대기)</option>
+              <option value="confirmedFirst">입금상태(확정)</option>
+            </select>
+          </label>
+        </div>
         <div class="admin-table-wrap">
           <table class="admin-table">
             <thead>
@@ -124,9 +190,13 @@
         var loginForm = document.getElementById("admin-login-form");
         var idInput = document.getElementById("admin-id");
         var pwInput = document.getElementById("admin-pw");
+        var pwToggleBtn = document.getElementById("admin-pw-toggle");
         var msgEl = document.getElementById("admin-message");
         var tableSection = document.getElementById("admin-table-section");
         var tableBody = document.getElementById("admin-table-body");
+        var sortSelect = document.getElementById("admin-sort-select");
+        var latestRows = [];
+        var sortKey = "checkin";
 
         function adminApiUrl() {
           var base = "";
@@ -158,6 +228,58 @@
             adminId: String(idInput.value || "").trim(),
             adminPw: String(pwInput.value || "").trim(),
           };
+        }
+
+        function asYmdNumber(ymd) {
+          var safe = String(ymd || "").replace(/\D/g, "");
+          if (!safe) {
+            return Number.MAX_SAFE_INTEGER;
+          }
+          return Number(safe);
+        }
+
+        function reservationDateNumber(row) {
+          var raw = String((row && row.reservationNumber) || "").slice(0, 8);
+          if (!/^\d{8}$/.test(raw)) {
+            return Number.MAX_SAFE_INTEGER;
+          }
+          return Number(raw);
+        }
+
+        function sortRows(rows) {
+          var copied = (rows || []).slice();
+          copied.sort(function (a, b) {
+            var aCheckin = asYmdNumber(a && a.checkIn);
+            var bCheckin = asYmdNumber(b && b.checkIn);
+            if (sortKey === "reservationDate") {
+              var aRes = reservationDateNumber(a);
+              var bRes = reservationDateNumber(b);
+              if (aRes !== bRes) {
+                return aRes - bRes;
+              }
+              return aCheckin - bCheckin;
+            }
+            if (sortKey === "pendingFirst" || sortKey === "confirmedFirst") {
+              var wantPending = sortKey === "pendingFirst";
+              var aIsPending = !(a && a.bankConfirmed);
+              var bIsPending = !(b && b.bankConfirmed);
+              var aPriority = aIsPending === wantPending ? 0 : 1;
+              var bPriority = bIsPending === wantPending ? 0 : 1;
+              if (aPriority !== bPriority) {
+                return aPriority - bPriority;
+              }
+              if (aCheckin !== bCheckin) {
+                return aCheckin - bCheckin;
+              }
+              return reservationDateNumber(a) - reservationDateNumber(b);
+            }
+            // default: check-in 오름차순
+            if (aCheckin !== bCheckin) {
+              return aCheckin - bCheckin;
+            }
+            return reservationDateNumber(a) - reservationDateNumber(b);
+          });
+          return copied;
         }
 
         function renderRows(rows) {
@@ -243,8 +365,10 @@
               if (!result.ok || !result.data.ok) {
                 throw new Error(result.data.error || "목록 조회 실패");
               }
+              loginForm.hidden = true;
               tableSection.hidden = false;
-              renderRows(result.data.rows || []);
+              latestRows = result.data.rows || [];
+              renderRows(sortRows(latestRows));
               showMessage("");
             });
         }
@@ -296,6 +420,28 @@
             showMessage((err && err.message) || "조회 중 오류가 발생했습니다.");
           });
         });
+
+        if (sortSelect) {
+          sortSelect.addEventListener("change", function () {
+            sortKey = sortSelect.value || "checkin";
+            if (tableSection.hidden) {
+              return;
+            }
+            renderRows(sortRows(latestRows));
+          });
+        }
+
+        if (pwToggleBtn && pwInput) {
+          pwToggleBtn.addEventListener("click", function () {
+            var showing = pwInput.type === "text";
+            pwInput.type = showing ? "password" : "text";
+            pwToggleBtn.textContent = showing ? "보기" : "숨기기";
+            pwToggleBtn.setAttribute(
+              "aria-label",
+              showing ? "비밀번호 보기" : "비밀번호 숨기기",
+            );
+          });
+        }
       });
     </script>
   </body>
