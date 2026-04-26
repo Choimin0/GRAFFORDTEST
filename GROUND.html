@@ -190,7 +190,11 @@
               </div>
             </div>
             <br />
-            <a href="RESERVATION.html?room=G1" class="btn reserve-btn"
+            <a
+              href="RESERVATION.html"
+              class="btn reserve-btn"
+              data-reserve-room="G1"
+            >
               >예약하기 ></a
             >
           </div>
@@ -296,7 +300,11 @@
               </div>
             </div>
             <br />
-            <a href="RESERVATION.html?room=G2" class="btn reserve-btn"
+            <a
+              href="RESERVATION.html"
+              class="btn reserve-btn"
+              data-reserve-room="G2"
+            >
               >예약하기 ></a
             >
           </div>
@@ -402,7 +410,11 @@
               </div>
             </div>
             <br />
-            <a href="RESERVATION.html?room=G3" class="btn reserve-btn"
+            <a
+              href="RESERVATION.html"
+              class="btn reserve-btn"
+              data-reserve-room="G3"
+            >
               >예약하기 ></a
             >
           </div>
@@ -508,7 +520,11 @@
               </div>
             </div>
             <br />
-            <a href="RESERVATION.html?room=G4" class="btn reserve-btn"
+            <a
+              href="RESERVATION.html"
+              class="btn reserve-btn"
+              data-reserve-room="G4"
+            >
               >예약하기 ></a
             >
           </div>
@@ -653,6 +669,21 @@
           .querySelectorAll(".room-image-slot--carousel")
           .forEach(function (slot, i) {
             startRoomSlotCarousel(slot, i * 400);
+          });
+
+        document
+          .querySelectorAll("a[data-reserve-room]")
+          .forEach(function (reserveLink) {
+            reserveLink.addEventListener("click", function () {
+              var room = reserveLink.getAttribute("data-reserve-room") || "";
+              if (!room) {
+                return;
+              }
+              sessionStorage.setItem(
+                "graffordReservationSelectedRoom",
+                room.toUpperCase(),
+              );
+            });
           });
       });
     </script>

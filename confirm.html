@@ -417,16 +417,26 @@
           G4: "D",
         };
 
-        var params = new URLSearchParams(window.location.search);
-        var roomRaw = (params.get("room") || "G1").toUpperCase();
+        var confirmDraft = null;
+        try {
+          confirmDraft = JSON.parse(
+            sessionStorage.getItem("graffordConfirmDraft") || "null",
+          );
+        } catch (e) {
+          confirmDraft = null;
+        }
+        var roomRaw = ((confirmDraft && confirmDraft.room) || "G1").toUpperCase();
         if (!P) {
           roomRaw = "G1";
         } else if (!P.ROOM_WEEKDAY_BASE.hasOwnProperty(roomRaw)) {
           roomRaw = "G1";
         }
-        var checkIn = params.get("checkIn") || "";
-        var checkOut = params.get("checkOut") || "";
-        var extraGuestsRaw = parseInt(params.get("extraGuests") || "0", 10);
+        var checkIn = (confirmDraft && confirmDraft.checkIn) || "";
+        var checkOut = (confirmDraft && confirmDraft.checkOut) || "";
+        var extraGuestsRaw = parseInt(
+          (confirmDraft && confirmDraft.extraGuests) || "0",
+          10,
+        );
         var extraGuests = P ? P.clampExtra(roomRaw, extraGuestsRaw) : 0;
 
         function formatKRW(n) {
@@ -820,10 +830,17 @@
                 );
                 window.location.href = "reserve-complete.html";
               } else {
-                var fd = new FormData(confirmForm);
-                var params = new URLSearchParams(fd);
-                params.set("orderNo", orderNumber);
-                window.location.href = "payment.html?" + params.toString();
+                sessionStorage.setItem(
+                  "graffordPaymentData",
+                  JSON.stringify({
+                    orderNo: orderNumber,
+                    totalAmount: String(totalAmount || 0),
+                    room: room,
+                    checkIn: checkIn,
+                    checkOut: checkOut,
+                  }),
+                );
+                window.location.href = "payment.html";
               }
             })
             .catch(function (err) {
