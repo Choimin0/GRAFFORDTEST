@@ -1427,6 +1427,8 @@ section ul li {
   color: #fff;
 }
 
+.rooms-features .room-feature .btn.reserve-btn:hover,
+.rooms-features .room-feature .btn.reserve-btn:focus-visible,
 .reservation-lookup-btn.btn.reserve-btn:hover,
 .reservation-lookup-btn.btn.reserve-btn:focus-visible,
 .reserve-cta.btn.reserve-btn:hover,
