@@ -3081,7 +3081,7 @@ iframe.map {
 }
 
 .delete-complete-page {
-  max-width: 760px;
+  max-width: 100%;
   margin-left: auto;
   margin-right: auto;
 }
@@ -3114,6 +3114,7 @@ iframe.map {
 .delete-complete-info {
   margin-top: 0.35rem;
   align-items: center;
+  justify-content: center;
 }
 
 .delete-complete-actions {
