@@ -284,6 +284,7 @@
         var openBtn = document.getElementById("cancel-submit-btn");
         var yesBtn = document.getElementById("cancel-modal-yes");
         var noBtn = document.getElementById("cancel-modal-no");
+        var modalActionsEl = document.querySelector(".reserve-delete-modal-actions");
         var modalTitleEl = document.getElementById("cancel-modal-title");
         var modalNoteEl = document.querySelector(".reserve-delete-modal-note");
         var reasonOtherInput = document.getElementById("cancel-reason-other");
@@ -311,19 +312,19 @@
         });
         syncOtherReasonState();
 
-        var deletedOrderMarker = sessionStorage.getItem(
-          "graffordDeletedReservationOrderNo",
-        );
-        if (
-          deletedOrderMarker &&
-          deletedOrderMarker === String(orderNo || "") &&
-          modalTitleEl
-        ) {
+        function applyMissingReservationMode() {
+          if (!modalTitleEl) {
+            return;
+          }
           missingMode = true;
           modalTitleEl.textContent = "예약 내용을 불러올 수 없습니다";
           yesBtn.textContent = "예";
           if (noBtn) {
             noBtn.hidden = true;
+            noBtn.style.display = "none";
+          }
+          if (modalActionsEl) {
+            modalActionsEl.style.justifyContent = "center";
           }
           if (modalNoteEl) {
             modalNoteEl.hidden = true;
@@ -332,8 +333,18 @@
             openBtn.disabled = true;
           }
           modal.hidden = false;
-          sessionStorage.removeItem("graffordDeletedReservationOrderNo");
         }
+
+        function syncDeletedStateOnEntry() {
+          var deletedOrderMarker = sessionStorage.getItem(
+            "graffordDeletedReservationOrderNo",
+          );
+          if (deletedOrderMarker && deletedOrderMarker === String(orderNo || "")) {
+            applyMissingReservationMode();
+          }
+        }
+        syncDeletedStateOnEntry();
+        window.addEventListener("pageshow", syncDeletedStateOnEntry);
 
         openBtn.addEventListener("click", function () {
           if (missingMode) {
@@ -347,6 +358,7 @@
         });
         yesBtn.addEventListener("click", function () {
           if (missingMode) {
+            sessionStorage.removeItem("graffordDeletedReservationOrderNo");
             window.location.href = "index.html";
             return;
           }
