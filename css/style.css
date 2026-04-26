@@ -1894,12 +1894,12 @@ iframe.map {
 
 .room-detail-intro .room-meta-title,
 .room-detail-intro .room-facility-name {
-  border-bottom-color: rgba(58, 53, 49, 0.22);
+  border-bottom-color: var(--grafford-mud);
 }
 
 .feature-text .room-meta-title,
 .feature-text .room-facility-name {
-  border-bottom-color: rgba(255, 255, 255, 0.26);
+  border-bottom-color: var(--grafford-mud);
 }
 
 .reservation-pricing-bar {
