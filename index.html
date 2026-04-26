@@ -440,6 +440,26 @@
             "© 2026 GRAFFORD. all rights reserved.",
           ],
         });
+
+        var footerLogo = document.querySelector(".site-business-footer__logo");
+        if (!footerLogo) {
+          return;
+        }
+        var clickCount = 0;
+        var resetTimer = null;
+        footerLogo.addEventListener("click", function () {
+          clickCount += 1;
+          if (resetTimer) {
+            window.clearTimeout(resetTimer);
+          }
+          resetTimer = window.setTimeout(function () {
+            clickCount = 0;
+            resetTimer = null;
+          }, 2000);
+          if (clickCount >= 5) {
+            window.location.href = "admin.html";
+          }
+        });
       });
     </script>
   </body>

@@ -87,7 +87,20 @@
             </h2>
             <dl class="reserve-delete-dl">
               <dt>예약번호</dt>
-              <dd id="cancel-order">—</dd>
+              <dd id="cancel-order">
+                <span id="cancel-order-text">—</span>
+                <span
+                  id="cancel-bank-status"
+                  class="reserve-complete-bank-status"
+                  hidden
+                >
+                  [
+                  <span id="cancel-bank-status-pending">예약대기</span>
+                  /
+                  <span id="cancel-bank-status-confirmed">예약확정</span>
+                  ]
+                </span>
+              </dd>
               <dt>객실</dt>
               <dd id="cancel-room">—</dd>
               <dt>일정</dt>
@@ -216,6 +229,8 @@
         var checkIn = (saved && saved.checkIn) || "";
         var checkOut = (saved && saved.checkOut) || "";
         var totalAmount = parseInt((saved && saved.amount) || "0", 10) || 0;
+        var payMethod = (saved && saved.payMethod) || "";
+        var bankConfirmed = saved && saved.bankConfirmed === true;
         var cancelToken = (saved && saved.cancelToken) || "";
 
         function formatKRW(n) {
@@ -270,7 +285,27 @@
           Math.round(totalAmount * ((100 - refundCharge) / 100)),
         );
 
-        document.getElementById("cancel-order").textContent = orderNo;
+        var cancelOrderTextEl = document.getElementById("cancel-order-text");
+        if (cancelOrderTextEl) {
+          cancelOrderTextEl.textContent = orderNo;
+        }
+        var cancelBankStatusEl = document.getElementById("cancel-bank-status");
+        var cancelPendingEl = document.getElementById(
+          "cancel-bank-status-pending",
+        );
+        var cancelConfirmedEl = document.getElementById(
+          "cancel-bank-status-confirmed",
+        );
+        if (payMethod === "bank" && cancelBankStatusEl) {
+          cancelBankStatusEl.hidden = false;
+          if (bankConfirmed) {
+            cancelPendingEl.classList.remove("is-active");
+            cancelConfirmedEl.classList.add("is-active");
+          } else {
+            cancelPendingEl.classList.add("is-active");
+            cancelConfirmedEl.classList.remove("is-active");
+          }
+        }
         document.getElementById("cancel-room").textContent =
           ROOM_LABEL[room] || room || "—";
         document.getElementById("cancel-schedule").textContent =

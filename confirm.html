@@ -826,6 +826,8 @@
                     totalAmount: String(totalAmount),
                     payMethod: payInput.value,
                     cancelToken: (result.data && result.data.cancelToken) || "",
+                    bankConfirmed:
+                      !!(result.data && result.data.bankConfirmed === true),
                   }),
                 );
                 window.location.href = "reserve-complete.html";

@@ -118,6 +118,7 @@
               extraGuests: String(data.extraGuests || 0),
               totalAmount: String(data.totalAmount || 0),
               payMethod: data.payMethod || "",
+              bankConfirmed: data.bankConfirmed === true,
               cancelToken: data.cancelToken || "",
             }),
           );
@@ -170,6 +171,7 @@
                   extraGuests: row.extraGuests || 0,
                   totalAmount: row.totalAmount || 0,
                   payMethod: row.paymentMethod || "",
+                  bankConfirmed: row.bankConfirmed === true,
                   cancelToken: result.data.cancelToken || "",
                 });
                 return;
@@ -199,6 +201,7 @@
                 extraGuests: found.extraGuests || 0,
                 totalAmount: found.totalAmount || 0,
                 payMethod: found.paymentMethod || "",
+                bankConfirmed: found.bankConfirmed === true,
                 cancelToken: "",
               });
             })
@@ -226,6 +229,7 @@
                 extraGuests: found.extraGuests || 0,
                 totalAmount: found.totalAmount || 0,
                 payMethod: found.paymentMethod || "",
+                bankConfirmed: found.bankConfirmed === true,
                 cancelToken: "",
               });
             });

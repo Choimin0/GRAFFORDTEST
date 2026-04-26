@@ -127,7 +127,20 @@
             </h2>
             <dl class="reserve-delete-dl">
               <dt>예약 번호</dt>
-              <dd id="complete-order-no">—</dd>
+              <dd id="complete-order-no">
+                <span id="complete-order-no-text">—</span>
+                <span
+                  id="complete-bank-status"
+                  class="reserve-complete-bank-status"
+                  hidden
+                >
+                  [
+                  <span id="complete-bank-status-pending">예약대기</span>
+                  /
+                  <span id="complete-bank-status-confirmed">예약확정</span>
+                  ]
+                </span>
+              </dd>
               <dt>체크인/체크아웃</dt>
               <dd id="complete-schedule">—</dd>
             </dl>
@@ -202,9 +215,27 @@
         var extraGuests = (saved && saved.extraGuests) || "0";
         var totalAmount = (saved && saved.totalAmount) || "0";
         var payMethod = (saved && saved.payMethod) || "";
+        var bankConfirmed = saved && saved.bankConfirmed === true;
         var cancelToken = (saved && saved.cancelToken) || "";
-        var orderEl = document.getElementById("complete-order-no");
-        orderEl.textContent = orderNo || "번호를 확인할 수 없습니다.";
+        var orderTextEl = document.getElementById("complete-order-no-text");
+        if (orderTextEl) {
+          orderTextEl.textContent = orderNo || "번호를 확인할 수 없습니다.";
+        }
+        var bankStatusEl = document.getElementById("complete-bank-status");
+        var pendingStatusEl = document.getElementById("complete-bank-status-pending");
+        var confirmedStatusEl = document.getElementById(
+          "complete-bank-status-confirmed",
+        );
+        if (payMethod === "bank" && bankStatusEl) {
+          bankStatusEl.hidden = false;
+          if (bankConfirmed) {
+            pendingStatusEl.classList.remove("is-active");
+            confirmedStatusEl.classList.add("is-active");
+          } else {
+            pendingStatusEl.classList.add("is-active");
+            confirmedStatusEl.classList.remove("is-active");
+          }
+        }
 
         document.getElementById("complete-room-name").textContent =
           ROOM_LABEL[room] || room || "객실 정보 없음";
@@ -308,6 +339,7 @@
               checkOut: checkOut || "",
               amount: String(totalAmount || "0"),
               payMethod: payMethod || "",
+              bankConfirmed: bankConfirmed === true,
               request: guestRequest || "",
               cancelToken: cancelToken || "",
             }),

@@ -212,6 +212,7 @@ export default async function handler(req, res) {
         total_amount,
         guest_request,
         payment_method,
+        bank_confirmed,
         created_at
       FROM reservations
       WHERE reservation_number = $1`,
@@ -243,6 +244,7 @@ export default async function handler(req, res) {
         totalAmount: row.total_amount != null ? Number(row.total_amount) : null,
         guestRequest: row.guest_request || "",
         paymentMethod: row.payment_method || null,
+        bankConfirmed: row.bank_confirmed === true,
         createdAt: row.created_at,
       },
       cancelToken: issueCancelToken(row.reservation_number, row.guest_name),

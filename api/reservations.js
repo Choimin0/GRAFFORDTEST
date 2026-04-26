@@ -50,7 +50,7 @@ function humanDbError(e) {
   }
   var c = e.code;
   if (c === "42703") {
-    return "DB에 필요한 컬럼이 없습니다. db/migrations/002_reservations_booking_columns.sql 과 db/migrations/004_add_guest_request_to_reservations.sql 을 실행하세요.";
+    return "DB에 필요한 컬럼이 없습니다. db/migrations/002_reservations_booking_columns.sql, db/migrations/004_add_guest_request_to_reservations.sql, db/migrations/005_add_bank_confirmed_to_reservations.sql 을 실행하세요.";
   }
   if (c === "42P01") {
     return "reservations 테이블이 없습니다. db/migrations/001_create_reservations.sql 을 실행하세요.";
@@ -394,6 +394,7 @@ export default async function handler(req, res) {
           total_amount,
           guest_request,
           payment_method,
+          bank_confirmed,
           created_at
         FROM reservations
         WHERE reservation_number = $1`,
@@ -428,6 +429,7 @@ export default async function handler(req, res) {
             dbRow.total_amount != null ? Number(dbRow.total_amount) : null,
           guestRequest: dbRow.guest_request || "",
           paymentMethod: dbRow.payment_method || null,
+          bankConfirmed: dbRow.bank_confirmed === true,
           createdAt: dbRow.created_at,
         },
       });
@@ -474,6 +476,7 @@ export default async function handler(req, res) {
               extraGuests: null,
               totalAmount: null,
               paymentMethod: null,
+              bankConfirmed: false,
               createdAt: br.created_at,
             },
             warning:
@@ -660,9 +663,10 @@ export default async function handler(req, res) {
       extra_guests,
       total_amount,
       guest_request,
-      payment_method
+      payment_method,
+      bank_confirmed
     ) VALUES (
-      $1, $2, $3, $4, $5::date, $6::date, $7, $8, $9, $10, $11, $12
+      $1, $2, $3, $4, $5::date, $6::date, $7, $8, $9, $10, $11, $12, $13
     )
     RETURNING id, reservation_number, created_at
   `;
@@ -680,6 +684,7 @@ export default async function handler(req, res) {
     ta,
     guestRequest,
     paymentMethod,
+    paymentMethod === "bank" ? false : true,
   ];
 
   try {
@@ -695,6 +700,7 @@ export default async function handler(req, res) {
       reservationNumber: row.reservation_number,
       createdAt: row.created_at,
       cancelToken: issueCancelToken(reservationNumber, guestName),
+      bankConfirmed: paymentMethod === "bank" ? false : true,
     });
   } catch (e) {
     if (e && e.code === "23505") {
