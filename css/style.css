@@ -1744,8 +1744,8 @@ iframe.map {
 
 @media (min-width: 768px) {
   .room-bridge-copy {
-    margin: 4.25rem 0 3.5rem;
-    padding: 7rem 3rem;
+    margin: 1rem 0 1rem;
+    padding: 2rem 3rem;
   }
 
   .room-bridge-copy p {
@@ -2426,7 +2426,7 @@ iframe.map {
   display: grid;
   grid-template-columns: 1fr;
   gap: 1.25rem;
-  margin-top: 4rem;
+  margin-top: 2rem;
 }
 
 .confirm-layout-col {
