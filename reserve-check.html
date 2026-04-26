@@ -180,19 +180,26 @@
           G4: "G4",
         };
         var ROOM_IMAGE_PREFIX = { G1: "A", G2: "B", G3: "C", G4: "D" };
-        var params = new URLSearchParams(window.location.search);
-        var orderNo = params.get("orderNo") || "";
-        var room = (params.get("room") || "G1").toUpperCase();
-        var checkIn = params.get("checkIn") || "";
-        var checkOut = params.get("checkOut") || "";
-        var guestName = params.get("guestName") || "";
-        var contact = params.get("contact") || "";
-        var guestRequest = params.get("guestRequest") || "";
-        var guestCount = params.get("guestCount") || "";
-        var extraGuests = params.get("extraGuests") || "0";
-        var totalAmount = params.get("totalAmount") || "0";
-        var payMethod = params.get("payMethod") || "";
-        var cancelToken = params.get("cancelToken") || "";
+        var saved = null;
+        try {
+          saved = JSON.parse(
+            sessionStorage.getItem("graffordReserveCheckData") || "null",
+          );
+        } catch (e) {
+          saved = null;
+        }
+        var orderNo = (saved && saved.orderNo) || "";
+        var room = ((saved && saved.room) || "G1").toUpperCase();
+        var checkIn = (saved && saved.checkIn) || "";
+        var checkOut = (saved && saved.checkOut) || "";
+        var guestName = (saved && saved.guestName) || "";
+        var contact = (saved && saved.contact) || "";
+        var guestRequest = (saved && saved.guestRequest) || "";
+        var guestCount = (saved && saved.guestCount) || "";
+        var extraGuests = (saved && saved.extraGuests) || "0";
+        var totalAmount = (saved && saved.totalAmount) || "0";
+        var payMethod = (saved && saved.payMethod) || "";
+        var cancelToken = (saved && saved.cancelToken) || "";
         var orderEl = document.getElementById("complete-order-no");
         orderEl.textContent = orderNo || "번호를 확인할 수 없습니다.";
 
@@ -286,18 +293,22 @@
 
         var cancelLink = document.getElementById("complete-link-cancel");
         if (cancelLink) {
-          var cancelParams = new URLSearchParams();
-          cancelParams.set("orderNo", orderNo || "");
-          cancelParams.set("name", guestName || "");
-          cancelParams.set("contact", contact || "");
-          cancelParams.set("room", room || "");
-          cancelParams.set("checkIn", checkIn || "");
-          cancelParams.set("checkOut", checkOut || "");
-          cancelParams.set("amount", String(totalAmount || "0"));
-          cancelParams.set("payMethod", payMethod || "");
-          cancelParams.set("request", guestRequest || "");
-          cancelParams.set("cancelToken", cancelToken || "");
-          cancelLink.href = "reserve-delete.html?" + cancelParams.toString();
+          sessionStorage.setItem(
+            "graffordCancelPayload",
+            JSON.stringify({
+              orderNo: orderNo || "",
+              name: guestName || "",
+              contact: contact || "",
+              room: room || "",
+              checkIn: checkIn || "",
+              checkOut: checkOut || "",
+              amount: String(totalAmount || "0"),
+              payMethod: payMethod || "",
+              request: guestRequest || "",
+              cancelToken: cancelToken || "",
+            }),
+          );
+          cancelLink.href = "reserve-delete.html";
         }
       });
     </script>

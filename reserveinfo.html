@@ -95,12 +95,6 @@
         var R = window.GraffordReservations;
         var form = document.getElementById("reserveinfo-form");
 
-        var params = new URLSearchParams(window.location.search);
-        var preOrder = params.get("orderNo");
-        if (preOrder) {
-          document.getElementById("lookup-order").value = preOrder;
-        }
-
         function lookupApiUrl() {
           var base = "";
           if (typeof window !== "undefined" && window.__GRAFFORD_API_BASE__) {
@@ -110,20 +104,24 @@
         }
 
         function goToReserveComplete(data) {
-          var p = new URLSearchParams();
-          p.set("orderNo", data.orderNo || "");
-          p.set("room", data.room || "");
-          p.set("checkIn", data.checkIn || "");
-          p.set("checkOut", data.checkOut || "");
-          p.set("guestName", data.guestName || "");
-          p.set("contact", data.contact || "");
-          p.set("guestRequest", data.guestRequest || "");
-          p.set("guestCount", String(data.guestCount || ""));
-          p.set("extraGuests", String(data.extraGuests || 0));
-          p.set("totalAmount", String(data.totalAmount || 0));
-          p.set("payMethod", data.payMethod || "");
-          p.set("cancelToken", data.cancelToken || "");
-          window.location.href = "reserve-check.html?" + p.toString();
+          sessionStorage.setItem(
+            "graffordReserveCheckData",
+            JSON.stringify({
+              orderNo: data.orderNo || "",
+              room: data.room || "",
+              checkIn: data.checkIn || "",
+              checkOut: data.checkOut || "",
+              guestName: data.guestName || "",
+              contact: data.contact || "",
+              guestRequest: data.guestRequest || "",
+              guestCount: String(data.guestCount || ""),
+              extraGuests: String(data.extraGuests || 0),
+              totalAmount: String(data.totalAmount || 0),
+              payMethod: data.payMethod || "",
+              cancelToken: data.cancelToken || "",
+            }),
+          );
+          window.location.href = "reserve-check.html";
         }
 
         function showError(msg) {

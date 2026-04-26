@@ -801,24 +801,24 @@
 
               if (payInput.value === "bank") {
                 R.save(record);
-                var completeParams = new URLSearchParams();
-                completeParams.set("orderNo", orderNumber);
-                completeParams.set("room", room);
-                completeParams.set("checkIn", checkIn);
-                completeParams.set("checkOut", checkOut);
-                completeParams.set("guestName", guestName);
-                completeParams.set("contact", contact);
-                completeParams.set("guestRequest", record.guestRequest || "");
-                completeParams.set("guestCount", String(guestCount));
-                completeParams.set("extraGuests", String(extraGuests));
-                completeParams.set("totalAmount", String(totalAmount));
-                completeParams.set("payMethod", payInput.value);
-                completeParams.set(
-                  "cancelToken",
-                  (result.data && result.data.cancelToken) || "",
+                sessionStorage.setItem(
+                  "graffordReserveCompleteData",
+                  JSON.stringify({
+                    orderNo: orderNumber,
+                    room: room,
+                    checkIn: checkIn,
+                    checkOut: checkOut,
+                    guestName: guestName,
+                    contact: contact,
+                    guestRequest: record.guestRequest || "",
+                    guestCount: String(guestCount),
+                    extraGuests: String(extraGuests),
+                    totalAmount: String(totalAmount),
+                    payMethod: payInput.value,
+                    cancelToken: (result.data && result.data.cancelToken) || "",
+                  }),
                 );
-                window.location.href =
-                  "reserve-complete.html?" + completeParams.toString();
+                window.location.href = "reserve-complete.html";
               } else {
                 var fd = new FormData(confirmForm);
                 var params = new URLSearchParams(fd);

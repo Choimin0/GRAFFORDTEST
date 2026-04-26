@@ -85,14 +85,21 @@
     <script>
       document.addEventListener("DOMContentLoaded", function () {
         var ROOM_LABEL = { G1: "G1", G2: "G2", G3: "G3", G4: "G4" };
-        var params = new URLSearchParams(window.location.search);
-        var orderNo = params.get("orderNo") || "—";
-        var room = params.get("room") || "";
-        var checkIn = params.get("checkIn") || "";
-        var checkOut = params.get("checkOut") || "";
-        var name = params.get("name") || "—";
-        var contact = params.get("contact") || "—";
-        var amount = parseInt(params.get("amount") || "0", 10) || 0;
+        var saved = null;
+        try {
+          saved = JSON.parse(
+            sessionStorage.getItem("graffordDeleteCompleteData") || "null",
+          );
+        } catch (e) {
+          saved = null;
+        }
+        var orderNo = (saved && saved.orderNo) || "—";
+        var room = (saved && saved.room) || "";
+        var checkIn = (saved && saved.checkIn) || "";
+        var checkOut = (saved && saved.checkOut) || "";
+        var name = (saved && saved.name) || "—";
+        var contact = (saved && saved.contact) || "—";
+        var amount = parseInt((saved && saved.amount) || "0", 10) || 0;
 
         function formatKRW(n) {
           return Number(n || 0).toLocaleString("ko-KR") + "원";

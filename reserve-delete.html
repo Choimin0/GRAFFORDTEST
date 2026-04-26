@@ -201,15 +201,22 @@
           G3: "G3",
           G4: "G4",
         };
-        var params = new URLSearchParams(window.location.search);
-        var orderNo = params.get("orderNo") || "—";
-        var name = params.get("name") || "—";
-        var contact = params.get("contact") || "—";
-        var room = params.get("room") || "";
-        var checkIn = params.get("checkIn") || "";
-        var checkOut = params.get("checkOut") || "";
-        var totalAmount = parseInt(params.get("amount") || "0", 10) || 0;
-        var cancelToken = params.get("cancelToken") || "";
+        var saved = null;
+        try {
+          saved = JSON.parse(
+            sessionStorage.getItem("graffordCancelPayload") || "null",
+          );
+        } catch (e) {
+          saved = null;
+        }
+        var orderNo = (saved && saved.orderNo) || "—";
+        var name = (saved && saved.name) || "—";
+        var contact = (saved && saved.contact) || "—";
+        var room = (saved && saved.room) || "";
+        var checkIn = (saved && saved.checkIn) || "";
+        var checkOut = (saved && saved.checkOut) || "";
+        var totalAmount = parseInt((saved && saved.amount) || "0", 10) || 0;
+        var cancelToken = (saved && saved.cancelToken) || "";
 
         function formatKRW(n) {
           return Number(n || 0).toLocaleString("ko-KR") + "원";
@@ -395,16 +402,19 @@
                 "graffordDeletedReservationOrderNo",
                 String(orderNo || ""),
               );
-              var doneParams = new URLSearchParams();
-              doneParams.set("orderNo", orderNo || "");
-              doneParams.set("name", name || "");
-              doneParams.set("contact", contact || "");
-              doneParams.set("room", room || "");
-              doneParams.set("checkIn", checkIn || "");
-              doneParams.set("checkOut", checkOut || "");
-              doneParams.set("amount", String(totalAmount || 0));
-              window.location.href =
-                "delete-complete.html?" + doneParams.toString();
+              sessionStorage.setItem(
+                "graffordDeleteCompleteData",
+                JSON.stringify({
+                  orderNo: orderNo || "",
+                  name: name || "",
+                  contact: contact || "",
+                  room: room || "",
+                  checkIn: checkIn || "",
+                  checkOut: checkOut || "",
+                  amount: String(totalAmount || 0),
+                }),
+              );
+              window.location.href = "delete-complete.html";
             })
             .catch(function (err) {
               window.alert(
