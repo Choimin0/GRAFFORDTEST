@@ -43,9 +43,14 @@
     </nav>
 
     <main class="content-section confirm-page reserve-complete-page">
-      <h1 class="confirm-title">
-        대지가 내어주는 그라운드가 당신을 기다립니다
-      </h1>
+      <h1 class="confirm-title">예약 완료</h1>
+      <section
+        id="complete-bridge-copy"
+        class="room-bridge-copy"
+        aria-label="완료 안내 문구"
+      >
+        <p>대지가 내어주는 그라운드가 당신을 기다립니다</p>
+      </section>
       <div class="confirm-layout-grid">
         <div class="confirm-layout-col">
           <section
@@ -146,7 +151,9 @@
 
           <section class="confirm-section">
             <div class="confirm-actions reserve-complete-actions">
-              <a href="index.html" class="reserve-complete-action-link">메인으로</a>
+              <a href="index.html" class="reserve-complete-action-link"
+                >메인으로</a
+              >
               <a
                 href="reserve-delete.html"
                 id="complete-link-cancel"
@@ -235,7 +242,8 @@
         function renderGallery(withFade) {
           if (!mainImg || !images.length) return;
           var src = images[galleryIndex];
-          var altText = (ROOM_LABEL[room] || room) + " 사진 " + (galleryIndex + 1);
+          var altText =
+            (ROOM_LABEL[room] || room) + " 사진 " + (galleryIndex + 1);
           if (!withFade) {
             mainImg.src = src;
             mainImg.alt = altText;
@@ -290,7 +298,6 @@
           cancelParams.set("request", guestRequest || "");
           cancelLink.href = "reserve-delete.html?" + cancelParams.toString();
         }
-
       });
     </script>
     <script defer src="js/grafford-page-fade.js"></script>

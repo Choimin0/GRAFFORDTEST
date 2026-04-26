@@ -284,10 +284,13 @@
         var openBtn = document.getElementById("cancel-submit-btn");
         var yesBtn = document.getElementById("cancel-modal-yes");
         var noBtn = document.getElementById("cancel-modal-no");
+        var modalTitleEl = document.getElementById("cancel-modal-title");
+        var modalNoteEl = document.querySelector(".reserve-delete-modal-note");
         var reasonOtherInput = document.getElementById("cancel-reason-other");
         var reasonInputs = document.querySelectorAll(
           'input[name="cancelReason"]',
         );
+        var missingMode = false;
 
         function syncOtherReasonState() {
           if (!reasonOtherInput) {
@@ -308,13 +311,45 @@
         });
         syncOtherReasonState();
 
+        var deletedOrderMarker = sessionStorage.getItem(
+          "graffordDeletedReservationOrderNo",
+        );
+        if (
+          deletedOrderMarker &&
+          deletedOrderMarker === String(orderNo || "") &&
+          modalTitleEl
+        ) {
+          missingMode = true;
+          modalTitleEl.textContent = "예약 내용을 불러올 수 없습니다";
+          yesBtn.textContent = "예";
+          if (noBtn) {
+            noBtn.hidden = true;
+          }
+          if (modalNoteEl) {
+            modalNoteEl.hidden = true;
+          }
+          if (openBtn) {
+            openBtn.disabled = true;
+          }
+          modal.hidden = false;
+          sessionStorage.removeItem("graffordDeletedReservationOrderNo");
+        }
+
         openBtn.addEventListener("click", function () {
+          if (missingMode) {
+            modal.hidden = false;
+            return;
+          }
           modal.hidden = false;
         });
         noBtn.addEventListener("click", function () {
           modal.hidden = true;
         });
         yesBtn.addEventListener("click", function () {
+          if (missingMode) {
+            window.location.href = "index.html";
+            return;
+          }
           yesBtn.disabled = true;
           noBtn.disabled = true;
           fetch(reservationsApiUrl(), {
@@ -342,7 +377,20 @@
                   "예약 취소 처리에 실패했습니다. (" + result.status + ")";
                 throw new Error(msg);
               }
-              window.location.href = "delete-complete.html";
+              sessionStorage.setItem(
+                "graffordDeletedReservationOrderNo",
+                String(orderNo || ""),
+              );
+              var doneParams = new URLSearchParams();
+              doneParams.set("orderNo", orderNo || "");
+              doneParams.set("name", name || "");
+              doneParams.set("contact", contact || "");
+              doneParams.set("room", room || "");
+              doneParams.set("checkIn", checkIn || "");
+              doneParams.set("checkOut", checkOut || "");
+              doneParams.set("amount", String(totalAmount || 0));
+              window.location.href =
+                "delete-complete.html?" + doneParams.toString();
             })
             .catch(function (err) {
               window.alert(
