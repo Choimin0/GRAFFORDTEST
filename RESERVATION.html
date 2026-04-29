@@ -1273,6 +1273,10 @@
             }
 
             btn.disabled = disabled;
+            btn.dataset.disabledReason = disabledReason || "enabled";
+            btn.dataset.debugPast = isPast ? "1" : "0";
+            btn.dataset.debugBeyond = isBeyondBookable ? "1" : "0";
+            btn.dataset.debugOccupied = isOcc ? "1" : "0";
             if (calDebugMode && disabled) {
               btn.setAttribute("title", ymdStr + " blocked: " + disabledReason);
             }
@@ -1320,6 +1324,10 @@
                   console.log("[CAL DEBUG CLICK]", {
                     date: formatYMD(dateCopy),
                     disabled: btn.disabled,
+                    disabledReason: btn.dataset.disabledReason,
+                    isPast: btn.dataset.debugPast === "1",
+                    isBeyond: btn.dataset.debugBeyond === "1",
+                    isOccupied: btn.dataset.debugOccupied === "1",
                     hasCheckIn: !!checkIn,
                     hasCheckOut: !!checkOut,
                   });
