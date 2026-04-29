@@ -9,6 +9,7 @@ const PAST_TABLE = "past_reservations";
 const DELETED_TABLE = "delete_reservations";
 
 function getDatabaseUrl() {
+  console.log("이건 당연히");
   return String(
     process.env.POSTGRES_URL ||
       process.env.POSTGRES_PRISMA_URL ||
