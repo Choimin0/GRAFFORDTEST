@@ -635,7 +635,9 @@
         function isBlockedByPastOrCutoff(dateObj) {
           var info = getKstNowInfo();
           var ymd = formatYMD(dateObj);
-          return ymd < info.todayYmd || (info.hour >= 19 && ymd === info.todayYmd);
+          return (
+            ymd < info.todayYmd || (info.hour >= 19 && ymd === info.todayYmd)
+          );
         }
 
         function formatDisplay(d) {
@@ -755,7 +757,7 @@
             if (extraGuestsHint) {
               if (currentRoom === "G3") {
                 extraGuestsHint.textContent =
-                  "기준 인원 외 최대 2인 추가 가능합니다.(인원 추가 시 박당 30,000원/인)";
+                  "기준 인원 외 최대 2인 추가 가능합니다. (인원 추가 시 박당 30,000원/인)";
               } else {
                 extraGuestsHint.textContent =
                   "기준 인원 외 최대 4인 추가 가능합니다. (인원 추가 시 박당 30,000원/인)";

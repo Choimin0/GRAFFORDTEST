@@ -4,13 +4,13 @@
  */
 (function (root) {
   var ROOM_WEEKDAY_BASE = {
-    G1: 200000,
-    G2: 200000,
+    G1: 250000,
+    G2: 250000,
     G3: 300000,
-    G4: 500000,
+    G4: 350000,
   };
   var EXTRA_PER_PERSON_PER_NIGHT = 30000;
-  var WEEKEND_SURCHARGE_PER_NIGHT = 30000;
+  var WEEKEND_SURCHARGE_PER_NIGHT = 20000;
   var CONSECUTIVE_SALE_PER_NIGHT = 20000;
   /** 추가 투숙 가능 인원 (기준 인원 외) */
   var MAX_EXTRA_GUESTS = { G1: 0, G2: 0, G3: 2, G4: 4 };
@@ -53,8 +53,7 @@
   }
 
   function clampExtra(room, n) {
-    var max =
-      MAX_EXTRA_GUESTS[room] !== undefined ? MAX_EXTRA_GUESTS[room] : 0;
+    var max = MAX_EXTRA_GUESTS[room] !== undefined ? MAX_EXTRA_GUESTS[room] : 0;
     n = Number(n);
     if (isNaN(n) || n < 0) {
       n = 0;
@@ -104,8 +103,7 @@
       }
     });
     var weekendSurcharge = weekendNights * WEEKEND_SURCHARGE_PER_NIGHT;
-    var extraGuestTotal =
-      extraGuests * EXTRA_PER_PERSON_PER_NIGHT * nights;
+    var extraGuestTotal = extraGuests * EXTRA_PER_PERSON_PER_NIGHT * nights;
     var grandTotal = baseTotal + weekendSurcharge + extraGuestTotal;
     var consecutiveSale =
       nights >= 2 ? (nights - 1) * CONSECUTIVE_SALE_PER_NIGHT : 0;
