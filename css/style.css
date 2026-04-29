@@ -1412,6 +1412,7 @@ section ul li {
 }
 
 /* ROOMS 예약하기 버튼은 유지, 나머지 통일 버튼은 기본색 grafford-beige2 */
+.admin-search-btn.btn.reserve-btn,
 .admin-refresh-btn.btn.reserve-btn,
 .reservation-lookup-btn.btn.reserve-btn,
 .reserve-cta.btn.reserve-btn,
@@ -1432,6 +1433,8 @@ section ul li {
   color: #fff;
 }
 
+.admin-search-btn.btn.reserve-btn:hover,
+.admin-search-btn.btn.reserve-btn:focus-visible,
 .admin-refresh-btn.btn.reserve-btn:hover,
 .admin-refresh-btn.btn.reserve-btn:focus-visible,
 .rooms-features .room-feature .btn.reserve-btn:hover,
@@ -3247,6 +3250,12 @@ iframe.map {
 .admin-login-form[hidden] {
   display: none !important;
 }
+.admin-login-section {
+  width: 100%;
+  max-width: 560px;
+  margin-left: auto;
+  margin-right: auto;
+}
 .admin-login-actions {
   margin-top: 0.45rem;
 }
@@ -3261,6 +3270,7 @@ iframe.map {
   gap: 0.8rem;
 }
 .admin-table-head-left {
+  text-align: center;
   display: inline-flex;
   align-items: center;
   gap: 0.6rem;
@@ -3286,7 +3296,7 @@ iframe.map {
 }
 .admin-sort-control select {
   min-width: 180px;
-  border: 1px solid #d4cdc5;
+  border: 2px solid #d4cdc5;
   background: var(--grafford-beige);
   padding: 0.34rem 0.45rem;
 }
@@ -3294,18 +3304,18 @@ iframe.map {
   display: grid;
   grid-template-columns: minmax(180px, 1fr) minmax(180px, 1fr) auto auto;
   gap: 0.55rem;
-  margin-top: 0.8rem;
+  margin-top: 1.5rem;
   align-items: end;
 }
 .admin-search-row .confirm-label {
   margin: 0;
 }
 .admin-search-btn {
+  text-align: center;
   white-space: nowrap;
 }
 .admin-page-reset-btn {
-  border: 1px solid #d4cdc5;
-  background: #fff;
+  background: var(--grafford-beige2);
   color: var(--grafford-mud2);
   white-space: nowrap;
 }
