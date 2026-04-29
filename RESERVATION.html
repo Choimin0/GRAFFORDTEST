@@ -1316,16 +1316,18 @@
 
             (function (dateCopy) {
               btn.addEventListener("click", function () {
+                if (calDebugMode) {
+                  console.log("[CAL DEBUG CLICK]", {
+                    date: formatYMD(dateCopy),
+                    disabled: btn.disabled,
+                    hasCheckIn: !!checkIn,
+                    hasCheckOut: !!checkOut,
+                  });
+                }
                 if (btn.disabled) return;
                 var shouldMoveToNextMonth = false;
                 if (!checkIn || (checkIn && checkOut)) {
-                  if (
-                    isBlockedByPastOrCutoff(dateCopy) ||
-                    isDateBeyondBookable(dateCopy, false) ||
-                    occupiedNightSet.has(formatYMD(dateCopy))
-                  ) {
-                    return;
-                  }
+                  // In check-in mode, trust render-time disabled state.
                   checkIn = new Date(dateCopy);
                   checkOut = null;
                   if (isLastDayOfMonth(checkIn)) {
