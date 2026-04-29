@@ -791,14 +791,6 @@
           todayParts.d,
         );
         var isTodayAfterCutoff = Number(kstNowInfo.hour || 0) >= 19;
-        var calDebugMode = false;
-        try {
-          calDebugMode =
-            new URLSearchParams(window.location.search).get("calDebug") === "1";
-        } catch (_e) {
-          calDebugMode = false;
-        }
-
         function isBlockedByPastOrCutoff(dateObj) {
           var target = toStartOfDay(dateObj);
           return (
@@ -1293,16 +1285,6 @@
             );
           }
 
-          var debugStats = {
-            totalDays: 0,
-            enabledDays: 0,
-            disabledPast: 0,
-            disabledBeyond: 0,
-            disabledOccupied: 0,
-            disabledOther: 0,
-          };
-          var debugBlockedSamples = [];
-
           for (var d = 1; d <= lastDay; d++) {
             var cellDate = new Date(y, m, d);
             var btn = document.createElement("button");
@@ -1341,37 +1323,11 @@
 
             btn.disabled = disabled;
             btn.dataset.disabledReason = disabledReason || "enabled";
-            btn.dataset.debugPast = isPast ? "1" : "0";
-            btn.dataset.debugBeyond = isBeyondBookable ? "1" : "0";
-            btn.dataset.debugOccupied = isOcc ? "1" : "0";
-            btn.dataset.debugTargetKey = String(targetKey);
-            btn.dataset.debugLimitKey = String(limitKey);
-            if (calDebugMode && disabled) {
-              btn.setAttribute("title", ymdStr + " blocked: " + disabledReason);
-            }
 
             if (isPast || isBeyondBookable) {
               btn.classList.add("cal-past");
             } else if (isOcc) {
               btn.classList.add("cal-past", "cal-booked");
-            }
-
-            if (calDebugMode) {
-              debugStats.totalDays += 1;
-              if (!disabled) {
-                debugStats.enabledDays += 1;
-              } else if (disabledReason === "past-or-cutoff") {
-                debugStats.disabledPast += 1;
-              } else if (disabledReason === "beyond-max-bookable") {
-                debugStats.disabledBeyond += 1;
-              } else if (disabledReason === "occupied-night") {
-                debugStats.disabledOccupied += 1;
-              } else {
-                debugStats.disabledOther += 1;
-              }
-              if (disabled && debugBlockedSamples.length < 8) {
-                debugBlockedSamples.push(ymdStr + ":" + disabledReason);
-              }
             }
 
             if (checkIn && sameDay(cellDate, checkIn))
@@ -1389,22 +1345,6 @@
 
             (function (dateCopy, btnEl) {
               btnEl.addEventListener("click", function () {
-                if (calDebugMode) {
-                  console.log("[DEBUG CLICK]", {
-                    date: formatYMD(dateCopy),
-                    disabled: btnEl.disabled,
-                    disabledReason: btnEl.dataset.disabledReason,
-                    isPast: btnEl.dataset.debugPast === "1",
-                    isBeyond: btnEl.dataset.debugBeyond === "1",
-                    isOccupied: btnEl.dataset.debugOccupied === "1",
-                    targetKey: btnEl.dataset.debugTargetKey,
-                    limitKey: btnEl.dataset.debugLimitKey,
-                    limitCheckIn: ymdPartsToString(maxCheckInParts),
-                    limitCheckOut: ymdPartsToString(maxCheckOutParts),
-                    hasCheckIn: !!checkIn,
-                    hasCheckOut: !!checkOut,
-                  });
-                }
                 if (btnEl.disabled) return;
                 var shouldMoveToNextMonth = false;
                 if (!checkIn || (checkIn && checkOut)) {
@@ -1476,43 +1416,6 @@
             })(cellDate, btn);
 
             calGrid.appendChild(btn);
-          }
-
-          if (calDebugMode) {
-            var debugSummary =
-              "[CAL DEBUG] month=" +
-              y +
-              "-" +
-              pad(m + 1) +
-              " today=" +
-              formatYMD(todayDateOnly) +
-              " cutoffAfter19=" +
-              (isTodayAfterCutoff ? "1" : "0") +
-              " maxCheckIn=" +
-              ymdPartsToString(maxCheckInParts) +
-              " maxCheckOut=" +
-              ymdPartsToString(maxCheckOutParts) +
-              " occupiedNights=" +
-              occupiedNightSet.size +
-              " enabled=" +
-              debugStats.enabledDays +
-              "/" +
-              debugStats.totalDays +
-              " past=" +
-              debugStats.disabledPast +
-              " beyond=" +
-              debugStats.disabledBeyond +
-              " occupied=" +
-              debugStats.disabledOccupied;
-            console.log(debugSummary, debugBlockedSamples);
-            if (availabilityEl && !checkIn && !checkOut) {
-              availabilityEl.textContent =
-                debugSummary +
-                (debugBlockedSamples.length
-                  ? " samples=" + debugBlockedSamples.join(", ")
-                  : "");
-              availabilityEl.classList.remove("is-ok");
-            }
           }
         }
 

@@ -316,11 +316,6 @@ export default async function handler(req, res) {
     json(res, 400, { ok: false, error: "Invalid JSON body" });
     return;
   }
-  var reqId = Math.random().toString(36).slice(2, 10);
-  var debugMode =
-    body && (body.debug === true || String(body.debug).toLowerCase() === "1");
-  console.error("[lookup] start", { reqId: reqId, at: new Date().toISOString() });
-
   var normName = normalizeLookupName(body.guestName || body.name || "");
   var normOrder = normalizeLookupOrder(
     body.reservationNumber || body.orderNo || body.number || "",
@@ -336,11 +331,6 @@ export default async function handler(req, res) {
   try {
     await archivePastReservations(pool);
     var autoCancelStats = await autoCancelUnpaidReservations(pool);
-    console.error("[lookup] auto-cancel stats", {
-      reqId: reqId,
-      movedFromActive: autoCancelStats.movedFromActive,
-      movedFromPast: autoCancelStats.movedFromPast,
-    });
     var sel = await pool.query(
       `SELECT
         id,
@@ -376,13 +366,6 @@ export default async function handler(req, res) {
       json(res, 200, {
         ok: true,
         source: "database",
-        debug:
-          debugMode === true
-            ? {
-                reqId: reqId,
-                autoCancelStats: autoCancelStats,
-              }
-            : undefined,
         row: {
           id: row.id,
           reservationNumber: row.reservation_number,
@@ -443,13 +426,6 @@ export default async function handler(req, res) {
       source: "database",
       deleted: true,
       deleteReason: String(deletedRow.cancel_reason || "").toLowerCase(),
-      debug:
-        debugMode === true
-          ? {
-              reqId: reqId,
-              autoCancelStats: autoCancelStats,
-            }
-          : undefined,
       row: {
         reservationNumber: deletedRow.reservation_number,
         guestName: deletedRow.guest_name,
@@ -482,7 +458,6 @@ export default async function handler(req, res) {
       },
     });
   } catch (e) {
-    console.error("[lookup] error", { reqId: reqId, error: String(e && e.message ? e.message : e) });
     json(res, 500, {
       ok: false,
       error: String((e && e.message) || e || "Lookup failed"),
