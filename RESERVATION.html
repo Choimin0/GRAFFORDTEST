@@ -1344,12 +1344,11 @@
                     (occupiedNightSet.has(formatYMD(dateCopy)) &&
                       !canSelectCheckOut(checkIn, dateCopy))
                   ) {
-                    checkIn = null;
-                    checkOut = null;
+                    // Invalid checkout click should not clear existing check-in.
+                    return;
                   } else if (!canSelectCheckOut(checkIn, dateCopy)) {
-                    /* 예약 구간을 가로지르면 기존 체크인 선택 취소 */
-                    checkIn = null;
-                    checkOut = null;
+                    // Keep current check-in; wait for a valid checkout selection.
+                    return;
                   } else {
                     checkOut = new Date(dateCopy);
                   }
