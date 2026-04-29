@@ -551,8 +551,16 @@
         var occupiedNightSet = new Set();
         var monthFadeTimer = null;
         var currentExtraGuests = 0;
-        var now = new Date();
-        var today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        var kstNowInfo = getKstNowInfo();
+        var today = parseYMDLocal(kstNowInfo.todayYmd);
+        if (!today) {
+          var fallbackNow = new Date();
+          today = new Date(
+            fallbackNow.getFullYear(),
+            fallbackNow.getMonth(),
+            fallbackNow.getDate(),
+          );
+        }
 
         function addMonthsKeepingDay(baseDate, monthsToAdd) {
           var y = baseDate.getFullYear();
@@ -588,6 +596,46 @@
             "-" +
             pad(d.getDate())
           );
+        }
+
+        function getKstNowInfo() {
+          var parts = new Intl.DateTimeFormat("en-CA", {
+            timeZone: "Asia/Seoul",
+            year: "numeric",
+            month: "2-digit",
+            day: "2-digit",
+            hour: "2-digit",
+            hour12: false,
+          }).formatToParts(new Date());
+          var map = {};
+          parts.forEach(function (p) {
+            if (p.type !== "literal") {
+              map[p.type] = p.value;
+            }
+          });
+          return {
+            todayYmd:
+              String(map.year || "") +
+              "-" +
+              String(map.month || "01") +
+              "-" +
+              String(map.day || "01"),
+            hour: Number(map.hour || 0),
+          };
+        }
+
+        function parseYMDLocal(ymd) {
+          if (!/^\d{4}-\d{2}-\d{2}$/.test(String(ymd || ""))) {
+            return null;
+          }
+          var p = ymd.split("-");
+          return new Date(Number(p[0]), Number(p[1]) - 1, Number(p[2]));
+        }
+
+        function isBlockedByPastOrCutoff(dateObj) {
+          var info = getKstNowInfo();
+          var ymd = formatYMD(dateObj);
+          return ymd < info.todayYmd || (info.hour >= 19 && ymd === info.todayYmd);
         }
 
         function formatDisplay(d) {
@@ -1060,7 +1108,9 @@
             calGrid.appendChild(empty);
           }
 
-          var isTodayAfterCutoff = now.getHours() >= 19;
+          var kstNow = getKstNowInfo();
+          var todayYmdKst = kstNow.todayYmd;
+          var isTodayAfterCutoff = kstNow.hour >= 19;
           var inCheckoutMode = !!(checkIn && !checkOut);
           if (calGrid) {
             calGrid.classList.toggle("is-selecting-checkout", inCheckoutMode);
@@ -1091,8 +1141,8 @@
 
             var ymdStr = formatYMD(cellDate);
             var isPast =
-              cellDate < today ||
-              (isTodayAfterCutoff && sameDay(cellDate, today));
+              ymdStr < todayYmdKst ||
+              (isTodayAfterCutoff && ymdStr === todayYmdKst);
             var isBeyondBookable = isDateBeyondBookable(cellDate);
             var isOcc = occupiedNightSet.has(ymdStr);
             var disabled = false;
@@ -1141,8 +1191,7 @@
                 var shouldMoveToNextMonth = false;
                 if (!checkIn || (checkIn && checkOut)) {
                   if (
-                    dateCopy < today ||
-                    (isTodayAfterCutoff && sameDay(dateCopy, today)) ||
+                    isBlockedByPastOrCutoff(dateCopy) ||
                     isDateBeyondBookable(dateCopy) ||
                     occupiedNightSet.has(formatYMD(dateCopy))
                   ) {
@@ -1161,8 +1210,7 @@
                     checkIn = null;
                     checkOut = null;
                   } else if (
-                    dateCopy < today ||
-                    (isTodayAfterCutoff && sameDay(dateCopy, today)) ||
+                    isBlockedByPastOrCutoff(dateCopy) ||
                     isDateBeyondBookable(dateCopy) ||
                     (occupiedNightSet.has(formatYMD(dateCopy)) &&
                       !canSelectCheckOut(checkIn, dateCopy))

@@ -76,6 +76,26 @@ function toYMD(v) {
   return y + "-" + m + "-" + day;
 }
 
+function formatDateTimeKst(v) {
+  if (v == null || v === "") {
+    return "";
+  }
+  var d = new Date(v);
+  if (isNaN(d.getTime())) {
+    return "";
+  }
+  return new Intl.DateTimeFormat("ko-KR", {
+    timeZone: "Asia/Seoul",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: false,
+  }).format(d);
+}
+
 function isAdminOk(body) {
   var inputId = String((body && body.adminId) || "").trim();
   var inputPw = String((body && body.adminPw) || "").trim();
@@ -218,7 +238,7 @@ export default async function handler(req, res) {
           checkOut: toYMD(row.check_out_date),
           totalAmount: row.total_amount != null ? Number(row.total_amount) : 0,
           bankConfirmed: row.bank_confirmed === true,
-          createdAt: row.created_at,
+          createdAt: formatDateTimeKst(row.created_at),
         };
       }),
     });

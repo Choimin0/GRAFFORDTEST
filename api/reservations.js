@@ -145,6 +145,26 @@ function rowDateToYMD(v) {
   return "";
 }
 
+function formatDateTimeKst(v) {
+  if (v == null || v === "") {
+    return "";
+  }
+  var d = new Date(v);
+  if (isNaN(d.getTime())) {
+    return "";
+  }
+  return new Intl.DateTimeFormat("ko-KR", {
+    timeZone: "Asia/Seoul",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: false,
+  }).format(d);
+}
+
 function addOneDayYMD(ymd) {
   var p = ymd.split("-");
   var dt = new Date(Number(p[0]), Number(p[1]) - 1, Number(p[2]));
@@ -462,7 +482,7 @@ export default async function handler(req, res) {
           guestRequest: dbRow.guest_request || "",
           paymentMethod: dbRow.payment_method || null,
           bankConfirmed: dbRow.bank_confirmed === true,
-          createdAt: dbRow.created_at,
+          createdAt: formatDateTimeKst(dbRow.created_at),
         },
       });
     } catch (e) {
@@ -509,7 +529,7 @@ export default async function handler(req, res) {
               totalAmount: null,
               paymentMethod: null,
               bankConfirmed: false,
-              createdAt: br.created_at,
+              createdAt: formatDateTimeKst(br.created_at),
             },
             warning:
               "일부 컬럼이 DB에 없습니다. db/migrations/002_reservations_booking_columns.sql 을 실행하세요.",
@@ -640,9 +660,10 @@ export default async function handler(req, res) {
             payment_method,
             guest_request,
             bank_confirmed,
-            cancel_reason
+            cancel_reason,
+            cancelled_at
           ) VALUES (
-            $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15
+            $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, NOW()
           )`,
           [
             deletedRow.reservation_number,
@@ -673,6 +694,7 @@ export default async function handler(req, res) {
         ok: true,
         deleted: true,
         reservationNumber: deletedRow.reservation_number,
+        cancelledAt: formatDateTimeKst(new Date()),
       });
     } catch (e) {
       console.error("reservations delete", e);
@@ -810,7 +832,7 @@ export default async function handler(req, res) {
       ok: true,
       id: row.id,
       reservationNumber: row.reservation_number,
-      createdAt: row.created_at,
+      createdAt: formatDateTimeKst(row.created_at),
       cancelToken: issueCancelToken(reservationNumber, guestName),
       bankConfirmed: paymentMethod === "bank" ? false : true,
     });

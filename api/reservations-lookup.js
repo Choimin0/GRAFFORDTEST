@@ -85,6 +85,26 @@ function toYMD(v) {
   return y + "-" + m + "-" + day;
 }
 
+function formatDateTimeKst(v) {
+  if (v == null || v === "") {
+    return "";
+  }
+  var d = new Date(v);
+  if (isNaN(d.getTime())) {
+    return "";
+  }
+  return new Intl.DateTimeFormat("ko-KR", {
+    timeZone: "Asia/Seoul",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: false,
+  }).format(d);
+}
+
 function readBody(req) {
   return new Promise(function (resolve, reject) {
     var chunks = [];
@@ -266,7 +286,7 @@ export default async function handler(req, res) {
         guestRequest: row.guest_request || "",
         paymentMethod: row.payment_method || null,
         bankConfirmed: row.bank_confirmed === true,
-        createdAt: row.created_at,
+        createdAt: formatDateTimeKst(row.created_at),
       },
       cancelToken: issueCancelToken(row.reservation_number, row.guest_name),
     });
