@@ -312,7 +312,7 @@
                       id="agree-privacy"
                       value="1"
                     />
-                    개인정보 수집 및 이용 동의
+                    개인 정보 수집 및 이용 동의
                   </label>
                   <button
                     type="button"
@@ -379,7 +379,11 @@
                   무통장입금
                 </label>
               </fieldset>
-              <div id="bank-transfer-notice" class="confirm-check-detail" hidden>
+              <div
+                id="bank-transfer-notice"
+                class="confirm-check-detail"
+                hidden
+              >
                 12시간 내 미입금 시 예약이 자동 취소됩니다. 취소된 예약은 복구가
                 불가합니다.
               </div>
@@ -429,7 +433,10 @@
         } catch (e) {
           confirmDraft = null;
         }
-        var roomRaw = ((confirmDraft && confirmDraft.room) || "G1").toUpperCase();
+        var roomRaw = (
+          (confirmDraft && confirmDraft.room) ||
+          "G1"
+        ).toUpperCase();
         if (!P) {
           roomRaw = "G1";
         } else if (!P.ROOM_WEEKDAY_BASE.hasOwnProperty(roomRaw)) {
@@ -558,7 +565,9 @@
           addBreakLine(
             "최종 결제금: " + formatKRW(quote.discountedGrandTotal || 0),
           );
-          totalDisplayEl.textContent = formatKRW(quote.discountedGrandTotal || 0);
+          totalDisplayEl.textContent = formatKRW(
+            quote.discountedGrandTotal || 0,
+          );
         } else {
           addBreakLine(
             "투숙 일수를 계산할 수 없습니다. 체크인·체크아웃을 확인해 주세요.",
@@ -575,7 +584,9 @@
         var agreePrivacyDetail = document.getElementById(
           "agree-privacy-detail",
         );
-        var bankTransferNotice = document.getElementById("bank-transfer-notice");
+        var bankTransferNotice = document.getElementById(
+          "bank-transfer-notice",
+        );
         var agreeSection = document
           .getElementById("sec-agree")
           .closest("section");
@@ -843,8 +854,9 @@
                     totalAmount: String(totalAmount),
                     payMethod: payInput.value,
                     cancelToken: (result.data && result.data.cancelToken) || "",
-                    bankConfirmed:
-                      !!(result.data && result.data.bankConfirmed === true),
+                    bankConfirmed: !!(
+                      result.data && result.data.bankConfirmed === true
+                    ),
                   }),
                 );
                 window.location.href = "reserve-complete.html";
