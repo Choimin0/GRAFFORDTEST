@@ -714,6 +714,8 @@
 
         var maxBookableDateOnly = toStartOfDay(maxBookableDate);
         var maxCheckoutDateOnly = toStartOfDay(maxCheckoutDate);
+        var todayDateOnly = toStartOfDay(today);
+        var isTodayAfterCutoff = Number(kstNowInfo.hour || 0) >= 19;
         var calDebugMode = false;
         try {
           calDebugMode =
@@ -723,16 +725,10 @@
         }
 
         function isBlockedByPastOrCutoff(dateObj) {
-          var info = getKstNowInfo();
-          var kstTodayDate = parseYMDLocal(info.todayYmd);
-          if (!kstTodayDate) {
-            return false;
-          }
           var target = toStartOfDay(dateObj);
-          var todayDateOnly = toStartOfDay(kstTodayDate);
           return (
             target < todayDateOnly ||
-            (info.hour >= 19 && sameDay(target, todayDateOnly))
+            (isTodayAfterCutoff && sameDay(target, todayDateOnly))
           );
         }
 
@@ -1407,7 +1403,9 @@
               "-" +
               pad(m + 1) +
               " today=" +
-              formatYMD(today) +
+              formatYMD(todayDateOnly) +
+              " cutoffAfter19=" +
+              (isTodayAfterCutoff ? "1" : "0") +
               " maxCheckIn=" +
               formatYMD(maxBookableDateOnly) +
               " maxCheckOut=" +
