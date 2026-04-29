@@ -1062,6 +1062,11 @@ main {
   margin: 0 0 0.85rem;
 }
 
+.room-intro-desc2 {
+  margin: 0 0 0.85rem;
+  font-size: 0.82em;
+}
+
 .room-meta-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -3316,7 +3321,7 @@ iframe.map {
 }
 .admin-page-reset-btn {
   background: var(--grafford-beige2);
-  color: var(--grafford-mud2);
+  color: #fff;
   white-space: nowrap;
 }
 .admin-table {
