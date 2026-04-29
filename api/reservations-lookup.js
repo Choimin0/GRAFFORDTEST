@@ -1,6 +1,10 @@
 import pg from "pg";
 import crypto from "node:crypto";
 
+console.log("----------------------------");
+console.log("함수 진입 성공 - 현재 시간:", new Date().toISOString());
+console.log("----------------------------");
+
 const { Pool } = pg;
 const LEGACY_TO_ROOM = { A: "G1", B: "G2", C: "G3", D: "G4" };
 const DEFAULT_CANCEL_TOKEN_TTL_MS = 10 * 60 * 1000;
