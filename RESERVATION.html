@@ -1307,10 +1307,9 @@
 
             var ymdStr = formatYMD(cellDate);
             var isPast = isBlockedByPastOrCutoff(cellDate);
-            var isBeyondBookable = isDateBeyondBookable(
-              cellDate,
-              inCheckoutMode,
-            );
+            var targetKey = toDateKey(toStartOfDay(cellDate));
+            var limitKey = inCheckoutMode ? maxCheckOutKey : maxCheckInKey;
+            var isBeyondBookable = targetKey > limitKey;
             var isOcc = occupiedNightSet.has(ymdStr);
             var disabled = false;
             var disabledReason = "";
@@ -1340,6 +1339,8 @@
             btn.dataset.debugPast = isPast ? "1" : "0";
             btn.dataset.debugBeyond = isBeyondBookable ? "1" : "0";
             btn.dataset.debugOccupied = isOcc ? "1" : "0";
+            btn.dataset.debugTargetKey = String(targetKey);
+            btn.dataset.debugLimitKey = String(limitKey);
             if (calDebugMode && disabled) {
               btn.setAttribute("title", ymdStr + " blocked: " + disabledReason);
             }
@@ -1391,6 +1392,8 @@
                     isPast: btn.dataset.debugPast === "1",
                     isBeyond: btn.dataset.debugBeyond === "1",
                     isOccupied: btn.dataset.debugOccupied === "1",
+                    targetKey: btn.dataset.debugTargetKey,
+                    limitKey: btn.dataset.debugLimitKey,
                     limitCheckIn: ymdPartsToString(maxCheckInParts),
                     limitCheckOut: ymdPartsToString(maxCheckOutParts),
                     hasCheckIn: !!checkIn,
