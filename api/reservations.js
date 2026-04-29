@@ -216,8 +216,7 @@ async function autoCancelUnpaidReservations(pool) {
       payment_method,
       guest_request,
       bank_confirmed,
-      cancel_reason,
-      cancelled_at
+      cancel_reason
     )
     SELECT
       reservation_number,
@@ -234,8 +233,7 @@ async function autoCancelUnpaidReservations(pool) {
       payment_method,
       guest_request,
       bank_confirmed,
-      'not paid',
-      NOW()
+      'not paid'
     FROM moved
     ON CONFLICT (reservation_number) DO NOTHING`,
   );
@@ -263,8 +261,7 @@ async function autoCancelUnpaidReservations(pool) {
       payment_method,
       guest_request,
       bank_confirmed,
-      cancel_reason,
-      cancelled_at
+      cancel_reason
     )
     SELECT
       reservation_number,
@@ -281,8 +278,7 @@ async function autoCancelUnpaidReservations(pool) {
       payment_method,
       guest_request,
       bank_confirmed,
-      'not paid',
-      NOW()
+      'not paid'
     FROM moved
     ON CONFLICT (reservation_number) DO NOTHING`,
   );
@@ -758,10 +754,9 @@ export default async function handler(req, res) {
             payment_method,
             guest_request,
             bank_confirmed,
-            cancel_reason,
-            cancelled_at
+            cancel_reason
           ) VALUES (
-            $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, NOW()
+            $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15
           )`,
           [
             deletedRow.reservation_number,

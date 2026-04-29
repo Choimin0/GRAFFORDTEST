@@ -9,7 +9,6 @@ const PAST_TABLE = "past_reservations";
 const DELETED_TABLE = "delete_reservations";
 
 function getDatabaseUrl() {
-  console.log("이건 당연히");
   return String(
     process.env.POSTGRES_URL ||
       process.env.POSTGRES_PRISMA_URL ||
@@ -213,8 +212,7 @@ async function autoCancelUnpaidReservations(pool) {
       payment_method,
       guest_request,
       bank_confirmed,
-      cancel_reason,
-      cancelled_at
+      cancel_reason
     )
     SELECT
       reservation_number,
@@ -231,8 +229,7 @@ async function autoCancelUnpaidReservations(pool) {
       payment_method,
       guest_request,
       bank_confirmed,
-      'not paid',
-      NOW()
+      'not paid'
     FROM moved
     ON CONFLICT (reservation_number) DO NOTHING`,
   );
@@ -260,8 +257,7 @@ async function autoCancelUnpaidReservations(pool) {
       payment_method,
       guest_request,
       bank_confirmed,
-      cancel_reason,
-      cancelled_at
+      cancel_reason
     )
     SELECT
       reservation_number,
@@ -278,8 +274,7 @@ async function autoCancelUnpaidReservations(pool) {
       payment_method,
       guest_request,
       bank_confirmed,
-      'not paid',
-      NOW()
+      'not paid'
     FROM moved
     ON CONFLICT (reservation_number) DO NOTHING`,
   );
@@ -407,8 +402,7 @@ export default async function handler(req, res) {
         guest_request,
         payment_method,
         bank_confirmed,
-        cancel_reason,
-        cancelled_at
+        cancel_reason
       FROM ${DELETED_TABLE}
       WHERE reservation_number = $1
       LIMIT 1`,
@@ -428,7 +422,6 @@ export default async function handler(req, res) {
       source: "database",
       deleted: true,
       deleteReason: String(deletedRow.cancel_reason || "").toLowerCase(),
-      cancelledAt: formatDateTimeKst(deletedRow.cancelled_at),
       row: {
         reservationNumber: deletedRow.reservation_number,
         guestName: deletedRow.guest_name,

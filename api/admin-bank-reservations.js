@@ -151,8 +151,7 @@ async function autoCancelUnpaidReservations(pool) {
       payment_method,
       guest_request,
       bank_confirmed,
-      cancel_reason,
-      cancelled_at
+      cancel_reason
     )
     SELECT
       reservation_number,
@@ -169,8 +168,7 @@ async function autoCancelUnpaidReservations(pool) {
       payment_method,
       guest_request,
       bank_confirmed,
-      'not paid',
-      NOW()
+      'not paid'
     FROM moved
     ON CONFLICT (reservation_number) DO NOTHING`,
   );
@@ -198,8 +196,7 @@ async function autoCancelUnpaidReservations(pool) {
       payment_method,
       guest_request,
       bank_confirmed,
-      cancel_reason,
-      cancelled_at
+      cancel_reason
     )
     SELECT
       reservation_number,
@@ -216,8 +213,7 @@ async function autoCancelUnpaidReservations(pool) {
       payment_method,
       guest_request,
       bank_confirmed,
-      'not paid',
-      NOW()
+      'not paid'
     FROM moved
     ON CONFLICT (reservation_number) DO NOTHING`,
   );
