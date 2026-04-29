@@ -21,44 +21,11 @@
         height: auto;
         display: block;
       }
-      .admin-login-grid {
-        display: grid;
-        grid-template-columns: 1fr 1fr auto;
-        gap: 0.7rem;
-        align-items: end;
-      }
-      .admin-login-grid[hidden] {
+      .admin-login-form[hidden] {
         display: none !important;
       }
-      .admin-login-grid .confirm-label {
-        margin: 0;
-      }
-      .admin-password-wrap {
-        display: flex;
-        align-items: center;
-        gap: 0.4rem;
-      }
-      .admin-password-wrap input {
-        flex: 1;
-      }
-      .admin-password-toggle {
-        border: 1px solid #d4cdc5;
-        background: #fff;
-        width: 2.15rem;
-        height: 2.15rem;
-        padding: 0;
-        line-height: 0;
-        cursor: pointer;
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-      }
-      .admin-password-toggle img {
-        width: 1.05rem;
-        height: 1.05rem;
-        object-fit: contain;
-        display: block;
-        background: transparent;
+      .admin-login-actions {
+        margin-top: 0.45rem;
       }
       .admin-table-wrap {
         margin-top: 1rem;
@@ -69,6 +36,22 @@
         align-items: center;
         justify-content: space-between;
         gap: 0.8rem;
+      }
+      .admin-table-head-left {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.6rem;
+      }
+      .admin-table-head-left .confirm-section-title {
+        margin: 0;
+      }
+      .admin-refresh-btn {
+        min-width: 96px;
+        padding: 0.42rem 0.85rem;
+      }
+      .admin-refresh-btn:disabled {
+        opacity: 0.7;
+        cursor: not-allowed;
       }
       .admin-sort-control {
         display: inline-flex;
@@ -82,6 +65,25 @@
         border: 1px solid #d4cdc5;
         background: #fff;
         padding: 0.34rem 0.45rem;
+      }
+      .admin-search-row {
+        display: grid;
+        grid-template-columns: minmax(180px, 1fr) minmax(180px, 1fr) auto auto;
+        gap: 0.55rem;
+        margin-top: 0.8rem;
+        align-items: end;
+      }
+      .admin-search-row .confirm-label {
+        margin: 0;
+      }
+      .admin-search-btn {
+        white-space: nowrap;
+      }
+      .admin-page-reset-btn {
+        border: 1px solid #d4cdc5;
+        background: #fff;
+        color: var(--grafford-mud2);
+        white-space: nowrap;
       }
       .admin-table {
         width: 100%;
@@ -114,6 +116,42 @@
         background-color: #c8c8c8;
         cursor: not-allowed;
       }
+      .admin-pagination {
+        margin-top: 0.95rem;
+        display: flex;
+        justify-content: center;
+        gap: 0.4rem;
+        flex-wrap: wrap;
+      }
+      .admin-page-btn {
+        min-width: 2rem;
+        height: 2rem;
+        border: 1px solid #d4cdc5;
+        background: #fff;
+        color: var(--grafford-mud2);
+        cursor: pointer;
+        padding: 0 0.55rem;
+      }
+      .admin-page-btn.is-active {
+        background: var(--grafford-beige2);
+        border-color: var(--grafford-beige2);
+        color: #fff;
+        font-weight: 700;
+      }
+      .admin-page-btn:disabled {
+        opacity: 0.45;
+        cursor: not-allowed;
+      }
+      @media (max-width: 900px) {
+        .admin-search-row {
+          grid-template-columns: 1fr 1fr;
+        }
+      }
+      @media (max-width: 640px) {
+        .admin-search-row {
+          grid-template-columns: 1fr;
+        }
+      }
     </style>
   </head>
   <body>
@@ -126,31 +164,32 @@
         <h2 class="confirm-section-title" id="admin-login-title">
           관리자 로그인
         </h2>
-        <form id="admin-login-form" class="admin-login-grid">
+        <form id="admin-login-form" class="admin-login-form checkout-form" novalidate>
           <label class="confirm-label">
-            <span>ID</span>
-            <input id="admin-id" type="text" autocomplete="username" required />
+            ID
+            <input
+              id="admin-id"
+              type="text"
+              autocomplete="username"
+              required
+              placeholder="관리자 ID"
+            />
           </label>
           <label class="confirm-label">
-            <span>PW</span>
-            <span class="admin-password-wrap">
-              <input
-                id="admin-pw"
-                type="password"
-                autocomplete="current-password"
-                required
-              />
-              <button
-                type="button"
-                id="admin-pw-toggle"
-                class="admin-password-toggle"
-                aria-label="비밀번호 보기"
-              >
-                <img src="images/view.png" alt="" />
-              </button>
-            </span>
+            PW
+            <input
+              id="admin-pw"
+              type="password"
+              autocomplete="current-password"
+              required
+              placeholder="관리자 비밀번호"
+            />
           </label>
-          <button type="submit" class="btn reserve-btn">조회</button>
+          <div class="confirm-actions admin-login-actions">
+            <button type="submit" class="btn reserve-btn confirm-pay-submit">
+              조회하기
+            </button>
+          </div>
         </form>
         <p class="confirm-back" id="admin-message" hidden></p>
       </section>
@@ -162,9 +201,18 @@
         hidden
       >
         <div class="admin-table-head">
-          <h2 class="confirm-section-title" id="admin-table-title">
-            무통장 예약 목록
-          </h2>
+          <div class="admin-table-head-left">
+            <h2 class="confirm-section-title" id="admin-table-title">
+              무통장 예약 목록
+            </h2>
+            <button
+              type="button"
+              id="admin-refresh-btn"
+              class="btn reserve-btn admin-refresh-btn"
+            >
+              Refresh
+            </button>
+          </div>
           <label class="admin-sort-control" for="admin-sort-select">
             정렬 기준
             <select id="admin-sort-select">
@@ -175,6 +223,30 @@
             </select>
           </label>
         </div>
+        <form id="admin-search-form" class="admin-search-row" autocomplete="off">
+          <label class="confirm-label">
+            예약자명
+            <input
+              id="admin-search-name"
+              type="text"
+              placeholder="예약자명으로 검색"
+            />
+          </label>
+          <label class="confirm-label">
+            연락처
+            <input
+              id="admin-search-contact"
+              type="text"
+              placeholder="연락처로 검색"
+            />
+          </label>
+          <button type="submit" class="btn reserve-btn admin-search-btn">
+            검색
+          </button>
+          <button type="button" id="admin-search-reset" class="btn admin-page-reset-btn">
+            초기화
+          </button>
+        </form>
         <div class="admin-table-wrap">
           <table class="admin-table">
             <thead>
@@ -192,6 +264,7 @@
             <tbody id="admin-table-body"></tbody>
           </table>
         </div>
+        <div id="admin-pagination" class="admin-pagination" aria-label="목록 페이지"></div>
       </section>
     </main>
 
@@ -201,12 +274,19 @@
         var loginTitleEl = document.getElementById("admin-login-title");
         var idInput = document.getElementById("admin-id");
         var pwInput = document.getElementById("admin-pw");
-        var pwToggleBtn = document.getElementById("admin-pw-toggle");
         var msgEl = document.getElementById("admin-message");
         var tableSection = document.getElementById("admin-table-section");
         var tableBody = document.getElementById("admin-table-body");
         var sortSelect = document.getElementById("admin-sort-select");
+        var refreshBtn = document.getElementById("admin-refresh-btn");
+        var searchForm = document.getElementById("admin-search-form");
+        var searchNameInput = document.getElementById("admin-search-name");
+        var searchContactInput = document.getElementById("admin-search-contact");
+        var searchResetBtn = document.getElementById("admin-search-reset");
+        var paginationEl = document.getElementById("admin-pagination");
         var latestRows = [];
+        var currentPage = 1;
+        var PAGE_SIZE = 20;
         var sortKey = "checkin";
 
         function adminApiUrl() {
@@ -293,6 +373,35 @@
             return Number.MAX_SAFE_INTEGER;
           }
           return Number(raw);
+        }
+
+        function normalizeSearchValue(v) {
+          return String(v || "")
+            .trim()
+            .toLowerCase();
+        }
+
+        function getFilteredRows(rows) {
+          var nameQuery = normalizeSearchValue(
+            searchNameInput && searchNameInput.value,
+          );
+          var contactQuery = normalizeSearchValue(
+            searchContactInput && searchContactInput.value,
+          ).replace(/\s+/g, "");
+          if (!nameQuery && !contactQuery) {
+            return (rows || []).slice();
+          }
+          return (rows || []).filter(function (row) {
+            var rowName = normalizeSearchValue(row && row.guestName);
+            var rowContact = normalizeSearchValue(row && row.contact).replace(
+              /\s+/g,
+              "",
+            );
+            var nameOk = !nameQuery || rowName.indexOf(nameQuery) >= 0;
+            var contactOk =
+              !contactQuery || rowContact.indexOf(contactQuery) >= 0;
+            return nameOk && contactOk;
+          });
         }
 
         function sortRows(rows) {
@@ -394,8 +503,70 @@
           });
         }
 
+        function renderPagination(totalCount) {
+          if (!paginationEl) {
+            return;
+          }
+          paginationEl.innerHTML = "";
+          var totalPages = Math.max(1, Math.ceil(totalCount / PAGE_SIZE));
+          if (totalCount <= PAGE_SIZE) {
+            return;
+          }
+
+          function makePageBtn(label, page, disabled, isActive) {
+            var btn = document.createElement("button");
+            btn.type = "button";
+            btn.className = "admin-page-btn" + (isActive ? " is-active" : "");
+            btn.textContent = label;
+            btn.disabled = !!disabled;
+            btn.addEventListener("click", function () {
+              if (btn.disabled) {
+                return;
+              }
+              currentPage = page;
+              applyListView();
+            });
+            paginationEl.appendChild(btn);
+          }
+
+          makePageBtn("이전", Math.max(1, currentPage - 1), currentPage <= 1);
+          for (var i = 1; i <= totalPages; i += 1) {
+            makePageBtn(String(i), i, false, i === currentPage);
+          }
+          makePageBtn(
+            "다음",
+            Math.min(totalPages, currentPage + 1),
+            currentPage >= totalPages,
+          );
+        }
+
+        function applyListView(resetPage) {
+          if (resetPage) {
+            currentPage = 1;
+          }
+          var sortedRows = sortRows(latestRows);
+          var filteredRows = getFilteredRows(sortedRows);
+          var totalPages = Math.max(1, Math.ceil(filteredRows.length / PAGE_SIZE));
+          if (currentPage > totalPages) {
+            currentPage = totalPages;
+          }
+          var start = (currentPage - 1) * PAGE_SIZE;
+          var pageRows = filteredRows.slice(start, start + PAGE_SIZE);
+          renderRows(pageRows);
+          renderPagination(filteredRows.length);
+        }
+
+        function setRefreshLoading(isLoading) {
+          if (!refreshBtn) {
+            return;
+          }
+          refreshBtn.disabled = !!isLoading;
+          refreshBtn.textContent = isLoading ? "Refreshing..." : "Refresh";
+        }
+
         function loadList() {
           var auth = getAuthPayload();
+          setRefreshLoading(true);
           return fetch(adminApiUrl(), {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -420,8 +591,11 @@
               }
               tableSection.hidden = false;
               latestRows = result.data.rows || [];
-              renderRows(sortRows(latestRows));
+              applyListView(true);
               showMessage("");
+            })
+            .finally(function () {
+              setRefreshLoading(false);
             });
         }
 
@@ -479,18 +653,42 @@
             if (tableSection.hidden) {
               return;
             }
-            renderRows(sortRows(latestRows));
+            applyListView(true);
           });
         }
 
-        if (pwToggleBtn && pwInput) {
-          pwToggleBtn.addEventListener("click", function () {
-            var showing = pwInput.type === "text";
-            pwInput.type = showing ? "password" : "text";
-            pwToggleBtn.setAttribute(
-              "aria-label",
-              showing ? "비밀번호 보기" : "비밀번호 숨기기",
-            );
+        if (refreshBtn) {
+          refreshBtn.addEventListener("click", function () {
+            if (tableSection.hidden) {
+              return;
+            }
+            loadList().catch(function (err) {
+              showMessage((err && err.message) || "새로고침 중 오류가 발생했습니다.");
+            });
+          });
+        }
+
+        if (searchForm) {
+          searchForm.addEventListener("submit", function (e) {
+            e.preventDefault();
+            if (tableSection.hidden) {
+              return;
+            }
+            applyListView(true);
+          });
+        }
+
+        if (searchResetBtn) {
+          searchResetBtn.addEventListener("click", function () {
+            if (searchNameInput) {
+              searchNameInput.value = "";
+            }
+            if (searchContactInput) {
+              searchContactInput.value = "";
+            }
+            if (!tableSection.hidden) {
+              applyListView(true);
+            }
           });
         }
       });
