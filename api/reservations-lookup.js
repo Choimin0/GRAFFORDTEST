@@ -188,10 +188,7 @@ async function archivePastReservations(pool) {
 }
 
 async function autoCancelUnpaidReservations(pool) {
-  console.log("[lookup] autoCancelUnpaidReservations:start", {
-    at: new Date().toISOString(),
-  });
-  await pool.query(
+  var resActive = await pool.query(
     `WITH moved AS (
       DELETE FROM ${ACTIVE_TABLE}
       WHERE lower(trim(payment_method)) = 'bank'
@@ -233,10 +230,10 @@ async function autoCancelUnpaidReservations(pool) {
       bank_confirmed,
       'not paid'
     FROM moved
-    ON CONFLICT (reservation_number) DO NOTHING`,
+    ON CONFLICT (reservation_number) DO NOTHING
+    RETURNING reservation_number`,
   );
-  console.log("조회 시 autounpaid 완료");
-  await pool.query(
+  var resPast = await pool.query(
     `WITH moved AS (
       DELETE FROM ${PAST_TABLE}
       WHERE lower(trim(payment_method)) = 'bank'
@@ -278,8 +275,13 @@ async function autoCancelUnpaidReservations(pool) {
       bank_confirmed,
       'not paid'
     FROM moved
-    ON CONFLICT (reservation_number) DO NOTHING`,
+    ON CONFLICT (reservation_number) DO NOTHING
+    RETURNING reservation_number`,
   );
+  return {
+    movedFromActive: (resActive.rows || []).length,
+    movedFromPast: (resPast.rows || []).length,
+  };
 }
 
 export default async function handler(req, res) {
@@ -314,6 +316,10 @@ export default async function handler(req, res) {
     json(res, 400, { ok: false, error: "Invalid JSON body" });
     return;
   }
+  var reqId = Math.random().toString(36).slice(2, 10);
+  var debugMode =
+    body && (body.debug === true || String(body.debug).toLowerCase() === "1");
+  console.error("[lookup] start", { reqId: reqId, at: new Date().toISOString() });
 
   var normName = normalizeLookupName(body.guestName || body.name || "");
   var normOrder = normalizeLookupOrder(
@@ -329,7 +335,12 @@ export default async function handler(req, res) {
 
   try {
     await archivePastReservations(pool);
-    await autoCancelUnpaidReservations(pool);
+    var autoCancelStats = await autoCancelUnpaidReservations(pool);
+    console.error("[lookup] auto-cancel stats", {
+      reqId: reqId,
+      movedFromActive: autoCancelStats.movedFromActive,
+      movedFromPast: autoCancelStats.movedFromPast,
+    });
     var sel = await pool.query(
       `SELECT
         id,
@@ -365,6 +376,13 @@ export default async function handler(req, res) {
       json(res, 200, {
         ok: true,
         source: "database",
+        debug:
+          debugMode === true
+            ? {
+                reqId: reqId,
+                autoCancelStats: autoCancelStats,
+              }
+            : undefined,
         row: {
           id: row.id,
           reservationNumber: row.reservation_number,
@@ -424,6 +442,13 @@ export default async function handler(req, res) {
       source: "database",
       deleted: true,
       deleteReason: String(deletedRow.cancel_reason || "").toLowerCase(),
+      debug:
+        debugMode === true
+          ? {
+              reqId: reqId,
+              autoCancelStats: autoCancelStats,
+            }
+          : undefined,
       row: {
         reservationNumber: deletedRow.reservation_number,
         guestName: deletedRow.guest_name,
@@ -454,6 +479,7 @@ export default async function handler(req, res) {
       },
     });
   } catch (e) {
+    console.error("[lookup] error", { reqId: reqId, error: String(e && e.message ? e.message : e) });
     json(res, 500, {
       ok: false,
       error: String((e && e.message) || e || "Lookup failed"),
