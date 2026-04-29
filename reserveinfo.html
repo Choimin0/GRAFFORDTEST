@@ -164,6 +164,14 @@
               contact: data.contact || "",
               extraGuests: String(data.extraGuests || 0),
               amount: String(getDiscountedAmount(data)),
+              paymentMethod: data.payMethod || "",
+              reservedAt: data.createdAt || "",
+              cancelledAt: data.cancelledAt || new Date().toISOString(),
+              cancelReason: data.cancelReason || "",
+              refundAmount:
+                typeof data.refundAmount === "number"
+                  ? String(data.refundAmount)
+                  : "",
             }),
           );
           window.location.href = "delete-complete.html";
@@ -213,6 +221,15 @@
                     contact: row.contact,
                     extraGuests: row.extraGuests || 0,
                     totalAmount: row.totalAmount || 0,
+                    payMethod: row.paymentMethod || "",
+                    createdAt: row.createdAt || "",
+                    cancelledAt: new Date().toISOString(),
+                    cancelReason:
+                      row.cancelReason || result.data.deleteReason || "미입금 자동 취소",
+                    refundAmount:
+                      (row.paymentMethod || "").toLowerCase() === "bank"
+                        ? 0
+                        : Number(row.totalAmount || 0),
                   });
                   return;
                 }

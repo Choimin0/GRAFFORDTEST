@@ -422,6 +422,7 @@ export default async function handler(req, res) {
         guest_request,
         payment_method,
         bank_confirmed,
+        created_at,
         cancel_reason
       FROM ${DELETED_TABLE}
       WHERE reservation_number = $1
@@ -476,6 +477,8 @@ export default async function handler(req, res) {
         guestRequest: deletedRow.guest_request || "",
         paymentMethod: deletedRow.payment_method || null,
         bankConfirmed: deletedRow.bank_confirmed === true,
+        createdAt: formatDateTimeKst(deletedRow.created_at),
+        cancelReason: deletedRow.cancel_reason || "",
       },
     });
   } catch (e) {

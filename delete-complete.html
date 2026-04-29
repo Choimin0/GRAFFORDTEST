@@ -68,6 +68,14 @@
           <dd id="done-contact">—</dd>
           <dt>결제 금액</dt>
           <dd id="done-amount">—</dd>
+          <dt>결제 수단</dt>
+          <dd id="done-pay-method">—</dd>
+          <dt>예약 일시 / 취소 일시</dt>
+          <dd id="done-reserve-cancel-at">—</dd>
+          <dt>취소 사유</dt>
+          <dd id="done-cancel-reason">—</dd>
+          <dt>환불 금액</dt>
+          <dd id="done-refund-amount">—</dd>
         </dl>
       </section>
 
@@ -156,6 +164,11 @@
         var name = (saved && saved.name) || "—";
         var contact = (saved && saved.contact) || "—";
         var amount = parseInt((saved && saved.amount) || "0", 10) || 0;
+        var paymentMethod = String((saved && saved.paymentMethod) || "").trim();
+        var reservedAt = String((saved && saved.reservedAt) || "").trim();
+        var cancelledAt = String((saved && saved.cancelledAt) || "").trim();
+        var cancelReason = String((saved && saved.cancelReason) || "").trim();
+        var refundAmountRaw = String((saved && saved.refundAmount) || "").trim();
 
         function formatKRW(n) {
           return Number(n || 0).toLocaleString("ko-KR") + "원";
@@ -172,6 +185,48 @@
         }
         var discountedAmount = getDiscountedAmount();
 
+        function formatDateTime(v) {
+          if (!v) {
+            return "—";
+          }
+          var d = new Date(v);
+          if (isNaN(d.getTime())) {
+            return v;
+          }
+          return new Intl.DateTimeFormat("ko-KR", {
+            timeZone: "Asia/Seoul",
+            year: "numeric",
+            month: "2-digit",
+            day: "2-digit",
+            hour: "2-digit",
+            minute: "2-digit",
+            second: "2-digit",
+            hour12: false,
+          }).format(d);
+        }
+
+        function paymentLabel(v) {
+          var key = String(v || "")
+            .trim()
+            .toLowerCase();
+          if (key === "card") {
+            return "카드결제";
+          }
+          if (key === "naver") {
+            return "네이버페이";
+          }
+          if (key === "bank" || key === "무통장입금") {
+            return "무통장입금";
+          }
+          return v || "—";
+        }
+
+        var refundAmount = Number(refundAmountRaw);
+        if (!isFinite(refundAmount)) {
+          refundAmount =
+            paymentMethod.toLowerCase() === "bank" ? 0 : discountedAmount;
+        }
+
         document.getElementById("done-order").textContent = orderNo;
         document.getElementById("done-room").textContent =
           ROOM_LABEL[room] || room || "—";
@@ -181,6 +236,14 @@
         document.getElementById("done-contact").textContent = contact;
         document.getElementById("done-amount").textContent =
           formatKRW(discountedAmount);
+        document.getElementById("done-pay-method").textContent =
+          paymentLabel(paymentMethod);
+        document.getElementById("done-reserve-cancel-at").textContent =
+          formatDateTime(reservedAt) + " / " + formatDateTime(cancelledAt);
+        document.getElementById("done-cancel-reason").textContent =
+          cancelReason || "—";
+        document.getElementById("done-refund-amount").textContent =
+          formatKRW(refundAmount);
       });
     </script>
     <script defer src="js/grafford-page-fade.js"></script>
