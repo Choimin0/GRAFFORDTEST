@@ -655,7 +655,7 @@
         }
 
         function addMonthsKeepingDayParts(parts, monthsToAdd) {
-          var totalMonths = (parts.y * 12 + (parts.m - 1)) + monthsToAdd;
+          var totalMonths = parts.y * 12 + (parts.m - 1) + monthsToAdd;
           var targetY = Math.floor(totalMonths / 12);
           var targetM = (totalMonths % 12) + 1;
           var targetD = Math.min(parts.d, daysInMonth(targetY, targetM));
@@ -785,7 +785,11 @@
           );
         }
 
-        var todayDateOnly = new Date(todayParts.y, todayParts.m - 1, todayParts.d);
+        var todayDateOnly = new Date(
+          todayParts.y,
+          todayParts.m - 1,
+          todayParts.d,
+        );
         var isTodayAfterCutoff = Number(kstNowInfo.hour || 0) >= 19;
         var calDebugMode = false;
         try {
@@ -846,6 +850,7 @@
           }
           var targetKey = toDateKey(toStartOfDay(dateObj));
           var limitKey = checkoutMode ? maxCheckOutKey : maxCheckInKey;
+          console.log("targetKey", targetKey);
           return targetKey > limitKey;
         }
 
