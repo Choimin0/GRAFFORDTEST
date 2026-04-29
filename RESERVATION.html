@@ -723,6 +723,23 @@
           );
         }
 
+        function dateCmp(a, b) {
+          var ak = toDateKey(a);
+          var bk = toDateKey(b);
+          if (ak === bk) {
+            return 0;
+          }
+          return ak < bk ? -1 : 1;
+        }
+
+        function addDays(dateObj, days) {
+          return new Date(
+            dateObj.getFullYear(),
+            dateObj.getMonth(),
+            dateObj.getDate() + Number(days || 0),
+          );
+        }
+
         var maxBookableDateOnly = toStartOfDay(maxBookableDate);
         var maxCheckoutDateOnly = toStartOfDay(maxCheckoutDate);
         var todayDateOnly = toStartOfDay(today);
@@ -738,7 +755,7 @@
         function isBlockedByPastOrCutoff(dateObj) {
           var target = toStartOfDay(dateObj);
           return (
-            target < todayDateOnly ||
+            dateCmp(target, todayDateOnly) < 0 ||
             (isTodayAfterCutoff && sameDay(target, todayDateOnly))
           );
         }
@@ -924,7 +941,7 @@
           if (P && typeof P.countNights === "function") {
             return P.countNights(ci, co) > 0;
           }
-          return checkOut > checkIn;
+          return dateLT(checkIn, checkOut);
         }
 
         function updateConfirmCtaState() {
@@ -1108,15 +1125,7 @@
         }
 
         function dateLT(a, b) {
-          var ay = a.getFullYear();
-          var am = a.getMonth();
-          var ad = a.getDate();
-          var by = b.getFullYear();
-          var bm = b.getMonth();
-          var bd = b.getDate();
-          if (ay !== by) return ay < by;
-          if (am !== bm) return am < bm;
-          return ad < bd;
+          return dateCmp(a, b) < 0;
         }
 
         function canSelectCheckOut(ci, co) {
@@ -1125,11 +1134,11 @@
           }
           var cur = new Date(ci.getFullYear(), ci.getMonth(), ci.getDate());
           var end = new Date(co.getFullYear(), co.getMonth(), co.getDate());
-          while (cur < end) {
+          while (dateLT(cur, end)) {
             if (occupiedNightSet.has(formatYMD(cur))) {
               return false;
             }
-            cur.setDate(cur.getDate() + 1);
+            cur = addDays(cur, 1);
           }
           return true;
         }
@@ -1335,8 +1344,8 @@
             if (
               checkIn &&
               checkOut &&
-              cellDate > checkIn &&
-              cellDate < checkOut
+              dateLT(checkIn, cellDate) &&
+              dateLT(cellDate, checkOut)
             ) {
               btn.classList.add("cal-range");
             }
@@ -1377,7 +1386,7 @@
                     shouldMoveToNextMonth = true;
                   }
                 } else {
-                  if (dateCopy < checkIn) {
+                  if (dateLT(dateCopy, checkIn)) {
                     checkIn = new Date(dateCopy);
                     checkOut = null;
                   } else if (sameDay(dateCopy, checkIn)) {
