@@ -2,11 +2,5 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "framework": null,
   "buildCommand": "echo 'Static HTML at repo root — no Vite app build'",
-  "outputDirectory": ".",
-  "crons": [
-    {
-      "path": "/api/cron-unpaid-bank-cleanup",
-      "schedule": "0 * * * *"
-    }
-  ]
+  "outputDirectory": "."
 }
