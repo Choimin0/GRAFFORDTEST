@@ -6,6 +6,7 @@ const LEGACY_TO_ROOM = { A: "G1", B: "G2", C: "G3", D: "G4" };
 const DEFAULT_CANCEL_TOKEN_TTL_MS = 10 * 60 * 1000;
 const ACTIVE_TABLE = "reservations";
 const PAST_TABLE = "past_reservations";
+const DELETED_TABLE = "delete_reservations";
 
 function getDatabaseUrl() {
   return String(
@@ -186,6 +187,102 @@ async function archivePastReservations(pool) {
   );
 }
 
+async function autoCancelUnpaidReservations(pool) {
+  await pool.query(
+    `WITH moved AS (
+      DELETE FROM ${ACTIVE_TABLE}
+      WHERE payment_method = 'bank'
+        AND bank_confirmed = FALSE
+        AND created_at <= NOW() - INTERVAL '12 hours'
+      RETURNING *
+    )
+    INSERT INTO ${DELETED_TABLE} (
+      reservation_number,
+      guest_name,
+      contact,
+      room_type,
+      check_in_date,
+      check_out_date,
+      guest_count,
+      created_at,
+      stay_nights,
+      extra_guests,
+      total_amount,
+      payment_method,
+      guest_request,
+      bank_confirmed,
+      cancel_reason,
+      cancelled_at
+    )
+    SELECT
+      reservation_number,
+      guest_name,
+      contact,
+      room_type,
+      check_in_date,
+      check_out_date,
+      guest_count,
+      created_at,
+      stay_nights,
+      extra_guests,
+      total_amount,
+      payment_method,
+      guest_request,
+      bank_confirmed,
+      'not paid',
+      NOW()
+    FROM moved
+    ON CONFLICT (reservation_number) DO NOTHING`,
+  );
+
+  await pool.query(
+    `WITH moved AS (
+      DELETE FROM ${PAST_TABLE}
+      WHERE payment_method = 'bank'
+        AND bank_confirmed = FALSE
+        AND created_at <= NOW() - INTERVAL '12 hours'
+      RETURNING *
+    )
+    INSERT INTO ${DELETED_TABLE} (
+      reservation_number,
+      guest_name,
+      contact,
+      room_type,
+      check_in_date,
+      check_out_date,
+      guest_count,
+      created_at,
+      stay_nights,
+      extra_guests,
+      total_amount,
+      payment_method,
+      guest_request,
+      bank_confirmed,
+      cancel_reason,
+      cancelled_at
+    )
+    SELECT
+      reservation_number,
+      guest_name,
+      contact,
+      room_type,
+      check_in_date,
+      check_out_date,
+      guest_count,
+      created_at,
+      stay_nights,
+      extra_guests,
+      total_amount,
+      payment_method,
+      guest_request,
+      bank_confirmed,
+      'not paid',
+      NOW()
+    FROM moved
+    ON CONFLICT (reservation_number) DO NOTHING`,
+  );
+}
+
 export default async function handler(req, res) {
   if (req.method === "OPTIONS") {
     res.statusCode = 204;
@@ -233,6 +330,7 @@ export default async function handler(req, res) {
 
   try {
     await archivePastReservations(pool);
+    await autoCancelUnpaidReservations(pool);
     var sel = await pool.query(
       `SELECT
         id,
