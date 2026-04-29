@@ -143,6 +143,8 @@
               </dd>
               <dt>체크인/체크아웃</dt>
               <dd id="complete-schedule">—</dd>
+              <dt>결제 금액</dt>
+              <dd id="complete-total-amount">—</dd>
             </dl>
           </section>
 
@@ -187,8 +189,10 @@
       ></footer>
     </main>
 
+    <script src="js/booking-pricing.js"></script>
     <script>
       document.addEventListener("DOMContentLoaded", function () {
+        var P = window.GraffordBookingPricing;
         var ROOM_LABEL = {
           G1: "G1",
           G2: "G2",
@@ -237,10 +241,24 @@
           }
         }
 
+        function getDiscountedAmount() {
+          if (P && checkIn && checkOut) {
+            var parsedExtraGuests = parseInt(extraGuests || "0", 10) || 0;
+            var quote = P.computeStay(room, checkIn, checkOut, parsedExtraGuests);
+            if (quote && quote.nights > 0) {
+              return quote.discountedGrandTotal || 0;
+            }
+          }
+          return parseInt(totalAmount || "0", 10) || 0;
+        }
+        var discountedAmount = getDiscountedAmount();
+
         document.getElementById("complete-room-name").textContent =
           ROOM_LABEL[room] || room || "객실 정보 없음";
         document.getElementById("complete-schedule").textContent =
           (checkIn || "—") + " ~ " + (checkOut || "—");
+        document.getElementById("complete-total-amount").textContent =
+          Number(discountedAmount || 0).toLocaleString("ko-KR") + "원";
         document.getElementById("complete-guest-name").textContent =
           guestName || "—";
         document.getElementById("complete-contact").textContent =
@@ -337,7 +355,8 @@
               room: room || "",
               checkIn: checkIn || "",
               checkOut: checkOut || "",
-              amount: String(totalAmount || "0"),
+              amount: String(discountedAmount || 0),
+              extraGuests: String(extraGuests || "0"),
               payMethod: payMethod || "",
               bankConfirmed: bankConfirmed === true,
               request: guestRequest || "",

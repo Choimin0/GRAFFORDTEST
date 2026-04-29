@@ -206,8 +206,10 @@
       ></footer>
     </main>
 
+    <script src="js/booking-pricing.js"></script>
     <script>
       document.addEventListener("DOMContentLoaded", function () {
+        var P = window.GraffordBookingPricing;
         var ROOM_LABEL = {
           G1: "G1",
           G2: "G2",
@@ -228,6 +230,7 @@
         var room = (saved && saved.room) || "";
         var checkIn = (saved && saved.checkIn) || "";
         var checkOut = (saved && saved.checkOut) || "";
+        var extraGuests = parseInt((saved && saved.extraGuests) || "0", 10) || 0;
         var totalAmount = parseInt((saved && saved.amount) || "0", 10) || 0;
         var payMethod = (saved && saved.payMethod) || "";
         var bankConfirmed = saved && saved.bankConfirmed === true;
@@ -252,6 +255,17 @@
           var p = s.split("-");
           return new Date(Number(p[0]), Number(p[1]) - 1, Number(p[2]));
         }
+
+        function getDiscountedAmount() {
+          if (P && checkIn && checkOut) {
+            var quote = P.computeStay(room, checkIn, checkOut, extraGuests);
+            if (quote && quote.nights > 0) {
+              return quote.discountedGrandTotal || 0;
+            }
+          }
+          return totalAmount;
+        }
+        var discountedAmount = getDiscountedAmount();
 
         var today = new Date();
         var todayDate = new Date(
@@ -282,7 +296,7 @@
 
         var refundAmount = Math.max(
           0,
-          Math.round(totalAmount * ((100 - refundCharge) / 100)),
+          Math.round(discountedAmount * ((100 - refundCharge) / 100)),
         );
 
         var cancelOrderTextEl = document.getElementById("cancel-order-text");
@@ -311,7 +325,7 @@
         document.getElementById("cancel-schedule").textContent =
           (checkIn || "—") + " ~ " + (checkOut || "—");
         document.getElementById("cancel-amount").textContent =
-          formatKRW(totalAmount);
+          formatKRW(discountedAmount);
         document.getElementById("cancel-name").textContent = name;
         document.getElementById("cancel-contact").textContent = contact;
         document.getElementById("refund-amount").textContent =
@@ -405,6 +419,15 @@
             window.location.href = "index.html";
             return;
           }
+          var selectedReasonEl = document.querySelector(
+            'input[name="cancelReason"]:checked',
+          );
+          var selectedReason = selectedReasonEl ? selectedReasonEl.value : "";
+          if (selectedReason === "other") {
+            selectedReason = String(
+              (reasonOtherInput && reasonOtherInput.value) || "",
+            ).trim();
+          }
           yesBtn.disabled = true;
           noBtn.disabled = true;
           fetch(reservationsApiUrl(), {
@@ -414,6 +437,7 @@
               reservationNumber: orderNo,
               guestName: name,
               cancelToken: cancelToken,
+              cancelReason: selectedReason,
             }),
           })
             .then(function (resp) {
@@ -446,7 +470,8 @@
                   room: room || "",
                   checkIn: checkIn || "",
                   checkOut: checkOut || "",
-                  amount: String(totalAmount || 0),
+                  extraGuests: String(extraGuests || 0),
+                  amount: String(discountedAmount || 0),
                 }),
               );
               window.location.href = "delete-complete.html";

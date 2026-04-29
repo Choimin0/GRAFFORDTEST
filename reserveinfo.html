@@ -7,6 +7,7 @@
     <title>예약 조회 - GRAFFORD</title>
     <link rel="stylesheet" href="css/style.css" />
     <script src="js/mobile-nav.js" defer></script>
+    <script src="js/booking-pricing.js" defer></script>
     <script src="js/booking-reservations.js" defer></script>
   </head>
   <body>
@@ -93,6 +94,7 @@
     <script>
       document.addEventListener("DOMContentLoaded", function () {
         var R = window.GraffordReservations;
+        var P = window.GraffordBookingPricing;
         var form = document.getElementById("reserveinfo-form");
 
         function lookupApiUrl() {
@@ -101,6 +103,27 @@
             base = String(window.__GRAFFORD_API_BASE__).replace(/\/$/, "");
           }
           return base + "/api/reservations-lookup";
+        }
+
+        function getDiscountedAmount(data) {
+          if (
+            P &&
+            data &&
+            data.room &&
+            data.checkIn &&
+            data.checkOut
+          ) {
+            var quote = P.computeStay(
+              String(data.room).toUpperCase(),
+              data.checkIn,
+              data.checkOut,
+              parseInt(data.extraGuests || 0, 10) || 0,
+            );
+            if (quote && quote.nights > 0) {
+              return quote.discountedGrandTotal || 0;
+            }
+          }
+          return parseInt((data && data.totalAmount) || 0, 10) || 0;
         }
 
         function goToReserveComplete(data) {
@@ -116,7 +139,7 @@
               guestRequest: data.guestRequest || "",
               guestCount: String(data.guestCount || ""),
               extraGuests: String(data.extraGuests || 0),
-              totalAmount: String(data.totalAmount || 0),
+              totalAmount: String(getDiscountedAmount(data)),
               payMethod: data.payMethod || "",
               bankConfirmed: data.bankConfirmed === true,
               cancelToken: data.cancelToken || "",

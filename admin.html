@@ -234,6 +234,44 @@
           return Number(n || 0).toLocaleString("ko-KR") + "원";
         }
 
+        function parseDateValue(value) {
+          var raw = String(value || "").trim();
+          if (!raw) {
+            return null;
+          }
+          var normalized = raw.replace(/\./g, "-").replace(/\//g, "-");
+          var date = new Date(normalized);
+          if (isNaN(date.getTime())) {
+            return null;
+          }
+          return date;
+        }
+
+        function getStayPeriodNights(row) {
+          var direct = Number((row && (row.stayPeriod || row.stay_period)) || 0);
+          if (isFinite(direct) && direct > 0) {
+            return Math.floor(direct);
+          }
+          var checkInDate = parseDateValue(row && row.checkIn);
+          var checkOutDate = parseDateValue(row && row.checkOut);
+          if (!checkInDate || !checkOutDate) {
+            return 0;
+          }
+          var diffMs = checkOutDate.getTime() - checkInDate.getTime();
+          var nights = Math.floor(diffMs / (24 * 60 * 60 * 1000));
+          return nights > 0 ? nights : 0;
+        }
+
+        function getConsecutiveSaleTotal(row) {
+          var baseTotal = Number((row && row.totalAmount) || 0);
+          var nights = getStayPeriodNights(row);
+          if (nights < 2) {
+            return baseTotal;
+          }
+          var discount = (nights - 1) * 20000;
+          return Math.max(0, baseTotal - discount);
+        }
+
         function getAuthPayload() {
           return {
             adminId: String(idInput.value || "").trim(),
@@ -333,7 +371,7 @@
               (row.checkOut || "—") +
               "</td>" +
               "<td>" +
-              formatKRW(row.totalAmount || 0) +
+              formatKRW(getConsecutiveSaleTotal(row)) +
               "</td>" +
               '<td><span class="' +
               statusClass +

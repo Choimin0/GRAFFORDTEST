@@ -82,8 +82,10 @@
       ></footer>
     </main>
 
+    <script src="js/booking-pricing.js"></script>
     <script>
       document.addEventListener("DOMContentLoaded", function () {
+        var P = window.GraffordBookingPricing;
         var ROOM_LABEL = { G1: "G1", G2: "G2", G3: "G3", G4: "G4" };
         var saved = null;
         try {
@@ -97,6 +99,7 @@
         var room = (saved && saved.room) || "";
         var checkIn = (saved && saved.checkIn) || "";
         var checkOut = (saved && saved.checkOut) || "";
+        var extraGuests = parseInt((saved && saved.extraGuests) || "0", 10) || 0;
         var name = (saved && saved.name) || "—";
         var contact = (saved && saved.contact) || "—";
         var amount = parseInt((saved && saved.amount) || "0", 10) || 0;
@@ -105,6 +108,17 @@
           return Number(n || 0).toLocaleString("ko-KR") + "원";
         }
 
+        function getDiscountedAmount() {
+          if (P && checkIn && checkOut) {
+            var quote = P.computeStay(room, checkIn, checkOut, extraGuests);
+            if (quote && quote.nights > 0) {
+              return quote.discountedGrandTotal || 0;
+            }
+          }
+          return amount;
+        }
+        var discountedAmount = getDiscountedAmount();
+
         document.getElementById("done-order").textContent = orderNo;
         document.getElementById("done-room").textContent =
           ROOM_LABEL[room] || room || "—";
@@ -112,7 +126,8 @@
           (checkIn || "—") + " ~ " + (checkOut || "—");
         document.getElementById("done-name").textContent = name;
         document.getElementById("done-contact").textContent = contact;
-        document.getElementById("done-amount").textContent = formatKRW(amount);
+        document.getElementById("done-amount").textContent =
+          formatKRW(discountedAmount);
       });
     </script>
     <script defer src="js/grafford-page-fade.js"></script>

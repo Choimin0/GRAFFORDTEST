@@ -13,7 +13,11 @@ const MAX_NAME = 255;
 const MAX_CONTACT = 120;
 const MAX_RESV = 32;
 const MAX_GUEST_REQUEST = 2000;
+const MAX_CANCEL_REASON = 1000;
 const DEFAULT_CANCEL_TOKEN_TTL_MS = 10 * 60 * 1000;
+const ACTIVE_TABLE = "reservations";
+const PAST_TABLE = "past_reservations";
+const DELETED_TABLE = "delete_reservations";
 
 /** Neon/Vercel에서 오는 URL 이름이 달라도 사용 (TCP — Neon's HTTP 404 회피) */
 function getDatabaseUrl() {
@@ -53,7 +57,7 @@ function humanDbError(e) {
     return "DB에 필요한 컬럼이 없습니다. db/migrations/002_reservations_booking_columns.sql, db/migrations/004_add_guest_request_to_reservations.sql, db/migrations/005_add_bank_confirmed_to_reservations.sql 을 실행하세요.";
   }
   if (c === "42P01") {
-    return "reservations 테이블이 없습니다. db/migrations/001_create_reservations.sql 을 실행하세요.";
+    return "필수 테이블이 없습니다. db/migrations/001_create_reservations.sql 과 db/migrations/006_split_reservation_tables.sql 을 실행하세요.";
   }
   if (c === "23505") {
     return "Duplicate reservation number";
@@ -149,6 +153,23 @@ function addOneDayYMD(ymd) {
   var m = String(dt.getMonth() + 1).padStart(2, "0");
   var day = String(dt.getDate()).padStart(2, "0");
   return y + "-" + m + "-" + day;
+}
+
+function todayYMDUtc() {
+  return new Date().toISOString().slice(0, 10);
+}
+
+async function archivePastReservations(pool) {
+  await pool.query(
+    `WITH moved AS (
+      DELETE FROM ${ACTIVE_TABLE}
+      WHERE check_in_date < CURRENT_DATE
+      RETURNING *
+    )
+    INSERT INTO ${PAST_TABLE}
+    SELECT * FROM moved
+    ON CONFLICT (reservation_number) DO NOTHING`,
+  );
 }
 
 /** [check_in, check_out) 구간의 숙박일(밤) — check_out 아침 퇴실 전날 밤까지 */
@@ -307,6 +328,17 @@ export default async function handler(req, res) {
   }
 
   if (req.method === "GET") {
+    try {
+      await archivePastReservations(pool);
+    } catch (e) {
+      console.error("archive past reservations before GET", e);
+      json(res, 500, {
+        ok: false,
+        error: humanDbError(e),
+        code: e.code || null,
+      });
+      return;
+    }
     var parsed = parseUrl(req.url || "", true);
     var q = parsed.query || {};
 
@@ -320,7 +352,7 @@ export default async function handler(req, res) {
         var roomForCalLegacy = ROOM_TO_LEGACY[roomForCal] || "";
         var calRows = await pool.query(
           `SELECT check_in_date, check_out_date
-           FROM reservations
+           FROM ${ACTIVE_TABLE}
            WHERE room_type = ANY($1::text[]) AND check_out_date IS NOT NULL
            ORDER BY check_in_date`,
           [[roomForCal, roomForCalLegacy]],
@@ -396,7 +428,7 @@ export default async function handler(req, res) {
           payment_method,
           bank_confirmed,
           created_at
-        FROM reservations
+        FROM ${ACTIVE_TABLE}
         WHERE reservation_number = $1`,
         [normOrder],
       );
@@ -447,7 +479,7 @@ export default async function handler(req, res) {
               check_out_date,
               guest_count,
               created_at
-            FROM reservations
+            FROM ${ACTIVE_TABLE}
             WHERE reservation_number = $1`,
             [normOrder],
           );
@@ -503,6 +535,17 @@ export default async function handler(req, res) {
   }
 
   if (req.method === "DELETE") {
+    try {
+      await archivePastReservations(pool);
+    } catch (e) {
+      console.error("archive past reservations before DELETE", e);
+      json(res, 500, {
+        ok: false,
+        error: humanDbError(e),
+        code: e.code || null,
+      });
+      return;
+    }
     var deleteBody;
     try {
       deleteBody = await getJsonBody(req);
@@ -515,6 +558,9 @@ export default async function handler(req, res) {
       deleteBody.reservationNumber || deleteBody.orderNo || "",
     );
     var delGuestName = normalizeLookupName(deleteBody.guestName || "");
+    var cancelReason = String(deleteBody.cancelReason || "")
+      .trim()
+      .slice(0, MAX_CANCEL_REASON);
     var cancelToken = String(deleteBody.cancelToken || "").trim();
     if (!delReservationNumber) {
       json(res, 400, {
@@ -548,21 +594,85 @@ export default async function handler(req, res) {
     }
 
     try {
-      var del = await pool.query(
-        `DELETE FROM reservations
-         WHERE reservation_number = $1
-           AND guest_name = $2
-         RETURNING id, reservation_number`,
-        [delReservationNumber, delGuestName],
-      );
-      if (!del.rows || !del.rows.length) {
-        json(res, 404, { ok: false, error: "삭제할 예약을 찾을 수 없습니다." });
-        return;
+      var client = await pool.connect();
+      var deletedRow = null;
+      try {
+        await client.query("BEGIN");
+        var delLive = await client.query(
+          `DELETE FROM ${ACTIVE_TABLE}
+           WHERE reservation_number = $1
+             AND guest_name = $2
+           RETURNING *`,
+          [delReservationNumber, delGuestName],
+        );
+        if (delLive.rows && delLive.rows.length) {
+          deletedRow = delLive.rows[0];
+        } else {
+          var delPast = await client.query(
+            `DELETE FROM ${PAST_TABLE}
+             WHERE reservation_number = $1
+               AND guest_name = $2
+             RETURNING *`,
+            [delReservationNumber, delGuestName],
+          );
+          if (delPast.rows && delPast.rows.length) {
+            deletedRow = delPast.rows[0];
+          }
+        }
+        if (!deletedRow) {
+          await client.query("ROLLBACK");
+          json(res, 404, { ok: false, error: "삭제할 예약을 찾을 수 없습니다." });
+          return;
+        }
+        await client.query(
+          `INSERT INTO ${DELETED_TABLE} (
+            reservation_number,
+            guest_name,
+            contact,
+            room_type,
+            check_in_date,
+            check_out_date,
+            guest_count,
+            created_at,
+            stay_nights,
+            extra_guests,
+            total_amount,
+            payment_method,
+            guest_request,
+            bank_confirmed,
+            cancel_reason
+          ) VALUES (
+            $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15
+          )`,
+          [
+            deletedRow.reservation_number,
+            deletedRow.guest_name,
+            deletedRow.contact,
+            deletedRow.room_type,
+            deletedRow.check_in_date,
+            deletedRow.check_out_date,
+            deletedRow.guest_count,
+            deletedRow.created_at,
+            deletedRow.stay_nights,
+            deletedRow.extra_guests,
+            deletedRow.total_amount,
+            deletedRow.payment_method,
+            deletedRow.guest_request,
+            deletedRow.bank_confirmed,
+            cancelReason,
+          ],
+        );
+        await client.query("COMMIT");
+      } catch (txErr) {
+        await client.query("ROLLBACK");
+        throw txErr;
+      } finally {
+        client.release();
       }
       json(res, 200, {
         ok: true,
         deleted: true,
-        reservationNumber: del.rows[0].reservation_number,
+        reservationNumber: deletedRow.reservation_number,
       });
     } catch (e) {
       console.error("reservations delete", e);
@@ -649,9 +759,10 @@ export default async function handler(req, res) {
   var sn = Math.floor(stayNights);
   var eg = Math.floor(extraGuests);
   var ta = Math.floor(totalAmount);
+  var insertTargetTable = checkIn < todayYMDUtc() ? PAST_TABLE : ACTIVE_TABLE;
 
   var insertSql = `
-    INSERT INTO reservations (
+    INSERT INTO ${insertTargetTable} (
       reservation_number,
       guest_name,
       contact,
@@ -688,6 +799,7 @@ export default async function handler(req, res) {
   ];
 
   try {
+    await archivePastReservations(pool);
     var result = await pool.query(insertSql, params);
     var row = result && result.rows && result.rows[0];
     if (!row) {

@@ -62,8 +62,10 @@
         hidden
       ></footer>
     </main>
+    <script src="js/booking-pricing.js"></script>
     <script>
       document.addEventListener("DOMContentLoaded", function () {
+        var P = window.GraffordBookingPricing;
         var saved = null;
         try {
           saved = JSON.parse(sessionStorage.getItem("graffordPaymentData") || "null");
@@ -72,7 +74,22 @@
         }
         var orderNo = (saved && saved.orderNo) || "";
         var total = (saved && saved.totalAmount) || "";
+        var room = ((saved && saved.room) || "").toUpperCase();
+        var checkIn = (saved && saved.checkIn) || "";
+        var checkOut = (saved && saved.checkOut) || "";
+        var extraGuests = parseInt((saved && saved.extraGuests) || "0", 10) || 0;
         var box = document.getElementById("payment-summary");
+        function getDiscountedAmount() {
+          if (P && room && checkIn && checkOut) {
+            var quote = P.computeStay(room, checkIn, checkOut, extraGuests);
+            if (quote && quote.nights > 0) {
+              return quote.discountedGrandTotal || 0;
+            }
+          }
+          return Number(total || 0);
+        }
+        var discountedAmount = getDiscountedAmount();
+
         if (!orderNo && !total) {
           return;
         }
@@ -84,7 +101,7 @@
         if (total) {
           document.getElementById("payment-amount-line").textContent =
             "결제 금액: " +
-            Number(total).toLocaleString("ko-KR") +
+            Number(discountedAmount).toLocaleString("ko-KR") +
             "원";
         }
       });

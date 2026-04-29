@@ -1,6 +1,8 @@
 import pg from "pg";
 
 const { Pool } = pg;
+const ACTIVE_TABLE = "reservations";
+const PAST_TABLE = "past_reservations";
 
 function getDatabaseUrl() {
   return String(
@@ -91,6 +93,19 @@ function isAdminOk(body) {
   return { ok: true };
 }
 
+async function archivePastReservations(pool) {
+  await pool.query(
+    `WITH moved AS (
+      DELETE FROM ${ACTIVE_TABLE}
+      WHERE check_in_date < CURRENT_DATE
+      RETURNING *
+    )
+    INSERT INTO ${PAST_TABLE}
+    SELECT * FROM moved
+    ON CONFLICT (reservation_number) DO NOTHING`,
+  );
+}
+
 export default async function handler(req, res) {
   if (req.method === "OPTIONS") {
     res.statusCode = 204;
@@ -130,6 +145,15 @@ export default async function handler(req, res) {
   }
 
   var action = String(body.action || "list").trim().toLowerCase();
+  try {
+    await archivePastReservations(pool);
+  } catch (e) {
+    json(res, 500, {
+      ok: false,
+      error: String((e && e.message) || e || "archive failed"),
+    });
+    return;
+  }
 
   if (action === "confirm") {
     var reservationNumber = String(body.reservationNumber || "")
@@ -141,7 +165,7 @@ export default async function handler(req, res) {
     }
     try {
       var upd = await pool.query(
-        `UPDATE reservations
+        `UPDATE ${ACTIVE_TABLE}
          SET bank_confirmed = TRUE
          WHERE reservation_number = $1
            AND payment_method = 'bank'
@@ -178,7 +202,7 @@ export default async function handler(req, res) {
         total_amount,
         bank_confirmed,
         created_at
-      FROM reservations
+      FROM ${ACTIVE_TABLE}
       WHERE payment_method = 'bank'
       ORDER BY created_at DESC`,
     );

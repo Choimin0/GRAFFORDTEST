@@ -462,6 +462,8 @@
                 weekendSurcharge: 0,
                 extraGuestTotal: 0,
                 grandTotal: 0,
+                consecutiveSale: 0,
+                discountedGrandTotal: 0,
                 extraGuests: extraGuests,
               };
 
@@ -473,7 +475,7 @@
           quote.extraGuests,
         );
         document.getElementById("f-total-amount").value = String(
-          quote.grandTotal,
+          quote.discountedGrandTotal,
         );
 
         var imgEl = document.getElementById("booking-room-img");
@@ -545,7 +547,14 @@
                 formatKRW(quote.extraGuestTotal),
             );
           }
-          totalDisplayEl.textContent = formatKRW(quote.grandTotal);
+          addBreakLine("총 금액: " + formatKRW(quote.grandTotal));
+          addBreakLine(
+            "연박할인 적용: -" + formatKRW(quote.consecutiveSale || 0),
+          );
+          addBreakLine(
+            "최종 결제금: " + formatKRW(quote.discountedGrandTotal || 0),
+          );
+          totalDisplayEl.textContent = formatKRW(quote.discountedGrandTotal || 0);
         } else {
           addBreakLine(
             "투숙 일수를 계산할 수 없습니다. 체크인·체크아웃을 확인해 주세요.",
@@ -840,6 +849,7 @@
                     room: room,
                     checkIn: checkIn,
                     checkOut: checkOut,
+                    extraGuests: String(extraGuests || 0),
                   }),
                 );
                 window.location.href = "payment.html";

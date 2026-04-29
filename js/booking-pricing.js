@@ -11,6 +11,7 @@
   };
   var EXTRA_PER_PERSON_PER_NIGHT = 30000;
   var WEEKEND_SURCHARGE_PER_NIGHT = 30000;
+  var CONSECUTIVE_SALE_PER_NIGHT = 20000;
   /** 추가 투숙 가능 인원 (기준 인원 외) */
   var MAX_EXTRA_GUESTS = { G1: 0, G2: 0, G3: 2, G4: 4 };
 
@@ -106,6 +107,9 @@
     var extraGuestTotal =
       extraGuests * EXTRA_PER_PERSON_PER_NIGHT * nights;
     var grandTotal = baseTotal + weekendSurcharge + extraGuestTotal;
+    var consecutiveSale =
+      nights >= 2 ? (nights - 1) * CONSECUTIVE_SALE_PER_NIGHT : 0;
+    var discountedGrandTotal = Math.max(0, grandTotal - consecutiveSale);
 
     return {
       room: room,
@@ -117,6 +121,8 @@
       weekendSurcharge: weekendSurcharge,
       extraGuestTotal: extraGuestTotal,
       grandTotal: grandTotal,
+      consecutiveSale: consecutiveSale,
+      discountedGrandTotal: discountedGrandTotal,
     };
   }
 
@@ -125,6 +131,7 @@
     MAX_EXTRA_GUESTS: MAX_EXTRA_GUESTS,
     EXTRA_PER_PERSON_PER_NIGHT: EXTRA_PER_PERSON_PER_NIGHT,
     WEEKEND_SURCHARGE_PER_NIGHT: WEEKEND_SURCHARGE_PER_NIGHT,
+    CONSECUTIVE_SALE_PER_NIGHT: CONSECUTIVE_SALE_PER_NIGHT,
     parseYMD: parseYMD,
     countNights: countNights,
     eachNightDate: eachNightDate,

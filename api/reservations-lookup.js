@@ -4,6 +4,8 @@ import crypto from "node:crypto";
 const { Pool } = pg;
 const LEGACY_TO_ROOM = { A: "G1", B: "G2", C: "G3", D: "G4" };
 const DEFAULT_CANCEL_TOKEN_TTL_MS = 10 * 60 * 1000;
+const ACTIVE_TABLE = "reservations";
+const PAST_TABLE = "past_reservations";
 
 function getDatabaseUrl() {
   return String(
@@ -151,6 +153,19 @@ function issueCancelToken(reservationNumber, guestName) {
   return payload + "." + sig;
 }
 
+async function archivePastReservations(pool) {
+  await pool.query(
+    `WITH moved AS (
+      DELETE FROM ${ACTIVE_TABLE}
+      WHERE check_in_date < CURRENT_DATE
+      RETURNING *
+    )
+    INSERT INTO ${PAST_TABLE}
+    SELECT * FROM moved
+    ON CONFLICT (reservation_number) DO NOTHING`,
+  );
+}
+
 export default async function handler(req, res) {
   if (req.method === "OPTIONS") {
     res.statusCode = 204;
@@ -197,6 +212,7 @@ export default async function handler(req, res) {
   }
 
   try {
+    await archivePastReservations(pool);
     var sel = await pool.query(
       `SELECT
         id,
@@ -214,8 +230,13 @@ export default async function handler(req, res) {
         payment_method,
         bank_confirmed,
         created_at
-      FROM reservations
-      WHERE reservation_number = $1`,
+      FROM (
+        SELECT * FROM ${ACTIVE_TABLE}
+        UNION ALL
+        SELECT * FROM ${PAST_TABLE}
+      ) AS merged_reservations
+      WHERE reservation_number = $1
+      LIMIT 1`,
       [normOrder],
     );
     if (!sel.rows || !sel.rows.length) {
