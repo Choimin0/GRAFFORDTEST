@@ -712,6 +712,17 @@
           );
         }
 
+        function toDateKey(dateObj) {
+          if (!dateObj) {
+            return 0;
+          }
+          return (
+            dateObj.getFullYear() * 10000 +
+            (dateObj.getMonth() + 1) * 100 +
+            dateObj.getDate()
+          );
+        }
+
         var maxBookableDateOnly = toStartOfDay(maxBookableDate);
         var maxCheckoutDateOnly = toStartOfDay(maxCheckoutDate);
         var todayDateOnly = toStartOfDay(today);
@@ -787,7 +798,7 @@
           var limitDate = checkoutMode
             ? recomputedMaxCheckOut
             : recomputedMaxCheckIn;
-          return target > limitDate;
+          return toDateKey(target) > toDateKey(limitDate);
         }
 
         function getExtraGuests() {
