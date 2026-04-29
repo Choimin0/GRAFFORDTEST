@@ -152,6 +152,23 @@
           window.alert(msg);
         }
 
+        function goToDeleteComplete(data) {
+          sessionStorage.setItem(
+            "graffordDeleteCompleteData",
+            JSON.stringify({
+              orderNo: data.orderNo || "",
+              room: data.room || "",
+              checkIn: data.checkIn || "",
+              checkOut: data.checkOut || "",
+              name: data.guestName || "",
+              contact: data.contact || "",
+              extraGuests: String(data.extraGuests || 0),
+              amount: String(getDiscountedAmount(data)),
+            }),
+          );
+          window.location.href = "delete-complete.html";
+        }
+
         form.addEventListener("submit", function (e) {
           e.preventDefault();
           if (!form.checkValidity()) {
@@ -182,6 +199,23 @@
                 result.data.row
               ) {
                 var row = result.data.row;
+                if (
+                  result.data.deleted === true &&
+                  String(result.data.deleteReason || "").toLowerCase() ===
+                    "not paid"
+                ) {
+                  goToDeleteComplete({
+                    orderNo: row.reservationNumber,
+                    room: row.roomType,
+                    checkIn: row.checkIn,
+                    checkOut: row.checkOut,
+                    guestName: row.guestName,
+                    contact: row.contact,
+                    extraGuests: row.extraGuests || 0,
+                    totalAmount: row.totalAmount || 0,
+                  });
+                  return;
+                }
                 goToReserveComplete({
                   orderNo: row.reservationNumber,
                   room: row.roomType,

@@ -357,36 +357,93 @@ export default async function handler(req, res) {
       LIMIT 1`,
       [normOrder],
     );
-    if (!sel.rows || !sel.rows.length) {
+    if (sel.rows && sel.rows.length) {
+      var row = sel.rows[0];
+      if (normalizeLookupName(row.guest_name) !== normName) {
+        json(res, 404, { ok: false, error: "Not found" });
+        return;
+      }
+      json(res, 200, {
+        ok: true,
+        source: "database",
+        row: {
+          id: row.id,
+          reservationNumber: row.reservation_number,
+          guestName: row.guest_name,
+          contact: row.contact,
+          roomType: normalizeRoomType(row.room_type) || row.room_type,
+          checkIn: toYMD(row.check_in_date),
+          checkOut: toYMD(row.check_out_date),
+          guestCount: row.guest_count,
+          stayNights: row.stay_nights != null ? Number(row.stay_nights) : null,
+          extraGuests: row.extra_guests != null ? Number(row.extra_guests) : null,
+          totalAmount: row.total_amount != null ? Number(row.total_amount) : null,
+          guestRequest: row.guest_request || "",
+          paymentMethod: row.payment_method || null,
+          bankConfirmed: row.bank_confirmed === true,
+          createdAt: formatDateTimeKst(row.created_at),
+        },
+        cancelToken: issueCancelToken(row.reservation_number, row.guest_name),
+      });
+      return;
+    }
+
+    var deletedSel = await pool.query(
+      `SELECT
+        reservation_number,
+        guest_name,
+        contact,
+        room_type,
+        check_in_date,
+        check_out_date,
+        guest_count,
+        stay_nights,
+        extra_guests,
+        total_amount,
+        guest_request,
+        payment_method,
+        bank_confirmed,
+        cancel_reason,
+        cancelled_at
+      FROM ${DELETED_TABLE}
+      WHERE reservation_number = $1
+      LIMIT 1`,
+      [normOrder],
+    );
+    if (!deletedSel.rows || !deletedSel.rows.length) {
       json(res, 404, { ok: false, error: "Not found" });
       return;
     }
-    var row = sel.rows[0];
-    if (normalizeLookupName(row.guest_name) !== normName) {
+    var deletedRow = deletedSel.rows[0];
+    if (normalizeLookupName(deletedRow.guest_name) !== normName) {
       json(res, 404, { ok: false, error: "Not found" });
       return;
     }
     json(res, 200, {
       ok: true,
       source: "database",
+      deleted: true,
+      deleteReason: String(deletedRow.cancel_reason || "").toLowerCase(),
+      cancelledAt: formatDateTimeKst(deletedRow.cancelled_at),
       row: {
-        id: row.id,
-        reservationNumber: row.reservation_number,
-        guestName: row.guest_name,
-        contact: row.contact,
-        roomType: normalizeRoomType(row.room_type) || row.room_type,
-        checkIn: toYMD(row.check_in_date),
-        checkOut: toYMD(row.check_out_date),
-        guestCount: row.guest_count,
-        stayNights: row.stay_nights != null ? Number(row.stay_nights) : null,
-        extraGuests: row.extra_guests != null ? Number(row.extra_guests) : null,
-        totalAmount: row.total_amount != null ? Number(row.total_amount) : null,
-        guestRequest: row.guest_request || "",
-        paymentMethod: row.payment_method || null,
-        bankConfirmed: row.bank_confirmed === true,
-        createdAt: formatDateTimeKst(row.created_at),
+        reservationNumber: deletedRow.reservation_number,
+        guestName: deletedRow.guest_name,
+        contact: deletedRow.contact,
+        roomType: normalizeRoomType(deletedRow.room_type) || deletedRow.room_type,
+        checkIn: toYMD(deletedRow.check_in_date),
+        checkOut: toYMD(deletedRow.check_out_date),
+        guestCount:
+          deletedRow.guest_count != null ? Number(deletedRow.guest_count) : null,
+        stayNights:
+          deletedRow.stay_nights != null ? Number(deletedRow.stay_nights) : null,
+        extraGuests:
+          deletedRow.extra_guests != null ? Number(deletedRow.extra_guests) : null,
+        totalAmount:
+          deletedRow.total_amount != null ? Number(deletedRow.total_amount) : null,
+        guestRequest: deletedRow.guest_request || "",
+        paymentMethod: deletedRow.payment_method || null,
+        bankConfirmed: deletedRow.bank_confirmed === true,
       },
-      cancelToken: issueCancelToken(row.reservation_number, row.guest_name),
     });
   } catch (e) {
     json(res, 500, {
