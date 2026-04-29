@@ -74,6 +74,34 @@
       <div class="confirm-actions delete-complete-actions">
         <a href="index.html" class="reserve-complete-action-link">메인으로</a>
       </div>
+      <div
+        class="reserve-delete-modal-backdrop"
+        id="delete-complete-back-modal"
+        hidden
+      >
+        <div
+          class="reserve-delete-modal"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="delete-complete-back-modal-title"
+        >
+          <p
+            id="delete-complete-back-modal-title"
+            class="reserve-delete-modal-title"
+          >
+            이미 예약 취소가 완료되었습니다.
+          </p>
+          <div class="reserve-delete-modal-actions">
+            <button
+              type="button"
+              class="btn reserve-btn"
+              id="delete-complete-back-modal-ok"
+            >
+              확인
+            </button>
+          </div>
+        </div>
+      </div>
 
       <footer
         id="site-business-footer-mount"
@@ -85,6 +113,30 @@
     <script src="js/booking-pricing.js"></script>
     <script>
       document.addEventListener("DOMContentLoaded", function () {
+        function blockBackNavigation() {
+          var modal = document.getElementById("delete-complete-back-modal");
+          var okBtn = document.getElementById("delete-complete-back-modal-ok");
+          function showModal() {
+            if (modal) {
+              modal.hidden = false;
+            }
+          }
+          function hideModal() {
+            if (modal) {
+              modal.hidden = true;
+            }
+          }
+          if (okBtn) {
+            okBtn.addEventListener("click", hideModal);
+          }
+          history.pushState({ noBack: true }, "", location.href);
+          window.addEventListener("popstate", function () {
+            showModal();
+            history.pushState({ noBack: true }, "", location.href);
+          });
+        }
+        blockBackNavigation();
+
         var P = window.GraffordBookingPricing;
         var ROOM_LABEL = { G1: "G1", G2: "G2", G3: "G3", G4: "G4" };
         var saved = null;
@@ -99,7 +151,8 @@
         var room = (saved && saved.room) || "";
         var checkIn = (saved && saved.checkIn) || "";
         var checkOut = (saved && saved.checkOut) || "";
-        var extraGuests = parseInt((saved && saved.extraGuests) || "0", 10) || 0;
+        var extraGuests =
+          parseInt((saved && saved.extraGuests) || "0", 10) || 0;
         var name = (saved && saved.name) || "—";
         var contact = (saved && saved.contact) || "—";
         var amount = parseInt((saved && saved.amount) || "0", 10) || 0;

@@ -379,6 +379,10 @@
                   무통장입금
                 </label>
               </fieldset>
+              <div id="bank-transfer-notice" class="confirm-check-detail" hidden>
+                12시간 내 미입금 시 예약이 자동 취소됩니다. 취소된 예약은 복구가
+                불가합니다.
+              </div>
               <div class="confirm-actions">
                 <button
                   type="submit"
@@ -571,6 +575,7 @@
         var agreePrivacyDetail = document.getElementById(
           "agree-privacy-detail",
         );
+        var bankTransferNotice = document.getElementById("bank-transfer-notice");
         var agreeSection = document
           .getElementById("sec-agree")
           .closest("section");
@@ -614,6 +619,9 @@
 
         var confirmForm = document.getElementById("confirm-form");
         var paySubmitBtn = confirmForm.querySelector(".confirm-pay-submit");
+        var payMethodInputs = confirmForm.querySelectorAll(
+          'input[name="paymentMethod"]',
+        );
         var R = window.GraffordReservations;
 
         function markSectionError(section, hasError) {
@@ -885,13 +893,38 @@
           });
         });
 
-        confirmForm
-          .querySelectorAll('input[name="paymentMethod"]')
-          .forEach(function (el) {
-            el.addEventListener("change", function () {
-              markSectionError(paySection, false);
+        function setBankTransferNoticeVisible(show) {
+          if (!bankTransferNotice) {
+            return;
+          }
+          var fadeMs = 220;
+          if (show) {
+            bankTransferNotice.hidden = false;
+            window.requestAnimationFrame(function () {
+              bankTransferNotice.classList.add("is-open");
             });
+            return;
+          }
+          bankTransferNotice.classList.remove("is-open");
+          window.setTimeout(function () {
+            if (!bankTransferNotice.classList.contains("is-open")) {
+              bankTransferNotice.hidden = true;
+            }
+          }, fadeMs);
+        }
+
+        payMethodInputs.forEach(function (el) {
+          el.addEventListener("change", function () {
+            markSectionError(paySection, false);
+            setBankTransferNoticeVisible(el.value === "bank" && el.checked);
           });
+        });
+        var initialPayInput = confirmForm.querySelector(
+          'input[name="paymentMethod"]:checked',
+        );
+        setBankTransferNoticeVisible(
+          !!(initialPayInput && initialPayInput.value === "bank"),
+        );
 
         [agreeAll, agreePrivacy, agreePurchase].forEach(function (el) {
           if (!el) {

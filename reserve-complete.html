@@ -182,6 +182,35 @@
           </section>
         </div>
       </div>
+      <div
+        class="reserve-delete-modal-backdrop"
+        id="reserve-complete-back-modal"
+        hidden
+      >
+        <div
+          class="reserve-delete-modal"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="reserve-complete-back-modal-title"
+        >
+          <p
+            id="reserve-complete-back-modal-title"
+            class="reserve-delete-modal-title"
+          >
+            이미 예약이 완료되었습니다.<br />
+            뒤로가기는 제한됩니다.
+          </p>
+          <div class="reserve-delete-modal-actions">
+            <button
+              type="button"
+              class="btn reserve-btn"
+              id="reserve-complete-back-modal-ok"
+            >
+              확인
+            </button>
+          </div>
+        </div>
+      </div>
       <footer
         id="site-business-footer-mount"
         class="site-footer site-business-footer"
@@ -192,6 +221,30 @@
     <script src="js/booking-pricing.js"></script>
     <script>
       document.addEventListener("DOMContentLoaded", function () {
+        function blockBackNavigation() {
+          var modal = document.getElementById("reserve-complete-back-modal");
+          var okBtn = document.getElementById("reserve-complete-back-modal-ok");
+          function showModal() {
+            if (modal) {
+              modal.hidden = false;
+            }
+          }
+          function hideModal() {
+            if (modal) {
+              modal.hidden = true;
+            }
+          }
+          if (okBtn) {
+            okBtn.addEventListener("click", hideModal);
+          }
+          history.pushState({ noBack: true }, "", location.href);
+          window.addEventListener("popstate", function () {
+            showModal();
+            history.pushState({ noBack: true }, "", location.href);
+          });
+        }
+        blockBackNavigation();
+
         var P = window.GraffordBookingPricing;
         var ROOM_LABEL = {
           G1: "G1",
@@ -226,7 +279,9 @@
           orderTextEl.textContent = orderNo || "번호를 확인할 수 없습니다.";
         }
         var bankStatusEl = document.getElementById("complete-bank-status");
-        var pendingStatusEl = document.getElementById("complete-bank-status-pending");
+        var pendingStatusEl = document.getElementById(
+          "complete-bank-status-pending",
+        );
         var confirmedStatusEl = document.getElementById(
           "complete-bank-status-confirmed",
         );
@@ -244,7 +299,12 @@
         function getDiscountedAmount() {
           if (P && checkIn && checkOut) {
             var parsedExtraGuests = parseInt(extraGuests || "0", 10) || 0;
-            var quote = P.computeStay(room, checkIn, checkOut, parsedExtraGuests);
+            var quote = P.computeStay(
+              room,
+              checkIn,
+              checkOut,
+              parsedExtraGuests,
+            );
             if (quote && quote.nights > 0) {
               return quote.discountedGrandTotal || 0;
             }
