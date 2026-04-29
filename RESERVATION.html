@@ -774,7 +774,9 @@
             return false;
           }
           var target = toStartOfDay(dateObj);
-          var limitDate = checkoutMode ? maxCheckoutDateOnly : maxBookableDateOnly;
+          var limitDate = checkoutMode
+            ? maxCheckoutDateOnly
+            : maxBookableDateOnly;
           return target > limitDate;
         }
 
@@ -1321,7 +1323,7 @@
             (function (dateCopy) {
               btn.addEventListener("click", function () {
                 if (calDebugMode) {
-                  console.log("[CAL DEBUG CLICK]", {
+                  console.log("[CAL DEBUG listening]", {
                     date: formatYMD(dateCopy),
                     disabled: btn.disabled,
                     disabledReason: btn.dataset.disabledReason,
