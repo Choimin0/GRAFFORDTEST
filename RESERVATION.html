@@ -638,20 +638,65 @@
           return resultDate;
         }
 
-        var minViewMonth = new Date(
-          today.getFullYear(),
-          today.getMonth() - 6,
+        function parseYmdParts(ymd) {
+          var s = String(ymd || "");
+          if (!/^\d{4}-\d{2}-\d{2}$/.test(s)) {
+            return null;
+          }
+          return {
+            y: Number(s.slice(0, 4)),
+            m: Number(s.slice(5, 7)),
+            d: Number(s.slice(8, 10)),
+          };
+        }
+
+        function daysInMonth(y, m1to12) {
+          return new Date(y, m1to12, 0).getDate();
+        }
+
+        function addMonthsKeepingDayParts(parts, monthsToAdd) {
+          var totalMonths = (parts.y * 12 + (parts.m - 1)) + monthsToAdd;
+          var targetY = Math.floor(totalMonths / 12);
+          var targetM = (totalMonths % 12) + 1;
+          var targetD = Math.min(parts.d, daysInMonth(targetY, targetM));
+          return { y: targetY, m: targetM, d: targetD };
+        }
+
+        function ymdPartsToKey(parts) {
+          return parts.y * 10000 + parts.m * 100 + parts.d;
+        }
+
+        function ymdPartsToString(parts) {
+          return (
+            String(parts.y).padStart(4, "0") +
+            "-" +
+            String(parts.m).padStart(2, "0") +
+            "-" +
+            String(parts.d).padStart(2, "0")
+          );
+        }
+
+        var todayParts = parseYmdParts(kstNowInfo.todayYmd) || {
+          y: today.getFullYear(),
+          m: today.getMonth() + 1,
+          d: today.getDate(),
+        };
+        var minViewMonth = new Date(todayParts.y, todayParts.m - 1 - 6, 1);
+        var maxCheckInParts = addMonthsKeepingDayParts(todayParts, 6);
+        var maxCheckOutDate = addDays(
+          new Date(maxCheckInParts.y, maxCheckInParts.m - 1, maxCheckInParts.d),
           1,
         );
-        var maxBookableDate = addMonthsKeepingDay(today, 6);
-        var maxCheckoutDate = new Date(
-          maxBookableDate.getFullYear(),
-          maxBookableDate.getMonth(),
-          maxBookableDate.getDate() + 1,
-        );
+        var maxCheckOutParts = {
+          y: maxCheckOutDate.getFullYear(),
+          m: maxCheckOutDate.getMonth() + 1,
+          d: maxCheckOutDate.getDate(),
+        };
+        var maxCheckInKey = ymdPartsToKey(maxCheckInParts);
+        var maxCheckOutKey = ymdPartsToKey(maxCheckOutParts);
         var maxViewMonth = new Date(
-          maxBookableDate.getFullYear(),
-          maxBookableDate.getMonth(),
+          maxCheckInParts.y,
+          maxCheckInParts.m - 1,
           1,
         );
 
@@ -740,9 +785,7 @@
           );
         }
 
-        var maxBookableDateOnly = toStartOfDay(maxBookableDate);
-        var maxCheckoutDateOnly = toStartOfDay(maxCheckoutDate);
-        var todayDateOnly = toStartOfDay(today);
+        var todayDateOnly = new Date(todayParts.y, todayParts.m - 1, todayParts.d);
         var isTodayAfterCutoff = Number(kstNowInfo.hour || 0) >= 19;
         var calDebugMode = false;
         try {
@@ -801,21 +844,9 @@
           if (!dateObj) {
             return false;
           }
-          var target = toStartOfDay(dateObj);
-          var recomputedMaxCheckIn = toStartOfDay(
-            addMonthsKeepingDay(todayDateOnly, 6),
-          );
-          var recomputedMaxCheckOut = toStartOfDay(
-            new Date(
-              recomputedMaxCheckIn.getFullYear(),
-              recomputedMaxCheckIn.getMonth(),
-              recomputedMaxCheckIn.getDate() + 1,
-            ),
-          );
-          var limitDate = checkoutMode
-            ? recomputedMaxCheckOut
-            : recomputedMaxCheckIn;
-          return toDateKey(target) > toDateKey(limitDate);
+          var targetKey = toDateKey(toStartOfDay(dateObj));
+          var limitKey = checkoutMode ? maxCheckOutKey : maxCheckInKey;
+          return targetKey > limitKey;
         }
 
         function getExtraGuests() {
@@ -1353,16 +1384,6 @@
             (function (dateCopy) {
               btn.addEventListener("click", function () {
                 if (calDebugMode) {
-                  var dbgMaxCheckIn = toStartOfDay(
-                    addMonthsKeepingDay(todayDateOnly, 6),
-                  );
-                  var dbgMaxCheckOut = toStartOfDay(
-                    new Date(
-                      dbgMaxCheckIn.getFullYear(),
-                      dbgMaxCheckIn.getMonth(),
-                      dbgMaxCheckIn.getDate() + 1,
-                    ),
-                  );
                   console.log("[CAL DEBUG CLICK]", {
                     date: formatYMD(dateCopy),
                     disabled: btn.disabled,
@@ -1370,8 +1391,8 @@
                     isPast: btn.dataset.debugPast === "1",
                     isBeyond: btn.dataset.debugBeyond === "1",
                     isOccupied: btn.dataset.debugOccupied === "1",
-                    limitCheckIn: formatYMD(dbgMaxCheckIn),
-                    limitCheckOut: formatYMD(dbgMaxCheckOut),
+                    limitCheckIn: ymdPartsToString(maxCheckInParts),
+                    limitCheckOut: ymdPartsToString(maxCheckOutParts),
                     hasCheckIn: !!checkIn,
                     hasCheckOut: !!checkOut,
                   });
@@ -1460,9 +1481,9 @@
               " cutoffAfter19=" +
               (isTodayAfterCutoff ? "1" : "0") +
               " maxCheckIn=" +
-              formatYMD(maxBookableDateOnly) +
+              ymdPartsToString(maxCheckInParts) +
               " maxCheckOut=" +
-              formatYMD(maxCheckoutDateOnly) +
+              ymdPartsToString(maxCheckOutParts) +
               " occupiedNights=" +
               occupiedNightSet.size +
               " enabled=" +
