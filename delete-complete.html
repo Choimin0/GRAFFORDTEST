@@ -70,8 +70,8 @@
           <dd id="done-amount">—</dd>
           <dt>결제 수단</dt>
           <dd id="done-pay-method">—</dd>
-          <dt>예약 일시 / 취소 일시</dt>
-          <dd id="done-reserve-cancel-at">—</dd>
+          <dt>예약일 / 취소일</dt>
+          <dd id="done-reserve-cancel-date">—</dd>
           <dt>취소 사유</dt>
           <dd id="done-cancel-reason">—</dd>
           <dt>환불 금액</dt>
@@ -168,6 +168,8 @@
         var reservedAt = String((saved && saved.reservedAt) || "").trim();
         var cancelledAt = String((saved && saved.cancelledAt) || "").trim();
         var cancelReason = String((saved && saved.cancelReason) || "").trim();
+        var cancelReasonCode = String((saved && saved.cancelReasonCode) || "").trim();
+        var cancelReasonDetail = String((saved && saved.cancelReasonDetail) || "").trim();
         var refundAmountRaw = String((saved && saved.refundAmount) || "").trim();
 
         function formatKRW(n) {
@@ -185,9 +187,16 @@
         }
         var discountedAmount = getDiscountedAmount();
 
-        function formatDateTime(v) {
+        function formatDateOnly(v) {
           if (!v) {
             return "—";
+          }
+          var ymd = String(v).trim();
+          if (/^\d{8}$/.test(ymd)) {
+            return ymd.slice(0, 4) + "." + ymd.slice(4, 6) + "." + ymd.slice(6, 8);
+          }
+          if (/^\d{4}-\d{2}-\d{2}$/.test(ymd)) {
+            return ymd.replace(/-/g, ".");
           }
           var d = new Date(v);
           if (isNaN(d.getTime())) {
@@ -198,10 +207,6 @@
             year: "numeric",
             month: "2-digit",
             day: "2-digit",
-            hour: "2-digit",
-            minute: "2-digit",
-            second: "2-digit",
-            hour12: false,
           }).format(d);
         }
 
@@ -221,6 +226,28 @@
           return v || "—";
         }
 
+        function cancelReasonLabel(rawReason, rawCode, otherDetail) {
+          var code = String(rawCode || rawReason || "")
+            .trim()
+            .toLowerCase();
+          if (code === "mind-change") {
+            return "단순 변심";
+          }
+          if (code === "schedule-change") {
+            return "일정 변경";
+          }
+          if (code === "other-hotel") {
+            return "타숙소 예약";
+          }
+          if (code === "not paid") {
+            return "입금 기한 초과";
+          }
+          if (code === "other") {
+            return String(otherDetail || "").trim() || "기타";
+          }
+          return String(rawReason || "").trim() || "—";
+        }
+
         var refundAmount = Number(refundAmountRaw);
         if (!isFinite(refundAmount)) {
           refundAmount =
@@ -238,10 +265,10 @@
           formatKRW(discountedAmount);
         document.getElementById("done-pay-method").textContent =
           paymentLabel(paymentMethod);
-        document.getElementById("done-reserve-cancel-at").textContent =
-          formatDateTime(reservedAt) + " / " + formatDateTime(cancelledAt);
+        document.getElementById("done-reserve-cancel-date").textContent =
+          formatDateOnly(reservedAt) + " / " + formatDateOnly(cancelledAt);
         document.getElementById("done-cancel-reason").textContent =
-          cancelReason || "—";
+          cancelReasonLabel(cancelReason, cancelReasonCode, cancelReasonDetail);
         document.getElementById("done-refund-amount").textContent =
           formatKRW(refundAmount);
       });

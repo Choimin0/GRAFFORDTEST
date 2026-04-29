@@ -422,11 +422,14 @@
           var selectedReasonEl = document.querySelector(
             'input[name="cancelReason"]:checked',
           );
-          var selectedReason = selectedReasonEl ? selectedReasonEl.value : "";
-          if (selectedReason === "other") {
-            selectedReason = String(
+          var selectedReasonCode = selectedReasonEl ? selectedReasonEl.value : "";
+          var selectedReasonDetail = "";
+          var selectedReason = selectedReasonCode;
+          if (selectedReasonCode === "other") {
+            selectedReasonDetail = String(
               (reasonOtherInput && reasonOtherInput.value) || "",
             ).trim();
+            selectedReason = selectedReasonDetail || "other";
           }
           yesBtn.disabled = true;
           noBtn.disabled = true;
@@ -472,6 +475,13 @@
                   checkOut: checkOut || "",
                   extraGuests: String(extraGuests || 0),
                   amount: String(discountedAmount || 0),
+                  paymentMethod: payMethod || "",
+                  reservedAt: String(orderNo || "").slice(0, 8),
+                  cancelledAt: new Date().toISOString(),
+                  cancelReason: selectedReason || "",
+                  cancelReasonCode: selectedReasonCode || "",
+                  cancelReasonDetail: selectedReasonDetail || "",
+                  refundAmount: String(refundAmount || 0),
                 }),
               );
               window.location.href = "delete-complete.html";
