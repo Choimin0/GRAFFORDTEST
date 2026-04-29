@@ -1412,6 +1412,7 @@ section ul li {
 }
 
 /* ROOMS 예약하기 버튼은 유지, 나머지 통일 버튼은 기본색 grafford-beige2 */
+.admin-refresh-btn.btn.reserve-btn,
 .reservation-lookup-btn.btn.reserve-btn,
 .reserve-cta.btn.reserve-btn,
 .confirm-pay-submit.btn.reserve-btn,
@@ -1431,6 +1432,8 @@ section ul li {
   color: #fff;
 }
 
+.admin-refresh-btn.btn.reserve-btn:hover,
+.admin-refresh-btn.btn.reserve-btn:focus-visible,
 .rooms-features .room-feature .btn.reserve-btn:hover,
 .rooms-features .room-feature .btn.reserve-btn:focus-visible,
 .reservation-lookup-btn.btn.reserve-btn:hover,
@@ -3263,6 +3266,7 @@ iframe.map {
   gap: 0.6rem;
 }
 .admin-table-head-left .confirm-section-title {
+  min-width: 70%;
   margin: 0;
 }
 .admin-refresh-btn {
@@ -3283,7 +3287,7 @@ iframe.map {
 .admin-sort-control select {
   min-width: 180px;
   border: 1px solid #d4cdc5;
-  background: #fff;
+  background: var(--grafford-beige);
   padding: 0.34rem 0.45rem;
 }
 .admin-search-row {
