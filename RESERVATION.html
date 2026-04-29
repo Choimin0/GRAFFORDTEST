@@ -643,14 +643,12 @@
           today.getMonth() - 6,
           1,
         );
-        var maxBookableDate = addMonthsKeepingDay(today, 7);
-        var maxBookableYMD = formatYMD(maxBookableDate);
+        var maxBookableDate = addMonthsKeepingDay(today, 6);
         var maxCheckoutDate = new Date(
           maxBookableDate.getFullYear(),
           maxBookableDate.getMonth(),
           maxBookableDate.getDate() + 1,
         );
-        var maxCheckoutYMD = formatYMD(maxCheckoutDate);
         var maxViewMonth = new Date(
           maxBookableDate.getFullYear(),
           maxBookableDate.getMonth(),
@@ -706,11 +704,28 @@
           return new Date(Number(p[0]), Number(p[1]) - 1, Number(p[2]));
         }
 
+        function toStartOfDay(dateObj) {
+          return new Date(
+            dateObj.getFullYear(),
+            dateObj.getMonth(),
+            dateObj.getDate(),
+          );
+        }
+
+        var maxBookableDateOnly = toStartOfDay(maxBookableDate);
+        var maxCheckoutDateOnly = toStartOfDay(maxCheckoutDate);
+
         function isBlockedByPastOrCutoff(dateObj) {
           var info = getKstNowInfo();
-          var ymd = formatYMD(dateObj);
+          var kstTodayDate = parseYMDLocal(info.todayYmd);
+          if (!kstTodayDate) {
+            return false;
+          }
+          var target = toStartOfDay(dateObj);
+          var todayDateOnly = toStartOfDay(kstTodayDate);
           return (
-            ymd < info.todayYmd || (info.hour >= 19 && ymd === info.todayYmd)
+            target < todayDateOnly ||
+            (info.hour >= 19 && sameDay(target, todayDateOnly))
           );
         }
 
@@ -755,8 +770,9 @@
           if (!dateObj) {
             return false;
           }
-          var limitYmd = checkoutMode ? maxCheckoutYMD : maxBookableYMD;
-          return formatYMD(dateObj) > limitYmd;
+          var target = toStartOfDay(dateObj);
+          var limitDate = checkoutMode ? maxCheckoutDateOnly : maxBookableDateOnly;
+          return target > limitDate;
         }
 
         function getExtraGuests() {
@@ -1185,9 +1201,6 @@
             calGrid.appendChild(empty);
           }
 
-          var kstNow = getKstNowInfo();
-          var todayYmdKst = kstNow.todayYmd;
-          var isTodayAfterCutoff = kstNow.hour >= 19;
           var inCheckoutMode = !!(checkIn && !checkOut);
           if (calGrid) {
             calGrid.classList.toggle("is-selecting-checkout", inCheckoutMode);
@@ -1217,9 +1230,7 @@
             btn.textContent = String(d);
 
             var ymdStr = formatYMD(cellDate);
-            var isPast =
-              ymdStr < todayYmdKst ||
-              (isTodayAfterCutoff && ymdStr === todayYmdKst);
+            var isPast = isBlockedByPastOrCutoff(cellDate);
             var isBeyondBookable = isDateBeyondBookable(
               cellDate,
               inCheckoutMode,
