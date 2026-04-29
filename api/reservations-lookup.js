@@ -191,8 +191,8 @@ async function autoCancelUnpaidReservations(pool) {
   await pool.query(
     `WITH moved AS (
       DELETE FROM ${ACTIVE_TABLE}
-      WHERE payment_method = 'bank'
-        AND bank_confirmed = FALSE
+      WHERE lower(trim(payment_method)) = 'bank'
+        AND bank_confirmed IS NOT TRUE
         AND created_at <= NOW() - INTERVAL '12 hours'
       RETURNING *
     )
@@ -238,8 +238,8 @@ async function autoCancelUnpaidReservations(pool) {
   await pool.query(
     `WITH moved AS (
       DELETE FROM ${PAST_TABLE}
-      WHERE payment_method = 'bank'
-        AND bank_confirmed = FALSE
+      WHERE lower(trim(payment_method)) = 'bank'
+        AND bank_confirmed IS NOT TRUE
         AND created_at <= NOW() - INTERVAL '12 hours'
       RETURNING *
     )
