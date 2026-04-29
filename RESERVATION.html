@@ -635,7 +635,9 @@
           var m = baseDate.getMonth() + monthsToAdd;
           var d = baseDate.getDate();
           var targetMonthLastDay = new Date(y, m + 1, 0).getDate();
-          return new Date(y, m, Math.min(d, targetMonthLastDay));
+          var resultDate = new Date(y, m, Math.min(d, targetMonthLastDay));
+          resultDate.setHours(23, 59, 59, 999);
+          return resultDate;
         }
 
         var minViewMonth = new Date(
