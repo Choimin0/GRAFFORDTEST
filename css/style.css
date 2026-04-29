@@ -1967,6 +1967,7 @@ iframe.map {
   position: relative;
   overflow: hidden;
   background: var(--grafford-mud2);
+  margin-bottom: 1.5rem;
 }
 
 .gallery-main-img {

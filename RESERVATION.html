@@ -645,6 +645,12 @@
         );
         var maxBookableDate = addMonthsKeepingDay(today, 6);
         var maxBookableYMD = formatYMD(maxBookableDate);
+        var maxCheckoutDate = new Date(
+          maxBookableDate.getFullYear(),
+          maxBookableDate.getMonth(),
+          maxBookableDate.getDate() + 1,
+        );
+        var maxCheckoutYMD = formatYMD(maxCheckoutDate);
         var maxViewMonth = new Date(
           maxBookableDate.getFullYear(),
           maxBookableDate.getMonth(),
@@ -745,11 +751,12 @@
           return new Date(target.getFullYear(), target.getMonth(), 1);
         }
 
-        function isDateBeyondBookable(dateObj) {
+        function isDateBeyondBookable(dateObj, checkoutMode) {
           if (!dateObj) {
             return false;
           }
-          return formatYMD(dateObj) > maxBookableYMD;
+          var limitYmd = checkoutMode ? maxCheckoutYMD : maxBookableYMD;
+          return formatYMD(dateObj) > limitYmd;
         }
 
         function getExtraGuests() {
@@ -1213,7 +1220,10 @@
             var isPast =
               ymdStr < todayYmdKst ||
               (isTodayAfterCutoff && ymdStr === todayYmdKst);
-            var isBeyondBookable = isDateBeyondBookable(cellDate);
+            var isBeyondBookable = isDateBeyondBookable(
+              cellDate,
+              inCheckoutMode,
+            );
             var isOcc = occupiedNightSet.has(ymdStr);
             var disabled = false;
             if (isPast) {
@@ -1262,7 +1272,7 @@
                 if (!checkIn || (checkIn && checkOut)) {
                   if (
                     isBlockedByPastOrCutoff(dateCopy) ||
-                    isDateBeyondBookable(dateCopy) ||
+                    isDateBeyondBookable(dateCopy, false) ||
                     occupiedNightSet.has(formatYMD(dateCopy))
                   ) {
                     return;
@@ -1281,7 +1291,7 @@
                     checkOut = null;
                   } else if (
                     isBlockedByPastOrCutoff(dateCopy) ||
-                    isDateBeyondBookable(dateCopy) ||
+                    isDateBeyondBookable(dateCopy, true) ||
                     (occupiedNightSet.has(formatYMD(dateCopy)) &&
                       !canSelectCheckOut(checkIn, dateCopy))
                   ) {
