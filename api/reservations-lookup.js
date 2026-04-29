@@ -188,6 +188,7 @@ async function archivePastReservations(pool) {
 }
 
 async function autoCancelUnpaidReservations(pool) {
+  console.log("조회 시 autounpaid 확인중");
   await pool.query(
     `WITH moved AS (
       DELETE FROM ${ACTIVE_TABLE}
@@ -234,7 +235,7 @@ async function autoCancelUnpaidReservations(pool) {
     FROM moved
     ON CONFLICT (reservation_number) DO NOTHING`,
   );
-
+  console.log("조회 시 autounpaid 완료");
   await pool.query(
     `WITH moved AS (
       DELETE FROM ${PAST_TABLE}
@@ -376,8 +377,10 @@ export default async function handler(req, res) {
           checkOut: toYMD(row.check_out_date),
           guestCount: row.guest_count,
           stayNights: row.stay_nights != null ? Number(row.stay_nights) : null,
-          extraGuests: row.extra_guests != null ? Number(row.extra_guests) : null,
-          totalAmount: row.total_amount != null ? Number(row.total_amount) : null,
+          extraGuests:
+            row.extra_guests != null ? Number(row.extra_guests) : null,
+          totalAmount:
+            row.total_amount != null ? Number(row.total_amount) : null,
           guestRequest: row.guest_request || "",
           paymentMethod: row.payment_method || null,
           bankConfirmed: row.bank_confirmed === true,
@@ -429,17 +432,26 @@ export default async function handler(req, res) {
         reservationNumber: deletedRow.reservation_number,
         guestName: deletedRow.guest_name,
         contact: deletedRow.contact,
-        roomType: normalizeRoomType(deletedRow.room_type) || deletedRow.room_type,
+        roomType:
+          normalizeRoomType(deletedRow.room_type) || deletedRow.room_type,
         checkIn: toYMD(deletedRow.check_in_date),
         checkOut: toYMD(deletedRow.check_out_date),
         guestCount:
-          deletedRow.guest_count != null ? Number(deletedRow.guest_count) : null,
+          deletedRow.guest_count != null
+            ? Number(deletedRow.guest_count)
+            : null,
         stayNights:
-          deletedRow.stay_nights != null ? Number(deletedRow.stay_nights) : null,
+          deletedRow.stay_nights != null
+            ? Number(deletedRow.stay_nights)
+            : null,
         extraGuests:
-          deletedRow.extra_guests != null ? Number(deletedRow.extra_guests) : null,
+          deletedRow.extra_guests != null
+            ? Number(deletedRow.extra_guests)
+            : null,
         totalAmount:
-          deletedRow.total_amount != null ? Number(deletedRow.total_amount) : null,
+          deletedRow.total_amount != null
+            ? Number(deletedRow.total_amount)
+            : null,
         guestRequest: deletedRow.guest_request || "",
         paymentMethod: deletedRow.payment_method || null,
         bankConfirmed: deletedRow.bank_confirmed === true,
