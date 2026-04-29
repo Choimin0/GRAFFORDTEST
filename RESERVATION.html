@@ -1387,25 +1387,25 @@
               btn.classList.add("cal-range");
             }
 
-            (function (dateCopy) {
-              btn.addEventListener("click", function () {
+            (function (dateCopy, btnEl) {
+              btnEl.addEventListener("click", function () {
                 if (calDebugMode) {
                   console.log("[DEBUG CLICK]", {
                     date: formatYMD(dateCopy),
-                    disabled: btn.disabled,
-                    disabledReason: btn.dataset.disabledReason,
-                    isPast: btn.dataset.debugPast === "1",
-                    isBeyond: btn.dataset.debugBeyond === "1",
-                    isOccupied: btn.dataset.debugOccupied === "1",
-                    targetKey: btn.dataset.debugTargetKey,
-                    limitKey: btn.dataset.debugLimitKey,
+                    disabled: btnEl.disabled,
+                    disabledReason: btnEl.dataset.disabledReason,
+                    isPast: btnEl.dataset.debugPast === "1",
+                    isBeyond: btnEl.dataset.debugBeyond === "1",
+                    isOccupied: btnEl.dataset.debugOccupied === "1",
+                    targetKey: btnEl.dataset.debugTargetKey,
+                    limitKey: btnEl.dataset.debugLimitKey,
                     limitCheckIn: ymdPartsToString(maxCheckInParts),
                     limitCheckOut: ymdPartsToString(maxCheckOutParts),
                     hasCheckIn: !!checkIn,
                     hasCheckOut: !!checkOut,
                   });
                 }
-                if (btn.disabled) return;
+                if (btnEl.disabled) return;
                 var shouldMoveToNextMonth = false;
                 if (!checkIn || (checkIn && checkOut)) {
                   // In check-in mode, trust render-time disabled state.
@@ -1473,7 +1473,7 @@
                   renderCalendar();
                 }
               });
-            })(cellDate);
+            })(cellDate, btn);
 
             calGrid.appendChild(btn);
           }
