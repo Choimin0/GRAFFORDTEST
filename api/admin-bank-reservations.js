@@ -131,7 +131,7 @@ async function autoCancelUnpaidReservations(pool) {
   await pool.query(
     `WITH moved AS (
       DELETE FROM ${ACTIVE_TABLE}
-      WHERE lower(trim(payment_method)) = 'bank'
+      WHERE coalesce(lower(trim(payment_method)), 'bank') IN ('bank', '무통장입금')
         AND bank_confirmed IS NOT TRUE
         AND created_at <= NOW() - INTERVAL '12 hours'
       RETURNING *
@@ -176,7 +176,7 @@ async function autoCancelUnpaidReservations(pool) {
   await pool.query(
     `WITH moved AS (
       DELETE FROM ${PAST_TABLE}
-      WHERE lower(trim(payment_method)) = 'bank'
+      WHERE coalesce(lower(trim(payment_method)), 'bank') IN ('bank', '무통장입금')
         AND bank_confirmed IS NOT TRUE
         AND created_at <= NOW() - INTERVAL '12 hours'
       RETURNING *
@@ -282,7 +282,7 @@ export default async function handler(req, res) {
         `UPDATE ${ACTIVE_TABLE}
          SET bank_confirmed = TRUE
          WHERE reservation_number = $1
-           AND lower(trim(payment_method)) = 'bank'
+           AND coalesce(lower(trim(payment_method)), 'bank') IN ('bank', '무통장입금')
          RETURNING reservation_number, bank_confirmed`,
         [reservationNumber],
       );
@@ -317,7 +317,7 @@ export default async function handler(req, res) {
         bank_confirmed,
         created_at
       FROM ${ACTIVE_TABLE}
-      WHERE lower(trim(payment_method)) = 'bank'
+      WHERE coalesce(lower(trim(payment_method)), 'bank') IN ('bank', '무통장입금')
       ORDER BY created_at DESC`,
     );
     json(res, 200, {

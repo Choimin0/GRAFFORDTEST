@@ -68,7 +68,7 @@ async function autoCancelUnpaidReservations(client, tableName) {
   var result = await client.query(
     `WITH moved AS (
       DELETE FROM ${tableName}
-      WHERE lower(trim(payment_method)) = 'bank'
+      WHERE coalesce(lower(trim(payment_method)), 'bank') IN ('bank', '무통장입금')
         AND bank_confirmed IS NOT TRUE
         AND created_at <= NOW() - INTERVAL '12 hours'
       RETURNING *
