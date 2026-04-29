@@ -774,9 +774,19 @@
             return false;
           }
           var target = toStartOfDay(dateObj);
+          var recomputedMaxCheckIn = toStartOfDay(
+            addMonthsKeepingDay(todayDateOnly, 6),
+          );
+          var recomputedMaxCheckOut = toStartOfDay(
+            new Date(
+              recomputedMaxCheckIn.getFullYear(),
+              recomputedMaxCheckIn.getMonth(),
+              recomputedMaxCheckIn.getDate() + 1,
+            ),
+          );
           var limitDate = checkoutMode
-            ? maxCheckoutDateOnly
-            : maxBookableDateOnly;
+            ? recomputedMaxCheckOut
+            : recomputedMaxCheckIn;
           return target > limitDate;
         }
 
@@ -1323,13 +1333,25 @@
             (function (dateCopy) {
               btn.addEventListener("click", function () {
                 if (calDebugMode) {
-                  console.log("[CAL DEBUG listening]", {
+                  var dbgMaxCheckIn = toStartOfDay(
+                    addMonthsKeepingDay(todayDateOnly, 6),
+                  );
+                  var dbgMaxCheckOut = toStartOfDay(
+                    new Date(
+                      dbgMaxCheckIn.getFullYear(),
+                      dbgMaxCheckIn.getMonth(),
+                      dbgMaxCheckIn.getDate() + 1,
+                    ),
+                  );
+                  console.log("[CAL DEBUG CLICK]", {
                     date: formatYMD(dateCopy),
                     disabled: btn.disabled,
                     disabledReason: btn.dataset.disabledReason,
                     isPast: btn.dataset.debugPast === "1",
                     isBeyond: btn.dataset.debugBeyond === "1",
                     isOccupied: btn.dataset.debugOccupied === "1",
+                    limitCheckIn: formatYMD(dbgMaxCheckIn),
+                    limitCheckOut: formatYMD(dbgMaxCheckOut),
                     hasCheckIn: !!checkIn,
                     hasCheckOut: !!checkOut,
                   });
