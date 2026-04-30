@@ -36,7 +36,11 @@
         <a href="RESERVATION.html">RESERVATION</a>
       </aside>
       <div class="desktop-nav-links" aria-label="데스크톱 메뉴">
-        <div class="lang-switch" data-language-switch aria-label="Language switch">
+        <div
+          class="lang-switch"
+          data-language-switch
+          aria-label="Language switch"
+        >
           <button type="button" class="lang-switch__btn" data-lang-option="kr">
             KR
           </button>
@@ -52,1222 +56,1371 @@
       </div>
     </nav>
     <div class="lang-kr">
+      <main class="content-section confirm-page">
+        <div class="confirm-topbar">
+          <a
+            href="RESERVATION.html"
+            class="confirm-back-inline"
+            aria-label="예약으로 돌아가기"
+            >&lt;</a
+          >
+          <h1 class="confirm-title">결제하기</h1>
+        </div>
 
-    <main class="content-section confirm-page">
-      <div class="confirm-topbar">
-        <a
-          href="RESERVATION.html"
-          class="confirm-back-inline"
-          aria-label="예약으로 돌아가기"
-          >&lt;</a
+        <form
+          class="confirm-form checkout-form"
+          id="confirm-form"
+          action="payment.html"
+          method="get"
+          novalidate
         >
-        <h1 class="confirm-title">결제하기</h1>
-      </div>
+          <input type="hidden" name="room" id="f-room" />
+          <input type="hidden" name="checkIn" id="f-checkin" />
+          <input type="hidden" name="checkOut" id="f-checkout" />
+          <input type="hidden" name="nights" id="f-nights" value="0" />
+          <input
+            type="hidden"
+            name="extraGuests"
+            id="f-extra-guests"
+            value="0"
+          />
+          <input
+            type="hidden"
+            name="totalAmount"
+            id="f-total-amount"
+            value="0"
+          />
 
-      <form
-        class="confirm-form checkout-form"
-        id="confirm-form"
-        action="payment.html"
-        method="get"
-        novalidate
-      >
-        <input type="hidden" name="room" id="f-room" />
-        <input type="hidden" name="checkIn" id="f-checkin" />
-        <input type="hidden" name="checkOut" id="f-checkout" />
-        <input type="hidden" name="nights" id="f-nights" value="0" />
-        <input type="hidden" name="extraGuests" id="f-extra-guests" value="0" />
-        <input type="hidden" name="totalAmount" id="f-total-amount" value="0" />
+          <div class="confirm-layout-grid">
+            <div class="confirm-layout-col">
+              <section class="confirm-section" aria-labelledby="sec-guide">
+                <h2 class="confirm-section-title" id="sec-guide">
+                  게스트 안내사항
+                </h2>
+                <div class="confirm-guide-list">
+                  <div class="confirm-guide-item">
+                    <span class="confirm-guide-subtitle"
+                      >예약인원 기준 명시 및 인원 규정 위반에 대한 책임</span
+                    >
+                    <p class="confirm-guide-content">
+                      예약된 인원 외의 추가 인원 입실은 불가하며, 방문객의 방문
+                      또한 입실로 간주합니다. 최대 인원 초과 시 즉시 퇴실 조치될
+                      수 있으며, 이로 인한 환불은 불가합니다. 예약 시 정확한
+                      인원을 체크해 주시기 바랍니다.
+                    </p>
+                  </div>
+                  <div class="confirm-guide-item">
+                    <span class="confirm-guide-subtitle"
+                      >금연 및 화재 예방</span
+                    >
+                    <p class="confirm-guide-content">
+                      객실을 포함한 숙소 전 구역은 금역 구역입니다. 흡연 적발 시
+                      특수 세척비가 청구됩니다. 또한 객실 내 화기 사용(휴대용
+                      가스레인지, 양초, 폭죽 등)은 화재 예방을 위해 엄격히
+                      금지하며, 위반 시 퇴실 조치됩니다.
+                    </p>
+                  </div>
+                  <div class="confirm-guide-item">
+                    <span class="confirm-guide-subtitle">변상 규정</span>
+                    <p class="confirm-guide-content">
+                      객실 내 가구, 가전, 비품 및 인테리어 소품이 파손, 오염
+                      또는 분실될 경우 해당 물품의 교체 비용 및 수리비가
+                      청구됩니다. 오염(침구류 오염 등) 발생 시 즉시 알려주시기
+                      바랍니다.
+                    </p>
+                  </div>
+                  <div class="confirm-guide-item">
+                    <span class="confirm-guide-subtitle"
+                      >미성년자 투숙 기준</span
+                    >
+                    <p class="confirm-guide-content">
+                      미성년자의 경우 법정 대리인(부모님 등) 동반 시에만 투숙이
+                      가능합니다. 보호자 없는 미성년자의 예약 및 투숙은
+                      불가하며, 입실 시 신분증 확인 결과 미성년자로 판명될 경우
+                      환불 없이 퇴실 조치됩니다.
+                    </p>
+                  </div>
+                  <div class="confirm-guide-item">
+                    <span class="confirm-guide-subtitle"
+                      >영유아 및 아동 투숙 인원 포함 사항</span
+                    >
+                    <p class="confirm-guide-content">
+                      숙박 기준 인원 및 최대 인원 산정 시 영유아와 아동도
+                      인원수에 포함됩니다. 인원수에 따른 추가 요금이 발생할 수
+                      있으니 예약 시 정확한 인원을 선택해 주시기 바랍니다.
+                    </p>
+                  </div>
+                  <div class="confirm-guide-item">
+                    <span class="confirm-guide-subtitle"
+                      >반려동물 출입 불가</span
+                    >
+                    <p class="confirm-guide-content">
+                      본 숙소는 반려동물과 동반 입실이 불가능한 숙소입니다. 몰래
+                      입실을 시도하거나 적발될 경우 즉시 퇴실 조치되며, 이에
+                      따른 당일 취소 수수료 및 객실 정화 비용이 청구됩니다.
+                    </p>
+                  </div>
+                  <div class="confirm-guide-item">
+                    <span class="confirm-guide-subtitle"
+                      >객실 내 취사 관련</span
+                    >
+                    <p class="confirm-guide-content">
+                      냄새가 심한 음식(육류 구이, 생선 요리, 청국장 등) 및
+                      기름기가 많은 음식의 조리는 금지됩니다. 간단한 조리만
+                      가능하며, 조리 후 반드시 환기와 설거지를 완료해 주시기
+                      바랍니다.
+                    </p>
+                  </div>
+                  <div class="confirm-guide-item">
+                    <span class="confirm-guide-subtitle">카페 이용 규칙</span>
+                    <p class="confirm-guide-content">
+                      카페 이용 시 타 고객에게 방해가 되는 행위는 삼가해 주시기
+                      바랍니다. 이용 가능 시간(10:00~18:00)을 준수해 주십시오.
+                    </p>
+                  </div>
+                  <div class="confirm-guide-item">
+                    <span class="confirm-guide-subtitle"
+                      >벌레 유입 및 방역에 대한 규정</span
+                    >
+                    <p class="confirm-guide-content">
+                      본 숙소는 정기적인 방역 작업을 실시하고 있으나, 숙소 위치
+                      특성상(숲, 산 근처 등) 벌레가 유입될 수 있습니다. 이로
+                      인한 환불은 불가능하오니 예민하신 분들은 예약에 신중을
+                      기해 주시기 바랍니다.
+                    </p>
+                  </div>
+                  <div class="confirm-guide-item">
+                    <span class="confirm-guide-subtitle">상업적 이용 불가</span>
+                    <p class="confirm-guide-content">
+                      사전 협의되지 않은 상업적 촬영(쇼핑몰, 유튜브 광고 촬영
+                      등)은 금지됩니다. 상업적 이용 적발 시 퇴실 조치 및 법적
+                      책임이 발생할 수 있으므로 관련 문의는 예약 전 반드시
+                      진행해 주시기 바랍니다.
+                    </p>
+                  </div>
+                  <div class="confirm-guide-item">
+                    <span class="confirm-guide-subtitle">숙박권 양도 안내</span>
+                    <p class="confirm-guide-content">
+                      숙박권은 제3자에게 양도하거나 재판매할 수 없습니다. 예약자
+                      본인이 아닌 경우 입실이 거부될 수 있으며, 부정한 방법으로
+                      거래된 숙박권으로 인한 피해는 숙소에서 책임지지 않습니다.
+                    </p>
+                  </div>
+                  <div class="confirm-guide-item">
+                    <span class="confirm-guide-subtitle">안전 유의</span>
+                    <p class="confirm-guide-content">
+                      이용객의 부주의로 인한 사고(시설물 이용 시 부주의, 귀중품
+                      분실 등)에 대해서는 숙소 측에서 책임을 지지 않습니다. 특히
+                      개인 소지품 관리에 유의해 주시고, 외출 시 문단속을 철저히
+                      해 주시기 바랍니다.
+                    </p>
+                  </div>
+                  <div class="confirm-guide-item">
+                    <span class="confirm-guide-subtitle">환불 규정</span>
+                    <p class="confirm-guide-content">
+                      취소 시점별로 환불 위약금이 적용됩니다. 예약 확정은 규정에
+                      동의한 것으로 간주되오니 신중하게 예약해 주시기 바랍니다.
+                    </p>
+                    <table
+                      class="confirm-refund-table"
+                      aria-label="환불 규정 표"
+                    >
+                      <tbody>
+                        <tr>
+                          <td>입실일로부터 15일 전</td>
+                          <td>100%</td>
+                        </tr>
+                        <tr>
+                          <td>입실일로부터 12일 전</td>
+                          <td>80%</td>
+                        </tr>
+                        <tr>
+                          <td>입실일로부터 9일 전</td>
+                          <td>70%</td>
+                        </tr>
+                        <tr>
+                          <td>입실일로부터 7일 전</td>
+                          <td>60%</td>
+                        </tr>
+                        <tr>
+                          <td>입실일로부터 5일 전</td>
+                          <td>50%</td>
+                        </tr>
+                        <tr>
+                          <td>입실일로부터 5일 이내</td>
+                          <td>환불 불가</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                  <div class="confirm-guide-item">
+                    <span class="confirm-guide-subtitle">특약 사항</span>
+                    <p class="confirm-guide-content">
+                      천재 지변이나 기상 악화로 인해 비행기 혹은 배 결항시 관련
+                      서류 송부시 100% 환불됩니다.
+                    </p>
+                  </div>
+                </div>
+                <label class="confirm-check confirm-check--all">
+                  <input type="checkbox" id="agree-all" />
+                  전체 동의
+                </label>
+              </section>
 
-        <div class="confirm-layout-grid">
-          <div class="confirm-layout-col">
-            <section class="confirm-section" aria-labelledby="sec-guide">
-              <h2 class="confirm-section-title" id="sec-guide">
-                게스트 안내사항
-              </h2>
-              <div class="confirm-guide-list">
-                <div class="confirm-guide-item">
-                  <span class="confirm-guide-subtitle"
-                    >예약인원 기준 명시 및 인원 규정 위반에 대한 책임</span
+              <section class="confirm-section" aria-labelledby="sec-request">
+                <h2 class="confirm-section-title" id="sec-request">요청사항</h2>
+                <label class="confirm-label">
+                  <textarea
+                    name="guestRequest"
+                    class="confirm-textarea"
+                    rows="1"
+                  ></textarea>
+                </label>
+              </section>
+            </div>
+
+            <div class="confirm-layout-col confirm-layout-col--right">
+              <section class="confirm-section" aria-labelledby="sec-booking">
+                <h2 class="confirm-section-title" id="sec-booking">
+                  예약 사항 정보
+                </h2>
+                <div class="confirm-booking-card">
+                  <img
+                    class="confirm-room-thumb"
+                    id="booking-room-img"
+                    src="images/A00.jpg"
+                    alt=""
+                    width="120"
+                    height="90"
+                    decoding="async"
+                  />
+                  <div class="confirm-booking-details">
+                    <p class="confirm-room-name" id="booking-room-name"></p>
+                    <p class="confirm-schedule" id="booking-schedule"></p>
+                  </div>
+                </div>
+              </section>
+
+              <section class="confirm-section" aria-labelledby="sec-guest">
+                <h2 class="confirm-section-title" id="sec-guest">
+                  예약자 정보
+                </h2>
+                <p class="confirm-info-text">
+                  예약 확정 및 안내를 위해 정확한 이름과 연락 가능한 번호를
+                  입력해 주세요.<br />
+                  입력하신 정보는 예약 처리·고객 응대 목적으로만 사용되며,<br />
+                  결제 완료 후 변경은 고객센터로 문의해 주세요.
+                </p>
+                <label class="confirm-label">
+                  성함
+                  <input
+                    type="text"
+                    name="guestName"
+                    id="f-name"
+                    required
+                    autocomplete="name"
+                    placeholder="홍길동"
+                  />
+                </label>
+                <label class="confirm-label">
+                  연락처
+                  <input
+                    type="tel"
+                    name="contact"
+                    id="f-contact"
+                    required
+                    autocomplete="tel"
+                    inputmode="numeric"
+                    maxlength="13"
+                    placeholder="010-1234-5678"
+                    title="숫자 11자리 (010-1234-5678 형식)"
+                    pattern="[0-9]{3}-[0-9]{4}-[0-9]{4}"
+                  />
+                </label>
+              </section>
+
+              <section class="confirm-section" aria-labelledby="sec-agree">
+                <h2 class="confirm-section-title" id="sec-agree">개별 동의</h2>
+                <div class="confirm-agree-list" id="agree-items">
+                  <div class="confirm-check-item">
+                    <label class="confirm-check">
+                      <input
+                        type="checkbox"
+                        name="agreePrivacy"
+                        id="agree-privacy"
+                        value="1"
+                      />
+                      개인정보 수집 및 이용 동의
+                    </label>
+                    <button
+                      type="button"
+                      class="confirm-check-toggle"
+                      id="agree-privacy-toggle"
+                      aria-expanded="false"
+                      aria-controls="agree-privacy-detail"
+                      aria-label="개인정보 수집 및 이용 동의 상세 내용 펼치기"
+                    >
+                      ▽
+                    </button>
+                  </div>
+                  <div
+                    id="agree-privacy-detail"
+                    class="confirm-check-detail"
+                    hidden
                   >
-                  <p class="confirm-guide-content">
-                    예약된 인원 외의 추가 인원 입실은 불가하며, 방문객의 방문
-                    또한 입실로 간주합니다. 최대 인원 초과 시 즉시 퇴실 조치될
-                    수 있으며, 이로 인한 환불은 불가합니다. 예약 시 정확한
-                    인원을 체크해 주시기 바랍니다.
-                  </p>
-                </div>
-                <div class="confirm-guide-item">
-                  <span class="confirm-guide-subtitle">금연 및 화재 예방</span>
-                  <p class="confirm-guide-content">
-                    객실을 포함한 숙소 전 구역은 금역 구역입니다. 흡연 적발 시
-                    특수 세척비가 청구됩니다. 또한 객실 내 화기 사용(휴대용
-                    가스레인지, 양초, 폭죽 등)은 화재 예방을 위해 엄격히
-                    금지하며, 위반 시 퇴실 조치됩니다.
-                  </p>
-                </div>
-                <div class="confirm-guide-item">
-                  <span class="confirm-guide-subtitle">변상 규정</span>
-                  <p class="confirm-guide-content">
-                    객실 내 가구, 가전, 비품 및 인테리어 소품이 파손, 오염 또는
-                    분실될 경우 해당 물품의 교체 비용 및 수리비가 청구됩니다.
-                    오염(침구류 오염 등) 발생 시 즉시 알려주시기 바랍니다.
-                  </p>
-                </div>
-                <div class="confirm-guide-item">
-                  <span class="confirm-guide-subtitle">미성년자 투숙 기준</span>
-                  <p class="confirm-guide-content">
-                    미성년자의 경우 법정 대리인(부모님 등) 동반 시에만 투숙이
-                    가능합니다. 보호자 없는 미성년자의 예약 및 투숙은 불가하며,
-                    입실 시 신분증 확인 결과 미성년자로 판명될 경우 환불 없이
-                    퇴실 조치됩니다.
-                  </p>
-                </div>
-                <div class="confirm-guide-item">
-                  <span class="confirm-guide-subtitle"
-                    >영유아 및 아동 투숙 인원 포함 사항</span
-                  >
-                  <p class="confirm-guide-content">
-                    숙박 기준 인원 및 최대 인원 산정 시 영유아와 아동도 인원수에
-                    포함됩니다. 인원수에 따른 추가 요금이 발생할 수 있으니 예약
-                    시 정확한 인원을 선택해 주시기 바랍니다.
-                  </p>
-                </div>
-                <div class="confirm-guide-item">
-                  <span class="confirm-guide-subtitle">반려동물 출입 불가</span>
-                  <p class="confirm-guide-content">
-                    본 숙소는 반려동물과 동반 입실이 불가능한 숙소입니다. 몰래
-                    입실을 시도하거나 적발될 경우 즉시 퇴실 조치되며, 이에 따른
-                    당일 취소 수수료 및 객실 정화 비용이 청구됩니다.
-                  </p>
-                </div>
-                <div class="confirm-guide-item">
-                  <span class="confirm-guide-subtitle">객실 내 취사 관련</span>
-                  <p class="confirm-guide-content">
-                    냄새가 심한 음식(육류 구이, 생선 요리, 청국장 등) 및
-                    기름기가 많은 음식의 조리는 금지됩니다. 간단한 조리만
-                    가능하며, 조리 후 반드시 환기와 설거지를 완료해 주시기
-                    바랍니다.
-                  </p>
-                </div>
-                <div class="confirm-guide-item">
-                  <span class="confirm-guide-subtitle">카페 이용 규칙</span>
-                  <p class="confirm-guide-content">
-                    카페 이용 시 타 고객에게 방해가 되는 행위는 삼가해 주시기
-                    바랍니다. 이용 가능 시간(10:00~18:00)을 준수해 주십시오.
-                  </p>
-                </div>
-                <div class="confirm-guide-item">
-                  <span class="confirm-guide-subtitle"
-                    >벌레 유입 및 방역에 대한 규정</span
-                  >
-                  <p class="confirm-guide-content">
-                    본 숙소는 정기적인 방역 작업을 실시하고 있으나, 숙소 위치
-                    특성상(숲, 산 근처 등) 벌레가 유입될 수 있습니다. 이로 인한
-                    환불은 불가능하오니 예민하신 분들은 예약에 신중을 기해
-                    주시기 바랍니다.
-                  </p>
-                </div>
-                <div class="confirm-guide-item">
-                  <span class="confirm-guide-subtitle">상업적 이용 불가</span>
-                  <p class="confirm-guide-content">
-                    사전 협의되지 않은 상업적 촬영(쇼핑몰, 유튜브 광고 촬영
-                    등)은 금지됩니다. 상업적 이용 적발 시 퇴실 조치 및 법적
-                    책임이 발생할 수 있으므로 관련 문의는 예약 전 반드시 진행해
-                    주시기 바랍니다.
-                  </p>
-                </div>
-                <div class="confirm-guide-item">
-                  <span class="confirm-guide-subtitle">숙박권 양도 안내</span>
-                  <p class="confirm-guide-content">
-                    숙박권은 제3자에게 양도하거나 재판매할 수 없습니다. 예약자
-                    본인이 아닌 경우 입실이 거부될 수 있으며, 부정한 방법으로
-                    거래된 숙박권으로 인한 피해는 숙소에서 책임지지 않습니다.
-                  </p>
-                </div>
-                <div class="confirm-guide-item">
-                  <span class="confirm-guide-subtitle">안전 유의</span>
-                  <p class="confirm-guide-content">
-                    이용객의 부주의로 인한 사고(시설물 이용 시 부주의, 귀중품
-                    분실 등)에 대해서는 숙소 측에서 책임을 지지 않습니다. 특히
-                    개인 소지품 관리에 유의해 주시고, 외출 시 문단속을 철저히 해
-                    주시기 바랍니다.
-                  </p>
-                </div>
-                <div class="confirm-guide-item">
-                  <span class="confirm-guide-subtitle">환불 규정</span>
-                  <p class="confirm-guide-content">
-                    취소 시점별로 환불 위약금이 적용됩니다. 예약 확정은 규정에
-                    동의한 것으로 간주되오니 신중하게 예약해 주시기 바랍니다.
-                  </p>
-                  <table class="confirm-refund-table" aria-label="환불 규정 표">
-                    <tbody>
-                      <tr>
-                        <td>입실일로부터 15일 전</td>
-                        <td>100%</td>
-                      </tr>
-                      <tr>
-                        <td>입실일로부터 12일 전</td>
-                        <td>80%</td>
-                      </tr>
-                      <tr>
-                        <td>입실일로부터 9일 전</td>
-                        <td>70%</td>
-                      </tr>
-                      <tr>
-                        <td>입실일로부터 7일 전</td>
-                        <td>60%</td>
-                      </tr>
-                      <tr>
-                        <td>입실일로부터 5일 전</td>
-                        <td>50%</td>
-                      </tr>
-                      <tr>
-                        <td>입실일로부터 5일 이내</td>
-                        <td>환불 불가</td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
-                <div class="confirm-guide-item">
-                  <span class="confirm-guide-subtitle">특약 사항</span>
-                  <p class="confirm-guide-content">
-                    천재 지변이나 기상 악화로 인해 비행기 혹은 배 결항시 관련
-                    서류 송부시 100% 환불됩니다.
-                  </p>
-                </div>
-              </div>
-              <label class="confirm-check confirm-check--all">
-                <input type="checkbox" id="agree-all" />
-                전체 동의
-              </label>
-            </section>
-
-            <section class="confirm-section" aria-labelledby="sec-request">
-              <h2 class="confirm-section-title" id="sec-request">요청사항</h2>
-              <label class="confirm-label">
-                <textarea
-                  name="guestRequest"
-                  class="confirm-textarea"
-                  rows="1"
-                ></textarea>
-              </label>
-            </section>
-          </div>
-
-          <div class="confirm-layout-col confirm-layout-col--right">
-            <section class="confirm-section" aria-labelledby="sec-booking">
-              <h2 class="confirm-section-title" id="sec-booking">
-                예약 사항 정보
-              </h2>
-              <div class="confirm-booking-card">
-                <img
-                  class="confirm-room-thumb"
-                  id="booking-room-img"
-                  src="images/A00.jpg"
-                  alt=""
-                  width="120"
-                  height="90"
-                  decoding="async"
-                />
-                <div class="confirm-booking-details">
-                  <p class="confirm-room-name" id="booking-room-name"></p>
-                  <p class="confirm-schedule" id="booking-schedule"></p>
-                </div>
-              </div>
-            </section>
-
-            <section class="confirm-section" aria-labelledby="sec-guest">
-              <h2 class="confirm-section-title" id="sec-guest">예약자 정보</h2>
-              <p class="confirm-info-text">
-                예약 확정 및 안내를 위해 정확한 이름과 연락 가능한 번호를 입력해
-                주세요.<br />
-                입력하신 정보는 예약 처리·고객 응대 목적으로만 사용되며,<br />
-                결제 완료 후 변경은 고객센터로 문의해 주세요.
-              </p>
-              <label class="confirm-label">
-                성함
-                <input
-                  type="text"
-                  name="guestName"
-                  id="f-name"
-                  required
-                  autocomplete="name"
-                  placeholder="홍길동"
-                />
-              </label>
-              <label class="confirm-label">
-                연락처
-                <input
-                  type="tel"
-                  name="contact"
-                  id="f-contact"
-                  required
-                  autocomplete="tel"
-                  inputmode="numeric"
-                  maxlength="13"
-                  placeholder="010-1234-5678"
-                  title="숫자 11자리 (010-1234-5678 형식)"
-                  pattern="[0-9]{3}-[0-9]{4}-[0-9]{4}"
-                />
-              </label>
-            </section>
-
-            <section class="confirm-section" aria-labelledby="sec-agree">
-              <h2 class="confirm-section-title" id="sec-agree">개별 동의</h2>
-              <div class="confirm-agree-list" id="agree-items">
-                <div class="confirm-check-item">
+                    개인정보는 예약 처리, 고객 안내 및 문의 응대를 위해
+                    수집되며, 관련 법령에서 정한 보관기간이 지나면 안전하게
+                    삭제됩니다.
+                  </div>
                   <label class="confirm-check">
                     <input
                       type="checkbox"
-                      name="agreePrivacy"
-                      id="agree-privacy"
+                      name="agreePurchase"
+                      id="agree-purchase"
                       value="1"
                     />
-                    개인정보 수집 및 이용 동의
+                    구매조건 확인 및 결제 진행 동의
                   </label>
-                  <button
-                    type="button"
-                    class="confirm-check-toggle"
-                    id="agree-privacy-toggle"
-                    aria-expanded="false"
-                    aria-controls="agree-privacy-detail"
-                    aria-label="개인정보 수집 및 이용 동의 상세 내용 펼치기"
-                  >
-                    ▽
-                  </button>
                 </div>
+              </section>
+
+              <section class="confirm-section" aria-labelledby="sec-total">
+                <h2 class="confirm-section-title" id="sec-total">
+                  최종 결제 금액
+                </h2>
+                <div class="confirm-total-box">
+                  <div class="confirm-breakdown" id="confirm-breakdown"></div>
+                  <p class="confirm-total-amount-wrap">
+                    <span class="confirm-total-label">합계</span>
+                    <strong
+                      class="confirm-total-amount"
+                      id="confirm-total-display"
+                      >—</strong
+                    >
+                  </p>
+                </div>
+              </section>
+
+              <section class="confirm-section" aria-labelledby="sec-pay">
+                <h2 class="confirm-section-title" id="sec-pay">결제하기</h2>
+                <fieldset class="confirm-fieldset">
+                  <legend class="visually-hidden">결제 수단 선택</legend>
+                  <label class="confirm-radio">
+                    <input type="radio" name="paymentMethod" value="card" />
+                    신용카드
+                  </label>
+                  <label class="confirm-radio">
+                    <input type="radio" name="paymentMethod" value="naver" />
+                    네이버페이
+                  </label>
+                  <label class="confirm-radio">
+                    <input type="radio" name="paymentMethod" value="bank" />
+                    무통장입금
+                  </label>
+                </fieldset>
                 <div
-                  id="agree-privacy-detail"
+                  id="bank-transfer-notice"
                   class="confirm-check-detail"
                   hidden
                 >
-                  개인정보는 예약 처리, 고객 안내 및 문의 응대를 위해 수집되며,
-                  관련 법령에서 정한 보관기간이 지나면 안전하게 삭제됩니다.
+                  12시간 내 미입금 시 예약이 자동 취소됩니다. 취소된 예약은
+                  복구가 불가합니다.
                 </div>
-                <label class="confirm-check">
-                  <input
-                    type="checkbox"
-                    name="agreePurchase"
-                    id="agree-purchase"
-                    value="1"
-                  />
-                  구매조건 확인 및 결제 진행 동의
-                </label>
-              </div>
-            </section>
-
-            <section class="confirm-section" aria-labelledby="sec-total">
-              <h2 class="confirm-section-title" id="sec-total">
-                최종 결제 금액
-              </h2>
-              <div class="confirm-total-box">
-                <div class="confirm-breakdown" id="confirm-breakdown"></div>
-                <p class="confirm-total-amount-wrap">
-                  <span class="confirm-total-label">합계</span>
-                  <strong
-                    class="confirm-total-amount"
-                    id="confirm-total-display"
-                    >—</strong
+                <div class="confirm-actions">
+                  <button
+                    type="submit"
+                    class="btn reserve-btn confirm-pay-submit"
                   >
-                </p>
-              </div>
-            </section>
-
-            <section class="confirm-section" aria-labelledby="sec-pay">
-              <h2 class="confirm-section-title" id="sec-pay">결제하기</h2>
-              <fieldset class="confirm-fieldset">
-                <legend class="visually-hidden">결제 수단 선택</legend>
-                <label class="confirm-radio">
-                  <input type="radio" name="paymentMethod" value="card" />
-                  신용카드
-                </label>
-                <label class="confirm-radio">
-                  <input type="radio" name="paymentMethod" value="naver" />
-                  네이버페이
-                </label>
-                <label class="confirm-radio">
-                  <input type="radio" name="paymentMethod" value="bank" />
-                  무통장입금
-                </label>
-              </fieldset>
-              <div
-                id="bank-transfer-notice"
-                class="confirm-check-detail"
-                hidden
-              >
-                12시간 내 미입금 시 예약이 자동 취소됩니다. 취소된 예약은 복구가
-                불가합니다.
-              </div>
-              <div class="confirm-actions">
-                <button
-                  type="submit"
-                  class="btn reserve-btn confirm-pay-submit"
-                >
-                  결제하기
-                </button>
-              </div>
-            </section>
+                    결제하기
+                  </button>
+                </div>
+              </section>
+            </div>
           </div>
-        </div>
-      </form>
+        </form>
 
-      <footer
-        id="site-business-footer-mount"
-        class="site-footer site-business-footer"
-        hidden
-      ></footer>
-    </main>
+        <footer
+          id="site-business-footer-mount"
+          class="site-footer site-business-footer"
+          hidden
+        ></footer>
+      </main>
 
-    <script src="js/booking-pricing.js"></script>
-    <script src="js/booking-reservations.js"></script>
-    <script>
-      document.addEventListener("DOMContentLoaded", function () {
-        var P = window.GraffordBookingPricing;
-        var ROOM_LABEL = {
-          G1: "G1",
-          G2: "G2",
-          G3: "G3",
-          G4: "G4",
-        };
-        var ROOM_IMAGE_PREFIX = {
-          G1: "A",
-          G2: "B",
-          G3: "C",
-          G4: "D",
-        };
-
-        var confirmDraft = null;
-        try {
-          confirmDraft = JSON.parse(
-            sessionStorage.getItem("graffordConfirmDraft") || "null",
-          );
-        } catch (e) {
-          confirmDraft = null;
-        }
-        var roomRaw = (
-          (confirmDraft && confirmDraft.room) ||
-          "G1"
-        ).toUpperCase();
-        if (!P) {
-          roomRaw = "G1";
-        } else if (!P.ROOM_WEEKDAY_BASE.hasOwnProperty(roomRaw)) {
-          roomRaw = "G1";
-        }
-        var checkIn = (confirmDraft && confirmDraft.checkIn) || "";
-        var checkOut = (confirmDraft && confirmDraft.checkOut) || "";
-        var extraGuestsRaw = parseInt(
-          (confirmDraft && confirmDraft.extraGuests) || "0",
-          10,
-        );
-        var extraGuests = P ? P.clampExtra(roomRaw, extraGuestsRaw) : 0;
-
-        function formatKRW(n) {
-          return n.toLocaleString("ko-KR") + "원";
-        }
-
-        function formatDisplayYMD(s) {
-          if (!P || !P.parseYMD(s)) {
-            return s || "—";
-          }
-          var p = s.split("-");
-          return p[0] + "." + p[1] + "." + p[2];
-        }
-
-        var quote =
-          P && checkIn && checkOut
-            ? P.computeStay(roomRaw, checkIn, checkOut, extraGuests)
-            : {
-                nights: 0,
-                baseNightly: P ? P.ROOM_WEEKDAY_BASE[roomRaw] : 0,
-                baseTotal: 0,
-                weekendNights: 0,
-                weekendSurcharge: 0,
-                extraGuestTotal: 0,
-                grandTotal: 0,
-                consecutiveSale: 0,
-                discountedGrandTotal: 0,
-                extraGuests: extraGuests,
-              };
-
-        document.getElementById("f-room").value = roomRaw;
-        document.getElementById("f-checkin").value = checkIn;
-        document.getElementById("f-checkout").value = checkOut;
-        document.getElementById("f-nights").value = String(quote.nights);
-        document.getElementById("f-extra-guests").value = String(
-          quote.extraGuests,
-        );
-        document.getElementById("f-total-amount").value = String(
-          quote.discountedGrandTotal,
-        );
-
-        var imgEl = document.getElementById("booking-room-img");
-        var roomImagePrefix = ROOM_IMAGE_PREFIX[roomRaw] || "A";
-        imgEl.src = "images/" + roomImagePrefix + "00.jpg";
-        imgEl.alt = ROOM_LABEL[roomRaw] + " 대표 이미지";
-
-        document.getElementById("booking-room-name").textContent =
-          ROOM_LABEL[roomRaw];
-
-        var schedEl = document.getElementById("booking-schedule");
-        if (checkIn && checkOut && quote.nights > 0) {
-          var scheduleLines = [
-            "체크인 " +
-              formatDisplayYMD(checkIn) +
-              " · 체크아웃 " +
-              formatDisplayYMD(checkOut),
-            "(" +
-              quote.nights +
-              "박, " +
-              "추가인원 " +
-              quote.extraGuests +
-              "명)",
-          ];
-          schedEl.textContent = scheduleLines.join("\n");
-        } else {
-          schedEl.textContent =
-            "일정이 없습니다. 예약 페이지에서 일정을 선택한 후 다시 들어와 주세요.";
-        }
-
-        var breakdownEl = document.getElementById("confirm-breakdown");
-        var totalDisplayEl = document.getElementById("confirm-total-display");
-        breakdownEl.innerHTML = "";
-        function addBreakLine(text) {
-          var p = document.createElement("p");
-          p.className = "confirm-total-line";
-          p.textContent = text;
-          breakdownEl.appendChild(p);
-        }
-        if (quote.nights > 0 && P) {
-          addBreakLine(
-            ROOM_LABEL[roomRaw] +
-              " (평일 기준) " +
-              formatKRW(quote.baseNightly) +
-              " × " +
-              quote.nights +
-              "박 = " +
-              formatKRW(quote.baseTotal),
-          );
-          if (quote.weekendSurcharge > 0) {
-            addBreakLine(
-              "주말(금·토) 추가 " +
-                formatKRW(P.WEEKEND_SURCHARGE_PER_NIGHT) +
-                " × " +
-                quote.weekendNights +
-                "박 = " +
-                formatKRW(quote.weekendSurcharge),
-            );
-          }
-          if (quote.extraGuestTotal > 0) {
-            addBreakLine(
-              "인원 추가 " +
-                formatKRW(P.EXTRA_PER_PERSON_PER_NIGHT) +
-                " × " +
-                quote.extraGuests +
-                "명 × " +
-                quote.nights +
-                "박 = " +
-                formatKRW(quote.extraGuestTotal),
-            );
-          }
-          addBreakLine("총 금액: " + formatKRW(quote.grandTotal));
-          addBreakLine(
-            "연박할인 적용: -" + formatKRW(quote.consecutiveSale || 0),
-          );
-          addBreakLine(
-            "최종 결제금: " + formatKRW(quote.discountedGrandTotal || 0),
-          );
-          totalDisplayEl.textContent = formatKRW(
-            quote.discountedGrandTotal || 0,
-          );
-        } else {
-          addBreakLine(
-            "투숙 일수를 계산할 수 없습니다. 체크인·체크아웃을 확인해 주세요.",
-          );
-          totalDisplayEl.textContent = "—";
-        }
-
-        var agreeAll = document.getElementById("agree-all");
-        var agreePrivacy = document.getElementById("agree-privacy");
-        var agreePurchase = document.getElementById("agree-purchase");
-        var agreePrivacyToggle = document.getElementById(
-          "agree-privacy-toggle",
-        );
-        var agreePrivacyDetail = document.getElementById(
-          "agree-privacy-detail",
-        );
-        var bankTransferNotice = document.getElementById(
-          "bank-transfer-notice",
-        );
-        var agreeSection = document
-          .getElementById("sec-agree")
-          .closest("section");
-        var guideSection = document
-          .getElementById("sec-guide")
-          .closest("section");
-        var paySection = document.getElementById("sec-pay").closest("section");
-        var guestNameInput = document.getElementById("f-name");
-        var contactInput = document.getElementById("f-contact");
-        var guestRequestInput = document.querySelector(
-          'textarea[name="guestRequest"]',
-        );
-        var hasTriedSubmit = false;
-
-        if (contactInput) {
-          function formatPhoneKRMobile(value) {
-            var d = String(value || "").replace(/\D/g, "");
-            if (d.startsWith("82")) {
-              d = "0" + d.slice(2);
-            }
-            d = d.slice(0, 11);
-            if (d.length <= 3) {
-              return d;
-            }
-            if (d.length <= 7) {
-              return d.slice(0, 3) + "-" + d.slice(3);
-            }
-            return d.slice(0, 3) + "-" + d.slice(3, 7) + "-" + d.slice(7);
-          }
-          contactInput.addEventListener("input", function () {
-            var cur = contactInput.value;
-            var next = formatPhoneKRMobile(cur);
-            if (cur !== next) {
-              contactInput.value = next;
-            }
-          });
-          contactInput.addEventListener("blur", function () {
-            contactInput.value = formatPhoneKRMobile(contactInput.value);
-          });
-        }
-
-        var confirmForm = document.getElementById("confirm-form");
-        var paySubmitBtn = confirmForm.querySelector(".confirm-pay-submit");
-        var payMethodInputs = confirmForm.querySelectorAll(
-          'input[name="paymentMethod"]',
-        );
-        var R = window.GraffordReservations;
-
-        function markSectionError(section, hasError) {
-          if (!section) {
-            return;
-          }
-          section.classList.toggle("confirm-section--error", !!hasError);
-        }
-
-        function markInputError(input, hasError) {
-          if (!input) {
-            return;
-          }
-          input.classList.toggle("confirm-input-error", !!hasError);
-        }
-
-        function bookingApiUrl() {
-          if (typeof window !== "undefined" && window.__GRAFFORD_API_BASE__) {
-            return (
-              String(window.__GRAFFORD_API_BASE__).replace(/\/$/, "") +
-              "/api/reservations"
-            );
-          }
-          return "/api/reservations";
-        }
-
-        function refreshConsentErrors() {
-          if (!hasTriedSubmit) {
-            return;
-          }
-          markSectionError(
-            agreeSection,
-            !(agreePrivacy.checked && agreePurchase.checked),
-          );
-          markSectionError(guideSection, !agreeAll.checked);
-        }
-
-        confirmForm.addEventListener("submit", function (e) {
-          e.preventDefault();
-          hasTriedSubmit = true;
-
-          var hasAgreeError = !(agreePrivacy.checked && agreePurchase.checked);
-          var hasGuideError = !agreeAll.checked;
-          var hasNameError = !guestNameInput.value.trim();
-          var normalizedContact = contactInput
-            ? formatPhoneKRMobile(contactInput.value)
-            : "";
-          if (contactInput) {
-            contactInput.value = normalizedContact;
-          }
-          var hasContactError = !/^\d{3}-\d{4}-\d{4}$/.test(normalizedContact);
-
-          var payInput = confirmForm.querySelector(
-            'input[name="paymentMethod"]:checked',
-          );
-          var hasPaymentError = !payInput;
-
-          markSectionError(agreeSection, hasAgreeError);
-          markSectionError(guideSection, hasGuideError);
-          markSectionError(paySection, hasPaymentError);
-          markInputError(guestNameInput, hasNameError);
-          markInputError(contactInput, hasContactError);
-
-          if (
-            hasAgreeError ||
-            hasGuideError ||
-            hasNameError ||
-            hasContactError ||
-            hasPaymentError
-          ) {
-            if (hasAgreeError && agreeSection) {
-              agreeSection.scrollIntoView({
-                behavior: "smooth",
-                block: "center",
-              });
-              return;
-            }
-            if (hasGuideError && guideSection) {
-              guideSection.scrollIntoView({
-                behavior: "smooth",
-                block: "center",
-              });
-              return;
-            }
-            if (hasNameError) {
-              guestNameInput.focus();
-              guestNameInput.scrollIntoView({
-                behavior: "smooth",
-                block: "center",
-              });
-              return;
-            }
-            if (hasContactError) {
-              contactInput.focus();
-              contactInput.scrollIntoView({
-                behavior: "smooth",
-                block: "center",
-              });
-              return;
-            }
-            if (hasPaymentError && paySection) {
-              paySection.scrollIntoView({
-                behavior: "smooth",
-                block: "center",
-              });
-            }
-            return;
-          }
-
-          markSectionError(agreeSection, false);
-          markSectionError(guideSection, false);
-          markSectionError(paySection, false);
-          markInputError(guestNameInput, false);
-          markInputError(contactInput, false);
-          var nights = parseInt(document.getElementById("f-nights").value, 10);
-          if (!nights || nights < 1) {
-            window.alert(
-              "체크인·체크아웃이 올바르지 않습니다. 예약 페이지에서 다시 선택해 주세요.",
-            );
-            return;
-          }
-          if (!R || typeof R.generateOrderNumber !== "function") {
-            window.alert(
-              "예약 처리 모듈을 불러올 수 없습니다. 새로고침 후 다시 시도해 주세요.",
-            );
-            return;
-          }
-
-          var guestName = guestNameInput.value.trim();
-          var contact = normalizedContact;
-          if (!/^\d{3}-\d{4}-\d{4}$/.test(contact)) {
-            window.alert(
-              "연락처는 010-1234-5678 형식(숫자 11자리)으로 입력해 주세요.",
-            );
-            return;
-          }
-          var orderNumber = R.generateOrderNumber();
-          var room = document.getElementById("f-room").value;
-          var checkIn = document.getElementById("f-checkin").value;
-          var checkOut = document.getElementById("f-checkout").value;
-          var extraGuests =
-            parseInt(document.getElementById("f-extra-guests").value, 10) || 0;
-          var totalAmount =
-            parseInt(document.getElementById("f-total-amount").value, 10) || 0;
-          var guestCount = Math.min(50, Math.max(1, 2 + extraGuests));
-
-          var payload = {
-            reservationNumber: orderNumber,
-            guestName: guestName,
-            contact: contact,
-            guestRequest: guestRequestInput
-              ? guestRequestInput.value.trim()
-              : "",
-            roomType: room,
-            checkIn: checkIn,
-            checkOut: checkOut,
-            stayNights: nights,
-            extraGuests: extraGuests,
-            totalAmount: totalAmount,
-            paymentMethod: payInput.value,
-            guestCount: guestCount,
+      <script src="js/booking-pricing.js"></script>
+      <script src="js/booking-reservations.js"></script>
+      <script>
+        document.addEventListener("DOMContentLoaded", function () {
+          var P = window.GraffordBookingPricing;
+          var ROOM_LABEL = {
+            G1: "G1",
+            G2: "G2",
+            G3: "G3",
+            G4: "G4",
+          };
+          var ROOM_IMAGE_PREFIX = {
+            G1: "A",
+            G2: "B",
+            G3: "C",
+            G4: "D",
           };
 
-          if (paySubmitBtn) {
-            paySubmitBtn.disabled = true;
+          var confirmDraft = null;
+          try {
+            confirmDraft = JSON.parse(
+              sessionStorage.getItem("graffordConfirmDraft") || "null",
+            );
+          } catch (e) {
+            confirmDraft = null;
+          }
+          var roomRaw = (
+            (confirmDraft && confirmDraft.room) ||
+            "G1"
+          ).toUpperCase();
+          if (!P) {
+            roomRaw = "G1";
+          } else if (!P.ROOM_WEEKDAY_BASE.hasOwnProperty(roomRaw)) {
+            roomRaw = "G1";
+          }
+          var checkIn = (confirmDraft && confirmDraft.checkIn) || "";
+          var checkOut = (confirmDraft && confirmDraft.checkOut) || "";
+          var extraGuestsRaw = parseInt(
+            (confirmDraft && confirmDraft.extraGuests) || "0",
+            10,
+          );
+          var extraGuests = P ? P.clampExtra(roomRaw, extraGuestsRaw) : 0;
+
+          function formatKRW(n) {
+            return n.toLocaleString("ko-KR") + "원";
           }
 
-          fetch(bookingApiUrl(), {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(payload),
-          })
-            .then(function (resp) {
-              return resp.json().then(function (data) {
-                return { ok: resp.ok, status: resp.status, data: data };
-              });
-            })
-            .then(function (result) {
-              if (!result.ok) {
-                var msg =
-                  (result.data && result.data.error) ||
-                  "저장에 실패했습니다. (" + result.status + ")";
-                if (result.data && result.data.code) {
-                  msg += " [코드: " + result.data.code + "]";
-                }
-                throw new Error(msg);
-              }
-              var record = {
-                orderNumber: orderNumber,
-                guestName: guestName,
-                contact: contact,
-                guestRequest: guestRequestInput
-                  ? guestRequestInput.value.trim()
-                  : "",
-                room: room,
-                checkIn: checkIn,
-                checkOut: checkOut,
-                nights: nights,
-                extraGuests: extraGuests,
-                totalAmount: totalAmount,
-                paymentMethod: payInput.value,
-                createdAt: Date.now(),
-              };
+          function formatDisplayYMD(s) {
+            if (!P || !P.parseYMD(s)) {
+              return s || "—";
+            }
+            var p = s.split("-");
+            return p[0] + "." + p[1] + "." + p[2];
+          }
 
-              if (payInput.value === "bank") {
-                R.save(record);
-                sessionStorage.setItem(
-                  "graffordReserveCompleteData",
-                  JSON.stringify({
-                    orderNo: orderNumber,
-                    room: room,
-                    checkIn: checkIn,
-                    checkOut: checkOut,
-                    guestName: guestName,
-                    contact: contact,
-                    guestRequest: record.guestRequest || "",
-                    guestCount: String(guestCount),
-                    extraGuests: String(extraGuests),
-                    totalAmount: String(totalAmount),
-                    payMethod: payInput.value,
-                    cancelToken: (result.data && result.data.cancelToken) || "",
-                    bankConfirmed: !!(
-                      result.data && result.data.bankConfirmed === true
-                    ),
-                  }),
-                );
-                window.location.href = "reserve-complete.html";
-              } else {
-                sessionStorage.setItem(
-                  "graffordPaymentData",
-                  JSON.stringify({
-                    orderNo: orderNumber,
-                    totalAmount: String(totalAmount || 0),
-                    room: room,
-                    checkIn: checkIn,
-                    checkOut: checkOut,
-                    extraGuests: String(extraGuests || 0),
-                  }),
-                );
-                window.location.href = "payment.html";
-              }
-            })
-            .catch(function (err) {
-              window.alert(
-                "예약 정보를 서버(Vercel DB)에 저장하지 못했습니다.\n" +
-                  (err && err.message ? err.message : "네트워크 오류") +
-                  "\n\n※ 로컬에서 HTML 파일만 연 경우에는 API가 없습니다. `vercel dev`로 실행하거나 배포된 사이트 주소에서 다시 시도해 주세요.",
+          var quote =
+            P && checkIn && checkOut
+              ? P.computeStay(roomRaw, checkIn, checkOut, extraGuests)
+              : {
+                  nights: 0,
+                  baseNightly: P ? P.ROOM_WEEKDAY_BASE[roomRaw] : 0,
+                  baseTotal: 0,
+                  weekendNights: 0,
+                  weekendSurcharge: 0,
+                  extraGuestTotal: 0,
+                  grandTotal: 0,
+                  consecutiveSale: 0,
+                  discountedGrandTotal: 0,
+                  extraGuests: extraGuests,
+                };
+
+          document.getElementById("f-room").value = roomRaw;
+          document.getElementById("f-checkin").value = checkIn;
+          document.getElementById("f-checkout").value = checkOut;
+          document.getElementById("f-nights").value = String(quote.nights);
+          document.getElementById("f-extra-guests").value = String(
+            quote.extraGuests,
+          );
+          document.getElementById("f-total-amount").value = String(
+            quote.discountedGrandTotal,
+          );
+
+          var imgEl = document.getElementById("booking-room-img");
+          var roomImagePrefix = ROOM_IMAGE_PREFIX[roomRaw] || "A";
+          imgEl.src = "images/" + roomImagePrefix + "00.jpg";
+          imgEl.alt = ROOM_LABEL[roomRaw] + " 대표 이미지";
+
+          document.getElementById("booking-room-name").textContent =
+            ROOM_LABEL[roomRaw];
+
+          var schedEl = document.getElementById("booking-schedule");
+          if (checkIn && checkOut && quote.nights > 0) {
+            var scheduleLines = [
+              "체크인 " +
+                formatDisplayYMD(checkIn) +
+                " · 체크아웃 " +
+                formatDisplayYMD(checkOut),
+              "(" +
+                quote.nights +
+                "박, " +
+                "추가인원 " +
+                quote.extraGuests +
+                "명)",
+            ];
+            schedEl.textContent = scheduleLines.join("\n");
+          } else {
+            schedEl.textContent =
+              "일정이 없습니다. 예약 페이지에서 일정을 선택한 후 다시 들어와 주세요.";
+          }
+
+          var breakdownEl = document.getElementById("confirm-breakdown");
+          var totalDisplayEl = document.getElementById("confirm-total-display");
+          breakdownEl.innerHTML = "";
+          function addBreakLine(text) {
+            var p = document.createElement("p");
+            p.className = "confirm-total-line";
+            p.textContent = text;
+            breakdownEl.appendChild(p);
+          }
+          if (quote.nights > 0 && P) {
+            addBreakLine(
+              ROOM_LABEL[roomRaw] +
+                " (평일 기준) " +
+                formatKRW(quote.baseNightly) +
+                " × " +
+                quote.nights +
+                "박 = " +
+                formatKRW(quote.baseTotal),
+            );
+            if (quote.weekendSurcharge > 0) {
+              addBreakLine(
+                "주말(금·토) 추가 " +
+                  formatKRW(P.WEEKEND_SURCHARGE_PER_NIGHT) +
+                  " × " +
+                  quote.weekendNights +
+                  "박 = " +
+                  formatKRW(quote.weekendSurcharge),
               );
-            })
-            .finally(function () {
-              if (paySubmitBtn) {
-                paySubmitBtn.disabled = false;
+            }
+            if (quote.extraGuestTotal > 0) {
+              addBreakLine(
+                "인원 추가 " +
+                  formatKRW(P.EXTRA_PER_PERSON_PER_NIGHT) +
+                  " × " +
+                  quote.extraGuests +
+                  "명 × " +
+                  quote.nights +
+                  "박 = " +
+                  formatKRW(quote.extraGuestTotal),
+              );
+            }
+            addBreakLine("총 금액: " + formatKRW(quote.grandTotal));
+            addBreakLine(
+              "연박할인 적용: -" + formatKRW(quote.consecutiveSale || 0),
+            );
+            addBreakLine(
+              "최종 결제금: " + formatKRW(quote.discountedGrandTotal || 0),
+            );
+            totalDisplayEl.textContent = formatKRW(
+              quote.discountedGrandTotal || 0,
+            );
+          } else {
+            addBreakLine(
+              "투숙 일수를 계산할 수 없습니다. 체크인·체크아웃을 확인해 주세요.",
+            );
+            totalDisplayEl.textContent = "—";
+          }
+
+          var agreeAll = document.getElementById("agree-all");
+          var agreePrivacy = document.getElementById("agree-privacy");
+          var agreePurchase = document.getElementById("agree-purchase");
+          var agreePrivacyToggle = document.getElementById(
+            "agree-privacy-toggle",
+          );
+          var agreePrivacyDetail = document.getElementById(
+            "agree-privacy-detail",
+          );
+          var bankTransferNotice = document.getElementById(
+            "bank-transfer-notice",
+          );
+          var agreeSection = document
+            .getElementById("sec-agree")
+            .closest("section");
+          var guideSection = document
+            .getElementById("sec-guide")
+            .closest("section");
+          var paySection = document
+            .getElementById("sec-pay")
+            .closest("section");
+          var guestNameInput = document.getElementById("f-name");
+          var contactInput = document.getElementById("f-contact");
+          var guestRequestInput = document.querySelector(
+            'textarea[name="guestRequest"]',
+          );
+          var hasTriedSubmit = false;
+
+          if (contactInput) {
+            function formatPhoneKRMobile(value) {
+              var d = String(value || "").replace(/\D/g, "");
+              if (d.startsWith("82")) {
+                d = "0" + d.slice(2);
+              }
+              d = d.slice(0, 11);
+              if (d.length <= 3) {
+                return d;
+              }
+              if (d.length <= 7) {
+                return d.slice(0, 3) + "-" + d.slice(3);
+              }
+              return d.slice(0, 3) + "-" + d.slice(3, 7) + "-" + d.slice(7);
+            }
+            contactInput.addEventListener("input", function () {
+              var cur = contactInput.value;
+              var next = formatPhoneKRMobile(cur);
+              if (cur !== next) {
+                contactInput.value = next;
               }
             });
-        });
-
-        [guestNameInput, contactInput].forEach(function (el) {
-          if (!el) {
-            return;
+            contactInput.addEventListener("blur", function () {
+              contactInput.value = formatPhoneKRMobile(contactInput.value);
+            });
           }
-          el.addEventListener("input", function () {
+
+          var confirmForm = document.getElementById("confirm-form");
+          var paySubmitBtn = confirmForm.querySelector(".confirm-pay-submit");
+          var payMethodInputs = confirmForm.querySelectorAll(
+            'input[name="paymentMethod"]',
+          );
+          var R = window.GraffordReservations;
+
+          function markSectionError(section, hasError) {
+            if (!section) {
+              return;
+            }
+            section.classList.toggle("confirm-section--error", !!hasError);
+          }
+
+          function markInputError(input, hasError) {
+            if (!input) {
+              return;
+            }
+            input.classList.toggle("confirm-input-error", !!hasError);
+          }
+
+          function bookingApiUrl() {
+            if (typeof window !== "undefined" && window.__GRAFFORD_API_BASE__) {
+              return (
+                String(window.__GRAFFORD_API_BASE__).replace(/\/$/, "") +
+                "/api/reservations"
+              );
+            }
+            return "/api/reservations";
+          }
+
+          function refreshConsentErrors() {
             if (!hasTriedSubmit) {
               return;
             }
-            markInputError(guestNameInput, !guestNameInput.value.trim());
-            markInputError(
-              contactInput,
-              !/^\d{3}-\d{4}-\d{4}$/.test(contactInput.value.trim()),
+            markSectionError(
+              agreeSection,
+              !(agreePrivacy.checked && agreePurchase.checked),
             );
-          });
-        });
+            markSectionError(guideSection, !agreeAll.checked);
+          }
 
-        function setBankTransferNoticeVisible(show) {
-          if (!bankTransferNotice) {
-            return;
-          }
-          var fadeMs = 220;
-          if (show) {
-            bankTransferNotice.hidden = false;
-            window.requestAnimationFrame(function () {
-              bankTransferNotice.classList.add("is-open");
-            });
-            return;
-          }
-          bankTransferNotice.classList.remove("is-open");
-          window.setTimeout(function () {
-            if (!bankTransferNotice.classList.contains("is-open")) {
-              bankTransferNotice.hidden = true;
+          confirmForm.addEventListener("submit", function (e) {
+            e.preventDefault();
+            hasTriedSubmit = true;
+
+            var hasAgreeError = !(
+              agreePrivacy.checked && agreePurchase.checked
+            );
+            var hasGuideError = !agreeAll.checked;
+            var hasNameError = !guestNameInput.value.trim();
+            var normalizedContact = contactInput
+              ? formatPhoneKRMobile(contactInput.value)
+              : "";
+            if (contactInput) {
+              contactInput.value = normalizedContact;
             }
-          }, fadeMs);
-        }
+            var hasContactError = !/^\d{3}-\d{4}-\d{4}$/.test(
+              normalizedContact,
+            );
 
-        payMethodInputs.forEach(function (el) {
-          el.addEventListener("change", function () {
+            var payInput = confirmForm.querySelector(
+              'input[name="paymentMethod"]:checked',
+            );
+            var hasPaymentError = !payInput;
+
+            markSectionError(agreeSection, hasAgreeError);
+            markSectionError(guideSection, hasGuideError);
+            markSectionError(paySection, hasPaymentError);
+            markInputError(guestNameInput, hasNameError);
+            markInputError(contactInput, hasContactError);
+
+            if (
+              hasAgreeError ||
+              hasGuideError ||
+              hasNameError ||
+              hasContactError ||
+              hasPaymentError
+            ) {
+              if (hasAgreeError && agreeSection) {
+                agreeSection.scrollIntoView({
+                  behavior: "smooth",
+                  block: "center",
+                });
+                return;
+              }
+              if (hasGuideError && guideSection) {
+                guideSection.scrollIntoView({
+                  behavior: "smooth",
+                  block: "center",
+                });
+                return;
+              }
+              if (hasNameError) {
+                guestNameInput.focus();
+                guestNameInput.scrollIntoView({
+                  behavior: "smooth",
+                  block: "center",
+                });
+                return;
+              }
+              if (hasContactError) {
+                contactInput.focus();
+                contactInput.scrollIntoView({
+                  behavior: "smooth",
+                  block: "center",
+                });
+                return;
+              }
+              if (hasPaymentError && paySection) {
+                paySection.scrollIntoView({
+                  behavior: "smooth",
+                  block: "center",
+                });
+              }
+              return;
+            }
+
+            markSectionError(agreeSection, false);
+            markSectionError(guideSection, false);
             markSectionError(paySection, false);
-            setBankTransferNoticeVisible(el.value === "bank" && el.checked);
-          });
-        });
-        var initialPayInput = confirmForm.querySelector(
-          'input[name="paymentMethod"]:checked',
-        );
-        setBankTransferNoticeVisible(
-          !!(initialPayInput && initialPayInput.value === "bank"),
-        );
-
-        [agreeAll, agreePrivacy, agreePurchase].forEach(function (el) {
-          if (!el) {
-            return;
-          }
-          el.addEventListener("change", refreshConsentErrors);
-        });
-
-        if (agreePrivacyToggle && agreePrivacyDetail) {
-          var detailFadeMs = 220;
-          agreePrivacyToggle.addEventListener("click", function () {
-            var expanded =
-              agreePrivacyToggle.getAttribute("aria-expanded") === "true";
-            var next = !expanded;
-            agreePrivacyToggle.setAttribute("aria-expanded", String(next));
-            agreePrivacyToggle.textContent = next ? "△" : "▽";
-            if (next) {
-              agreePrivacyDetail.hidden = false;
-              window.requestAnimationFrame(function () {
-                agreePrivacyDetail.classList.add("is-open");
-              });
-            } else {
-              agreePrivacyDetail.classList.remove("is-open");
-              window.setTimeout(function () {
-                if (
-                  agreePrivacyToggle.getAttribute("aria-expanded") === "false"
-                ) {
-                  agreePrivacyDetail.hidden = true;
-                }
-              }, detailFadeMs);
+            markInputError(guestNameInput, false);
+            markInputError(contactInput, false);
+            var nights = parseInt(
+              document.getElementById("f-nights").value,
+              10,
+            );
+            if (!nights || nights < 1) {
+              window.alert(
+                "체크인·체크아웃이 올바르지 않습니다. 예약 페이지에서 다시 선택해 주세요.",
+              );
+              return;
             }
+            if (!R || typeof R.generateOrderNumber !== "function") {
+              window.alert(
+                "예약 처리 모듈을 불러올 수 없습니다. 새로고침 후 다시 시도해 주세요.",
+              );
+              return;
+            }
+
+            var guestName = guestNameInput.value.trim();
+            var contact = normalizedContact;
+            if (!/^\d{3}-\d{4}-\d{4}$/.test(contact)) {
+              window.alert(
+                "연락처는 010-1234-5678 형식(숫자 11자리)으로 입력해 주세요.",
+              );
+              return;
+            }
+            var orderNumber = R.generateOrderNumber();
+            var room = document.getElementById("f-room").value;
+            var checkIn = document.getElementById("f-checkin").value;
+            var checkOut = document.getElementById("f-checkout").value;
+            var extraGuests =
+              parseInt(document.getElementById("f-extra-guests").value, 10) ||
+              0;
+            var totalAmount =
+              parseInt(document.getElementById("f-total-amount").value, 10) ||
+              0;
+            var guestCount = Math.min(50, Math.max(1, 2 + extraGuests));
+
+            var payload = {
+              reservationNumber: orderNumber,
+              guestName: guestName,
+              contact: contact,
+              guestRequest: guestRequestInput
+                ? guestRequestInput.value.trim()
+                : "",
+              roomType: room,
+              checkIn: checkIn,
+              checkOut: checkOut,
+              stayNights: nights,
+              extraGuests: extraGuests,
+              totalAmount: totalAmount,
+              paymentMethod: payInput.value,
+              guestCount: guestCount,
+            };
+
+            if (paySubmitBtn) {
+              paySubmitBtn.disabled = true;
+            }
+
+            fetch(bookingApiUrl(), {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(payload),
+            })
+              .then(function (resp) {
+                return resp.json().then(function (data) {
+                  return { ok: resp.ok, status: resp.status, data: data };
+                });
+              })
+              .then(function (result) {
+                if (!result.ok) {
+                  var msg =
+                    (result.data && result.data.error) ||
+                    "저장에 실패했습니다. (" + result.status + ")";
+                  if (result.data && result.data.code) {
+                    msg += " [코드: " + result.data.code + "]";
+                  }
+                  throw new Error(msg);
+                }
+                var record = {
+                  orderNumber: orderNumber,
+                  guestName: guestName,
+                  contact: contact,
+                  guestRequest: guestRequestInput
+                    ? guestRequestInput.value.trim()
+                    : "",
+                  room: room,
+                  checkIn: checkIn,
+                  checkOut: checkOut,
+                  nights: nights,
+                  extraGuests: extraGuests,
+                  totalAmount: totalAmount,
+                  paymentMethod: payInput.value,
+                  createdAt: Date.now(),
+                };
+
+                if (payInput.value === "bank") {
+                  R.save(record);
+                  sessionStorage.setItem(
+                    "graffordReserveCompleteData",
+                    JSON.stringify({
+                      orderNo: orderNumber,
+                      room: room,
+                      checkIn: checkIn,
+                      checkOut: checkOut,
+                      guestName: guestName,
+                      contact: contact,
+                      guestRequest: record.guestRequest || "",
+                      guestCount: String(guestCount),
+                      extraGuests: String(extraGuests),
+                      totalAmount: String(totalAmount),
+                      payMethod: payInput.value,
+                      cancelToken:
+                        (result.data && result.data.cancelToken) || "",
+                      bankConfirmed: !!(
+                        result.data && result.data.bankConfirmed === true
+                      ),
+                    }),
+                  );
+                  window.location.href = "reserve-complete.html";
+                } else {
+                  sessionStorage.setItem(
+                    "graffordPaymentData",
+                    JSON.stringify({
+                      orderNo: orderNumber,
+                      totalAmount: String(totalAmount || 0),
+                      room: room,
+                      checkIn: checkIn,
+                      checkOut: checkOut,
+                      extraGuests: String(extraGuests || 0),
+                    }),
+                  );
+                  window.location.href = "payment.html";
+                }
+              })
+              .catch(function (err) {
+                window.alert(
+                  "예약 정보를 서버(Vercel DB)에 저장하지 못했습니다.\n" +
+                    (err && err.message ? err.message : "네트워크 오류") +
+                    "\n\n※ 로컬에서 HTML 파일만 연 경우에는 API가 없습니다. `vercel dev`로 실행하거나 배포된 사이트 주소에서 다시 시도해 주세요.",
+                );
+              })
+              .finally(function () {
+                if (paySubmitBtn) {
+                  paySubmitBtn.disabled = false;
+                }
+              });
           });
-        }
-      });
-    </script>
-    <script defer src="js/grafford-page-fade.js"></script>
-    <script src="js/site-business-footer.js"></script>
-    <script>
-      document.addEventListener("DOMContentLoaded", function () {
-        window.initSiteBusinessFooter({
-          instagram: {
-            href: "https://www.instagram.com/p/DWaqvQKkzye/",
-            imgSrc: "images/insta.png",
-          },
-          lines: [
-            "대표 : GRAFFORD",
-            "주소 : 제주특별자치도 서귀포시 토산중앙로 22",
-            "사업자등록번호 : 123-45-67890",
-            "전화 : 010-1234-5678",
-            "이메일 : info@grafford.com",
-            " ",
-            "© 2026 GRAFFORD. all rights reserved.",
-          ],
+
+          [guestNameInput, contactInput].forEach(function (el) {
+            if (!el) {
+              return;
+            }
+            el.addEventListener("input", function () {
+              if (!hasTriedSubmit) {
+                return;
+              }
+              markInputError(guestNameInput, !guestNameInput.value.trim());
+              markInputError(
+                contactInput,
+                !/^\d{3}-\d{4}-\d{4}$/.test(contactInput.value.trim()),
+              );
+            });
+          });
+
+          function setBankTransferNoticeVisible(show) {
+            if (!bankTransferNotice) {
+              return;
+            }
+            var fadeMs = 220;
+            if (show) {
+              bankTransferNotice.hidden = false;
+              window.requestAnimationFrame(function () {
+                bankTransferNotice.classList.add("is-open");
+              });
+              return;
+            }
+            bankTransferNotice.classList.remove("is-open");
+            window.setTimeout(function () {
+              if (!bankTransferNotice.classList.contains("is-open")) {
+                bankTransferNotice.hidden = true;
+              }
+            }, fadeMs);
+          }
+
+          payMethodInputs.forEach(function (el) {
+            el.addEventListener("change", function () {
+              markSectionError(paySection, false);
+              setBankTransferNoticeVisible(el.value === "bank" && el.checked);
+            });
+          });
+          var initialPayInput = confirmForm.querySelector(
+            'input[name="paymentMethod"]:checked',
+          );
+          setBankTransferNoticeVisible(
+            !!(initialPayInput && initialPayInput.value === "bank"),
+          );
+
+          [agreeAll, agreePrivacy, agreePurchase].forEach(function (el) {
+            if (!el) {
+              return;
+            }
+            el.addEventListener("change", refreshConsentErrors);
+          });
+
+          if (agreePrivacyToggle && agreePrivacyDetail) {
+            var detailFadeMs = 220;
+            agreePrivacyToggle.addEventListener("click", function () {
+              var expanded =
+                agreePrivacyToggle.getAttribute("aria-expanded") === "true";
+              var next = !expanded;
+              agreePrivacyToggle.setAttribute("aria-expanded", String(next));
+              agreePrivacyToggle.textContent = next ? "△" : "▽";
+              if (next) {
+                agreePrivacyDetail.hidden = false;
+                window.requestAnimationFrame(function () {
+                  agreePrivacyDetail.classList.add("is-open");
+                });
+              } else {
+                agreePrivacyDetail.classList.remove("is-open");
+                window.setTimeout(function () {
+                  if (
+                    agreePrivacyToggle.getAttribute("aria-expanded") === "false"
+                  ) {
+                    agreePrivacyDetail.hidden = true;
+                  }
+                }, detailFadeMs);
+              }
+            });
+          }
         });
-      });
-    </script>
-  
+      </script>
+      <script defer src="js/grafford-page-fade.js"></script>
+      <script src="js/site-business-footer.js"></script>
+      <script>
+        document.addEventListener("DOMContentLoaded", function () {
+          window.initSiteBusinessFooter({
+            instagram: {
+              href: "https://www.instagram.com/p/DWaqvQKkzye/",
+              imgSrc: "images/insta.png",
+            },
+            lines: [
+              "대표 : GRAFFORD",
+              "주소 : 제주특별자치도 서귀포시 토산중앙로 22",
+              "사업자등록번호 : 123-45-67890",
+              "전화 : 010-1234-5678",
+              "이메일 : info@grafford.com",
+              " ",
+              "© 2026 GRAFFORD. all rights reserved.",
+            ],
+          });
+        });
+      </script>
     </div>
     <div class="lang-en">
-    <main class="content-section confirm-page">
-      <div class="confirm-topbar">
-        <a
-          href="RESERVATION.html"
-          class="confirm-back-inline"
-          aria-label="예약으로 돌아가기"
-          ></a
+      <main class="content-section confirm-page">
+        <div class="confirm-topbar">
+          <a
+            href="RESERVATION.html"
+            class="confirm-back-inline"
+            aria-label="예약으로 돌아가기"
+            ><</a
+          >
+          <h1 class="confirm-title">Check Reservation</h1>
+        </div>
+
+        <form
+          class="confirm-form checkout-form"
+          action="payment.html"
+          method="get"
+          novalidate
         >
-        <h1 class="confirm-title"></h1>
-      </div>
+          <input type="hidden" name="room" />
+          <input type="hidden" name="checkIn" />
+          <input type="hidden" name="checkOut" />
+          <input type="hidden" name="nights" value="" />
+          <input type="hidden" name="extraGuests" value="" />
+          <input type="hidden" name="totalAmount" value="" />
 
-      <form
-        class="confirm-form checkout-form"
-        action="payment.html"
-        method="get"
-        novalidate
-      >
-        <input type="hidden" name="room" />
-        <input type="hidden" name="checkIn" />
-        <input type="hidden" name="checkOut" />
-        <input type="hidden" name="nights" value="" />
-        <input type="hidden" name="extraGuests" value="" />
-        <input type="hidden" name="totalAmount" value="" />
+          <div class="confirm-layout-grid">
+            <div class="confirm-layout-col">
+              <section class="confirm-section">
+                <h2 class="confirm-section-title">
+                  Guest Guidelines & Policies
+                </h2>
+                <div class="confirm-guide-list">
+                  <div class="confirm-guide-item">
+                    <span class="confirm-guide-subtitle"
+                      >Reservation Capacity and Responsibility for
+                      Violations</span
+                    >
+                    <p class="confirm-guide-content">
+                      Only the pre-registered number of guests is permitted to
+                      enter.<br />
+                      Any outside visitors will be treated as additional guests
+                      and are strictly prohibited.<br />
+                      Exceeding the maximum occupancy will result in immediate
+                      eviction without a refund.<br />
+                      Please ensure the exact number of guests is recorded at
+                      the time of booking.
+                    </p>
+                  </div>
+                  <div class="confirm-guide-item">
+                    <span class="confirm-guide-subtitle"
+                      >Non-Smoking Policy and Fire Prevention</span
+                    >
+                    <p class="confirm-guide-content">
+                      The entire property, including all guest rooms, is a
+                      strictly non-smoking zone.<br />
+                      A specialized deep-cleaning fee will be charged if smoking
+                      is detected.<br />
+                      To prevent fires, the use of any flammable items (portable
+                      gas stoves, candles, fireworks, etc.) is strictly
+                      prohibited indoors.<br />
+                      Violation will lead to immediate eviction.
+                    </p>
+                  </div>
+                  <div class="confirm-guide-item">
+                    <span class="confirm-guide-subtitle"
+                      >Damage and Liability</span
+                    >
+                    <p class="confirm-guide-content">
+                      In the event of damage, staining, or loss of furniture,
+                      appliances, or decor, the guest will be charged for the
+                      full replacement or repair costs.<br />
+                      Please notify us immediately of any incidents, such as
+                      stains on bedding.
+                    </p>
+                  </div>
+                  <div class="confirm-guide-item">
+                    <span class="confirm-guide-subtitle">Minors Policy</span>
+                    <p class="confirm-guide-content">
+                      Minors are permitted to stay only when accompanied by a
+                      legal guardian.<br />
+                      Reservations or stays by unaccompanied minors are strictly
+                      prohibited.<br />
+                      If a guest is identified as a minor without a guardian
+                      during ID verification at check-in, they will be asked to
+                      leave immediately without a refund.
+                    </p>
+                  </div>
+                  <div class="confirm-guide-item">
+                    <span class="confirm-guide-subtitle">
+                      Child Occupancy Policy
+                    </span>
+                    <p class="confirm-guide-content">
+                      Infants and children are included in the total headcount
+                      for both standard and maximum occupancy.<br />
+                      Additional fees may apply based on the number of
+                      guests.<br />
+                      While infants under 24 months are included in the
+                      headcount, they are exempt from additional guest charges.
+                    </p>
+                  </div>
+                  <div class="confirm-guide-item">
+                    <span class="confirm-guide-subtitle">No-Pet Policy</span>
+                    <p class="confirm-guide-content">
+                      Pets are strictly prohibited.<br />
+                      Any attempt to bring pets onto the premises will result in
+                      immediate eviction, along with a same-day cancellation fee
+                      and specialized deep-cleaning charges.
+                    </p>
+                  </div>
+                  <div class="confirm-guide-item">
+                    <span class="confirm-guide-subtitle"
+                      >In-Room Cooking Restrictions</span
+                    >
+                    <p class="confirm-guide-content">
+                      Cooking foods with strong odors (grilled meat, fish,
+                      traditional fermented stews, etc.) or excessive grease is
+                      strictly prohibited.<br />
+                      Only light cooking is allowed.<br />
+                      Please clean all cooking utensils after use.
+                    </p>
+                  </div>
+                  <div class="confirm-guide-item">
+                    <span class="confirm-guide-subtitle"
+                      >Cafe and Lounge Conduct</span
+                    >
+                    <p class="confirm-guide-content">
+                      Please refrain from actions that may disturb other guests
+                      in the cafe.<br />
+                      Kindly observe the operating hours (10:00 AM – 6:00 PM).
+                    </p>
+                  </div>
+                  <div class="confirm-guide-item">
+                    <span class="confirm-guide-subtitle"
+                      >Pest Control and Environment Policy
+                    </span>
+                    <p class="confirm-guide-content">
+                      While we conduct regular professional pest control, the
+                      natural surroundings (proximity to forests or mountains)
+                      may lead to the occasional presence of insects.<br />
+                      Refunds will not be issued for this reason.<br />
+                      Please consider this carefully before booking if you are
+                      sensitive to such occurrences.
+                    </p>
+                  </div>
+                  <div class="confirm-guide-item">
+                    <span class="confirm-guide-subtitle"
+                      >Prohibition of Commercial Use</span
+                    >
+                    <p class="confirm-guide-content">
+                      Unauthorized commercial filming (online malls, YouTube
+                      advertisements, etc.) is strictly prohibited.<br />
+                      Discovery of unauthorized commercial use will result in
+                      immediate eviction and potential legal liability.<br />
+                      For inquiries regarding commercial use, please contact us
+                      by phone in advance.
+                    </p>
+                  </div>
+                  <div class="confirm-guide-item">
+                    <span class="confirm-guide-subtitle"
+                      >Transfer and Resale of Booking</span
+                    >
+                    <p class="confirm-guide-content">
+                      The right to stay cannot be transferred or resold to a
+                      third party. Entry may be denied if the guest is not the
+                      original booker.<br />
+                      The property is not responsible for any damages resulting
+                      from bookings traded through unauthorized methods.
+                    </p>
+                  </div>
+                  <div class="confirm-guide-item">
+                    <span class="confirm-guide-subtitle"
+                      >Safety Precautions</span
+                    >
+                    <p class="confirm-guide-content">
+                      The property is not liable for accidents caused by guest
+                      negligence (misuse of facilities, loss of valuables,
+                      etc.).<br />
+                      Guests are responsible for their personal belongings and
+                      must ensure all doors are locked when leaving.
+                    </p>
+                  </div>
+                  <div class="confirm-guide-item">
+                    <span class="confirm-guide-subtitle">Refund Policy</span>
+                    <p class="confirm-guide-content">
+                      Cancellation fees apply based on the timing of the
+                      cancellation.<br />
+                      Confirming a reservation signifies your agreement to these
+                      terms.<br />
+                      Please book with care.
+                    </p>
+                    <table
+                      class="confirm-refund-table"
+                      aria-label="환불 규정 표"
+                    >
+                      <tbody>
+                        <tr>
+                          <td>15 Days Before the Check-In Date</td>
+                          <td>100%</td>
+                        </tr>
+                        <tr>
+                          <td>12 Days Before the Check-In Date</td>
+                          <td>80%</td>
+                        </tr>
+                        <tr>
+                          <td>9 Days Before the Check-In Date</td>
+                          <td>70%</td>
+                        </tr>
+                        <tr>
+                          <td>7 Days Before the Check-In Date</td>
+                          <td>60%</td>
+                        </tr>
+                        <tr>
+                          <td>5 Days Before the Check-In Date</td>
+                          <td>50%</td>
+                        </tr>
+                        <tr>
+                          <td>5 Days or Less Before the Check-In Date</td>
+                          <td>No Refund</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                  <div class="confirm-guide-item">
+                    <span class="confirm-guide-subtitle"
+                      >Special Provisions (Force Majeure)</span
+                    >
+                    <p class="confirm-guide-content">
+                      In the event of flight or ferry cancellations due to
+                      natural disasters or severe weather, a 100% refund will be
+                      issued upon submission of supporting documentation.
+                    </p>
+                  </div>
+                </div>
+                <label class="confirm-check confirm-check--all">
+                  <input type="checkbox" />Agree-all</label
+                >
+              </section>
 
-        <div class="confirm-layout-grid">
-          <div class="confirm-layout-col">
-            <section class="confirm-section">
-              <h2 class="confirm-section-title"></h2>
-              <div class="confirm-guide-list">
-                <div class="confirm-guide-item">
-                  <span class="confirm-guide-subtitle"
-                    ></span
-                  >
-                  <p class="confirm-guide-content"></p>
-                </div>
-                <div class="confirm-guide-item">
-                  <span class="confirm-guide-subtitle"></span>
-                  <p class="confirm-guide-content"></p>
-                </div>
-                <div class="confirm-guide-item">
-                  <span class="confirm-guide-subtitle"></span>
-                  <p class="confirm-guide-content"></p>
-                </div>
-                <div class="confirm-guide-item">
-                  <span class="confirm-guide-subtitle"></span>
-                  <p class="confirm-guide-content"></p>
-                </div>
-                <div class="confirm-guide-item">
-                  <span class="confirm-guide-subtitle"
-                    ></span
-                  >
-                  <p class="confirm-guide-content"></p>
-                </div>
-                <div class="confirm-guide-item">
-                  <span class="confirm-guide-subtitle"></span>
-                  <p class="confirm-guide-content"></p>
-                </div>
-                <div class="confirm-guide-item">
-                  <span class="confirm-guide-subtitle"></span>
-                  <p class="confirm-guide-content"></p>
-                </div>
-                <div class="confirm-guide-item">
-                  <span class="confirm-guide-subtitle"></span>
-                  <p class="confirm-guide-content"></p>
-                </div>
-                <div class="confirm-guide-item">
-                  <span class="confirm-guide-subtitle"
-                    ></span
-                  >
-                  <p class="confirm-guide-content"></p>
-                </div>
-                <div class="confirm-guide-item">
-                  <span class="confirm-guide-subtitle"></span>
-                  <p class="confirm-guide-content"></p>
-                </div>
-                <div class="confirm-guide-item">
-                  <span class="confirm-guide-subtitle"></span>
-                  <p class="confirm-guide-content"></p>
-                </div>
-                <div class="confirm-guide-item">
-                  <span class="confirm-guide-subtitle"></span>
-                  <p class="confirm-guide-content"></p>
-                </div>
-                <div class="confirm-guide-item">
-                  <span class="confirm-guide-subtitle"></span>
-                  <p class="confirm-guide-content"></p>
-                  <table class="confirm-refund-table" aria-label="환불 규정 표">
-                    <tbody>
-                      <tr>
-                        <td></td>
-                        <td></td>
-                      </tr>
-                      <tr>
-                        <td></td>
-                        <td></td>
-                      </tr>
-                      <tr>
-                        <td></td>
-                        <td></td>
-                      </tr>
-                      <tr>
-                        <td></td>
-                        <td></td>
-                      </tr>
-                      <tr>
-                        <td></td>
-                        <td></td>
-                      </tr>
-                      <tr>
-                        <td></td>
-                        <td></td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
-                <div class="confirm-guide-item">
-                  <span class="confirm-guide-subtitle"></span>
-                  <p class="confirm-guide-content"></p>
-                </div>
-              </div>
-              <label class="confirm-check confirm-check--all">
-                <input type="checkbox" /></label>
-            </section>
+              <section class="confirm-section">
+                <h2 class="confirm-section-title">Request</h2>
+                <label class="confirm-label">
+                  <textarea
+                    name="guestRequest"
+                    class="confirm-textarea"
+                    rows="1"
+                  ></textarea>
+                </label>
+              </section>
+            </div>
 
-            <section class="confirm-section">
-              <h2 class="confirm-section-title"></h2>
-              <label class="confirm-label">
-                <textarea
-                  name="guestRequest"
-                  class="confirm-textarea"
-                  rows="1"
-                ></textarea>
-              </label>
-            </section>
-          </div>
-
-          <div class="confirm-layout-col confirm-layout-col--right">
-            <section class="confirm-section">
-              <h2 class="confirm-section-title"></h2>
-              <div class="confirm-booking-card">
-                <img
-                  class="confirm-room-thumb"
-                  src="images/A00.jpg"
-                  alt=""
-                  width="120"
-                  height="90"
-                  decoding="async"
-                />
-                <div class="confirm-booking-details">
-                  <p class="confirm-room-name"></p>
-                  <p class="confirm-schedule"></p>
+            <div class="confirm-layout-col confirm-layout-col--right">
+              <section class="confirm-section">
+                <h2 class="confirm-section-title">Booking Details</h2>
+                <div class="confirm-booking-card">
+                  <img
+                    class="confirm-room-thumb"
+                    src="images/A00.jpg"
+                    alt=""
+                    width="120"
+                    height="90"
+                    decoding="async"
+                  />
+                  <div class="confirm-booking-details">
+                    <p class="confirm-room-name"></p>
+                    <p class="confirm-schedule"></p>
+                  </div>
                 </div>
-              </div>
-            </section>
+              </section>
 
-            <section class="confirm-section">
-              <h2 class="confirm-section-title"></h2>
-              <p class="confirm-info-text"><br /><br /></p>
-              <label class="confirm-label"><input
-                  type="text"
-                  name="guestName"
-                  required
-                  autocomplete="name" placeholder=""
-                />
-              </label>
-              <label class="confirm-label"><input
-                  type="tel"
-                  name="contact"
-                  required
-                  autocomplete="tel"
-                  inputmode="numeric"
-                  maxlength="13" placeholder=""
-                  title="숫자 11자리 (010-1234-5678 형식)"
-                  pattern="[0-9]{3}-[0-9]{4}-[0-9]{4}"
-                />
-              </label>
-            </section>
+              <section class="confirm-section">
+                <h2 class="confirm-section-title">Guest Information</h2>
+                <p class="confirm-info-text">
+                  Please enter the your name and contact information.
+                </p>
+                <label class="confirm-label"
+                  >Name
+                  <input
+                    type="text"
+                    name="guestName"
+                    required
+                    autocomplete="name"
+                    placeholder=""
+                  />
+                </label>
+                <label class="confirm-label"
+                  >Contact
+                  <input
+                    type="tel"
+                    name="contact"
+                    required
+                    autocomplete="tel"
+                    inputmode="numeric"
+                    maxlength="13"
+                    placeholder=""
+                    title="11 digits (010-1234-5678 format)"
+                    pattern="[0-9]{3}-[0-9]{4}-[0-9]{4}"
+                  />
+                </label>
+              </section>
 
-            <section class="confirm-section">
-              <h2 class="confirm-section-title"></h2>
-              <div class="confirm-agree-list">
-                <div class="confirm-check-item">
+              <section class="confirm-section">
+                <h2 class="confirm-section-title">Individual Agreement</h2>
+                <div class="confirm-agree-list">
+                  <div class="confirm-check-item">
+                    <label class="confirm-check">
+                      <input
+                        type="checkbox"
+                        name="agreePrivacy"
+                        value=""
+                      />Consent to collecting and using personal
+                      information</label
+                    >
+                    <button
+                      type="button"
+                      class="confirm-check-toggle"
+                      aria-expanded="false"
+                      aria-controls="agree-privacy-detail"
+                      aria-label="개인정보 수집 및 이용 동의 상세 내용 펼치기"
+                    ></button>
+                  </div>
+                  <div class="confirm-check-detail" hidden></div>
                   <label class="confirm-check">
                     <input
                       type="checkbox"
-                      name="agreePrivacy" value=""
-                    /></label>
-                  <button
-                    type="button"
-                    class="confirm-check-toggle"
-                    aria-expanded="false"
-                    aria-controls="agree-privacy-detail"
-                    aria-label="개인정보 수집 및 이용 동의 상세 내용 펼치기"
-                  ></button>
-                </div>
-                <div
-                  class="confirm-check-detail"
-                  hidden
-                ></div>
-                <label class="confirm-check">
-                  <input
-                    type="checkbox"
-                    name="agreePurchase" value=""
-                  /></label>
-              </div>
-            </section>
-
-            <section class="confirm-section">
-              <h2 class="confirm-section-title"></h2>
-              <div class="confirm-total-box">
-                <div class="confirm-breakdown"></div>
-                <p class="confirm-total-amount-wrap">
-                  <span class="confirm-total-label"></span>
-                  <strong
-                    class="confirm-total-amount"
-                    ></strong
+                      name="agreePurchase"
+                      value=""
+                    />Confirmation of purchase conditions and consent to proceed
+                    with payment</label
                   >
-                </p>
-              </div>
-            </section>
+                </div>
+              </section>
 
-            <section class="confirm-section">
-              <h2 class="confirm-section-title"></h2>
-              <fieldset class="confirm-fieldset">
-                <legend class="visually-hidden"></legend>
-                <label class="confirm-radio">
-                  <input type="radio" name="paymentMethod" value="" /></label>
-                <label class="confirm-radio">
-                  <input type="radio" name="paymentMethod" value="" /></label>
-                <label class="confirm-radio">
-                  <input type="radio" name="paymentMethod" value="" /></label>
-              </fieldset>
-              <div
-                class="confirm-check-detail"
-                hidden
-              ></div>
-              <div class="confirm-actions">
-                <button
-                  type="submit"
-                  class="btn reserve-btn confirm-pay-submit"
-                ></button>
-              </div>
-            </section>
+              <section class="confirm-section">
+                <h2 class="confirm-section-title">Total Amount</h2>
+                <div class="confirm-total-box">
+                  <div class="confirm-breakdown"></div>
+                  <p class="confirm-total-amount-wrap">
+                    <span class="confirm-total-label">Total</span>
+                    <strong class="confirm-total-amount"></strong>
+                  </p>
+                </div>
+              </section>
+
+              <section class="confirm-section">
+                <h2 class="confirm-section-title"></h2>
+                <fieldset class="confirm-fieldset">
+                  <legend class="visually-hidden"></legend>
+                  <label class="confirm-radio">
+                    <input type="radio" name="paymentMethod" value="" />Credit
+                    Card</label
+                  >
+                  <label class="confirm-radio">
+                    <input type="radio" name="paymentMethod" value="" />Naver
+                    Pay</label
+                  >
+                  <label class="confirm-radio">
+                    <input type="radio" name="paymentMethod" value="" />Bank
+                    Transfer</label
+                  >
+                </fieldset>
+                <div class="confirm-check-detail" hidden></div>
+                <div class="confirm-actions">
+                  <button
+                    type="submit"
+                    class="btn reserve-btn confirm-pay-submit"
+                  >
+                    Pay Now
+                  </button>
+                </div>
+              </section>
+            </div>
           </div>
-        </div>
-      </form>
+        </form>
 
-      <footer
-        class="site-footer site-business-footer"
-        hidden
-      ></footer>
-    </main>
-
-    
-    
-    
-    
-    
-    
-  
-    
+        <footer class="site-footer site-business-footer" hidden></footer>
+      </main>
     </div>
-</body>
+  </body>
 </html>

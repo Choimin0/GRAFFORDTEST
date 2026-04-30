@@ -85,6 +85,25 @@
     });
   }
 
+  function ensureMobileLanguageSwitch() {
+    var navs = document.querySelectorAll(".site-nav");
+    navs.forEach(function (nav) {
+      var mobileBtn = nav.querySelector(".mobile-menu-btn");
+      if (!mobileBtn) return;
+      if (nav.querySelector(".mobile-lang-switch")) return;
+
+      var wrapper = document.createElement("div");
+      wrapper.className = "lang-switch mobile-lang-switch";
+      wrapper.setAttribute("data-language-switch", "");
+      wrapper.setAttribute("aria-label", "Language switch");
+      wrapper.innerHTML =
+        '<button type="button" class="lang-switch__btn" data-lang-option="kr">KR</button>' +
+        '<span class="lang-switch__divider" aria-hidden="true">|</span>' +
+        '<button type="button" class="lang-switch__btn" data-lang-option="en">EN</button>';
+      nav.insertBefore(wrapper, mobileBtn);
+    });
+  }
+
   function ensureEnglishHeroSlides() {
     var enHeroes = document.querySelectorAll(".lang-en .hero-media");
     enHeroes.forEach(function (heroMedia) {
@@ -150,6 +169,7 @@
   }
 
   function initLanguageSwitch() {
+    ensureMobileLanguageSwitch();
     document.addEventListener("click", handleScrollDownClick);
     document.addEventListener("click", handleSwitchClick);
     applyLanguage(getSavedLanguage());

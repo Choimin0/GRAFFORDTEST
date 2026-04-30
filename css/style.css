@@ -259,6 +259,10 @@ html {
   outline-offset: 2px;
 }
 
+.mobile-lang-switch {
+  display: none;
+}
+
 /* Page-level language sections */
 .lang-en {
   display: none;
@@ -1688,6 +1692,12 @@ iframe.map {
     display: none;
   }
 
+  .mobile-lang-switch {
+    display: inline-flex;
+    order: 1;
+    margin-right: 0.2rem;
+  }
+
   .top-right-nav .nav-logo,
   .site-nav.top-right-nav .nav-logo {
     position: absolute;
@@ -1704,6 +1714,7 @@ iframe.map {
   }
 
   .mobile-menu-btn {
+    order: 2;
     display: inline-flex;
     align-items: center;
     justify-content: center;
