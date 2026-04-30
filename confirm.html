@@ -7,6 +7,7 @@
     <title>결제하기 - GRAFFORD</title>
     <link rel="stylesheet" href="css/style.css" />
     <script src="js/mobile-nav.js" defer></script>
+    <script src="js/site-language.js" defer></script>
   </head>
   <body>
     <div id="grafford-react-fade-root"></div>
@@ -35,12 +36,22 @@
         <a href="RESERVATION.html">RESERVATION</a>
       </aside>
       <div class="desktop-nav-links" aria-label="데스크톱 메뉴">
+        <div class="lang-switch" data-language-switch aria-label="Language switch">
+          <button type="button" class="lang-switch__btn" data-lang-option="kr">
+            KR
+          </button>
+          <span class="lang-switch__divider" aria-hidden="true">|</span>
+          <button type="button" class="lang-switch__btn" data-lang-option="en">
+            EN
+          </button>
+        </div>
         <a href="STORY.html">STORY</a>
         <a href="GROUND.html">GROUND</a>
         <a href="FACILITIES.html">FACILITIES</a>
         <a href="RESERVATION.html">RESERVATION</a>
       </div>
     </nav>
+    <div class="lang-kr">
 
     <main class="content-section confirm-page">
       <div class="confirm-topbar">
@@ -993,5 +1004,270 @@
         });
       });
     </script>
-  </body>
+  
+    </div>
+    <div class="lang-en">
+    <main class="content-section confirm-page">
+      <div class="confirm-topbar">
+        <a
+          href="RESERVATION.html"
+          class="confirm-back-inline"
+          aria-label="예약으로 돌아가기"
+          ></a
+        >
+        <h1 class="confirm-title"></h1>
+      </div>
+
+      <form
+        class="confirm-form checkout-form"
+        action="payment.html"
+        method="get"
+        novalidate
+      >
+        <input type="hidden" name="room" />
+        <input type="hidden" name="checkIn" />
+        <input type="hidden" name="checkOut" />
+        <input type="hidden" name="nights" value="" />
+        <input type="hidden" name="extraGuests" value="" />
+        <input type="hidden" name="totalAmount" value="" />
+
+        <div class="confirm-layout-grid">
+          <div class="confirm-layout-col">
+            <section class="confirm-section">
+              <h2 class="confirm-section-title"></h2>
+              <div class="confirm-guide-list">
+                <div class="confirm-guide-item">
+                  <span class="confirm-guide-subtitle"
+                    ></span
+                  >
+                  <p class="confirm-guide-content"></p>
+                </div>
+                <div class="confirm-guide-item">
+                  <span class="confirm-guide-subtitle"></span>
+                  <p class="confirm-guide-content"></p>
+                </div>
+                <div class="confirm-guide-item">
+                  <span class="confirm-guide-subtitle"></span>
+                  <p class="confirm-guide-content"></p>
+                </div>
+                <div class="confirm-guide-item">
+                  <span class="confirm-guide-subtitle"></span>
+                  <p class="confirm-guide-content"></p>
+                </div>
+                <div class="confirm-guide-item">
+                  <span class="confirm-guide-subtitle"
+                    ></span
+                  >
+                  <p class="confirm-guide-content"></p>
+                </div>
+                <div class="confirm-guide-item">
+                  <span class="confirm-guide-subtitle"></span>
+                  <p class="confirm-guide-content"></p>
+                </div>
+                <div class="confirm-guide-item">
+                  <span class="confirm-guide-subtitle"></span>
+                  <p class="confirm-guide-content"></p>
+                </div>
+                <div class="confirm-guide-item">
+                  <span class="confirm-guide-subtitle"></span>
+                  <p class="confirm-guide-content"></p>
+                </div>
+                <div class="confirm-guide-item">
+                  <span class="confirm-guide-subtitle"
+                    ></span
+                  >
+                  <p class="confirm-guide-content"></p>
+                </div>
+                <div class="confirm-guide-item">
+                  <span class="confirm-guide-subtitle"></span>
+                  <p class="confirm-guide-content"></p>
+                </div>
+                <div class="confirm-guide-item">
+                  <span class="confirm-guide-subtitle"></span>
+                  <p class="confirm-guide-content"></p>
+                </div>
+                <div class="confirm-guide-item">
+                  <span class="confirm-guide-subtitle"></span>
+                  <p class="confirm-guide-content"></p>
+                </div>
+                <div class="confirm-guide-item">
+                  <span class="confirm-guide-subtitle"></span>
+                  <p class="confirm-guide-content"></p>
+                  <table class="confirm-refund-table" aria-label="환불 규정 표">
+                    <tbody>
+                      <tr>
+                        <td></td>
+                        <td></td>
+                      </tr>
+                      <tr>
+                        <td></td>
+                        <td></td>
+                      </tr>
+                      <tr>
+                        <td></td>
+                        <td></td>
+                      </tr>
+                      <tr>
+                        <td></td>
+                        <td></td>
+                      </tr>
+                      <tr>
+                        <td></td>
+                        <td></td>
+                      </tr>
+                      <tr>
+                        <td></td>
+                        <td></td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+                <div class="confirm-guide-item">
+                  <span class="confirm-guide-subtitle"></span>
+                  <p class="confirm-guide-content"></p>
+                </div>
+              </div>
+              <label class="confirm-check confirm-check--all">
+                <input type="checkbox" /></label>
+            </section>
+
+            <section class="confirm-section">
+              <h2 class="confirm-section-title"></h2>
+              <label class="confirm-label">
+                <textarea
+                  name="guestRequest"
+                  class="confirm-textarea"
+                  rows="1"
+                ></textarea>
+              </label>
+            </section>
+          </div>
+
+          <div class="confirm-layout-col confirm-layout-col--right">
+            <section class="confirm-section">
+              <h2 class="confirm-section-title"></h2>
+              <div class="confirm-booking-card">
+                <img
+                  class="confirm-room-thumb"
+                  src="images/A00.jpg"
+                  alt=""
+                  width="120"
+                  height="90"
+                  decoding="async"
+                />
+                <div class="confirm-booking-details">
+                  <p class="confirm-room-name"></p>
+                  <p class="confirm-schedule"></p>
+                </div>
+              </div>
+            </section>
+
+            <section class="confirm-section">
+              <h2 class="confirm-section-title"></h2>
+              <p class="confirm-info-text"><br /><br /></p>
+              <label class="confirm-label"><input
+                  type="text"
+                  name="guestName"
+                  required
+                  autocomplete="name" placeholder=""
+                />
+              </label>
+              <label class="confirm-label"><input
+                  type="tel"
+                  name="contact"
+                  required
+                  autocomplete="tel"
+                  inputmode="numeric"
+                  maxlength="13" placeholder=""
+                  title="숫자 11자리 (010-1234-5678 형식)"
+                  pattern="[0-9]{3}-[0-9]{4}-[0-9]{4}"
+                />
+              </label>
+            </section>
+
+            <section class="confirm-section">
+              <h2 class="confirm-section-title"></h2>
+              <div class="confirm-agree-list">
+                <div class="confirm-check-item">
+                  <label class="confirm-check">
+                    <input
+                      type="checkbox"
+                      name="agreePrivacy" value=""
+                    /></label>
+                  <button
+                    type="button"
+                    class="confirm-check-toggle"
+                    aria-expanded="false"
+                    aria-controls="agree-privacy-detail"
+                    aria-label="개인정보 수집 및 이용 동의 상세 내용 펼치기"
+                  ></button>
+                </div>
+                <div
+                  class="confirm-check-detail"
+                  hidden
+                ></div>
+                <label class="confirm-check">
+                  <input
+                    type="checkbox"
+                    name="agreePurchase" value=""
+                  /></label>
+              </div>
+            </section>
+
+            <section class="confirm-section">
+              <h2 class="confirm-section-title"></h2>
+              <div class="confirm-total-box">
+                <div class="confirm-breakdown"></div>
+                <p class="confirm-total-amount-wrap">
+                  <span class="confirm-total-label"></span>
+                  <strong
+                    class="confirm-total-amount"
+                    ></strong
+                  >
+                </p>
+              </div>
+            </section>
+
+            <section class="confirm-section">
+              <h2 class="confirm-section-title"></h2>
+              <fieldset class="confirm-fieldset">
+                <legend class="visually-hidden"></legend>
+                <label class="confirm-radio">
+                  <input type="radio" name="paymentMethod" value="" /></label>
+                <label class="confirm-radio">
+                  <input type="radio" name="paymentMethod" value="" /></label>
+                <label class="confirm-radio">
+                  <input type="radio" name="paymentMethod" value="" /></label>
+              </fieldset>
+              <div
+                class="confirm-check-detail"
+                hidden
+              ></div>
+              <div class="confirm-actions">
+                <button
+                  type="submit"
+                  class="btn reserve-btn confirm-pay-submit"
+                ></button>
+              </div>
+            </section>
+          </div>
+        </div>
+      </form>
+
+      <footer
+        class="site-footer site-business-footer"
+        hidden
+      ></footer>
+    </main>
+
+    
+    
+    
+    
+    
+    
+  
+    
+    </div>
+</body>
 </html>

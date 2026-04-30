@@ -7,6 +7,7 @@
     <title>예약 취소 - GRAFFORD</title>
     <link rel="stylesheet" href="css/style.css" />
     <script src="js/mobile-nav.js" defer></script>
+    <script src="js/site-language.js" defer></script>
   </head>
   <body>
     <div id="grafford-react-fade-root"></div>
@@ -35,12 +36,22 @@
         <a href="RESERVATION.html">RESERVATION</a>
       </aside>
       <div class="desktop-nav-links" aria-label="데스크톱 메뉴">
+        <div class="lang-switch" data-language-switch aria-label="Language switch">
+          <button type="button" class="lang-switch__btn" data-lang-option="kr">
+            KR
+          </button>
+          <span class="lang-switch__divider" aria-hidden="true">|</span>
+          <button type="button" class="lang-switch__btn" data-lang-option="en">
+            EN
+          </button>
+        </div>
         <a href="STORY.html">STORY</a>
         <a href="GROUND.html">GROUND</a>
         <a href="FACILITIES.html">FACILITIES</a>
         <a href="RESERVATION.html">RESERVATION</a>
       </div>
     </nav>
+    <div class="lang-kr">
 
     <main class="content-section confirm-page reserve-delete-page">
       <div class="confirm-topbar">
@@ -520,5 +531,131 @@
         });
       });
     </script>
-  </body>
+  
+    </div>
+    <div class="lang-en">
+    <main class="content-section confirm-page reserve-delete-page">
+      <div class="confirm-topbar">
+        <a
+          href="reserveinfo.html"
+          class="confirm-back-inline"
+          aria-label="예약조회로 돌아가기"
+          ></a
+        >
+        <h1 class="confirm-title"></h1>
+      </div>
+      <p class="confirm-summary"></p>
+
+      <div class="confirm-layout-grid">
+        <div class="confirm-layout-col">
+          <section
+            class="confirm-section"
+          >
+            <h2 class="confirm-section-title"></h2>
+            <p class="confirm-guide-content"></p>
+            <p class="confirm-guide-content"></p>
+            <div class="reserve-delete-refund-box">
+              <p class="reserve-delete-refund-label"></p>
+              <p class="reserve-delete-refund-amount"></p>
+            </div>
+          </section>
+        </div>
+
+        <div class="confirm-layout-col confirm-layout-col--right">
+          <section
+            class="confirm-section"
+          >
+            <h2 class="confirm-section-title"></h2>
+            <dl class="reserve-delete-dl">
+              <dt></dt>
+              <dd>
+                <span></span>
+                <span
+                  class="reserve-complete-bank-status"
+                  hidden
+                ><span></span><span></span></span>
+              </dd>
+              <dt></dt>
+              <dd></dd>
+              <dt></dt>
+              <dd></dd>
+              <dt></dt>
+              <dd></dd>
+            </dl>
+          </section>
+
+          <section class="confirm-section">
+            <h2 class="confirm-section-title"></h2>
+            <dl class="reserve-delete-dl">
+              <dt></dt>
+              <dd></dd>
+              <dt></dt>
+              <dd></dd>
+            </dl>
+          </section>
+
+          <section
+            class="confirm-section"
+          >
+            <h2 class="confirm-section-title"></h2>
+            <div class="confirm-agree-list reserve-delete-reason-row">
+              <label class="confirm-check">
+                <input type="radio" name="cancelReason" value="" /></label>
+              <label class="confirm-check">
+                <input
+                  type="radio"
+                  name="cancelReason" value=""
+                /></label>
+              <label class="confirm-check">
+                <input type="radio" name="cancelReason" value="" /></label>
+            </div>
+            <div class="reserve-delete-other-row">
+              <label class="confirm-check">
+                <input type="radio" name="cancelReason" value="" /></label>
+              <label class="confirm-label reserve-delete-other-label">
+                <input
+                  type="text" placeholder=""
+                />
+              </label>
+            </div>
+            <div class="confirm-actions">
+              <button
+                type="button"
+                class="btn reserve-btn confirm-pay-submit"
+              ></button>
+            </div>
+          </section>
+        </div>
+      </div>
+
+      <div class="reserve-delete-modal-backdrop" hidden>
+        <div
+          class="reserve-delete-modal"
+          role="dialog"
+          aria-modal="true"
+        >
+          <p class="reserve-delete-modal-title"><br /></p>
+          <div class="reserve-delete-modal-actions">
+            <button type="button" class="btn reserve-btn"></button>
+            <button type="button" class="btn reserve-btn"></button>
+          </div>
+          <p class="reserve-delete-modal-note"><br /></p>
+        </div>
+      </div>
+
+      <footer
+        class="site-footer site-business-footer"
+        hidden
+      ></footer>
+    </main>
+
+    
+    
+    
+    
+    
+  
+    
+    </div>
+</body>
 </html>

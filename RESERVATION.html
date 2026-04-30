@@ -9,6 +9,7 @@
     <script src="js/nav-hero.js" defer></script>
     <script src="js/mobile-nav.js" defer></script>
     <script src="js/booking-pricing.js" defer></script>
+    <script src="js/site-language.js" defer></script>
   </head>
   <body class="home-page page-hero-nav-sync reservation-page">
     <div id="grafford-react-fade-root"></div>
@@ -37,1463 +38,2012 @@
         <a href="RESERVATION.html">RESERVATION</a>
       </aside>
       <div class="desktop-nav-links" aria-label="데스크톱 메뉴">
+        <div
+          class="lang-switch"
+          data-language-switch
+          aria-label="Language switch"
+        >
+          <button type="button" class="lang-switch__btn" data-lang-option="kr">
+            KR
+          </button>
+          <span class="lang-switch__divider" aria-hidden="true">|</span>
+          <button type="button" class="lang-switch__btn" data-lang-option="en">
+            EN
+          </button>
+        </div>
         <a href="STORY.html">STORY</a>
         <a href="GROUND.html">GROUND</a>
         <a href="FACILITIES.html">FACILITIES</a>
         <a href="RESERVATION.html">RESERVATION</a>
       </div>
     </nav>
-
-    <section class="hero-section fullpage-section" id="hero">
-      <div class="hero-media" aria-hidden="true">
-        <img
-          src="images/reservation.jpeg"
-          alt=""
-          class="hero-slide is-active"
-        />
-        <div class="hero-overlay"></div>
-      </div>
-      <header class="site-header hero-header">
-        <h1>RESERVATION</h1>
-      </header>
-      <button
-        class="scroll-down-btn"
-        id="scroll-down-btn"
-        aria-label="Scroll to booking"
-      >
-        <span></span>
-      </button>
-    </section>
-
-    <main class="content-section fullpage-section" id="content">
-      <div class="reservation-booking scroll-fade" id="reservation-booking">
-        <div class="room-type-row">
-          <div class="room-type-bar" role="tablist" aria-label="Room type">
-            <button
-              type="button"
-              class="room-type-btn is-active"
-              data-room="G1"
-            >
-              G1
-            </button>
-            <button type="button" class="room-type-btn" data-room="G2">
-              G2
-            </button>
-            <button type="button" class="room-type-btn" data-room="G3">
-              G3
-            </button>
-            <button type="button" class="room-type-btn" data-room="G4">
-              G4
-            </button>
-          </div>
-          <a
-            href="reserveinfo.html"
-            class="btn reserve-btn reservation-lookup-btn"
-            >예약조회</a
-          >
+    <div class="lang-kr">
+      <section class="hero-section fullpage-section" id="hero">
+        <div class="hero-media" aria-hidden="true">
+          <img
+            src="images/reservation.jpeg"
+            alt=""
+            class="hero-slide is-active"
+          />
+          <div class="hero-overlay"></div>
         </div>
+        <header class="site-header hero-header">
+          <h1>RESERVATION</h1>
+        </header>
+        <button
+          class="scroll-down-btn"
+          id="scroll-down-btn"
+          aria-label="Scroll to booking"
+        >
+          <span></span>
+        </button>
+      </section>
 
-        <div class="reservation-split">
-          <div class="reservation-gallery">
-            <div class="gallery-main-wrap">
+      <main class="content-section fullpage-section" id="content">
+        <div class="reservation-booking scroll-fade" id="reservation-booking">
+          <div class="room-type-row">
+            <div class="room-type-bar" role="tablist" aria-label="Room type">
               <button
                 type="button"
-                class="gallery-nav gallery-prev"
-                id="gallery-prev"
-                aria-label="Previous photo"
-              >
-                &#10094;
-              </button>
-              <img
-                class="gallery-main-img"
-                id="gallery-main-img"
-                src="images/A00.jpg"
-                alt="Room photo"
-              />
-              <button
-                type="button"
-                class="gallery-nav gallery-next"
-                id="gallery-next"
-                aria-label="Next photo"
-              >
-                &#10095;
-              </button>
-              <div class="gallery-thumbs" id="gallery-thumbs"></div>
-            </div>
-            <div class="room-copy-blocks">
-              <div
-                class="room-detail-intro room-copy is-visible"
+                class="room-type-btn is-active"
                 data-room="G1"
               >
-                <p class="room-intro-desc">
-                  창밖을 바라보면 바다가 보이는 첫번째 그라운드 입니다.<br />
-                  바다와 대지가 공존하는 곳에선 자연의 광활함이 느껴집니다.<br />
-                  가만히 귀를 기울여 보면 뭘까요옹
-                </p>
-                <br />
-                <div
-                  class="room-meta-grid"
-                  role="list"
-                  aria-label="G1 객실 주요 정보"
-                >
-                  <div class="room-meta-item" role="listitem">
-                    <h4 class="room-meta-title">체크인/체크아웃</h4>
-                    <p class="room-meta-value">체크인 16:00 · 체크아웃 11:00</p>
-                  </div>
-                  <div class="room-meta-item" role="listitem">
-                    <h4 class="room-meta-title">투숙 가능 인원</h4>
-                    <p class="room-meta-value">기준 2인, 최대 2인</p>
-                  </div>
-                  <div class="room-meta-item" role="listitem">
-                    <h4 class="room-meta-title">구성</h4>
-                    <p class="room-meta-value">
-                      침실 1개, 욕실 1개, 자쿠지 1개, 거실
-                    </p>
-                  </div>
-                  <div class="room-meta-item" role="listitem">
-                    <h4 class="room-meta-title">면적</h4>
-                    <p class="room-meta-value">20㎡</p>
-                  </div>
-                </div>
-                <br />
-                <div class="room-facility">
-                  <h4 class="room-meta-title room-facility-title">시설 현황</h4>
-                  <div
-                    class="room-facility-list"
-                    role="list"
-                    aria-label="G1 유닛 시설 현황"
-                  >
-                    <div class="room-facility-item" role="listitem">
-                      <p class="room-facility-name">Living room</p>
-                      <p class="room-facility-desc">
-                        TV, 소파, Free WIFI, 블루투스 스피커
-                      </p>
-                    </div>
-                    <div class="room-facility-item" role="listitem">
-                      <p class="room-facility-name">Kitchen (취사 불가능)</p>
-                      <p class="room-facility-desc">
-                        웰컴 키트, 냉장고, 발뮤다 드립포트 & 토스터기,
-                        전자레인지, 2인식기 & 잔
-                      </p>
-                    </div>
-                    <div class="room-facility-item" role="listitem">
-                      <p class="room-facility-name">Bathroom</p>
-                      <p class="room-facility-desc">
-                        욕실 어메니티(샴푸, 컨디셔너, 바디워시, 핸드워시),
-                        다이슨 헤어 드라이어, 타올
-                      </p>
-                    </div>
-                    <div class="room-facility-item" role="listitem">
-                      <p class="room-facility-name">Bedroom</p>
-                      <p class="room-facility-desc">퀸 침대 1개</p>
-                    </div>
-                  </div>
-                </div>
-                <br />
-                <p class="room-intro-desc2">
-                  ▸ 취사가 불가능하지만, 음식을 데워 드실수 있습니다.<br />
-                  ▸ 금연 객실 입니다.<br />
-                  ▸ 반려동물 동반 입장은 불가능합니다.<br />
-                  ▸ 화재의 위험이 있는 양초류 사용 불가합니다.<br />
-                  ▸ 각 그라운드마다 차량 1대 주차 가능합니다.<br />
-                  ▸ 2박 이상 숙박의 경우 연박할인이 적용됩니다.<br />
-                </p>
-                <div class="room-plan-image-wrap">
-                  <img
-                    src="images/A-groundplan.png"
-                    alt="G1 객실 평면도"
-                    class="room-plan-image"
-                  />
-                </div>
-              </div>
-              <div class="room-detail-intro room-copy" data-room="G2" hidden>
-                <p class="room-intro-desc">
-                  아늑함 속에서도 여유로운 공간을 내어주기 위해 만든 두번째
-                  그라운드입니다.<br />
-                  남쪽으로 내어진 창을 통해 가장 따뜻한 햇살을 자연스럽게 내부로
-                  받아들여, 온기를 머금게 합니다.
-                </p>
-                <br />
-                <div
-                  class="room-meta-grid"
-                  role="list"
-                  aria-label="G2 객실 주요 정보"
-                >
-                  <div class="room-meta-item" role="listitem">
-                    <h4 class="room-meta-title">체크인/체크아웃</h4>
-                    <p class="room-meta-value">체크인 16:00 · 체크아웃 11:00</p>
-                  </div>
-                  <div class="room-meta-item" role="listitem">
-                    <h4 class="room-meta-title">투숙 가능 인원</h4>
-                    <p class="room-meta-value">기준 2인, 최대 2인</p>
-                  </div>
-                  <div class="room-meta-item" role="listitem">
-                    <h4 class="room-meta-title">구성</h4>
-                    <p class="room-meta-value">
-                      침실 1개, 욕실 1개, 자쿠지 1개, 거실
-                    </p>
-                  </div>
-                  <div class="room-meta-item" role="listitem">
-                    <h4 class="room-meta-title">면적</h4>
-                    <p class="room-meta-value">20㎡</p>
-                  </div>
-                </div>
-                <br />
-                <div class="room-facility">
-                  <h4 class="room-meta-title room-facility-title">시설 현황</h4>
-                  <div
-                    class="room-facility-list"
-                    role="list"
-                    aria-label="G2 유닛 시설 현황"
-                  >
-                    <div class="room-facility-item" role="listitem">
-                      <p class="room-facility-name">Living room</p>
-                      <p class="room-facility-desc">
-                        TV, 소파, Free WIFI, 블루투스 스피커
-                      </p>
-                    </div>
-                    <div class="room-facility-item" role="listitem">
-                      <p class="room-facility-name">Kitchen (취사 불가능)</p>
-                      <p class="room-facility-desc">
-                        웰컴 키트, 냉장고, 발뮤다 드립포트 & 토스터기,
-                        전자레인지, 2인식기 & 잔
-                      </p>
-                    </div>
-                    <div class="room-facility-item" role="listitem">
-                      <p class="room-facility-name">Bathroom</p>
-                      <p class="room-facility-desc">
-                        욕실 어메니티(샴푸, 컨디셔너, 바디워시, 핸드워시),
-                        다이슨 헤어 드라이어, 타올
-                      </p>
-                    </div>
-                    <div class="room-facility-item" role="listitem">
-                      <p class="room-facility-name">Bedroom</p>
-                      <p class="room-facility-desc">퀸 침대 1개</p>
-                    </div>
-                  </div>
-                </div>
-                <br />
-                <p class="room-intro-desc2">
-                  ▸ 취사가 불가능하지만, 음식을 데워 드실수 있습니다.<br />
-                  ▸ 금연 객실 입니다.<br />
-                  ▸ 반려동물 동반 입장은 불가능합니다.<br />
-                  ▸ 화재의 위험이 있는 양초류 사용 불가합니다.<br />
-                  ▸ 각 그라운드마다 차량 1대 주차 가능합니다.<br />
-                  ▸ 2박 이상 숙박의 경우 연박할인이 적용됩니다.<br />
-                </p>
-                <div class="room-plan-image-wrap">
-                  <img
-                    src="images/B-groundplan.png"
-                    alt="G2 객실 평면도"
-                    class="room-plan-image"
-                  />
-                </div>
-              </div>
-              <div class="room-detail-intro room-copy" data-room="G3" hidden>
-                <p class="room-intro-desc">
-                  세번째 그라운드는 게스트분들 누구에게나 그 필요를 채워주는
-                  공간입니다.<br />
-                  직사각형의 그라운드는 실내와 중정의 비례에서 오는 균형감에서
-                  단정함이 느껴집니다.
-                </p>
-                <br />
-                <div
-                  class="room-meta-grid"
-                  role="list"
-                  aria-label="G3 객실 주요 정보"
-                >
-                  <div class="room-meta-item" role="listitem">
-                    <h4 class="room-meta-title">체크인/체크아웃</h4>
-                    <p class="room-meta-value">체크인 16:00 · 체크아웃 11:00</p>
-                  </div>
-                  <div class="room-meta-item" role="listitem">
-                    <h4 class="room-meta-title">투숙 가능 인원</h4>
-                    <p class="room-meta-value">기준 2인, 최대 4인</p>
-                  </div>
-                  <div class="room-meta-item" role="listitem">
-                    <h4 class="room-meta-title">구성</h4>
-                    <p class="room-meta-value">
-                      침실 1개, 욕실 1개, 자쿠지 1개, 거실
-                    </p>
-                  </div>
-                  <div class="room-meta-item" role="listitem">
-                    <h4 class="room-meta-title">면적</h4>
-                    <p class="room-meta-value">35㎡</p>
-                  </div>
-                </div>
-                <br />
-                <div class="room-facility">
-                  <h4 class="room-meta-title room-facility-title">시설 현황</h4>
-                  <div
-                    class="room-facility-list"
-                    role="list"
-                    aria-label="G3 유닛 시설 현황"
-                  >
-                    <div class="room-facility-item" role="listitem">
-                      <p class="room-facility-name">Living room</p>
-                      <p class="room-facility-desc">
-                        TV, 소파, Free WIFI, 블루투스 스피커
-                      </p>
-                    </div>
-                    <div class="room-facility-item" role="listitem">
-                      <p class="room-facility-name">Kitchen (취사 가능)</p>
-                      <p class="room-facility-desc">
-                        웰컴 키트, 냉장고, 발뮤다 드립포트 & 토스터기,
-                        전자레인지, 2구 인덕션, 4인식기 & 잔, 조리도구
-                      </p>
-                    </div>
-                    <div class="room-facility-item" role="listitem">
-                      <p class="room-facility-name">Bathroom</p>
-                      <p class="room-facility-desc">
-                        욕실 어메니티(샴푸, 컨디셔너, 바디워시, 핸드워시),
-                        다이슨 헤어 드라이어, 타올
-                      </p>
-                    </div>
-                    <div class="room-facility-item" role="listitem">
-                      <p class="room-facility-name">Bedroom</p>
-                      <p class="room-facility-desc">퀸 침대 1개</p>
-                    </div>
-                  </div>
-                </div>
-                <br />
-                <p class="room-intro-desc2">
-                  ▸ 간단한 취사가 가능한 그라운드입니다.<br />
-                  ▸ 금연 객실 입니다.<br />
-                  ▸ 반려동물 동반 입장은 불가능합니다.<br />
-                  ▸ 화재의 위험이 있는 양초류 사용 불가합니다.<br />
-                  ▸ 각 그라운드마다 차량 1대 주차 가능합니다.<br />
-                  ▸ 2박 이상 숙박의 경우 연박할인이 적용됩니다.<br />
-                  ▸ 24개월 미만의 영유아는 추가 비용이 발생하지 않습니다.<br />
-                  (다만 인원수에는 포함되므로 예약시 메모란에 기재
-                  부탁드립니다.)<br />
-                </p>
-                <div class="room-plan-image-wrap">
-                  <img
-                    src="images/C-groundplan.png"
-                    alt="G3 객실 평면도"
-                    class="room-plan-image"
-                  />
-                </div>
-              </div>
-              <div class="room-detail-intro room-copy" data-room="G4" hidden>
-                <p class="room-intro-desc">
-                  네번째 그라운드에 들어서면, 동쪽으로 나있는 창문을 통해 빛이
-                  드리웁니다.<br />
-                  넓게 존재하는 중정은 창을 열지 않아도 넉넉한 바람이 머물고,
-                  대지가 곁에 있다는 기분이 들게 합니다.<br />
-                  길게 뻗어 있는 복도는 그라운드의 모든 방을 이어주어 무경계의
-                  자유로움을 느끼게 해 줍니다.
-                </p>
-                <br />
-                <div
-                  class="room-meta-grid"
-                  role="list"
-                  aria-label="G4 객실 주요 정보"
-                >
-                  <div class="room-meta-item" role="listitem">
-                    <h4 class="room-meta-title">체크인/체크아웃</h4>
-                    <p class="room-meta-value">체크인 16:00 · 체크아웃 11:00</p>
-                  </div>
-                  <div class="room-meta-item" role="listitem">
-                    <h4 class="room-meta-title">투숙 가능 인원</h4>
-                    <p class="room-meta-value">기준 2인, 최대 6인</p>
-                  </div>
-                  <div class="room-meta-item" role="listitem">
-                    <h4 class="room-meta-title">구성</h4>
-                    <p class="room-meta-value">
-                      침실 2개, 욕실 1개, 자쿠지 1개, 거실
-                    </p>
-                  </div>
-                  <div class="room-meta-item" role="listitem">
-                    <h4 class="room-meta-title">면적</h4>
-                    <p class="room-meta-value">60㎡</p>
-                  </div>
-                </div>
-                <br />
-                <div class="room-facility">
-                  <h4 class="room-meta-title room-facility-title">시설 현황</h4>
-                  <div
-                    class="room-facility-list"
-                    role="list"
-                    aria-label="G4 유닛 시설 현황"
-                  >
-                    <div class="room-facility-item" role="listitem">
-                      <p class="room-facility-name">Living room</p>
-                      <p class="room-facility-desc">
-                        TV, 소파, Free WIFI, 블루투스 스피커
-                      </p>
-                    </div>
-                    <div class="room-facility-item" role="listitem">
-                      <p class="room-facility-name">Kitchen (취사 가능)</p>
-                      <p class="room-facility-desc">
-                        웰컴 키트, 냉장고, 발뮤다 드립포트 & 토스터기,
-                        전자레인지, 2구 인덕션, 6인식기 & 잔, 조리도구
-                      </p>
-                    </div>
-                    <div class="room-facility-item" role="listitem">
-                      <p class="room-facility-name">Bathroom</p>
-                      <p class="room-facility-desc">
-                        욕실 어메니티(샴푸, 컨디셔너, 바디워시, 핸드워시),
-                        다이슨 헤어 드라이어, 타올
-                      </p>
-                    </div>
-                    <div class="room-facility-item" role="listitem">
-                      <p class="room-facility-name">Bedroom</p>
-                      <p class="room-facility-desc">
-                        퀸 침대 2개, 싱글 침대 1개
-                      </p>
-                    </div>
-                  </div>
-                </div>
-                <br />
-                <p class="room-intro-desc2">
-                  ▸ 간단한 취사가 가능한 그라운드입니다.<br />
-                  ▸ 금연 객실 입니다.<br />
-                  ▸ 반려동물 동반 입장은 불가능합니다.<br />
-                  ▸ 화재의 위험이 있는 양초류 사용 불가합니다.<br />
-                  ▸ 각 그라운드마다 차량 1대 주차 가능합니다.<br />
-                  ▸ 2박 이상 숙박의 경우 연박할인이 적용됩니다.<br />
-                  ▸ 24개월 미만의 영유아는 추가 비용이 발생하지 않습니다.<br />
-                  (다만 인원수에는 포함되므로 예약시 메모란에 기재
-                  부탁드립니다.)<br />
-                </p>
-                <div class="room-plan-image-wrap">
-                  <img
-                    src="images/D-groundplan.png"
-                    alt="G4 객실 평면도"
-                    class="room-plan-image"
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div class="reservation-calendar-panel">
-            <div class="booking-calendar" id="booking-calendar">
-              <h3 class="cal-year-title" id="cal-year-label"></h3>
-              <div class="cal-header">
-                <button
-                  type="button"
-                  class="cal-nav"
-                  id="cal-prev"
-                  aria-label="Previous month"
-                >
-                  &#10094;
-                </button>
-                <span class="cal-month-label" id="cal-month-label"></span>
-                <button
-                  type="button"
-                  class="cal-nav"
-                  id="cal-next"
-                  aria-label="Next month"
-                >
-                  &#10095;
-                </button>
-              </div>
-              <div class="cal-weekdays">
-                <span>Sun</span><span>Mon</span><span>Tue</span><span>Wed</span
-                ><span>Thu</span><span>Fri</span><span>Sat</span>
-              </div>
-              <div class="cal-grid" id="cal-grid"></div>
-            </div>
-
-            <div class="reservation-extra-block">
-              <div class="reservation-extra-row">
-                <span class="reservation-extra-label">인원 추가</span>
-                <div
-                  class="reservation-extra-stepper"
-                  aria-describedby="extra-guests-hint"
-                >
-                  <button
-                    type="button"
-                    class="reservation-extra-btn"
-                    id="extra-guests-minus"
-                    aria-label="추가 인원 감소"
-                  >
-                    ＜
-                  </button>
-                  <span class="reservation-extra-count" id="extra-guests-count"
-                    >0</span
-                  >
-                  <button
-                    type="button"
-                    class="reservation-extra-btn"
-                    id="extra-guests-plus"
-                    aria-label="추가 인원 증가"
-                  >
-                    ＞
-                  </button>
-                </div>
-              </div>
-              <p class="reservation-extra-hint" id="extra-guests-hint"></p>
-            </div>
-            <div
-              class="reservation-price-summary"
-              id="reservation-price-summary"
-            >
-              <p
-                class="reservation-price-placeholder"
-                id="reservation-price-placeholder"
-              >
-                TOTAL 0원
-              </p>
-              <p
-                class="reservation-price-total"
-                id="reservation-price-total"
-                hidden
-              ></p>
+                G1
+              </button>
+              <button type="button" class="room-type-btn" data-room="G2">
+                G2
+              </button>
+              <button type="button" class="room-type-btn" data-room="G3">
+                G3
+              </button>
+              <button type="button" class="room-type-btn" data-room="G4">
+                G4
+              </button>
             </div>
             <a
-              href="confirm.html"
-              class="btn reserve-btn reserve-cta"
-              id="reserve-confirm-link"
-              >예약하기</a
+              href="reserveinfo.html"
+              class="btn reserve-btn reservation-lookup-btn"
+              >예약조회</a
             >
           </div>
+
+          <div class="reservation-split">
+            <div class="reservation-gallery">
+              <div class="gallery-main-wrap">
+                <button
+                  type="button"
+                  class="gallery-nav gallery-prev"
+                  id="gallery-prev"
+                  aria-label="Previous photo"
+                >
+                  ＜
+                </button>
+                <img
+                  class="gallery-main-img"
+                  id="gallery-main-img"
+                  src="images/A00.jpg"
+                  alt="Room photo"
+                />
+                <button
+                  type="button"
+                  class="gallery-nav gallery-next"
+                  id="gallery-next"
+                  aria-label="Next photo"
+                >
+                  ＞
+                </button>
+                <div class="gallery-thumbs" id="gallery-thumbs"></div>
+              </div>
+              <div class="room-copy-blocks">
+                <div
+                  class="room-detail-intro room-copy is-visible"
+                  data-room="G1"
+                >
+                  <p class="room-intro-desc">
+                    창밖을 바라보면 바다가 보이는 첫번째 그라운드 입니다.<br />
+                    바다와 대지가 공존하는 곳에선 자연의 광활함이 느껴지고
+                    가만히 귀를 기울여 보면 바다의 일렁임이 땅의 온기와 만나는
+                    소리가 들립니다.<br />
+                    대지의 단단함 위에서 일렁이는 마음을 잠시 내려놓으세요.
+                  </p>
+                  <br />
+                  <div
+                    class="room-meta-grid"
+                    role="list"
+                    aria-label="G1 객실 주요 정보"
+                  >
+                    <div class="room-meta-item" role="listitem">
+                      <h4 class="room-meta-title">체크인/체크아웃</h4>
+                      <p class="room-meta-value">
+                        체크인 16:00 · 체크아웃 11:00
+                      </p>
+                    </div>
+                    <div class="room-meta-item" role="listitem">
+                      <h4 class="room-meta-title">투숙 가능 인원</h4>
+                      <p class="room-meta-value">기준 2인, 최대 2인</p>
+                    </div>
+                    <div class="room-meta-item" role="listitem">
+                      <h4 class="room-meta-title">구성</h4>
+                      <p class="room-meta-value">
+                        침실 1개, 욕실 1개, 자쿠지 1개, 거실
+                      </p>
+                    </div>
+                    <div class="room-meta-item" role="listitem">
+                      <h4 class="room-meta-title">면적</h4>
+                      <p class="room-meta-value">20㎡</p>
+                    </div>
+                  </div>
+                  <br />
+                  <div class="room-facility">
+                    <h4 class="room-meta-title room-facility-title">
+                      시설 현황
+                    </h4>
+                    <div
+                      class="room-facility-list"
+                      role="list"
+                      aria-label="G1 유닛 시설 현황"
+                    >
+                      <div class="room-facility-item" role="listitem">
+                        <p class="room-facility-name">Living room</p>
+                        <p class="room-facility-desc">
+                          TV, 소파, Free WIFI, 블루투스 스피커
+                        </p>
+                      </div>
+                      <div class="room-facility-item" role="listitem">
+                        <p class="room-facility-name">Kitchen (취사 불가능)</p>
+                        <p class="room-facility-desc">
+                          웰컴 키트, 냉장고, 발뮤다 드립포트 & 토스터기,
+                          전자레인지, 2인식기 & 잔
+                        </p>
+                      </div>
+                      <div class="room-facility-item" role="listitem">
+                        <p class="room-facility-name">Bathroom</p>
+                        <p class="room-facility-desc">
+                          욕실 어메니티(샴푸, 컨디셔너, 바디워시, 핸드워시),
+                          다이슨 헤어 드라이어, 타올
+                        </p>
+                      </div>
+                      <div class="room-facility-item" role="listitem">
+                        <p class="room-facility-name">Bedroom</p>
+                        <p class="room-facility-desc">퀸 침대 1개</p>
+                      </div>
+                    </div>
+                  </div>
+                  <br />
+                  <p class="room-intro-desc2">
+                    ▸ 취사가 불가능하지만, 음식을 데워 드실수 있습니다.<br />
+                    ▸ 금연 객실 입니다.<br />
+                    ▸ 반려동물 동반 입장은 불가능합니다.<br />
+                    ▸ 화재의 위험이 있는 양초류 사용 불가합니다.<br />
+                    ▸ 각 그라운드마다 차량 1대 주차 가능합니다.<br />
+                    ▸ 2박 이상 숙박의 경우 연박할인이 적용됩니다.<br />
+                  </p>
+                  <div class="room-plan-image-wrap">
+                    <img
+                      src="images/A-groundplan.png"
+                      alt="G1 객실 평면도"
+                      class="room-plan-image"
+                    />
+                  </div>
+                </div>
+                <div class="room-detail-intro room-copy" data-room="G2" hidden>
+                  <p class="room-intro-desc">
+                    아늑함 속에서도 여유로운 공간을 내어주기 위해 만든 두번째
+                    그라운드입니다.<br />
+                    남쪽으로 내어진 창을 통해 가장 따뜻한 햇살을 자연스럽게
+                    내부로 받아들여, 온기를 머금게 합니다.<br />
+                    그 빛이 머무는 자리마다 다정한 평온이 깃들길 바랍니다.
+                  </p>
+                  <br />
+                  <div
+                    class="room-meta-grid"
+                    role="list"
+                    aria-label="G2 객실 주요 정보"
+                  >
+                    <div class="room-meta-item" role="listitem">
+                      <h4 class="room-meta-title">체크인/체크아웃</h4>
+                      <p class="room-meta-value">
+                        체크인 16:00 · 체크아웃 11:00
+                      </p>
+                    </div>
+                    <div class="room-meta-item" role="listitem">
+                      <h4 class="room-meta-title">투숙 가능 인원</h4>
+                      <p class="room-meta-value">기준 2인, 최대 2인</p>
+                    </div>
+                    <div class="room-meta-item" role="listitem">
+                      <h4 class="room-meta-title">구성</h4>
+                      <p class="room-meta-value">
+                        침실 1개, 욕실 1개, 자쿠지 1개, 거실
+                      </p>
+                    </div>
+                    <div class="room-meta-item" role="listitem">
+                      <h4 class="room-meta-title">면적</h4>
+                      <p class="room-meta-value">20㎡</p>
+                    </div>
+                  </div>
+                  <br />
+                  <div class="room-facility">
+                    <h4 class="room-meta-title room-facility-title">
+                      시설 현황
+                    </h4>
+                    <div
+                      class="room-facility-list"
+                      role="list"
+                      aria-label="G2 유닛 시설 현황"
+                    >
+                      <div class="room-facility-item" role="listitem">
+                        <p class="room-facility-name">Living room</p>
+                        <p class="room-facility-desc">
+                          TV, 소파, Free WIFI, 블루투스 스피커
+                        </p>
+                      </div>
+                      <div class="room-facility-item" role="listitem">
+                        <p class="room-facility-name">Kitchen (취사 불가능)</p>
+                        <p class="room-facility-desc">
+                          웰컴 키트, 냉장고, 발뮤다 드립포트 & 토스터기,
+                          전자레인지, 2인식기 & 잔
+                        </p>
+                      </div>
+                      <div class="room-facility-item" role="listitem">
+                        <p class="room-facility-name">Bathroom</p>
+                        <p class="room-facility-desc">
+                          욕실 어메니티(샴푸, 컨디셔너, 바디워시, 핸드워시),
+                          다이슨 헤어 드라이어, 타올
+                        </p>
+                      </div>
+                      <div class="room-facility-item" role="listitem">
+                        <p class="room-facility-name">Bedroom</p>
+                        <p class="room-facility-desc">퀸 침대 1개</p>
+                      </div>
+                    </div>
+                  </div>
+                  <br />
+                  <p class="room-intro-desc2">
+                    ▸ 취사가 불가능하지만, 음식을 데워 드실수 있습니다.<br />
+                    ▸ 금연 객실 입니다.<br />
+                    ▸ 반려동물 동반 입장은 불가능합니다.<br />
+                    ▸ 화재의 위험이 있는 양초류 사용 불가합니다.<br />
+                    ▸ 각 그라운드마다 차량 1대 주차 가능합니다.<br />
+                    ▸ 2박 이상 숙박의 경우 연박할인이 적용됩니다.<br />
+                  </p>
+                  <div class="room-plan-image-wrap">
+                    <img
+                      src="images/B-groundplan.png"
+                      alt="G2 객실 평면도"
+                      class="room-plan-image"
+                    />
+                  </div>
+                </div>
+                <div class="room-detail-intro room-copy" data-room="G3" hidden>
+                  <p class="room-intro-desc">
+                    세번째 그라운드는 게스트분들 누구에게나 그 필요를 채워주는
+                    공간입니다.<br />
+                    직사각형의 그라운드는 실내와 중정의 비례에서 오는 균형감에서
+                    단정함이 느껴집니다.<br />
+                    단정한 공간이 주는 힘으로 삶의 균형을 되찾아보세요.
+                  </p>
+                  <br />
+                  <div
+                    class="room-meta-grid"
+                    role="list"
+                    aria-label="G3 객실 주요 정보"
+                  >
+                    <div class="room-meta-item" role="listitem">
+                      <h4 class="room-meta-title">체크인/체크아웃</h4>
+                      <p class="room-meta-value">
+                        체크인 16:00 · 체크아웃 11:00
+                      </p>
+                    </div>
+                    <div class="room-meta-item" role="listitem">
+                      <h4 class="room-meta-title">투숙 가능 인원</h4>
+                      <p class="room-meta-value">기준 2인, 최대 4인</p>
+                    </div>
+                    <div class="room-meta-item" role="listitem">
+                      <h4 class="room-meta-title">구성</h4>
+                      <p class="room-meta-value">
+                        침실 1개, 욕실 1개, 자쿠지 1개, 거실
+                      </p>
+                    </div>
+                    <div class="room-meta-item" role="listitem">
+                      <h4 class="room-meta-title">면적</h4>
+                      <p class="room-meta-value">35㎡</p>
+                    </div>
+                  </div>
+                  <br />
+                  <div class="room-facility">
+                    <h4 class="room-meta-title room-facility-title">
+                      시설 현황
+                    </h4>
+                    <div
+                      class="room-facility-list"
+                      role="list"
+                      aria-label="G3 유닛 시설 현황"
+                    >
+                      <div class="room-facility-item" role="listitem">
+                        <p class="room-facility-name">Living room</p>
+                        <p class="room-facility-desc">
+                          TV, 소파, Free WIFI, 블루투스 스피커
+                        </p>
+                      </div>
+                      <div class="room-facility-item" role="listitem">
+                        <p class="room-facility-name">Kitchen (취사 가능)</p>
+                        <p class="room-facility-desc">
+                          웰컴 키트, 냉장고, 발뮤다 드립포트 & 토스터기,
+                          전자레인지, 2구 인덕션, 4인식기 & 잔, 조리도구
+                        </p>
+                      </div>
+                      <div class="room-facility-item" role="listitem">
+                        <p class="room-facility-name">Bathroom</p>
+                        <p class="room-facility-desc">
+                          욕실 어메니티(샴푸, 컨디셔너, 바디워시, 핸드워시),
+                          다이슨 헤어 드라이어, 타올
+                        </p>
+                      </div>
+                      <div class="room-facility-item" role="listitem">
+                        <p class="room-facility-name">Bedroom</p>
+                        <p class="room-facility-desc">퀸 침대 1개</p>
+                      </div>
+                    </div>
+                  </div>
+                  <br />
+                  <p class="room-intro-desc2">
+                    ▸ 간단한 취사가 가능한 그라운드입니다.<br />
+                    ▸ 금연 객실 입니다.<br />
+                    ▸ 반려동물 동반 입장은 불가능합니다.<br />
+                    ▸ 화재의 위험이 있는 양초류 사용 불가합니다.<br />
+                    ▸ 각 그라운드마다 차량 1대 주차 가능합니다.<br />
+                    ▸ 2박 이상 숙박의 경우 연박할인이 적용됩니다.<br />
+                    ▸ 24개월 미만의 영유아는 추가 비용이 발생하지 않습니다.<br />
+                    (다만 인원수에는 포함되므로 예약시 메모란에 기재
+                    부탁드립니다.)<br />
+                  </p>
+                  <div class="room-plan-image-wrap">
+                    <img
+                      src="images/C-groundplan.png"
+                      alt="G3 객실 평면도"
+                      class="room-plan-image"
+                    />
+                  </div>
+                </div>
+                <div class="room-detail-intro room-copy" data-room="G4" hidden>
+                  <p class="room-intro-desc">
+                    네번째 그라운드에 들어서면, 동쪽으로 나있는 창문을 통해 빛이
+                    드리웁니다.<br />
+                    넓게 존재하는 중정은 창을 열지 않아도 넉넉한 바람이 머물고,
+                    대지가 곁에 있다는 기분이 들게 합니다.<br />
+                    길게 뻗어 있는 복도는 그라운드의 모든 방을 이어주어 무경계의
+                    자유로움을 느끼게 해 줍니다.<br />
+                    경계 없는 길을 따라 당신의 사유도 자유로이 흐릅니다.
+                  </p>
+                  <br />
+                  <div
+                    class="room-meta-grid"
+                    role="list"
+                    aria-label="G4 객실 주요 정보"
+                  >
+                    <div class="room-meta-item" role="listitem">
+                      <h4 class="room-meta-title">체크인/체크아웃</h4>
+                      <p class="room-meta-value">
+                        체크인 16:00 · 체크아웃 11:00
+                      </p>
+                    </div>
+                    <div class="room-meta-item" role="listitem">
+                      <h4 class="room-meta-title">투숙 가능 인원</h4>
+                      <p class="room-meta-value">기준 2인, 최대 6인</p>
+                    </div>
+                    <div class="room-meta-item" role="listitem">
+                      <h4 class="room-meta-title">구성</h4>
+                      <p class="room-meta-value">
+                        침실 2개, 욕실 1개, 자쿠지 1개, 거실
+                      </p>
+                    </div>
+                    <div class="room-meta-item" role="listitem">
+                      <h4 class="room-meta-title">면적</h4>
+                      <p class="room-meta-value">60㎡</p>
+                    </div>
+                  </div>
+                  <br />
+                  <div class="room-facility">
+                    <h4 class="room-meta-title room-facility-title">
+                      시설 현황
+                    </h4>
+                    <div
+                      class="room-facility-list"
+                      role="list"
+                      aria-label="G4 유닛 시설 현황"
+                    >
+                      <div class="room-facility-item" role="listitem">
+                        <p class="room-facility-name">Living room</p>
+                        <p class="room-facility-desc">
+                          TV, 소파, Free WIFI, 블루투스 스피커
+                        </p>
+                      </div>
+                      <div class="room-facility-item" role="listitem">
+                        <p class="room-facility-name">Kitchen (취사 가능)</p>
+                        <p class="room-facility-desc">
+                          웰컴 키트, 냉장고, 발뮤다 드립포트 & 토스터기,
+                          전자레인지, 2구 인덕션, 6인식기 & 잔, 조리도구
+                        </p>
+                      </div>
+                      <div class="room-facility-item" role="listitem">
+                        <p class="room-facility-name">Bathroom</p>
+                        <p class="room-facility-desc">
+                          욕실 어메니티(샴푸, 컨디셔너, 바디워시, 핸드워시),
+                          다이슨 헤어 드라이어, 타올
+                        </p>
+                      </div>
+                      <div class="room-facility-item" role="listitem">
+                        <p class="room-facility-name">Bedroom</p>
+                        <p class="room-facility-desc">
+                          퀸 침대 2개, 싱글 침대 1개
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                  <br />
+                  <p class="room-intro-desc2">
+                    ▸ 간단한 취사가 가능한 그라운드입니다.<br />
+                    ▸ 금연 객실 입니다.<br />
+                    ▸ 반려동물 동반 입장은 불가능합니다.<br />
+                    ▸ 화재의 위험이 있는 양초류 사용 불가합니다.<br />
+                    ▸ 각 그라운드마다 차량 1대 주차 가능합니다.<br />
+                    ▸ 2박 이상 숙박의 경우 연박할인이 적용됩니다.<br />
+                    ▸ 24개월 미만의 영유아는 추가 비용이 발생하지 않습니다.<br />
+                    (다만 인원수에는 포함되므로 예약시 메모란에 기재
+                    부탁드립니다.)<br />
+                  </p>
+                  <div class="room-plan-image-wrap">
+                    <img
+                      src="images/D-groundplan.png"
+                      alt="G4 객실 평면도"
+                      class="room-plan-image"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="reservation-calendar-panel">
+              <div class="booking-calendar" id="booking-calendar">
+                <h3 class="cal-year-title" id="cal-year-label"></h3>
+                <div class="cal-header">
+                  <button
+                    type="button"
+                    class="cal-nav"
+                    id="cal-prev"
+                    aria-label="Previous month"
+                  >
+                    &#10094;
+                  </button>
+                  <span class="cal-month-label" id="cal-month-label"></span>
+                  <button
+                    type="button"
+                    class="cal-nav"
+                    id="cal-next"
+                    aria-label="Next month"
+                  >
+                    &#10095;
+                  </button>
+                </div>
+                <div class="cal-weekdays">
+                  <span>Sun</span><span>Mon</span><span>Tue</span
+                  ><span>Wed</span><span>Thu</span><span>Fri</span
+                  ><span>Sat</span>
+                </div>
+                <div class="cal-grid" id="cal-grid"></div>
+              </div>
+
+              <div class="reservation-extra-block">
+                <div class="reservation-extra-row">
+                  <span class="reservation-extra-label">인원 추가</span>
+                  <div
+                    class="reservation-extra-stepper"
+                    aria-describedby="extra-guests-hint"
+                  >
+                    <button
+                      type="button"
+                      class="reservation-extra-btn"
+                      id="extra-guests-minus"
+                      aria-label="추가 인원 감소"
+                    >
+                      ＜
+                    </button>
+                    <span
+                      class="reservation-extra-count"
+                      id="extra-guests-count"
+                      >0</span
+                    >
+                    <button
+                      type="button"
+                      class="reservation-extra-btn"
+                      id="extra-guests-plus"
+                      aria-label="추가 인원 증가"
+                    >
+                      ＞
+                    </button>
+                  </div>
+                </div>
+                <p class="reservation-extra-hint" id="extra-guests-hint"></p>
+              </div>
+              <div
+                class="reservation-price-summary"
+                id="reservation-price-summary"
+              >
+                <p
+                  class="reservation-price-placeholder"
+                  id="reservation-price-placeholder"
+                >
+                  TOTAL 0원
+                </p>
+                <p
+                  class="reservation-price-total"
+                  id="reservation-price-total"
+                  hidden
+                ></p>
+              </div>
+              <a
+                href="confirm.html"
+                class="btn reserve-btn reserve-cta"
+                id="reserve-confirm-link"
+                >예약하기</a
+              >
+            </div>
+          </div>
         </div>
-      </div>
 
-      <footer
-        id="site-business-footer-mount"
-        class="site-footer site-business-footer"
-        hidden
-      ></footer>
-    </main>
+        <footer
+          id="site-business-footer-mount"
+          class="site-footer site-business-footer"
+          hidden
+        ></footer>
+      </main>
 
-    <script>
-      document.addEventListener("DOMContentLoaded", function () {
-        var scrollButton = document.getElementById("scroll-down-btn");
-        var nextSection = document.getElementById("content");
-        var fadeEl = document.querySelector(".reservation-booking.scroll-fade");
-
-        var roomImages = {
-          G1: ["images/A00.jpg", "images/A01.jpg", "images/A02.jpg"],
-          G2: ["images/B00.jpg", "images/B01.jpg", "images/B02.jpg"],
-          G3: ["images/C00.jpg", "images/C01.jpg", "images/C02.jpg"],
-          G4: ["images/D00.jpg", "images/D01.jpg", "images/D02.jpg"],
-        };
-
-        var currentRoom = "G1";
-        var galleryIndex = 0;
-        var galleryFadeMs = 650;
-
-        var mainImg = document.getElementById("gallery-main-img");
-        var thumbsEl = document.getElementById("gallery-thumbs");
-        var btnPrev = document.getElementById("gallery-prev");
-        var btnNext = document.getElementById("gallery-next");
-        var typeButtons = document.querySelectorAll(".room-type-btn");
-        var confirmLink = document.getElementById("reserve-confirm-link");
-        var roomCopies = document.querySelectorAll(".room-copy");
-
-        var calYearLabel = document.getElementById("cal-year-label");
-        var calMonthLabel = document.getElementById("cal-month-label");
-        var calGrid = document.getElementById("cal-grid");
-        var bookingCalendar = document.getElementById("booking-calendar");
-        var calPrev = document.getElementById("cal-prev");
-        var calNext = document.getElementById("cal-next");
-        var calCheckinEl = document.getElementById("cal-checkin");
-        var calCheckoutEl = document.getElementById("cal-checkout");
-        var availabilityEl = document.getElementById("availability-note");
-        var P = window.GraffordBookingPricing;
-        var extraGuestsBlock = document.querySelector(
-          ".reservation-extra-block",
-        );
-        var extraGuestsMinusBtn = document.getElementById("extra-guests-minus");
-        var extraGuestsPlusBtn = document.getElementById("extra-guests-plus");
-        var extraGuestsCountEl = document.getElementById("extra-guests-count");
-        var extraGuestsHint = document.getElementById("extra-guests-hint");
-        var weekdayDisplay = document.getElementById(
-          "reservation-weekday-display",
-        );
-        var pricePlaceholder = document.getElementById(
-          "reservation-price-placeholder",
-        );
-        var priceTotalEl = document.getElementById("reservation-price-total");
-
-        var viewDate = new Date();
-        viewDate.setDate(1);
-        var checkIn = null;
-        var checkOut = null;
-        var occupiedNightSet = new Set();
-        var monthFadeTimer = null;
-        var currentExtraGuests = 0;
-        var kstNowInfo = getKstNowInfo();
-        var today = parseYMDLocal(kstNowInfo.todayYmd);
-        if (!today) {
-          var fallbackNow = new Date();
-          today = new Date(
-            fallbackNow.getFullYear(),
-            fallbackNow.getMonth(),
-            fallbackNow.getDate(),
+      <script>
+        document.addEventListener("DOMContentLoaded", function () {
+          var scrollButton = document.getElementById("scroll-down-btn");
+          var nextSection = document.getElementById("content");
+          var fadeEl = document.querySelector(
+            ".reservation-booking.scroll-fade",
           );
-        }
 
-        function addMonthsKeepingDay(baseDate, monthsToAdd) {
-          var y = baseDate.getFullYear();
-          var m = baseDate.getMonth() + monthsToAdd;
-          var d = baseDate.getDate();
-          var targetMonthLastDay = new Date(y, m + 1, 0).getDate();
-          var resultDate = new Date(y, m, Math.min(d, targetMonthLastDay));
-          resultDate.setHours(23, 59, 59, 999);
-          return resultDate;
-        }
-
-        function parseYmdParts(ymd) {
-          var s = String(ymd || "");
-          if (!/^\d{4}-\d{2}-\d{2}$/.test(s)) {
-            return null;
-          }
-          return {
-            y: Number(s.slice(0, 4)),
-            m: Number(s.slice(5, 7)),
-            d: Number(s.slice(8, 10)),
+          var roomImages = {
+            G1: ["images/A00.jpg", "images/A01.jpg", "images/A02.jpg"],
+            G2: ["images/B00.jpg", "images/B01.jpg", "images/B02.jpg"],
+            G3: ["images/C00.jpg", "images/C01.jpg", "images/C02.jpg"],
+            G4: ["images/D00.jpg", "images/D01.jpg", "images/D02.jpg"],
           };
-        }
 
-        function daysInMonth(y, m1to12) {
-          return new Date(y, m1to12, 0).getDate();
-        }
+          var currentRoom = "G1";
+          var galleryIndex = 0;
+          var galleryFadeMs = 650;
 
-        function addMonthsKeepingDayParts(parts, monthsToAdd) {
-          var totalMonths = parts.y * 12 + (parts.m - 1) + monthsToAdd;
-          var targetY = Math.floor(totalMonths / 12);
-          var targetM = (totalMonths % 12) + 1;
-          var targetD = Math.min(parts.d, daysInMonth(targetY, targetM));
-          return { y: targetY, m: targetM, d: targetD };
-        }
+          var mainImg = document.getElementById("gallery-main-img");
+          var thumbsEl = document.getElementById("gallery-thumbs");
+          var btnPrev = document.getElementById("gallery-prev");
+          var btnNext = document.getElementById("gallery-next");
+          var typeButtons = document.querySelectorAll(".room-type-btn");
+          var confirmLink = document.getElementById("reserve-confirm-link");
+          var roomCopies = document.querySelectorAll(".room-copy");
 
-        function ymdPartsToKey(parts) {
-          return parts.y * 10000 + parts.m * 100 + parts.d;
-        }
-
-        function ymdPartsToString(parts) {
-          return (
-            String(parts.y).padStart(4, "0") +
-            "-" +
-            String(parts.m).padStart(2, "0") +
-            "-" +
-            String(parts.d).padStart(2, "0")
+          var calYearLabel = document.getElementById("cal-year-label");
+          var calMonthLabel = document.getElementById("cal-month-label");
+          var calGrid = document.getElementById("cal-grid");
+          var bookingCalendar = document.getElementById("booking-calendar");
+          var calPrev = document.getElementById("cal-prev");
+          var calNext = document.getElementById("cal-next");
+          var calCheckinEl = document.getElementById("cal-checkin");
+          var calCheckoutEl = document.getElementById("cal-checkout");
+          var availabilityEl = document.getElementById("availability-note");
+          var P = window.GraffordBookingPricing;
+          var extraGuestsBlock = document.querySelector(
+            ".reservation-extra-block",
           );
-        }
-
-        var todayParts = parseYmdParts(kstNowInfo.todayYmd) || {
-          y: today.getFullYear(),
-          m: today.getMonth() + 1,
-          d: today.getDate(),
-        };
-        var minViewMonth = new Date(todayParts.y, todayParts.m - 1 - 6, 1);
-        var maxCheckInParts = addMonthsKeepingDayParts(todayParts, 6);
-        var maxCheckOutDate = addDays(
-          new Date(maxCheckInParts.y, maxCheckInParts.m - 1, maxCheckInParts.d),
-          1,
-        );
-        var maxCheckOutParts = {
-          y: maxCheckOutDate.getFullYear(),
-          m: maxCheckOutDate.getMonth() + 1,
-          d: maxCheckOutDate.getDate(),
-        };
-        var maxCheckInKey = ymdPartsToKey(maxCheckInParts);
-        var maxCheckOutKey = ymdPartsToKey(maxCheckOutParts);
-        var maxViewMonth = new Date(
-          maxCheckInParts.y,
-          maxCheckInParts.m - 1,
-          1,
-        );
-
-        function pad(n) {
-          return n < 10 ? "0" + n : String(n);
-        }
-
-        function formatYMD(d) {
-          if (!d) return "";
-          return (
-            d.getFullYear() +
-            "-" +
-            pad(d.getMonth() + 1) +
-            "-" +
-            pad(d.getDate())
+          var extraGuestsMinusBtn =
+            document.getElementById("extra-guests-minus");
+          var extraGuestsPlusBtn = document.getElementById("extra-guests-plus");
+          var extraGuestsCountEl =
+            document.getElementById("extra-guests-count");
+          var extraGuestsHint = document.getElementById("extra-guests-hint");
+          var weekdayDisplay = document.getElementById(
+            "reservation-weekday-display",
           );
-        }
+          var pricePlaceholder = document.getElementById(
+            "reservation-price-placeholder",
+          );
+          var priceTotalEl = document.getElementById("reservation-price-total");
 
-        function getKstNowInfo() {
-          var parts = new Intl.DateTimeFormat("en-CA", {
-            timeZone: "Asia/Seoul",
-            year: "numeric",
-            month: "2-digit",
-            day: "2-digit",
-            hour: "2-digit",
-            hour12: false,
-          }).formatToParts(new Date());
-          var map = {};
-          parts.forEach(function (p) {
-            if (p.type !== "literal") {
-              map[p.type] = p.value;
+          var viewDate = new Date();
+          viewDate.setDate(1);
+          var checkIn = null;
+          var checkOut = null;
+          var occupiedNightSet = new Set();
+          var monthFadeTimer = null;
+          var currentExtraGuests = 0;
+          var kstNowInfo = getKstNowInfo();
+          var today = parseYMDLocal(kstNowInfo.todayYmd);
+          if (!today) {
+            var fallbackNow = new Date();
+            today = new Date(
+              fallbackNow.getFullYear(),
+              fallbackNow.getMonth(),
+              fallbackNow.getDate(),
+            );
+          }
+
+          function addMonthsKeepingDay(baseDate, monthsToAdd) {
+            var y = baseDate.getFullYear();
+            var m = baseDate.getMonth() + monthsToAdd;
+            var d = baseDate.getDate();
+            var targetMonthLastDay = new Date(y, m + 1, 0).getDate();
+            var resultDate = new Date(y, m, Math.min(d, targetMonthLastDay));
+            resultDate.setHours(23, 59, 59, 999);
+            return resultDate;
+          }
+
+          function parseYmdParts(ymd) {
+            var s = String(ymd || "");
+            if (!/^\d{4}-\d{2}-\d{2}$/.test(s)) {
+              return null;
             }
-          });
-          return {
-            todayYmd:
-              String(map.year || "") +
+            return {
+              y: Number(s.slice(0, 4)),
+              m: Number(s.slice(5, 7)),
+              d: Number(s.slice(8, 10)),
+            };
+          }
+
+          function daysInMonth(y, m1to12) {
+            return new Date(y, m1to12, 0).getDate();
+          }
+
+          function addMonthsKeepingDayParts(parts, monthsToAdd) {
+            var totalMonths = parts.y * 12 + (parts.m - 1) + monthsToAdd;
+            var targetY = Math.floor(totalMonths / 12);
+            var targetM = (totalMonths % 12) + 1;
+            var targetD = Math.min(parts.d, daysInMonth(targetY, targetM));
+            return { y: targetY, m: targetM, d: targetD };
+          }
+
+          function ymdPartsToKey(parts) {
+            return parts.y * 10000 + parts.m * 100 + parts.d;
+          }
+
+          function ymdPartsToString(parts) {
+            return (
+              String(parts.y).padStart(4, "0") +
               "-" +
-              String(map.month || "01") +
+              String(parts.m).padStart(2, "0") +
               "-" +
-              String(map.day || "01"),
-            hour: Number(map.hour || 0),
+              String(parts.d).padStart(2, "0")
+            );
+          }
+
+          var todayParts = parseYmdParts(kstNowInfo.todayYmd) || {
+            y: today.getFullYear(),
+            m: today.getMonth() + 1,
+            d: today.getDate(),
           };
-        }
-
-        function parseYMDLocal(ymd) {
-          if (!/^\d{4}-\d{2}-\d{2}$/.test(String(ymd || ""))) {
-            return null;
-          }
-          var p = ymd.split("-");
-          return new Date(Number(p[0]), Number(p[1]) - 1, Number(p[2]));
-        }
-
-        function toStartOfDay(dateObj) {
-          return new Date(
-            dateObj.getFullYear(),
-            dateObj.getMonth(),
-            dateObj.getDate(),
+          var minViewMonth = new Date(todayParts.y, todayParts.m - 1 - 6, 1);
+          var maxCheckInParts = addMonthsKeepingDayParts(todayParts, 6);
+          var maxCheckOutDate = addDays(
+            new Date(
+              maxCheckInParts.y,
+              maxCheckInParts.m - 1,
+              maxCheckInParts.d,
+            ),
+            1,
           );
-        }
-
-        function toDateKey(dateObj) {
-          if (!dateObj) {
-            return 0;
-          }
-          return (
-            dateObj.getFullYear() * 10000 +
-            (dateObj.getMonth() + 1) * 100 +
-            dateObj.getDate()
+          var maxCheckOutParts = {
+            y: maxCheckOutDate.getFullYear(),
+            m: maxCheckOutDate.getMonth() + 1,
+            d: maxCheckOutDate.getDate(),
+          };
+          var maxCheckInKey = ymdPartsToKey(maxCheckInParts);
+          var maxCheckOutKey = ymdPartsToKey(maxCheckOutParts);
+          var maxViewMonth = new Date(
+            maxCheckInParts.y,
+            maxCheckInParts.m - 1,
+            1,
           );
-        }
 
-        function dateCmp(a, b) {
-          var ak = toDateKey(a);
-          var bk = toDateKey(b);
-          if (ak === bk) {
-            return 0;
+          function pad(n) {
+            return n < 10 ? "0" + n : String(n);
           }
-          return ak < bk ? -1 : 1;
-        }
 
-        function addDays(dateObj, days) {
-          return new Date(
-            dateObj.getFullYear(),
-            dateObj.getMonth(),
-            dateObj.getDate() + Number(days || 0),
+          function formatYMD(d) {
+            if (!d) return "";
+            return (
+              d.getFullYear() +
+              "-" +
+              pad(d.getMonth() + 1) +
+              "-" +
+              pad(d.getDate())
+            );
+          }
+
+          function getKstNowInfo() {
+            var parts = new Intl.DateTimeFormat("en-CA", {
+              timeZone: "Asia/Seoul",
+              year: "numeric",
+              month: "2-digit",
+              day: "2-digit",
+              hour: "2-digit",
+              hour12: false,
+            }).formatToParts(new Date());
+            var map = {};
+            parts.forEach(function (p) {
+              if (p.type !== "literal") {
+                map[p.type] = p.value;
+              }
+            });
+            return {
+              todayYmd:
+                String(map.year || "") +
+                "-" +
+                String(map.month || "01") +
+                "-" +
+                String(map.day || "01"),
+              hour: Number(map.hour || 0),
+            };
+          }
+
+          function parseYMDLocal(ymd) {
+            if (!/^\d{4}-\d{2}-\d{2}$/.test(String(ymd || ""))) {
+              return null;
+            }
+            var p = ymd.split("-");
+            return new Date(Number(p[0]), Number(p[1]) - 1, Number(p[2]));
+          }
+
+          function toStartOfDay(dateObj) {
+            return new Date(
+              dateObj.getFullYear(),
+              dateObj.getMonth(),
+              dateObj.getDate(),
+            );
+          }
+
+          function toDateKey(dateObj) {
+            if (!dateObj) {
+              return 0;
+            }
+            return (
+              dateObj.getFullYear() * 10000 +
+              (dateObj.getMonth() + 1) * 100 +
+              dateObj.getDate()
+            );
+          }
+
+          function dateCmp(a, b) {
+            var ak = toDateKey(a);
+            var bk = toDateKey(b);
+            if (ak === bk) {
+              return 0;
+            }
+            return ak < bk ? -1 : 1;
+          }
+
+          function addDays(dateObj, days) {
+            return new Date(
+              dateObj.getFullYear(),
+              dateObj.getMonth(),
+              dateObj.getDate() + Number(days || 0),
+            );
+          }
+
+          var todayDateOnly = new Date(
+            todayParts.y,
+            todayParts.m - 1,
+            todayParts.d,
           );
-        }
-
-        var todayDateOnly = new Date(
-          todayParts.y,
-          todayParts.m - 1,
-          todayParts.d,
-        );
-        var isTodayAfterCutoff = Number(kstNowInfo.hour || 0) >= 19;
-        function isBlockedByPastOrCutoff(dateObj) {
-          var target = toStartOfDay(dateObj);
-          return (
-            dateCmp(target, todayDateOnly) < 0 ||
-            (isTodayAfterCutoff && sameDay(target, todayDateOnly))
-          );
-        }
-
-        function formatDisplay(d) {
-          if (!d) return "—";
-          return (
-            d.getFullYear() +
-            "." +
-            pad(d.getMonth() + 1) +
-            "." +
-            pad(d.getDate())
-          );
-        }
-
-        function formatKRW(n) {
-          return n.toLocaleString("ko-KR") + "원";
-        }
-
-        function isSameMonth(a, b) {
-          return (
-            a &&
-            b &&
-            a.getFullYear() === b.getFullYear() &&
-            a.getMonth() === b.getMonth()
-          );
-        }
-
-        function clampViewMonth(target) {
-          if (!target) {
-            return new Date(minViewMonth.getTime());
+          var isTodayAfterCutoff = Number(kstNowInfo.hour || 0) >= 19;
+          function isBlockedByPastOrCutoff(dateObj) {
+            var target = toStartOfDay(dateObj);
+            return (
+              dateCmp(target, todayDateOnly) < 0 ||
+              (isTodayAfterCutoff && sameDay(target, todayDateOnly))
+            );
           }
-          if (target < minViewMonth) {
-            return new Date(minViewMonth.getTime());
-          }
-          if (target > maxViewMonth) {
-            return new Date(maxViewMonth.getTime());
-          }
-          return new Date(target.getFullYear(), target.getMonth(), 1);
-        }
 
-        function isDateBeyondBookable(dateObj, checkoutMode) {
-          if (!dateObj) {
-            return false;
+          function formatDisplay(d) {
+            if (!d) return "—";
+            return (
+              d.getFullYear() +
+              "." +
+              pad(d.getMonth() + 1) +
+              "." +
+              pad(d.getDate())
+            );
           }
-          var targetKey = toDateKey(toStartOfDay(dateObj));
-          var limitKey = checkoutMode ? maxCheckOutKey : maxCheckInKey;
-          console.log("targetKey", targetKey);
-          return targetKey > limitKey;
-        }
 
-        function getExtraGuests() {
-          return currentExtraGuests;
-        }
-
-        function getMaxExtraGuests() {
-          if (!P || !P.MAX_EXTRA_GUESTS) {
-            return 0;
+          function formatKRW(n) {
+            return n.toLocaleString("ko-KR") + "원";
           }
-          return P.MAX_EXTRA_GUESTS[currentRoom] || 0;
-        }
 
-        function renderExtraGuestsStepper() {
-          var max = getMaxExtraGuests();
-          var isUnavailable = max === 0;
-
-          if (extraGuestsCountEl) {
-            extraGuestsCountEl.textContent = String(currentExtraGuests);
+          function isSameMonth(a, b) {
+            return (
+              a &&
+              b &&
+              a.getFullYear() === b.getFullYear() &&
+              a.getMonth() === b.getMonth()
+            );
           }
+
+          function clampViewMonth(target) {
+            if (!target) {
+              return new Date(minViewMonth.getTime());
+            }
+            if (target < minViewMonth) {
+              return new Date(minViewMonth.getTime());
+            }
+            if (target > maxViewMonth) {
+              return new Date(maxViewMonth.getTime());
+            }
+            return new Date(target.getFullYear(), target.getMonth(), 1);
+          }
+
+          function isDateBeyondBookable(dateObj, checkoutMode) {
+            if (!dateObj) {
+              return false;
+            }
+            var targetKey = toDateKey(toStartOfDay(dateObj));
+            var limitKey = checkoutMode ? maxCheckOutKey : maxCheckInKey;
+            console.log("targetKey", targetKey);
+            return targetKey > limitKey;
+          }
+
+          function getExtraGuests() {
+            return currentExtraGuests;
+          }
+
+          function getMaxExtraGuests() {
+            if (!P || !P.MAX_EXTRA_GUESTS) {
+              return 0;
+            }
+            return P.MAX_EXTRA_GUESTS[currentRoom] || 0;
+          }
+
+          function renderExtraGuestsStepper() {
+            var max = getMaxExtraGuests();
+            var isUnavailable = max === 0;
+
+            if (extraGuestsCountEl) {
+              extraGuestsCountEl.textContent = String(currentExtraGuests);
+            }
+
+            if (extraGuestsMinusBtn) {
+              var cannotDecrease = isUnavailable || currentExtraGuests <= 0;
+              extraGuestsMinusBtn.disabled = cannotDecrease;
+              extraGuestsMinusBtn.setAttribute(
+                "aria-disabled",
+                cannotDecrease ? "true" : "false",
+              );
+            }
+
+            if (extraGuestsPlusBtn) {
+              var cannotIncrease = isUnavailable || currentExtraGuests >= max;
+              extraGuestsPlusBtn.disabled = cannotIncrease;
+              extraGuestsPlusBtn.setAttribute(
+                "aria-disabled",
+                cannotIncrease ? "true" : "false",
+              );
+            }
+          }
+
+          function setExtraGuests(nextValue) {
+            var max = getMaxExtraGuests();
+            var next = parseInt(nextValue, 10) || 0;
+            if (next < 0) {
+              next = 0;
+            }
+            if (next > max) {
+              next = max;
+            }
+            currentExtraGuests = next;
+            renderExtraGuestsStepper();
+          }
+
+          function rebuildExtraSelect() {
+            if (!P) {
+              return;
+            }
+            var max = getMaxExtraGuests();
+            setExtraGuests(Math.min(getExtraGuests(), max));
+            if (max === 0) {
+              if (extraGuestsBlock) {
+                extraGuestsBlock.hidden = true;
+              }
+              if (extraGuestsHint) {
+                extraGuestsHint.textContent =
+                  "G1·G2는 기준 인원 외 추가가 불가합니다.";
+              }
+              setExtraGuests(0);
+            } else {
+              if (extraGuestsBlock) {
+                extraGuestsBlock.hidden = false;
+              }
+              if (extraGuestsHint) {
+                if (currentRoom === "G3") {
+                  extraGuestsHint.textContent =
+                    "기준 인원 외 최대 2인 추가 가능합니다. (인원 추가 시 박당 30,000원/인)";
+                } else {
+                  extraGuestsHint.textContent =
+                    "기준 인원 외 최대 4인 추가 가능합니다. (인원 추가 시 박당 30,000원/인)";
+                }
+              }
+            }
+            renderExtraGuestsStepper();
+          }
+
+          function updateWeekdayRateDisplay() {
+            if (!P || !weekdayDisplay) {
+              return;
+            }
+            weekdayDisplay.textContent = formatKRW(
+              P.ROOM_WEEKDAY_BASE[currentRoom],
+            );
+          }
+
+          function updatePricingSummary() {
+            updateConfirmCtaState();
+            if (!P || !pricePlaceholder || !priceTotalEl) {
+              return;
+            }
+            var ci = checkIn ? formatYMD(checkIn) : "";
+            var co = checkOut ? formatYMD(checkOut) : "";
+            if (!checkIn || !checkOut || !P.countNights(ci, co)) {
+              pricePlaceholder.hidden = false;
+              priceTotalEl.hidden = true;
+              priceTotalEl.textContent = "";
+              return;
+            }
+            var eg = P.clampExtra(currentRoom, getExtraGuests());
+            setExtraGuests(eg);
+            var q = P.computeStay(currentRoom, ci, co, eg);
+            pricePlaceholder.hidden = true;
+            priceTotalEl.hidden = false;
+            priceTotalEl.textContent =
+              "TOTAL " + q.discountedGrandTotal.toLocaleString("ko-KR") + "원";
+          }
+
+          function hasValidStaySelection() {
+            if (!checkIn || !checkOut) {
+              return false;
+            }
+            var ci = formatYMD(checkIn);
+            var co = formatYMD(checkOut);
+            if (P && typeof P.countNights === "function") {
+              return P.countNights(ci, co) > 0;
+            }
+            return dateLT(checkIn, checkOut);
+          }
+
+          function updateConfirmCtaState() {
+            if (!confirmLink) {
+              return;
+            }
+            var isReady = hasValidStaySelection();
+            confirmLink.classList.toggle("is-disabled", !isReady);
+            confirmLink.setAttribute(
+              "aria-disabled",
+              isReady ? "false" : "true",
+            );
+            if (isReady) {
+              confirmLink.removeAttribute("tabindex");
+            } else {
+              confirmLink.setAttribute("tabindex", "-1");
+            }
+          }
+
+          function updateConfirmLink() {
+            sessionStorage.setItem(
+              "graffordConfirmDraft",
+              JSON.stringify({
+                room: currentRoom,
+                checkIn: checkIn ? formatYMD(checkIn) : "",
+                checkOut: checkOut ? formatYMD(checkOut) : "",
+                extraGuests: String(getExtraGuests()),
+              }),
+            );
+            confirmLink.href = "confirm.html";
+          }
+
+          if (confirmLink) {
+            confirmLink.addEventListener("click", function (e) {
+              if (confirmLink.classList.contains("is-disabled")) {
+                e.preventDefault();
+              }
+            });
+          }
+
+          function syncRoomCopy() {
+            roomCopies.forEach(function (el) {
+              var r = el.getAttribute("data-room");
+              if (r === currentRoom) {
+                el.hidden = false;
+                el.classList.add("is-visible");
+              } else {
+                el.hidden = true;
+                el.classList.remove("is-visible");
+              }
+            });
+          }
+
+          function renderGallery() {
+            var imgs = roomImages[currentRoom] || [];
+            var label = "Room " + currentRoom;
+            if (!imgs.length) {
+              mainImg.removeAttribute("src");
+              mainImg.alt = "No photos";
+              thumbsEl.innerHTML = "";
+              return;
+            }
+            galleryIndex = Math.min(galleryIndex, imgs.length - 1);
+            thumbsEl.classList.add("is-switching");
+            thumbsEl.innerHTML = "";
+            imgs.forEach(function (_, i) {
+              var b = document.createElement("button");
+              b.type = "button";
+              b.className =
+                "gallery-thumb" + (i === galleryIndex ? " is-active" : "");
+              b.setAttribute("aria-label", "Photo " + (i + 1));
+              b.addEventListener("click", function () {
+                if (i === galleryIndex) {
+                  return;
+                }
+                galleryIndex = i;
+                renderGallery();
+              });
+              thumbsEl.appendChild(b);
+            });
+            mainImg.classList.add("is-switching");
+            window.setTimeout(function () {
+              mainImg.src = imgs[galleryIndex];
+              mainImg.alt = label + " photo " + (galleryIndex + 1);
+              var onLoad = function () {
+                mainImg.removeEventListener("load", onLoad);
+                window.requestAnimationFrame(function () {
+                  mainImg.classList.remove("is-switching");
+                  thumbsEl.classList.remove("is-switching");
+                });
+              };
+              mainImg.addEventListener("load", onLoad);
+              if (mainImg.complete) {
+                window.requestAnimationFrame(function () {
+                  mainImg.classList.remove("is-switching");
+                  thumbsEl.classList.remove("is-switching");
+                });
+              }
+            }, galleryFadeMs);
+            updatePricingSummary();
+            updateConfirmLink();
+          }
+
+          function setRoom(room) {
+            currentRoom = room;
+            galleryIndex = 0;
+            checkIn = null;
+            checkOut = null;
+            if (calCheckinEl) {
+              calCheckinEl.textContent = "—";
+            }
+            if (calCheckoutEl) {
+              calCheckoutEl.textContent = "—";
+            }
+            if (availabilityEl) {
+              availabilityEl.textContent =
+                "Select check-in and check-out to see availability for this room.";
+              availabilityEl.classList.remove("is-ok");
+            }
+            typeButtons.forEach(function (btn) {
+              btn.classList.toggle(
+                "is-active",
+                btn.getAttribute("data-room") === room,
+              );
+            });
+            syncRoomCopy();
+            rebuildExtraSelect();
+            updateWeekdayRateDisplay();
+            renderGallery();
+            renderCalendar();
+            updatePricingSummary();
+            updateConfirmLink();
+            loadAvailability(room).then(function () {
+              renderCalendar();
+              updatePricingSummary();
+              updateConfirmLink();
+            });
+          }
+
+          typeButtons.forEach(function (btn) {
+            btn.addEventListener("click", function () {
+              setRoom(btn.getAttribute("data-room"));
+            });
+          });
 
           if (extraGuestsMinusBtn) {
-            var cannotDecrease = isUnavailable || currentExtraGuests <= 0;
-            extraGuestsMinusBtn.disabled = cannotDecrease;
-            extraGuestsMinusBtn.setAttribute(
-              "aria-disabled",
-              cannotDecrease ? "true" : "false",
-            );
+            extraGuestsMinusBtn.addEventListener("click", function () {
+              setExtraGuests(getExtraGuests() - 1);
+              updatePricingSummary();
+              updateConfirmLink();
+            });
           }
 
           if (extraGuestsPlusBtn) {
-            var cannotIncrease = isUnavailable || currentExtraGuests >= max;
-            extraGuestsPlusBtn.disabled = cannotIncrease;
-            extraGuestsPlusBtn.setAttribute(
-              "aria-disabled",
-              cannotIncrease ? "true" : "false",
-            );
-          }
-        }
-
-        function setExtraGuests(nextValue) {
-          var max = getMaxExtraGuests();
-          var next = parseInt(nextValue, 10) || 0;
-          if (next < 0) {
-            next = 0;
-          }
-          if (next > max) {
-            next = max;
-          }
-          currentExtraGuests = next;
-          renderExtraGuestsStepper();
-        }
-
-        function rebuildExtraSelect() {
-          if (!P) {
-            return;
-          }
-          var max = getMaxExtraGuests();
-          setExtraGuests(Math.min(getExtraGuests(), max));
-          if (max === 0) {
-            if (extraGuestsBlock) {
-              extraGuestsBlock.hidden = true;
-            }
-            if (extraGuestsHint) {
-              extraGuestsHint.textContent =
-                "G1·G2는 기준 인원 외 추가가 불가합니다.";
-            }
-            setExtraGuests(0);
-          } else {
-            if (extraGuestsBlock) {
-              extraGuestsBlock.hidden = false;
-            }
-            if (extraGuestsHint) {
-              if (currentRoom === "G3") {
-                extraGuestsHint.textContent =
-                  "기준 인원 외 최대 2인 추가 가능합니다. (인원 추가 시 박당 30,000원/인)";
-              } else {
-                extraGuestsHint.textContent =
-                  "기준 인원 외 최대 4인 추가 가능합니다. (인원 추가 시 박당 30,000원/인)";
-              }
-            }
-          }
-          renderExtraGuestsStepper();
-        }
-
-        function updateWeekdayRateDisplay() {
-          if (!P || !weekdayDisplay) {
-            return;
-          }
-          weekdayDisplay.textContent = formatKRW(
-            P.ROOM_WEEKDAY_BASE[currentRoom],
-          );
-        }
-
-        function updatePricingSummary() {
-          updateConfirmCtaState();
-          if (!P || !pricePlaceholder || !priceTotalEl) {
-            return;
-          }
-          var ci = checkIn ? formatYMD(checkIn) : "";
-          var co = checkOut ? formatYMD(checkOut) : "";
-          if (!checkIn || !checkOut || !P.countNights(ci, co)) {
-            pricePlaceholder.hidden = false;
-            priceTotalEl.hidden = true;
-            priceTotalEl.textContent = "";
-            return;
-          }
-          var eg = P.clampExtra(currentRoom, getExtraGuests());
-          setExtraGuests(eg);
-          var q = P.computeStay(currentRoom, ci, co, eg);
-          pricePlaceholder.hidden = true;
-          priceTotalEl.hidden = false;
-          priceTotalEl.textContent =
-            "TOTAL " + q.discountedGrandTotal.toLocaleString("ko-KR") + "원";
-        }
-
-        function hasValidStaySelection() {
-          if (!checkIn || !checkOut) {
-            return false;
-          }
-          var ci = formatYMD(checkIn);
-          var co = formatYMD(checkOut);
-          if (P && typeof P.countNights === "function") {
-            return P.countNights(ci, co) > 0;
-          }
-          return dateLT(checkIn, checkOut);
-        }
-
-        function updateConfirmCtaState() {
-          if (!confirmLink) {
-            return;
-          }
-          var isReady = hasValidStaySelection();
-          confirmLink.classList.toggle("is-disabled", !isReady);
-          confirmLink.setAttribute("aria-disabled", isReady ? "false" : "true");
-          if (isReady) {
-            confirmLink.removeAttribute("tabindex");
-          } else {
-            confirmLink.setAttribute("tabindex", "-1");
-          }
-        }
-
-        function updateConfirmLink() {
-          sessionStorage.setItem(
-            "graffordConfirmDraft",
-            JSON.stringify({
-              room: currentRoom,
-              checkIn: checkIn ? formatYMD(checkIn) : "",
-              checkOut: checkOut ? formatYMD(checkOut) : "",
-              extraGuests: String(getExtraGuests()),
-            }),
-          );
-          confirmLink.href = "confirm.html";
-        }
-
-        if (confirmLink) {
-          confirmLink.addEventListener("click", function (e) {
-            if (confirmLink.classList.contains("is-disabled")) {
-              e.preventDefault();
-            }
-          });
-        }
-
-        function syncRoomCopy() {
-          roomCopies.forEach(function (el) {
-            var r = el.getAttribute("data-room");
-            if (r === currentRoom) {
-              el.hidden = false;
-              el.classList.add("is-visible");
-            } else {
-              el.hidden = true;
-              el.classList.remove("is-visible");
-            }
-          });
-        }
-
-        function renderGallery() {
-          var imgs = roomImages[currentRoom] || [];
-          var label = "Room " + currentRoom;
-          if (!imgs.length) {
-            mainImg.removeAttribute("src");
-            mainImg.alt = "No photos";
-            thumbsEl.innerHTML = "";
-            return;
-          }
-          galleryIndex = Math.min(galleryIndex, imgs.length - 1);
-          thumbsEl.classList.add("is-switching");
-          thumbsEl.innerHTML = "";
-          imgs.forEach(function (_, i) {
-            var b = document.createElement("button");
-            b.type = "button";
-            b.className =
-              "gallery-thumb" + (i === galleryIndex ? " is-active" : "");
-            b.setAttribute("aria-label", "Photo " + (i + 1));
-            b.addEventListener("click", function () {
-              if (i === galleryIndex) {
-                return;
-              }
-              galleryIndex = i;
-              renderGallery();
+            extraGuestsPlusBtn.addEventListener("click", function () {
+              setExtraGuests(getExtraGuests() + 1);
+              updatePricingSummary();
+              updateConfirmLink();
             });
-            thumbsEl.appendChild(b);
-          });
-          mainImg.classList.add("is-switching");
-          window.setTimeout(function () {
-            mainImg.src = imgs[galleryIndex];
-            mainImg.alt = label + " photo " + (galleryIndex + 1);
-            var onLoad = function () {
-              mainImg.removeEventListener("load", onLoad);
-              window.requestAnimationFrame(function () {
-                mainImg.classList.remove("is-switching");
-                thumbsEl.classList.remove("is-switching");
-              });
-            };
-            mainImg.addEventListener("load", onLoad);
-            if (mainImg.complete) {
-              window.requestAnimationFrame(function () {
-                mainImg.classList.remove("is-switching");
-                thumbsEl.classList.remove("is-switching");
-              });
-            }
-          }, galleryFadeMs);
-          updatePricingSummary();
-          updateConfirmLink();
-        }
+          }
 
-        function setRoom(room) {
-          currentRoom = room;
-          galleryIndex = 0;
-          checkIn = null;
-          checkOut = null;
-          if (calCheckinEl) {
-            calCheckinEl.textContent = "—";
-          }
-          if (calCheckoutEl) {
-            calCheckoutEl.textContent = "—";
-          }
-          if (availabilityEl) {
-            availabilityEl.textContent =
-              "Select check-in and check-out to see availability for this room.";
-            availabilityEl.classList.remove("is-ok");
-          }
-          typeButtons.forEach(function (btn) {
-            btn.classList.toggle(
-              "is-active",
-              btn.getAttribute("data-room") === room,
+          btnPrev.addEventListener("click", function () {
+            var imgs = roomImages[currentRoom];
+            if (!imgs || !imgs.length) return;
+            galleryIndex = (galleryIndex - 1 + imgs.length) % imgs.length;
+            renderGallery();
+          });
+
+          btnNext.addEventListener("click", function () {
+            var imgs = roomImages[currentRoom];
+            if (!imgs || !imgs.length) return;
+            galleryIndex = (galleryIndex + 1) % imgs.length;
+            renderGallery();
+          });
+
+          function sameDay(a, b) {
+            return (
+              a &&
+              b &&
+              a.getFullYear() === b.getFullYear() &&
+              a.getMonth() === b.getMonth() &&
+              a.getDate() === b.getDate()
             );
-          });
-          syncRoomCopy();
-          rebuildExtraSelect();
-          updateWeekdayRateDisplay();
-          renderGallery();
-          renderCalendar();
-          updatePricingSummary();
-          updateConfirmLink();
-          loadAvailability(room).then(function () {
-            renderCalendar();
-            updatePricingSummary();
-            updateConfirmLink();
-          });
-        }
-
-        typeButtons.forEach(function (btn) {
-          btn.addEventListener("click", function () {
-            setRoom(btn.getAttribute("data-room"));
-          });
-        });
-
-        if (extraGuestsMinusBtn) {
-          extraGuestsMinusBtn.addEventListener("click", function () {
-            setExtraGuests(getExtraGuests() - 1);
-            updatePricingSummary();
-            updateConfirmLink();
-          });
-        }
-
-        if (extraGuestsPlusBtn) {
-          extraGuestsPlusBtn.addEventListener("click", function () {
-            setExtraGuests(getExtraGuests() + 1);
-            updatePricingSummary();
-            updateConfirmLink();
-          });
-        }
-
-        btnPrev.addEventListener("click", function () {
-          var imgs = roomImages[currentRoom];
-          if (!imgs || !imgs.length) return;
-          galleryIndex = (galleryIndex - 1 + imgs.length) % imgs.length;
-          renderGallery();
-        });
-
-        btnNext.addEventListener("click", function () {
-          var imgs = roomImages[currentRoom];
-          if (!imgs || !imgs.length) return;
-          galleryIndex = (galleryIndex + 1) % imgs.length;
-          renderGallery();
-        });
-
-        function sameDay(a, b) {
-          return (
-            a &&
-            b &&
-            a.getFullYear() === b.getFullYear() &&
-            a.getMonth() === b.getMonth() &&
-            a.getDate() === b.getDate()
-          );
-        }
-
-        function dateLT(a, b) {
-          return dateCmp(a, b) < 0;
-        }
-
-        function canSelectCheckOut(ci, co) {
-          if (!ci || !co || !dateLT(ci, co)) {
-            return false;
           }
-          var cur = new Date(ci.getFullYear(), ci.getMonth(), ci.getDate());
-          var end = new Date(co.getFullYear(), co.getMonth(), co.getDate());
-          while (dateLT(cur, end)) {
-            if (occupiedNightSet.has(formatYMD(cur))) {
+
+          function dateLT(a, b) {
+            return dateCmp(a, b) < 0;
+          }
+
+          function canSelectCheckOut(ci, co) {
+            if (!ci || !co || !dateLT(ci, co)) {
               return false;
             }
-            cur = addDays(cur, 1);
-          }
-          return true;
-        }
-
-        function isLastDayOfMonth(d) {
-          if (!d) {
-            return false;
-          }
-          var last = new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate();
-          return d.getDate() === last;
-        }
-
-        function shiftCalendarMonth(delta, withFade) {
-          var nextView = new Date(
-            viewDate.getFullYear(),
-            viewDate.getMonth() + delta,
-            1,
-          );
-          var clampedNextView = clampViewMonth(nextView);
-          if (isSameMonth(clampedNextView, viewDate)) {
-            return;
-          }
-          if (!withFade || !bookingCalendar) {
-            viewDate = clampedNextView;
-            renderCalendar();
-            return;
-          }
-          if (monthFadeTimer) {
-            window.clearTimeout(monthFadeTimer);
-            monthFadeTimer = null;
-          }
-          bookingCalendar.classList.add("is-month-fading");
-          monthFadeTimer = window.setTimeout(function () {
-            viewDate = clampedNextView;
-            renderCalendar();
-            bookingCalendar.classList.remove("is-month-fading");
-            monthFadeTimer = null;
-          }, 180);
-        }
-
-        function loadAvailability(room) {
-          return fetch(
-            "/api/reservations?room=" +
-              encodeURIComponent(room) +
-              "&availability=1",
-          )
-            .then(function (r) {
-              return r.json();
-            })
-            .then(function (data) {
-              if (data && data.ok) {
-                occupiedNightSet = new Set(data.occupiedNights || []);
-              } else {
-                occupiedNightSet = new Set();
+            var cur = new Date(ci.getFullYear(), ci.getMonth(), ci.getDate());
+            var end = new Date(co.getFullYear(), co.getMonth(), co.getDate());
+            while (dateLT(cur, end)) {
+              if (occupiedNightSet.has(formatYMD(cur))) {
+                return false;
               }
-            })
-            .catch(function () {
-              occupiedNightSet = new Set();
-            });
-        }
-
-        function renderCalendar() {
-          viewDate = clampViewMonth(viewDate);
-          var y = viewDate.getFullYear();
-          var m = viewDate.getMonth();
-          var monthNames = [
-            "JANUARY",
-            "FEBRUARY",
-            "MARCH",
-            "APRIL",
-            "MAY",
-            "JUNE",
-            "JULY",
-            "AUGUST",
-            "SEPTEMBER",
-            "OCTOBER",
-            "NOVEMBER",
-            "DECEMBER",
-          ];
-          if (calYearLabel) {
-            calYearLabel.textContent = y + "년";
-          }
-          if (calMonthLabel) {
-            calMonthLabel.textContent = monthNames[m];
+              cur = addDays(cur, 1);
+            }
+            return true;
           }
 
-          var first = new Date(y, m, 1);
-          var startPad = first.getDay();
-          var lastDay = new Date(y, m + 1, 0).getDate();
-
-          calGrid.innerHTML = "";
-          for (var i = 0; i < startPad; i++) {
-            var empty = document.createElement("div");
-            empty.className = "cal-cell cal-empty";
-            calGrid.appendChild(empty);
+          function isLastDayOfMonth(d) {
+            if (!d) {
+              return false;
+            }
+            var last = new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate();
+            return d.getDate() === last;
           }
 
-          var inCheckoutMode = !!(checkIn && !checkOut);
-          if (calGrid) {
-            calGrid.classList.toggle("is-selecting-checkout", inCheckoutMode);
-          }
-          if (calPrev) {
-            var atMinMonth = isSameMonth(viewDate, minViewMonth);
-            calPrev.disabled = atMinMonth;
-            calPrev.setAttribute(
-              "aria-disabled",
-              atMinMonth ? "true" : "false",
+          function shiftCalendarMonth(delta, withFade) {
+            var nextView = new Date(
+              viewDate.getFullYear(),
+              viewDate.getMonth() + delta,
+              1,
             );
+            var clampedNextView = clampViewMonth(nextView);
+            if (isSameMonth(clampedNextView, viewDate)) {
+              return;
+            }
+            if (!withFade || !bookingCalendar) {
+              viewDate = clampedNextView;
+              renderCalendar();
+              return;
+            }
+            if (monthFadeTimer) {
+              window.clearTimeout(monthFadeTimer);
+              monthFadeTimer = null;
+            }
+            bookingCalendar.classList.add("is-month-fading");
+            monthFadeTimer = window.setTimeout(function () {
+              viewDate = clampedNextView;
+              renderCalendar();
+              bookingCalendar.classList.remove("is-month-fading");
+              monthFadeTimer = null;
+            }, 180);
           }
-          if (calNext) {
-            var atMaxMonth = isSameMonth(viewDate, maxViewMonth);
-            calNext.disabled = atMaxMonth;
-            calNext.setAttribute(
-              "aria-disabled",
-              atMaxMonth ? "true" : "false",
-            );
-          }
 
-          for (var d = 1; d <= lastDay; d++) {
-            var cellDate = new Date(y, m, d);
-            var btn = document.createElement("button");
-            btn.type = "button";
-            btn.className = "cal-cell cal-day";
-            btn.textContent = String(d);
-
-            var ymdStr = formatYMD(cellDate);
-            var isPast = isBlockedByPastOrCutoff(cellDate);
-            var targetKey = toDateKey(toStartOfDay(cellDate));
-            var limitKey = inCheckoutMode ? maxCheckOutKey : maxCheckInKey;
-            var isBeyondBookable = targetKey > limitKey;
-            var isOcc = occupiedNightSet.has(ymdStr);
-            var disabled = false;
-            var disabledReason = "";
-            if (isPast) {
-              disabled = true;
-              disabledReason = "past-or-cutoff";
-            } else if (isBeyondBookable) {
-              disabled = true;
-              disabledReason = "beyond-max-bookable";
-            } else if (isOcc) {
-              /* 체크아웃 선택 모드에서는 "점유일"도 체크아웃 후보로 허용 (당일 퇴실) */
-              if (
-                !(
-                  inCheckoutMode &&
-                  checkIn &&
-                  dateLT(checkIn, cellDate) &&
-                  canSelectCheckOut(checkIn, cellDate)
-                )
-              ) {
-                disabled = true;
-                disabledReason = "occupied-night";
-              }
-            }
-
-            btn.disabled = disabled;
-            btn.dataset.disabledReason = disabledReason || "enabled";
-
-            if (isPast || isBeyondBookable) {
-              btn.classList.add("cal-past");
-            } else if (isOcc) {
-              btn.classList.add("cal-past", "cal-booked");
-            }
-
-            if (checkIn && sameDay(cellDate, checkIn))
-              btn.classList.add("cal-checkin");
-            if (checkOut && sameDay(cellDate, checkOut))
-              btn.classList.add("cal-checkout");
-            if (
-              checkIn &&
-              checkOut &&
-              dateLT(checkIn, cellDate) &&
-              dateLT(cellDate, checkOut)
-            ) {
-              btn.classList.add("cal-range");
-            }
-
-            (function (dateCopy, btnEl) {
-              btnEl.addEventListener("click", function () {
-                if (btnEl.disabled) return;
-                var shouldMoveToNextMonth = false;
-                if (!checkIn || (checkIn && checkOut)) {
-                  // In check-in mode, trust render-time disabled state.
-                  checkIn = new Date(dateCopy);
-                  checkOut = null;
-                  if (isLastDayOfMonth(checkIn)) {
-                    shouldMoveToNextMonth = true;
-                  }
+          function loadAvailability(room) {
+            return fetch(
+              "/api/reservations?room=" +
+                encodeURIComponent(room) +
+                "&availability=1",
+            )
+              .then(function (r) {
+                return r.json();
+              })
+              .then(function (data) {
+                if (data && data.ok) {
+                  occupiedNightSet = new Set(data.occupiedNights || []);
                 } else {
-                  if (dateLT(dateCopy, checkIn)) {
+                  occupiedNightSet = new Set();
+                }
+              })
+              .catch(function () {
+                occupiedNightSet = new Set();
+              });
+          }
+
+          function renderCalendar() {
+            viewDate = clampViewMonth(viewDate);
+            var y = viewDate.getFullYear();
+            var m = viewDate.getMonth();
+            var monthNames = [
+              "JANUARY",
+              "FEBRUARY",
+              "MARCH",
+              "APRIL",
+              "MAY",
+              "JUNE",
+              "JULY",
+              "AUGUST",
+              "SEPTEMBER",
+              "OCTOBER",
+              "NOVEMBER",
+              "DECEMBER",
+            ];
+            if (calYearLabel) {
+              calYearLabel.textContent = y + "년";
+            }
+            if (calMonthLabel) {
+              calMonthLabel.textContent = monthNames[m];
+            }
+
+            var first = new Date(y, m, 1);
+            var startPad = first.getDay();
+            var lastDay = new Date(y, m + 1, 0).getDate();
+
+            calGrid.innerHTML = "";
+            for (var i = 0; i < startPad; i++) {
+              var empty = document.createElement("div");
+              empty.className = "cal-cell cal-empty";
+              calGrid.appendChild(empty);
+            }
+
+            var inCheckoutMode = !!(checkIn && !checkOut);
+            if (calGrid) {
+              calGrid.classList.toggle("is-selecting-checkout", inCheckoutMode);
+            }
+            if (calPrev) {
+              var atMinMonth = isSameMonth(viewDate, minViewMonth);
+              calPrev.disabled = atMinMonth;
+              calPrev.setAttribute(
+                "aria-disabled",
+                atMinMonth ? "true" : "false",
+              );
+            }
+            if (calNext) {
+              var atMaxMonth = isSameMonth(viewDate, maxViewMonth);
+              calNext.disabled = atMaxMonth;
+              calNext.setAttribute(
+                "aria-disabled",
+                atMaxMonth ? "true" : "false",
+              );
+            }
+
+            for (var d = 1; d <= lastDay; d++) {
+              var cellDate = new Date(y, m, d);
+              var btn = document.createElement("button");
+              btn.type = "button";
+              btn.className = "cal-cell cal-day";
+              btn.textContent = String(d);
+
+              var ymdStr = formatYMD(cellDate);
+              var isPast = isBlockedByPastOrCutoff(cellDate);
+              var targetKey = toDateKey(toStartOfDay(cellDate));
+              var limitKey = inCheckoutMode ? maxCheckOutKey : maxCheckInKey;
+              var isBeyondBookable = targetKey > limitKey;
+              var isOcc = occupiedNightSet.has(ymdStr);
+              var disabled = false;
+              var disabledReason = "";
+              if (isPast) {
+                disabled = true;
+                disabledReason = "past-or-cutoff";
+              } else if (isBeyondBookable) {
+                disabled = true;
+                disabledReason = "beyond-max-bookable";
+              } else if (isOcc) {
+                /* 체크아웃 선택 모드에서는 "점유일"도 체크아웃 후보로 허용 (당일 퇴실) */
+                if (
+                  !(
+                    inCheckoutMode &&
+                    checkIn &&
+                    dateLT(checkIn, cellDate) &&
+                    canSelectCheckOut(checkIn, cellDate)
+                  )
+                ) {
+                  disabled = true;
+                  disabledReason = "occupied-night";
+                }
+              }
+
+              btn.disabled = disabled;
+              btn.dataset.disabledReason = disabledReason || "enabled";
+
+              if (isPast || isBeyondBookable) {
+                btn.classList.add("cal-past");
+              } else if (isOcc) {
+                btn.classList.add("cal-past", "cal-booked");
+              }
+
+              if (checkIn && sameDay(cellDate, checkIn))
+                btn.classList.add("cal-checkin");
+              if (checkOut && sameDay(cellDate, checkOut))
+                btn.classList.add("cal-checkout");
+              if (
+                checkIn &&
+                checkOut &&
+                dateLT(checkIn, cellDate) &&
+                dateLT(cellDate, checkOut)
+              ) {
+                btn.classList.add("cal-range");
+              }
+
+              (function (dateCopy, btnEl) {
+                btnEl.addEventListener("click", function () {
+                  if (btnEl.disabled) return;
+                  var shouldMoveToNextMonth = false;
+                  if (!checkIn || (checkIn && checkOut)) {
+                    // In check-in mode, trust render-time disabled state.
                     checkIn = new Date(dateCopy);
                     checkOut = null;
-                  } else if (sameDay(dateCopy, checkIn)) {
-                    checkIn = null;
-                    checkOut = null;
-                  } else if (
-                    isBlockedByPastOrCutoff(dateCopy) ||
-                    isDateBeyondBookable(dateCopy, true) ||
-                    (occupiedNightSet.has(formatYMD(dateCopy)) &&
-                      !canSelectCheckOut(checkIn, dateCopy))
-                  ) {
-                    // Invalid checkout click should not clear existing check-in.
-                    return;
-                  } else if (!canSelectCheckOut(checkIn, dateCopy)) {
-                    // Keep current check-in; wait for a valid checkout selection.
-                    return;
+                    if (isLastDayOfMonth(checkIn)) {
+                      shouldMoveToNextMonth = true;
+                    }
                   } else {
-                    checkOut = new Date(dateCopy);
+                    if (dateLT(dateCopy, checkIn)) {
+                      checkIn = new Date(dateCopy);
+                      checkOut = null;
+                    } else if (sameDay(dateCopy, checkIn)) {
+                      checkIn = null;
+                      checkOut = null;
+                    } else if (
+                      isBlockedByPastOrCutoff(dateCopy) ||
+                      isDateBeyondBookable(dateCopy, true) ||
+                      (occupiedNightSet.has(formatYMD(dateCopy)) &&
+                        !canSelectCheckOut(checkIn, dateCopy))
+                    ) {
+                      // Invalid checkout click should not clear existing check-in.
+                      return;
+                    } else if (!canSelectCheckOut(checkIn, dateCopy)) {
+                      // Keep current check-in; wait for a valid checkout selection.
+                      return;
+                    } else {
+                      checkOut = new Date(dateCopy);
+                    }
                   }
-                }
-                if (calCheckinEl) {
-                  calCheckinEl.textContent = formatDisplay(checkIn);
-                }
-                if (calCheckoutEl) {
-                  calCheckoutEl.textContent = checkOut
-                    ? formatDisplay(checkOut)
-                    : "—";
-                }
+                  if (calCheckinEl) {
+                    calCheckinEl.textContent = formatDisplay(checkIn);
+                  }
+                  if (calCheckoutEl) {
+                    calCheckoutEl.textContent = checkOut
+                      ? formatDisplay(checkOut)
+                      : "—";
+                  }
 
-                if (availabilityEl) {
-                  if (checkIn && checkOut) {
-                    availabilityEl.textContent =
-                      "Available for Room " +
-                      currentRoom +
-                      " from " +
-                      formatDisplay(checkIn) +
-                      " to " +
-                      formatDisplay(checkOut) +
-                      ".";
-                    availabilityEl.classList.add("is-ok");
-                  } else if (checkIn) {
-                    availabilityEl.textContent = "Select check-out date.";
-                    availabilityEl.classList.remove("is-ok");
+                  if (availabilityEl) {
+                    if (checkIn && checkOut) {
+                      availabilityEl.textContent =
+                        "Available for Room " +
+                        currentRoom +
+                        " from " +
+                        formatDisplay(checkIn) +
+                        " to " +
+                        formatDisplay(checkOut) +
+                        ".";
+                      availabilityEl.classList.add("is-ok");
+                    } else if (checkIn) {
+                      availabilityEl.textContent = "Select check-out date.";
+                      availabilityEl.classList.remove("is-ok");
+                    } else {
+                      availabilityEl.textContent =
+                        "Select check-in and check-out to see availability for this room.";
+                      availabilityEl.classList.remove("is-ok");
+                    }
+                  }
+                  updatePricingSummary();
+                  updateConfirmLink();
+                  if (shouldMoveToNextMonth) {
+                    shiftCalendarMonth(1, true);
                   } else {
-                    availabilityEl.textContent =
-                      "Select check-in and check-out to see availability for this room.";
-                    availabilityEl.classList.remove("is-ok");
+                    renderCalendar();
                   }
-                }
-                updatePricingSummary();
-                updateConfirmLink();
-                if (shouldMoveToNextMonth) {
-                  shiftCalendarMonth(1, true);
-                } else {
-                  renderCalendar();
-                }
-              });
-            })(cellDate, btn);
+                });
+              })(cellDate, btn);
 
-            calGrid.appendChild(btn);
+              calGrid.appendChild(btn);
+            }
           }
-        }
 
-        calPrev.addEventListener("click", function () {
-          shiftCalendarMonth(-1, false);
-        });
-
-        calNext.addEventListener("click", function () {
-          shiftCalendarMonth(1, false);
-        });
-
-        if (fadeEl) {
-          var obs = new IntersectionObserver(
-            function (entries) {
-              entries.forEach(function (e) {
-                if (e.isIntersecting) {
-                  e.target.classList.add("is-visible");
-                  obs.unobserve(e.target);
-                }
-              });
-            },
-            { threshold: 0.12 },
-          );
-          obs.observe(fadeEl);
-        }
-
-        if (scrollButton && nextSection) {
-          scrollButton.addEventListener("click", function () {
-            nextSection.scrollIntoView({ behavior: "smooth", block: "start" });
+          calPrev.addEventListener("click", function () {
+            shiftCalendarMonth(-1, false);
           });
-        }
 
-        var allowedRooms = ["G1", "G2", "G3", "G4"];
-        var savedRoom = sessionStorage.getItem(
-          "graffordReservationSelectedRoom",
-        );
-        if (savedRoom) {
-          savedRoom = savedRoom.trim().toUpperCase();
-        }
-        var initialRoom =
-          savedRoom && allowedRooms.indexOf(savedRoom) !== -1
-            ? savedRoom
-            : "G1";
-        setRoom(initialRoom);
-        if (savedRoom && allowedRooms.indexOf(savedRoom) !== -1) {
-          var bookingAnchor = document.getElementById("reservation-booking");
-          if (bookingAnchor) {
-            requestAnimationFrame(function () {
-              bookingAnchor.scrollIntoView({
+          calNext.addEventListener("click", function () {
+            shiftCalendarMonth(1, false);
+          });
+
+          if (fadeEl) {
+            var obs = new IntersectionObserver(
+              function (entries) {
+                entries.forEach(function (e) {
+                  if (e.isIntersecting) {
+                    e.target.classList.add("is-visible");
+                    obs.unobserve(e.target);
+                  }
+                });
+              },
+              { threshold: 0.12 },
+            );
+            obs.observe(fadeEl);
+          }
+
+          if (scrollButton && nextSection) {
+            scrollButton.addEventListener("click", function () {
+              nextSection.scrollIntoView({
                 behavior: "smooth",
                 block: "start",
               });
             });
           }
-          sessionStorage.removeItem("graffordReservationSelectedRoom");
-        }
-      });
-    </script>
-    <script defer src="js/grafford-page-fade.js"></script>
-    <script src="js/site-business-footer.js"></script>
-    <script>
-      document.addEventListener("DOMContentLoaded", function () {
-        window.initSiteBusinessFooter({
-          instagram: {
-            href: "https://www.instagram.com/p/DWaqvQKkzye/",
-            imgSrc: "images/insta.png",
-          },
-          lines: [
-            "대표 : GRAFFORD",
-            "주소 : 제주특별자치도 서귀포시 토산중앙로 22",
-            "사업자등록번호 : 123-45-67890",
-            "전화 : 010-1234-5678",
-            "이메일 : info@grafford.com",
-            " ",
-            "© 2026 GRAFFORD. all rights reserved.",
-          ],
+
+          var allowedRooms = ["G1", "G2", "G3", "G4"];
+          var savedRoom = sessionStorage.getItem(
+            "graffordReservationSelectedRoom",
+          );
+          if (savedRoom) {
+            savedRoom = savedRoom.trim().toUpperCase();
+          }
+          var initialRoom =
+            savedRoom && allowedRooms.indexOf(savedRoom) !== -1
+              ? savedRoom
+              : "G1";
+          setRoom(initialRoom);
+          if (savedRoom && allowedRooms.indexOf(savedRoom) !== -1) {
+            var bookingAnchor = document.getElementById("reservation-booking");
+            if (bookingAnchor) {
+              requestAnimationFrame(function () {
+                bookingAnchor.scrollIntoView({
+                  behavior: "smooth",
+                  block: "start",
+                });
+              });
+            }
+            sessionStorage.removeItem("graffordReservationSelectedRoom");
+          }
         });
-      });
-    </script>
+      </script>
+      <script defer src="js/grafford-page-fade.js"></script>
+      <script src="js/site-business-footer.js"></script>
+      <script>
+        document.addEventListener("DOMContentLoaded", function () {
+          window.initSiteBusinessFooter({
+            instagram: {
+              href: "https://www.instagram.com/p/DWaqvQKkzye/",
+              imgSrc: "images/insta.png",
+            },
+            lines: [
+              "대표 : GRAFFORD",
+              "주소 : 제주특별자치도 서귀포시 토산중앙로 22",
+              "사업자등록번호 : 123-45-67890",
+              "전화 : 010-1234-5678",
+              "이메일 : info@grafford.com",
+              " ",
+              "© 2026 GRAFFORD. all rights reserved.",
+            ],
+          });
+        });
+      </script>
+    </div>
+
+    <div class="lang-en">
+      <section class="hero-section fullpage-section">
+        <div class="hero-media" aria-hidden="true">
+          <img
+            src="images/reservation.jpeg"
+            alt=""
+            class="hero-slide is-active"
+          />
+          <div class="hero-overlay"></div>
+        </div>
+        <header class="site-header hero-header">
+          <h1>RESERVATION</h1>
+        </header>
+        <button class="scroll-down-btn" aria-label="Scroll to booking">
+          <span></span>
+        </button>
+      </section>
+
+      <main class="content-section fullpage-section">
+        <div class="reservation-booking scroll-fade">
+          <div class="room-type-row">
+            <div class="room-type-bar" role="tablist" aria-label="Room type">
+              <button
+                type="button"
+                class="room-type-btn is-active"
+                data-room="G1"
+              ></button>
+              <button
+                type="button"
+                class="room-type-btn"
+                data-room="G2"
+              ></button>
+              <button
+                type="button"
+                class="room-type-btn"
+                data-room="G3"
+              ></button>
+              <button
+                type="button"
+                class="room-type-btn"
+                data-room="G4"
+              ></button>
+            </div>
+            <a
+              href="reserveinfo.html"
+              class="btn reserve-btn reservation-lookup-btn"
+            ></a>
+          </div>
+
+          <div class="reservation-split">
+            <div class="reservation-gallery">
+              <div class="gallery-main-wrap">
+                <button
+                  type="button"
+                  class="gallery-nav gallery-prev"
+                  aria-label="Previous photo"
+                ></button>
+                <img
+                  class="gallery-main-img"
+                  src="images/A00.jpg"
+                  alt="Room photo"
+                />
+                <button
+                  type="button"
+                  class="gallery-nav gallery-next"
+                  aria-label="Next photo"
+                ></button>
+                <div class="gallery-thumbs"></div>
+              </div>
+              <div class="room-copy-blocks">
+                <div
+                  class="room-detail-intro room-copy is-visible"
+                  data-room="G1"
+                >
+                  <p class="room-intro-desc">
+                    Ground 01 offers a view where the sea unfolds before your
+                    eyes.<br />
+                    In this place where the ocean and the earth coexist, one can
+                    feel the vast expanse of nature.<br />
+                    If you listen closely, you can hear the sound of the swaying
+                    tides meeting the warmth of the land.<br />
+                    On the unwavering solidity of this ground, we invite you to
+                    lay down your restless heart for a moment.
+                  </p>
+                  <br />
+                  <div
+                    class="room-meta-grid"
+                    role="list"
+                    aria-label="G1 객실 주요 정보"
+                  >
+                    <div class="room-meta-item" role="listitem">
+                      <h4 class="room-meta-title">Check-in/out</h4>
+                      <p class="room-meta-value">16:00 · 11:00</p>
+                    </div>
+                    <div class="room-meta-item" role="listitem">
+                      <h4 class="room-meta-title">
+                        Standard Guests/Max Guests
+                      </h4>
+                      <p class="room-meta-value">2 Guests / 2 Guests</p>
+                    </div>
+                    <div class="room-meta-item" role="listitem">
+                      <h4 class="room-meta-title">Configuration</h4>
+                      <p class="room-meta-value">
+                        1 Bedroom, 1 Bathroom, 1 Jacuzzi, Living Room
+                      </p>
+                    </div>
+                    <div class="room-meta-item" role="listitem">
+                      <h4 class="room-meta-title">Area</h4>
+                      <p class="room-meta-value">20㎡</p>
+                    </div>
+                  </div>
+                  <br />
+                  <div class="room-facility">
+                    <h4 class="room-meta-title room-facility-title"></h4>
+                    <div
+                      class="room-facility-list"
+                      role="list"
+                      aria-label="G1 유닛 시설 현황"
+                    >
+                      <div class="room-facility-item" role="listitem">
+                        <p class="room-facility-name">Living Room</p>
+                        <p class="room-facility-desc">
+                          TV, Sofa, Free WIFI, Bluetooth Speaker
+                        </p>
+                      </div>
+                      <div class="room-facility-item" role="listitem">
+                        <p class="room-facility-name">
+                          Kitchen (no cooking allowed)
+                        </p>
+                        <p class="room-facility-desc">
+                          Welcome kit, Refrigerator, Balmuda Drip Port &
+                          Toaster, Microwave, 2-person Tableware & Cup
+                        </p>
+                      </div>
+                      <div class="room-facility-item" role="listitem">
+                        <p class="room-facility-name">Bathroom</p>
+                        <p class="room-facility-desc">
+                          Bathroom Amenities (Shampoo, Conditioner, Body Wash,
+                          Hand Wash), Dyson Hair Dryer, Towel
+                        </p>
+                      </div>
+                      <div class="room-facility-item" role="listitem">
+                        <p class="room-facility-name">Bedroom</p>
+                        <p class="room-facility-desc">one Queen size bed</p>
+                      </div>
+                    </div>
+                  </div>
+                  <br />
+                  <p class="room-intro-desc2">
+                    ▸ Cooking is not possible, but you can heat up the food.<br />
+                    ▸ It's non-smoking room.<br />
+                    ▸ Pets are not allowed.<br />
+                    ▸ Candles are not allowed due to fire risk.<br />
+                    ▸ 1 car parking is available per ground.<br />
+                    ▸ If you stay for 2 nights or more, the consecutive discount
+                    is applied.<br />
+                  </p>
+                  <div class="room-plan-image-wrap">
+                    <img
+                      src="images/A-groundplan.png"
+                      alt="G1 객실 평면도"
+                      class="room-plan-image"
+                    />
+                  </div>
+                </div>
+                <div class="room-detail-intro room-copy" data-room="G2" hidden>
+                  <p class="room-intro-desc">
+                    Ground 02 is designed to offer a spacious sense of freedom
+                    within a cozy embrace.<br />
+                    Through the south-facing windows, the warmest sunlight is
+                    naturally invited in, allowing the interior to hold a deep,
+                    lingering warmth.<br />
+                    We hope that wherever that light rests, a gentle and tender
+                    tranquility takes root.
+                  </p>
+                  <br />
+                  <div
+                    class="room-meta-grid"
+                    role="list"
+                    aria-label="G2 객실 주요 정보"
+                  >
+                    <div class="room-meta-item" role="listitem">
+                      <h4 class="room-meta-title">Check-in/out</h4>
+                      <p class="room-meta-value">16:00 · 11:00</p>
+                    </div>
+                    <div class="room-meta-item" role="listitem">
+                      <h4 class="room-meta-title">
+                        Standard Guests/Max Guests
+                      </h4>
+                      <p class="room-meta-value">2 Guests / 2 Guests</p>
+                    </div>
+                    <div class="room-meta-item" role="listitem">
+                      <h4 class="room-meta-title">Configuration</h4>
+                      <p class="room-meta-value">
+                        1 Bedroom, 1 Bathroom, 1 Jacuzzi, Living Room
+                      </p>
+                    </div>
+                    <div class="room-meta-item" role="listitem">
+                      <h4 class="room-meta-title">Area</h4>
+                      <p class="room-meta-value">20㎡</p>
+                    </div>
+                  </div>
+                  <br />
+                  <div class="room-facility">
+                    <h4 class="room-meta-title room-facility-title"></h4>
+                    <div
+                      class="room-facility-list"
+                      role="list"
+                      aria-label="G2 유닛 시설 현황"
+                    >
+                      <div class="room-facility-item" role="listitem">
+                        <p class="room-facility-name">Living Room</p>
+                        <p class="room-facility-desc">
+                          TV, Sofa, Free WIFI, Bluetooth Speaker
+                        </p>
+                      </div>
+                      <div class="room-facility-item" role="listitem">
+                        <p class="room-facility-name">
+                          Kitchen (no cooking allowed)
+                        </p>
+                        <p class="room-facility-desc">
+                          Welcome kit, Refrigerator, Balmuda Drip Port &
+                          Toaster, Microwave, 2-person Tableware & Cup
+                        </p>
+                      </div>
+                      <div class="room-facility-item" role="listitem">
+                        <p class="room-facility-name">Bathroom</p>
+                        <p class="room-facility-desc">
+                          Bathroom Amenities (Shampoo, Conditioner, Body Wash,
+                          Hand Wash), Dyson Hair Dryer, Towel
+                        </p>
+                      </div>
+                      <div class="room-facility-item" role="listitem">
+                        <p class="room-facility-name">Bedroom</p>
+                        <p class="room-facility-desc">one Queen size bed</p>
+                      </div>
+                    </div>
+                  </div>
+                  <br />
+                  <p class="room-intro-desc2">
+                    ▸ Cooking is not possible, but you can heat up the food.<br />
+                    ▸ It's non-smoking room.<br />
+                    ▸ Pets are not allowed.<br />
+                    ▸ Candles are not allowed due to fire risk.<br />
+                    ▸ 1 car parking is available per ground.<br />
+                    ▸ If you stay for 2 nights or more, the consecutive discount
+                    is applied.<br />
+                  </p>
+                  <div class="room-plan-image-wrap">
+                    <img
+                      src="images/B-groundplan.png"
+                      alt="G2 객실 평면도"
+                      class="room-plan-image"
+                    />
+                  </div>
+                </div>
+                <div class="room-detail-intro room-copy" data-room="G3" hidden>
+                  <p class="room-intro-desc">
+                    Ground 03 is a space designed to fulfill the unique needs of
+                    every guest.<br />
+                    This rectangular ground exudes a sense of refined order,
+                    born from the balanced proportions between the interior and
+                    the courtyard.<br />
+                    We invite you to reclaim your life’s equilibrium through the
+                    quiet strength of this well-ordered space.
+                  </p>
+                  <br />
+                  <div
+                    class="room-meta-grid"
+                    role="list"
+                    aria-label="G3 객실 주요 정보"
+                  >
+                    <div class="room-meta-item" role="listitem">
+                      <h4 class="room-meta-title">Check-in/out</h4>
+                      <p class="room-meta-value">16:00 · 11:00</p>
+                    </div>
+                    <div class="room-meta-item" role="listitem">
+                      <h4 class="room-meta-title">
+                        Standard Guests/Max Guests
+                      </h4>
+                      <p class="room-meta-value">2 Guests / 4 Guests</p>
+                    </div>
+                    <div class="room-meta-item" role="listitem">
+                      <h4 class="room-meta-title">Configuration</h4>
+                      <p class="room-meta-value">
+                        1 Bedroom, 1 Bathroom, 1 Jacuzzi, Living Room
+                      </p>
+                    </div>
+                    <div class="room-meta-item" role="listitem">
+                      <h4 class="room-meta-title">Area</h4>
+                      <p class="room-meta-value">35㎡</p>
+                    </div>
+                  </div>
+                  <br />
+                  <div class="room-facility">
+                    <h4 class="room-meta-title room-facility-title"></h4>
+                    <div
+                      class="room-facility-list"
+                      role="list"
+                      aria-label="G3 유닛 시설 현황"
+                    >
+                      <div class="room-facility-item" role="listitem">
+                        <p class="room-facility-name">Living Room</p>
+                        <p class="room-facility-desc">
+                          TV, Sofa, Free WIFI, Bluetooth Speaker
+                        </p>
+                      </div>
+                      <div class="room-facility-item" role="listitem">
+                        <p class="room-facility-name">
+                          Kitchen (cooking allowed)
+                        </p>
+                        <p class="room-facility-desc">
+                          Welcome kit, Refrigerator, Balmuda Drip Port &
+                          Toaster, Microwave, 4-person Tableware & Cup, Cookware
+                        </p>
+                      </div>
+                      <div class="room-facility-item" role="listitem">
+                        <p class="room-facility-name">Bathroom</p>
+                        <p class="room-facility-desc">
+                          Bathroom Amenities (Shampoo, Conditioner, Body Wash,
+                          Hand Wash), Dyson Hair Dryer, Towel
+                        </p>
+                      </div>
+                      <div class="room-facility-item" role="listitem">
+                        <p class="room-facility-name">Bedroom</p>
+                        <p class="room-facility-desc">one Queen size bed</p>
+                      </div>
+                    </div>
+                  </div>
+                  <br />
+                  <p class="room-intro-desc2">
+                    ▸ Cooking is possible.<br />
+                    ▸ It's non-smoking room.<br />
+                    ▸ Pets are not allowed.<br />
+                    ▸ Candles are not allowed due to fire risk.<br />
+                    ▸ 1 car parking is available per ground.<br />
+                    ▸ If you stay for 2 nights or more, the consecutive discount
+                    is applied.<br />
+                  </p>
+                  <div class="room-plan-image-wrap">
+                    <img
+                      src="images/C-groundplan.png"
+                      alt="G3 객실 평면도"
+                      class="room-plan-image"
+                    />
+                  </div>
+                </div>
+                <div class="room-detail-intro room-copy" data-room="G4" hidden>
+                  <p class="room-intro-desc">
+                    As you step into Ground 04, the morning light gently drifts
+                    in through the east-facing windows.<br />
+                    The expansive courtyard allows a generous breeze to linger
+                    even when the windows are closed, evoking a profound sense
+                    that the earth is always by your side.<br />
+                    A long, stretching hallway connects every room within this
+                    ground, offering a liberation that transcends boundaries.<br />
+                    Along this path where limits dissolve, may your thoughts
+                    also flow with absolute freedom.s
+                  </p>
+                  <br />
+                  <div
+                    class="room-meta-grid"
+                    role="list"
+                    aria-label="G4 객실 주요 정보"
+                  >
+                    <div class="room-meta-item" role="listitem">
+                      <h4 class="room-meta-title">Check-in/out</h4>
+                      <p class="room-meta-value">16:00 · 11:00</p>
+                    </div>
+                    <div class="room-meta-item" role="listitem">
+                      <h4 class="room-meta-title">
+                        Standard Guests/Max Guests
+                      </h4>
+                      <p class="room-meta-value">2 Guests / 6 Guests</p>
+                    </div>
+                    <div class="room-meta-item" role="listitem">
+                      <h4 class="room-meta-title">Configuration</h4>
+                      <p class="room-meta-value">
+                        2 Bedrooms, 1 Bathroom, 1 Jacuzzi, Living Room
+                      </p>
+                    </div>
+                    <div class="room-meta-item" role="listitem">
+                      <h4 class="room-meta-title">Area</h4>
+                      <p class="room-meta-value">60㎡</p>
+                    </div>
+                  </div>
+                  <br />
+                  <div class="room-facility">
+                    <h4 class="room-meta-title room-facility-title"></h4>
+                    <div
+                      class="room-facility-list"
+                      role="list"
+                      aria-label="G4 유닛 시설 현황"
+                    >
+                      <div class="room-facility-item" role="listitem">
+                        <p class="room-facility-name">Living Room</p>
+                        <p class="room-facility-desc">
+                          TV, Sofa, Free WIFI, Bluetooth Speaker
+                        </p>
+                      </div>
+                      <div class="room-facility-item" role="listitem">
+                        <p class="room-facility-name">
+                          Kitchen (cooking allowed)
+                        </p>
+                        <p class="room-facility-desc">
+                          Welcome kit, Refrigerator, Balmuda Drip Port &
+                          Toaster, Microwave, 6-person Tableware & Cup, Cookware
+                        </p>
+                      </div>
+                      <div class="room-facility-item" role="listitem">
+                        <p class="room-facility-name">Bathroom</p>
+                        <p class="room-facility-desc">
+                          Bathroom Amenities (Shampoo, Conditioner, Body Wash,
+                          Hand Wash), Dyson Hair Dryer, Towel
+                        </p>
+                      </div>
+                      <div class="room-facility-item" role="listitem">
+                        <p class="room-facility-name">Bedroom</p>
+                        <p class="room-facility-desc">
+                          two Queen size beds, one Single size bed
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                  <br />
+                  <p class="room-intro-desc2">
+                    <br /><br /><br /><br /><br /><br /><br /><br />
+                  </p>
+                  <div class="room-plan-image-wrap">
+                    <img
+                      src="images/D-groundplan.png"
+                      alt="G4 객실 평면도"
+                      class="room-plan-image"
+                    />
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="reservation-calendar-panel">
+              <div class="booking-calendar">
+                <h3 class="cal-year-title"></h3>
+                <div class="cal-header">
+                  <button
+                    type="button"
+                    class="cal-nav"
+                    aria-label="Previous month"
+                  ></button>
+                  <span class="cal-month-label"></span>
+                  <button
+                    type="button"
+                    class="cal-nav"
+                    aria-label="Next month"
+                  ></button>
+                </div>
+                <div class="cal-weekdays">
+                  <span></span><span></span><span></span><span></span
+                  ><span></span><span></span><span></span>
+                </div>
+                <div class="cal-grid"></div>
+              </div>
+
+              <div class="reservation-extra-block">
+                <div class="reservation-extra-row">
+                  <span class="reservation-extra-label"></span>
+                  <div
+                    class="reservation-extra-stepper"
+                    aria-describedby="extra-guests-hint"
+                  >
+                    <button
+                      type="button"
+                      class="reservation-extra-btn"
+                      aria-label="추가 인원 감소"
+                    ></button>
+                    <span class="reservation-extra-count"></span>
+                    <button
+                      type="button"
+                      class="reservation-extra-btn"
+                      aria-label="추가 인원 증가"
+                    ></button>
+                  </div>
+                </div>
+                <p class="reservation-extra-hint"></p>
+              </div>
+              <div class="reservation-price-summary">
+                <p class="reservation-price-placeholder"></p>
+                <p class="reservation-price-total" hidden></p>
+              </div>
+              <a href="confirm.html" class="btn reserve-btn reserve-cta"></a>
+            </div>
+          </div>
+        </div>
+
+        <footer class="site-footer site-business-footer" hidden></footer>
+      </main>
+    </div>
   </body>
 </html>

@@ -26,6 +26,7 @@
     </script>
     <script src="js/nav-hero.js" defer></script>
     <script src="js/mobile-nav.js" defer></script>
+    <script src="js/site-language.js" defer></script>
   </head>
   <body class="home-page page-hero-nav-sync">
     <div id="grafford-react-fade-root"></div>
@@ -54,283 +55,406 @@
         <a href="RESERVATION.html">RESERVATION</a>
       </aside>
       <div class="desktop-nav-links" aria-label="데스크톱 메뉴">
+        <div
+          class="lang-switch"
+          data-language-switch
+          aria-label="Language switch"
+        >
+          <button type="button" class="lang-switch__btn" data-lang-option="kr">
+            KR
+          </button>
+          <span class="lang-switch__divider" aria-hidden="true">|</span>
+          <button type="button" class="lang-switch__btn" data-lang-option="en">
+            EN
+          </button>
+        </div>
         <a href="STORY.html">STORY</a>
         <a href="GROUND.html">GROUND</a>
         <a href="FACILITIES.html">FACILITIES</a>
         <a href="RESERVATION.html">RESERVATION</a>
       </div>
     </nav>
-
-    <section class="hero-section fullpage-section" id="hero">
-      <div class="hero-media" aria-hidden="true">
-        <img src="images/story.jpeg" alt="" class="hero-slide is-active" />
-        <div class="hero-overlay"></div>
-      </div>
-      <header class="site-header hero-header">
-        <h1>STORY</h1>
-      </header>
-      <button
-        class="scroll-down-btn"
-        id="scroll-down-btn"
-        aria-label="다음 섹션으로 이동"
-      >
-        <span></span>
-      </button>
-    </section>
-
-    <main class="content-section fullpage-section" id="content">
-      <section class="features features--story">
-        <article
-          class="feature feature-story-1 scroll-fade my-[8vh] bg-[var(--chocolate-brown)] text-[var(--grafford-beige)] md:my-[8vh]"
+    <div class="lang-kr">
+      <section class="hero-section fullpage-section" id="hero">
+        <div class="hero-media" aria-hidden="true">
+          <img src="images/story.jpeg" alt="" class="hero-slide is-active" />
+          <div class="hero-overlay"></div>
+        </div>
+        <header class="site-header hero-header">
+          <h1>STORY</h1>
+        </header>
+        <button
+          class="scroll-down-btn"
+          id="scroll-down-btn"
+          aria-label="다음 섹션으로 이동"
         >
-          <div class="feature-media w-full min-h-0 shrink-0">
-            <img
-              src="images/story.jpeg"
-              alt="GRAFFORD 시작 이야기"
-              class="feature-image block max-w-full"
-            />
-          </div>
-          <div
-            class="feature-text flex min-h-0 flex-col justify-center gap-3 px-4 py-6 text-left md:px-[clamp(1.25rem,3vw,3rem)] md:py-8"
+          <span></span>
+        </button>
+      </section>
+
+      <main class="content-section fullpage-section" id="content">
+        <section class="features features--story">
+          <article
+            class="feature feature-story-1 scroll-fade my-[8vh] bg-[var(--chocolate-brown)] text-[var(--grafford-beige)] md:my-[8vh]"
           >
-            <h3
-              class="feature-heading text-lg font-semibold tracking-wide text-grafford-dark md:text-3xl md:font-medium"
+            <div class="feature-media w-full min-h-0 shrink-0">
+              <img
+                src="images/story.jpeg"
+                alt="GRAFFORD 시작 이야기"
+                class="feature-image block max-w-full"
+              />
+            </div>
+            <div
+              class="feature-text flex min-h-0 flex-col justify-center gap-3 px-4 py-6 text-left md:px-[clamp(1.25rem,3vw,3rem)] md:py-8"
             >
-              Beginning
-            </h3>
-            <p
-              class="feature-body text-sm leading-relaxed text-grafford-mud md:text-base md:leading-relaxed"
-            >
-              흔들림 없이 사람을 지지해 주는 땅, 자연스럽게 이어지며 잠시 쉬어
-              갈 수 있는 여울길.<br />
-              이 두 단어가 만난 그라포드는 땅의 묵직함과 여울의 부드러움을
-              동시에 품은 공간입니다.<br />
-              바쁜 일상 속에서 잠시 멈춰 쉴 수 있는 든든한 바탕. <br />
-              그라포드가 추구하는 가치입니다.
-            </p>
-          </div>
-        </article>
-        <article
-          class="feature feature-story-2 scroll-fade my-[8vh] bg-[var(--chocolate-brown)] text-[var(--grafford-beige)] md:my-[8vh]"
-        >
-          <div
-            class="feature-text flex min-h-0 flex-col justify-center gap-3 px-4 py-6 text-left md:px-[clamp(1.25rem,3vw,3rem)] md:py-8"
-          >
-            <h3
-              class="feature-heading text-lg font-semibold tracking-wide text-grafford-dark md:text-3xl md:font-medium"
-            >
-              Designing Spaces
-            </h3>
-            <p
-              class="feature-body text-sm leading-relaxed text-grafford-mud md:text-base md:leading-relaxed"
-            >
-              GRAffORD는 로스터리 카페를 함께 하는 스테이입니다.<br />
-              우리가 추구하는 커피는 화려한 기술보다 불편함을 정제하는 과정에
-              집중합니다. <br />
-              혀끝을 찌르는 과한 산미, 입안에 남는 텁텁함, 마음을 조급하게
-              만드는 서두름.<br />
-              그라포드는 커피가 줄 수 있는 모든 불편한 감각들을 섬세하게
-              걸러내어, 오직 부드러운 몰입의 시간만을 드리기 위해 노력합니다.
-            </p>
-          </div>
-          <div
-            class="feature-media feature-media--story-gallery w-full min-h-0 shrink-0"
+              <p
+                class="feature-body text-sm leading-relaxed text-grafford-mud md:text-base md:leading-relaxed"
+              >
+                흔들림 없이 사람을 지지해 주는 땅, 자연스럽게 이어지며 잠시 쉬어
+                갈 수 있는 여울길.<br />
+                이 두 단어가 만난 그라포드는 땅의 묵직함과 여울의 부드러움을
+                동시에 품은 공간입니다.<br />
+                바쁜 일상 속에서 잠시 멈춰 쉴 수 있는 든든한 바탕. <br />
+                그라포드가 추구하는 가치입니다.
+              </p>
+            </div>
+          </article>
+          <article
+            class="feature feature-story-2 scroll-fade my-[8vh] bg-[var(--chocolate-brown)] text-[var(--grafford-beige)] md:my-[8vh]"
           >
             <div
-              class="room-image-slot room-image-slot--carousel w-full shrink-0"
-              id="story-cafe-gallery"
-              aria-label="로스터리 카페 사진"
+              class="feature-text flex min-h-0 flex-col justify-center gap-3 px-4 py-6 text-left md:px-[clamp(1.25rem,3vw,3rem)] md:py-8"
             >
-              <div class="room-slot-gallery">
-                <div class="gallery-main-wrap">
-                  <button
-                    type="button"
-                    class="gallery-nav gallery-prev room-slot-nav-prev"
-                    aria-label="이전 사진"
-                  >
-                    &#10094;
-                  </button>
-                  <img
-                    class="room-slot-main-img w-full min-h-0 object-cover"
-                    src="images/cafe01.jpg"
-                    alt="카페 사진"
-                  />
-                  <button
-                    type="button"
-                    class="gallery-nav gallery-next room-slot-nav-next"
-                    aria-label="다음 사진"
-                  >
-                    &#10095;
-                  </button>
+              <h3
+                class="feature-heading text-lg font-semibold tracking-wide text-grafford-dark md:text-3xl md:font-medium"
+              >
+                Designing Spaces
+              </h3>
+              <p
+                class="feature-body text-sm leading-relaxed text-grafford-mud md:text-base md:leading-relaxed"
+              >
+                GRAffORD는 로스터리 카페를 함께 하는 스테이입니다.<br />
+                우리가 추구하는 커피는 화려한 기술보다 불편함을 정제하는 과정에
+                집중합니다. <br />
+                혀끝을 찌르는 과한 산미, 입안에 남는 텁텁함, 마음을 조급하게
+                만드는 서두름.<br />
+                그라포드는 커피가 줄 수 있는 모든 불편한 감각들을 섬세하게
+                걸러내어, 오직 부드러운 몰입의 시간만을 드리기 위해 노력합니다.
+              </p>
+            </div>
+            <div
+              class="feature-media feature-media--story-gallery w-full min-h-0 shrink-0"
+            >
+              <div
+                class="room-image-slot room-image-slot--carousel w-full shrink-0"
+                id="story-cafe-gallery"
+                aria-label="로스터리 카페 사진"
+              >
+                <div class="room-slot-gallery">
+                  <div class="gallery-main-wrap">
+                    <button
+                      type="button"
+                      class="gallery-nav gallery-prev room-slot-nav-prev"
+                      aria-label="이전 사진"
+                    >
+                      &#10094;
+                    </button>
+                    <img
+                      class="room-slot-main-img w-full min-h-0 object-cover"
+                      src="images/cafe01.jpg"
+                      alt="카페 사진"
+                    />
+                    <button
+                      type="button"
+                      class="gallery-nav gallery-next room-slot-nav-next"
+                      aria-label="다음 사진"
+                    >
+                      &#10095;
+                    </button>
+                  </div>
+                  <div class="gallery-thumbs room-slot-thumbs"></div>
                 </div>
-                <div class="gallery-thumbs room-slot-thumbs"></div>
               </div>
             </div>
-          </div>
-        </article>
-      </section>
-      <footer
-        id="site-business-footer-mount"
-        class="site-footer site-business-footer"
-        hidden
-      ></footer>
-    </main>
+          </article>
+        </section>
+        <footer
+          id="site-business-footer-mount"
+          class="site-footer site-business-footer"
+          hidden
+        ></footer>
+      </main>
 
-    <script>
-      document.addEventListener("DOMContentLoaded", function () {
-        const fadeTargets = document.querySelectorAll(".scroll-fade");
-        const scrollButton = document.getElementById("scroll-down-btn");
-        const nextSection = document.getElementById("content");
+      <script>
+        document.addEventListener("DOMContentLoaded", function () {
+          const fadeTargets = document.querySelectorAll(".scroll-fade");
+          const scrollButton = document.getElementById("scroll-down-btn");
+          const nextSection = document.getElementById("content");
 
-        const observer = new IntersectionObserver(
-          function (entries) {
-            entries.forEach(function (entry) {
-              if (entry.isIntersecting) {
-                entry.target.classList.add("is-visible");
-                observer.unobserve(entry.target);
-              }
-            });
-          },
-          { threshold: 0.2 },
-        );
-
-        fadeTargets.forEach(function (el) {
-          observer.observe(el);
-        });
-
-        if (scrollButton && nextSection) {
-          scrollButton.addEventListener("click", function () {
-            nextSection.scrollIntoView({ behavior: "smooth", block: "start" });
-          });
-        }
-
-        var storyCafeImages = [
-          "images/cafe01.jpg",
-          "images/cafe02.jpg",
-          "images/cafe03.jpg",
-          "images/cafe04.jpg",
-          "images/cafe05.jpg",
-          "images/cafe06.jpg",
-        ];
-
-        function startStoryCafeGallery(slot) {
-          var imgs = storyCafeImages;
-          var imgEl = slot.querySelector(".room-slot-main-img");
-          var thumbsEl = slot.querySelector(".room-slot-thumbs");
-          var btnPrev = slot.querySelector(".room-slot-nav-prev");
-          var btnNext = slot.querySelector(".room-slot-nav-next");
-          if (!imgs.length || !imgEl || !thumbsEl) {
-            return;
-          }
-          var index = 0;
-          var fadeMs = 650;
-          var intervalMs = 5000;
-          var autoTimer = null;
-          var label = "카페";
-
-          function renderThumbs() {
-            thumbsEl.innerHTML = "";
-            imgs.forEach(function (_, i) {
-              var b = document.createElement("button");
-              b.type = "button";
-              b.className = "gallery-thumb" + (i === index ? " is-active" : "");
-              b.setAttribute("aria-label", label + " 사진 " + (i + 1));
-              b.addEventListener("click", function () {
-                if (i === index) {
-                  return;
+          const observer = new IntersectionObserver(
+            function (entries) {
+              entries.forEach(function (entry) {
+                if (entry.isIntersecting) {
+                  entry.target.classList.add("is-visible");
+                  observer.unobserve(entry.target);
                 }
-                goToIndex(i);
-                resetAutoTimer();
               });
-              thumbsEl.appendChild(b);
+            },
+            { threshold: 0.2 },
+          );
+
+          fadeTargets.forEach(function (el) {
+            observer.observe(el);
+          });
+
+          if (scrollButton && nextSection) {
+            scrollButton.addEventListener("click", function () {
+              nextSection.scrollIntoView({
+                behavior: "smooth",
+                block: "start",
+              });
             });
           }
 
-          function goToIndex(newIndex) {
-            newIndex = ((newIndex % imgs.length) + imgs.length) % imgs.length;
-            if (newIndex === index) {
+          var storyCafeImages = [
+            "images/cafe01.jpg",
+            "images/cafe02.jpg",
+            "images/cafe03.jpg",
+            "images/cafe04.jpg",
+            "images/cafe05.jpg",
+            "images/cafe06.jpg",
+          ];
+
+          function startStoryCafeGallery(slot) {
+            var imgs = storyCafeImages;
+            var imgEl = slot.querySelector(".room-slot-main-img");
+            var thumbsEl = slot.querySelector(".room-slot-thumbs");
+            var btnPrev = slot.querySelector(".room-slot-nav-prev");
+            var btnNext = slot.querySelector(".room-slot-nav-next");
+            if (!imgs.length || !imgEl || !thumbsEl) {
               return;
             }
-            index = newIndex;
-            thumbsEl.classList.add("is-switching");
-            renderThumbs();
-            imgEl.classList.add("is-switching");
-            window.setTimeout(function () {
-              imgEl.src = imgs[index];
-              imgEl.alt = label + " 사진 " + (index + 1);
-              var onLoad = function () {
-                imgEl.removeEventListener("load", onLoad);
-                window.requestAnimationFrame(function () {
-                  imgEl.classList.remove("is-switching");
-                  thumbsEl.classList.remove("is-switching");
-                });
-              };
-              imgEl.addEventListener("load", onLoad);
-              if (imgEl.complete) {
-                window.requestAnimationFrame(function () {
-                  imgEl.classList.remove("is-switching");
-                  thumbsEl.classList.remove("is-switching");
-                });
-              }
-            }, fadeMs);
-          }
+            var index = 0;
+            var fadeMs = 650;
+            var intervalMs = 5000;
+            var autoTimer = null;
+            var label = "카페";
 
-          function goNext() {
-            goToIndex(index + 1);
-          }
-
-          function resetAutoTimer() {
-            if (autoTimer) {
-              window.clearInterval(autoTimer);
+            function renderThumbs() {
+              thumbsEl.innerHTML = "";
+              imgs.forEach(function (_, i) {
+                var b = document.createElement("button");
+                b.type = "button";
+                b.className =
+                  "gallery-thumb" + (i === index ? " is-active" : "");
+                b.setAttribute("aria-label", label + " 사진 " + (i + 1));
+                b.addEventListener("click", function () {
+                  if (i === index) {
+                    return;
+                  }
+                  goToIndex(i);
+                  resetAutoTimer();
+                });
+                thumbsEl.appendChild(b);
+              });
             }
-            autoTimer = window.setInterval(goNext, intervalMs);
-          }
 
-          renderThumbs();
-          if (btnPrev) {
-            btnPrev.addEventListener("click", function () {
-              goToIndex(index - 1);
-              resetAutoTimer();
-            });
-          }
-          if (btnNext) {
-            btnNext.addEventListener("click", function () {
+            function goToIndex(newIndex) {
+              newIndex = ((newIndex % imgs.length) + imgs.length) % imgs.length;
+              if (newIndex === index) {
+                return;
+              }
+              index = newIndex;
+              thumbsEl.classList.add("is-switching");
+              renderThumbs();
+              imgEl.classList.add("is-switching");
+              window.setTimeout(function () {
+                imgEl.src = imgs[index];
+                imgEl.alt = label + " 사진 " + (index + 1);
+                var onLoad = function () {
+                  imgEl.removeEventListener("load", onLoad);
+                  window.requestAnimationFrame(function () {
+                    imgEl.classList.remove("is-switching");
+                    thumbsEl.classList.remove("is-switching");
+                  });
+                };
+                imgEl.addEventListener("load", onLoad);
+                if (imgEl.complete) {
+                  window.requestAnimationFrame(function () {
+                    imgEl.classList.remove("is-switching");
+                    thumbsEl.classList.remove("is-switching");
+                  });
+                }
+              }, fadeMs);
+            }
+
+            function goNext() {
               goToIndex(index + 1);
+            }
+
+            function resetAutoTimer() {
+              if (autoTimer) {
+                window.clearInterval(autoTimer);
+              }
+              autoTimer = window.setInterval(goNext, intervalMs);
+            }
+
+            renderThumbs();
+            if (btnPrev) {
+              btnPrev.addEventListener("click", function () {
+                goToIndex(index - 1);
+                resetAutoTimer();
+              });
+            }
+            if (btnNext) {
+              btnNext.addEventListener("click", function () {
+                goToIndex(index + 1);
+                resetAutoTimer();
+              });
+            }
+
+            window.setTimeout(function () {
               resetAutoTimer();
-            });
+            }, 400);
           }
 
-          window.setTimeout(function () {
-            resetAutoTimer();
-          }, 400);
-        }
-
-        var storyCafeSlot = document.getElementById("story-cafe-gallery");
-        if (storyCafeSlot) {
-          startStoryCafeGallery(storyCafeSlot);
-        }
-      });
-    </script>
-    <script defer src="js/grafford-page-fade.js"></script>
-    <script src="js/site-business-footer.js"></script>
-    <script>
-      document.addEventListener("DOMContentLoaded", function () {
-        window.initSiteBusinessFooter({
-          instagram: {
-            href: "https://www.instagram.com/p/DWaqvQKkzye/",
-            imgSrc: "images/insta.png",
-          },
-          lines: [
-            "대표 : GRAFFORD",
-            "주소 : 제주특별자치도 서귀포시 토산중앙로 22",
-            "사업자등록번호 : 123-45-67890",
-            "전화 : 010-1234-5678",
-            "이메일 : info@grafford.com",
-            " ",
-            "© 2026 GRAFFORD. all rights reserved.",
-          ],
+          var storyCafeSlots = document.querySelectorAll(
+            ".feature-story-2 .room-image-slot--carousel",
+          );
+          storyCafeSlots.forEach(function (slot) {
+            if (slot.dataset.galleryInitialized === "true") {
+              return;
+            }
+            slot.dataset.galleryInitialized = "true";
+            startStoryCafeGallery(slot);
+          });
         });
-      });
-    </script>
+      </script>
+      <script defer src="js/grafford-page-fade.js"></script>
+      <script src="js/site-business-footer.js"></script>
+      <script>
+        document.addEventListener("DOMContentLoaded", function () {
+          window.initSiteBusinessFooter({
+            instagram: {
+              href: "https://www.instagram.com/p/DWaqvQKkzye/",
+              imgSrc: "images/insta.png",
+            },
+            lines: [
+              "대표 : GRAFFORD",
+              "주소 : 제주특별자치도 서귀포시 토산중앙로 22",
+              "사업자등록번호 : 123-45-67890",
+              "전화 : 010-1234-5678",
+              "이메일 : info@grafford.com",
+              " ",
+              "© 2026 GRAFFORD. all rights reserved.",
+            ],
+          });
+        });
+      </script>
+    </div>
+    <div class="lang-en">
+      <section class="hero-section fullpage-section">
+        <div class="hero-media" aria-hidden="true">
+          <img src="images/story.jpeg" alt="" class="hero-slide is-active" />
+          <div class="hero-overlay"></div>
+        </div>
+        <header class="site-header hero-header">
+          <h1></h1>
+        </header>
+        <button class="scroll-down-btn" aria-label="다음 섹션으로 이동">
+          <span></span>
+        </button>
+      </section>
+
+      <main class="content-section fullpage-section">
+        <section class="features features--story">
+          <article
+            class="feature feature-story-1 scroll-fade my-[8vh] bg-[var(--chocolate-brown)] text-[var(--grafford-beige)] md:my-[8vh]"
+          >
+            <div class="feature-media w-full min-h-0 shrink-0">
+              <img
+                src="images/story.jpeg"
+                alt="GRAFFORD 시작 이야기"
+                class="feature-image block max-w-full"
+              />
+            </div>
+            <div
+              class="feature-text flex min-h-0 flex-col justify-center gap-3 px-4 py-6 text-left md:px-[clamp(1.25rem,3vw,3rem)] md:py-8"
+            >
+              <h3
+                class="feature-heading text-lg font-semibold tracking-wide text-grafford-dark md:text-3xl md:font-medium"
+              ></h3>
+              <p
+                class="feature-body text-sm leading-relaxed text-grafford-mud md:text-base md:leading-relaxed"
+              >
+                "Ground," an unwavering support beneath our feet; and "Ford," a
+                naturally flowing crossing where one can pause briefly.<br />
+                These two words unite to form Grafford, a space that embraces
+                both the firm weight of the land and the gentle flow of a
+                ford.<br />
+                In the bustle of everyday life, Grafford is the reliable base
+                that lets you stop and take a moment’s rest.<br />
+                This is the value that Grafford pursues.
+              </p>
+            </div>
+          </article>
+          <article
+            class="feature feature-story-2 scroll-fade my-[8vh] bg-[var(--chocolate-brown)] text-[var(--grafford-beige)] md:my-[8vh]"
+          >
+            <div
+              class="feature-text flex min-h-0 flex-col justify-center gap-3 px-4 py-6 text-left md:px-[clamp(1.25rem,3vw,3rem)] md:py-8"
+            >
+              <h3
+                class="feature-heading text-lg font-semibold tracking-wide text-grafford-dark md:text-3xl md:font-medium"
+              ></h3>
+              <p
+                class="feature-body text-sm leading-relaxed text-grafford-mud md:text-base md:leading-relaxed"
+              >
+                Grafford is a stay that operates its own coffee roastery. The
+                coffee, beverages, and desserts we pursue focus on the process
+                of refining discomfort rather than showcasing flashy
+                techniques.<br />
+                The sharp acidity that pricks the tongue, the lingering
+                bitterness in the mouth, and the haste that stirs a sense of
+                urgency—Grafford delicately filters out all the uneasy
+                sensations that food and drink can bring.<br />
+                In their place, we strive to offer you only a time of smooth,
+                quiet immersion.
+              </p>
+            </div>
+            <div
+              class="feature-media feature-media--story-gallery w-full min-h-0 shrink-0"
+            >
+              <div
+                class="room-image-slot room-image-slot--carousel w-full shrink-0"
+                aria-label="로스터리 카페 사진"
+              >
+                <div class="room-slot-gallery">
+                  <div class="gallery-main-wrap">
+                    <button
+                      type="button"
+                      class="gallery-nav gallery-prev room-slot-nav-prev"
+                      aria-label="이전 사진"
+                    ></button>
+                    <img
+                      class="room-slot-main-img w-full min-h-0 object-cover"
+                      src="images/cafe01.jpg"
+                      alt="카페 사진"
+                    />
+                    <button
+                      type="button"
+                      class="gallery-nav gallery-next room-slot-nav-next"
+                      aria-label="다음 사진"
+                    ></button>
+                  </div>
+                  <div class="gallery-thumbs room-slot-thumbs"></div>
+                </div>
+              </div>
+            </div>
+          </article>
+        </section>
+        <footer class="site-footer site-business-footer" hidden></footer>
+      </main>
+    </div>
   </body>
 </html>

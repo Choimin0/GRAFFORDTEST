@@ -7,6 +7,7 @@
     <title>결제 진행 - GRAFFORD</title>
     <link rel="stylesheet" href="css/style.css" />
     <script src="js/mobile-nav.js" defer></script>
+    <script src="js/site-language.js" defer></script>
   </head>
   <body>
     <div id="grafford-react-fade-root"></div>
@@ -35,12 +36,22 @@
         <a href="RESERVATION.html">RESERVATION</a>
       </aside>
       <div class="desktop-nav-links" aria-label="데스크톱 메뉴">
+        <div class="lang-switch" data-language-switch aria-label="Language switch">
+          <button type="button" class="lang-switch__btn" data-lang-option="kr">
+            KR
+          </button>
+          <span class="lang-switch__divider" aria-hidden="true">|</span>
+          <button type="button" class="lang-switch__btn" data-lang-option="en">
+            EN
+          </button>
+        </div>
         <a href="STORY.html">STORY</a>
         <a href="GROUND.html">GROUND</a>
         <a href="FACILITIES.html">FACILITIES</a>
         <a href="RESERVATION.html">RESERVATION</a>
       </div>
     </nav>
+    <div class="lang-kr">
 
     <main class="content-section confirm-page payment-page">
       <h1 class="confirm-title">결제 진행</h1>
@@ -127,5 +138,31 @@
         });
       });
     </script>
-  </body>
+  
+    </div>
+    <div class="lang-en">
+    <main class="content-section confirm-page payment-page">
+      <h1 class="confirm-title"></h1>
+      <p class="confirm-summary"></p>
+      <div class="confirm-total-box payment-summary-box" hidden>
+        <p class="confirm-total-line"></p>
+        <p class="confirm-total-line"></p>
+      </div>
+      <p class="confirm-back">
+        <a href="RESERVATION.html"></a><a href="GROUND.html"></a>
+      </p>
+      <footer
+        class="site-footer site-business-footer"
+        hidden
+      ></footer>
+    </main>
+    
+    
+    
+    
+    
+  
+    
+    </div>
+</body>
 </html>

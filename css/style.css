@@ -224,6 +224,67 @@ html {
   gap: 0.75rem 1rem;
 }
 
+.lang-switch {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.38rem;
+  margin-right: 0.4rem;
+  color: #fff;
+  font-weight: 600;
+}
+
+.lang-switch__btn {
+  border: 0;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
+  line-height: 1;
+  padding: 0.06rem 0.12rem;
+  opacity: 0.7;
+  transition: opacity 0.2s ease;
+}
+
+.lang-switch__btn.is-active {
+  opacity: 1;
+}
+
+.lang-switch__divider {
+  opacity: 0.7;
+  line-height: 1;
+}
+
+.lang-switch__btn:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
+}
+
+/* Page-level language sections */
+.lang-en {
+  display: none;
+}
+
+body[data-site-language="kr"] .lang-kr {
+  display: block;
+}
+
+body[data-site-language="kr"] .lang-en {
+  display: none;
+}
+
+body[data-site-language="en"] .lang-kr {
+  display: none;
+}
+
+body[data-site-language="en"] .lang-en {
+  display: block;
+}
+
+/* EN에서 히어로 슬라이드 상태가 비어도 첫 장은 항상 표시 */
+body[data-site-language="en"] .lang-en .hero-slide:first-child {
+  opacity: 1;
+}
+
 .mobile-menu-btn,
 .mobile-nav-drawer,
 .mobile-nav-backdrop {
@@ -1967,7 +2028,6 @@ iframe.map {
   position: relative;
   overflow: hidden;
   background: var(--grafford-mud2);
-  margin-bottom: 1.5rem;
 }
 
 .gallery-main-img {

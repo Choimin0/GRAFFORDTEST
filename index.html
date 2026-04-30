@@ -26,6 +26,7 @@
     </script>
     <script src="js/nav-hero.js" defer></script>
     <script src="js/mobile-nav.js" defer></script>
+    <script src="js/site-language.js" defer></script>
   </head>
   <body class="home-page">
     <div id="grafford-react-fade-root"></div>
@@ -54,413 +55,605 @@
         <a href="RESERVATION.html">RESERVATION</a>
       </aside>
       <div class="desktop-nav-links" aria-label="데스크톱 메뉴">
+        <div
+          class="lang-switch"
+          data-language-switch
+          aria-label="Language switch"
+        >
+          <button type="button" class="lang-switch__btn" data-lang-option="kr">
+            KR
+          </button>
+          <span class="lang-switch__divider" aria-hidden="true">|</span>
+          <button type="button" class="lang-switch__btn" data-lang-option="en">
+            EN
+          </button>
+        </div>
         <a href="STORY.html">STORY</a>
         <a href="GROUND.html">GROUND</a>
         <a href="FACILITIES.html">FACILITIES</a>
         <a href="RESERVATION.html">RESERVATION</a>
       </div>
     </nav>
-
-    <section class="hero-section fullpage-section" id="hero">
-      <div class="hero-media" aria-hidden="true">
-        <img src="images/mainimg0.jpg" alt="" class="hero-slide is-active" />
-        <img src="images/reservation.jpeg" alt="" class="hero-slide" />
-        <img src="images/rooms.jpeg" alt="" class="hero-slide" />
-        <img src="images/story.jpeg" alt="" class="hero-slide" />
-        <div class="hero-overlay"></div>
-      </div>
-      <header class="site-header hero-header hero-header--index-brand">
-        <h1 class="hero-title-logo">
-          <img
-            src="images/LOGO.png"
-            alt="GRAFFORD"
-            class="hero-logo-img"
-            width="800"
-            height="200"
-          />
-        </h1>
-        <p class="hero-tagline">The tranquility the earth conveys</p>
-      </header>
-      <button
-        class="scroll-down-btn"
-        id="scroll-down-btn"
-        aria-label="다음 섹션으로 이동"
-      >
-        <span></span>
-      </button>
-    </section>
-
-    <main class="content-section fullpage-section" id="content">
-      <section class="features features--index">
-        <article
-          class="feature feature-index-1 scroll-fade my-[8vh] bg-[var(--chocolate-brown)] text-[var(--grafford-beige)] md:my-[8vh]"
-        >
-          <div class="feature-media w-full min-h-0 shrink-0">
+    <div class="lang-kr">
+      <section class="hero-section fullpage-section" id="hero">
+        <div class="hero-media" aria-hidden="true">
+          <img src="images/mainimg0.jpg" alt="" class="hero-slide is-active" />
+          <img src="images/reservation.jpeg" alt="" class="hero-slide" />
+          <img src="images/rooms.jpeg" alt="" class="hero-slide" />
+          <img src="images/story.jpeg" alt="" class="hero-slide" />
+          <div class="hero-overlay"></div>
+        </div>
+        <header class="site-header hero-header hero-header--index-brand">
+          <h1 class="hero-title-logo">
             <img
-              src="images/mainimg1.jpg"
-              alt="High Quality 객실 이미지"
-              class="feature-image block max-w-full"
+              src="images/LOGO.png"
+              alt="GRAFFORD"
+              class="hero-logo-img"
+              width="800"
+              height="200"
             />
-          </div>
-          <div
-            class="feature-text flex min-h-0 flex-col justify-center gap-3 px-4 py-6 text-left md:px-[clamp(1.25rem,3vw,3rem)] md:py-8"
-          >
-            <p
-              class="feature-body text-[0.9375rem] leading-relaxed text-grafford-mud md:text-lg md:leading-[1.65]"
-            >
-              발끝으로 대지를 밟는 순간, 묵직한 안도감이 스며들었습니다. <br />
-              흘러가는 물 속에서도 나를 붙잡아 주는 든든한 중심 같달까요. <br />
-              그라포드의 이야기는 바로 이 단단함에서 비롯되는 듯합니다.
-            </p>
-          </div>
-        </article>
-        <article
-          class="feature feature-index-2 scroll-fade my-[8vh] bg-[var(--chocolate-brown)] text-[var(--grafford-beige)] md:my-[8vh]"
+          </h1>
+          <p class="hero-tagline">The tranquility the earth conveys</p>
+        </header>
+        <button
+          class="scroll-down-btn"
+          id="scroll-down-btn"
+          aria-label="다음 섹션으로 이동"
         >
-          <div
-            class="feature-text flex min-h-0 flex-col justify-center gap-3 px-4 py-6 text-left md:px-[clamp(1.25rem,3vw,3rem)] md:py-8"
+          <span></span>
+        </button>
+      </section>
+
+      <main class="content-section fullpage-section" id="content">
+        <section class="features features--index">
+          <article
+            class="feature feature-index-1 scroll-fade my-[8vh] bg-[var(--chocolate-brown)] text-[var(--grafford-beige)] md:my-[8vh]"
           >
-            <p
-              class="feature-body text-[0.9375rem] leading-relaxed text-grafford-mud md:text-lg md:leading-[1.65]"
+            <div class="feature-media w-full min-h-0 shrink-0">
+              <img
+                src="images/mainimg1.jpg"
+                alt="High Quality 객실 이미지"
+                class="feature-image block max-w-full"
+              />
+            </div>
+            <div
+              class="feature-text flex min-h-0 flex-col justify-center gap-3 px-4 py-6 text-left md:px-[clamp(1.25rem,3vw,3rem)] md:py-8"
             >
-              그라포드는 시각적인 자극을 통해 방문객의 이목을 집중시키기 보다
-              빛이 들어오는 방향, 마감재의 질감, 창밖의 풍경 같은 기본 요소들을
-              세심하게 정돈했습니다.<br />
-              불필요한 자극을 걷어낸 공간에는 머무는 사람의 시간이 채워집니다.
-              <br />
-              오롯이 자신에게 집중할 수 있는 환경을 만드는 것. <br />
-              그것이 그라포드가 생각하는 공간의 본질입니다.
-            </p>
-          </div>
-          <div class="feature-media w-full min-h-0 shrink-0">
-            <img
-              src="images/mainimg2.jpg"
-              alt="Private Terrace 이미지"
-              class="feature-image block max-w-full"
-            />
-          </div>
-        </article>
-        <article
-          class="feature feature-index-3 scroll-fade my-[8vh] bg-[var(--chocolate-brown)] text-[var(--grafford-beige)] md:my-[8vh]"
-        >
-          <div
-            class="feature-media feature-media--index-gallery w-full min-h-0 shrink-0"
+              <p
+                class="feature-body text-[0.9375rem] leading-relaxed text-grafford-mud md:text-lg md:leading-[1.65]"
+              >
+                발끝으로 대지를 밟는 순간, 묵직한 안도감이 스며들었습니다.
+                <br />
+                흘러가는 물 속에서도 나를 붙잡아 주는 든든한 중심 같달까요.
+                <br />
+                그라포드의 이야기는 바로 이 단단함에서 비롯되는 듯합니다.
+              </p>
+            </div>
+          </article>
+          <article
+            class="feature feature-index-2 scroll-fade my-[8vh] bg-[var(--chocolate-brown)] text-[var(--grafford-beige)] md:my-[8vh]"
           >
             <div
-              class="room-image-slot room-image-slot--carousel w-full shrink-0"
-              id="index-all-rooms-gallery"
-              aria-label="전체 객실 사진"
+              class="feature-text flex min-h-0 flex-col justify-center gap-3 px-4 py-6 text-left md:px-[clamp(1.25rem,3vw,3rem)] md:py-8"
             >
-              <div class="room-slot-gallery">
-                <div class="gallery-main-wrap">
-                  <button
-                    type="button"
-                    class="gallery-nav gallery-prev room-slot-nav-prev"
-                    aria-label="이전 사진"
-                  >
-                    &#10094;
-                  </button>
-                  <img
-                    class="room-slot-main-img w-full min-h-0 object-cover"
-                    src="images/A00.jpg"
-                    alt="객실 사진"
-                  />
-                  <button
-                    type="button"
-                    class="gallery-nav gallery-next room-slot-nav-next"
-                    aria-label="다음 사진"
-                  >
-                    &#10095;
-                  </button>
+              <p
+                class="feature-body text-[0.9375rem] leading-relaxed text-grafford-mud md:text-lg md:leading-[1.65]"
+              >
+                그라포드는 시각적인 자극을 통해 방문객의 이목을 집중시키기 보다
+                빛이 들어오는 방향, 마감재의 질감, 창밖의 풍경 같은 기본
+                요소들을 세심하게 정돈했습니다.<br />
+                불필요한 자극을 걷어낸 공간에는 머무는 사람의 시간이 채워집니다.
+                <br />
+                오롯이 자신에게 집중할 수 있는 환경을 만드는 것. <br />
+                그것이 그라포드가 생각하는 공간의 본질입니다.
+              </p>
+            </div>
+            <div class="feature-media w-full min-h-0 shrink-0">
+              <img
+                src="images/mainimg2.jpg"
+                alt="Private Terrace 이미지"
+                class="feature-image block max-w-full"
+              />
+            </div>
+          </article>
+          <article
+            class="feature feature-index-3 scroll-fade my-[8vh] bg-[var(--chocolate-brown)] text-[var(--grafford-beige)] md:my-[8vh]"
+          >
+            <div
+              class="feature-media feature-media--index-gallery w-full min-h-0 shrink-0"
+            >
+              <div
+                class="room-image-slot room-image-slot--carousel w-full shrink-0"
+                id="index-all-rooms-gallery"
+                aria-label="전체 객실 사진"
+              >
+                <div class="room-slot-gallery">
+                  <div class="gallery-main-wrap">
+                    <button
+                      type="button"
+                      class="gallery-nav gallery-prev room-slot-nav-prev"
+                      aria-label="이전 사진"
+                    >
+                      &#10094;
+                    </button>
+                    <img
+                      class="room-slot-main-img w-full min-h-0 object-cover"
+                      src="images/A00.jpg"
+                      alt="객실 사진"
+                    />
+                    <button
+                      type="button"
+                      class="gallery-nav gallery-next room-slot-nav-next"
+                      aria-label="다음 사진"
+                    >
+                      &#10095;
+                    </button>
+                  </div>
+                  <div class="gallery-thumbs room-slot-thumbs"></div>
                 </div>
-                <div class="gallery-thumbs room-slot-thumbs"></div>
               </div>
             </div>
-          </div>
-          <div
-            class="feature-text flex min-h-0 flex-col justify-center gap-3 px-4 py-6 text-left md:px-[clamp(1.25rem,3vw,3rem)] md:py-8"
-          >
-            <p
-              class="feature-body text-[0.9375rem] leading-relaxed text-grafford-mud md:text-lg md:leading-[1.65]"
+            <div
+              class="feature-text flex min-h-0 flex-col justify-center gap-3 px-4 py-6 text-left md:px-[clamp(1.25rem,3vw,3rem)] md:py-8"
             >
-              오랜 시간 물길에 다듬어진 바위는 모서리가 둥글고 표면이
-              단단합니다.<br />
-              그 위에 잠시 앉아보면 돌이 머금은 묵직한 온기가 전해집니다. <br />
-              그라포드는 바로 이 담백한 감각에서 출발했습니다.
-            </p>
-          </div>
-        </article>
-        <article
-          class="feature feature-index-4 scroll-fade my-[8vh] bg-[var(--chocolate-brown)] text-[var(--grafford-beige)] md:my-[8vh]"
-        >
-          <div
-            class="feature-text flex min-h-0 flex-col justify-center gap-3 px-4 py-6 text-left md:px-[clamp(1.25rem,3vw,3rem)] md:py-8"
-          >
-            <h3
-              class="feature-heading text-lg font-semibold tracking-wide text-grafford-dark md:text-3xl md:font-medium"
-            >
-              <a
-                href="https://map.naver.com/v5/search/%EC%A0%9C%EC%A3%BC%ED%8A%B9%EB%B3%84%EC%9E%90%EC%B9%98%EB%8F%84%20%EC%84%9C%EA%B7%80%ED%8F%AC%EC%8B%9C%20%ED%86%A0%EC%82%B0%EC%A4%91%EC%95%99%EB%A1%9C%2022"
-                target="_blank"
-                rel="noopener noreferrer"
-                class="underline decoration-current underline-offset-4 hover:opacity-80"
-                aria-label="네이버 지도에서 주소 보기"
-                >Location</a
+              <p
+                class="feature-body text-[0.9375rem] leading-relaxed text-grafford-mud md:text-lg md:leading-[1.65]"
               >
-            </h3>
-            <p
-              class="feature-body text-[0.9375rem] leading-relaxed text-grafford-mud md:text-lg md:leading-[1.65]"
+                오랜 시간 물길에 다듬어진 바위는 모서리가 둥글고 표면이
+                단단합니다.<br />
+                그 위에 잠시 앉아보면 돌이 머금은 묵직한 온기가 전해집니다.
+                <br />
+                그라포드는 바로 이 담백한 감각에서 출발했습니다.
+              </p>
+            </div>
+          </article>
+          <article
+            class="feature feature-index-4 scroll-fade my-[8vh] bg-[var(--chocolate-brown)] text-[var(--grafford-beige)] md:my-[8vh]"
+          >
+            <div
+              class="feature-text flex min-h-0 flex-col justify-center gap-3 px-4 py-6 text-left md:px-[clamp(1.25rem,3vw,3rem)] md:py-8"
             >
-              제주특별자치도 서귀포시 토산중앙로 22<br />
-              주차는 편하신 대로 ... 그럼 이만
-            </p>
-          </div>
-          <div class="feature-media w-full min-h-0 shrink-0">
-            <img
-              src="images/story02.jpg"
-              alt="스토리 이미지"
-              class="feature-image block max-w-full"
-            />
-          </div>
-        </article>
-      </section>
-      <footer
-        id="site-business-footer-mount"
-        class="site-footer site-business-footer"
-        hidden
-      ></footer>
-    </main>
+              <h3
+                class="feature-heading text-lg font-semibold tracking-wide text-grafford-dark md:text-3xl md:font-medium"
+              >
+                <a
+                  href="https://map.naver.com/v5/search/%EC%A0%9C%EC%A3%BC%ED%8A%B9%EB%B3%84%EC%9E%90%EC%B9%98%EB%8F%84%20%EC%84%9C%EA%B7%80%ED%8F%AC%EC%8B%9C%20%ED%86%A0%EC%82%B0%EC%A4%91%EC%95%99%EB%A1%9C%2022"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="underline decoration-current underline-offset-4 hover:opacity-80"
+                  aria-label="네이버 지도에서 주소 보기"
+                  >Location</a
+                >
+              </h3>
+              <p
+                class="feature-body text-[0.9375rem] leading-relaxed text-grafford-mud md:text-lg md:leading-[1.65]"
+              >
+                제주특별자치도 서귀포시 토산중앙로 22<br />
+                주차는 편하신 대로 ... 그럼 이만
+              </p>
+            </div>
+            <div class="feature-media w-full min-h-0 shrink-0">
+              <img
+                src="images/story02.jpg"
+                alt="스토리 이미지"
+                class="feature-image block max-w-full"
+              />
+            </div>
+          </article>
+        </section>
+        <footer
+          id="site-business-footer-mount"
+          class="site-footer site-business-footer"
+          hidden
+        ></footer>
+      </main>
 
-    <script>
-      document.addEventListener("DOMContentLoaded", function () {
-        const fadeTargets = document.querySelectorAll(".scroll-fade");
-        const scrollButton = document.getElementById("scroll-down-btn");
-        const nextSection = document.getElementById("content");
-        const sliderImage = document.getElementById("slider-image");
-        const prevButton = document.getElementById("slider-prev");
-        const nextButton = document.getElementById("slider-next");
-        const sliderImages = ["images/A.jpg", "images/B.jpg", "images/C.jpg"];
-        const heroSlides = document.querySelectorAll(".hero-slide");
-        let sliderIndex = 0;
-        let heroIndex = 0;
+      <script>
+        document.addEventListener("DOMContentLoaded", function () {
+          const fadeTargets = document.querySelectorAll(".scroll-fade");
+          const scrollButton = document.getElementById("scroll-down-btn");
+          const nextSection = document.getElementById("content");
+          const sliderImage = document.getElementById("slider-image");
+          const prevButton = document.getElementById("slider-prev");
+          const nextButton = document.getElementById("slider-next");
+          const sliderImages = ["images/A.jpg", "images/B.jpg", "images/C.jpg"];
+          const heroSlides = document.querySelectorAll(".hero-slide");
+          let sliderIndex = 0;
+          let heroIndex = 0;
 
-        const observer = new IntersectionObserver(
-          function (entries) {
-            entries.forEach(function (entry) {
-              if (entry.isIntersecting) {
-                entry.target.classList.add("is-visible");
-                observer.unobserve(entry.target);
-              }
-            });
-          },
-          { threshold: 0.2 },
-        );
-
-        fadeTargets.forEach(function (el) {
-          observer.observe(el);
-        });
-
-        if (scrollButton && nextSection) {
-          scrollButton.addEventListener("click", function () {
-            nextSection.scrollIntoView({ behavior: "smooth", block: "start" });
-          });
-        }
-
-        function showSliderImage(nextIndex) {
-          if (!sliderImage) {
-            return;
-          }
-          sliderImage.classList.remove("is-active");
-          setTimeout(function () {
-            sliderImage.src = sliderImages[nextIndex];
-            sliderImage.classList.add("is-active");
-          }, 140);
-        }
-
-        if (sliderImage) {
-          sliderImage.classList.add("is-active");
-        }
-
-        if (prevButton) {
-          prevButton.addEventListener("click", function () {
-            sliderIndex =
-              (sliderIndex - 1 + sliderImages.length) % sliderImages.length;
-            showSliderImage(sliderIndex);
-          });
-        }
-
-        if (nextButton) {
-          nextButton.addEventListener("click", function () {
-            sliderIndex = (sliderIndex + 1) % sliderImages.length;
-            showSliderImage(sliderIndex);
-          });
-        }
-
-        if (heroSlides.length > 1) {
-          setInterval(function () {
-            heroSlides[heroIndex].classList.remove("is-active");
-            heroIndex = (heroIndex + 1) % heroSlides.length;
-            heroSlides[heroIndex].classList.add("is-active");
-          }, 5000);
-        }
-
-        var indexAllRoomImages = [
-          "images/A00.jpg",
-          "images/A01.jpg",
-          "images/A02.jpg",
-          "images/B00.jpg",
-          "images/B01.jpg",
-          "images/B02.jpg",
-          "images/C00.jpg",
-          "images/C01.jpg",
-          "images/C02.jpg",
-          "images/D00.jpg",
-          "images/D01.jpg",
-          "images/D02.jpg",
-          "images/D03.jpg",
-        ];
-
-        function startIndexAllRoomsGallery(slot) {
-          var imgs = indexAllRoomImages;
-          var imgEl = slot.querySelector(".room-slot-main-img");
-          var thumbsEl = slot.querySelector(".room-slot-thumbs");
-          var btnPrev = slot.querySelector(".room-slot-nav-prev");
-          var btnNext = slot.querySelector(".room-slot-nav-next");
-          if (!imgs.length || !imgEl || !thumbsEl) {
-            return;
-          }
-          var index = 0;
-          var fadeMs = 650;
-          var intervalMs = 5000;
-          var autoTimer = null;
-          var label = "객실";
-
-          function renderThumbs() {
-            thumbsEl.innerHTML = "";
-            imgs.forEach(function (_, i) {
-              var b = document.createElement("button");
-              b.type = "button";
-              b.className = "gallery-thumb" + (i === index ? " is-active" : "");
-              b.setAttribute("aria-label", label + " 사진 " + (i + 1));
-              b.addEventListener("click", function () {
-                if (i === index) {
-                  return;
+          const observer = new IntersectionObserver(
+            function (entries) {
+              entries.forEach(function (entry) {
+                if (entry.isIntersecting) {
+                  entry.target.classList.add("is-visible");
+                  observer.unobserve(entry.target);
                 }
-                goToIndex(i);
-                resetAutoTimer();
               });
-              thumbsEl.appendChild(b);
+            },
+            { threshold: 0.2 },
+          );
+
+          fadeTargets.forEach(function (el) {
+            observer.observe(el);
+          });
+
+          if (scrollButton && nextSection) {
+            scrollButton.addEventListener("click", function () {
+              nextSection.scrollIntoView({
+                behavior: "smooth",
+                block: "start",
+              });
             });
           }
 
-          function goToIndex(newIndex) {
-            newIndex = ((newIndex % imgs.length) + imgs.length) % imgs.length;
-            if (newIndex === index) {
+          function showSliderImage(nextIndex) {
+            if (!sliderImage) {
               return;
             }
-            index = newIndex;
-            thumbsEl.classList.add("is-switching");
-            renderThumbs();
-            imgEl.classList.add("is-switching");
-            window.setTimeout(function () {
-              imgEl.src = imgs[index];
-              imgEl.alt = label + " 사진 " + (index + 1);
-              var onLoad = function () {
-                imgEl.removeEventListener("load", onLoad);
-                window.requestAnimationFrame(function () {
-                  imgEl.classList.remove("is-switching");
-                  thumbsEl.classList.remove("is-switching");
-                });
-              };
-              imgEl.addEventListener("load", onLoad);
-              if (imgEl.complete) {
-                window.requestAnimationFrame(function () {
-                  imgEl.classList.remove("is-switching");
-                  thumbsEl.classList.remove("is-switching");
-                });
-              }
-            }, fadeMs);
+            sliderImage.classList.remove("is-active");
+            setTimeout(function () {
+              sliderImage.src = sliderImages[nextIndex];
+              sliderImage.classList.add("is-active");
+            }, 140);
           }
 
-          function goNext() {
-            goToIndex(index + 1);
+          if (sliderImage) {
+            sliderImage.classList.add("is-active");
           }
 
-          function resetAutoTimer() {
-            if (autoTimer) {
-              window.clearInterval(autoTimer);
+          if (prevButton) {
+            prevButton.addEventListener("click", function () {
+              sliderIndex =
+                (sliderIndex - 1 + sliderImages.length) % sliderImages.length;
+              showSliderImage(sliderIndex);
+            });
+          }
+
+          if (nextButton) {
+            nextButton.addEventListener("click", function () {
+              sliderIndex = (sliderIndex + 1) % sliderImages.length;
+              showSliderImage(sliderIndex);
+            });
+          }
+
+          if (heroSlides.length > 1) {
+            setInterval(function () {
+              heroSlides[heroIndex].classList.remove("is-active");
+              heroIndex = (heroIndex + 1) % heroSlides.length;
+              heroSlides[heroIndex].classList.add("is-active");
+            }, 5000);
+          }
+
+          var indexAllRoomImages = [
+            "images/A00.jpg",
+            "images/A01.jpg",
+            "images/A02.jpg",
+            "images/B00.jpg",
+            "images/B01.jpg",
+            "images/B02.jpg",
+            "images/C00.jpg",
+            "images/C01.jpg",
+            "images/C02.jpg",
+            "images/D00.jpg",
+            "images/D01.jpg",
+            "images/D02.jpg",
+            "images/D03.jpg",
+          ];
+
+          function startIndexAllRoomsGallery(slot) {
+            var imgs = indexAllRoomImages;
+            var imgEl = slot.querySelector(".room-slot-main-img");
+            var thumbsEl = slot.querySelector(".room-slot-thumbs");
+            var btnPrev = slot.querySelector(".room-slot-nav-prev");
+            var btnNext = slot.querySelector(".room-slot-nav-next");
+            if (!imgs.length || !imgEl || !thumbsEl) {
+              return;
             }
-            autoTimer = window.setInterval(goNext, intervalMs);
-          }
+            var index = 0;
+            var fadeMs = 650;
+            var intervalMs = 5000;
+            var autoTimer = null;
+            var label = "객실";
 
-          renderThumbs();
-          if (btnPrev) {
-            btnPrev.addEventListener("click", function () {
-              goToIndex(index - 1);
-              resetAutoTimer();
-            });
-          }
-          if (btnNext) {
-            btnNext.addEventListener("click", function () {
+            function renderThumbs() {
+              thumbsEl.innerHTML = "";
+              imgs.forEach(function (_, i) {
+                var b = document.createElement("button");
+                b.type = "button";
+                b.className =
+                  "gallery-thumb" + (i === index ? " is-active" : "");
+                b.setAttribute("aria-label", label + " 사진 " + (i + 1));
+                b.addEventListener("click", function () {
+                  if (i === index) {
+                    return;
+                  }
+                  goToIndex(i);
+                  resetAutoTimer();
+                });
+                thumbsEl.appendChild(b);
+              });
+            }
+
+            function goToIndex(newIndex) {
+              newIndex = ((newIndex % imgs.length) + imgs.length) % imgs.length;
+              if (newIndex === index) {
+                return;
+              }
+              index = newIndex;
+              thumbsEl.classList.add("is-switching");
+              renderThumbs();
+              imgEl.classList.add("is-switching");
+              window.setTimeout(function () {
+                imgEl.src = imgs[index];
+                imgEl.alt = label + " 사진 " + (index + 1);
+                var onLoad = function () {
+                  imgEl.removeEventListener("load", onLoad);
+                  window.requestAnimationFrame(function () {
+                    imgEl.classList.remove("is-switching");
+                    thumbsEl.classList.remove("is-switching");
+                  });
+                };
+                imgEl.addEventListener("load", onLoad);
+                if (imgEl.complete) {
+                  window.requestAnimationFrame(function () {
+                    imgEl.classList.remove("is-switching");
+                    thumbsEl.classList.remove("is-switching");
+                  });
+                }
+              }, fadeMs);
+            }
+
+            function goNext() {
               goToIndex(index + 1);
+            }
+
+            function resetAutoTimer() {
+              if (autoTimer) {
+                window.clearInterval(autoTimer);
+              }
+              autoTimer = window.setInterval(goNext, intervalMs);
+            }
+
+            renderThumbs();
+            if (btnPrev) {
+              btnPrev.addEventListener("click", function () {
+                goToIndex(index - 1);
+                resetAutoTimer();
+              });
+            }
+            if (btnNext) {
+              btnNext.addEventListener("click", function () {
+                goToIndex(index + 1);
+                resetAutoTimer();
+              });
+            }
+
+            window.setTimeout(function () {
               resetAutoTimer();
-            });
+            }, 400);
           }
 
-          window.setTimeout(function () {
-            resetAutoTimer();
-          }, 400);
-        }
-
-        var indexGallerySlot = document.getElementById(
-          "index-all-rooms-gallery",
-        );
-        if (indexGallerySlot) {
-          startIndexAllRoomsGallery(indexGallerySlot);
-        }
-      });
-    </script>
-    <script defer src="js/grafford-page-fade.js"></script>
-    <script src="js/site-business-footer.js"></script>
-    <script>
-      document.addEventListener("DOMContentLoaded", function () {
-        window.initSiteBusinessFooter({
-          naverMapAddress: true,
-          instagram: {
-            href: "https://www.instagram.com/grafford_tosan?igsh=NnEwMWxtOGx2Y2w3",
-            imgSrc: "images/insta.png",
-          },
-          lines: [
-            "대표 : GRAFFORD",
-            "주소 : 제주특별자치도 서귀포시 토산중앙로 22",
-            "사업자등록번호 : 123-45-67890",
-            "전화 : 010-1234-5678",
-            "이메일 : info@grafford.com",
-            " ",
-            "© 2026 GRAFFORD. all rights reserved.",
-          ],
+          var indexGallerySlots = document.querySelectorAll(
+            ".room-image-slot--carousel",
+          );
+          indexGallerySlots.forEach(function (slot) {
+            if (slot.dataset.galleryInitialized === "true") {
+              return;
+            }
+            slot.dataset.galleryInitialized = "true";
+            startIndexAllRoomsGallery(slot);
+          });
         });
+      </script>
+      <script defer src="js/grafford-page-fade.js"></script>
+      <script src="js/site-business-footer.js"></script>
+      <script>
+        document.addEventListener("DOMContentLoaded", function () {
+          window.initSiteBusinessFooter({
+            naverMapAddress: true,
+            instagram: {
+              href: "https://www.instagram.com/grafford_tosan?igsh=NnEwMWxtOGx2Y2w3",
+              imgSrc: "images/insta.png",
+            },
+            lines: [
+              "대표 : GRAFFORD",
+              "주소 : 제주특별자치도 서귀포시 토산중앙로 22",
+              "사업자등록번호 : 123-45-67890",
+              "전화 : 010-1234-5678",
+              "이메일 : info@grafford.com",
+              " ",
+              "© 2026 GRAFFORD. all rights reserved.",
+            ],
+          });
 
-        var footerLogo = document.querySelector(".site-business-footer__logo");
-        if (!footerLogo) {
-          return;
-        }
-        var clickCount = 0;
-        var resetTimer = null;
-        footerLogo.addEventListener("click", function () {
-          clickCount += 1;
-          if (resetTimer) {
-            window.clearTimeout(resetTimer);
+          var footerLogo = document.querySelector(
+            ".site-business-footer__logo",
+          );
+          if (!footerLogo) {
+            return;
           }
-          resetTimer = window.setTimeout(function () {
-            clickCount = 0;
-            resetTimer = null;
-          }, 2000);
-          if (clickCount >= 5) {
-            window.location.href = "admin.html";
-          }
+          var clickCount = 0;
+          var resetTimer = null;
+          footerLogo.addEventListener("click", function () {
+            clickCount += 1;
+            if (resetTimer) {
+              window.clearTimeout(resetTimer);
+            }
+            resetTimer = window.setTimeout(function () {
+              clickCount = 0;
+              resetTimer = null;
+            }, 2000);
+            if (clickCount >= 5) {
+              window.location.href = "admin.html";
+            }
+          });
         });
-      });
-    </script>
+      </script>
+    </div>
+
+    <div class="lang-en">
+      <section class="hero-section fullpage-section">
+        <div class="hero-media" aria-hidden="true">
+          <img src="images/mainimg0.jpg" alt="" class="hero-slide is-active" />
+          <img src="images/reservation.jpeg" alt="" class="hero-slide" />
+          <img src="images/rooms.jpeg" alt="" class="hero-slide" />
+          <img src="images/story.jpeg" alt="" class="hero-slide" />
+          <div class="hero-overlay"></div>
+        </div>
+        <header class="site-header hero-header hero-header--index-brand">
+          <h1 class="hero-title-logo">
+            <img
+              src="images/LOGO.png"
+              alt="GRAFFORD"
+              class="hero-logo-img"
+              width="800"
+              height="200"
+            />
+          </h1>
+          <p class="hero-tagline"></p>
+        </header>
+        <button class="scroll-down-btn" aria-label="다음 섹션으로 이동">
+          <span></span>
+        </button>
+      </section>
+
+      <main class="content-section fullpage-section">
+        <section class="features features--index">
+          <article
+            class="feature feature-index-1 scroll-fade my-[8vh] bg-[var(--chocolate-brown)] text-[var(--grafford-beige)] md:my-[8vh]"
+          >
+            <div class="feature-media w-full min-h-0 shrink-0">
+              <img
+                src="images/mainimg1.jpg"
+                alt="High Quality 객실 이미지"
+                class="feature-image block max-w-full"
+              />
+            </div>
+            <div
+              class="feature-text flex min-h-0 flex-col justify-center gap-3 px-4 py-6 text-left md:px-[clamp(1.25rem,3vw,3rem)] md:py-8"
+            >
+              <p
+                class="feature-body text-[0.9375rem] leading-relaxed text-grafford-mud md:text-lg md:leading-[1.65]"
+              >
+                The moment my toes touched the earth, a profound sense of relief
+                swept over me—like a steadfast center that holds me even in
+                flowing waters.<br />
+                It seems that Grafford’s story arises from this very solidity.
+              </p>
+            </div>
+          </article>
+          <article
+            class="feature feature-index-2 scroll-fade my-[8vh] bg-[var(--chocolate-brown)] text-[var(--grafford-beige)] md:my-[8vh]"
+          >
+            <div
+              class="feature-text flex min-h-0 flex-col justify-center gap-3 px-4 py-6 text-left md:px-[clamp(1.25rem,3vw,3rem)] md:py-8"
+            >
+              <p
+                class="feature-body text-[0.9375rem] leading-relaxed text-grafford-mud md:text-lg md:leading-[1.65]"
+              >
+                Rather than capturing attention through fleeting visual
+                stimulation, Grafford meticulously refines the most fundamental
+                elements: the direction of light, the texture of materials, and
+                the scenery framed by the window.<br />
+                In a space where unnecessary distractions have been stripped
+                away, the time of those who stay begins to fill the void.<br />
+                To create an environment where one can focus entirely on
+                oneself—that is the very essence of space as envisioned by
+                Grafford.
+              </p>
+            </div>
+            <div class="feature-media w-full min-h-0 shrink-0">
+              <img
+                src="images/mainimg2.jpg"
+                alt="Private Terrace 이미지"
+                class="feature-image block max-w-full"
+              />
+            </div>
+          </article>
+          <article
+            class="feature feature-index-3 scroll-fade my-[8vh] bg-[var(--chocolate-brown)] text-[var(--grafford-beige)] md:my-[8vh]"
+          >
+            <div
+              class="feature-media feature-media--index-gallery w-full min-h-0 shrink-0"
+            >
+              <div
+                class="room-image-slot room-image-slot--carousel w-full shrink-0"
+                id="index-all-rooms-gallery-en"
+                aria-label="전체 객실 사진"
+              >
+                <div class="room-slot-gallery">
+                  <div class="gallery-main-wrap">
+                    <button
+                      type="button"
+                      class="gallery-nav gallery-prev room-slot-nav-prev"
+                      aria-label="이전 사진"
+                    ></button>
+                    <img
+                      class="room-slot-main-img w-full min-h-0 object-cover"
+                      src="images/A00.jpg"
+                      alt="객실 사진"
+                    />
+                    <button
+                      type="button"
+                      class="gallery-nav gallery-next room-slot-nav-next"
+                      aria-label="다음 사진"
+                    ></button>
+                  </div>
+                  <div class="gallery-thumbs room-slot-thumbs"></div>
+                </div>
+              </div>
+            </div>
+            <div
+              class="feature-text flex min-h-0 flex-col justify-center gap-3 px-4 py-6 text-left md:px-[clamp(1.25rem,3vw,3rem)] md:py-8"
+            >
+              <p
+                class="feature-body text-[0.9375rem] leading-relaxed text-grafford-mud md:text-lg md:leading-[1.65]"
+              >
+                Boulders shaped by the flow of water over many years have
+                rounded edges and a solid surface.<br />
+                Sitting upon one, you can feel the heavy warmth held deep within
+                the stone.<br />
+                It is from this very sense of unadorned simplicity that Grafford
+                began.
+              </p>
+            </div>
+          </article>
+          <article
+            class="feature feature-index-4 scroll-fade my-[8vh] bg-[var(--chocolate-brown)] text-[var(--grafford-beige)] md:my-[8vh]"
+          >
+            <div
+              class="feature-text flex min-h-0 flex-col justify-center gap-3 px-4 py-6 text-left md:px-[clamp(1.25rem,3vw,3rem)] md:py-8"
+            >
+              <h3
+                class="feature-heading text-lg font-semibold tracking-wide text-grafford-dark md:text-3xl md:font-medium"
+              >
+                <a
+                  href="https://maps.app.goo.gl/DwCUk5h4F91oSJBC8"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="underline decoration-current underline-offset-4 hover:opacity-80"
+                  aria-label="Open location in Google Maps"
+                  >Location</a
+                >
+              </h3>
+              <p
+                class="feature-body text-[0.9375rem] leading-relaxed text-grafford-mud md:text-lg md:leading-[1.65]"
+              >
+                22, Tosanjungang-ro, Pyoseon-myeon, Seogwipo-si, Jeju-do,
+                Republic of Korea
+              </p>
+            </div>
+            <div class="feature-media w-full min-h-0 shrink-0">
+              <img
+                src="images/story02.jpg"
+                alt="스토리 이미지"
+                class="feature-image block max-w-full"
+              />
+            </div>
+          </article>
+        </section>
+        <footer class="site-footer site-business-footer" hidden></footer>
+      </main>
+    </div>
   </body>
 </html>

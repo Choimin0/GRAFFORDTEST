@@ -7,6 +7,7 @@
     <title>예약 완료 - GRAFFORD</title>
     <link rel="stylesheet" href="css/style.css" />
     <script src="js/mobile-nav.js" defer></script>
+    <script src="js/site-language.js" defer></script>
   </head>
   <body>
     <div id="grafford-react-fade-root"></div>
@@ -35,12 +36,22 @@
         <a href="RESERVATION.html">RESERVATION</a>
       </aside>
       <div class="desktop-nav-links" aria-label="데스크톱 메뉴">
+        <div class="lang-switch" data-language-switch aria-label="Language switch">
+          <button type="button" class="lang-switch__btn" data-lang-option="kr">
+            KR
+          </button>
+          <span class="lang-switch__divider" aria-hidden="true">|</span>
+          <button type="button" class="lang-switch__btn" data-lang-option="en">
+            EN
+          </button>
+        </div>
         <a href="STORY.html">STORY</a>
         <a href="GROUND.html">GROUND</a>
         <a href="FACILITIES.html">FACILITIES</a>
         <a href="RESERVATION.html">RESERVATION</a>
       </div>
     </nav>
+    <div class="lang-kr">
 
     <main class="content-section confirm-page reserve-complete-page">
       <div class="reserve-complete-mark" aria-hidden="true">
@@ -447,5 +458,149 @@
         });
       });
     </script>
-  </body>
+  
+    </div>
+    <div class="lang-en">
+    <main class="content-section confirm-page reserve-complete-page">
+      <div class="reserve-complete-mark" aria-hidden="true">
+        <img src="images/icons/confirm.png" alt="" />
+      </div>
+      <h1 class="confirm-title"></h1>
+      <section
+        class="room-bridge-copy"
+        aria-label="완료 안내 문구"
+      >
+        <p></p>
+      </section>
+      <div class="confirm-layout-grid">
+        <div class="confirm-layout-col">
+          <section
+            class="confirm-section"
+          >
+            <p class="reserve-complete-room-name"></p>
+            <div class="reserve-complete-gallery">
+              <div class="gallery-main-wrap reserve-complete-gallery-main-wrap">
+                <button
+                  type="button"
+                  class="gallery-nav gallery-prev"
+                  aria-label="이전 사진"
+                ></button>
+                <img
+                  class="gallery-main-img"
+                  src="images/A00.jpg"
+                  alt="예약 객실 대표 이미지"
+                  loading="lazy"
+                  decoding="async"
+                />
+                <button
+                  type="button"
+                  class="gallery-nav gallery-next"
+                  aria-label="다음 사진"
+                ></button>
+              </div>
+            </div>
+          </section>
+
+          <section class="confirm-section">
+            <h2 class="confirm-section-title"></h2>
+            <p class="confirm-guide-content"></p>
+          </section>
+
+          <section class="confirm-section">
+            <h2 class="confirm-section-title"></h2>
+            <p class="confirm-guide-content"></p>
+          </section>
+
+          <section class="confirm-section">
+            <h2 class="confirm-section-title"></h2>
+            <p class="confirm-guide-content"></p>
+          </section>
+        </div>
+
+        <div class="confirm-layout-col confirm-layout-col--right">
+          <section
+            class="confirm-section"
+          >
+            <h2 class="confirm-section-title"></h2>
+            <dl class="reserve-delete-dl">
+              <dt></dt>
+              <dd>
+                <span></span>
+                <span
+                  class="reserve-complete-bank-status"
+                  hidden
+                ><span></span><span></span></span>
+              </dd>
+              <dt></dt>
+              <dd></dd>
+              <dt></dt>
+              <dd></dd>
+            </dl>
+          </section>
+
+          <section
+            class="confirm-section"
+          >
+            <h2 class="confirm-section-title"></h2>
+            <dl class="reserve-delete-dl">
+              <dt></dt>
+              <dd></dd>
+              <dt></dt>
+              <dd></dd>
+              <dt></dt>
+              <dd></dd>
+              <dt></dt>
+              <dd></dd>
+            </dl>
+          </section>
+
+          <section class="confirm-section">
+            <div class="confirm-actions reserve-complete-actions">
+              <a href="index.html" class="reserve-complete-action-link"
+                ></a
+              >
+              <a
+                href="reserve-delete.html"
+                class="reserve-complete-action-link"
+                ></a
+              >
+            </div>
+          </section>
+        </div>
+      </div>
+      <div
+        class="reserve-delete-modal-backdrop"
+        hidden
+      >
+        <div
+          class="reserve-delete-modal"
+          role="dialog"
+          aria-modal="true"
+        >
+          <p
+            class="reserve-delete-modal-title"
+          ></p>
+          <div class="reserve-delete-modal-actions">
+            <button
+              type="button"
+              class="btn reserve-btn"
+            ></button>
+          </div>
+        </div>
+      </div>
+      <footer
+        class="site-footer site-business-footer"
+        hidden
+      ></footer>
+    </main>
+
+    
+    
+    
+    
+    
+  
+    
+    </div>
+</body>
 </html>

@@ -6,8 +6,10 @@
     <link rel="icon" href="images/LOGO-transparent.png" type="image/png" />
     <title>관리자 페이지 - GRAFFORD</title>
     <link rel="stylesheet" href="css/style.css" />
+    <script src="js/site-language.js" defer></script>
   </head>
   <body>
+    <div class="lang-kr">
     <main class="content-section confirm-page admin-page">
       <a href="index.html" class="admin-top-logo" aria-label="메인으로 이동">
         <img src="images/LOGO-transparent.png" alt="GRAFFORD LOGO" />
@@ -553,5 +555,95 @@
         }
       });
     </script>
-  </body>
+    </div>
+    <div class="lang-en">
+    <main class="content-section confirm-page admin-page">
+      <a href="index.html" class="admin-top-logo" aria-label="메인으로 이동">
+        <img src="images/LOGO-transparent.png" alt="GRAFFORD LOGO" />
+      </a>
+      <h1 class="confirm-title"></h1>
+      <section
+        class="confirm-section admin-login-section"
+      >
+        <h2 class="confirm-section-title"></h2>
+        <form
+          class="admin-login-form reserveinfo-form checkout-form"
+          novalidate
+        >
+          <label class="confirm-label"><input
+              type="text"
+              autocomplete="username"
+              required placeholder=""
+            />
+          </label>
+          <label class="confirm-label"><input
+              type="password"
+              autocomplete="current-password"
+              required placeholder=""
+            />
+          </label>
+          <div class="confirm-actions admin-login-actions">
+            <button type="submit" class="btn reserve-btn confirm-pay-submit"></button>
+          </div>
+        </form>
+        <p class="confirm-back" hidden></p>
+      </section>
+
+      <section
+        class="confirm-section"
+        hidden
+      >
+        <div class="admin-table-head">
+          <div class="admin-table-head-left">
+            <h2 class="confirm-section-title"></h2>
+            <button
+              type="button"
+              class="btn reserve-btn admin-refresh-btn"
+            ></button>
+          </div>
+          <label class="admin-sort-control"><select>
+              <option value=""></option>
+              <option value=""></option>
+              <option value=""></option>
+              <option value=""></option>
+            </select>
+          </label>
+        </div>
+        <form class="admin-search-row" autocomplete="off">
+          <label class="confirm-label"><input
+              type="text" placeholder=""
+            />
+          </label>
+          <label class="confirm-label"><input
+              type="text" placeholder=""
+            />
+          </label>
+          <button type="submit" class="btn reserve-btn admin-search-btn"></button>
+          <button type="button" class="btn admin-page-reset-btn"></button>
+        </form>
+        <div class="admin-table-wrap">
+          <table class="admin-table">
+            <thead>
+              <tr>
+                <th></th>
+                <th></th>
+                <th></th>
+                <th></th>
+                <th></th>
+                <th></th>
+                <th></th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+        </div>
+        <div class="admin-pagination" aria-label="목록 페이지"></div>
+      </section>
+    </main>
+
+    
+    
+    </div>
+</body>
 </html>

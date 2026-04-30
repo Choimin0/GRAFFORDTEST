@@ -9,6 +9,7 @@
     <script src="js/mobile-nav.js" defer></script>
     <script src="js/booking-pricing.js" defer></script>
     <script src="js/booking-reservations.js" defer></script>
+    <script src="js/site-language.js" defer></script>
   </head>
   <body>
     <div id="grafford-react-fade-root"></div>
@@ -37,12 +38,22 @@
         <a href="RESERVATION.html">RESERVATION</a>
       </aside>
       <div class="desktop-nav-links" aria-label="데스크톱 메뉴">
+        <div class="lang-switch" data-language-switch aria-label="Language switch">
+          <button type="button" class="lang-switch__btn" data-lang-option="kr">
+            KR
+          </button>
+          <span class="lang-switch__divider" aria-hidden="true">|</span>
+          <button type="button" class="lang-switch__btn" data-lang-option="en">
+            EN
+          </button>
+        </div>
         <a href="STORY.html">STORY</a>
         <a href="GROUND.html">GROUND</a>
         <a href="FACILITIES.html">FACILITIES</a>
         <a href="RESERVATION.html">RESERVATION</a>
       </div>
     </nav>
+    <div class="lang-kr">
 
     <main class="content-section confirm-page reserveinfo-page">
       <h1 class="confirm-title">예약 조회</h1>
@@ -331,5 +342,48 @@
         });
       });
     </script>
-  </body>
+  
+    </div>
+    <div class="lang-en">
+    <main class="content-section confirm-page reserveinfo-page">
+      <h1 class="confirm-title"></h1>
+      <p class="confirm-summary"></p>
+
+      <form
+        class="reserveinfo-form checkout-form"
+        novalidate
+      >
+        <label class="confirm-label"><input
+            type="text"
+            name="lookupName"
+            required
+            autocomplete="name" placeholder=""
+          />
+        </label>
+        <label class="confirm-label"><input
+            type="text"
+            name="lookupOrder"
+            required
+            autocomplete="off" placeholder=""
+          />
+        </label>
+        <div class="confirm-actions">
+          <button type="submit" class="btn reserve-btn confirm-pay-submit"></button>
+        </div>
+      </form>
+
+      <footer
+        class="site-footer site-business-footer"
+        hidden
+      ></footer>
+    </main>
+
+    
+    
+    
+    
+  
+    
+    </div>
+</body>
 </html>
