@@ -491,12 +491,6 @@
             ],
           });
 
-          var footerLogos = document.querySelectorAll(
-            ".site-business-footer__logo",
-          );
-          if (!footerLogos.length) {
-            return;
-          }
           var clickCount = 0;
           var resetTimer = null;
           var isShiftPressed = false;
@@ -541,7 +535,6 @@
               return;
             }
             clickCount += 1;
-            console.log(clickCount);
             if (resetTimer) {
               window.clearTimeout(resetTimer);
             }
@@ -554,8 +547,12 @@
             }
           }
 
-          footerLogos.forEach(function (logo) {
-            logo.addEventListener("click", handleFooterLogoClick);
+          document.addEventListener("click", function (event) {
+            var logo = event.target.closest(".site-business-footer__logo");
+            if (!logo) {
+              return;
+            }
+            handleFooterLogoClick();
           });
         });
       </script>

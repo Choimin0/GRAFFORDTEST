@@ -282,7 +282,7 @@
             <div class="confirm-layout-col confirm-layout-col--right">
               <section class="confirm-section" aria-labelledby="sec-booking">
                 <h2 class="confirm-section-title" id="sec-booking">
-                  예약 사항 정보
+                  예약 정보
                 </h2>
                 <div class="confirm-booking-card">
                   <img
@@ -308,8 +308,7 @@
                 <p class="confirm-info-text">
                   예약 확정 및 안내를 위해 정확한 이름과 연락 가능한 번호를
                   입력해 주세요.<br />
-                  입력하신 정보는 예약 처리·고객 응대 목적으로만 사용되며,<br />
-                  결제 완료 후 변경은 고객센터로 문의해 주세요.
+                  입력하신 정보는 예약 처리·고객 응대 목적으로만 사용됩니다.
                 </p>
                 <label class="confirm-label">
                   성함
@@ -319,7 +318,6 @@
                     id="f-name"
                     required
                     autocomplete="name"
-                    placeholder="홍길동"
                   />
                 </label>
                 <label class="confirm-label">
@@ -332,7 +330,6 @@
                     autocomplete="tel"
                     inputmode="numeric"
                     maxlength="13"
-                    placeholder="010-1234-5678"
                     title="숫자 11자리 (010-1234-5678 형식)"
                     pattern="[0-9]{3}-[0-9]{4}-[0-9]{4}"
                   />
@@ -441,6 +438,7 @@
 
         <footer
           id="site-business-footer-mount"
+          data-site-business-footer-mount
           class="site-footer site-business-footer"
           hidden
         ></footer>
@@ -528,91 +526,157 @@
             quote.discountedGrandTotal,
           );
 
-          var imgEl = document.getElementById("booking-room-img");
-          var roomImagePrefix = ROOM_IMAGE_PREFIX[roomRaw] || "A";
-          imgEl.src = "images/" + roomImagePrefix + "00.jpg";
-          imgEl.alt = ROOM_LABEL[roomRaw] + " 대표 이미지";
-
-          document.getElementById("booking-room-name").textContent =
-            ROOM_LABEL[roomRaw];
-
-          var schedEl = document.getElementById("booking-schedule");
-          if (checkIn && checkOut && quote.nights > 0) {
-            var scheduleLines = [
-              "체크인 " +
-                formatDisplayYMD(checkIn) +
-                " · 체크아웃 " +
-                formatDisplayYMD(checkOut),
-              "(" +
-                quote.nights +
-                "박, " +
-                "추가인원 " +
-                quote.extraGuests +
-                "명)",
-            ];
-            schedEl.textContent = scheduleLines.join("\n");
-          } else {
-            schedEl.textContent =
-              "일정이 없습니다. 예약 페이지에서 일정을 선택한 후 다시 들어와 주세요.";
-          }
-
-          var breakdownEl = document.getElementById("confirm-breakdown");
-          var totalDisplayEl = document.getElementById("confirm-total-display");
-          breakdownEl.innerHTML = "";
-          function addBreakLine(text) {
-            var p = document.createElement("p");
-            p.className = "confirm-total-line";
-            p.textContent = text;
-            breakdownEl.appendChild(p);
-          }
-          if (quote.nights > 0 && P) {
-            addBreakLine(
-              ROOM_LABEL[roomRaw] +
-                " (평일 기준) " +
-                formatKRW(quote.baseNightly) +
-                " × " +
-                quote.nights +
-                "박 = " +
-                formatKRW(quote.baseTotal),
-            );
-            if (quote.weekendSurcharge > 0) {
-              addBreakLine(
-                "주말(금·토) 추가 " +
-                  formatKRW(P.WEEKEND_SURCHARGE_PER_NIGHT) +
-                  " × " +
-                  quote.weekendNights +
-                  "박 = " +
-                  formatKRW(quote.weekendSurcharge),
-              );
-            }
-            if (quote.extraGuestTotal > 0) {
-              addBreakLine(
-                "인원 추가 " +
-                  formatKRW(P.EXTRA_PER_PERSON_PER_NIGHT) +
-                  " × " +
-                  quote.extraGuests +
-                  "명 × " +
+          function buildBookingScheduleText(language) {
+            var isEn = language === "en";
+            if (checkIn && checkOut && quote.nights > 0) {
+              if (isEn) {
+                return [
+                  "Check-in " +
+                    formatDisplayYMD(checkIn) +
+                    " · Check-out " +
+                    formatDisplayYMD(checkOut),
+                  "(" +
+                    quote.nights +
+                    " night" +
+                    (quote.nights > 1 ? "s" : "") +
+                    ", extra guests " +
+                    quote.extraGuests +
+                    ")",
+                ].join("\n");
+              }
+              return [
+                "체크인 " +
+                  formatDisplayYMD(checkIn) +
+                  " · 체크아웃 " +
+                  formatDisplayYMD(checkOut),
+                "(" +
                   quote.nights +
-                  "박 = " +
-                  formatKRW(quote.extraGuestTotal),
-              );
+                  "박, " +
+                  "추가인원 " +
+                  quote.extraGuests +
+                  "명)",
+              ].join("\n");
             }
-            addBreakLine("총 금액: " + formatKRW(quote.grandTotal));
-            addBreakLine(
-              "연박할인 적용: -" + formatKRW(quote.consecutiveSale || 0),
-            );
-            addBreakLine(
-              "최종 결제금: " + formatKRW(quote.discountedGrandTotal || 0),
-            );
-            totalDisplayEl.textContent = formatKRW(
-              quote.discountedGrandTotal || 0,
-            );
-          } else {
-            addBreakLine(
-              "투숙 일수를 계산할 수 없습니다. 체크인·체크아웃을 확인해 주세요.",
-            );
-            totalDisplayEl.textContent = "—";
+            return isEn
+              ? "No schedule selected. Please choose your stay dates on the reservation page."
+              : "일정이 없습니다. 예약 페이지에서 일정을 선택한 후 다시 들어와 주세요.";
           }
+
+          function renderBookingDetails(scope, language) {
+            if (!scope) {
+              return;
+            }
+            var imgEl = scope.querySelector(".confirm-room-thumb");
+            var roomNameEl = scope.querySelector(".confirm-room-name");
+            var schedEl = scope.querySelector(".confirm-schedule");
+            if (!imgEl || !roomNameEl || !schedEl) {
+              return;
+            }
+            var roomImagePrefix = ROOM_IMAGE_PREFIX[roomRaw] || "A";
+            imgEl.src = "images/" + roomImagePrefix + "00.jpg";
+            imgEl.alt =
+              ROOM_LABEL[roomRaw] +
+              (language === "en" ? " hero image" : " 대표 이미지");
+            roomNameEl.textContent = ROOM_LABEL[roomRaw];
+            schedEl.textContent = buildBookingScheduleText(language);
+          }
+
+          renderBookingDetails(document.querySelector(".lang-kr"), "kr");
+          renderBookingDetails(document.querySelector(".lang-en"), "en");
+
+          function formatMoneyByLanguage(amount, language) {
+            if (language === "en") {
+              return Number(amount || 0).toLocaleString("en-US") + " KRW";
+            }
+            return formatKRW(Number(amount || 0));
+          }
+
+          function renderPricingSummary(scope, language) {
+            if (!scope) {
+              return;
+            }
+            var breakdownEl = scope.querySelector(".confirm-breakdown");
+            var totalDisplayEl = scope.querySelector(".confirm-total-amount");
+            if (!breakdownEl || !totalDisplayEl) {
+              return;
+            }
+            breakdownEl.innerHTML = "";
+            function addBreakLine(text) {
+              var p = document.createElement("p");
+              p.className = "confirm-total-line";
+              p.textContent = text;
+              breakdownEl.appendChild(p);
+            }
+            var isEn = language === "en";
+
+            if (quote.nights > 0 && P) {
+              addBreakLine(
+                ROOM_LABEL[roomRaw] +
+                  (isEn ? " (Weekday) " : " (평일) ") +
+                  formatMoneyByLanguage(quote.baseNightly, language) +
+                  " × " +
+                  quote.nights +
+                  (isEn ? " night" + (quote.nights > 1 ? "s" : "") : "박") +
+                  " = " +
+                  formatMoneyByLanguage(quote.baseTotal, language),
+              );
+              if (quote.weekendSurcharge > 0) {
+                addBreakLine(
+                  (isEn ? "Weekend surcharge " : "주말(금·토) 추가 ") +
+                    formatMoneyByLanguage(
+                      P.WEEKEND_SURCHARGE_PER_NIGHT,
+                      language,
+                    ) +
+                    " × " +
+                    quote.weekendNights +
+                    (isEn
+                      ? " night" + (quote.weekendNights > 1 ? "s" : "")
+                      : "박") +
+                    " = " +
+                    formatMoneyByLanguage(quote.weekendSurcharge, language),
+                );
+              }
+              if (quote.extraGuestTotal > 0) {
+                addBreakLine(
+                  (isEn ? "Extra guests " : "인원 추가 ") +
+                    formatMoneyByLanguage(
+                      P.EXTRA_PER_PERSON_PER_NIGHT,
+                      language,
+                    ) +
+                    " × " +
+                    quote.extraGuests +
+                    (isEn
+                      ? " guest" + (quote.extraGuests > 1 ? "s" : "")
+                      : "명") +
+                    " × " +
+                    quote.nights +
+                    (isEn ? " night" + (quote.nights > 1 ? "s" : "") : "박") +
+                    " = " +
+                    formatMoneyByLanguage(quote.extraGuestTotal, language),
+                );
+              }
+              if ((quote.consecutiveSale || 0) > 0) {
+                addBreakLine(
+                  (isEn ? "Consecutive stay discount: -" : "연박할인 : -") +
+                    formatMoneyByLanguage(quote.consecutiveSale, language),
+                );
+              }
+              totalDisplayEl.textContent = formatMoneyByLanguage(
+                quote.discountedGrandTotal || 0,
+                language,
+              );
+            } else {
+              addBreakLine(
+                isEn
+                  ? "Unable to calculate stay nights. Please check your check-in/check-out dates."
+                  : "투숙 일수를 계산할 수 없습니다. 체크인·체크아웃을 확인해 주세요.",
+              );
+              totalDisplayEl.textContent = "—";
+            }
+          }
+
+          renderPricingSummary(document.querySelector(".lang-kr"), "kr");
+          renderPricingSummary(document.querySelector(".lang-en"), "en");
 
           var agreeAll = document.getElementById("agree-all");
           var agreePrivacy = document.getElementById("agree-privacy");
@@ -1317,7 +1381,7 @@
               <section class="confirm-section">
                 <h2 class="confirm-section-title">Guest Information</h2>
                 <p class="confirm-info-text">
-                  Please enter the your name and contact information.
+                  Please enter your name and contact information.
                 </p>
                 <label class="confirm-label"
                   >Name
@@ -1419,7 +1483,11 @@
           </div>
         </form>
 
-        <footer class="site-footer site-business-footer" hidden></footer>
+        <footer
+          data-site-business-footer-mount
+          class="site-footer site-business-footer"
+          hidden
+        ></footer>
       </main>
     </div>
   </body>

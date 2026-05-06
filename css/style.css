@@ -2563,11 +2563,11 @@ iframe.map {
 }
 
 .confirm-booking-card {
+  max-width: 70%;
   display: flex;
   gap: 1rem;
   align-items: flex-start;
-  background: rgba(211, 199, 177, 0.25);
-  border-radius: 8px;
+  background: var(--grafford-beige2);
   padding: 0.75rem;
 }
 
@@ -2576,7 +2576,6 @@ iframe.map {
   width: 120px;
   height: 90px;
   object-fit: cover;
-  border-radius: 6px;
   background: var(--grafford-mud2);
 }
 
@@ -2691,9 +2690,8 @@ iframe.map {
 }
 
 .confirm-total-box {
-  background: rgba(83, 98, 77, 0.08);
+  background: var(--grafford-beige2);
   width: 70%;
-  border-radius: 8px;
   padding: 1rem 1.1rem;
 }
 
@@ -2748,7 +2746,28 @@ iframe.map {
 .confirm-radio input {
   width: 1.05rem;
   height: 1.05rem;
-  accent-color: var(--grafford-beige2);
+  -webkit-appearance: none;
+  appearance: none;
+  border: 1px solid var(--grafford-mud);
+  border-radius: 50%;
+  background-color: transparent;
+  display: inline-grid;
+  place-content: center;
+  margin: 0;
+}
+
+.confirm-radio input::before {
+  content: "";
+  width: 0.52rem;
+  height: 0.52rem;
+  border-radius: 50%;
+  transform: scale(0);
+  transition: transform 0.16s ease-in-out;
+  background-color: var(--grafford-mud);
+}
+
+.confirm-radio input:checked::before {
+  transform: scale(1);
 }
 
 .confirm-check {
@@ -2818,10 +2837,10 @@ iframe.map {
   appearance: none;
   -webkit-appearance: none;
   border: 1px solid var(--grafford-mud2);
-  border-radius: 3px;
   background: transparent;
   display: inline-grid;
   place-content: center;
+  margin-top: 0.05rem;
 }
 
 .confirm-agree-list .confirm-check input::before,
