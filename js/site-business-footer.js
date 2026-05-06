@@ -12,8 +12,16 @@
  * @param {boolean} [options.naverMapAddress=false] - true이면 `주소 : …` 줄에서 콜론 뒤만 네이버 지도 검색으로 연결
  */
 function initSiteBusinessFooter(options) {
-  var root = document.getElementById("site-business-footer-mount");
-  if (!root) {
+  var roots = Array.prototype.slice.call(
+    document.querySelectorAll("[data-site-business-footer-mount]"),
+  );
+  if (!roots.length) {
+    var legacyRoot = document.getElementById("site-business-footer-mount");
+    if (legacyRoot) {
+      roots.push(legacyRoot);
+    }
+  }
+  if (!roots.length) {
     return;
   }
 
@@ -125,20 +133,22 @@ function initSiteBusinessFooter(options) {
         ? '<div class="site-business-footer__text">' + innerText + "</div>"
         : '<div class="site-business-footer__text site-business-footer__text--empty" aria-hidden="true"></div>';
 
-    root.className = "site-footer site-business-footer";
-    root.innerHTML =
-      '<div class="site-business-footer__rule" aria-hidden="true"></div>' +
-      '<div class="site-business-footer__inner">' +
-      textBlock +
-      '<div class="site-business-footer__logo-wrap">' +
-      '<img class="site-business-footer__logo" src="' +
-      escapeHtml(logoSrc) +
-      '" alt="' +
-      escapeHtml(logoAlt) +
-      '" decoding="async" />' +
-      "</div>" +
-      "</div>";
-    root.hidden = false;
+    roots.forEach(function (root) {
+      root.className = "site-footer site-business-footer";
+      root.innerHTML =
+        '<div class="site-business-footer__rule" aria-hidden="true"></div>' +
+        '<div class="site-business-footer__inner">' +
+        textBlock +
+        '<div class="site-business-footer__logo-wrap">' +
+        '<img class="site-business-footer__logo" src="' +
+        escapeHtml(logoSrc) +
+        '" alt="' +
+        escapeHtml(logoAlt) +
+        '" decoding="async" />' +
+        "</div>" +
+        "</div>";
+      root.hidden = false;
+    });
   }
 
   renderByLanguage(resolveCurrentLanguage());

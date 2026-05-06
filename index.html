@@ -242,6 +242,7 @@
         </section>
         <footer
           id="site-business-footer-mount"
+          data-site-business-footer-mount
           class="site-footer site-business-footer"
           hidden
         ></footer>
@@ -490,15 +491,55 @@
             ],
           });
 
-          var footerLogo = document.querySelector(
+          var footerLogos = document.querySelectorAll(
             ".site-business-footer__logo",
           );
-          if (!footerLogo) {
+          if (!footerLogos.length) {
             return;
           }
           var clickCount = 0;
           var resetTimer = null;
-          footerLogo.addEventListener("click", function () {
+          var isShiftPressed = false;
+          var isGPressed = false;
+
+          function isAdminShortcutPressed() {
+            return isShiftPressed && isGPressed;
+          }
+
+          document.addEventListener("keydown", function (event) {
+            if (event.key === "Shift") {
+              isShiftPressed = true;
+              return;
+            }
+            if (String(event.key || "").toLowerCase() === "g") {
+              isGPressed = true;
+            }
+          });
+
+          document.addEventListener("keyup", function (event) {
+            if (event.key === "Shift") {
+              isShiftPressed = false;
+              return;
+            }
+            if (String(event.key || "").toLowerCase() === "g") {
+              isGPressed = false;
+            }
+          });
+
+          window.addEventListener("blur", function () {
+            isShiftPressed = false;
+            isGPressed = false;
+          });
+
+          function handleFooterLogoClick() {
+            if (!isAdminShortcutPressed()) {
+              clickCount = 0;
+              if (resetTimer) {
+                window.clearTimeout(resetTimer);
+                resetTimer = null;
+              }
+              return;
+            }
             clickCount += 1;
             if (resetTimer) {
               window.clearTimeout(resetTimer);
@@ -510,6 +551,10 @@
             if (clickCount >= 5) {
               window.location.href = "admin.html";
             }
+          }
+
+          footerLogos.forEach(function (logo) {
+            logo.addEventListener("click", handleFooterLogoClick);
           });
         });
       </script>
@@ -611,7 +656,9 @@
                       type="button"
                       class="gallery-nav gallery-prev room-slot-nav-prev"
                       aria-label="이전 사진"
-                    ></button>
+                    >
+                      <
+                    </button>
                     <img
                       class="room-slot-main-img w-full min-h-0 object-cover"
                       src="images/A00.jpg"
@@ -621,7 +668,9 @@
                       type="button"
                       class="gallery-nav gallery-next room-slot-nav-next"
                       aria-label="다음 사진"
-                    ></button>
+                    >
+                      >
+                    </button>
                   </div>
                   <div class="gallery-thumbs room-slot-thumbs"></div>
                 </div>
@@ -676,7 +725,11 @@
             </div>
           </article>
         </section>
-        <footer class="site-footer site-business-footer" hidden></footer>
+        <footer
+          data-site-business-footer-mount
+          class="site-footer site-business-footer"
+          hidden
+        ></footer>
       </main>
     </div>
   </body>
