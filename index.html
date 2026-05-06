@@ -541,6 +541,7 @@
               return;
             }
             clickCount += 1;
+            console.log(clickCount);
             if (resetTimer) {
               window.clearTimeout(resetTimer);
             }
@@ -554,7 +555,6 @@
           }
 
           footerLogos.forEach(function (logo) {
-            console.log("Footer logo clicked");
             logo.addEventListener("click", handleFooterLogoClick);
           });
         });
