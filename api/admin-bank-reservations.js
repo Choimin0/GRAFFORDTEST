@@ -320,6 +320,36 @@ export default async function handler(req, res) {
       WHERE coalesce(lower(trim(payment_method)), 'bank') IN ('bank', '무통장입금')
       ORDER BY created_at DESC`,
     );
+    var calSel = await pool.query(
+      `SELECT
+        reservation_number,
+        guest_name,
+        contact,
+        room_type,
+        check_in_date,
+        check_out_date,
+        total_amount,
+        payment_method,
+        bank_confirmed,
+        created_at,
+        FALSE AS is_past
+      FROM ${ACTIVE_TABLE}
+      UNION ALL
+      SELECT
+        reservation_number,
+        guest_name,
+        contact,
+        room_type,
+        check_in_date,
+        check_out_date,
+        total_amount,
+        payment_method,
+        bank_confirmed,
+        created_at,
+        TRUE AS is_past
+      FROM ${PAST_TABLE}
+      ORDER BY check_in_date ASC, created_at DESC`,
+    );
     json(res, 200, {
       ok: true,
       rows: (sel.rows || []).map(function (row) {
@@ -333,6 +363,21 @@ export default async function handler(req, res) {
           totalAmount: row.total_amount != null ? Number(row.total_amount) : 0,
           bankConfirmed: row.bank_confirmed === true,
           createdAt: formatDateTimeKst(row.created_at),
+        };
+      }),
+      calendarRows: (calSel.rows || []).map(function (row) {
+        return {
+          reservationNumber: row.reservation_number,
+          guestName: row.guest_name,
+          contact: row.contact,
+          roomType: row.room_type,
+          checkIn: toYMD(row.check_in_date),
+          checkOut: toYMD(row.check_out_date),
+          totalAmount: row.total_amount != null ? Number(row.total_amount) : 0,
+          paymentMethod: row.payment_method || "",
+          bankConfirmed: row.bank_confirmed === true,
+          createdAt: formatDateTimeKst(row.created_at),
+          isPast: row.is_past === true,
         };
       }),
     });

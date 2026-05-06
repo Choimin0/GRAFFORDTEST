@@ -19,17 +19,25 @@
         aria-label="관리자 카테고리"
         hidden
       >
-        <button type="button" class="admin-category-btn" data-admin-category="status">
+        <button
+          type="button"
+          class="admin-category-btn is-active"
+          data-admin-category="status"
+        >
           예약 현황
         </button>
         <button
           type="button"
-          class="admin-category-btn is-active"
+          class="admin-category-btn"
           data-admin-category="bank"
         >
           무통장 예약
         </button>
-        <button type="button" class="admin-category-btn" data-admin-category="sales">
+        <button
+          type="button"
+          class="admin-category-btn"
+          data-admin-category="sales"
+        >
           매출 현황
         </button>
       </nav>
@@ -80,27 +88,95 @@
         aria-labelledby="admin-status-title"
         hidden
       >
+        <div class="admin-status-top-grid">
+          <section
+            class="admin-status-card"
+            aria-labelledby="admin-today-checkin-title"
+          >
+            <div class="admin-status-card-head">
+              <h3
+                id="admin-today-checkin-title"
+                class="admin-status-card-title"
+              >
+                입실 리스트
+              </h3>
+              <div class="admin-inline-date-nav">
+                <button
+                  type="button"
+                  id="admin-checkin-prev-date"
+                  class="admin-page-btn"
+                  aria-label="이전 날짜"
+                >
+                  <
+                </button>
+                <strong
+                  id="admin-checkin-date-label"
+                  class="admin-inline-date-label"
+                ></strong>
+                <button
+                  type="button"
+                  id="admin-checkin-next-date"
+                  class="admin-page-btn"
+                  aria-label="다음 날짜"
+                >
+                  >
+                </button>
+              </div>
+            </div>
+            <div id="admin-today-checkin-list" class="admin-status-list"></div>
+          </section>
+          <section
+            class="admin-status-card"
+            aria-labelledby="admin-room-status-title"
+          >
+            <h3 id="admin-room-status-title" class="admin-status-card-title">
+              객실 현황
+            </h3>
+            <div id="admin-room-status-list" class="admin-status-list"></div>
+          </section>
+        </div>
         <div class="admin-table-head">
-          <h2 class="confirm-section-title" id="admin-status-title">예약 현황</h2>
           <div class="admin-calendar-nav">
-            <button type="button" id="admin-calendar-prev" class="admin-page-btn">
-              이전
+            <button
+              type="button"
+              id="admin-calendar-prev"
+              class="admin-page-btn"
+            >
+              <
             </button>
-            <strong id="admin-calendar-label" class="admin-calendar-label">—</strong>
-            <button type="button" id="admin-calendar-next" class="admin-page-btn">
-              다음
+            <strong id="admin-calendar-label" class="admin-calendar-label"
+              >—</strong
+            >
+            <button
+              type="button"
+              id="admin-calendar-next"
+              class="admin-page-btn"
+            >
+              >
             </button>
           </div>
         </div>
         <div class="admin-calendar-wrap">
           <div class="admin-calendar-weekdays">
-            <span>일</span><span>월</span><span>화</span><span>수</span><span>목</span
-            ><span>금</span><span>토</span>
+            <span>일</span><span>월</span><span>화</span><span>수</span
+            ><span>목</span><span>금</span><span>토</span>
           </div>
           <div id="admin-calendar-grid" class="admin-calendar-grid"></div>
-          <p id="admin-calendar-help" class="admin-calendar-help">
-            날짜별 숫자는 해당 날짜에 포함된 예약 건수입니다.
-          </p>
+
+          <section
+            id="admin-calendar-detail"
+            class="admin-calendar-detail"
+            hidden
+          >
+            <h3
+              id="admin-calendar-detail-title"
+              class="admin-calendar-detail-title"
+            ></h3>
+            <div
+              id="admin-calendar-detail-list"
+              class="admin-calendar-detail-list"
+            ></div>
+          </section>
         </div>
       </section>
 
@@ -111,18 +187,6 @@
         hidden
       >
         <div class="admin-table-head">
-          <div class="admin-table-head-left">
-            <h2 class="confirm-section-title" id="admin-bank-title">
-              무통장 예약 목록
-            </h2>
-            <button
-              type="button"
-              id="admin-refresh-btn"
-              class="btn reserve-btn admin-refresh-btn"
-            >
-              Refresh
-            </button>
-          </div>
           <label class="admin-sort-control" for="admin-sort-select">
             정렬 기준
             <select id="admin-sort-select">
@@ -160,9 +224,16 @@
           <button
             type="button"
             id="admin-search-reset"
-            class="btn admin-page-reset-btn"
+            class="btn reserve-btn admin-page-reset-btn"
           >
             초기화
+          </button>
+          <button
+            type="button"
+            id="admin-refresh-btn"
+            class="btn reserve-btn admin-refresh-btn"
+          >
+            Refresh
           </button>
         </form>
         <div class="admin-table-wrap">
@@ -227,22 +298,52 @@
         var calendarNextBtn = document.getElementById("admin-calendar-next");
         var calendarLabel = document.getElementById("admin-calendar-label");
         var calendarGrid = document.getElementById("admin-calendar-grid");
+        var calendarDetail = document.getElementById("admin-calendar-detail");
+        var calendarDetailTitle = document.getElementById(
+          "admin-calendar-detail-title",
+        );
+        var calendarDetailList = document.getElementById(
+          "admin-calendar-detail-list",
+        );
+        var todayCheckinListEl = document.getElementById(
+          "admin-today-checkin-list",
+        );
+        var roomStatusListEl = document.getElementById(
+          "admin-room-status-list",
+        );
+        var checkinPrevDateBtn = document.getElementById(
+          "admin-checkin-prev-date",
+        );
+        var checkinNextDateBtn = document.getElementById(
+          "admin-checkin-next-date",
+        );
+        var checkinDateLabelEl = document.getElementById(
+          "admin-checkin-date-label",
+        );
         var latestRows = [];
+        var latestCalendarRows = [];
         var currentPage = 1;
         var PAGE_SIZE = 20;
         var sortKey = "checkin";
         var activeCategory = "bank";
         var calendarViewDate = new Date();
         calendarViewDate.setDate(1);
+        var selectedCheckinDate = getTodayYmdKst();
+        var query = new URLSearchParams(window.location.search || "");
+        var isLocalhost =
+          window.location.hostname === "localhost" ||
+          window.location.hostname === "127.0.0.1";
+        var isLayoutPreviewMode =
+          isLocalhost && query.get("adminPreview") === "1";
 
         function dateKey(ymd) {
           return String(ymd || "").slice(0, 10);
         }
 
-        function addOneDay(ymd) {
+        function addOneDay(ymd, deltaDays) {
           var p = String(ymd || "").split("-");
           var d = new Date(Number(p[0]), Number(p[1]) - 1, Number(p[2]));
-          d.setDate(d.getDate() + 1);
+          d.setDate(d.getDate() + Number(deltaDays == null ? 1 : deltaDays));
           return (
             d.getFullYear() +
             "-" +
@@ -265,7 +366,7 @@
 
         function getReservationCountByDate() {
           var counts = Object.create(null);
-          (latestRows || []).forEach(function (row) {
+          (latestCalendarRows || []).forEach(function (row) {
             var ci = dateKey(row && row.checkIn);
             var co = dateKey(row && row.checkOut);
             expandNights(ci, co).forEach(function (d) {
@@ -275,15 +376,216 @@
           return counts;
         }
 
+        function getPastReservationCountByDate() {
+          var counts = Object.create(null);
+          (latestCalendarRows || []).forEach(function (row) {
+            if (!row || row.isPast !== true) {
+              return;
+            }
+            var ci = dateKey(row.checkIn);
+            var co = dateKey(row.checkOut);
+            expandNights(ci, co).forEach(function (d) {
+              counts[d] = (counts[d] || 0) + 1;
+            });
+          });
+          return counts;
+        }
+
+        function formatDateLabel(ymd) {
+          var p = String(ymd || "").split("-");
+          if (p.length !== 3) {
+            return String(ymd || "");
+          }
+          return p[0] + "." + p[1] + "." + p[2];
+        }
+
+        function getTodayYmdKst() {
+          var parts = new Intl.DateTimeFormat("en-CA", {
+            timeZone: "Asia/Seoul",
+            year: "numeric",
+            month: "2-digit",
+            day: "2-digit",
+          }).formatToParts(new Date());
+          var map = {};
+          parts.forEach(function (p) {
+            if (p.type !== "literal") {
+              map[p.type] = p.value;
+            }
+          });
+          return (
+            String(map.year || "") +
+            "-" +
+            String(map.month || "01") +
+            "-" +
+            String(map.day || "01")
+          );
+        }
+
+        function compareYmd(a, b) {
+          if (a === b) return 0;
+          return a < b ? -1 : 1;
+        }
+
+        function renderTodayStatusPanels() {
+          if (!todayCheckinListEl || !roomStatusListEl) {
+            return;
+          }
+          var today = getTodayYmdKst();
+          var selectedDate = selectedCheckinDate || today;
+          if (checkinDateLabelEl) {
+            checkinDateLabelEl.textContent = formatDateLabel(selectedDate);
+          }
+          var rows = (latestCalendarRows || []).filter(function (row) {
+            return row && row.checkIn && row.checkOut;
+          });
+
+          var todayCheckins = rows.filter(function (row) {
+            return dateKey(row.checkIn) === selectedDate;
+          });
+          todayCheckinListEl.innerHTML = "";
+          if (!todayCheckins.length) {
+            var empty = document.createElement("p");
+            empty.className = "admin-status-empty";
+            empty.textContent = "입실이 없습니다";
+            todayCheckinListEl.appendChild(empty);
+          } else {
+            todayCheckins
+              .slice()
+              .sort(function (a, b) {
+                return compareYmd(dateKey(a.checkOut), dateKey(b.checkOut));
+              })
+              .forEach(function (row) {
+                var item = document.createElement("article");
+                item.className = "admin-status-item";
+                item.innerHTML =
+                  "<p><strong>" +
+                  (row.roomType || "—") +
+                  "</strong> · " +
+                  (row.guestName || "—") +
+                  "</p>" +
+                  "<p>" +
+                  dateKey(row.checkIn) +
+                  " ~ " +
+                  dateKey(row.checkOut) +
+                  "</p>" +
+                  "<p>" +
+                  (row.contact || "연락처 없음") +
+                  "</p>";
+                todayCheckinListEl.appendChild(item);
+              });
+          }
+
+          var rooms = ["G1", "G2", "G3", "G4"];
+          roomStatusListEl.innerHTML = "";
+          rooms.forEach(function (room) {
+            var inRoom = rows.filter(function (row) {
+              return String(row.roomType || "").toUpperCase() === room;
+            });
+            var staying = inRoom.find(function (row) {
+              var ci = dateKey(row.checkIn);
+              var co = dateKey(row.checkOut);
+              return compareYmd(ci, today) < 0 && compareYmd(today, co) < 0;
+            });
+            var checkoutToday = inRoom.find(function (row) {
+              return dateKey(row.checkOut) === today;
+            });
+            var checkinToday = inRoom.find(function (row) {
+              return dateKey(row.checkIn) === today;
+            });
+
+            var rowEl = document.createElement("article");
+            rowEl.className = "admin-status-item";
+            rowEl.innerHTML =
+              "<p><strong>" +
+              room +
+              "</strong></p>" +
+              '<p class="admin-room-line">퇴실 - ' +
+              (checkoutToday && checkoutToday.guestName
+                ? checkoutToday.guestName
+                : "x") +
+              "</p>" +
+              '<p class="admin-room-line">재실 - ' +
+              (staying && staying.guestName ? staying.guestName : "x") +
+              "</p>" +
+              '<p class="admin-room-line">입실 - ' +
+              (checkinToday && checkinToday.guestName
+                ? checkinToday.guestName
+                : "x") +
+              "</p>";
+            roomStatusListEl.appendChild(rowEl);
+          });
+        }
+
+        function findReservationsByDate(ymd) {
+          return (latestCalendarRows || []).filter(function (row) {
+            var ci = dateKey(row && row.checkIn);
+            var co = dateKey(row && row.checkOut);
+            return expandNights(ci, co).indexOf(ymd) >= 0;
+          });
+        }
+
+        function renderCalendarDetail(ymd) {
+          if (!calendarDetail || !calendarDetailTitle || !calendarDetailList) {
+            return;
+          }
+          var rows = findReservationsByDate(ymd);
+          if (!rows.length) {
+            calendarDetail.hidden = true;
+            calendarDetailTitle.textContent = "";
+            calendarDetailList.innerHTML = "";
+            return;
+          }
+          calendarDetail.hidden = false;
+          calendarDetailTitle.textContent =
+            formatDateLabel(ymd) + " 예약 (" + rows.length + "건)";
+          calendarDetailList.innerHTML = "";
+          rows.forEach(function (row) {
+            var card = document.createElement("article");
+            card.className =
+              "admin-calendar-detail-item" + (row.isPast ? " is-past" : "");
+            card.innerHTML =
+              "<p><strong>예약번호 | </strong> " +
+              (row.reservationNumber || "—") +
+              "</p>" +
+              "<p><strong>예약자 | </strong> " +
+              (row.guestName || "—") +
+              "</p>" +
+              "<p><strong>연락처 | </strong> " +
+              (row.contact || "—") +
+              "</p>" +
+              "<p><strong>객실 | </strong> " +
+              (row.roomType || "—") +
+              "</p>" +
+              "<p><strong>일정 | </strong> " +
+              (row.checkIn || "—") +
+              " ~ " +
+              (row.checkOut || "—") +
+              "</p>" +
+              "<p><strong>예약금 | </strong> " +
+              formatKRW(row.totalAmount || 0) +
+              "(" +
+              formatPaymentMethodLabel(row.paymentMethod) +
+              ")" +
+              "</p>" +
+              "<p><strong>예약 경로 | </strong> 자사 홈페이지</p>" +
+              "<p><strong>구분 | </strong> " +
+              (row.isPast ? "지난 예약" : "현재/예정 예약") +
+              "</p>";
+            calendarDetailList.appendChild(card);
+          });
+        }
+
         function renderStatusCalendar() {
           if (!calendarGrid || !calendarLabel) {
             return;
           }
           var y = calendarViewDate.getFullYear();
           var m = calendarViewDate.getMonth();
-          calendarLabel.textContent = y + "년 " + String(m + 1).padStart(2, "0") + "월";
+          calendarLabel.textContent =
+            y + "년 " + String(m + 1).padStart(2, "0") + "월";
 
           var counts = getReservationCountByDate();
+          var pastCounts = getPastReservationCountByDate();
           var first = new Date(y, m, 1);
           var startPad = first.getDay();
           var lastDay = new Date(y, m + 1, 0).getDate();
@@ -305,7 +607,11 @@
               String(dObj.getDate()).padStart(2, "0");
             var cnt = counts[key] || 0;
             var cell = document.createElement("div");
-            cell.className = "admin-calendar-cell" + (cnt > 0 ? " has-reservation" : "");
+            cell.className =
+              "admin-calendar-cell" + (cnt > 0 ? " has-reservation" : "");
+            if ((pastCounts[key] || 0) > 0) {
+              cell.className += " has-past";
+            }
             var dayEl = document.createElement("span");
             dayEl.className = "admin-calendar-day";
             dayEl.textContent = String(day);
@@ -314,6 +620,22 @@
             cntEl.textContent = cnt > 0 ? String(cnt) : "—";
             cell.appendChild(dayEl);
             cell.appendChild(cntEl);
+            if (cnt > 0) {
+              cell.setAttribute("role", "button");
+              cell.setAttribute("tabindex", "0");
+              (function (dateValue) {
+                function openDetail() {
+                  renderCalendarDetail(dateValue);
+                }
+                cell.addEventListener("click", openDetail);
+                cell.addEventListener("keydown", function (ev) {
+                  if (ev.key === "Enter" || ev.key === " ") {
+                    ev.preventDefault();
+                    openDetail();
+                  }
+                });
+              })(key);
+            }
             calendarGrid.appendChild(cell);
           }
         }
@@ -331,7 +653,65 @@
           salesSection.hidden = category !== "sales";
           if (category === "status") {
             renderStatusCalendar();
+            renderTodayStatusPanels();
           }
+        }
+
+        function enableLayoutPreviewMode() {
+          loginForm.hidden = true;
+          if (loginTitleEl) {
+            loginTitleEl.hidden = true;
+          }
+          if (categoryNav) {
+            categoryNav.hidden = false;
+          }
+          latestRows = [
+            {
+              reservationNumber: "20260501-AAAAAA",
+              guestName: "홍길동",
+              contact: "010-1111-2222",
+              roomType: "G1",
+              checkIn: "2026-05-04",
+              checkOut: "2026-05-06",
+              totalAmount: 560000,
+              paymentMethod: "bank",
+              bankConfirmed: false,
+            },
+            {
+              reservationNumber: "20260502-BBBBBB",
+              guestName: "김민영",
+              contact: "010-3333-4444",
+              roomType: "G3",
+              checkIn: "2026-05-06",
+              checkOut: "2026-05-17",
+              totalAmount: 990000,
+              paymentMethod: "card",
+              bankConfirmed: true,
+            },
+          ];
+          latestCalendarRows = [
+            latestRows[0],
+            latestRows[1],
+            {
+              reservationNumber: "20260420-CCCCCC",
+              guestName: "박테스트",
+              contact: "010-5555-6666",
+              roomType: "G2",
+              checkIn: "2026-04-20",
+              checkOut: "2026-04-22",
+              totalAmount: 420000,
+              paymentMethod: "card",
+              bankConfirmed: true,
+              isPast: true,
+            },
+          ];
+          applyListView(true);
+          renderStatusCalendar();
+          renderTodayStatusPanels();
+          setActiveCategory("status");
+          showMessage(
+            "로컬 레이아웃 프리뷰 모드입니다. (URL: ?adminPreview=1)",
+          );
         }
 
         function adminApiUrl() {
@@ -357,6 +737,22 @@
 
         function formatKRW(n) {
           return Number(n || 0).toLocaleString("ko-KR") + "원";
+        }
+
+        function formatPaymentMethodLabel(method) {
+          var raw = String(method || "")
+            .trim()
+            .toLowerCase();
+          if (raw === "card" || raw === "신용카드") {
+            return "신용카드";
+          }
+          if (raw === "naver" || raw === "네이버페이") {
+            return "네이버페이";
+          }
+          if (raw === "bank" || raw === "무통장입금") {
+            return "무통장입금";
+          }
+          return "결제수단 미확인";
         }
 
         function parseDateValue(value) {
@@ -643,9 +1039,11 @@
                 categoryNav.hidden = false;
               }
               latestRows = result.data.rows || [];
+              latestCalendarRows = result.data.calendarRows || latestRows || [];
               applyListView(true);
               renderStatusCalendar();
-              setActiveCategory("bank");
+              renderTodayStatusPanels();
+              setActiveCategory("status");
               showMessage("");
             })
             .finally(function () {
@@ -770,6 +1168,26 @@
           });
         }
 
+        if (checkinPrevDateBtn) {
+          checkinPrevDateBtn.addEventListener("click", function () {
+            selectedCheckinDate = addOneDay(
+              selectedCheckinDate || getTodayYmdKst(),
+              -1,
+            );
+            renderTodayStatusPanels();
+          });
+        }
+
+        if (checkinNextDateBtn) {
+          checkinNextDateBtn.addEventListener("click", function () {
+            selectedCheckinDate = addOneDay(
+              selectedCheckinDate || getTodayYmdKst(),
+              1,
+            );
+            renderTodayStatusPanels();
+          });
+        }
+
         categoryButtons.forEach(function (btn) {
           btn.addEventListener("click", function () {
             if (loginForm && !loginForm.hidden) {
@@ -778,6 +1196,10 @@
             setActiveCategory(btn.getAttribute("data-admin-category"));
           });
         });
+
+        if (isLayoutPreviewMode) {
+          enableLayoutPreviewMode();
+        }
       });
     </script>
   </body>
