@@ -231,6 +231,7 @@ html {
   margin-right: 0.4rem;
   color: #fff;
   font-weight: 600;
+  margin-bottom: 0.18rem;
 }
 
 .lang-switch__btn {
@@ -1696,6 +1697,7 @@ iframe.map {
     display: inline-flex;
     order: 1;
     margin-right: 0.2rem;
+    margin-top: 0.2rem;
   }
 
   .top-right-nav .nav-logo,
