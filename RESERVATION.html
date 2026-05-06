@@ -117,7 +117,7 @@
                   id="gallery-prev"
                   aria-label="Previous photo"
                 >
-                  ＜
+                  &#10094;
                 </button>
                 <img
                   class="gallery-main-img"
@@ -131,7 +131,7 @@
                   id="gallery-next"
                   aria-label="Next photo"
                 >
-                  ＞
+                  &#10095;
                 </button>
                 <div class="gallery-thumbs" id="gallery-thumbs"></div>
               </div>
@@ -601,11 +601,15 @@
 
       <script>
         document.addEventListener("DOMContentLoaded", function () {
-          var scrollButton = document.getElementById("scroll-down-btn");
-          var nextSection = document.getElementById("content");
-          var fadeEl = document.querySelector(
-            ".reservation-booking.scroll-fade",
-          );
+          var reservationScopes = document.querySelectorAll(".lang-kr, .lang-en");
+          reservationScopes.forEach(function (scope) {
+            initReservationScope(scope);
+          });
+
+          function initReservationScope(scope) {
+            var scrollButton = scope.querySelector(".scroll-down-btn");
+            var nextSection = scope.querySelector("main.content-section");
+            var fadeEl = scope.querySelector(".reservation-booking.scroll-fade");
 
           var roomImages = {
             G1: ["images/A00.jpg", "images/A01.jpg", "images/A02.jpg"],
@@ -618,40 +622,49 @@
           var galleryIndex = 0;
           var galleryFadeMs = 650;
 
-          var mainImg = document.getElementById("gallery-main-img");
-          var thumbsEl = document.getElementById("gallery-thumbs");
-          var btnPrev = document.getElementById("gallery-prev");
-          var btnNext = document.getElementById("gallery-next");
-          var typeButtons = document.querySelectorAll(".room-type-btn");
-          var confirmLink = document.getElementById("reserve-confirm-link");
-          var roomCopies = document.querySelectorAll(".room-copy");
+          var mainImg = scope.querySelector(".gallery-main-img");
+          var thumbsEl = scope.querySelector(".gallery-thumbs");
+          var btnPrev = scope.querySelector(".gallery-prev");
+          var btnNext = scope.querySelector(".gallery-next");
+          var typeButtons = scope.querySelectorAll(".room-type-btn");
+          var confirmLink = scope.querySelector(".reserve-cta");
+          var roomCopies = scope.querySelectorAll(".room-copy");
 
-          var calYearLabel = document.getElementById("cal-year-label");
-          var calMonthLabel = document.getElementById("cal-month-label");
-          var calGrid = document.getElementById("cal-grid");
-          var bookingCalendar = document.getElementById("booking-calendar");
-          var calPrev = document.getElementById("cal-prev");
-          var calNext = document.getElementById("cal-next");
-          var calCheckinEl = document.getElementById("cal-checkin");
-          var calCheckoutEl = document.getElementById("cal-checkout");
-          var availabilityEl = document.getElementById("availability-note");
+          var calYearLabel = scope.querySelector(".cal-year-title");
+          var calMonthLabel = scope.querySelector(".cal-month-label");
+          var calGrid = scope.querySelector(".cal-grid");
+          var bookingCalendar = scope.querySelector(".booking-calendar");
+          var calPrev = scope.querySelector(".cal-nav[aria-label*='Previous']");
+          var calNext = scope.querySelector(".cal-nav[aria-label*='Next']");
+          var calCheckinEl = scope.querySelector("#cal-checkin");
+          var calCheckoutEl = scope.querySelector("#cal-checkout");
+          var availabilityEl = scope.querySelector("#availability-note");
           var P = window.GraffordBookingPricing;
-          var extraGuestsBlock = document.querySelector(
+          var extraGuestsBlock = scope.querySelector(
             ".reservation-extra-block",
           );
-          var extraGuestsMinusBtn =
-            document.getElementById("extra-guests-minus");
-          var extraGuestsPlusBtn = document.getElementById("extra-guests-plus");
-          var extraGuestsCountEl =
-            document.getElementById("extra-guests-count");
-          var extraGuestsHint = document.getElementById("extra-guests-hint");
-          var weekdayDisplay = document.getElementById(
-            "reservation-weekday-display",
+          var extraGuestsMinusBtn = scope.querySelector(".reservation-extra-btn");
+          var extraGuestsPlusBtn = scope.querySelectorAll(
+            ".reservation-extra-btn",
+          )[1];
+          var extraGuestsCountEl = scope.querySelector(".reservation-extra-count");
+          var extraGuestsHint = scope.querySelector(".reservation-extra-hint");
+          var weekdayDisplay = scope.querySelector("#reservation-weekday-display");
+          var pricePlaceholder = scope.querySelector(
+            ".reservation-price-placeholder",
           );
-          var pricePlaceholder = document.getElementById(
-            "reservation-price-placeholder",
-          );
-          var priceTotalEl = document.getElementById("reservation-price-total");
+          var priceTotalEl = scope.querySelector(".reservation-price-total");
+          if (
+            !mainImg ||
+            !thumbsEl ||
+            !btnPrev ||
+            !btnNext ||
+            !calGrid ||
+            !calPrev ||
+            !calNext
+          ) {
+            return;
+          }
 
           var viewDate = new Date();
           viewDate.setDate(1);
@@ -1514,7 +1527,7 @@
               : "G1";
           setRoom(initialRoom);
           if (savedRoom && allowedRooms.indexOf(savedRoom) !== -1) {
-            var bookingAnchor = document.getElementById("reservation-booking");
+            var bookingAnchor = scope.querySelector(".reservation-booking");
             if (bookingAnchor) {
               requestAnimationFrame(function () {
                 bookingAnchor.scrollIntoView({
@@ -1524,6 +1537,7 @@
               });
             }
             sessionStorage.removeItem("graffordReservationSelectedRoom");
+          }
           }
         });
       </script>

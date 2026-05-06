@@ -1888,8 +1888,9 @@ iframe.map {
   padding-bottom: 2rem;
 }
 
-/* RESERVATION 페이지에서만 hero/content 사이 간격 */
-.reservation-page .content-section#content {
+/* RESERVATION 페이지에서만 hero/content 사이 간격 (KR/EN 공통) */
+.reservation-page .lang-kr .content-section,
+.reservation-page .lang-en .content-section {
   margin-top: clamp(2rem, 8vh, 4rem);
 }
 
