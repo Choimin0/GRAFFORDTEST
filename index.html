@@ -511,7 +511,7 @@
               isShiftPressed = true;
               return;
             }
-            if (String(event.key || "").toLowerCase() === "g") {
+            if (event.code === "KeyG") {
               isGPressed = true;
             }
           });
@@ -521,7 +521,7 @@
               isShiftPressed = false;
               return;
             }
-            if (String(event.key || "").toLowerCase() === "g") {
+            if (event.code === "KeyG") {
               isGPressed = false;
             }
           });
