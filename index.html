@@ -513,6 +513,7 @@
             }
             if (event.code === "KeyG") {
               isGPressed = true;
+              console.log("G key pressed");
             }
           });
 
@@ -523,6 +524,7 @@
             }
             if (event.code === "KeyG") {
               isGPressed = false;
+              console.log("G key released");
             }
           });
 
@@ -549,6 +551,7 @@
               resetTimer = null;
             }, 2000);
             if (clickCount >= 5) {
+              console.log("Admin shortcut pressed");
               window.location.href = "admin.html";
             }
           }
