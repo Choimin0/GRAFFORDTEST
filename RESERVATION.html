@@ -602,7 +602,8 @@
 
       <script>
         document.addEventListener("DOMContentLoaded", function () {
-          var reservationScopes = document.querySelectorAll(".lang-kr, .lang-en");
+          var reservationScopes =
+            document.querySelectorAll(".lang-kr, .lang-en");
           reservationScopes.forEach(function (scope) {
             initReservationScope(scope);
           });
@@ -610,935 +611,956 @@
           function initReservationScope(scope) {
             var scrollButton = scope.querySelector(".scroll-down-btn");
             var nextSection = scope.querySelector("main.content-section");
-            var fadeEl = scope.querySelector(".reservation-booking.scroll-fade");
-
-          var roomImages = {
-            G1: ["images/A00.jpg", "images/A01.jpg", "images/A02.jpg"],
-            G2: ["images/B00.jpg", "images/B01.jpg", "images/B02.jpg"],
-            G3: ["images/C00.jpg", "images/C01.jpg", "images/C02.jpg"],
-            G4: ["images/D00.jpg", "images/D01.jpg", "images/D02.jpg"],
-          };
-
-          var currentRoom = "G1";
-          var galleryIndex = 0;
-          var galleryFadeMs = 650;
-
-          var mainImg = scope.querySelector(".gallery-main-img");
-          var thumbsEl = scope.querySelector(".gallery-thumbs");
-          var btnPrev = scope.querySelector(".gallery-prev");
-          var btnNext = scope.querySelector(".gallery-next");
-          var typeButtons = scope.querySelectorAll(".room-type-btn");
-          var confirmLink = scope.querySelector(".reserve-cta");
-          var roomCopies = scope.querySelectorAll(".room-copy");
-
-          var calYearLabel = scope.querySelector(".cal-year-title");
-          var calMonthLabel = scope.querySelector(".cal-month-label");
-          var calGrid = scope.querySelector(".cal-grid");
-          var bookingCalendar = scope.querySelector(".booking-calendar");
-          var calPrev = scope.querySelector(".cal-nav[aria-label*='Previous']");
-          var calNext = scope.querySelector(".cal-nav[aria-label*='Next']");
-          var calCheckinEl = scope.querySelector("#cal-checkin");
-          var calCheckoutEl = scope.querySelector("#cal-checkout");
-          var availabilityEl = scope.querySelector("#availability-note");
-          var P = window.GraffordBookingPricing;
-          var extraGuestsBlock = scope.querySelector(
-            ".reservation-extra-block",
-          );
-          var extraGuestsMinusBtn = scope.querySelector(".reservation-extra-btn");
-          var extraGuestsPlusBtn = scope.querySelectorAll(
-            ".reservation-extra-btn",
-          )[1];
-          var extraGuestsCountEl = scope.querySelector(".reservation-extra-count");
-          var extraGuestsHint = scope.querySelector(".reservation-extra-hint");
-          var weekdayDisplay = scope.querySelector("#reservation-weekday-display");
-          var pricePlaceholder = scope.querySelector(
-            ".reservation-price-placeholder",
-          );
-          var priceTotalEl = scope.querySelector(".reservation-price-total");
-          if (
-            !mainImg ||
-            !thumbsEl ||
-            !btnPrev ||
-            !btnNext ||
-            !calGrid ||
-            !calPrev ||
-            !calNext
-          ) {
-            return;
-          }
-
-          var viewDate = new Date();
-          viewDate.setDate(1);
-          var checkIn = null;
-          var checkOut = null;
-          var occupiedNightSet = new Set();
-          var monthFadeTimer = null;
-          var currentExtraGuests = 0;
-          var kstNowInfo = getKstNowInfo();
-          var today = parseYMDLocal(kstNowInfo.todayYmd);
-          if (!today) {
-            var fallbackNow = new Date();
-            today = new Date(
-              fallbackNow.getFullYear(),
-              fallbackNow.getMonth(),
-              fallbackNow.getDate(),
+            var fadeEl = scope.querySelector(
+              ".reservation-booking.scroll-fade",
             );
-          }
 
-          function addMonthsKeepingDay(baseDate, monthsToAdd) {
-            var y = baseDate.getFullYear();
-            var m = baseDate.getMonth() + monthsToAdd;
-            var d = baseDate.getDate();
-            var targetMonthLastDay = new Date(y, m + 1, 0).getDate();
-            var resultDate = new Date(y, m, Math.min(d, targetMonthLastDay));
-            resultDate.setHours(23, 59, 59, 999);
-            return resultDate;
-          }
-
-          function parseYmdParts(ymd) {
-            var s = String(ymd || "");
-            if (!/^\d{4}-\d{2}-\d{2}$/.test(s)) {
-              return null;
-            }
-            return {
-              y: Number(s.slice(0, 4)),
-              m: Number(s.slice(5, 7)),
-              d: Number(s.slice(8, 10)),
+            var roomImages = {
+              G1: ["images/A00.jpg", "images/A01.jpg", "images/A02.jpg"],
+              G2: ["images/B00.jpg", "images/B01.jpg", "images/B02.jpg"],
+              G3: ["images/C00.jpg", "images/C01.jpg", "images/C02.jpg"],
+              G4: ["images/D00.jpg", "images/D01.jpg", "images/D02.jpg"],
             };
-          }
 
-          function daysInMonth(y, m1to12) {
-            return new Date(y, m1to12, 0).getDate();
-          }
+            var currentRoom = "G1";
+            var galleryIndex = 0;
+            var galleryFadeMs = 650;
 
-          function addMonthsKeepingDayParts(parts, monthsToAdd) {
-            var totalMonths = parts.y * 12 + (parts.m - 1) + monthsToAdd;
-            var targetY = Math.floor(totalMonths / 12);
-            var targetM = (totalMonths % 12) + 1;
-            var targetD = Math.min(parts.d, daysInMonth(targetY, targetM));
-            return { y: targetY, m: targetM, d: targetD };
-          }
+            var mainImg = scope.querySelector(".gallery-main-img");
+            var thumbsEl = scope.querySelector(".gallery-thumbs");
+            var btnPrev = scope.querySelector(".gallery-prev");
+            var btnNext = scope.querySelector(".gallery-next");
+            var typeButtons = scope.querySelectorAll(".room-type-btn");
+            var confirmLink = scope.querySelector(".reserve-cta");
+            var roomCopies = scope.querySelectorAll(".room-copy");
 
-          function ymdPartsToKey(parts) {
-            return parts.y * 10000 + parts.m * 100 + parts.d;
-          }
-
-          function ymdPartsToString(parts) {
-            return (
-              String(parts.y).padStart(4, "0") +
-              "-" +
-              String(parts.m).padStart(2, "0") +
-              "-" +
-              String(parts.d).padStart(2, "0")
+            var calYearLabel = scope.querySelector(".cal-year-title");
+            var calMonthLabel = scope.querySelector(".cal-month-label");
+            var calGrid = scope.querySelector(".cal-grid");
+            var bookingCalendar = scope.querySelector(".booking-calendar");
+            var calPrev = scope.querySelector(
+              ".cal-nav[aria-label*='Previous']",
             );
-          }
+            var calNext = scope.querySelector(".cal-nav[aria-label*='Next']");
+            var calCheckinEl = scope.querySelector("#cal-checkin");
+            var calCheckoutEl = scope.querySelector("#cal-checkout");
+            var availabilityEl = scope.querySelector("#availability-note");
+            var P = window.GraffordBookingPricing;
+            var extraGuestsBlock = scope.querySelector(
+              ".reservation-extra-block",
+            );
+            var extraGuestsMinusBtn = scope.querySelector(
+              ".reservation-extra-btn",
+            );
+            var extraGuestsPlusBtn = scope.querySelectorAll(
+              ".reservation-extra-btn",
+            )[1];
+            var extraGuestsCountEl = scope.querySelector(
+              ".reservation-extra-count",
+            );
+            var extraGuestsHint = scope.querySelector(
+              ".reservation-extra-hint",
+            );
+            var weekdayDisplay = scope.querySelector(
+              "#reservation-weekday-display",
+            );
+            var pricePlaceholder = scope.querySelector(
+              ".reservation-price-placeholder",
+            );
+            var priceTotalEl = scope.querySelector(".reservation-price-total");
+            if (
+              !mainImg ||
+              !thumbsEl ||
+              !btnPrev ||
+              !btnNext ||
+              !calGrid ||
+              !calPrev ||
+              !calNext
+            ) {
+              return;
+            }
 
-          var todayParts = parseYmdParts(kstNowInfo.todayYmd) || {
-            y: today.getFullYear(),
-            m: today.getMonth() + 1,
-            d: today.getDate(),
-          };
-          var minViewMonth = new Date(todayParts.y, todayParts.m - 1 - 6, 1);
-          var maxCheckInParts = addMonthsKeepingDayParts(todayParts, 6);
-          var maxCheckOutDate = addDays(
-            new Date(
+            var viewDate = new Date();
+            viewDate.setDate(1);
+            var checkIn = null;
+            var checkOut = null;
+            var occupiedNightSet = new Set();
+            var monthFadeTimer = null;
+            var currentExtraGuests = 0;
+            var kstNowInfo = getKstNowInfo();
+            var today = parseYMDLocal(kstNowInfo.todayYmd);
+            if (!today) {
+              var fallbackNow = new Date();
+              today = new Date(
+                fallbackNow.getFullYear(),
+                fallbackNow.getMonth(),
+                fallbackNow.getDate(),
+              );
+            }
+
+            function addMonthsKeepingDay(baseDate, monthsToAdd) {
+              var y = baseDate.getFullYear();
+              var m = baseDate.getMonth() + monthsToAdd;
+              var d = baseDate.getDate();
+              var targetMonthLastDay = new Date(y, m + 1, 0).getDate();
+              var resultDate = new Date(y, m, Math.min(d, targetMonthLastDay));
+              resultDate.setHours(23, 59, 59, 999);
+              return resultDate;
+            }
+
+            function parseYmdParts(ymd) {
+              var s = String(ymd || "");
+              if (!/^\d{4}-\d{2}-\d{2}$/.test(s)) {
+                return null;
+              }
+              return {
+                y: Number(s.slice(0, 4)),
+                m: Number(s.slice(5, 7)),
+                d: Number(s.slice(8, 10)),
+              };
+            }
+
+            function daysInMonth(y, m1to12) {
+              return new Date(y, m1to12, 0).getDate();
+            }
+
+            function addMonthsKeepingDayParts(parts, monthsToAdd) {
+              var totalMonths = parts.y * 12 + (parts.m - 1) + monthsToAdd;
+              var targetY = Math.floor(totalMonths / 12);
+              var targetM = (totalMonths % 12) + 1;
+              var targetD = Math.min(parts.d, daysInMonth(targetY, targetM));
+              return { y: targetY, m: targetM, d: targetD };
+            }
+
+            function ymdPartsToKey(parts) {
+              return parts.y * 10000 + parts.m * 100 + parts.d;
+            }
+
+            function ymdPartsToString(parts) {
+              return (
+                String(parts.y).padStart(4, "0") +
+                "-" +
+                String(parts.m).padStart(2, "0") +
+                "-" +
+                String(parts.d).padStart(2, "0")
+              );
+            }
+
+            var todayParts = parseYmdParts(kstNowInfo.todayYmd) || {
+              y: today.getFullYear(),
+              m: today.getMonth() + 1,
+              d: today.getDate(),
+            };
+            var minViewMonth = new Date(todayParts.y, todayParts.m - 1 - 6, 1);
+            var maxCheckInParts = addMonthsKeepingDayParts(todayParts, 6);
+            var maxCheckOutDate = addDays(
+              new Date(
+                maxCheckInParts.y,
+                maxCheckInParts.m - 1,
+                maxCheckInParts.d,
+              ),
+              1,
+            );
+            var maxCheckOutParts = {
+              y: maxCheckOutDate.getFullYear(),
+              m: maxCheckOutDate.getMonth() + 1,
+              d: maxCheckOutDate.getDate(),
+            };
+            var maxCheckInKey = ymdPartsToKey(maxCheckInParts);
+            var maxCheckOutKey = ymdPartsToKey(maxCheckOutParts);
+            var maxViewMonth = new Date(
               maxCheckInParts.y,
               maxCheckInParts.m - 1,
-              maxCheckInParts.d,
-            ),
-            1,
-          );
-          var maxCheckOutParts = {
-            y: maxCheckOutDate.getFullYear(),
-            m: maxCheckOutDate.getMonth() + 1,
-            d: maxCheckOutDate.getDate(),
-          };
-          var maxCheckInKey = ymdPartsToKey(maxCheckInParts);
-          var maxCheckOutKey = ymdPartsToKey(maxCheckOutParts);
-          var maxViewMonth = new Date(
-            maxCheckInParts.y,
-            maxCheckInParts.m - 1,
-            1,
-          );
-
-          function pad(n) {
-            return n < 10 ? "0" + n : String(n);
-          }
-
-          function formatYMD(d) {
-            if (!d) return "";
-            return (
-              d.getFullYear() +
-              "-" +
-              pad(d.getMonth() + 1) +
-              "-" +
-              pad(d.getDate())
+              1,
             );
-          }
 
-          function getKstNowInfo() {
-            var parts = new Intl.DateTimeFormat("en-CA", {
-              timeZone: "Asia/Seoul",
-              year: "numeric",
-              month: "2-digit",
-              day: "2-digit",
-              hour: "2-digit",
-              hour12: false,
-            }).formatToParts(new Date());
-            var map = {};
-            parts.forEach(function (p) {
-              if (p.type !== "literal") {
-                map[p.type] = p.value;
+            function pad(n) {
+              return n < 10 ? "0" + n : String(n);
+            }
+
+            function formatYMD(d) {
+              if (!d) return "";
+              return (
+                d.getFullYear() +
+                "-" +
+                pad(d.getMonth() + 1) +
+                "-" +
+                pad(d.getDate())
+              );
+            }
+
+            function getKstNowInfo() {
+              var parts = new Intl.DateTimeFormat("en-CA", {
+                timeZone: "Asia/Seoul",
+                year: "numeric",
+                month: "2-digit",
+                day: "2-digit",
+                hour: "2-digit",
+                hour12: false,
+              }).formatToParts(new Date());
+              var map = {};
+              parts.forEach(function (p) {
+                if (p.type !== "literal") {
+                  map[p.type] = p.value;
+                }
+              });
+              return {
+                todayYmd:
+                  String(map.year || "") +
+                  "-" +
+                  String(map.month || "01") +
+                  "-" +
+                  String(map.day || "01"),
+                hour: Number(map.hour || 0),
+              };
+            }
+
+            function parseYMDLocal(ymd) {
+              if (!/^\d{4}-\d{2}-\d{2}$/.test(String(ymd || ""))) {
+                return null;
               }
+              var p = ymd.split("-");
+              return new Date(Number(p[0]), Number(p[1]) - 1, Number(p[2]));
+            }
+
+            function toStartOfDay(dateObj) {
+              return new Date(
+                dateObj.getFullYear(),
+                dateObj.getMonth(),
+                dateObj.getDate(),
+              );
+            }
+
+            function toDateKey(dateObj) {
+              if (!dateObj) {
+                return 0;
+              }
+              return (
+                dateObj.getFullYear() * 10000 +
+                (dateObj.getMonth() + 1) * 100 +
+                dateObj.getDate()
+              );
+            }
+
+            function dateCmp(a, b) {
+              var ak = toDateKey(a);
+              var bk = toDateKey(b);
+              if (ak === bk) {
+                return 0;
+              }
+              return ak < bk ? -1 : 1;
+            }
+
+            function addDays(dateObj, days) {
+              return new Date(
+                dateObj.getFullYear(),
+                dateObj.getMonth(),
+                dateObj.getDate() + Number(days || 0),
+              );
+            }
+
+            var todayDateOnly = new Date(
+              todayParts.y,
+              todayParts.m - 1,
+              todayParts.d,
+            );
+            var isTodayAfterCutoff = Number(kstNowInfo.hour || 0) >= 19;
+            function isBlockedByPastOrCutoff(dateObj) {
+              var target = toStartOfDay(dateObj);
+              return (
+                dateCmp(target, todayDateOnly) < 0 ||
+                (isTodayAfterCutoff && sameDay(target, todayDateOnly))
+              );
+            }
+
+            function formatDisplay(d) {
+              if (!d) return "—";
+              return (
+                d.getFullYear() +
+                "." +
+                pad(d.getMonth() + 1) +
+                "." +
+                pad(d.getDate())
+              );
+            }
+
+            function formatKRW(n) {
+              return n.toLocaleString("ko-KR") + "원";
+            }
+
+            function isSameMonth(a, b) {
+              return (
+                a &&
+                b &&
+                a.getFullYear() === b.getFullYear() &&
+                a.getMonth() === b.getMonth()
+              );
+            }
+
+            function clampViewMonth(target) {
+              if (!target) {
+                return new Date(minViewMonth.getTime());
+              }
+              if (target < minViewMonth) {
+                return new Date(minViewMonth.getTime());
+              }
+              if (target > maxViewMonth) {
+                return new Date(maxViewMonth.getTime());
+              }
+              return new Date(target.getFullYear(), target.getMonth(), 1);
+            }
+
+            function isDateBeyondBookable(dateObj, checkoutMode) {
+              if (!dateObj) {
+                return false;
+              }
+              var targetKey = toDateKey(toStartOfDay(dateObj));
+              var limitKey = checkoutMode ? maxCheckOutKey : maxCheckInKey;
+              console.log("targetKey", targetKey);
+              return targetKey > limitKey;
+            }
+
+            function getExtraGuests() {
+              return currentExtraGuests;
+            }
+
+            function getMaxExtraGuests() {
+              if (!P || !P.MAX_EXTRA_GUESTS) {
+                return 0;
+              }
+              return P.MAX_EXTRA_GUESTS[currentRoom] || 0;
+            }
+
+            function renderExtraGuestsStepper() {
+              var max = getMaxExtraGuests();
+              var isUnavailable = max === 0;
+
+              if (extraGuestsCountEl) {
+                extraGuestsCountEl.textContent = String(currentExtraGuests);
+              }
+
+              if (extraGuestsMinusBtn) {
+                var cannotDecrease = isUnavailable || currentExtraGuests <= 0;
+                extraGuestsMinusBtn.disabled = cannotDecrease;
+                extraGuestsMinusBtn.setAttribute(
+                  "aria-disabled",
+                  cannotDecrease ? "true" : "false",
+                );
+              }
+
+              if (extraGuestsPlusBtn) {
+                var cannotIncrease = isUnavailable || currentExtraGuests >= max;
+                extraGuestsPlusBtn.disabled = cannotIncrease;
+                extraGuestsPlusBtn.setAttribute(
+                  "aria-disabled",
+                  cannotIncrease ? "true" : "false",
+                );
+              }
+            }
+
+            function setExtraGuests(nextValue) {
+              var max = getMaxExtraGuests();
+              var next = parseInt(nextValue, 10) || 0;
+              if (next < 0) {
+                next = 0;
+              }
+              if (next > max) {
+                next = max;
+              }
+              currentExtraGuests = next;
+              renderExtraGuestsStepper();
+            }
+
+            function rebuildExtraSelect() {
+              if (!P) {
+                return;
+              }
+              var max = getMaxExtraGuests();
+              setExtraGuests(Math.min(getExtraGuests(), max));
+              if (max === 0) {
+                if (extraGuestsBlock) {
+                  extraGuestsBlock.hidden = true;
+                }
+                if (extraGuestsHint) {
+                  extraGuestsHint.textContent =
+                    "G1·G2는 기준 인원 외 추가가 불가합니다.";
+                }
+                setExtraGuests(0);
+              } else {
+                if (extraGuestsBlock) {
+                  extraGuestsBlock.hidden = false;
+                }
+                if (extraGuestsHint) {
+                  if (currentRoom === "G3") {
+                    extraGuestsHint.textContent =
+                      "기준 인원 외 최대 2인 추가 가능합니다. (인원 추가 시 박당 30,000원/인)";
+                  } else {
+                    extraGuestsHint.textContent =
+                      "기준 인원 외 최대 4인 추가 가능합니다. (인원 추가 시 박당 30,000원/인)";
+                  }
+                }
+              }
+              renderExtraGuestsStepper();
+            }
+
+            function updateWeekdayRateDisplay() {
+              if (!P || !weekdayDisplay) {
+                return;
+              }
+              weekdayDisplay.textContent = formatKRW(
+                P.ROOM_WEEKDAY_BASE[currentRoom],
+              );
+            }
+
+            function updatePricingSummary() {
+              updateConfirmCtaState();
+              if (!P || !pricePlaceholder || !priceTotalEl) {
+                return;
+              }
+              var ci = checkIn ? formatYMD(checkIn) : "";
+              var co = checkOut ? formatYMD(checkOut) : "";
+              if (!checkIn || !checkOut || !P.countNights(ci, co)) {
+                pricePlaceholder.hidden = false;
+                priceTotalEl.hidden = true;
+                priceTotalEl.textContent = "";
+                return;
+              }
+              var eg = P.clampExtra(currentRoom, getExtraGuests());
+              setExtraGuests(eg);
+              var q = P.computeStay(currentRoom, ci, co, eg);
+              pricePlaceholder.hidden = true;
+              priceTotalEl.hidden = false;
+              priceTotalEl.textContent =
+                "TOTAL " +
+                q.discountedGrandTotal.toLocaleString("ko-KR") +
+                "원";
+            }
+
+            function hasValidStaySelection() {
+              if (!checkIn || !checkOut) {
+                return false;
+              }
+              var ci = formatYMD(checkIn);
+              var co = formatYMD(checkOut);
+              if (P && typeof P.countNights === "function") {
+                return P.countNights(ci, co) > 0;
+              }
+              return dateLT(checkIn, checkOut);
+            }
+
+            function updateConfirmCtaState() {
+              if (!confirmLink) {
+                return;
+              }
+              var isReady = hasValidStaySelection();
+              confirmLink.classList.toggle("is-disabled", !isReady);
+              confirmLink.setAttribute(
+                "aria-disabled",
+                isReady ? "false" : "true",
+              );
+              if (isReady) {
+                confirmLink.removeAttribute("tabindex");
+              } else {
+                confirmLink.setAttribute("tabindex", "-1");
+              }
+            }
+
+            function updateConfirmLink() {
+              sessionStorage.setItem(
+                "graffordConfirmDraft",
+                JSON.stringify({
+                  room: currentRoom,
+                  checkIn: checkIn ? formatYMD(checkIn) : "",
+                  checkOut: checkOut ? formatYMD(checkOut) : "",
+                  extraGuests: String(getExtraGuests()),
+                }),
+              );
+              confirmLink.href = "confirm.html";
+            }
+
+            if (confirmLink) {
+              confirmLink.addEventListener("click", function (e) {
+                if (confirmLink.classList.contains("is-disabled")) {
+                  e.preventDefault();
+                }
+              });
+            }
+
+            function syncRoomCopy() {
+              roomCopies.forEach(function (el) {
+                var r = el.getAttribute("data-room");
+                if (r === currentRoom) {
+                  el.hidden = false;
+                  el.classList.add("is-visible");
+                } else {
+                  el.hidden = true;
+                  el.classList.remove("is-visible");
+                }
+              });
+            }
+
+            function renderGallery() {
+              var imgs = roomImages[currentRoom] || [];
+              var label = "Room " + currentRoom;
+              if (!imgs.length) {
+                mainImg.removeAttribute("src");
+                mainImg.alt = "No photos";
+                thumbsEl.innerHTML = "";
+                return;
+              }
+              galleryIndex = Math.min(galleryIndex, imgs.length - 1);
+              thumbsEl.classList.add("is-switching");
+              thumbsEl.innerHTML = "";
+              imgs.forEach(function (_, i) {
+                var b = document.createElement("button");
+                b.type = "button";
+                b.className =
+                  "gallery-thumb" + (i === galleryIndex ? " is-active" : "");
+                b.setAttribute("aria-label", "Photo " + (i + 1));
+                b.addEventListener("click", function () {
+                  if (i === galleryIndex) {
+                    return;
+                  }
+                  galleryIndex = i;
+                  renderGallery();
+                });
+                thumbsEl.appendChild(b);
+              });
+              mainImg.classList.add("is-switching");
+              window.setTimeout(function () {
+                mainImg.src = imgs[galleryIndex];
+                mainImg.alt = label + " photo " + (galleryIndex + 1);
+                var onLoad = function () {
+                  mainImg.removeEventListener("load", onLoad);
+                  window.requestAnimationFrame(function () {
+                    mainImg.classList.remove("is-switching");
+                    thumbsEl.classList.remove("is-switching");
+                  });
+                };
+                mainImg.addEventListener("load", onLoad);
+                if (mainImg.complete) {
+                  window.requestAnimationFrame(function () {
+                    mainImg.classList.remove("is-switching");
+                    thumbsEl.classList.remove("is-switching");
+                  });
+                }
+              }, galleryFadeMs);
+              updatePricingSummary();
+              updateConfirmLink();
+            }
+
+            function setRoom(room) {
+              currentRoom = room;
+              galleryIndex = 0;
+              checkIn = null;
+              checkOut = null;
+              if (calCheckinEl) {
+                calCheckinEl.textContent = "—";
+              }
+              if (calCheckoutEl) {
+                calCheckoutEl.textContent = "—";
+              }
+              if (availabilityEl) {
+                availabilityEl.textContent =
+                  "Select check-in and check-out to see availability for this room.";
+                availabilityEl.classList.remove("is-ok");
+              }
+              typeButtons.forEach(function (btn) {
+                btn.classList.toggle(
+                  "is-active",
+                  btn.getAttribute("data-room") === room,
+                );
+              });
+              syncRoomCopy();
+              rebuildExtraSelect();
+              updateWeekdayRateDisplay();
+              renderGallery();
+              renderCalendar();
+              updatePricingSummary();
+              updateConfirmLink();
+              loadAvailability(room).then(function () {
+                renderCalendar();
+                updatePricingSummary();
+                updateConfirmLink();
+              });
+            }
+
+            typeButtons.forEach(function (btn) {
+              btn.addEventListener("click", function () {
+                setRoom(btn.getAttribute("data-room"));
+              });
             });
-            return {
-              todayYmd:
-                String(map.year || "") +
-                "-" +
-                String(map.month || "01") +
-                "-" +
-                String(map.day || "01"),
-              hour: Number(map.hour || 0),
-            };
-          }
-
-          function parseYMDLocal(ymd) {
-            if (!/^\d{4}-\d{2}-\d{2}$/.test(String(ymd || ""))) {
-              return null;
-            }
-            var p = ymd.split("-");
-            return new Date(Number(p[0]), Number(p[1]) - 1, Number(p[2]));
-          }
-
-          function toStartOfDay(dateObj) {
-            return new Date(
-              dateObj.getFullYear(),
-              dateObj.getMonth(),
-              dateObj.getDate(),
-            );
-          }
-
-          function toDateKey(dateObj) {
-            if (!dateObj) {
-              return 0;
-            }
-            return (
-              dateObj.getFullYear() * 10000 +
-              (dateObj.getMonth() + 1) * 100 +
-              dateObj.getDate()
-            );
-          }
-
-          function dateCmp(a, b) {
-            var ak = toDateKey(a);
-            var bk = toDateKey(b);
-            if (ak === bk) {
-              return 0;
-            }
-            return ak < bk ? -1 : 1;
-          }
-
-          function addDays(dateObj, days) {
-            return new Date(
-              dateObj.getFullYear(),
-              dateObj.getMonth(),
-              dateObj.getDate() + Number(days || 0),
-            );
-          }
-
-          var todayDateOnly = new Date(
-            todayParts.y,
-            todayParts.m - 1,
-            todayParts.d,
-          );
-          var isTodayAfterCutoff = Number(kstNowInfo.hour || 0) >= 19;
-          function isBlockedByPastOrCutoff(dateObj) {
-            var target = toStartOfDay(dateObj);
-            return (
-              dateCmp(target, todayDateOnly) < 0 ||
-              (isTodayAfterCutoff && sameDay(target, todayDateOnly))
-            );
-          }
-
-          function formatDisplay(d) {
-            if (!d) return "—";
-            return (
-              d.getFullYear() +
-              "." +
-              pad(d.getMonth() + 1) +
-              "." +
-              pad(d.getDate())
-            );
-          }
-
-          function formatKRW(n) {
-            return n.toLocaleString("ko-KR") + "원";
-          }
-
-          function isSameMonth(a, b) {
-            return (
-              a &&
-              b &&
-              a.getFullYear() === b.getFullYear() &&
-              a.getMonth() === b.getMonth()
-            );
-          }
-
-          function clampViewMonth(target) {
-            if (!target) {
-              return new Date(minViewMonth.getTime());
-            }
-            if (target < minViewMonth) {
-              return new Date(minViewMonth.getTime());
-            }
-            if (target > maxViewMonth) {
-              return new Date(maxViewMonth.getTime());
-            }
-            return new Date(target.getFullYear(), target.getMonth(), 1);
-          }
-
-          function isDateBeyondBookable(dateObj, checkoutMode) {
-            if (!dateObj) {
-              return false;
-            }
-            var targetKey = toDateKey(toStartOfDay(dateObj));
-            var limitKey = checkoutMode ? maxCheckOutKey : maxCheckInKey;
-            console.log("targetKey", targetKey);
-            return targetKey > limitKey;
-          }
-
-          function getExtraGuests() {
-            return currentExtraGuests;
-          }
-
-          function getMaxExtraGuests() {
-            if (!P || !P.MAX_EXTRA_GUESTS) {
-              return 0;
-            }
-            return P.MAX_EXTRA_GUESTS[currentRoom] || 0;
-          }
-
-          function renderExtraGuestsStepper() {
-            var max = getMaxExtraGuests();
-            var isUnavailable = max === 0;
-
-            if (extraGuestsCountEl) {
-              extraGuestsCountEl.textContent = String(currentExtraGuests);
-            }
 
             if (extraGuestsMinusBtn) {
-              var cannotDecrease = isUnavailable || currentExtraGuests <= 0;
-              extraGuestsMinusBtn.disabled = cannotDecrease;
-              extraGuestsMinusBtn.setAttribute(
-                "aria-disabled",
-                cannotDecrease ? "true" : "false",
-              );
+              extraGuestsMinusBtn.addEventListener("click", function () {
+                setExtraGuests(getExtraGuests() - 1);
+                updatePricingSummary();
+                updateConfirmLink();
+              });
             }
 
             if (extraGuestsPlusBtn) {
-              var cannotIncrease = isUnavailable || currentExtraGuests >= max;
-              extraGuestsPlusBtn.disabled = cannotIncrease;
-              extraGuestsPlusBtn.setAttribute(
-                "aria-disabled",
-                cannotIncrease ? "true" : "false",
-              );
-            }
-          }
-
-          function setExtraGuests(nextValue) {
-            var max = getMaxExtraGuests();
-            var next = parseInt(nextValue, 10) || 0;
-            if (next < 0) {
-              next = 0;
-            }
-            if (next > max) {
-              next = max;
-            }
-            currentExtraGuests = next;
-            renderExtraGuestsStepper();
-          }
-
-          function rebuildExtraSelect() {
-            if (!P) {
-              return;
-            }
-            var max = getMaxExtraGuests();
-            setExtraGuests(Math.min(getExtraGuests(), max));
-            if (max === 0) {
-              if (extraGuestsBlock) {
-                extraGuestsBlock.hidden = true;
-              }
-              if (extraGuestsHint) {
-                extraGuestsHint.textContent =
-                  "G1·G2는 기준 인원 외 추가가 불가합니다.";
-              }
-              setExtraGuests(0);
-            } else {
-              if (extraGuestsBlock) {
-                extraGuestsBlock.hidden = false;
-              }
-              if (extraGuestsHint) {
-                if (currentRoom === "G3") {
-                  extraGuestsHint.textContent =
-                    "기준 인원 외 최대 2인 추가 가능합니다. (인원 추가 시 박당 30,000원/인)";
-                } else {
-                  extraGuestsHint.textContent =
-                    "기준 인원 외 최대 4인 추가 가능합니다. (인원 추가 시 박당 30,000원/인)";
-                }
-              }
-            }
-            renderExtraGuestsStepper();
-          }
-
-          function updateWeekdayRateDisplay() {
-            if (!P || !weekdayDisplay) {
-              return;
-            }
-            weekdayDisplay.textContent = formatKRW(
-              P.ROOM_WEEKDAY_BASE[currentRoom],
-            );
-          }
-
-          function updatePricingSummary() {
-            updateConfirmCtaState();
-            if (!P || !pricePlaceholder || !priceTotalEl) {
-              return;
-            }
-            var ci = checkIn ? formatYMD(checkIn) : "";
-            var co = checkOut ? formatYMD(checkOut) : "";
-            if (!checkIn || !checkOut || !P.countNights(ci, co)) {
-              pricePlaceholder.hidden = false;
-              priceTotalEl.hidden = true;
-              priceTotalEl.textContent = "";
-              return;
-            }
-            var eg = P.clampExtra(currentRoom, getExtraGuests());
-            setExtraGuests(eg);
-            var q = P.computeStay(currentRoom, ci, co, eg);
-            pricePlaceholder.hidden = true;
-            priceTotalEl.hidden = false;
-            priceTotalEl.textContent =
-              "TOTAL " + q.discountedGrandTotal.toLocaleString("ko-KR") + "원";
-          }
-
-          function hasValidStaySelection() {
-            if (!checkIn || !checkOut) {
-              return false;
-            }
-            var ci = formatYMD(checkIn);
-            var co = formatYMD(checkOut);
-            if (P && typeof P.countNights === "function") {
-              return P.countNights(ci, co) > 0;
-            }
-            return dateLT(checkIn, checkOut);
-          }
-
-          function updateConfirmCtaState() {
-            if (!confirmLink) {
-              return;
-            }
-            var isReady = hasValidStaySelection();
-            confirmLink.classList.toggle("is-disabled", !isReady);
-            confirmLink.setAttribute(
-              "aria-disabled",
-              isReady ? "false" : "true",
-            );
-            if (isReady) {
-              confirmLink.removeAttribute("tabindex");
-            } else {
-              confirmLink.setAttribute("tabindex", "-1");
-            }
-          }
-
-          function updateConfirmLink() {
-            sessionStorage.setItem(
-              "graffordConfirmDraft",
-              JSON.stringify({
-                room: currentRoom,
-                checkIn: checkIn ? formatYMD(checkIn) : "",
-                checkOut: checkOut ? formatYMD(checkOut) : "",
-                extraGuests: String(getExtraGuests()),
-              }),
-            );
-            confirmLink.href = "confirm.html";
-          }
-
-          if (confirmLink) {
-            confirmLink.addEventListener("click", function (e) {
-              if (confirmLink.classList.contains("is-disabled")) {
-                e.preventDefault();
-              }
-            });
-          }
-
-          function syncRoomCopy() {
-            roomCopies.forEach(function (el) {
-              var r = el.getAttribute("data-room");
-              if (r === currentRoom) {
-                el.hidden = false;
-                el.classList.add("is-visible");
-              } else {
-                el.hidden = true;
-                el.classList.remove("is-visible");
-              }
-            });
-          }
-
-          function renderGallery() {
-            var imgs = roomImages[currentRoom] || [];
-            var label = "Room " + currentRoom;
-            if (!imgs.length) {
-              mainImg.removeAttribute("src");
-              mainImg.alt = "No photos";
-              thumbsEl.innerHTML = "";
-              return;
-            }
-            galleryIndex = Math.min(galleryIndex, imgs.length - 1);
-            thumbsEl.classList.add("is-switching");
-            thumbsEl.innerHTML = "";
-            imgs.forEach(function (_, i) {
-              var b = document.createElement("button");
-              b.type = "button";
-              b.className =
-                "gallery-thumb" + (i === galleryIndex ? " is-active" : "");
-              b.setAttribute("aria-label", "Photo " + (i + 1));
-              b.addEventListener("click", function () {
-                if (i === galleryIndex) {
-                  return;
-                }
-                galleryIndex = i;
-                renderGallery();
+              extraGuestsPlusBtn.addEventListener("click", function () {
+                setExtraGuests(getExtraGuests() + 1);
+                updatePricingSummary();
+                updateConfirmLink();
               });
-              thumbsEl.appendChild(b);
-            });
-            mainImg.classList.add("is-switching");
-            window.setTimeout(function () {
-              mainImg.src = imgs[galleryIndex];
-              mainImg.alt = label + " photo " + (galleryIndex + 1);
-              var onLoad = function () {
-                mainImg.removeEventListener("load", onLoad);
-                window.requestAnimationFrame(function () {
-                  mainImg.classList.remove("is-switching");
-                  thumbsEl.classList.remove("is-switching");
-                });
-              };
-              mainImg.addEventListener("load", onLoad);
-              if (mainImg.complete) {
-                window.requestAnimationFrame(function () {
-                  mainImg.classList.remove("is-switching");
-                  thumbsEl.classList.remove("is-switching");
-                });
-              }
-            }, galleryFadeMs);
-            updatePricingSummary();
-            updateConfirmLink();
-          }
+            }
 
-          function setRoom(room) {
-            currentRoom = room;
-            galleryIndex = 0;
-            checkIn = null;
-            checkOut = null;
-            if (calCheckinEl) {
-              calCheckinEl.textContent = "—";
-            }
-            if (calCheckoutEl) {
-              calCheckoutEl.textContent = "—";
-            }
-            if (availabilityEl) {
-              availabilityEl.textContent =
-                "Select check-in and check-out to see availability for this room.";
-              availabilityEl.classList.remove("is-ok");
-            }
-            typeButtons.forEach(function (btn) {
-              btn.classList.toggle(
-                "is-active",
-                btn.getAttribute("data-room") === room,
+            btnPrev.addEventListener("click", function () {
+              var imgs = roomImages[currentRoom];
+              if (!imgs || !imgs.length) return;
+              galleryIndex = (galleryIndex - 1 + imgs.length) % imgs.length;
+              renderGallery();
+            });
+
+            btnNext.addEventListener("click", function () {
+              var imgs = roomImages[currentRoom];
+              if (!imgs || !imgs.length) return;
+              galleryIndex = (galleryIndex + 1) % imgs.length;
+              renderGallery();
+            });
+
+            function sameDay(a, b) {
+              return (
+                a &&
+                b &&
+                a.getFullYear() === b.getFullYear() &&
+                a.getMonth() === b.getMonth() &&
+                a.getDate() === b.getDate()
               );
-            });
-            syncRoomCopy();
-            rebuildExtraSelect();
-            updateWeekdayRateDisplay();
-            renderGallery();
-            renderCalendar();
-            updatePricingSummary();
-            updateConfirmLink();
-            loadAvailability(room).then(function () {
-              renderCalendar();
-              updatePricingSummary();
-              updateConfirmLink();
-            });
-          }
-
-          typeButtons.forEach(function (btn) {
-            btn.addEventListener("click", function () {
-              setRoom(btn.getAttribute("data-room"));
-            });
-          });
-
-          if (extraGuestsMinusBtn) {
-            extraGuestsMinusBtn.addEventListener("click", function () {
-              setExtraGuests(getExtraGuests() - 1);
-              updatePricingSummary();
-              updateConfirmLink();
-            });
-          }
-
-          if (extraGuestsPlusBtn) {
-            extraGuestsPlusBtn.addEventListener("click", function () {
-              setExtraGuests(getExtraGuests() + 1);
-              updatePricingSummary();
-              updateConfirmLink();
-            });
-          }
-
-          btnPrev.addEventListener("click", function () {
-            var imgs = roomImages[currentRoom];
-            if (!imgs || !imgs.length) return;
-            galleryIndex = (galleryIndex - 1 + imgs.length) % imgs.length;
-            renderGallery();
-          });
-
-          btnNext.addEventListener("click", function () {
-            var imgs = roomImages[currentRoom];
-            if (!imgs || !imgs.length) return;
-            galleryIndex = (galleryIndex + 1) % imgs.length;
-            renderGallery();
-          });
-
-          function sameDay(a, b) {
-            return (
-              a &&
-              b &&
-              a.getFullYear() === b.getFullYear() &&
-              a.getMonth() === b.getMonth() &&
-              a.getDate() === b.getDate()
-            );
-          }
-
-          function dateLT(a, b) {
-            return dateCmp(a, b) < 0;
-          }
-
-          function canSelectCheckOut(ci, co) {
-            if (!ci || !co || !dateLT(ci, co)) {
-              return false;
             }
-            var cur = new Date(ci.getFullYear(), ci.getMonth(), ci.getDate());
-            var end = new Date(co.getFullYear(), co.getMonth(), co.getDate());
-            while (dateLT(cur, end)) {
-              if (occupiedNightSet.has(formatYMD(cur))) {
+
+            function dateLT(a, b) {
+              return dateCmp(a, b) < 0;
+            }
+
+            function canSelectCheckOut(ci, co) {
+              if (!ci || !co || !dateLT(ci, co)) {
                 return false;
               }
-              cur = addDays(cur, 1);
-            }
-            return true;
-          }
-
-          function isLastDayOfMonth(d) {
-            if (!d) {
-              return false;
-            }
-            var last = new Date(d.getFullYear(), d.getMonth() + 1, 0).getDate();
-            return d.getDate() === last;
-          }
-
-          function shiftCalendarMonth(delta, withFade) {
-            var nextView = new Date(
-              viewDate.getFullYear(),
-              viewDate.getMonth() + delta,
-              1,
-            );
-            var clampedNextView = clampViewMonth(nextView);
-            if (isSameMonth(clampedNextView, viewDate)) {
-              return;
-            }
-            if (!withFade || !bookingCalendar) {
-              viewDate = clampedNextView;
-              renderCalendar();
-              return;
-            }
-            if (monthFadeTimer) {
-              window.clearTimeout(monthFadeTimer);
-              monthFadeTimer = null;
-            }
-            bookingCalendar.classList.add("is-month-fading");
-            monthFadeTimer = window.setTimeout(function () {
-              viewDate = clampedNextView;
-              renderCalendar();
-              bookingCalendar.classList.remove("is-month-fading");
-              monthFadeTimer = null;
-            }, 180);
-          }
-
-          function loadAvailability(room) {
-            return fetch(
-              "/api/reservations?room=" +
-                encodeURIComponent(room) +
-                "&availability=1",
-            )
-              .then(function (r) {
-                return r.json();
-              })
-              .then(function (data) {
-                if (data && data.ok) {
-                  occupiedNightSet = new Set(data.occupiedNights || []);
-                } else {
-                  occupiedNightSet = new Set();
+              var cur = new Date(ci.getFullYear(), ci.getMonth(), ci.getDate());
+              var end = new Date(co.getFullYear(), co.getMonth(), co.getDate());
+              while (dateLT(cur, end)) {
+                if (occupiedNightSet.has(formatYMD(cur))) {
+                  return false;
                 }
-              })
-              .catch(function () {
-                occupiedNightSet = new Set();
-              });
-          }
-
-          function renderCalendar() {
-            viewDate = clampViewMonth(viewDate);
-            var y = viewDate.getFullYear();
-            var m = viewDate.getMonth();
-            var monthNames = [
-              "JANUARY",
-              "FEBRUARY",
-              "MARCH",
-              "APRIL",
-              "MAY",
-              "JUNE",
-              "JULY",
-              "AUGUST",
-              "SEPTEMBER",
-              "OCTOBER",
-              "NOVEMBER",
-              "DECEMBER",
-            ];
-            if (calYearLabel) {
-              calYearLabel.textContent = y + "년";
-            }
-            if (calMonthLabel) {
-              calMonthLabel.textContent = monthNames[m];
+                cur = addDays(cur, 1);
+              }
+              return true;
             }
 
-            var first = new Date(y, m, 1);
-            var startPad = first.getDay();
-            var lastDay = new Date(y, m + 1, 0).getDate();
-
-            calGrid.innerHTML = "";
-            for (var i = 0; i < startPad; i++) {
-              var empty = document.createElement("div");
-              empty.className = "cal-cell cal-empty";
-              calGrid.appendChild(empty);
+            function isLastDayOfMonth(d) {
+              if (!d) {
+                return false;
+              }
+              var last = new Date(
+                d.getFullYear(),
+                d.getMonth() + 1,
+                0,
+              ).getDate();
+              return d.getDate() === last;
             }
 
-            var inCheckoutMode = !!(checkIn && !checkOut);
-            if (calGrid) {
-              calGrid.classList.toggle("is-selecting-checkout", inCheckoutMode);
-            }
-            if (calPrev) {
-              var atMinMonth = isSameMonth(viewDate, minViewMonth);
-              calPrev.disabled = atMinMonth;
-              calPrev.setAttribute(
-                "aria-disabled",
-                atMinMonth ? "true" : "false",
+            function shiftCalendarMonth(delta, withFade) {
+              var nextView = new Date(
+                viewDate.getFullYear(),
+                viewDate.getMonth() + delta,
+                1,
               );
+              var clampedNextView = clampViewMonth(nextView);
+              if (isSameMonth(clampedNextView, viewDate)) {
+                return;
+              }
+              if (!withFade || !bookingCalendar) {
+                viewDate = clampedNextView;
+                renderCalendar();
+                return;
+              }
+              if (monthFadeTimer) {
+                window.clearTimeout(monthFadeTimer);
+                monthFadeTimer = null;
+              }
+              bookingCalendar.classList.add("is-month-fading");
+              monthFadeTimer = window.setTimeout(function () {
+                viewDate = clampedNextView;
+                renderCalendar();
+                bookingCalendar.classList.remove("is-month-fading");
+                monthFadeTimer = null;
+              }, 180);
             }
-            if (calNext) {
-              var atMaxMonth = isSameMonth(viewDate, maxViewMonth);
-              calNext.disabled = atMaxMonth;
-              calNext.setAttribute(
-                "aria-disabled",
-                atMaxMonth ? "true" : "false",
-              );
-            }
 
-            for (var d = 1; d <= lastDay; d++) {
-              var cellDate = new Date(y, m, d);
-              var btn = document.createElement("button");
-              btn.type = "button";
-              btn.className = "cal-cell cal-day";
-              btn.textContent = String(d);
-
-              var ymdStr = formatYMD(cellDate);
-              var isPast = isBlockedByPastOrCutoff(cellDate);
-              var targetKey = toDateKey(toStartOfDay(cellDate));
-              var limitKey = inCheckoutMode ? maxCheckOutKey : maxCheckInKey;
-              var isBeyondBookable = targetKey > limitKey;
-              var isOcc = occupiedNightSet.has(ymdStr);
-              var disabled = false;
-              var disabledReason = "";
-              if (isPast) {
-                disabled = true;
-                disabledReason = "past-or-cutoff";
-              } else if (isBeyondBookable) {
-                disabled = true;
-                disabledReason = "beyond-max-bookable";
-              } else if (isOcc) {
-                /* 체크아웃 선택 모드에서는 "점유일"도 체크아웃 후보로 허용 (당일 퇴실) */
-                if (
-                  !(
-                    inCheckoutMode &&
-                    checkIn &&
-                    dateLT(checkIn, cellDate) &&
-                    canSelectCheckOut(checkIn, cellDate)
-                  )
-                ) {
-                  disabled = true;
-                  disabledReason = "occupied-night";
-                }
-              }
-
-              btn.disabled = disabled;
-              btn.dataset.disabledReason = disabledReason || "enabled";
-
-              if (isPast || isBeyondBookable) {
-                btn.classList.add("cal-past");
-              } else if (isOcc) {
-                btn.classList.add("cal-past", "cal-booked");
-              }
-
-              if (checkIn && sameDay(cellDate, checkIn))
-                btn.classList.add("cal-checkin");
-              if (checkOut && sameDay(cellDate, checkOut))
-                btn.classList.add("cal-checkout");
-              if (
-                checkIn &&
-                checkOut &&
-                dateLT(checkIn, cellDate) &&
-                dateLT(cellDate, checkOut)
-              ) {
-                btn.classList.add("cal-range");
-              }
-
-              (function (dateCopy, btnEl) {
-                btnEl.addEventListener("click", function () {
-                  if (btnEl.disabled) return;
-                  var shouldMoveToNextMonth = false;
-                  if (!checkIn || (checkIn && checkOut)) {
-                    // In check-in mode, trust render-time disabled state.
-                    checkIn = new Date(dateCopy);
-                    checkOut = null;
-                    if (isLastDayOfMonth(checkIn)) {
-                      shouldMoveToNextMonth = true;
-                    }
+            function loadAvailability(room) {
+              return fetch(
+                "/api/reservations?room=" +
+                  encodeURIComponent(room) +
+                  "&availability=1",
+              )
+                .then(function (r) {
+                  return r.json();
+                })
+                .then(function (data) {
+                  if (data && data.ok) {
+                    occupiedNightSet = new Set(data.occupiedNights || []);
                   } else {
-                    if (dateLT(dateCopy, checkIn)) {
+                    occupiedNightSet = new Set();
+                  }
+                })
+                .catch(function () {
+                  occupiedNightSet = new Set();
+                });
+            }
+
+            function renderCalendar() {
+              viewDate = clampViewMonth(viewDate);
+              var y = viewDate.getFullYear();
+              var m = viewDate.getMonth();
+              var monthNames = [
+                "JANUARY",
+                "FEBRUARY",
+                "MARCH",
+                "APRIL",
+                "MAY",
+                "JUNE",
+                "JULY",
+                "AUGUST",
+                "SEPTEMBER",
+                "OCTOBER",
+                "NOVEMBER",
+                "DECEMBER",
+              ];
+              if (calYearLabel) {
+                calYearLabel.textContent = y + "년";
+              }
+              if (calMonthLabel) {
+                calMonthLabel.textContent = monthNames[m];
+              }
+
+              var first = new Date(y, m, 1);
+              var startPad = first.getDay();
+              var lastDay = new Date(y, m + 1, 0).getDate();
+
+              calGrid.innerHTML = "";
+              for (var i = 0; i < startPad; i++) {
+                var empty = document.createElement("div");
+                empty.className = "cal-cell cal-empty";
+                calGrid.appendChild(empty);
+              }
+
+              var inCheckoutMode = !!(checkIn && !checkOut);
+              if (calGrid) {
+                calGrid.classList.toggle(
+                  "is-selecting-checkout",
+                  inCheckoutMode,
+                );
+              }
+              if (calPrev) {
+                var atMinMonth = isSameMonth(viewDate, minViewMonth);
+                calPrev.disabled = atMinMonth;
+                calPrev.setAttribute(
+                  "aria-disabled",
+                  atMinMonth ? "true" : "false",
+                );
+              }
+              if (calNext) {
+                var atMaxMonth = isSameMonth(viewDate, maxViewMonth);
+                calNext.disabled = atMaxMonth;
+                calNext.setAttribute(
+                  "aria-disabled",
+                  atMaxMonth ? "true" : "false",
+                );
+              }
+
+              for (var d = 1; d <= lastDay; d++) {
+                var cellDate = new Date(y, m, d);
+                var btn = document.createElement("button");
+                btn.type = "button";
+                btn.className = "cal-cell cal-day";
+                btn.textContent = String(d);
+
+                var ymdStr = formatYMD(cellDate);
+                var isPast = isBlockedByPastOrCutoff(cellDate);
+                var targetKey = toDateKey(toStartOfDay(cellDate));
+                var limitKey = inCheckoutMode ? maxCheckOutKey : maxCheckInKey;
+                var isBeyondBookable = targetKey > limitKey;
+                var isOcc = occupiedNightSet.has(ymdStr);
+                var disabled = false;
+                var disabledReason = "";
+                if (isPast) {
+                  disabled = true;
+                  disabledReason = "past-or-cutoff";
+                } else if (isBeyondBookable) {
+                  disabled = true;
+                  disabledReason = "beyond-max-bookable";
+                } else if (isOcc) {
+                  /* 체크아웃 선택 모드에서는 "점유일"도 체크아웃 후보로 허용 (당일 퇴실) */
+                  if (
+                    !(
+                      inCheckoutMode &&
+                      checkIn &&
+                      dateLT(checkIn, cellDate) &&
+                      canSelectCheckOut(checkIn, cellDate)
+                    )
+                  ) {
+                    disabled = true;
+                    disabledReason = "occupied-night";
+                  }
+                }
+
+                btn.disabled = disabled;
+                btn.dataset.disabledReason = disabledReason || "enabled";
+
+                if (isPast || isBeyondBookable) {
+                  btn.classList.add("cal-past");
+                } else if (isOcc) {
+                  btn.classList.add("cal-past", "cal-booked");
+                }
+
+                if (checkIn && sameDay(cellDate, checkIn))
+                  btn.classList.add("cal-checkin");
+                if (checkOut && sameDay(cellDate, checkOut))
+                  btn.classList.add("cal-checkout");
+                if (
+                  checkIn &&
+                  checkOut &&
+                  dateLT(checkIn, cellDate) &&
+                  dateLT(cellDate, checkOut)
+                ) {
+                  btn.classList.add("cal-range");
+                }
+
+                (function (dateCopy, btnEl) {
+                  btnEl.addEventListener("click", function () {
+                    if (btnEl.disabled) return;
+                    var shouldMoveToNextMonth = false;
+                    if (!checkIn || (checkIn && checkOut)) {
+                      // In check-in mode, trust render-time disabled state.
                       checkIn = new Date(dateCopy);
                       checkOut = null;
-                    } else if (sameDay(dateCopy, checkIn)) {
-                      checkIn = null;
-                      checkOut = null;
-                    } else if (
-                      isBlockedByPastOrCutoff(dateCopy) ||
-                      isDateBeyondBookable(dateCopy, true) ||
-                      (occupiedNightSet.has(formatYMD(dateCopy)) &&
-                        !canSelectCheckOut(checkIn, dateCopy))
-                    ) {
-                      // Invalid checkout click should not clear existing check-in.
-                      return;
-                    } else if (!canSelectCheckOut(checkIn, dateCopy)) {
-                      // Keep current check-in; wait for a valid checkout selection.
-                      return;
+                      if (isLastDayOfMonth(checkIn)) {
+                        shouldMoveToNextMonth = true;
+                      }
                     } else {
-                      checkOut = new Date(dateCopy);
+                      if (dateLT(dateCopy, checkIn)) {
+                        checkIn = new Date(dateCopy);
+                        checkOut = null;
+                      } else if (sameDay(dateCopy, checkIn)) {
+                        checkIn = null;
+                        checkOut = null;
+                      } else if (
+                        isBlockedByPastOrCutoff(dateCopy) ||
+                        isDateBeyondBookable(dateCopy, true) ||
+                        (occupiedNightSet.has(formatYMD(dateCopy)) &&
+                          !canSelectCheckOut(checkIn, dateCopy))
+                      ) {
+                        // Invalid checkout click should not clear existing check-in.
+                        return;
+                      } else if (!canSelectCheckOut(checkIn, dateCopy)) {
+                        // Keep current check-in; wait for a valid checkout selection.
+                        return;
+                      } else {
+                        checkOut = new Date(dateCopy);
+                      }
                     }
-                  }
-                  if (calCheckinEl) {
-                    calCheckinEl.textContent = formatDisplay(checkIn);
-                  }
-                  if (calCheckoutEl) {
-                    calCheckoutEl.textContent = checkOut
-                      ? formatDisplay(checkOut)
-                      : "—";
-                  }
+                    if (calCheckinEl) {
+                      calCheckinEl.textContent = formatDisplay(checkIn);
+                    }
+                    if (calCheckoutEl) {
+                      calCheckoutEl.textContent = checkOut
+                        ? formatDisplay(checkOut)
+                        : "—";
+                    }
 
-                  if (availabilityEl) {
-                    if (checkIn && checkOut) {
-                      availabilityEl.textContent =
-                        "Available for Room " +
-                        currentRoom +
-                        " from " +
-                        formatDisplay(checkIn) +
-                        " to " +
-                        formatDisplay(checkOut) +
-                        ".";
-                      availabilityEl.classList.add("is-ok");
-                    } else if (checkIn) {
-                      availabilityEl.textContent = "Select check-out date.";
-                      availabilityEl.classList.remove("is-ok");
+                    if (availabilityEl) {
+                      if (checkIn && checkOut) {
+                        availabilityEl.textContent =
+                          "Available for Room " +
+                          currentRoom +
+                          " from " +
+                          formatDisplay(checkIn) +
+                          " to " +
+                          formatDisplay(checkOut) +
+                          ".";
+                        availabilityEl.classList.add("is-ok");
+                      } else if (checkIn) {
+                        availabilityEl.textContent = "Select check-out date.";
+                        availabilityEl.classList.remove("is-ok");
+                      } else {
+                        availabilityEl.textContent =
+                          "Select check-in and check-out to see availability for this room.";
+                        availabilityEl.classList.remove("is-ok");
+                      }
+                    }
+                    updatePricingSummary();
+                    updateConfirmLink();
+                    if (shouldMoveToNextMonth) {
+                      shiftCalendarMonth(1, true);
                     } else {
-                      availabilityEl.textContent =
-                        "Select check-in and check-out to see availability for this room.";
-                      availabilityEl.classList.remove("is-ok");
+                      renderCalendar();
                     }
-                  }
-                  updatePricingSummary();
-                  updateConfirmLink();
-                  if (shouldMoveToNextMonth) {
-                    shiftCalendarMonth(1, true);
-                  } else {
-                    renderCalendar();
-                  }
-                });
-              })(cellDate, btn);
+                  });
+                })(cellDate, btn);
 
-              calGrid.appendChild(btn);
+                calGrid.appendChild(btn);
+              }
             }
-          }
 
-          calPrev.addEventListener("click", function () {
-            shiftCalendarMonth(-1, false);
-          });
-
-          calNext.addEventListener("click", function () {
-            shiftCalendarMonth(1, false);
-          });
-
-          if (fadeEl) {
-            var obs = new IntersectionObserver(
-              function (entries) {
-                entries.forEach(function (e) {
-                  if (e.isIntersecting) {
-                    e.target.classList.add("is-visible");
-                    obs.unobserve(e.target);
-                  }
-                });
-              },
-              { threshold: 0.12 },
-            );
-            obs.observe(fadeEl);
-          }
-
-          if (scrollButton && nextSection) {
-            scrollButton.addEventListener("click", function () {
-              nextSection.scrollIntoView({
-                behavior: "smooth",
-                block: "start",
-              });
+            calPrev.addEventListener("click", function () {
+              shiftCalendarMonth(-1, false);
             });
-          }
 
-          var allowedRooms = ["G1", "G2", "G3", "G4"];
-          var savedRoom = sessionStorage.getItem(
-            "graffordReservationSelectedRoom",
-          );
-          if (savedRoom) {
-            savedRoom = savedRoom.trim().toUpperCase();
-          }
-          var initialRoom =
-            savedRoom && allowedRooms.indexOf(savedRoom) !== -1
-              ? savedRoom
-              : "G1";
-          setRoom(initialRoom);
-          if (savedRoom && allowedRooms.indexOf(savedRoom) !== -1) {
-            var bookingAnchor = scope.querySelector(".reservation-booking");
-            if (bookingAnchor) {
-              requestAnimationFrame(function () {
-                bookingAnchor.scrollIntoView({
+            calNext.addEventListener("click", function () {
+              shiftCalendarMonth(1, false);
+            });
+
+            if (fadeEl) {
+              var obs = new IntersectionObserver(
+                function (entries) {
+                  entries.forEach(function (e) {
+                    if (e.isIntersecting) {
+                      e.target.classList.add("is-visible");
+                      obs.unobserve(e.target);
+                    }
+                  });
+                },
+                { threshold: 0.12 },
+              );
+              obs.observe(fadeEl);
+            }
+
+            if (scrollButton && nextSection) {
+              scrollButton.addEventListener("click", function () {
+                nextSection.scrollIntoView({
                   behavior: "smooth",
                   block: "start",
                 });
               });
             }
-            sessionStorage.removeItem("graffordReservationSelectedRoom");
-          }
+
+            var allowedRooms = ["G1", "G2", "G3", "G4"];
+            var savedRoom = sessionStorage.getItem(
+              "graffordReservationSelectedRoom",
+            );
+            if (savedRoom) {
+              savedRoom = savedRoom.trim().toUpperCase();
+            }
+            var initialRoom =
+              savedRoom && allowedRooms.indexOf(savedRoom) !== -1
+                ? savedRoom
+                : "G1";
+            setRoom(initialRoom);
+            if (savedRoom && allowedRooms.indexOf(savedRoom) !== -1) {
+              var bookingAnchor = scope.querySelector(".reservation-booking");
+              if (bookingAnchor) {
+                requestAnimationFrame(function () {
+                  bookingAnchor.scrollIntoView({
+                    behavior: "smooth",
+                    block: "start",
+                  });
+                });
+              }
+              sessionStorage.removeItem("graffordReservationSelectedRoom");
+            }
           }
         });
       </script>

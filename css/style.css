@@ -3359,6 +3359,91 @@ iframe.map {
 .admin-login-actions {
   margin-top: 0.45rem;
 }
+.admin-category-nav {
+  margin: 0 auto 1.1rem;
+  max-width: 1100px;
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+}
+.admin-category-btn {
+  border: none;
+  background: transparent;
+  color: var(--grafford-mud2);
+  font-size: 1rem;
+  font-weight: 500;
+  cursor: pointer;
+  padding: 0;
+}
+.admin-category-btn.is-active {
+  color: var(--grafford-dark-brown);
+  text-decoration: underline;
+  text-underline-offset: 0.3rem;
+  text-decoration-thickness: 2px;
+}
+.admin-calendar-nav {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+.admin-calendar-label {
+  min-width: 7rem;
+  text-align: center;
+  color: var(--grafford-mud2);
+}
+.admin-calendar-wrap {
+  margin-top: 1rem;
+}
+.admin-calendar-weekdays,
+.admin-calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+}
+.admin-calendar-weekdays {
+  margin-bottom: 0.45rem;
+  color: var(--grafford-mud2);
+  font-size: 0.87rem;
+}
+.admin-calendar-weekdays span {
+  text-align: center;
+}
+.admin-calendar-grid {
+  gap: 0.45rem;
+}
+.admin-calendar-cell {
+  min-height: 74px;
+  border: 1px solid rgba(58, 53, 49, 0.16);
+  background: var(--grafford-beige);
+  padding: 0.45rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+.admin-calendar-cell.is-empty {
+  border-color: transparent;
+  background: transparent;
+}
+.admin-calendar-cell.has-reservation {
+  background: rgba(211, 199, 177, 0.38);
+  border-color: rgba(90, 82, 71, 0.35);
+}
+.admin-calendar-day {
+  font-size: 0.9rem;
+  color: var(--grafford-mud2);
+}
+.admin-calendar-count {
+  align-self: flex-end;
+  font-size: 0.92rem;
+  color: var(--grafford-dark-brown);
+}
+.admin-calendar-help {
+  margin: 0.7rem 0 0;
+  font-size: 0.84rem;
+  color: var(--grafford-mud2);
+}
+.admin-empty-section {
+  min-height: 260px;
+}
 .admin-table-wrap {
   margin-top: 1rem;
   overflow-x: auto;
