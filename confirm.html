@@ -285,6 +285,15 @@
                   예약 정보
                 </h2>
                 <div class="confirm-booking-card">
+                  <img
+                    class="confirm-room-thumb"
+                    id="booking-room-img"
+                    src="images/A00.jpg"
+                    alt=""
+                    width="120"
+                    height="90"
+                    decoding="async"
+                  />
                   <div class="confirm-booking-details">
                     <p class="confirm-room-name" id="booking-room-name"></p>
                     <p class="confirm-schedule" id="booking-schedule"></p>
@@ -335,7 +344,7 @@
                     autocomplete="email"
                     inputmode="email"
                     maxlength="255"
-                    placeholder="example@email.com"
+                    placeholder=""
                     title="올바른 이메일 주소를 입력해 주세요"
                   />
                 </label>
@@ -757,45 +766,17 @@
           var inPaymentFlow =
             sessionStorage.getItem("graffordInPaymentFlow") === "1";
 
-          var leaveOverlayKr = document.getElementById("confirm-leave-overlay");
-          var leaveOverlayEn = document.getElementById(
-            "confirm-leave-overlay-en",
-          );
-          var leaveConfirmBtnKr = document.getElementById(
+          var leaveOverlay = document.getElementById("confirm-leave-overlay");
+          var leaveConfirmBtn = document.getElementById(
             "confirm-leave-confirm",
           );
-          var leaveConfirmBtnEn = document.getElementById(
-            "confirm-leave-confirm-en",
-          );
-          var leaveCancelBtnKr = document.getElementById(
-            "confirm-leave-cancel",
-          );
-          var leaveCancelBtnEn = document.getElementById(
-            "confirm-leave-cancel-en",
-          );
-
-          function isEnglishUiActive() {
-            return (
-              (document.body &&
-                document.body.getAttribute("data-site-language") === "en") ||
-              (document.documentElement &&
-                document.documentElement.getAttribute("lang") === "en")
-            );
-          }
-
-          function getActiveLeaveOverlay() {
-            return isEnglishUiActive()
-              ? leaveOverlayEn || leaveOverlayKr
-              : leaveOverlayKr || leaveOverlayEn;
-          }
+          var leaveCancelBtn = document.getElementById("confirm-leave-cancel");
 
           function showLeaveOverlay() {
-            var overlay = getActiveLeaveOverlay();
-            if (overlay) overlay.classList.add("is-visible");
+            if (leaveOverlay) leaveOverlay.classList.add("is-visible");
           }
           function hideLeaveOverlay() {
-            if (leaveOverlayKr) leaveOverlayKr.classList.remove("is-visible");
-            if (leaveOverlayEn) leaveOverlayEn.classList.remove("is-visible");
+            if (leaveOverlay) leaveOverlay.classList.remove("is-visible");
           }
 
           // payment.html 왕복이 아닐 때만 가드 히스토리 항목을 추가
@@ -823,25 +804,22 @@
             showLeaveOverlay();
           });
 
-          [leaveConfirmBtnKr, leaveConfirmBtnEn].forEach(function (btn) {
-            if (!btn) return;
-            btn.addEventListener("click", function () {
+          if (leaveConfirmBtn) {
+            leaveConfirmBtn.addEventListener("click", function () {
               sessionStorage.removeItem("graffordInPaymentFlow");
               sessionStorage.removeItem("graffordPaymentData");
               // replace 사용: confirm.html이 히스토리에서 제거되어 앞으로가기 불가
               window.location.replace("RESERVATION.html");
             });
-          });
-          [leaveCancelBtnKr, leaveCancelBtnEn].forEach(function (btn) {
-            if (!btn) return;
-            btn.addEventListener("click", hideLeaveOverlay);
-          });
-          [leaveOverlayKr, leaveOverlayEn].forEach(function (overlay) {
-            if (!overlay) return;
-            overlay.addEventListener("click", function (e) {
-              if (e.target === overlay) hideLeaveOverlay();
+          }
+          if (leaveCancelBtn) {
+            leaveCancelBtn.addEventListener("click", hideLeaveOverlay);
+          }
+          if (leaveOverlay) {
+            leaveOverlay.addEventListener("click", function (e) {
+              if (e.target === leaveOverlay) hideLeaveOverlay();
             });
-          });
+          }
 
           // 인라인 뒤로가기(<) 버튼도 동일한 이탈 확인 팝업 사용
           var backLinks = document.querySelectorAll(".confirm-back-inline");
@@ -1553,6 +1531,14 @@
               <section class="confirm-section">
                 <h2 class="confirm-section-title">Booking Details</h2>
                 <div class="confirm-booking-card">
+                  <img
+                    class="confirm-room-thumb"
+                    src="images/A00.jpg"
+                    alt=""
+                    width="120"
+                    height="90"
+                    decoding="async"
+                  />
                   <div class="confirm-booking-details">
                     <p class="confirm-room-name"></p>
                     <p class="confirm-schedule"></p>
@@ -1598,7 +1584,7 @@
                     autocomplete="email"
                     inputmode="email"
                     maxlength="255"
-                    placeholder="example@email.com"
+                    placeholder=""
                     title="Please enter a valid email address"
                   />
                 </label>
@@ -1622,7 +1608,9 @@
                       aria-expanded="false"
                       aria-controls="agree-privacy-detail"
                       aria-label="개인정보 수집 및 이용 동의 상세 내용 펼치기"
-                    ></button>
+                    >
+                      ▽
+                    </button>
                   </div>
                   <div class="confirm-check-detail" hidden></div>
                   <label class="confirm-check">

@@ -2723,7 +2723,7 @@ iframe.map {
   font-size: 0.9rem;
   color: var(--grafford-mud2);
   line-height: 1.6;
-  margin: 0 0 1rem;
+  margin: 0 0.7rem 0.85rem;
 }
 
 .confirm-guide-list {
@@ -2754,7 +2754,7 @@ iframe.map {
 
 .confirm-label {
   display: block;
-  margin-bottom: 0.85rem;
+  margin: 0 0.7rem 0.85rem;
   font-size: 0.95rem;
   color: var(--grafford-mud2);
 }
@@ -2809,7 +2809,7 @@ iframe.map {
 .confirm-total-box {
   background: transparent;
   width: 70%;
-  padding: 0rem 0.6rem;
+  margin: 0 0.7rem 0.85rem;
 }
 
 .confirm-breakdown {
@@ -2844,7 +2844,7 @@ iframe.map {
 
 .confirm-fieldset {
   border: none;
-  margin: 0;
+  margin: 0 0.7rem 0.85rem;
   padding: 0;
   display: flex;
   flex-direction: column;
@@ -2994,6 +2994,7 @@ iframe.map {
 
 .confirm-agree-list {
   padding-left: 0.15rem;
+  margin: 0 0.7rem 0.85rem;
 }
 
 .confirm-refund-table {
