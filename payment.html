@@ -38,7 +38,11 @@
         <a href="RESERVATION.html">RESERVATION</a>
       </aside>
       <div class="desktop-nav-links" aria-label="데스크톱 메뉴">
-        <div class="lang-switch" data-language-switch aria-label="Language switch">
+        <div
+          class="lang-switch"
+          data-language-switch
+          aria-label="Language switch"
+        >
           <button type="button" class="lang-switch__btn" data-lang-option="kr">
             KR
           </button>
@@ -59,20 +63,21 @@
         <h1 class="confirm-title">결제 진행</h1>
 
         <!-- 로딩 상태 -->
-        <p class="payment-status-msg" id="payment-loading-msg">결제 정보를 불러오는 중...</p>
+        <p class="payment-status-msg" id="payment-loading-msg">
+          결제 정보를 불러오는 중...
+        </p>
 
         <!-- 결제 데이터 없음 -->
         <div id="payment-no-data" hidden>
           <p class="payment-status-msg">결제 정보가 없습니다.</p>
-          <p class="confirm-back">
-            <a href="RESERVATION.html">예약으로</a>
-            ·
-            <a href="GROUND.html">객실 안내</a>
-          </p>
         </div>
 
         <!-- 결제 요약 박스 -->
-        <div class="confirm-total-box payment-summary-box" id="payment-summary" hidden>
+        <div
+          class="confirm-total-box payment-summary-box"
+          id="payment-summary"
+          hidden
+        >
           <div class="payment-summary-row">
             <span class="payment-summary-label">예약번호</span>
             <span class="payment-summary-value" id="pay-order-no">—</span>
@@ -86,50 +91,34 @@
             <span class="payment-summary-value" id="pay-schedule">—</span>
           </div>
           <div class="payment-summary-row">
-            <span class="payment-summary-label">예약자</span>
+            <span class="payment-summary-label">방문 인원</span>
+            <span class="payment-summary-value" id="pay-guest-count">—</span>
+          </div>
+
+          <div class="payment-summary-row">
+            <span class="payment-summary-label">예약자 성함</span>
             <span class="payment-summary-value" id="pay-guest">—</span>
           </div>
           <div class="payment-summary-row payment-summary-row--total">
-            <span class="payment-summary-label">결제 금액</span>
+            <span class="payment-summary-label">최종 결제 금액</span>
             <span class="payment-summary-value" id="pay-amount">—</span>
           </div>
         </div>
 
         <!-- 결제 버튼 영역 -->
-        <div class="confirm-actions payment-actions" id="payment-btn-area" hidden>
+        <div
+          class="confirm-actions payment-actions"
+          id="payment-btn-area"
+          hidden
+        >
           <button
             type="button"
             id="payment-submit-btn"
             class="btn reserve-btn confirm-pay-submit"
           >
-            KG이니시스로 결제하기
+            결제하기
           </button>
         </div>
-
-        <!-- 결제 처리 중 -->
-        <p class="payment-status-msg" id="payment-processing-msg" hidden>
-          결제창을 불러오는 중입니다...
-        </p>
-
-        <!-- 결제 오류 메시지 -->
-        <div id="payment-error-area" hidden>
-          <p class="payment-status-msg payment-status-msg--error" id="payment-error-msg"></p>
-          <div class="confirm-actions payment-actions">
-            <button
-              type="button"
-              id="payment-retry-btn"
-              class="btn reserve-btn confirm-pay-submit"
-            >
-              다시 시도
-            </button>
-          </div>
-        </div>
-
-        <p class="confirm-back" id="payment-back-link">
-          <a href="RESERVATION.html">예약으로</a>
-          ·
-          <a href="GROUND.html">객실 안내</a>
-        </p>
 
         <footer
           id="site-business-footer-mount"
@@ -187,10 +176,7 @@
           var payMethod = saved.payMethod || "card";
 
           function reservationsApiUrl() {
-            if (
-              typeof window !== "undefined" &&
-              window.__GRAFFORD_API_BASE__
-            ) {
+            if (typeof window !== "undefined" && window.__GRAFFORD_API_BASE__) {
               return (
                 String(window.__GRAFFORD_API_BASE__).replace(/\/$/, "") +
                 "/api/reservations"
@@ -222,7 +208,14 @@
             if (!ymd) return "—";
             var parts = ymd.split("-");
             if (parts.length !== 3) return ymd;
-            return parts[0] + "년 " + parseInt(parts[1], 10) + "월 " + parseInt(parts[2], 10) + "일";
+            return (
+              parts[0] +
+              "년 " +
+              parseInt(parts[1], 10) +
+              "월 " +
+              parseInt(parts[2], 10) +
+              "일"
+            );
           }
 
           hideLoading();
@@ -233,6 +226,7 @@
           var roomEl = document.getElementById("pay-room");
           var scheduleEl = document.getElementById("pay-schedule");
           var guestEl = document.getElementById("pay-guest");
+          var guestCountEl = document.getElementById("pay-guest-count");
           var amountEl = document.getElementById("pay-amount");
 
           if (orderNoEl) orderNoEl.textContent = orderNo;
@@ -241,6 +235,7 @@
             scheduleEl.textContent =
               formatDate(checkIn) + " ~ " + formatDate(checkOut);
           if (guestEl) guestEl.textContent = guestName || "—";
+          if (guestCountEl) guestCountEl.textContent = guestCount + "명" || "—";
           if (amountEl)
             amountEl.textContent =
               Number(finalAmount).toLocaleString("ko-KR") + "원";
@@ -248,7 +243,8 @@
           function showError(msg) {
             if (processingMsg) processingMsg.hidden = true;
             if (submitBtn) submitBtn.disabled = false;
-            if (errorMsg) errorMsg.textContent = msg || "결제 중 오류가 발생했습니다.";
+            if (errorMsg)
+              errorMsg.textContent = msg || "결제 중 오류가 발생했습니다.";
             if (errorArea) errorArea.hidden = false;
           }
 
@@ -270,13 +266,16 @@
             } catch (e) {
               showError(
                 "결제 설정을 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.\n(" +
-                  (e && e.message ? e.message : "네트워크 오류") + ")",
+                  (e && e.message ? e.message : "네트워크 오류") +
+                  ")",
               );
               return;
             }
 
             if (!config.storeId || !config.channelKey) {
-              showError("결제 설정이 올바르지 않습니다. 관리자에게 문의하세요.");
+              showError(
+                "결제 설정이 올바르지 않습니다. 관리자에게 문의하세요.",
+              );
               return;
             }
 
@@ -296,7 +295,8 @@
                 storeId: config.storeId,
                 channelKey: config.channelKey,
                 paymentId: orderNo,
-                orderName: "GRAFFORD 숙박 예약 (" + (ROOM_LABELS[room] || room) + ")",
+                orderName:
+                  "GRAFFORD 숙박 예약 (" + (ROOM_LABELS[room] || room) + ")",
                 totalAmount: finalAmount,
                 currency: "KRW",
                 payMethod: "CARD",
@@ -314,7 +314,8 @@
             } catch (e) {
               showError(
                 "결제창 실행 중 오류가 발생했습니다.\n(" +
-                  (e && e.message ? e.message : String(e)) + ")",
+                  (e && e.message ? e.message : String(e)) +
+                  ")",
               );
               return;
             }
@@ -348,7 +349,8 @@
             } catch (e) {
               showError(
                 "결제 검증 중 네트워크 오류가 발생했습니다. 결제가 정상적으로 이루어졌다면 고객센터로 문의해 주세요.\n(" +
-                  (e && e.message ? e.message : String(e)) + ")",
+                  (e && e.message ? e.message : String(e)) +
+                  ")",
               );
               return;
             }
@@ -383,7 +385,10 @@
             } catch (e) {
               showError(
                 "결제는 완료되었으나 예약 저장 중 오류가 발생했습니다.\n고객센터로 문의해 주세요.\n(결제번호: " +
-                  orderNo + ")\n(" + (e && e.message ? e.message : String(e)) + ")",
+                  orderNo +
+                  ")\n(" +
+                  (e && e.message ? e.message : String(e)) +
+                  ")",
               );
               return;
             }
@@ -391,7 +396,9 @@
             if (!saveRes.ok || !saveData.ok) {
               showError(
                 "결제는 완료되었으나 예약 저장에 실패했습니다.\n고객센터로 문의해 주세요.\n(결제번호: " +
-                  orderNo + ")\n" + (saveData.error || ""),
+                  orderNo +
+                  ")\n" +
+                  (saveData.error || ""),
               );
               return;
             }
@@ -447,9 +454,9 @@
             lines: [
               "대표 : GRAFFORD",
               "주소 : 제주특별자치도 서귀포시 토산중앙로 22",
-              "사업자등록번호 : 123-45-67890",
-              "전화 : 010-1234-5678",
-              "이메일 : info@grafford.com",
+              "사업자등록번호 : 587-23-00957",
+              "전화 : 010-6830-1105",
+              "이메일 : tilkoas35@naver.com",
               " ",
               "© 2026 GRAFFORD. all rights reserved.",
             ],
@@ -461,7 +468,9 @@
     <div class="lang-en">
       <main class="content-section confirm-page payment-page">
         <h1 class="confirm-title">Payment</h1>
-        <p class="payment-status-msg" id="payment-loading-msg-en">Loading payment information...</p>
+        <p class="payment-status-msg" id="payment-loading-msg-en">
+          Loading payment information...
+        </p>
 
         <div id="payment-no-data-en" hidden>
           <p class="payment-status-msg">No payment information found.</p>
@@ -472,7 +481,11 @@
           </p>
         </div>
 
-        <div class="confirm-total-box payment-summary-box" id="payment-summary-en" hidden>
+        <div
+          class="confirm-total-box payment-summary-box"
+          id="payment-summary-en"
+          hidden
+        >
           <div class="payment-summary-row">
             <span class="payment-summary-label">Reservation No.</span>
             <span class="payment-summary-value" id="pay-order-no-en">—</span>
@@ -495,31 +508,18 @@
           </div>
         </div>
 
-        <div class="confirm-actions payment-actions" id="payment-btn-area-en" hidden>
+        <div
+          class="confirm-actions payment-actions"
+          id="payment-btn-area-en"
+          hidden
+        >
           <button
             type="button"
             id="payment-submit-btn-en"
             class="btn reserve-btn confirm-pay-submit"
           >
-            Pay with KG Inicis
+            Pay
           </button>
-        </div>
-
-        <p class="payment-status-msg" id="payment-processing-msg-en" hidden>
-          Opening payment window...
-        </p>
-
-        <div id="payment-error-area-en" hidden>
-          <p class="payment-status-msg payment-status-msg--error" id="payment-error-msg-en"></p>
-          <div class="confirm-actions payment-actions">
-            <button
-              type="button"
-              id="payment-retry-btn-en"
-              class="btn reserve-btn confirm-pay-submit"
-            >
-              Retry
-            </button>
-          </div>
         </div>
 
         <p class="confirm-back">
@@ -553,7 +553,9 @@
           var summaryEl = document.getElementById("payment-summary-en");
           var btnArea = document.getElementById("payment-btn-area-en");
           var submitBtn = document.getElementById("payment-submit-btn-en");
-          var processingMsg = document.getElementById("payment-processing-msg-en");
+          var processingMsg = document.getElementById(
+            "payment-processing-msg-en",
+          );
           var errorArea = document.getElementById("payment-error-area-en");
           var errorMsg = document.getElementById("payment-error-msg-en");
           var retryBtn = document.getElementById("payment-retry-btn-en");
@@ -582,10 +584,7 @@
           var payMethod = saved.payMethod || "card";
 
           function reservationsApiUrl() {
-            if (
-              typeof window !== "undefined" &&
-              window.__GRAFFORD_API_BASE__
-            ) {
+            if (typeof window !== "undefined" && window.__GRAFFORD_API_BASE__) {
               return (
                 String(window.__GRAFFORD_API_BASE__).replace(/\/$/, "") +
                 "/api/reservations"
@@ -643,7 +642,8 @@
           function showError(msg) {
             if (processingMsg) processingMsg.hidden = true;
             if (submitBtn) submitBtn.disabled = false;
-            if (errorMsg) errorMsg.textContent = msg || "A payment error occurred.";
+            if (errorMsg)
+              errorMsg.textContent = msg || "A payment error occurred.";
             if (errorArea) errorArea.hidden = false;
           }
 
@@ -665,13 +665,16 @@
             } catch (e) {
               showError(
                 "Failed to load payment configuration. Please try again.\n(" +
-                  (e && e.message ? e.message : "Network error") + ")",
+                  (e && e.message ? e.message : "Network error") +
+                  ")",
               );
               return;
             }
 
             if (!config.storeId || !config.channelKey) {
-              showError("Payment configuration is invalid. Please contact support.");
+              showError(
+                "Payment configuration is invalid. Please contact support.",
+              );
               return;
             }
 
@@ -692,7 +695,9 @@
                 channelKey: config.channelKey,
                 paymentId: orderNo,
                 orderName:
-                  "GRAFFORD Stay Reservation (" + (ROOM_LABELS[room] || room) + ")",
+                  "GRAFFORD Stay Reservation (" +
+                  (ROOM_LABELS[room] || room) +
+                  ")",
                 totalAmount: finalAmount,
                 currency: "KRW",
                 payMethod: "CARD",
@@ -710,7 +715,8 @@
             } catch (e) {
               showError(
                 "An error occurred while opening the payment window.\n(" +
-                  (e && e.message ? e.message : String(e)) + ")",
+                  (e && e.message ? e.message : String(e)) +
+                  ")",
               );
               return;
             }
@@ -744,7 +750,8 @@
             } catch (e) {
               showError(
                 "Network error during payment verification. If you believe your payment went through, please contact support.\n(" +
-                  (e && e.message ? e.message : String(e)) + ")",
+                  (e && e.message ? e.message : String(e)) +
+                  ")",
               );
               return;
             }
@@ -779,7 +786,10 @@
             } catch (e) {
               showError(
                 "Payment completed but reservation save failed. Please contact support.\n(Payment ID: " +
-                  orderNo + ")\n(" + (e && e.message ? e.message : String(e)) + ")",
+                  orderNo +
+                  ")\n(" +
+                  (e && e.message ? e.message : String(e)) +
+                  ")",
               );
               return;
             }
@@ -787,7 +797,9 @@
             if (!saveRes2.ok || !saveData2.ok) {
               showError(
                 "Payment completed but reservation save failed. Please contact support.\n(Payment ID: " +
-                  orderNo + ")\n" + (saveData2.error || ""),
+                  orderNo +
+                  ")\n" +
+                  (saveData2.error || ""),
               );
               return;
             }

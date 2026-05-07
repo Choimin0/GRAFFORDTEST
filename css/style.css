@@ -2452,12 +2452,18 @@ iframe.map {
 }
 
 .payment-page {
-  max-width: 560px;
+  width: 100vw;
+  max-width: 100%;
+  min-height: 100svh;
+  margin-left: auto;
+  margin-right: auto;
+  align-items: center;
+  justify-content: center;
 }
 
 .payment-summary-box {
-  margin-bottom: 1.25rem;
   text-align: left;
+  max-width: 50%;
 }
 
 .payment-summary-row {
@@ -2576,7 +2582,7 @@ iframe.map {
 
 .confirm-title {
   color: var(--grafford-mud2);
-  margin: 0;
+  margin-bottom: 2rem;
   font-size: 1.5rem;
   text-align: center;
   flex: 0 1 auto;
@@ -3024,9 +3030,11 @@ iframe.map {
 }
 
 .confirm-pay-submit {
+  margin-left: auto;
   width: 100%;
   padding: 0.85rem 1.2rem;
   font-size: 1.05rem;
+  margin-bottom: 2rem;
 }
 
 .confirm-form .confirm-hint {
