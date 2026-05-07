@@ -334,6 +334,20 @@
                     pattern="[0-9]{3}-[0-9]{4}-[0-9]{4}"
                   />
                 </label>
+                <label class="confirm-label">
+                  이메일
+                  <input
+                    type="email"
+                    name="email"
+                    id="f-email"
+                    required
+                    autocomplete="email"
+                    inputmode="email"
+                    maxlength="255"
+                    placeholder="example@email.com"
+                    title="올바른 이메일 주소를 입력해 주세요"
+                  />
+                </label>
               </section>
 
               <section class="confirm-section" aria-labelledby="sec-agree">
@@ -701,6 +715,7 @@
             .closest("section");
           var guestNameInput = document.getElementById("f-name");
           var contactInput = document.getElementById("f-contact");
+          var emailInput = document.getElementById("f-email");
           var guestRequestInput = document.querySelector(
             'textarea[name="guestRequest"]',
           );
@@ -881,6 +896,12 @@
               );
               return;
             }
+            var emailVal = emailInput ? emailInput.value.trim() : "";
+            if (!emailVal || !/^[^\s@]{1,64}@[^\s@]{1,255}\.[^\s@]{1,63}$/.test(emailVal)) {
+              window.alert("올바른 이메일 주소를 입력해 주세요.");
+              if (emailInput) emailInput.focus();
+              return;
+            }
             var orderNumber = R.generateOrderNumber();
             var room = document.getElementById("f-room").value;
             var checkIn = document.getElementById("f-checkin").value;
@@ -897,6 +918,7 @@
               reservationNumber: orderNumber,
               guestName: guestName,
               contact: contact,
+              email: emailVal,
               guestRequest: guestRequestInput
                 ? guestRequestInput.value.trim()
                 : "",
@@ -962,6 +984,7 @@
                       checkOut: checkOut,
                       guestName: guestName,
                       contact: contact,
+                      email: emailVal,
                       guestRequest: record.guestRequest || "",
                       guestCount: String(guestCount),
                       extraGuests: String(extraGuests),
@@ -987,6 +1010,7 @@
                       extraGuests: String(extraGuests || 0),
                       guestName: guestName,
                       contact: contact,
+                      email: emailVal,
                       guestRequest: guestRequestInput
                         ? guestRequestInput.value.trim()
                         : "",
@@ -1414,6 +1438,19 @@
                     placeholder=""
                     title="11 digits (010-1234-5678 format)"
                     pattern="[0-9]{3}-[0-9]{4}-[0-9]{4}"
+                  />
+                </label>
+                <label class="confirm-label"
+                  >Email
+                  <input
+                    type="email"
+                    name="email"
+                    required
+                    autocomplete="email"
+                    inputmode="email"
+                    maxlength="255"
+                    placeholder="example@email.com"
+                    title="Please enter a valid email address"
                   />
                 </label>
               </section>

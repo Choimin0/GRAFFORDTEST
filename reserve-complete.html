@@ -192,6 +192,8 @@
                 <dd id="complete-guest-name">—</dd>
                 <dt>예약자 연락처</dt>
                 <dd id="complete-contact">—</dd>
+                <dt>예약자 이메일</dt>
+                <dd id="complete-email">—</dd>
                 <dt>요청사항</dt>
                 <dd id="complete-request">—</dd>
               </dl>
@@ -298,6 +300,7 @@
           var checkOut = (saved && saved.checkOut) || "";
           var guestName = (saved && saved.guestName) || "";
           var contact = (saved && saved.contact) || "";
+          var email = (saved && saved.email) || "";
           var guestRequest = (saved && saved.guestRequest) || "";
           var guestCount = (saved && saved.guestCount) || "";
           var extraGuests = (saved && saved.extraGuests) || "0";
@@ -354,6 +357,8 @@
             guestName || "—";
           document.getElementById("complete-contact").textContent =
             contact || "—";
+          document.getElementById("complete-email").textContent =
+            email || "—";
           document.getElementById("complete-request").textContent =
             guestRequest || "—";
           var checkinGuideEl = document.getElementById(
@@ -445,6 +450,7 @@
                 orderNo: orderNo || "",
                 name: guestName || "",
                 contact: contact || "",
+                email: email || "",
                 room: room || "",
                 checkIn: checkIn || "",
                 checkOut: checkOut || "",

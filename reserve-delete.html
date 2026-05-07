@@ -130,6 +130,8 @@
               <dd id="cancel-name">—</dd>
               <dt>연락처</dt>
               <dd id="cancel-contact">—</dd>
+              <dt>이메일</dt>
+              <dd id="cancel-email">—</dd>
             </dl>
           </section>
 
@@ -238,6 +240,7 @@
         var orderNo = (saved && saved.orderNo) || "—";
         var name = (saved && saved.name) || "—";
         var contact = (saved && saved.contact) || "—";
+        var email = (saved && saved.email) || "";
         var room = (saved && saved.room) || "";
         var checkIn = (saved && saved.checkIn) || "";
         var checkOut = (saved && saved.checkOut) || "";
@@ -339,6 +342,7 @@
           formatKRW(discountedAmount);
         document.getElementById("cancel-name").textContent = name;
         document.getElementById("cancel-contact").textContent = contact;
+        document.getElementById("cancel-email").textContent = email || "—";
         document.getElementById("refund-amount").textContent =
           formatKRW(refundAmount);
         document.getElementById("refund-rule-summary").textContent =

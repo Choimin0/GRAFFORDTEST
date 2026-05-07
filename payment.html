@@ -181,6 +181,7 @@
             parseInt(saved.extraGuests || "0", 10) || 0;
           var guestName = saved.guestName || "";
           var contact = saved.contact || "";
+          var email = saved.email || "";
           var guestRequest = saved.guestRequest || "";
           var guestCount = parseInt(saved.guestCount || "2", 10) || 2;
           var payMethod = saved.payMethod || "card";
@@ -290,6 +291,7 @@
                 customer: {
                   fullName: guestName || undefined,
                   phoneNumber: contact || undefined,
+                  email: email || undefined,
                 },
                 locale: "KO_KR",
                 redirectUrl:
@@ -348,6 +350,7 @@
                 checkOut: checkOut,
                 guestName: guestName,
                 contact: contact,
+                email: email,
                 guestRequest: guestRequest,
                 guestCount: String(guestCount),
                 extraGuests: String(extraGuests),
@@ -514,6 +517,7 @@
           var extraGuests = parseInt(saved.extraGuests || "0", 10) || 0;
           var guestName = saved.guestName || "";
           var contact = saved.contact || "";
+          var email = saved.email || "";
           var guestRequest = saved.guestRequest || "";
           var guestCount = parseInt(saved.guestCount || "2", 10) || 2;
           var payMethod = saved.payMethod || "card";
@@ -624,6 +628,7 @@
                 customer: {
                   fullName: guestName || undefined,
                   phoneNumber: contact || undefined,
+                  email: email || undefined,
                 },
                 locale: "EN_US",
                 redirectUrl:
@@ -682,6 +687,7 @@
                 checkOut: checkOut,
                 guestName: guestName,
                 contact: contact,
+                email: email,
                 guestRequest: guestRequest,
                 guestCount: String(guestCount),
                 extraGuests: String(extraGuests),

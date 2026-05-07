@@ -9,11 +9,13 @@ const LEGACY_TO_ROOM = { A: "G1", B: "G2", C: "G3", D: "G4" };
 const ROOM_TO_LEGACY = { G1: "A", G2: "B", G3: "C", G4: "D" };
 const ALLOWED_PAY = new Set(["card", "naver", "bank"]);
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
+const EMAIL_RE = /^[^\s@]{1,64}@[^\s@]{1,255}\.[^\s@]{1,63}$/;
 const MAX_NAME = 255;
 const MAX_CONTACT = 120;
 const MAX_RESV = 32;
 const MAX_GUEST_REQUEST = 2000;
 const MAX_CANCEL_REASON = 1000;
+const MAX_EMAIL = 255;
 const DEFAULT_CANCEL_TOKEN_TTL_MS = 10 * 60 * 1000;
 const ACTIVE_TABLE = "reservations";
 const PAST_TABLE = "past_reservations";
@@ -795,6 +797,7 @@ export default async function handler(req, res) {
           reservation_number,
           guest_name,
           contact,
+          email,
           room_type,
           check_in_date,
           check_out_date,
@@ -827,6 +830,7 @@ export default async function handler(req, res) {
           reservationNumber: dbRow.reservation_number,
           guestName: dbRow.guest_name,
           contact: dbRow.contact,
+          email: dbRow.email || "",
           roomType: normalizeRoomType(dbRow.room_type) || dbRow.room_type,
           checkIn: toYMD(dbRow.check_in_date),
           checkOut: toYMD(dbRow.check_out_date),
@@ -1081,6 +1085,7 @@ export default async function handler(req, res) {
   var reservationNumber = String(body.reservationNumber || "").trim();
   var guestName = String(body.guestName || "").trim();
   var contact = String(body.contact || "").trim();
+  var email = String(body.email || "").trim().slice(0, MAX_EMAIL);
   var roomType = normalizeRoomType(body.roomType || "");
   var checkIn = String(body.checkIn || "").trim();
   var checkOut = String(body.checkOut || "").trim();
@@ -1131,6 +1136,10 @@ export default async function handler(req, res) {
     json(res, 400, { ok: false, error: "Invalid paymentMethod" });
     return;
   }
+  if (email && !EMAIL_RE.test(email)) {
+    json(res, 400, { ok: false, error: "Invalid email format" });
+    return;
+  }
   if (!Number.isFinite(guestCount) || guestCount < 1 || guestCount > 50) {
     guestCount = Math.min(50, Math.max(1, 2 + (extraGuests | 0)));
   }
@@ -1146,6 +1155,7 @@ export default async function handler(req, res) {
       reservation_number,
       guest_name,
       contact,
+      email,
       room_type,
       check_in_date,
       check_out_date,
@@ -1157,7 +1167,7 @@ export default async function handler(req, res) {
       payment_method,
       bank_confirmed
     ) VALUES (
-      $1, $2, $3, $4, $5::date, $6::date, $7, $8, $9, $10, $11, $12, $13
+      $1, $2, $3, $4, $5, $6::date, $7::date, $8, $9, $10, $11, $12, $13, $14
     )
     RETURNING id, reservation_number, created_at
   `;
@@ -1166,6 +1176,7 @@ export default async function handler(req, res) {
     reservationNumber,
     guestName,
     contact,
+    email || null,
     roomType,
     checkIn,
     checkOut,
