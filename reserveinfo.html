@@ -109,7 +109,7 @@
         document.addEventListener("DOMContentLoaded", function () {
           var R = window.GraffordReservations;
           var P = window.GraffordBookingPricing;
-          var form = document.getElementById("reserveinfo-form");
+          var forms = document.querySelectorAll(".reserveinfo-form");
 
           function lookupApiUrl() {
             var base = "";
@@ -186,142 +186,151 @@
             window.location.href = "delete-complete.html";
           }
 
-          form.addEventListener("submit", function (e) {
-            e.preventDefault();
-            if (!form.checkValidity()) {
-              form.reportValidity();
-              return;
-            }
-            var name = document.getElementById("lookup-name").value;
-            var order = document.getElementById("lookup-order").value;
+          function bindLookupSubmit(form) {
+            if (!form) return;
+            form.addEventListener("submit", function (e) {
+              e.preventDefault();
+              if (!form.checkValidity()) {
+                form.reportValidity();
+                return;
+              }
+              var nameInput = form.querySelector('input[name="lookupName"]');
+              var orderInput = form.querySelector('input[name="lookupOrder"]');
+              var name = nameInput ? nameInput.value : "";
+              var order = orderInput ? orderInput.value : "";
 
-            fetch(lookupApiUrl(), {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify({
-                guestName: String(name || "").trim(),
-                reservationNumber: String(order || "").trim(),
-              }),
-            })
-              .then(function (resp) {
-                return resp.json().then(function (data) {
-                  return { ok: resp.ok, status: resp.status, data: data };
-                });
+              fetch(lookupApiUrl(), {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  guestName: String(name || "").trim(),
+                  reservationNumber: String(order || "").trim(),
+                }),
               })
-              .then(function (result) {
-                if (
-                  result.ok &&
-                  result.data &&
-                  result.data.ok &&
-                  result.data.row
-                ) {
-                  var row = result.data.row;
+                .then(function (resp) {
+                  return resp.json().then(function (data) {
+                    return { ok: resp.ok, status: resp.status, data: data };
+                  });
+                })
+                .then(function (result) {
                   if (
-                    result.data.deleted === true &&
-                    String(result.data.deleteReason || "").toLowerCase() ===
-                      "not paid"
+                    result.ok &&
+                    result.data &&
+                    result.data.ok &&
+                    result.data.row
                   ) {
-                    goToDeleteComplete({
+                    var row = result.data.row;
+                    if (
+                      result.data.deleted === true &&
+                      String(result.data.deleteReason || "").toLowerCase() ===
+                        "not paid"
+                    ) {
+                      goToDeleteComplete({
+                        orderNo: row.reservationNumber,
+                        room: row.roomType,
+                        checkIn: row.checkIn,
+                        checkOut: row.checkOut,
+                        guestName: row.guestName,
+                        contact: row.contact,
+                        extraGuests: row.extraGuests || 0,
+                        totalAmount: row.totalAmount || 0,
+                        payMethod: row.paymentMethod || "",
+                        createdAt: row.createdAt || "",
+                        cancelledAt: new Date().toISOString(),
+                        cancelReason:
+                          row.cancelReason ||
+                          result.data.deleteReason ||
+                          "미입금 자동 취소",
+                        refundAmount:
+                          (row.paymentMethod || "").toLowerCase() === "bank"
+                            ? 0
+                            : Number(row.totalAmount || 0),
+                      });
+                      return;
+                    }
+                    goToReserveComplete({
                       orderNo: row.reservationNumber,
                       room: row.roomType,
                       checkIn: row.checkIn,
                       checkOut: row.checkOut,
                       guestName: row.guestName,
                       contact: row.contact,
+                      email: row.email || "",
+                      guestRequest: row.guestRequest || "",
+                      guestCount: row.guestCount || "",
                       extraGuests: row.extraGuests || 0,
                       totalAmount: row.totalAmount || 0,
                       payMethod: row.paymentMethod || "",
-                      createdAt: row.createdAt || "",
-                      cancelledAt: new Date().toISOString(),
-                      cancelReason:
-                        row.cancelReason ||
-                        result.data.deleteReason ||
-                        "미입금 자동 취소",
-                      refundAmount:
-                        (row.paymentMethod || "").toLowerCase() === "bank"
-                          ? 0
-                          : Number(row.totalAmount || 0),
+                      bankConfirmed: row.bankConfirmed === true,
+                      cancelToken: result.data.cancelToken || "",
                     });
                     return;
                   }
+                  if (!R) {
+                    showError(
+                      "예약 내역을 불러오지 못했습니다. 새로고침 후 다시 시도해 주세요.",
+                    );
+                    return;
+                  }
+                  var found = R.findByNameAndOrder(name, order);
+                  if (!found) {
+                    showError(
+                      "일치하는 예약을 찾을 수 없습니다. 성함·예약번호를 다시 확인해 주세요.",
+                    );
+                    return;
+                  }
                   goToReserveComplete({
-                    orderNo: row.reservationNumber,
-                    room: row.roomType,
-                    checkIn: row.checkIn,
-                    checkOut: row.checkOut,
-                    guestName: row.guestName,
-                    contact: row.contact,
-                    email: row.email || "",
-                    guestRequest: row.guestRequest || "",
-                    guestCount: row.guestCount || "",
-                    extraGuests: row.extraGuests || 0,
-                    totalAmount: row.totalAmount || 0,
-                    payMethod: row.paymentMethod || "",
-                    bankConfirmed: row.bankConfirmed === true,
-                    cancelToken: result.data.cancelToken || "",
+                    orderNo: found.orderNumber,
+                    room: found.room,
+                    checkIn: found.checkIn,
+                    checkOut: found.checkOut,
+                    guestName: found.guestName,
+                    contact: found.contact,
+                    email: found.email || "",
+                    guestRequest: found.guestRequest || "",
+                    guestCount: found.guestCount || "",
+                    extraGuests: found.extraGuests || 0,
+                    totalAmount: found.totalAmount || 0,
+                    payMethod: found.paymentMethod || "",
+                    bankConfirmed: found.bankConfirmed === true,
+                    cancelToken: "",
                   });
-                  return;
-                }
-                if (!R) {
-                  showError(
-                    "서버에서 예약을 찾지 못했고, 이 페이지용 저장소 스크립트도 없습니다. 새로고침 후 다시 시도해 주세요.",
-                  );
-                  return;
-                }
-                var found = R.findByNameAndOrder(name, order);
-                if (!found) {
-                  showError(
-                    "일치하는 예약을 찾을 수 없습니다. 성함·예약번호를 다시 확인하거나, 결제 완료 후 서버에 저장됐는지 확인해 주세요.",
-                  );
-                  return;
-                }
-                goToReserveComplete({
-                  orderNo: found.orderNumber,
-                  room: found.room,
-                  checkIn: found.checkIn,
-                  checkOut: found.checkOut,
-                  guestName: found.guestName,
-                  contact: found.contact,
-                  email: found.email || "",
-                  guestRequest: found.guestRequest || "",
-                  guestCount: found.guestCount || "",
-                  extraGuests: found.extraGuests || 0,
-                  totalAmount: found.totalAmount || 0,
-                  payMethod: found.paymentMethod || "",
-                  bankConfirmed: found.bankConfirmed === true,
-                  cancelToken: "",
+                })
+                .catch(function () {
+                  if (!R) {
+                    showError(
+                      "조회에 실패했습니다. 네트워크 연결 상태를 확인해 주세요.",
+                    );
+                    return;
+                  }
+                  var found = R.findByNameAndOrder(name, order);
+                  if (!found) {
+                    showError(
+                      "서버에 연결할 수 없고, 이 기기 저장소에도 없습니다. vercel dev 가 켜져 있는지 확인해 주세요.",
+                    );
+                    return;
+                  }
+                  goToReserveComplete({
+                    orderNo: found.orderNumber,
+                    room: found.room,
+                    checkIn: found.checkIn,
+                    checkOut: found.checkOut,
+                    guestName: found.guestName,
+                    contact: found.contact,
+                    email: found.email || "",
+                    guestRequest: found.guestRequest || "",
+                    guestCount: found.guestCount || "",
+                    extraGuests: found.extraGuests || 0,
+                    totalAmount: found.totalAmount || 0,
+                    payMethod: found.paymentMethod || "",
+                    bankConfirmed: found.bankConfirmed === true,
+                    cancelToken: "",
+                  });
                 });
-              })
-              .catch(function () {
-                if (!R) {
-                  showError("조회에 실패했습니다. 네트워크를 확인해 주세요.");
-                  return;
-                }
-                var found = R.findByNameAndOrder(name, order);
-                if (!found) {
-                  showError(
-                    "서버에 연결할 수 없고, 이 기기 저장소에도 없습니다. vercel dev 가 켜져 있는지 확인해 주세요.",
-                  );
-                  return;
-                }
-                goToReserveComplete({
-                  orderNo: found.orderNumber,
-                  room: found.room,
-                  checkIn: found.checkIn,
-                  checkOut: found.checkOut,
-                  guestName: found.guestName,
-                  contact: found.contact,
-                  email: found.email || "",
-                  guestRequest: found.guestRequest || "",
-                  guestCount: found.guestCount || "",
-                  extraGuests: found.extraGuests || 0,
-                  totalAmount: found.totalAmount || 0,
-                  payMethod: found.paymentMethod || "",
-                  bankConfirmed: found.bankConfirmed === true,
-                  cancelToken: "",
-                });
-              });
-          });
+            });
+          }
+
+          forms.forEach(bindLookupSubmit);
         });
       </script>
       <script defer src="js/grafford-page-fade.js"></script>
