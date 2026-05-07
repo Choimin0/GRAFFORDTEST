@@ -130,7 +130,10 @@
               <h2 class="confirm-section-title" id="complete-notice-2">
                 비대면 체크인 안내사항
               </h2>
-              <p class="confirm-guide-content" id="complete-checkin-guide-en"></p>
+              <p
+                class="confirm-guide-content"
+                id="complete-checkin-guide-en"
+              ></p>
             </section>
 
             <section
@@ -349,6 +352,8 @@
 
           document.getElementById("complete-room-name").textContent =
             ROOM_LABEL[room] || room || "객실 정보 없음";
+          document.getElementById("complete-room-name-en").textContent =
+            ROOM_LABEL[room] || room || "Room Information Not Available";
           document.getElementById("complete-schedule").textContent =
             (checkIn || "—") + " ~ " + (checkOut || "—");
           document.getElementById("complete-total-amount").textContent =
@@ -486,9 +491,9 @@
             lines: [
               "대표 : GRAFFORD",
               "주소 : 제주특별자치도 서귀포시 토산중앙로 22",
-              "사업자등록번호 : 123-45-67890",
-              "전화 : 010-1234-5678",
-              "이메일 : info@grafford.com",
+              "사업자등록번호 : 587-23-00957",
+              "전화 : 010-6830-1105",
+              "이메일 : tilkoas35@naver.com",
               " ",
               "© 2026 GRAFFORD. all rights reserved.",
             ],
@@ -508,7 +513,9 @@
         <div class="confirm-layout-grid">
           <div class="confirm-layout-col">
             <section class="confirm-section">
-              <p class="reserve-complete-room-name"></p>
+              <p class="reserve-complete-room-name" id="complete-room-name-en">
+                —
+              </p>
               <div class="reserve-complete-gallery">
                 <div
                   class="gallery-main-wrap reserve-complete-gallery-main-wrap"
