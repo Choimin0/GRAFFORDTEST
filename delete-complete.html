@@ -71,25 +71,25 @@
           <h2 class="confirm-section-title">예약 취소 정보</h2>
           <dl class="reserve-delete-dl">
             <dt>예약번호</dt>
-            <dd id="done-order">—</dd>
+            <dd id="done-order-en">—</dd>
             <dt>객실</dt>
-            <dd id="done-room">—</dd>
+            <dd id="done-room-en">—</dd>
             <dt>체크인/체크아웃</dt>
-            <dd id="done-schedule">—</dd>
+            <dd id="done-schedule-en">—</dd>
             <dt>예약자 성함</dt>
-            <dd id="done-name">—</dd>
+            <dd id="done-name-en">—</dd>
             <dt>예약자 연락처</dt>
-            <dd id="done-contact">—</dd>
+            <dd id="done-contact-en">—</dd>
             <dt>결제 금액</dt>
-            <dd id="done-amount">—</dd>
+            <dd id="done-amount-en">—</dd>
             <dt>결제 수단</dt>
-            <dd id="done-pay-method">—</dd>
+            <dd id="done-pay-method-en">—</dd>
             <dt>예약일 / 취소일</dt>
-            <dd id="done-reserve-cancel-date">—</dd>
+            <dd id="done-reserve-cancel-date-en">—</dd>
             <dt>취소 사유</dt>
-            <dd id="done-cancel-reason">—</dd>
+            <dd id="done-cancel-reason-en">—</dd>
             <dt>환불 금액</dt>
-            <dd id="done-refund-amount">—</dd>
+            <dd id="done-refund-amount-en">—</dd>
           </dl>
         </section>
 
@@ -199,6 +199,9 @@
           function formatKRW(n) {
             return Number(n || 0).toLocaleString("ko-KR") + "원";
           }
+          function formatKRWEn(n) {
+            return Number(n || 0).toLocaleString("en-US") + " KRW";
+          }
 
           function getDiscountedAmount() {
             if (P && checkIn && checkOut) {
@@ -252,6 +255,22 @@
             return v || "—";
           }
 
+          function paymentLabelEn(v) {
+            var key = String(v || "")
+              .trim()
+              .toLowerCase();
+            if (key === "card") {
+              return "Credit Card";
+            }
+            if (key === "naver") {
+              return "Naver Pay";
+            }
+            if (key === "bank" || key === "무통장입금") {
+              return "Bank Transfer";
+            }
+            return v || "—";
+          }
+
           function cancelReasonLabel(rawReason, rawCode, otherDetail) {
             var code = String(rawCode || rawReason || "")
               .trim()
@@ -274,33 +293,79 @@
             return String(rawReason || "").trim() || "—";
           }
 
+          function cancelReasonLabelEn(rawReason, rawCode, otherDetail) {
+            var code = String(rawCode || rawReason || "")
+              .trim()
+              .toLowerCase();
+            if (code === "mind-change") {
+              return "Change of mind";
+            }
+            if (code === "schedule-change") {
+              return "Schedule change";
+            }
+            if (code === "other-hotel") {
+              return "Booked another accommodation";
+            }
+            if (code === "not paid") {
+              return "Payment deadline exceeded";
+            }
+            if (code === "other") {
+              return String(otherDetail || "").trim() || "Other";
+            }
+            return String(rawReason || "").trim() || "—";
+          }
+
           var refundAmount = Number(refundAmountRaw);
           if (!isFinite(refundAmount)) {
             refundAmount =
               paymentMethod.toLowerCase() === "bank" ? 0 : discountedAmount;
           }
 
-          document.getElementById("done-order").textContent = orderNo;
-          document.getElementById("done-room").textContent =
-            ROOM_LABEL[room] || room || "—";
-          document.getElementById("done-schedule").textContent =
-            (checkIn || "—") + " ~ " + (checkOut || "—");
-          document.getElementById("done-name").textContent = name;
-          document.getElementById("done-contact").textContent = contact;
-          document.getElementById("done-amount").textContent =
-            formatKRW(discountedAmount);
-          document.getElementById("done-pay-method").textContent =
-            paymentLabel(paymentMethod);
-          document.getElementById("done-reserve-cancel-date").textContent =
+          function setText(id, value) {
+            var el = document.getElementById(id);
+            if (el) {
+              el.textContent = value;
+            }
+          }
+
+          var roomLabel = ROOM_LABEL[room] || room || "—";
+          var scheduleText = (checkIn || "—") + " ~ " + (checkOut || "—");
+          var reserveCancelDateText =
             formatDateOnly(reservedAt) + " / " + formatDateOnly(cancelledAt);
-          document.getElementById("done-cancel-reason").textContent =
-            cancelReasonLabel(
+
+          // Korean
+          setText("done-order", orderNo);
+          setText("done-room", roomLabel);
+          setText("done-schedule", scheduleText);
+          setText("done-name", name);
+          setText("done-contact", contact);
+          setText("done-amount", formatKRW(discountedAmount));
+          setText("done-pay-method", paymentLabel(paymentMethod));
+          setText("done-reserve-cancel-date", reserveCancelDateText);
+          setText(
+            "done-cancel-reason",
+            cancelReasonLabel(cancelReason, cancelReasonCode, cancelReasonDetail),
+          );
+          setText("done-refund-amount", formatKRW(refundAmount));
+
+          // English
+          setText("done-order-en", orderNo);
+          setText("done-room-en", roomLabel);
+          setText("done-schedule-en", scheduleText);
+          setText("done-name-en", name);
+          setText("done-contact-en", contact);
+          setText("done-amount-en", formatKRWEn(discountedAmount));
+          setText("done-pay-method-en", paymentLabelEn(paymentMethod));
+          setText("done-reserve-cancel-date-en", reserveCancelDateText);
+          setText(
+            "done-cancel-reason-en",
+            cancelReasonLabelEn(
               cancelReason,
               cancelReasonCode,
               cancelReasonDetail,
-            );
-          document.getElementById("done-refund-amount").textContent =
-            formatKRW(refundAmount);
+            ),
+          );
+          setText("done-refund-amount-en", formatKRWEn(refundAmount));
         });
       </script>
       <script defer src="js/grafford-page-fade.js"></script>

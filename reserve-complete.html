@@ -130,7 +130,7 @@
               <h2 class="confirm-section-title" id="complete-notice-2">
                 비대면 체크인 안내사항
               </h2>
-              <p class="confirm-guide-content" id="complete-checkin-guide"></p>
+              <p class="confirm-guide-content" id="complete-checkin-guide-en"></p>
             </section>
 
             <section
@@ -363,6 +363,9 @@
           var checkinGuideEl = document.getElementById(
             "complete-checkin-guide",
           );
+          var checkinGuideEnEl = document.getElementById(
+            "complete-checkin-guide-en",
+          );
           if (checkinGuideEl) {
             var contactDigits = String(contact || "").replace(/\D/g, "");
             var contactLast4 =
@@ -371,6 +374,12 @@
               '체크인 당일 예약 시 기입된 연락처 뒷번호 4자리(<strong class="reserve-complete-pin">' +
               contactLast4 +
               "</strong>)로 설정될 예정입니다.<br />예약시 입력해주신 연락처를 통해 입실 당일 관련 안내 사항을 카카오톡 알림톡으로 발송해드리겠습니다.";
+            if (checkinGuideEnEl) {
+              checkinGuideEnEl.innerHTML =
+                'On your check-in day, the entry PIN will be set to the last 4 digits of the phone number you provided (<strong class="reserve-complete-pin">' +
+                contactLast4 +
+                "</strong>).<br />A KakaoTalk notification with check-in details will be sent to your registered contact number on the day of arrival.";
+            }
           }
 
           var parsedGuestCount = parseInt(guestCount || "", 10);
