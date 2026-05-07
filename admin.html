@@ -98,7 +98,7 @@
                 id="admin-today-checkin-title"
                 class="admin-status-card-title"
               >
-                입실 리스트
+                체크인 리스트
               </h3>
               <div class="admin-inline-date-nav">
                 <button
@@ -426,6 +426,24 @@
           return a < b ? -1 : 1;
         }
 
+        function appendCheckinCell(tr, text, className) {
+          var td = document.createElement("td");
+          if (className) {
+            td.className = className;
+          }
+          td.textContent = text == null ? "" : String(text);
+          tr.appendChild(td);
+          return td;
+        }
+
+        function formatGuestCount(row) {
+          var raw = row && row.guestCount;
+          if (raw == null || raw === "") {
+            return "—";
+          }
+          return String(raw) + "명";
+        }
+
         function renderTodayStatusPanels() {
           if (!todayCheckinListEl || !roomStatusListEl) {
             return;
@@ -443,39 +461,75 @@
             return dateKey(row.checkIn) === selectedDate;
           });
           todayCheckinListEl.innerHTML = "";
-          if (!todayCheckins.length) {
-            var empty = document.createElement("p");
-            empty.className = "admin-status-empty";
-            empty.textContent = "입실이 없습니다";
-            todayCheckinListEl.appendChild(empty);
-          } else {
-            todayCheckins
-              .slice()
+          var rooms = ["G1", "G2", "G3", "G4"];
+          var tableWrap = document.createElement("div");
+          tableWrap.className = "admin-checkin-table-wrap";
+          var table = document.createElement("table");
+          table.className = "admin-checkin-table";
+          var thead = document.createElement("thead");
+          var headTr = document.createElement("tr");
+          ["", "예약자명", "인원수", "알림톡", "요청사항", "객실관리"].forEach(
+            function (label, idx) {
+              var th = document.createElement("th");
+              th.scope = "col";
+              th.textContent = label;
+              if (idx === 0) {
+                th.setAttribute("aria-label", "객실");
+              }
+              headTr.appendChild(th);
+            },
+          );
+          thead.appendChild(headTr);
+          table.appendChild(thead);
+
+          var tbody = document.createElement("tbody");
+          rooms.forEach(function (room) {
+            var roomCheckin = todayCheckins
+              .filter(function (row) {
+                return String(row.roomType || "").toUpperCase() === room;
+              })
               .sort(function (a, b) {
                 return compareYmd(dateKey(a.checkOut), dateKey(b.checkOut));
-              })
-              .forEach(function (row) {
-                var item = document.createElement("article");
-                item.className = "admin-status-item";
-                item.innerHTML =
-                  "<p><strong>" +
-                  (row.roomType || "—") +
-                  "</strong> · " +
-                  (row.guestName || "—") +
-                  "</p>" +
-                  "<p>" +
-                  dateKey(row.checkIn) +
-                  " ~ " +
-                  dateKey(row.checkOut) +
-                  "</p>" +
-                  "<p>" +
-                  (row.contact || "연락처 없음") +
-                  "</p>";
-                todayCheckinListEl.appendChild(item);
-              });
-          }
+              })[0];
+            var tr = document.createElement("tr");
+            var roomTh = document.createElement("th");
+            roomTh.scope = "row";
+            roomTh.textContent = room;
+            tr.appendChild(roomTh);
 
-          var rooms = ["G1", "G2", "G3", "G4"];
+            if (!roomCheckin) {
+              appendCheckinCell(tr, "");
+              appendCheckinCell(tr, "");
+              appendCheckinCell(tr, "");
+              appendCheckinCell(tr, "");
+              appendCheckinCell(tr, "");
+              tbody.appendChild(tr);
+              return;
+            }
+
+            appendCheckinCell(tr, roomCheckin.guestName || "—");
+            appendCheckinCell(tr, formatGuestCount(roomCheckin));
+            var talkTd = appendCheckinCell(tr, "");
+            var sendBtn = document.createElement("button");
+            sendBtn.type = "button";
+            sendBtn.className = "admin-checkin-send-btn";
+            sendBtn.textContent = "전송";
+            sendBtn.dataset.room = room;
+            sendBtn.dataset.reservationNumber =
+              roomCheckin.reservationNumber || "";
+            talkTd.appendChild(sendBtn);
+            appendCheckinCell(
+              tr,
+              roomCheckin.guestRequest || "—",
+              "admin-checkin-request-cell",
+            );
+            appendCheckinCell(tr, "—");
+            tbody.appendChild(tr);
+          });
+          table.appendChild(tbody);
+          tableWrap.appendChild(table);
+          todayCheckinListEl.appendChild(tableWrap);
+
           roomStatusListEl.innerHTML = "";
           rooms.forEach(function (room) {
             var inRoom = rows.filter(function (row) {
@@ -673,6 +727,8 @@
               roomType: "G1",
               checkIn: "2026-05-04",
               checkOut: "2026-05-06",
+              guestCount: 2,
+              guestRequest: "조용한 객실 요청",
               totalAmount: 560000,
               paymentMethod: "bank",
               bankConfirmed: false,
@@ -684,6 +740,8 @@
               roomType: "G3",
               checkIn: "2026-05-06",
               checkOut: "2026-05-17",
+              guestCount: 4,
+              guestRequest: "",
               totalAmount: 990000,
               paymentMethod: "card",
               bankConfirmed: true,
@@ -699,6 +757,8 @@
               roomType: "G2",
               checkIn: "2026-04-20",
               checkOut: "2026-04-22",
+              guestCount: 2,
+              guestRequest: "",
               totalAmount: 420000,
               paymentMethod: "card",
               bankConfirmed: true,

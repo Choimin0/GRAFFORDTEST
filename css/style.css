@@ -3553,6 +3553,43 @@ iframe.map {
   display: grid;
   gap: 0.5rem;
 }
+.admin-checkin-table-wrap {
+  overflow-x: auto;
+}
+.admin-checkin-table {
+  width: 100%;
+  min-width: 640px;
+  border-collapse: collapse;
+  background: transparent;
+}
+.admin-checkin-table th,
+.admin-checkin-table td {
+  border: 1px solid rgba(58, 53, 49, 0.14);
+  padding: 0.55rem 0.5rem;
+  text-align: center;
+  vertical-align: top;
+  font-size: 0.86rem;
+}
+.admin-checkin-table th {
+  color: var(--grafford-mud2);
+  font-weight: 700;
+  white-space: nowrap;
+}
+.admin-checkin-table tbody th {
+  width: 3.2rem;
+}
+.admin-checkin-request-cell {
+  min-width: 9rem;
+  white-space: pre-wrap;
+}
+.admin-checkin-send-btn {
+  border: 1px solid transparent;
+  background-color: var(--grafford-beige2);
+  color: #fff;
+  padding: 0.28rem 0.7rem;
+  cursor: pointer;
+  font-size: 0.82rem;
+}
 #admin-room-status-list {
   grid-template-columns: repeat(2, minmax(0, 1fr));
 }
