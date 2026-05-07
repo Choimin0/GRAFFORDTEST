@@ -2684,7 +2684,7 @@ iframe.map {
   display: flex;
   gap: 1rem;
   align-items: flex-start;
-  background: var(--grafford-beige2);
+  background: transparent;
   padding: 0.75rem;
 }
 
@@ -2756,7 +2756,7 @@ iframe.map {
   display: block;
   margin-bottom: 0.85rem;
   font-size: 0.95rem;
-  color: var(--grafford-dark-brown);
+  color: var(--grafford-mud);
 }
 
 .confirm-label input {
@@ -2766,7 +2766,7 @@ iframe.map {
   padding: 0.5rem 0.6rem;
   border: none;
   border-radius: 5px;
-  border-bottom: 1px solid var(--grafford-mud2);
+  border-bottom: 1px solid var(--grafford-mud);
   background: transparent;
   font-size: 1rem;
   box-sizing: border-box;
@@ -2807,7 +2807,7 @@ iframe.map {
 }
 
 .confirm-total-box {
-  background: var(--grafford-beige2);
+  background: transparent;
   width: 70%;
   padding: 1rem 1.1rem;
 }
