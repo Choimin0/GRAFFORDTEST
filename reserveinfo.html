@@ -38,7 +38,11 @@
         <a href="RESERVATION.html">RESERVATION</a>
       </aside>
       <div class="desktop-nav-links" aria-label="데스크톱 메뉴">
-        <div class="lang-switch" data-language-switch aria-label="Language switch">
+        <div
+          class="lang-switch"
+          data-language-switch
+          aria-label="Language switch"
+        >
           <button type="button" class="lang-switch__btn" data-lang-option="kr">
             KR
           </button>
@@ -54,340 +58,330 @@
       </div>
     </nav>
     <div class="lang-kr">
+      <main class="content-section confirm-page reserveinfo-page">
+        <h1 class="confirm-title">예약 조회</h1>
+        <p class="confirm-summary">
+          예약 시 입력하신 성함과 발급된 예약번호(주문번호)를 입력해 주세요.
+        </p>
 
-    <main class="content-section confirm-page reserveinfo-page">
-      <h1 class="confirm-title">예약 조회</h1>
-      <p class="confirm-summary">
-        예약 시 입력하신 성함과 발급된 예약번호(주문번호)를 입력해 주세요.
-      </p>
+        <form
+          class="reserveinfo-form checkout-form"
+          id="reserveinfo-form"
+          novalidate
+        >
+          <label class="confirm-label">
+            성함
+            <input
+              type="text"
+              name="lookupName"
+              id="lookup-name"
+              required
+              autocomplete="name"
+              placeholder="예약 시 입력한 이름"
+            />
+          </label>
+          <label class="confirm-label">
+            예약번호
+            <input
+              type="text"
+              name="lookupOrder"
+              id="lookup-order"
+              required
+              autocomplete="off"
+              placeholder="예: 연월일8자리-XXXXXX"
+            />
+          </label>
+          <div class="confirm-actions">
+            <button type="submit" class="btn reserve-btn confirm-pay-submit">
+              조회하기
+            </button>
+          </div>
+        </form>
 
-      <form
-        class="reserveinfo-form checkout-form"
-        id="reserveinfo-form"
-        novalidate
-      >
-        <label class="confirm-label">
-          성함
-          <input
-            type="text"
-            name="lookupName"
-            id="lookup-name"
-            required
-            autocomplete="name"
-            placeholder="예약 시 입력한 이름"
-          />
-        </label>
-        <label class="confirm-label">
-          예약번호
-          <input
-            type="text"
-            name="lookupOrder"
-            id="lookup-order"
-            required
-            autocomplete="off"
-            placeholder="예: 연월일8자리-XXXXXX"
-          />
-        </label>
-        <div class="confirm-actions">
-          <button type="submit" class="btn reserve-btn confirm-pay-submit">
-            조회하기
-          </button>
-        </div>
-      </form>
+        <footer
+          id="site-business-footer-mount"
+          class="site-footer site-business-footer"
+          hidden
+        ></footer>
+      </main>
 
-      <footer
-        id="site-business-footer-mount"
-        class="site-footer site-business-footer"
-        hidden
-      ></footer>
-    </main>
+      <script>
+        document.addEventListener("DOMContentLoaded", function () {
+          var R = window.GraffordReservations;
+          var P = window.GraffordBookingPricing;
+          var form = document.getElementById("reserveinfo-form");
 
-    <script>
-      document.addEventListener("DOMContentLoaded", function () {
-        var R = window.GraffordReservations;
-        var P = window.GraffordBookingPricing;
-        var form = document.getElementById("reserveinfo-form");
-
-        function lookupApiUrl() {
-          var base = "";
-          if (typeof window !== "undefined" && window.__GRAFFORD_API_BASE__) {
-            base = String(window.__GRAFFORD_API_BASE__).replace(/\/$/, "");
-          }
-          return base + "/api/reservations-lookup";
-        }
-
-        function getDiscountedAmount(data) {
-          if (
-            P &&
-            data &&
-            data.room &&
-            data.checkIn &&
-            data.checkOut
-          ) {
-            var quote = P.computeStay(
-              String(data.room).toUpperCase(),
-              data.checkIn,
-              data.checkOut,
-              parseInt(data.extraGuests || 0, 10) || 0,
-            );
-            if (quote && quote.nights > 0) {
-              return quote.discountedGrandTotal || 0;
+          function lookupApiUrl() {
+            var base = "";
+            if (typeof window !== "undefined" && window.__GRAFFORD_API_BASE__) {
+              base = String(window.__GRAFFORD_API_BASE__).replace(/\/$/, "");
             }
+            return base + "/api/reservations-lookup";
           }
-          return parseInt((data && data.totalAmount) || 0, 10) || 0;
-        }
 
-        function goToReserveComplete(data) {
-          sessionStorage.setItem(
-            "graffordReserveCheckData",
-            JSON.stringify({
-              orderNo: data.orderNo || "",
-              room: data.room || "",
-              checkIn: data.checkIn || "",
-              checkOut: data.checkOut || "",
-              guestName: data.guestName || "",
-              contact: data.contact || "",
-              email: data.email || "",
-              guestRequest: data.guestRequest || "",
-              guestCount: String(data.guestCount || ""),
-              extraGuests: String(data.extraGuests || 0),
-              totalAmount: String(getDiscountedAmount(data)),
-              payMethod: data.payMethod || "",
-              bankConfirmed: data.bankConfirmed === true,
-              cancelToken: data.cancelToken || "",
-            }),
-          );
-          window.location.href = "reserve-check.html";
-        }
-
-        function showError(msg) {
-          window.alert(msg);
-        }
-
-        function goToDeleteComplete(data) {
-          sessionStorage.setItem(
-            "graffordDeleteCompleteData",
-            JSON.stringify({
-              orderNo: data.orderNo || "",
-              room: data.room || "",
-              checkIn: data.checkIn || "",
-              checkOut: data.checkOut || "",
-              name: data.guestName || "",
-              contact: data.contact || "",
-              extraGuests: String(data.extraGuests || 0),
-              amount: String(getDiscountedAmount(data)),
-              paymentMethod: data.payMethod || "",
-              reservedAt: data.createdAt || "",
-              cancelledAt: data.cancelledAt || new Date().toISOString(),
-              cancelReason: data.cancelReason || "",
-              refundAmount:
-                typeof data.refundAmount === "number"
-                  ? String(data.refundAmount)
-                  : "",
-            }),
-          );
-          window.location.href = "delete-complete.html";
-        }
-
-        form.addEventListener("submit", function (e) {
-          e.preventDefault();
-          if (!form.checkValidity()) {
-            form.reportValidity();
-            return;
+          function getDiscountedAmount(data) {
+            if (P && data && data.room && data.checkIn && data.checkOut) {
+              var quote = P.computeStay(
+                String(data.room).toUpperCase(),
+                data.checkIn,
+                data.checkOut,
+                parseInt(data.extraGuests || 0, 10) || 0,
+              );
+              if (quote && quote.nights > 0) {
+                return quote.discountedGrandTotal || 0;
+              }
+            }
+            return parseInt((data && data.totalAmount) || 0, 10) || 0;
           }
-          var name = document.getElementById("lookup-name").value;
-          var order = document.getElementById("lookup-order").value;
 
-          fetch(lookupApiUrl(), {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              guestName: String(name || "").trim(),
-              reservationNumber: String(order || "").trim(),
-            }),
-          })
-            .then(function (resp) {
-              return resp.json().then(function (data) {
-                return { ok: resp.ok, status: resp.status, data: data };
-              });
+          function goToReserveComplete(data) {
+            sessionStorage.setItem(
+              "graffordReserveCheckData",
+              JSON.stringify({
+                orderNo: data.orderNo || "",
+                room: data.room || "",
+                checkIn: data.checkIn || "",
+                checkOut: data.checkOut || "",
+                guestName: data.guestName || "",
+                contact: data.contact || "",
+                email: data.email || "",
+                guestRequest: data.guestRequest || "",
+                guestCount: String(data.guestCount || ""),
+                extraGuests: String(data.extraGuests || 0),
+                totalAmount: String(getDiscountedAmount(data)),
+                payMethod: data.payMethod || "",
+                bankConfirmed: data.bankConfirmed === true,
+                cancelToken: data.cancelToken || "",
+              }),
+            );
+            window.location.href = "reserve-check.html";
+          }
+
+          function showError(msg) {
+            window.alert(msg);
+          }
+
+          function goToDeleteComplete(data) {
+            sessionStorage.setItem(
+              "graffordDeleteCompleteData",
+              JSON.stringify({
+                orderNo: data.orderNo || "",
+                room: data.room || "",
+                checkIn: data.checkIn || "",
+                checkOut: data.checkOut || "",
+                name: data.guestName || "",
+                contact: data.contact || "",
+                extraGuests: String(data.extraGuests || 0),
+                amount: String(getDiscountedAmount(data)),
+                paymentMethod: data.payMethod || "",
+                reservedAt: data.createdAt || "",
+                cancelledAt: data.cancelledAt || new Date().toISOString(),
+                cancelReason: data.cancelReason || "",
+                refundAmount:
+                  typeof data.refundAmount === "number"
+                    ? String(data.refundAmount)
+                    : "",
+              }),
+            );
+            window.location.href = "delete-complete.html";
+          }
+
+          form.addEventListener("submit", function (e) {
+            e.preventDefault();
+            if (!form.checkValidity()) {
+              form.reportValidity();
+              return;
+            }
+            var name = document.getElementById("lookup-name").value;
+            var order = document.getElementById("lookup-order").value;
+
+            fetch(lookupApiUrl(), {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                guestName: String(name || "").trim(),
+                reservationNumber: String(order || "").trim(),
+              }),
             })
-            .then(function (result) {
-              if (
-                result.ok &&
-                result.data &&
-                result.data.ok &&
-                result.data.row
-              ) {
-                var row = result.data.row;
+              .then(function (resp) {
+                return resp.json().then(function (data) {
+                  return { ok: resp.ok, status: resp.status, data: data };
+                });
+              })
+              .then(function (result) {
                 if (
-                  result.data.deleted === true &&
-                  String(result.data.deleteReason || "").toLowerCase() ===
-                    "not paid"
+                  result.ok &&
+                  result.data &&
+                  result.data.ok &&
+                  result.data.row
                 ) {
-                  goToDeleteComplete({
+                  var row = result.data.row;
+                  if (
+                    result.data.deleted === true &&
+                    String(result.data.deleteReason || "").toLowerCase() ===
+                      "not paid"
+                  ) {
+                    goToDeleteComplete({
+                      orderNo: row.reservationNumber,
+                      room: row.roomType,
+                      checkIn: row.checkIn,
+                      checkOut: row.checkOut,
+                      guestName: row.guestName,
+                      contact: row.contact,
+                      extraGuests: row.extraGuests || 0,
+                      totalAmount: row.totalAmount || 0,
+                      payMethod: row.paymentMethod || "",
+                      createdAt: row.createdAt || "",
+                      cancelledAt: new Date().toISOString(),
+                      cancelReason:
+                        row.cancelReason ||
+                        result.data.deleteReason ||
+                        "미입금 자동 취소",
+                      refundAmount:
+                        (row.paymentMethod || "").toLowerCase() === "bank"
+                          ? 0
+                          : Number(row.totalAmount || 0),
+                    });
+                    return;
+                  }
+                  goToReserveComplete({
                     orderNo: row.reservationNumber,
                     room: row.roomType,
                     checkIn: row.checkIn,
                     checkOut: row.checkOut,
                     guestName: row.guestName,
                     contact: row.contact,
+                    email: row.email || "",
+                    guestRequest: row.guestRequest || "",
+                    guestCount: row.guestCount || "",
                     extraGuests: row.extraGuests || 0,
                     totalAmount: row.totalAmount || 0,
                     payMethod: row.paymentMethod || "",
-                    createdAt: row.createdAt || "",
-                    cancelledAt: new Date().toISOString(),
-                    cancelReason:
-                      row.cancelReason || result.data.deleteReason || "미입금 자동 취소",
-                    refundAmount:
-                      (row.paymentMethod || "").toLowerCase() === "bank"
-                        ? 0
-                        : Number(row.totalAmount || 0),
+                    bankConfirmed: row.bankConfirmed === true,
+                    cancelToken: result.data.cancelToken || "",
                   });
                   return;
                 }
+                if (!R) {
+                  showError(
+                    "서버에서 예약을 찾지 못했고, 이 페이지용 저장소 스크립트도 없습니다. 새로고침 후 다시 시도해 주세요.",
+                  );
+                  return;
+                }
+                var found = R.findByNameAndOrder(name, order);
+                if (!found) {
+                  showError(
+                    "일치하는 예약을 찾을 수 없습니다. 성함·예약번호를 다시 확인하거나, 결제 완료 후 서버에 저장됐는지 확인해 주세요.",
+                  );
+                  return;
+                }
                 goToReserveComplete({
-                  orderNo: row.reservationNumber,
-                  room: row.roomType,
-                  checkIn: row.checkIn,
-                  checkOut: row.checkOut,
-                  guestName: row.guestName,
-                  contact: row.contact,
-                  email: row.email || "",
-                  guestRequest: row.guestRequest || "",
-                  guestCount: row.guestCount || "",
-                  extraGuests: row.extraGuests || 0,
-                  totalAmount: row.totalAmount || 0,
-                  payMethod: row.paymentMethod || "",
-                  bankConfirmed: row.bankConfirmed === true,
-                  cancelToken: result.data.cancelToken || "",
+                  orderNo: found.orderNumber,
+                  room: found.room,
+                  checkIn: found.checkIn,
+                  checkOut: found.checkOut,
+                  guestName: found.guestName,
+                  contact: found.contact,
+                  email: found.email || "",
+                  guestRequest: found.guestRequest || "",
+                  guestCount: found.guestCount || "",
+                  extraGuests: found.extraGuests || 0,
+                  totalAmount: found.totalAmount || 0,
+                  payMethod: found.paymentMethod || "",
+                  bankConfirmed: found.bankConfirmed === true,
+                  cancelToken: "",
                 });
-                return;
-              }
-              if (!R) {
-                showError(
-                  "서버에서 예약을 찾지 못했고, 이 페이지용 저장소 스크립트도 없습니다. 새로고침 후 다시 시도해 주세요.",
-                );
-                return;
-              }
-              var found = R.findByNameAndOrder(name, order);
-              if (!found) {
-                showError(
-                  "일치하는 예약을 찾을 수 없습니다. 성함·예약번호를 다시 확인하거나, 결제 완료 후 서버에 저장됐는지 확인해 주세요.",
-                );
-                return;
-              }
-              goToReserveComplete({
-                orderNo: found.orderNumber,
-                room: found.room,
-                checkIn: found.checkIn,
-                checkOut: found.checkOut,
-                guestName: found.guestName,
-                contact: found.contact,
-                email: found.email || "",
-                guestRequest: found.guestRequest || "",
-                guestCount: found.guestCount || "",
-                extraGuests: found.extraGuests || 0,
-                totalAmount: found.totalAmount || 0,
-                payMethod: found.paymentMethod || "",
-                bankConfirmed: found.bankConfirmed === true,
-                cancelToken: "",
+              })
+              .catch(function () {
+                if (!R) {
+                  showError("조회에 실패했습니다. 네트워크를 확인해 주세요.");
+                  return;
+                }
+                var found = R.findByNameAndOrder(name, order);
+                if (!found) {
+                  showError(
+                    "서버에 연결할 수 없고, 이 기기 저장소에도 없습니다. vercel dev 가 켜져 있는지 확인해 주세요.",
+                  );
+                  return;
+                }
+                goToReserveComplete({
+                  orderNo: found.orderNumber,
+                  room: found.room,
+                  checkIn: found.checkIn,
+                  checkOut: found.checkOut,
+                  guestName: found.guestName,
+                  contact: found.contact,
+                  email: found.email || "",
+                  guestRequest: found.guestRequest || "",
+                  guestCount: found.guestCount || "",
+                  extraGuests: found.extraGuests || 0,
+                  totalAmount: found.totalAmount || 0,
+                  payMethod: found.paymentMethod || "",
+                  bankConfirmed: found.bankConfirmed === true,
+                  cancelToken: "",
+                });
               });
-            })
-            .catch(function () {
-              if (!R) {
-                showError("조회에 실패했습니다. 네트워크를 확인해 주세요.");
-                return;
-              }
-              var found = R.findByNameAndOrder(name, order);
-              if (!found) {
-                showError(
-                  "서버에 연결할 수 없고, 이 기기 저장소에도 없습니다. vercel dev 가 켜져 있는지 확인해 주세요.",
-                );
-                return;
-              }
-              goToReserveComplete({
-                orderNo: found.orderNumber,
-                room: found.room,
-                checkIn: found.checkIn,
-                checkOut: found.checkOut,
-                guestName: found.guestName,
-                contact: found.contact,
-                email: found.email || "",
-                guestRequest: found.guestRequest || "",
-                guestCount: found.guestCount || "",
-                extraGuests: found.extraGuests || 0,
-                totalAmount: found.totalAmount || 0,
-                payMethod: found.paymentMethod || "",
-                bankConfirmed: found.bankConfirmed === true,
-                cancelToken: "",
-              });
-            });
+          });
         });
-      });
-    </script>
-    <script defer src="js/grafford-page-fade.js"></script>
-    <script src="js/site-business-footer.js"></script>
-    <script>
-      document.addEventListener("DOMContentLoaded", function () {
-        window.initSiteBusinessFooter({
-          instagram: {
-            href: "https://www.instagram.com/p/DWaqvQKkzye/",
-            imgSrc: "images/insta.png",
-          },
-          lines: [
-            "대표 : GRAFFORD",
-            "주소 : 제주특별자치도 서귀포시 토산중앙로 22",
-            "사업자등록번호 : 123-45-67890",
-            "전화 : 010-1234-5678",
-            "이메일 : info@grafford.com",
-            " ",
-            "© 2026 GRAFFORD. all rights reserved.",
-          ],
+      </script>
+      <script defer src="js/grafford-page-fade.js"></script>
+      <script src="js/site-business-footer.js"></script>
+      <script>
+        document.addEventListener("DOMContentLoaded", function () {
+          window.initSiteBusinessFooter({
+            instagram: {
+              href: "https://www.instagram.com/p/DWaqvQKkzye/",
+              imgSrc: "images/insta.png",
+            },
+            lines: [
+              "대표 : GRAFFORD",
+              "주소 : 제주특별자치도 서귀포시 토산중앙로 22",
+              "사업자등록번호 : 123-45-67890",
+              "전화 : 010-1234-5678",
+              "이메일 : info@grafford.com",
+              " ",
+              "© 2026 GRAFFORD. all rights reserved.",
+            ],
+          });
         });
-      });
-    </script>
-  
+      </script>
     </div>
     <div class="lang-en">
-    <main class="content-section confirm-page reserveinfo-page">
-      <h1 class="confirm-title"></h1>
-      <p class="confirm-summary"></p>
+      <main class="content-section confirm-page reserveinfo-page">
+        <h1 class="confirm-title">View Reservation</h1>
+        <p class="confirm-summary">
+          Please enter the name and reservation number you used when making your
+          reservation.
+        </p>
 
-      <form
-        class="reserveinfo-form checkout-form"
-        novalidate
-      >
-        <label class="confirm-label"><input
-            type="text"
-            name="lookupName"
-            required
-            autocomplete="name" placeholder=""
-          />
-        </label>
-        <label class="confirm-label"><input
-            type="text"
-            name="lookupOrder"
-            required
-            autocomplete="off" placeholder=""
-          />
-        </label>
-        <div class="confirm-actions">
-          <button type="submit" class="btn reserve-btn confirm-pay-submit"></button>
-        </div>
-      </form>
+        <form class="reserveinfo-form checkout-form" novalidate>
+          <label class="confirm-label"
+            >Name<input
+              type="text"
+              name="lookupName"
+              required
+              autocomplete="name"
+              placeholder=""
+            />
+          </label>
+          <label class="confirm-label"
+            >Reservation Number<input
+              type="text"
+              name="lookupOrder"
+              required
+              autocomplete="off"
+              placeholder=""
+            />
+          </label>
+          <div class="confirm-actions">
+            <button type="submit" class="btn reserve-btn confirm-pay-submit">
+              Search
+            </button>
+          </div>
+        </form>
 
-      <footer
-        class="site-footer site-business-footer"
-        hidden
-      ></footer>
-    </main>
-
-    
-    
-    
-    
-  
-    
+        <footer class="site-footer site-business-footer" hidden></footer>
+      </main>
     </div>
-</body>
+  </body>
 </html>
