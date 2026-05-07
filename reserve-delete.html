@@ -417,112 +417,89 @@
           setText("refund-amount", "예상 환불 금액: " + refundTextKr);
           setText("refund-amount-en", "Estimated Refund Amount: " + refundTextEn);
 
-          var enRoot = document.querySelector(".lang-en");
-          var enVisible =
-            !!enRoot && window.getComputedStyle(enRoot).display !== "none";
-          var reasonName = enVisible ? "cancelReasonEn" : "cancelReason";
-          var modal = document.getElementById(
-            enVisible ? "cancel-modal-en" : "cancel-modal",
-          );
-          var openBtn = document.getElementById(
-            enVisible ? "cancel-submit-btn-en" : "cancel-submit-btn",
-          );
-          var yesBtn = document.getElementById(
-            enVisible ? "cancel-modal-yes-en" : "cancel-modal-yes",
-          );
-          var noBtn = document.getElementById(
-            enVisible ? "cancel-modal-no-en" : "cancel-modal-no",
-          );
-          var modalActionsEl = modal
-            ? modal.querySelector(".reserve-delete-modal-actions")
-            : null;
-          var modalTitleEl = document.getElementById(
-            enVisible ? "cancel-modal-title-en" : "cancel-modal-title",
-          );
-          var modalNoteEl = modal
-            ? modal.querySelector(".reserve-delete-modal-note")
-            : null;
-          var reasonOtherInput = document.getElementById(
-            enVisible ? "cancel-reason-other-en" : "cancel-reason-other",
-          );
-          var reasonInputs = document.querySelectorAll(
-            'input[name="' + reasonName + '"]',
-          );
-          var missingMode = false;
+          function bindCancelFlow(config) {
+            var modal = document.getElementById(config.modalId);
+            var openBtn = document.getElementById(config.openBtnId);
+            var yesBtn = document.getElementById(config.yesBtnId);
+            var noBtn = document.getElementById(config.noBtnId);
+            var modalTitleEl = document.getElementById(config.modalTitleId);
+            var modalActionsEl = modal
+              ? modal.querySelector(".reserve-delete-modal-actions")
+              : null;
+            var modalNoteEl = modal
+              ? modal.querySelector(".reserve-delete-modal-note")
+              : null;
+            var reasonOtherInput = document.getElementById(config.otherInputId);
+            var reasonInputs = document.querySelectorAll(
+              'input[name="' + config.reasonName + '"]',
+            );
+            var missingMode = false;
 
-          function syncOtherReasonState() {
-            if (!reasonOtherInput) {
+            if (!modal || !openBtn || !yesBtn) {
               return;
             }
-            var selected = document.querySelector(
-              'input[name="' + reasonName + '"]:checked',
-            );
-            var isOther = !!(selected && selected.value === "other");
-            reasonOtherInput.disabled = !isOther;
-            if (!isOther) {
-              reasonOtherInput.value = "";
-            }
-          }
 
-          reasonInputs.forEach(function (el) {
-            el.addEventListener("change", syncOtherReasonState);
-          });
-          syncOtherReasonState();
-
-          function applyMissingReservationMode() {
-            if (!modalTitleEl) {
-              return;
-            }
-            missingMode = true;
-            modalTitleEl.textContent = enVisible
-              ? "Unable to load reservation details"
-              : "예약 내용을 불러올 수 없습니다";
-            yesBtn.textContent = enVisible ? "OK" : "예";
-            if (noBtn) {
-              noBtn.hidden = true;
-              noBtn.style.display = "none";
-            }
-            if (modalActionsEl) {
-              modalActionsEl.style.justifyContent = "center";
-            }
-            if (modalNoteEl) {
-              modalNoteEl.hidden = true;
-            }
-            if (openBtn) {
-              openBtn.disabled = true;
-            }
-            modal.hidden = false;
-          }
-
-          function syncDeletedStateOnEntry() {
-            var deletedOrderMarker = sessionStorage.getItem(
-              "graffordDeletedReservationOrderNo",
-            );
-            if (
-              deletedOrderMarker &&
-              deletedOrderMarker === String(orderNo || "")
-            ) {
-              applyMissingReservationMode();
-            }
-          }
-          syncDeletedStateOnEntry();
-          window.addEventListener("pageshow", syncDeletedStateOnEntry);
-
-          if (openBtn) {
-            openBtn.addEventListener("click", function () {
-              if (missingMode) {
-                modal.hidden = false;
-                return;
+            function syncOtherReasonState() {
+              if (!reasonOtherInput) return;
+              var selected = document.querySelector(
+                'input[name="' + config.reasonName + '"]:checked',
+              );
+              var isOther = !!(selected && selected.value === "other");
+              reasonOtherInput.disabled = !isOther;
+              if (!isOther) {
+                reasonOtherInput.value = "";
               }
+            }
+
+            reasonInputs.forEach(function (el) {
+              el.addEventListener("change", syncOtherReasonState);
+            });
+            syncOtherReasonState();
+
+            function applyMissingReservationMode() {
+              if (!modalTitleEl) return;
+              missingMode = true;
+              modalTitleEl.textContent = config.isEn
+                ? "Unable to load reservation details"
+                : "예약 내용을 불러올 수 없습니다";
+              yesBtn.textContent = config.isEn ? "OK" : "예";
+              if (noBtn) {
+                noBtn.hidden = true;
+                noBtn.style.display = "none";
+              }
+              if (modalActionsEl) {
+                modalActionsEl.style.justifyContent = "center";
+              }
+              if (modalNoteEl) {
+                modalNoteEl.hidden = true;
+              }
+              openBtn.disabled = true;
+              modal.hidden = false;
+            }
+
+            function syncDeletedStateOnEntry() {
+              var deletedOrderMarker = sessionStorage.getItem(
+                "graffordDeletedReservationOrderNo",
+              );
+              if (
+                deletedOrderMarker &&
+                deletedOrderMarker === String(orderNo || "")
+              ) {
+                applyMissingReservationMode();
+              }
+            }
+            syncDeletedStateOnEntry();
+            window.addEventListener("pageshow", syncDeletedStateOnEntry);
+
+            openBtn.addEventListener("click", function () {
               modal.hidden = false;
             });
-          }
-          if (noBtn) {
-            noBtn.addEventListener("click", function () {
-              modal.hidden = true;
-            });
-          }
-          if (yesBtn) {
+            if (noBtn) {
+              noBtn.addEventListener("click", function () {
+                modal.hidden = true;
+              });
+            }
+
             yesBtn.addEventListener("click", function () {
               if (missingMode) {
                 sessionStorage.removeItem("graffordDeletedReservationOrderNo");
@@ -530,7 +507,7 @@
                 return;
               }
               var selectedReasonEl = document.querySelector(
-                'input[name="' + reasonName + '"]:checked',
+                'input[name="' + config.reasonName + '"]:checked',
               );
               var selectedReasonCode = selectedReasonEl
                 ? selectedReasonEl.value
@@ -543,10 +520,10 @@
                 ).trim();
                 selectedReason = selectedReasonDetail || "other";
               }
+
               yesBtn.disabled = true;
-              if (noBtn) {
-                noBtn.disabled = true;
-              }
+              if (noBtn) noBtn.disabled = true;
+
               fetch(reservationsApiUrl(), {
                 method: "DELETE",
                 headers: { "Content-Type": "application/json" },
@@ -571,7 +548,7 @@
                   if (!result.ok || !result.data || !result.data.ok) {
                     var msg =
                       (result.data && result.data.error) ||
-                      (enVisible
+                      (config.isEn
                         ? "Failed to process reservation cancellation. (" +
                           result.status +
                           ")"
@@ -606,7 +583,7 @@
                 })
                 .catch(function (err) {
                   window.alert(
-                    (enVisible
+                    (config.isEn
                       ? "Failed to delete reservation from DB.\n"
                       : "DB에서 예약을 삭제하지 못했습니다.\n") +
                       (err && err.message ? err.message : "Network error"),
@@ -614,12 +591,31 @@
                 })
                 .finally(function () {
                   yesBtn.disabled = false;
-                  if (noBtn) {
-                    noBtn.disabled = false;
-                  }
+                  if (noBtn) noBtn.disabled = false;
                 });
             });
           }
+
+          bindCancelFlow({
+            isEn: false,
+            reasonName: "cancelReason",
+            otherInputId: "cancel-reason-other",
+            modalId: "cancel-modal",
+            openBtnId: "cancel-submit-btn",
+            yesBtnId: "cancel-modal-yes",
+            noBtnId: "cancel-modal-no",
+            modalTitleId: "cancel-modal-title",
+          });
+          bindCancelFlow({
+            isEn: true,
+            reasonName: "cancelReasonEn",
+            otherInputId: "cancel-reason-other-en",
+            modalId: "cancel-modal-en",
+            openBtnId: "cancel-submit-btn-en",
+            yesBtnId: "cancel-modal-yes-en",
+            noBtnId: "cancel-modal-no-en",
+            modalTitleId: "cancel-modal-title-en",
+          });
         });
       </script>
       <script defer src="js/grafford-page-fade.js"></script>
