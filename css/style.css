@@ -2504,6 +2504,72 @@ iframe.map {
   margin-top: 1.25rem;
 }
 
+/* ── 페이지 이탈 확인 팝업 ─────────────────────────────── */
+.confirm-leave-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.48);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: 1rem;
+  box-sizing: border-box;
+}
+
+.confirm-leave-dialog {
+  background: #fff;
+  border-radius: 0.75rem;
+  padding: 2rem 1.75rem 1.5rem;
+  max-width: 340px;
+  width: 100%;
+  text-align: center;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18);
+}
+
+.confirm-leave-msg {
+  color: var(--grafford-mud2);
+  font-size: 0.97rem;
+  line-height: 1.65;
+  margin: 0 0 1.5rem;
+}
+
+.confirm-leave-actions {
+  display: flex;
+  gap: 0.65rem;
+  justify-content: center;
+}
+
+.confirm-leave-btn {
+  min-width: 90px;
+  padding: 0.55rem 1.1rem;
+  font-size: 0.9rem;
+}
+
+.confirm-leave-btn--stay {
+  background-color: transparent;
+  color: var(--grafford-mud2);
+  border: 1px solid var(--grafford-mud2);
+}
+
+.confirm-leave-btn--stay:hover {
+  background-color: var(--grafford-mud2);
+  color: #fff;
+  border-color: var(--grafford-mud2);
+}
+
+.confirm-leave-btn--leave {
+  background-color: var(--grafford-beige2);
+  color: #fff;
+  border-color: var(--grafford-beige2);
+}
+
+.confirm-leave-btn--leave:hover {
+  background-color: var(--grafford-mud);
+  border-color: var(--grafford-mud);
+  color: #fff;
+}
+
 .confirm-title {
   color: var(--grafford-mud2);
   margin: 0;

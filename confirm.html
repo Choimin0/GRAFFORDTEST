@@ -450,6 +450,17 @@
           </div>
         </form>
 
+        <!-- 페이지 이탈 확인 팝업 -->
+        <div id="confirm-leave-overlay" class="confirm-leave-overlay" hidden aria-modal="true" role="dialog" aria-labelledby="confirm-leave-title">
+          <div class="confirm-leave-dialog">
+            <p id="confirm-leave-title" class="confirm-leave-msg">이 페이지를 나가면<br />작성한 내용이 사라집니다.</p>
+            <div class="confirm-leave-actions">
+              <button type="button" id="confirm-leave-cancel" class="btn reserve-btn confirm-leave-btn confirm-leave-btn--stay">취소</button>
+              <button type="button" id="confirm-leave-confirm" class="btn reserve-btn confirm-leave-btn confirm-leave-btn--leave">확인</button>
+            </div>
+          </div>
+        </div>
+
         <footer
           id="site-business-footer-mount"
           data-site-business-footer-mount
@@ -721,6 +732,69 @@
           );
           var hasTriedSubmit = false;
 
+          // ── 뒤로가기 가드 ──────────────────────────────────────────
+          var inPaymentFlow =
+            sessionStorage.getItem("graffordInPaymentFlow") === "1";
+
+          if (!inPaymentFlow) {
+            history.pushState(null, "", window.location.href);
+          }
+
+          var leaveOverlay = document.getElementById("confirm-leave-overlay");
+          var leaveConfirmBtn = document.getElementById("confirm-leave-confirm");
+          var leaveCancelBtn = document.getElementById("confirm-leave-cancel");
+
+          window.addEventListener("popstate", function () {
+            if (inPaymentFlow) {
+              return;
+            }
+            history.pushState(null, "", window.location.href);
+            if (leaveOverlay) leaveOverlay.hidden = false;
+          });
+
+          if (leaveConfirmBtn) {
+            leaveConfirmBtn.addEventListener("click", function () {
+              sessionStorage.removeItem("graffordInPaymentFlow");
+              sessionStorage.removeItem("graffordPaymentData");
+              window.location.replace("RESERVATION.html");
+            });
+          }
+          if (leaveCancelBtn) {
+            leaveCancelBtn.addEventListener("click", function () {
+              if (leaveOverlay) leaveOverlay.hidden = true;
+            });
+          }
+          if (leaveOverlay) {
+            leaveOverlay.addEventListener("click", function (e) {
+              if (e.target === leaveOverlay) leaveOverlay.hidden = true;
+            });
+          }
+
+          // ── Payment flow 복귀 시 폼 사전 입력 ──────────────────────
+          if (inPaymentFlow) {
+            var prevPayData = null;
+            try {
+              prevPayData = JSON.parse(
+                sessionStorage.getItem("graffordPaymentData") || "null",
+              );
+            } catch (e) {}
+            if (prevPayData) {
+              if (guestNameInput && prevPayData.guestName) {
+                guestNameInput.value = prevPayData.guestName;
+              }
+              if (contactInput && prevPayData.contact) {
+                contactInput.value = prevPayData.contact;
+              }
+              if (emailInput && prevPayData.email) {
+                emailInput.value = prevPayData.email;
+              }
+              if (guestRequestInput && prevPayData.guestRequest) {
+                guestRequestInput.value = prevPayData.guestRequest;
+              }
+            }
+          }
+          // ───────────────────────────────────────────────────────────
+
           if (contactInput) {
             function formatPhoneKRMobile(value) {
               var d = String(value || "").replace(/\D/g, "");
@@ -932,48 +1006,45 @@
               guestCount: guestCount,
             };
 
-            if (paySubmitBtn) {
-              paySubmitBtn.disabled = true;
-            }
+            if (payInput.value === "bank") {
+              if (paySubmitBtn) paySubmitBtn.disabled = true;
 
-            fetch(bookingApiUrl(), {
-              method: "POST",
-              headers: { "Content-Type": "application/json" },
-              body: JSON.stringify(payload),
-            })
-              .then(function (resp) {
-                return resp.json().then(function (data) {
-                  return { ok: resp.ok, status: resp.status, data: data };
-                });
+              fetch(bookingApiUrl(), {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(payload),
               })
-              .then(function (result) {
-                if (!result.ok) {
-                  var msg =
-                    (result.data && result.data.error) ||
-                    "저장에 실패했습니다. (" + result.status + ")";
-                  if (result.data && result.data.code) {
-                    msg += " [코드: " + result.data.code + "]";
+                .then(function (resp) {
+                  return resp.json().then(function (data) {
+                    return { ok: resp.ok, status: resp.status, data: data };
+                  });
+                })
+                .then(function (result) {
+                  if (!result.ok) {
+                    var msg =
+                      (result.data && result.data.error) ||
+                      "저장에 실패했습니다. (" + result.status + ")";
+                    if (result.data && result.data.code) {
+                      msg += " [코드: " + result.data.code + "]";
+                    }
+                    throw new Error(msg);
                   }
-                  throw new Error(msg);
-                }
-                var record = {
-                  orderNumber: orderNumber,
-                  guestName: guestName,
-                  contact: contact,
-                  guestRequest: guestRequestInput
-                    ? guestRequestInput.value.trim()
-                    : "",
-                  room: room,
-                  checkIn: checkIn,
-                  checkOut: checkOut,
-                  nights: nights,
-                  extraGuests: extraGuests,
-                  totalAmount: totalAmount,
-                  paymentMethod: payInput.value,
-                  createdAt: Date.now(),
-                };
-
-                if (payInput.value === "bank") {
+                  var record = {
+                    orderNumber: orderNumber,
+                    guestName: guestName,
+                    contact: contact,
+                    guestRequest: guestRequestInput
+                      ? guestRequestInput.value.trim()
+                      : "",
+                    room: room,
+                    checkIn: checkIn,
+                    checkOut: checkOut,
+                    nights: nights,
+                    extraGuests: extraGuests,
+                    totalAmount: totalAmount,
+                    paymentMethod: payInput.value,
+                    createdAt: Date.now(),
+                  };
                   R.save(record);
                   sessionStorage.setItem(
                     "graffordReserveCompleteData",
@@ -998,43 +1069,41 @@
                     }),
                   );
                   window.location.href = "reserve-complete.html";
-                } else {
-                  sessionStorage.setItem(
-                    "graffordPaymentData",
-                    JSON.stringify({
-                      orderNo: orderNumber,
-                      totalAmount: String(totalAmount || 0),
-                      room: room,
-                      checkIn: checkIn,
-                      checkOut: checkOut,
-                      extraGuests: String(extraGuests || 0),
-                      guestName: guestName,
-                      contact: contact,
-                      email: emailVal,
-                      guestRequest: guestRequestInput
-                        ? guestRequestInput.value.trim()
-                        : "",
-                      guestCount: String(guestCount),
-                      payMethod: payInput.value,
-                      cancelToken:
-                        (result.data && result.data.cancelToken) || "",
-                    }),
+                })
+                .catch(function (err) {
+                  window.alert(
+                    "예약 정보를 서버(Vercel DB)에 저장하지 못했습니다.\n" +
+                      (err && err.message ? err.message : "네트워크 오류") +
+                      "\n\n※ 로컬에서 HTML 파일만 연 경우에는 API가 없습니다. `vercel dev`로 실행하거나 배포된 사이트 주소에서 다시 시도해 주세요.",
                   );
-                  window.location.href = "payment.html";
-                }
-              })
-              .catch(function (err) {
-                window.alert(
-                  "예약 정보를 서버(Vercel DB)에 저장하지 못했습니다.\n" +
-                    (err && err.message ? err.message : "네트워크 오류") +
-                    "\n\n※ 로컬에서 HTML 파일만 연 경우에는 API가 없습니다. `vercel dev`로 실행하거나 배포된 사이트 주소에서 다시 시도해 주세요.",
-                );
-              })
-              .finally(function () {
-                if (paySubmitBtn) {
-                  paySubmitBtn.disabled = false;
-                }
-              });
+                })
+                .finally(function () {
+                  if (paySubmitBtn) paySubmitBtn.disabled = false;
+                });
+            } else {
+              sessionStorage.setItem("graffordInPaymentFlow", "1");
+              sessionStorage.setItem(
+                "graffordPaymentData",
+                JSON.stringify({
+                  orderNo: orderNumber,
+                  totalAmount: String(totalAmount || 0),
+                  room: room,
+                  checkIn: checkIn,
+                  checkOut: checkOut,
+                  stayNights: String(nights),
+                  extraGuests: String(extraGuests || 0),
+                  guestName: guestName,
+                  contact: contact,
+                  email: emailVal,
+                  guestRequest: guestRequestInput
+                    ? guestRequestInput.value.trim()
+                    : "",
+                  guestCount: String(guestCount),
+                  payMethod: payInput.value,
+                }),
+              );
+              window.location.href = "payment.html";
+            }
           });
 
           [guestNameInput, contactInput].forEach(function (el) {
