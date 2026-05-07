@@ -733,18 +733,54 @@
           var hasTriedSubmit = false;
 
           // ── 뒤로가기 가드 ──────────────────────────────────────────
+          var referrer = String(document.referrer || "");
+          var cameFromReservation = /RESERVATION\.html$/i.test(referrer);
+          var cameFromPayment = /payment\.html$/i.test(referrer);
+
+          // reservation -> confirm 최초 진입에서는 이전 결제 세션 데이터를 정리
+          if (cameFromReservation && !cameFromPayment) {
+            sessionStorage.removeItem("graffordInPaymentFlow");
+            sessionStorage.removeItem("graffordPaymentData");
+          }
+
           var inPaymentFlow =
             sessionStorage.getItem("graffordInPaymentFlow") === "1";
 
-          var leaveOverlay = document.getElementById("confirm-leave-overlay");
-          var leaveConfirmBtn = document.getElementById("confirm-leave-confirm");
-          var leaveCancelBtn = document.getElementById("confirm-leave-cancel");
+          var leaveOverlayKr = document.getElementById("confirm-leave-overlay");
+          var leaveOverlayEn = document.getElementById(
+            "confirm-leave-overlay-en",
+          );
+          var leaveConfirmBtnKr = document.getElementById("confirm-leave-confirm");
+          var leaveConfirmBtnEn = document.getElementById(
+            "confirm-leave-confirm-en",
+          );
+          var leaveCancelBtnKr = document.getElementById("confirm-leave-cancel");
+          var leaveCancelBtnEn = document.getElementById(
+            "confirm-leave-cancel-en",
+          );
+
+          function isEnglishUiActive() {
+            return (
+              (document.body &&
+                document.body.getAttribute("data-site-language") === "en") ||
+              (document.documentElement &&
+                document.documentElement.getAttribute("lang") === "en")
+            );
+          }
+
+          function getActiveLeaveOverlay() {
+            return isEnglishUiActive()
+              ? leaveOverlayEn || leaveOverlayKr
+              : leaveOverlayKr || leaveOverlayEn;
+          }
 
           function showLeaveOverlay() {
-            if (leaveOverlay) leaveOverlay.classList.add("is-visible");
+            var overlay = getActiveLeaveOverlay();
+            if (overlay) overlay.classList.add("is-visible");
           }
           function hideLeaveOverlay() {
-            if (leaveOverlay) leaveOverlay.classList.remove("is-visible");
+            if (leaveOverlayKr) leaveOverlayKr.classList.remove("is-visible");
+            if (leaveOverlayEn) leaveOverlayEn.classList.remove("is-visible");
           }
 
           // payment.html 왕복이 아닐 때만 가드 히스토리 항목을 추가
@@ -772,22 +808,37 @@
             showLeaveOverlay();
           });
 
-          if (leaveConfirmBtn) {
-            leaveConfirmBtn.addEventListener("click", function () {
+          [leaveConfirmBtnKr, leaveConfirmBtnEn].forEach(function (btn) {
+            if (!btn) return;
+            btn.addEventListener("click", function () {
               sessionStorage.removeItem("graffordInPaymentFlow");
               sessionStorage.removeItem("graffordPaymentData");
               // replace 사용: confirm.html이 히스토리에서 제거되어 앞으로가기 불가
               window.location.replace("RESERVATION.html");
             });
-          }
-          if (leaveCancelBtn) {
-            leaveCancelBtn.addEventListener("click", hideLeaveOverlay);
-          }
-          if (leaveOverlay) {
-            leaveOverlay.addEventListener("click", function (e) {
-              if (e.target === leaveOverlay) hideLeaveOverlay();
+          });
+          [leaveCancelBtnKr, leaveCancelBtnEn].forEach(function (btn) {
+            if (!btn) return;
+            btn.addEventListener("click", hideLeaveOverlay);
+          });
+          [leaveOverlayKr, leaveOverlayEn].forEach(function (overlay) {
+            if (!overlay) return;
+            overlay.addEventListener("click", function (e) {
+              if (e.target === overlay) hideLeaveOverlay();
             });
-          }
+          });
+
+          // 인라인 뒤로가기(<) 버튼도 동일한 이탈 확인 팝업 사용
+          var backLinks = document.querySelectorAll(".confirm-back-inline");
+          backLinks.forEach(function (link) {
+            link.addEventListener("click", function (e) {
+              if (inPaymentFlow) {
+                return;
+              }
+              e.preventDefault();
+              showLeaveOverlay();
+            });
+          });
 
           // ── Payment flow 복귀 시 폼 사전 입력 ──────────────────────
           if (inPaymentFlow) {
@@ -1220,9 +1271,9 @@
             lines: [
               "대표 : GRAFFORD",
               "주소 : 제주특별자치도 서귀포시 토산중앙로 22",
-              "사업자등록번호 : 123-45-67890",
-              "전화 : 010-1234-5678",
-              "이메일 : info@grafford.com",
+              "사업자등록번호 : 587-23-00957",
+              "전화 : 010-6830-1105",
+              "이메일 : tilkoas35@naver.com",
               " ",
               "© 2026 GRAFFORD. all rights reserved.",
             ],
@@ -1616,6 +1667,37 @@
             </div>
           </div>
         </form>
+
+        <!-- Leave page confirmation popup (EN) -->
+        <div
+          id="confirm-leave-overlay-en"
+          class="confirm-leave-overlay"
+          aria-modal="true"
+          role="dialog"
+          aria-labelledby="confirm-leave-title-en"
+        >
+          <div class="confirm-leave-dialog">
+            <p id="confirm-leave-title-en" class="confirm-leave-msg">
+              If you leave this page,<br />your entered information will be lost.
+            </p>
+            <div class="confirm-leave-actions">
+              <button
+                type="button"
+                id="confirm-leave-cancel-en"
+                class="btn reserve-btn confirm-leave-btn confirm-leave-btn--stay"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                id="confirm-leave-confirm-en"
+                class="btn reserve-btn confirm-leave-btn confirm-leave-btn--leave"
+              >
+                Confirm
+              </button>
+            </div>
+          </div>
+        </div>
 
         <footer
           data-site-business-footer-mount
