@@ -71,25 +71,25 @@
           <h2 class="confirm-section-title">예약 취소 정보</h2>
           <dl class="reserve-delete-dl">
             <dt>예약번호</dt>
-            <dd id="done-order-en">—</dd>
+            <dd id="done-order">—</dd>
             <dt>객실</dt>
-            <dd id="done-room-en">—</dd>
+            <dd id="done-room">—</dd>
             <dt>체크인/체크아웃</dt>
-            <dd id="done-schedule-en">—</dd>
+            <dd id="done-schedule">—</dd>
             <dt>예약자 성함</dt>
-            <dd id="done-name-en">—</dd>
+            <dd id="done-name">—</dd>
             <dt>예약자 연락처</dt>
-            <dd id="done-contact-en">—</dd>
+            <dd id="done-contact">—</dd>
             <dt>결제 금액</dt>
-            <dd id="done-amount-en">—</dd>
+            <dd id="done-amount">—</dd>
             <dt>결제 수단</dt>
-            <dd id="done-pay-method-en">—</dd>
+            <dd id="done-pay-method">—</dd>
             <dt>예약일 / 취소일</dt>
-            <dd id="done-reserve-cancel-date-en">—</dd>
+            <dd id="done-reserve-cancel-date">—</dd>
             <dt>취소 사유</dt>
-            <dd id="done-cancel-reason-en">—</dd>
+            <dd id="done-cancel-reason">—</dd>
             <dt>환불 금액</dt>
-            <dd id="done-refund-amount-en">—</dd>
+            <dd id="done-refund-amount">—</dd>
           </dl>
         </section>
 
@@ -344,7 +344,11 @@
           setText("done-reserve-cancel-date", reserveCancelDateText);
           setText(
             "done-cancel-reason",
-            cancelReasonLabel(cancelReason, cancelReasonCode, cancelReasonDetail),
+            cancelReasonLabel(
+              cancelReason,
+              cancelReasonCode,
+              cancelReasonDetail,
+            ),
           );
           setText("done-refund-amount", formatKRW(refundAmount));
 
@@ -380,9 +384,9 @@
             lines: [
               "대표 : GRAFFORD",
               "주소 : 제주특별자치도 서귀포시 토산중앙로 22",
-              "사업자등록번호 : 123-45-67890",
-              "전화 : 010-1234-5678",
-              "이메일 : info@grafford.com",
+              "사업자등록번호 : 587-23-00957",
+              "전화 : 010-6830-1105",
+              "이메일 : tilkoas35@naver.com",
               " ",
               "© 2026 GRAFFORD. all rights reserved.",
             ],
@@ -408,25 +412,25 @@
           </h2>
           <dl class="reserve-delete-dl">
             <dt>Reservation Number</dt>
-            <dd id="done-order">—</dd>
+            <dd id="done-order-en">—</dd>
             <dt>Room</dt>
-            <dd id="done-room">—</dd>
+            <dd id="done-room-en">—</dd>
             <dt>Check-in/Check-out</dt>
-            <dd id="done-schedule">—</dd>
+            <dd id="done-schedule-en">—</dd>
             <dt>Guest Name</dt>
-            <dd id="done-name">—</dd>
+            <dd id="done-name-en">—</dd>
             <dt>Guest Contact</dt>
-            <dd id="done-contact">—</dd>
+            <dd id="done-contact-en">—</dd>
             <dt>Total Amount</dt>
-            <dd id="done-amount">—</dd>
+            <dd id="done-amount-en">—</dd>
             <dt>Payment Method</dt>
-            <dd id="done-pay-method">—</dd>
+            <dd id="done-pay-method-en">—</dd>
             <dt>Reservation Date / Cancellation Date</dt>
-            <dd id="done-reserve-cancel-date">—</dd>
+            <dd id="done-reserve-cancel-date-en">—</dd>
             <dt>Cancellation Reason</dt>
-            <dd id="done-cancel-reason">—</dd>
+            <dd id="done-cancel-reason-en">—</dd>
             <dt>Refund Amount</dt>
-            <dd id="done-refund-amount">—</dd>
+            <dd id="done-refund-amount-en">—</dd>
           </dl>
         </section>
 

@@ -2676,7 +2676,7 @@ iframe.map {
   font-size: 1.05rem;
   font-weight: 600;
   color: var(--grafford-mud2);
-  margin: 0 0 0.85rem;
+  margin: 0 0.7rem 0.85rem;
 }
 
 .confirm-booking-card {
@@ -3107,6 +3107,7 @@ iframe.map {
   grid-template-columns: 7rem 1fr;
   gap: 0.35rem 0.75rem;
   align-items: baseline;
+  text-align: center;
 }
 
 .reserve-delete-dl dt {
