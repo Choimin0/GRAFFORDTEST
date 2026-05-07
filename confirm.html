@@ -451,7 +451,7 @@
         </form>
 
         <!-- 페이지 이탈 확인 팝업 -->
-        <div id="confirm-leave-overlay" class="confirm-leave-overlay" hidden aria-modal="true" role="dialog" aria-labelledby="confirm-leave-title">
+        <div id="confirm-leave-overlay" class="confirm-leave-overlay" aria-modal="true" role="dialog" aria-labelledby="confirm-leave-title">
           <div class="confirm-leave-dialog">
             <p id="confirm-leave-title" class="confirm-leave-msg">이 페이지를 나가면<br />작성한 내용이 사라집니다.</p>
             <div class="confirm-leave-actions">
@@ -736,37 +736,56 @@
           var inPaymentFlow =
             sessionStorage.getItem("graffordInPaymentFlow") === "1";
 
-          if (!inPaymentFlow) {
-            history.pushState(null, "", window.location.href);
-          }
-
           var leaveOverlay = document.getElementById("confirm-leave-overlay");
           var leaveConfirmBtn = document.getElementById("confirm-leave-confirm");
           var leaveCancelBtn = document.getElementById("confirm-leave-cancel");
 
-          window.addEventListener("popstate", function () {
-            if (inPaymentFlow) {
-              return;
-            }
-            history.pushState(null, "", window.location.href);
-            if (leaveOverlay) leaveOverlay.hidden = false;
+          function showLeaveOverlay() {
+            if (leaveOverlay) leaveOverlay.classList.add("is-visible");
+          }
+          function hideLeaveOverlay() {
+            if (leaveOverlay) leaveOverlay.classList.remove("is-visible");
+          }
+
+          // payment.html 왕복이 아닐 때만 가드 히스토리 항목을 추가
+          if (!inPaymentFlow) {
+            history.pushState({ confirmGuard: true }, "", window.location.href);
+          }
+
+          // 페이지 초기화 스크립트가 모두 실행된 뒤에 popstate 가드를 활성화
+          var popstateReady = false;
+          requestAnimationFrame(function () {
+            requestAnimationFrame(function () {
+              popstateReady = true;
+            });
+          });
+
+          window.addEventListener("popstate", function (e) {
+            if (!popstateReady) return;
+            // payment.html 왕복 시에는 팝업 없이 자유 이동 허용
+            if (inPaymentFlow) return;
+            // 가드 히스토리 항목으로 이동하는 이벤트는 무시
+            if (e.state && e.state.confirmGuard === true) return;
+
+            // 사용자가 reservation으로 뒤로가기를 시도 → 가드 항목 재추가 후 팝업
+            history.pushState({ confirmGuard: true }, "", window.location.href);
+            showLeaveOverlay();
           });
 
           if (leaveConfirmBtn) {
             leaveConfirmBtn.addEventListener("click", function () {
               sessionStorage.removeItem("graffordInPaymentFlow");
               sessionStorage.removeItem("graffordPaymentData");
+              // replace 사용: confirm.html이 히스토리에서 제거되어 앞으로가기 불가
               window.location.replace("RESERVATION.html");
             });
           }
           if (leaveCancelBtn) {
-            leaveCancelBtn.addEventListener("click", function () {
-              if (leaveOverlay) leaveOverlay.hidden = true;
-            });
+            leaveCancelBtn.addEventListener("click", hideLeaveOverlay);
           }
           if (leaveOverlay) {
             leaveOverlay.addEventListener("click", function (e) {
-              if (e.target === leaveOverlay) leaveOverlay.hidden = true;
+              if (e.target === leaveOverlay) hideLeaveOverlay();
             });
           }
 

@@ -357,8 +357,7 @@
             guestName || "—";
           document.getElementById("complete-contact").textContent =
             contact || "—";
-          document.getElementById("complete-email").textContent =
-            email || "—";
+          document.getElementById("complete-email").textContent = email || "—";
           document.getElementById("complete-request").textContent =
             guestRequest || "—";
           var checkinGuideEl = document.getElementById(
@@ -495,7 +494,7 @@
         </div>
         <h1 class="confirm-title">Reservation Complete</h1>
         <section class="room-bridge-copy" aria-label="완료 안내 문구">
-          <p>The ground that gives you the ground is waiting for you</p>
+          <p>The ground embraced by the earth awaits you.</p>
         </section>
         <div class="confirm-layout-grid">
           <div class="confirm-layout-col">
@@ -531,75 +530,94 @@
             </section>
 
             <section class="confirm-section">
-              <h2 class="confirm-section-title">
-                Important Notice Before Check-In
-              </h2>
+              <h2 class="confirm-section-title">Pre-arrival Notes</h2>
               <p class="confirm-guide-content">
-                The check-in date is the day you make your reservation. Please
-                ensure the exact number of guests is recorded at the time of
-                booking.
+                Your check-in guide will be sent on the morning of your arrival.
+                To ensure a peaceful stay for everyone, only the pre-registered
+                number of guests may enter.
               </p>
             </section>
 
             <section class="confirm-section">
-              <h2 class="confirm-section-title"></h2>
-              <p class="confirm-guide-content"></p>
+              <h2 class="confirm-section-title">Contactless Check-in Guide</h2>
+              <p class="confirm-guide-content" id="complete-checkin-guide"></p>
             </section>
 
             <section class="confirm-section">
-              <h2 class="confirm-section-title"></h2>
-              <p class="confirm-guide-content"></p>
+              <h2 class="confirm-section-title">Parking Guide</h2>
+              <p class="confirm-guide-content">
+                Complimentary parking is available for one vehicle per room.
+              </p>
             </section>
           </div>
 
           <div class="confirm-layout-col confirm-layout-col--right">
             <section class="confirm-section">
-              <h2 class="confirm-section-title"></h2>
+              <h2 class="confirm-section-title">Reservation Details</h2>
               <dl class="reserve-delete-dl">
-                <dt></dt>
-                <dd>
-                  <span></span>
-                  <span class="reserve-complete-bank-status" hidden
-                    ><span></span><span></span
-                  ></span>
+                <dt>Reservation Number</dt>
+                <dd id="complete-order-no-text">
+                  <span id="complete-order-no-text">—</span>
+                  <span
+                    id="complete-bank-status"
+                    class="reserve-complete-bank-status"
+                    hidden
+                  >
+                    [
+                    <span id="complete-bank-status-pending"
+                      >Reservation Pending</span
+                    >
+                    /
+                    <span id="complete-bank-status-confirmed"
+                      >Reservation Confirmed</span
+                    >
+                    ]
+                  </span>
                 </dd>
-                <dt></dt>
-                <dd></dd>
-                <dt></dt>
-                <dd></dd>
+                <dt>Check-in/Check-out</dt>
+                <dd id="complete-schedule">—</dd>
+                <dt>Total Amount</dt>
+                <dd id="complete-total-amount">—</dd>
               </dl>
             </section>
 
             <section class="confirm-section">
-              <h2 class="confirm-section-title"></h2>
+              <h2 class="confirm-section-title">Guest Information</h2>
               <dl class="reserve-delete-dl">
-                <dt></dt>
-                <dd></dd>
-                <dt></dt>
-                <dd></dd>
-                <dt></dt>
-                <dd></dd>
-                <dt></dt>
-                <dd></dd>
+                <dt>Guests</dt>
+                <dd id="complete-guest-count">—</dd>
+                <dt>Guest Name</dt>
+                <dd id="complete-guest-name">—</dd>
+                <dt>Guest Contact</dt>
+                <dd id="complete-contact">—</dd>
+                <dt>Guest Email</dt>
+                <dd id="complete-email">—</dd>
+                <dt>Special Requests</dt>
+                <dd id="complete-request">—</dd>
               </dl>
             </section>
 
             <section class="confirm-section">
               <div class="confirm-actions reserve-complete-actions">
-                <a href="index.html" class="reserve-complete-action-link"></a>
+                <a href="index.html" class="reserve-complete-action-link"
+                  >Main</a
+                >
                 <a
                   href="reserve-delete.html"
                   class="reserve-complete-action-link"
-                ></a>
+                  >Cancel Reservation</a
+                >
               </div>
             </section>
           </div>
         </div>
         <div class="reserve-delete-modal-backdrop" hidden>
           <div class="reserve-delete-modal" role="dialog" aria-modal="true">
-            <p class="reserve-delete-modal-title"></p>
+            <p class="reserve-delete-modal-title">
+              Reservation Already Completed
+            </p>
             <div class="reserve-delete-modal-actions">
-              <button type="button" class="btn reserve-btn"></button>
+              <button type="button" class="btn reserve-btn">OK</button>
             </div>
           </div>
         </div>
