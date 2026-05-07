@@ -285,15 +285,6 @@
                   예약 정보
                 </h2>
                 <div class="confirm-booking-card">
-                  <img
-                    class="confirm-room-thumb"
-                    id="booking-room-img"
-                    src="images/A00.jpg"
-                    alt=""
-                    width="120"
-                    height="90"
-                    decoding="async"
-                  />
                   <div class="confirm-booking-details">
                     <p class="confirm-room-name" id="booking-room-name"></p>
                     <p class="confirm-schedule" id="booking-schedule"></p>
@@ -451,12 +442,32 @@
         </form>
 
         <!-- 페이지 이탈 확인 팝업 -->
-        <div id="confirm-leave-overlay" class="confirm-leave-overlay" aria-modal="true" role="dialog" aria-labelledby="confirm-leave-title">
+        <div
+          id="confirm-leave-overlay"
+          class="confirm-leave-overlay"
+          aria-modal="true"
+          role="dialog"
+          aria-labelledby="confirm-leave-title"
+        >
           <div class="confirm-leave-dialog">
-            <p id="confirm-leave-title" class="confirm-leave-msg">이 페이지를 나가면<br />작성한 내용이 사라집니다.</p>
+            <p id="confirm-leave-title" class="confirm-leave-msg">
+              이 페이지를 나가면<br />작성한 내용이 사라집니다.
+            </p>
             <div class="confirm-leave-actions">
-              <button type="button" id="confirm-leave-cancel" class="btn reserve-btn confirm-leave-btn confirm-leave-btn--stay">취소</button>
-              <button type="button" id="confirm-leave-confirm" class="btn reserve-btn confirm-leave-btn confirm-leave-btn--leave">확인</button>
+              <button
+                type="button"
+                id="confirm-leave-cancel"
+                class="btn reserve-btn confirm-leave-btn confirm-leave-btn--stay"
+              >
+                취소
+              </button>
+              <button
+                type="button"
+                id="confirm-leave-confirm"
+                class="btn reserve-btn confirm-leave-btn confirm-leave-btn--leave"
+              >
+                확인
+              </button>
             </div>
           </div>
         </div>
@@ -750,11 +761,15 @@
           var leaveOverlayEn = document.getElementById(
             "confirm-leave-overlay-en",
           );
-          var leaveConfirmBtnKr = document.getElementById("confirm-leave-confirm");
+          var leaveConfirmBtnKr = document.getElementById(
+            "confirm-leave-confirm",
+          );
           var leaveConfirmBtnEn = document.getElementById(
             "confirm-leave-confirm-en",
           );
-          var leaveCancelBtnKr = document.getElementById("confirm-leave-cancel");
+          var leaveCancelBtnKr = document.getElementById(
+            "confirm-leave-cancel",
+          );
           var leaveCancelBtnEn = document.getElementById(
             "confirm-leave-cancel-en",
           );
@@ -1041,7 +1056,10 @@
               return;
             }
             var emailVal = emailInput ? emailInput.value.trim() : "";
-            if (!emailVal || !/^[^\s@]{1,64}@[^\s@]{1,255}\.[^\s@]{1,63}$/.test(emailVal)) {
+            if (
+              !emailVal ||
+              !/^[^\s@]{1,64}@[^\s@]{1,255}\.[^\s@]{1,63}$/.test(emailVal)
+            ) {
               window.alert("올바른 이메일 주소를 입력해 주세요.");
               if (emailInput) emailInput.focus();
               return;
@@ -1535,14 +1553,6 @@
               <section class="confirm-section">
                 <h2 class="confirm-section-title">Booking Details</h2>
                 <div class="confirm-booking-card">
-                  <img
-                    class="confirm-room-thumb"
-                    src="images/A00.jpg"
-                    alt=""
-                    width="120"
-                    height="90"
-                    decoding="async"
-                  />
                   <div class="confirm-booking-details">
                     <p class="confirm-room-name"></p>
                     <p class="confirm-schedule"></p>
@@ -1678,7 +1688,8 @@
         >
           <div class="confirm-leave-dialog">
             <p id="confirm-leave-title-en" class="confirm-leave-msg">
-              If you leave this page,<br />your entered information will be lost.
+              If you leave this page,<br />your entered information will be
+              lost.
             </p>
             <div class="confirm-leave-actions">
               <button
