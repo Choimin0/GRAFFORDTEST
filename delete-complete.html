@@ -36,7 +36,11 @@
         <a href="RESERVATION.html">RESERVATION</a>
       </aside>
       <div class="desktop-nav-links" aria-label="데스크톱 메뉴">
-        <div class="lang-switch" data-language-switch aria-label="Language switch">
+        <div
+          class="lang-switch"
+          data-language-switch
+          aria-label="Language switch"
+        >
           <button type="button" class="lang-switch__btn" data-lang-option="kr">
             KR
           </button>
@@ -52,332 +56,331 @@
       </div>
     </nav>
     <div class="lang-kr">
+      <main class="content-section confirm-page delete-complete-page">
+        <div class="delete-complete-mark" aria-hidden="true">
+          <img src="images/icons/confirm.png" alt="" />
+        </div>
+        <h1 class="confirm-title delete-complete-title">
+          예약 취소가 정상적으로 완료되었습니다.
+        </h1>
+        <p class="confirm-summary delete-complete-subtitle">
+          기다려주신 마음을 잘 알기에 아쉬움이 큽니다.
+        </p>
 
-    <main class="content-section confirm-page delete-complete-page">
-      <div class="delete-complete-mark" aria-hidden="true">
-        <img src="images/icons/confirm.png" alt="" />
-      </div>
-      <h1 class="confirm-title delete-complete-title">
-        예약 취소가 정상적으로 완료되었습니다.
-      </h1>
-      <p class="confirm-summary delete-complete-subtitle">
-        기다려주신 마음을 잘 알기에 아쉬움이 큽니다.
-      </p>
+        <section class="confirm-section delete-complete-info">
+          <h2 class="confirm-section-title">예약 취소 정보</h2>
+          <dl class="reserve-delete-dl">
+            <dt>예약번호</dt>
+            <dd id="done-order">—</dd>
+            <dt>객실</dt>
+            <dd id="done-room">—</dd>
+            <dt>체크인/체크아웃</dt>
+            <dd id="done-schedule">—</dd>
+            <dt>예약자 성함</dt>
+            <dd id="done-name">—</dd>
+            <dt>예약자 연락처</dt>
+            <dd id="done-contact">—</dd>
+            <dt>결제 금액</dt>
+            <dd id="done-amount">—</dd>
+            <dt>결제 수단</dt>
+            <dd id="done-pay-method">—</dd>
+            <dt>예약일 / 취소일</dt>
+            <dd id="done-reserve-cancel-date">—</dd>
+            <dt>취소 사유</dt>
+            <dd id="done-cancel-reason">—</dd>
+            <dt>환불 금액</dt>
+            <dd id="done-refund-amount">—</dd>
+          </dl>
+        </section>
 
-      <section class="confirm-section delete-complete-info">
-        <h2 class="confirm-section-title">예약 취소 정보</h2>
-        <dl class="reserve-delete-dl">
-          <dt>예약번호</dt>
-          <dd id="done-order">—</dd>
-          <dt>객실</dt>
-          <dd id="done-room">—</dd>
-          <dt>체크인/체크아웃</dt>
-          <dd id="done-schedule">—</dd>
-          <dt>예약자 성함</dt>
-          <dd id="done-name">—</dd>
-          <dt>예약자 연락처</dt>
-          <dd id="done-contact">—</dd>
-          <dt>결제 금액</dt>
-          <dd id="done-amount">—</dd>
-          <dt>결제 수단</dt>
-          <dd id="done-pay-method">—</dd>
-          <dt>예약일 / 취소일</dt>
-          <dd id="done-reserve-cancel-date">—</dd>
-          <dt>취소 사유</dt>
-          <dd id="done-cancel-reason">—</dd>
-          <dt>환불 금액</dt>
-          <dd id="done-refund-amount">—</dd>
-        </dl>
-      </section>
-
-      <div class="confirm-actions delete-complete-actions">
-        <a href="index.html" class="reserve-complete-action-link">메인으로</a>
-      </div>
-      <div
-        class="reserve-delete-modal-backdrop"
-        id="delete-complete-back-modal"
-        hidden
-      >
+        <div class="confirm-actions delete-complete-actions">
+          <a href="index.html" class="reserve-complete-action-link">메인으로</a>
+        </div>
         <div
-          class="reserve-delete-modal"
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="delete-complete-back-modal-title"
+          class="reserve-delete-modal-backdrop"
+          id="delete-complete-back-modal"
+          hidden
         >
-          <p
-            id="delete-complete-back-modal-title"
-            class="reserve-delete-modal-title"
+          <div
+            class="reserve-delete-modal"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="delete-complete-back-modal-title"
           >
-            이미 예약 취소가 완료되었습니다.
-          </p>
-          <div class="reserve-delete-modal-actions">
-            <button
-              type="button"
-              class="btn reserve-btn"
-              id="delete-complete-back-modal-ok"
+            <p
+              id="delete-complete-back-modal-title"
+              class="reserve-delete-modal-title"
             >
-              확인
-            </button>
+              이미 예약 취소가 완료되었습니다.
+            </p>
+            <div class="reserve-delete-modal-actions">
+              <button
+                type="button"
+                class="btn reserve-btn"
+                id="delete-complete-back-modal-ok"
+              >
+                확인
+              </button>
+            </div>
           </div>
         </div>
-      </div>
 
-      <footer
-        id="site-business-footer-mount"
-        class="site-footer site-business-footer"
-        hidden
-      ></footer>
-    </main>
+        <footer
+          id="site-business-footer-mount"
+          class="site-footer site-business-footer"
+          hidden
+        ></footer>
+      </main>
 
-    <script src="js/booking-pricing.js"></script>
-    <script>
-      document.addEventListener("DOMContentLoaded", function () {
-        function blockBackNavigation() {
-          var modal = document.getElementById("delete-complete-back-modal");
-          var okBtn = document.getElementById("delete-complete-back-modal-ok");
-          function showModal() {
-            if (modal) {
-              modal.hidden = false;
+      <script src="js/booking-pricing.js"></script>
+      <script>
+        document.addEventListener("DOMContentLoaded", function () {
+          function blockBackNavigation() {
+            var modal = document.getElementById("delete-complete-back-modal");
+            var okBtn = document.getElementById(
+              "delete-complete-back-modal-ok",
+            );
+            function showModal() {
+              if (modal) {
+                modal.hidden = false;
+              }
             }
-          }
-          function hideModal() {
-            if (modal) {
-              modal.hidden = true;
+            function hideModal() {
+              if (modal) {
+                modal.hidden = true;
+              }
             }
-          }
-          if (okBtn) {
-            okBtn.addEventListener("click", hideModal);
-          }
-          history.pushState({ noBack: true }, "", location.href);
-          window.addEventListener("popstate", function () {
-            showModal();
+            if (okBtn) {
+              okBtn.addEventListener("click", hideModal);
+            }
             history.pushState({ noBack: true }, "", location.href);
-          });
-        }
-        blockBackNavigation();
+            window.addEventListener("popstate", function () {
+              showModal();
+              history.pushState({ noBack: true }, "", location.href);
+            });
+          }
+          blockBackNavigation();
 
-        var P = window.GraffordBookingPricing;
-        var ROOM_LABEL = { G1: "G1", G2: "G2", G3: "G3", G4: "G4" };
-        var saved = null;
-        try {
-          saved = JSON.parse(
-            sessionStorage.getItem("graffordDeleteCompleteData") || "null",
-          );
-        } catch (e) {
-          saved = null;
-        }
-        var orderNo = (saved && saved.orderNo) || "—";
-        var room = (saved && saved.room) || "";
-        var checkIn = (saved && saved.checkIn) || "";
-        var checkOut = (saved && saved.checkOut) || "";
-        var extraGuests =
-          parseInt((saved && saved.extraGuests) || "0", 10) || 0;
-        var name = (saved && saved.name) || "—";
-        var contact = (saved && saved.contact) || "—";
-        var amount = parseInt((saved && saved.amount) || "0", 10) || 0;
-        var paymentMethod = String((saved && saved.paymentMethod) || "").trim();
-        var reservedAt = String((saved && saved.reservedAt) || "").trim();
-        var cancelledAt = String((saved && saved.cancelledAt) || "").trim();
-        var cancelReason = String((saved && saved.cancelReason) || "").trim();
-        var cancelReasonCode = String((saved && saved.cancelReasonCode) || "").trim();
-        var cancelReasonDetail = String((saved && saved.cancelReasonDetail) || "").trim();
-        var refundAmountRaw = String((saved && saved.refundAmount) || "").trim();
+          var P = window.GraffordBookingPricing;
+          var ROOM_LABEL = { G1: "G1", G2: "G2", G3: "G3", G4: "G4" };
+          var saved = null;
+          try {
+            saved = JSON.parse(
+              sessionStorage.getItem("graffordDeleteCompleteData") || "null",
+            );
+          } catch (e) {
+            saved = null;
+          }
+          var orderNo = (saved && saved.orderNo) || "—";
+          var room = (saved && saved.room) || "";
+          var checkIn = (saved && saved.checkIn) || "";
+          var checkOut = (saved && saved.checkOut) || "";
+          var extraGuests =
+            parseInt((saved && saved.extraGuests) || "0", 10) || 0;
+          var name = (saved && saved.name) || "—";
+          var contact = (saved && saved.contact) || "—";
+          var amount = parseInt((saved && saved.amount) || "0", 10) || 0;
+          var paymentMethod = String(
+            (saved && saved.paymentMethod) || "",
+          ).trim();
+          var reservedAt = String((saved && saved.reservedAt) || "").trim();
+          var cancelledAt = String((saved && saved.cancelledAt) || "").trim();
+          var cancelReason = String((saved && saved.cancelReason) || "").trim();
+          var cancelReasonCode = String(
+            (saved && saved.cancelReasonCode) || "",
+          ).trim();
+          var cancelReasonDetail = String(
+            (saved && saved.cancelReasonDetail) || "",
+          ).trim();
+          var refundAmountRaw = String(
+            (saved && saved.refundAmount) || "",
+          ).trim();
 
-        function formatKRW(n) {
-          return Number(n || 0).toLocaleString("ko-KR") + "원";
-        }
+          function formatKRW(n) {
+            return Number(n || 0).toLocaleString("ko-KR") + "원";
+          }
 
-        function getDiscountedAmount() {
-          if (P && checkIn && checkOut) {
-            var quote = P.computeStay(room, checkIn, checkOut, extraGuests);
-            if (quote && quote.nights > 0) {
-              return quote.discountedGrandTotal || 0;
+          function getDiscountedAmount() {
+            if (P && checkIn && checkOut) {
+              var quote = P.computeStay(room, checkIn, checkOut, extraGuests);
+              if (quote && quote.nights > 0) {
+                return quote.discountedGrandTotal || 0;
+              }
             }
+            return amount;
           }
-          return amount;
-        }
-        var discountedAmount = getDiscountedAmount();
+          var discountedAmount = getDiscountedAmount();
 
-        function formatDateOnly(v) {
-          if (!v) {
-            return "—";
+          function formatDateOnly(v) {
+            if (!v) {
+              return "—";
+            }
+            var ymd = String(v).trim();
+            if (/^\d{8}$/.test(ymd)) {
+              return (
+                ymd.slice(0, 4) + "." + ymd.slice(4, 6) + "." + ymd.slice(6, 8)
+              );
+            }
+            if (/^\d{4}-\d{2}-\d{2}$/.test(ymd)) {
+              return ymd.replace(/-/g, ".");
+            }
+            var d = new Date(v);
+            if (isNaN(d.getTime())) {
+              return v;
+            }
+            return new Intl.DateTimeFormat("ko-KR", {
+              timeZone: "Asia/Seoul",
+              year: "numeric",
+              month: "2-digit",
+              day: "2-digit",
+            }).format(d);
           }
-          var ymd = String(v).trim();
-          if (/^\d{8}$/.test(ymd)) {
-            return ymd.slice(0, 4) + "." + ymd.slice(4, 6) + "." + ymd.slice(6, 8);
-          }
-          if (/^\d{4}-\d{2}-\d{2}$/.test(ymd)) {
-            return ymd.replace(/-/g, ".");
-          }
-          var d = new Date(v);
-          if (isNaN(d.getTime())) {
-            return v;
-          }
-          return new Intl.DateTimeFormat("ko-KR", {
-            timeZone: "Asia/Seoul",
-            year: "numeric",
-            month: "2-digit",
-            day: "2-digit",
-          }).format(d);
-        }
 
-        function paymentLabel(v) {
-          var key = String(v || "")
-            .trim()
-            .toLowerCase();
-          if (key === "card") {
-            return "카드결제";
+          function paymentLabel(v) {
+            var key = String(v || "")
+              .trim()
+              .toLowerCase();
+            if (key === "card") {
+              return "카드결제";
+            }
+            if (key === "naver") {
+              return "네이버페이";
+            }
+            if (key === "bank" || key === "무통장입금") {
+              return "무통장입금";
+            }
+            return v || "—";
           }
-          if (key === "naver") {
-            return "네이버페이";
-          }
-          if (key === "bank" || key === "무통장입금") {
-            return "무통장입금";
-          }
-          return v || "—";
-        }
 
-        function cancelReasonLabel(rawReason, rawCode, otherDetail) {
-          var code = String(rawCode || rawReason || "")
-            .trim()
-            .toLowerCase();
-          if (code === "mind-change") {
-            return "단순 변심";
+          function cancelReasonLabel(rawReason, rawCode, otherDetail) {
+            var code = String(rawCode || rawReason || "")
+              .trim()
+              .toLowerCase();
+            if (code === "mind-change") {
+              return "단순 변심";
+            }
+            if (code === "schedule-change") {
+              return "일정 변경";
+            }
+            if (code === "other-hotel") {
+              return "타숙소 예약";
+            }
+            if (code === "not paid") {
+              return "입금 기한 초과";
+            }
+            if (code === "other") {
+              return String(otherDetail || "").trim() || "기타";
+            }
+            return String(rawReason || "").trim() || "—";
           }
-          if (code === "schedule-change") {
-            return "일정 변경";
-          }
-          if (code === "other-hotel") {
-            return "타숙소 예약";
-          }
-          if (code === "not paid") {
-            return "입금 기한 초과";
-          }
-          if (code === "other") {
-            return String(otherDetail || "").trim() || "기타";
-          }
-          return String(rawReason || "").trim() || "—";
-        }
 
-        var refundAmount = Number(refundAmountRaw);
-        if (!isFinite(refundAmount)) {
-          refundAmount =
-            paymentMethod.toLowerCase() === "bank" ? 0 : discountedAmount;
-        }
+          var refundAmount = Number(refundAmountRaw);
+          if (!isFinite(refundAmount)) {
+            refundAmount =
+              paymentMethod.toLowerCase() === "bank" ? 0 : discountedAmount;
+          }
 
-        document.getElementById("done-order").textContent = orderNo;
-        document.getElementById("done-room").textContent =
-          ROOM_LABEL[room] || room || "—";
-        document.getElementById("done-schedule").textContent =
-          (checkIn || "—") + " ~ " + (checkOut || "—");
-        document.getElementById("done-name").textContent = name;
-        document.getElementById("done-contact").textContent = contact;
-        document.getElementById("done-amount").textContent =
-          formatKRW(discountedAmount);
-        document.getElementById("done-pay-method").textContent =
-          paymentLabel(paymentMethod);
-        document.getElementById("done-reserve-cancel-date").textContent =
-          formatDateOnly(reservedAt) + " / " + formatDateOnly(cancelledAt);
-        document.getElementById("done-cancel-reason").textContent =
-          cancelReasonLabel(cancelReason, cancelReasonCode, cancelReasonDetail);
-        document.getElementById("done-refund-amount").textContent =
-          formatKRW(refundAmount);
-      });
-    </script>
-    <script defer src="js/grafford-page-fade.js"></script>
-    <script src="js/site-business-footer.js"></script>
-    <script>
-      document.addEventListener("DOMContentLoaded", function () {
-        window.initSiteBusinessFooter({
-          instagram: {
-            href: "https://www.instagram.com/p/DWaqvQKkzye/",
-            imgSrc: "images/insta.png",
-          },
-          lines: [
-            "대표 : GRAFFORD",
-            "주소 : 제주특별자치도 서귀포시 토산중앙로 22",
-            "사업자등록번호 : 123-45-67890",
-            "전화 : 010-1234-5678",
-            "이메일 : info@grafford.com",
-            " ",
-            "© 2026 GRAFFORD. all rights reserved.",
-          ],
+          document.getElementById("done-order").textContent = orderNo;
+          document.getElementById("done-room").textContent =
+            ROOM_LABEL[room] || room || "—";
+          document.getElementById("done-schedule").textContent =
+            (checkIn || "—") + " ~ " + (checkOut || "—");
+          document.getElementById("done-name").textContent = name;
+          document.getElementById("done-contact").textContent = contact;
+          document.getElementById("done-amount").textContent =
+            formatKRW(discountedAmount);
+          document.getElementById("done-pay-method").textContent =
+            paymentLabel(paymentMethod);
+          document.getElementById("done-reserve-cancel-date").textContent =
+            formatDateOnly(reservedAt) + " / " + formatDateOnly(cancelledAt);
+          document.getElementById("done-cancel-reason").textContent =
+            cancelReasonLabel(
+              cancelReason,
+              cancelReasonCode,
+              cancelReasonDetail,
+            );
+          document.getElementById("done-refund-amount").textContent =
+            formatKRW(refundAmount);
         });
-      });
-    </script>
-  
+      </script>
+      <script defer src="js/grafford-page-fade.js"></script>
+      <script src="js/site-business-footer.js"></script>
+      <script>
+        document.addEventListener("DOMContentLoaded", function () {
+          window.initSiteBusinessFooter({
+            instagram: {
+              href: "https://www.instagram.com/p/DWaqvQKkzye/",
+              imgSrc: "images/insta.png",
+            },
+            lines: [
+              "대표 : GRAFFORD",
+              "주소 : 제주특별자치도 서귀포시 토산중앙로 22",
+              "사업자등록번호 : 123-45-67890",
+              "전화 : 010-1234-5678",
+              "이메일 : info@grafford.com",
+              " ",
+              "© 2026 GRAFFORD. all rights reserved.",
+            ],
+          });
+        });
+      </script>
     </div>
     <div class="lang-en">
-    <main class="content-section confirm-page delete-complete-page">
-      <div class="delete-complete-mark" aria-hidden="true">
-        <img src="images/icons/confirm.png" alt="" />
-      </div>
-      <h1 class="confirm-title delete-complete-title"></h1>
-      <p class="confirm-summary delete-complete-subtitle"></p>
+      <main class="content-section confirm-page delete-complete-page">
+        <div class="delete-complete-mark" aria-hidden="true">
+          <img src="images/icons/confirm.png" alt="" />
+        </div>
+        <h1 class="confirm-title delete-complete-title">
+          Reservation Cancellation Complete
+        </h1>
+        <p class="confirm-summary delete-complete-subtitle">
+          We are sorry to see you go.
+        </p>
 
-      <section class="confirm-section delete-complete-info">
-        <h2 class="confirm-section-title"></h2>
-        <dl class="reserve-delete-dl">
-          <dt></dt>
-          <dd></dd>
-          <dt></dt>
-          <dd></dd>
-          <dt></dt>
-          <dd></dd>
-          <dt></dt>
-          <dd></dd>
-          <dt></dt>
-          <dd></dd>
-          <dt></dt>
-          <dd></dd>
-          <dt></dt>
-          <dd></dd>
-          <dt></dt>
-          <dd></dd>
-          <dt></dt>
-          <dd></dd>
-          <dt></dt>
-          <dd></dd>
-        </dl>
-      </section>
+        <section class="confirm-section delete-complete-info">
+          <h2 class="confirm-section-title">
+            Reservation Cancellation Information
+          </h2>
+          <dl class="reserve-delete-dl">
+            <dt>Reservation Number</dt>
+            <dd id="done-order">—</dd>
+            <dt>Room</dt>
+            <dd id="done-room">—</dd>
+            <dt>Check-in/Check-out</dt>
+            <dd id="done-schedule">—</dd>
+            <dt>Guest Name</dt>
+            <dd id="done-name">—</dd>
+            <dt>Guest Contact</dt>
+            <dd id="done-contact">—</dd>
+            <dt>Total Amount</dt>
+            <dd id="done-amount">—</dd>
+            <dt>Payment Method</dt>
+            <dd id="done-pay-method">—</dd>
+            <dt>Reservation Date / Cancellation Date</dt>
+            <dd id="done-reserve-cancel-date">—</dd>
+            <dt>Cancellation Reason</dt>
+            <dd id="done-cancel-reason">—</dd>
+            <dt>Refund Amount</dt>
+            <dd id="done-refund-amount">—</dd>
+          </dl>
+        </section>
 
-      <div class="confirm-actions delete-complete-actions">
-        <a href="index.html" class="reserve-complete-action-link"></a>
-      </div>
-      <div
-        class="reserve-delete-modal-backdrop"
-        hidden
-      >
-        <div
-          class="reserve-delete-modal"
-          role="dialog"
-          aria-modal="true"
-        >
-          <p
-            class="reserve-delete-modal-title"
-          ></p>
-          <div class="reserve-delete-modal-actions">
-            <button
-              type="button"
-              class="btn reserve-btn"
-            ></button>
+        <div class="confirm-actions delete-complete-actions">
+          <a href="index.html" class="reserve-complete-action-link">Main</a>
+        </div>
+        <div class="reserve-delete-modal-backdrop" hidden>
+          <div class="reserve-delete-modal" role="dialog" aria-modal="true">
+            <p class="reserve-delete-modal-title">
+              Reservation Already Cancelled
+            </p>
+            <div class="reserve-delete-modal-actions">
+              <button type="button" class="btn reserve-btn">OK</button>
+            </div>
           </div>
         </div>
-      </div>
 
-      <footer
-        class="site-footer site-business-footer"
-        hidden
-      ></footer>
-    </main>
-
-    
-    
-    
-    
-    
-  
-    
+        <footer class="site-footer site-business-footer" hidden></footer>
+      </main>
     </div>
-</body>
+  </body>
 </html>
