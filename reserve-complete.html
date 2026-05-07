@@ -36,7 +36,11 @@
         <a href="RESERVATION.html">RESERVATION</a>
       </aside>
       <div class="desktop-nav-links" aria-label="데스크톱 메뉴">
-        <div class="lang-switch" data-language-switch aria-label="Language switch">
+        <div
+          class="lang-switch"
+          data-language-switch
+          aria-label="Language switch"
+        >
           <button type="button" class="lang-switch__btn" data-lang-option="kr">
             KR
           </button>
@@ -52,555 +56,549 @@
       </div>
     </nav>
     <div class="lang-kr">
-
-    <main class="content-section confirm-page reserve-complete-page">
-      <div class="reserve-complete-mark" aria-hidden="true">
-        <img src="images/icons/confirm.png" alt="" />
-      </div>
-      <h1 class="confirm-title">예약 완료</h1>
-      <section
-        id="complete-bridge-copy"
-        class="room-bridge-copy"
-        aria-label="완료 안내 문구"
-      >
-        <p>대지가 내어주는 그라운드가 당신을 기다립니다</p>
-      </section>
-      <div class="confirm-layout-grid">
-        <div class="confirm-layout-col">
-          <section
-            class="confirm-section"
-            aria-labelledby="complete-room-title"
-          >
-            <p class="reserve-complete-room-name" id="complete-room-name">—</p>
-            <div class="reserve-complete-gallery">
-              <div class="gallery-main-wrap reserve-complete-gallery-main-wrap">
-                <button
-                  type="button"
-                  class="gallery-nav gallery-prev"
-                  id="complete-gallery-prev"
-                  aria-label="이전 사진"
-                >
-                  &#10094;
-                </button>
-                <img
-                  class="gallery-main-img"
-                  id="complete-gallery-main"
-                  src="images/A00.jpg"
-                  alt="예약 객실 대표 이미지"
-                  loading="lazy"
-                  decoding="async"
-                />
-                <button
-                  type="button"
-                  class="gallery-nav gallery-next"
-                  id="complete-gallery-next"
-                  aria-label="다음 사진"
-                >
-                  &#10095;
-                </button>
-              </div>
-            </div>
-          </section>
-
-          <section class="confirm-section" aria-labelledby="complete-notice-1">
-            <h2 class="confirm-section-title" id="complete-notice-1">
-              입실 전 유의사항
-            </h2>
-            <p class="confirm-guide-content">
-              입실 당일 오전에 체크인 안내 메시지가 발송됩니다. 기준 인원을
-              초과한 입실은 불가하며, 추가 인원은 사전 신청 내역 기준으로만
-              인정됩니다.
-            </p>
-          </section>
-
-          <section class="confirm-section" aria-labelledby="complete-notice-2">
-            <h2 class="confirm-section-title" id="complete-notice-2">
-              비대면 체크인 안내사항
-            </h2>
-            <p class="confirm-guide-content" id="complete-checkin-guide"></p>
-          </section>
-
-          <section class="confirm-section" aria-labelledby="complete-notice-3">
-            <h2 class="confirm-section-title" id="complete-notice-3">
-              주차 안내
-            </h2>
-            <p class="confirm-guide-content">객실 당 1대 주차 가능합니다.</p>
-          </section>
+      <main class="content-section confirm-page reserve-complete-page">
+        <div class="reserve-complete-mark" aria-hidden="true">
+          <img src="images/icons/confirm.png" alt="" />
         </div>
-
-        <div class="confirm-layout-col confirm-layout-col--right">
-          <section
-            class="confirm-section"
-            aria-labelledby="complete-booking-info-title"
-          >
-            <h2 class="confirm-section-title" id="complete-booking-info-title">
-              예약 정보
-            </h2>
-            <dl class="reserve-delete-dl">
-              <dt>예약 번호</dt>
-              <dd id="complete-order-no">
-                <span id="complete-order-no-text">—</span>
-                <span
-                  id="complete-bank-status"
-                  class="reserve-complete-bank-status"
-                  hidden
-                >
-                  [
-                  <span id="complete-bank-status-pending">예약대기</span>
-                  /
-                  <span id="complete-bank-status-confirmed">예약확정</span>
-                  ]
-                </span>
-              </dd>
-              <dt>체크인/체크아웃</dt>
-              <dd id="complete-schedule">—</dd>
-              <dt>결제 금액</dt>
-              <dd id="complete-total-amount">—</dd>
-            </dl>
-          </section>
-
-          <section
-            class="confirm-section"
-            aria-labelledby="complete-guest-info-title"
-          >
-            <h2 class="confirm-section-title" id="complete-guest-info-title">
-              예약자 정보
-            </h2>
-            <dl class="reserve-delete-dl">
-              <dt>방문 인원</dt>
-              <dd id="complete-guest-count">—</dd>
-              <dt>예약자 성함</dt>
-              <dd id="complete-guest-name">—</dd>
-              <dt>예약자 연락처</dt>
-              <dd id="complete-contact">—</dd>
-              <dt>요청사항</dt>
-              <dd id="complete-request">—</dd>
-            </dl>
-          </section>
-
-          <section class="confirm-section">
-            <div class="confirm-actions reserve-complete-actions">
-              <a href="index.html" class="reserve-complete-action-link"
-                >메인으로</a
-              >
-              <a
-                href="reserve-delete.html"
-                id="complete-link-cancel"
-                class="reserve-complete-action-link"
-                >예약취소</a
-              >
-            </div>
-          </section>
-        </div>
-      </div>
-      <div
-        class="reserve-delete-modal-backdrop"
-        id="reserve-complete-back-modal"
-        hidden
-      >
-        <div
-          class="reserve-delete-modal"
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="reserve-complete-back-modal-title"
+        <h1 class="confirm-title">예약 완료</h1>
+        <section
+          id="complete-bridge-copy"
+          class="room-bridge-copy"
+          aria-label="완료 안내 문구"
         >
-          <p
-            id="reserve-complete-back-modal-title"
-            class="reserve-delete-modal-title"
-          >
-            이미 예약이 완료되었습니다.
-          </p>
-          <div class="reserve-delete-modal-actions">
-            <button
-              type="button"
-              class="btn reserve-btn"
-              id="reserve-complete-back-modal-ok"
+          <p>대지가 내어주는 그라운드가 당신을 기다립니다</p>
+        </section>
+        <div class="confirm-layout-grid">
+          <div class="confirm-layout-col">
+            <section
+              class="confirm-section"
+              aria-labelledby="complete-room-title"
             >
-              확인
-            </button>
+              <p class="reserve-complete-room-name" id="complete-room-name">
+                —
+              </p>
+              <div class="reserve-complete-gallery">
+                <div
+                  class="gallery-main-wrap reserve-complete-gallery-main-wrap"
+                >
+                  <button
+                    type="button"
+                    class="gallery-nav gallery-prev"
+                    id="complete-gallery-prev"
+                    aria-label="이전 사진"
+                  >
+                    &#10094;
+                  </button>
+                  <img
+                    class="gallery-main-img"
+                    id="complete-gallery-main"
+                    src="images/A00.jpg"
+                    alt="예약 객실 대표 이미지"
+                    loading="lazy"
+                    decoding="async"
+                  />
+                  <button
+                    type="button"
+                    class="gallery-nav gallery-next"
+                    id="complete-gallery-next"
+                    aria-label="다음 사진"
+                  >
+                    &#10095;
+                  </button>
+                </div>
+              </div>
+            </section>
+
+            <section
+              class="confirm-section"
+              aria-labelledby="complete-notice-1"
+            >
+              <h2 class="confirm-section-title" id="complete-notice-1">
+                입실 전 유의사항
+              </h2>
+              <p class="confirm-guide-content">
+                입실 당일 오전에 체크인 안내 메시지가 발송됩니다. 기준 인원을
+                초과한 입실은 불가하며, 추가 인원은 사전 신청 내역 기준으로만
+                인정됩니다.
+              </p>
+            </section>
+
+            <section
+              class="confirm-section"
+              aria-labelledby="complete-notice-2"
+            >
+              <h2 class="confirm-section-title" id="complete-notice-2">
+                비대면 체크인 안내사항
+              </h2>
+              <p class="confirm-guide-content" id="complete-checkin-guide"></p>
+            </section>
+
+            <section
+              class="confirm-section"
+              aria-labelledby="complete-notice-3"
+            >
+              <h2 class="confirm-section-title" id="complete-notice-3">
+                주차 안내
+              </h2>
+              <p class="confirm-guide-content">객실 당 1대 주차 가능합니다.</p>
+            </section>
+          </div>
+
+          <div class="confirm-layout-col confirm-layout-col--right">
+            <section
+              class="confirm-section"
+              aria-labelledby="complete-booking-info-title"
+            >
+              <h2
+                class="confirm-section-title"
+                id="complete-booking-info-title"
+              >
+                예약 정보
+              </h2>
+              <dl class="reserve-delete-dl">
+                <dt>예약 번호</dt>
+                <dd id="complete-order-no">
+                  <span id="complete-order-no-text">—</span>
+                  <span
+                    id="complete-bank-status"
+                    class="reserve-complete-bank-status"
+                    hidden
+                  >
+                    [
+                    <span id="complete-bank-status-pending">예약대기</span>
+                    /
+                    <span id="complete-bank-status-confirmed">예약확정</span>
+                    ]
+                  </span>
+                </dd>
+                <dt>체크인/체크아웃</dt>
+                <dd id="complete-schedule">—</dd>
+                <dt>결제 금액</dt>
+                <dd id="complete-total-amount">—</dd>
+              </dl>
+            </section>
+
+            <section
+              class="confirm-section"
+              aria-labelledby="complete-guest-info-title"
+            >
+              <h2 class="confirm-section-title" id="complete-guest-info-title">
+                예약자 정보
+              </h2>
+              <dl class="reserve-delete-dl">
+                <dt>방문 인원</dt>
+                <dd id="complete-guest-count">—</dd>
+                <dt>예약자 성함</dt>
+                <dd id="complete-guest-name">—</dd>
+                <dt>예약자 연락처</dt>
+                <dd id="complete-contact">—</dd>
+                <dt>요청사항</dt>
+                <dd id="complete-request">—</dd>
+              </dl>
+            </section>
+
+            <section class="confirm-section">
+              <div class="confirm-actions reserve-complete-actions">
+                <a href="index.html" class="reserve-complete-action-link"
+                  >메인으로</a
+                >
+                <a
+                  href="reserve-delete.html"
+                  id="complete-link-cancel"
+                  class="reserve-complete-action-link"
+                  >예약취소</a
+                >
+              </div>
+            </section>
           </div>
         </div>
-      </div>
-      <footer
-        id="site-business-footer-mount"
-        class="site-footer site-business-footer"
-        hidden
-      ></footer>
-    </main>
+        <div
+          class="reserve-delete-modal-backdrop"
+          id="reserve-complete-back-modal"
+          hidden
+        >
+          <div
+            class="reserve-delete-modal"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="reserve-complete-back-modal-title"
+          >
+            <p
+              id="reserve-complete-back-modal-title"
+              class="reserve-delete-modal-title"
+            >
+              이미 예약이 완료되었습니다.
+            </p>
+            <div class="reserve-delete-modal-actions">
+              <button
+                type="button"
+                class="btn reserve-btn"
+                id="reserve-complete-back-modal-ok"
+              >
+                확인
+              </button>
+            </div>
+          </div>
+        </div>
+        <footer
+          id="site-business-footer-mount"
+          class="site-footer site-business-footer"
+          hidden
+        ></footer>
+      </main>
 
-    <script src="js/booking-pricing.js"></script>
-    <script>
-      document.addEventListener("DOMContentLoaded", function () {
-        function blockBackNavigation() {
-          var modal = document.getElementById("reserve-complete-back-modal");
-          var okBtn = document.getElementById("reserve-complete-back-modal-ok");
-          function showModal() {
-            if (modal) {
-              modal.hidden = false;
-            }
-          }
-          function hideModal() {
-            if (modal) {
-              modal.hidden = true;
-            }
-          }
-          if (okBtn) {
-            okBtn.addEventListener("click", hideModal);
-          }
-          history.pushState({ noBack: true }, "", location.href);
-          window.addEventListener("popstate", function () {
-            showModal();
-            history.pushState({ noBack: true }, "", location.href);
-          });
-        }
-        blockBackNavigation();
-
-        var P = window.GraffordBookingPricing;
-        var ROOM_LABEL = {
-          G1: "G1",
-          G2: "G2",
-          G3: "G3",
-          G4: "G4",
-        };
-        var ROOM_IMAGE_PREFIX = { G1: "A", G2: "B", G3: "C", G4: "D" };
-        var saved = null;
-        try {
-          saved = JSON.parse(
-            sessionStorage.getItem("graffordReserveCompleteData") || "null",
-          );
-        } catch (e) {
-          saved = null;
-        }
-        var orderNo = (saved && saved.orderNo) || "";
-        var room = ((saved && saved.room) || "G1").toUpperCase();
-        var checkIn = (saved && saved.checkIn) || "";
-        var checkOut = (saved && saved.checkOut) || "";
-        var guestName = (saved && saved.guestName) || "";
-        var contact = (saved && saved.contact) || "";
-        var guestRequest = (saved && saved.guestRequest) || "";
-        var guestCount = (saved && saved.guestCount) || "";
-        var extraGuests = (saved && saved.extraGuests) || "0";
-        var totalAmount = (saved && saved.totalAmount) || "0";
-        var payMethod = (saved && saved.payMethod) || "";
-        var bankConfirmed = saved && saved.bankConfirmed === true;
-        var cancelToken = (saved && saved.cancelToken) || "";
-        var orderTextEl = document.getElementById("complete-order-no-text");
-        if (orderTextEl) {
-          orderTextEl.textContent = orderNo || "번호를 확인할 수 없습니다.";
-        }
-        var bankStatusEl = document.getElementById("complete-bank-status");
-        var pendingStatusEl = document.getElementById(
-          "complete-bank-status-pending",
-        );
-        var confirmedStatusEl = document.getElementById(
-          "complete-bank-status-confirmed",
-        );
-        if (payMethod === "bank" && bankStatusEl) {
-          bankStatusEl.hidden = false;
-          if (bankConfirmed) {
-            pendingStatusEl.classList.remove("is-active");
-            confirmedStatusEl.classList.add("is-active");
-          } else {
-            pendingStatusEl.classList.add("is-active");
-            confirmedStatusEl.classList.remove("is-active");
-          }
-        }
-
-        function getDiscountedAmount() {
-          if (P && checkIn && checkOut) {
-            var parsedExtraGuests = parseInt(extraGuests || "0", 10) || 0;
-            var quote = P.computeStay(
-              room,
-              checkIn,
-              checkOut,
-              parsedExtraGuests,
+      <script src="js/booking-pricing.js"></script>
+      <script>
+        document.addEventListener("DOMContentLoaded", function () {
+          function blockBackNavigation() {
+            var modal = document.getElementById("reserve-complete-back-modal");
+            var okBtn = document.getElementById(
+              "reserve-complete-back-modal-ok",
             );
-            if (quote && quote.nights > 0) {
-              return quote.discountedGrandTotal || 0;
+            function showModal() {
+              if (modal) {
+                modal.hidden = false;
+              }
+            }
+            function hideModal() {
+              if (modal) {
+                modal.hidden = true;
+              }
+            }
+            if (okBtn) {
+              okBtn.addEventListener("click", hideModal);
+            }
+            history.pushState({ noBack: true }, "", location.href);
+            window.addEventListener("popstate", function () {
+              showModal();
+              history.pushState({ noBack: true }, "", location.href);
+            });
+          }
+          blockBackNavigation();
+
+          var P = window.GraffordBookingPricing;
+          var ROOM_LABEL = {
+            G1: "G1",
+            G2: "G2",
+            G3: "G3",
+            G4: "G4",
+          };
+          var ROOM_IMAGE_PREFIX = { G1: "A", G2: "B", G3: "C", G4: "D" };
+          var saved = null;
+          try {
+            saved = JSON.parse(
+              sessionStorage.getItem("graffordReserveCompleteData") || "null",
+            );
+          } catch (e) {
+            saved = null;
+          }
+          var orderNo = (saved && saved.orderNo) || "";
+          var room = ((saved && saved.room) || "G1").toUpperCase();
+          var checkIn = (saved && saved.checkIn) || "";
+          var checkOut = (saved && saved.checkOut) || "";
+          var guestName = (saved && saved.guestName) || "";
+          var contact = (saved && saved.contact) || "";
+          var guestRequest = (saved && saved.guestRequest) || "";
+          var guestCount = (saved && saved.guestCount) || "";
+          var extraGuests = (saved && saved.extraGuests) || "0";
+          var totalAmount = (saved && saved.totalAmount) || "0";
+          var payMethod = (saved && saved.payMethod) || "";
+          var bankConfirmed = saved && saved.bankConfirmed === true;
+          var cancelToken = (saved && saved.cancelToken) || "";
+          var orderTextEl = document.getElementById("complete-order-no-text");
+          if (orderTextEl) {
+            orderTextEl.textContent = orderNo || "번호를 확인할 수 없습니다.";
+          }
+          var bankStatusEl = document.getElementById("complete-bank-status");
+          var pendingStatusEl = document.getElementById(
+            "complete-bank-status-pending",
+          );
+          var confirmedStatusEl = document.getElementById(
+            "complete-bank-status-confirmed",
+          );
+          if (payMethod === "bank" && bankStatusEl) {
+            bankStatusEl.hidden = false;
+            if (bankConfirmed) {
+              pendingStatusEl.classList.remove("is-active");
+              confirmedStatusEl.classList.add("is-active");
+            } else {
+              pendingStatusEl.classList.add("is-active");
+              confirmedStatusEl.classList.remove("is-active");
             }
           }
-          return parseInt(totalAmount || "0", 10) || 0;
-        }
-        var discountedAmount = getDiscountedAmount();
 
-        document.getElementById("complete-room-name").textContent =
-          ROOM_LABEL[room] || room || "객실 정보 없음";
-        document.getElementById("complete-schedule").textContent =
-          (checkIn || "—") + " ~ " + (checkOut || "—");
-        document.getElementById("complete-total-amount").textContent =
-          Number(discountedAmount || 0).toLocaleString("ko-KR") + "원";
-        document.getElementById("complete-guest-name").textContent =
-          guestName || "—";
-        document.getElementById("complete-contact").textContent =
-          contact || "—";
-        document.getElementById("complete-request").textContent =
-          guestRequest || "—";
-        var checkinGuideEl = document.getElementById("complete-checkin-guide");
-        if (checkinGuideEl) {
-          var contactDigits = String(contact || "").replace(/\D/g, "");
-          var contactLast4 =
-            contactDigits.length >= 4 ? contactDigits.slice(-4) : "----";
-          checkinGuideEl.innerHTML =
-            '체크인 당일 예약 시 기입된 연락처 뒷번호 4자리(<strong class="reserve-complete-pin">' +
-            contactLast4 +
-            "</strong>)로 설정될 예정입니다.<br />예약시 입력해주신 연락처를 통해 입실 당일 관련 안내 사항을 카카오톡 알림톡으로 발송해드리겠습니다.";
-        }
-
-        var parsedGuestCount = parseInt(guestCount || "", 10);
-        if (!parsedGuestCount || parsedGuestCount < 1) {
-          parsedGuestCount = Math.max(
-            1,
-            2 + (parseInt(extraGuests || "0", 10) || 0),
-          );
-        }
-        document.getElementById("complete-guest-count").textContent =
-          String(parsedGuestCount) + "명";
-
-        var prefix = ROOM_IMAGE_PREFIX[room] || "A";
-        var images = [
-          "images/" + prefix + "00.jpg",
-          "images/" + prefix + "01.jpg",
-          "images/" + prefix + "02.jpg",
-        ];
-        var mainImg = document.getElementById("complete-gallery-main");
-        var prevBtn = document.getElementById("complete-gallery-prev");
-        var nextBtn = document.getElementById("complete-gallery-next");
-        var galleryIndex = 0;
-        var galleryFadeMs = 280;
-        var galleryTimer = null;
-
-        function renderGallery(withFade) {
-          if (!mainImg || !images.length) return;
-          var src = images[galleryIndex];
-          var altText =
-            (ROOM_LABEL[room] || room) + " 사진 " + (galleryIndex + 1);
-          if (!withFade) {
-            mainImg.src = src;
-            mainImg.alt = altText;
-            return;
-          }
-
-          mainImg.classList.add("is-switching");
-          if (galleryTimer) {
-            window.clearTimeout(galleryTimer);
-            galleryTimer = null;
-          }
-          galleryTimer = window.setTimeout(function () {
-            mainImg.src = src;
-            mainImg.alt = altText;
-            var done = function () {
-              mainImg.removeEventListener("load", done);
-              mainImg.classList.remove("is-switching");
-            };
-            mainImg.addEventListener("load", done);
-            if (mainImg.complete) {
-              mainImg.classList.remove("is-switching");
+          function getDiscountedAmount() {
+            if (P && checkIn && checkOut) {
+              var parsedExtraGuests = parseInt(extraGuests || "0", 10) || 0;
+              var quote = P.computeStay(
+                room,
+                checkIn,
+                checkOut,
+                parsedExtraGuests,
+              );
+              if (quote && quote.nights > 0) {
+                return quote.discountedGrandTotal || 0;
+              }
             }
-          }, galleryFadeMs);
-        }
-        if (mainImg) {
-          renderGallery(false);
-        }
-        if (prevBtn) {
-          prevBtn.addEventListener("click", function () {
-            galleryIndex = (galleryIndex - 1 + images.length) % images.length;
-            renderGallery(true);
-          });
-        }
-        if (nextBtn) {
-          nextBtn.addEventListener("click", function () {
-            galleryIndex = (galleryIndex + 1) % images.length;
-            renderGallery(true);
-          });
-        }
+            return parseInt(totalAmount || "0", 10) || 0;
+          }
+          var discountedAmount = getDiscountedAmount();
 
-        var cancelLink = document.getElementById("complete-link-cancel");
-        if (cancelLink) {
-          sessionStorage.setItem(
-            "graffordCancelPayload",
-            JSON.stringify({
-              orderNo: orderNo || "",
-              name: guestName || "",
-              contact: contact || "",
-              room: room || "",
-              checkIn: checkIn || "",
-              checkOut: checkOut || "",
-              amount: String(discountedAmount || 0),
-              extraGuests: String(extraGuests || "0"),
-              payMethod: payMethod || "",
-              bankConfirmed: bankConfirmed === true,
-              request: guestRequest || "",
-              cancelToken: cancelToken || "",
-            }),
+          document.getElementById("complete-room-name").textContent =
+            ROOM_LABEL[room] || room || "객실 정보 없음";
+          document.getElementById("complete-schedule").textContent =
+            (checkIn || "—") + " ~ " + (checkOut || "—");
+          document.getElementById("complete-total-amount").textContent =
+            Number(discountedAmount || 0).toLocaleString("ko-KR") + "원";
+          document.getElementById("complete-guest-name").textContent =
+            guestName || "—";
+          document.getElementById("complete-contact").textContent =
+            contact || "—";
+          document.getElementById("complete-request").textContent =
+            guestRequest || "—";
+          var checkinGuideEl = document.getElementById(
+            "complete-checkin-guide",
           );
-          cancelLink.href = "reserve-delete.html";
-        }
-      });
-    </script>
-    <script defer src="js/grafford-page-fade.js"></script>
-    <script src="js/site-business-footer.js"></script>
-    <script>
-      document.addEventListener("DOMContentLoaded", function () {
-        window.initSiteBusinessFooter({
-          instagram: {
-            href: "https://www.instagram.com/p/DWaqvQKkzye/",
-            imgSrc: "images/insta.png",
-          },
-          lines: [
-            "대표 : GRAFFORD",
-            "주소 : 제주특별자치도 서귀포시 토산중앙로 22",
-            "사업자등록번호 : 123-45-67890",
-            "전화 : 010-1234-5678",
-            "이메일 : info@grafford.com",
-            " ",
-            "© 2026 GRAFFORD. all rights reserved.",
-          ],
+          if (checkinGuideEl) {
+            var contactDigits = String(contact || "").replace(/\D/g, "");
+            var contactLast4 =
+              contactDigits.length >= 4 ? contactDigits.slice(-4) : "----";
+            checkinGuideEl.innerHTML =
+              '체크인 당일 예약 시 기입된 연락처 뒷번호 4자리(<strong class="reserve-complete-pin">' +
+              contactLast4 +
+              "</strong>)로 설정될 예정입니다.<br />예약시 입력해주신 연락처를 통해 입실 당일 관련 안내 사항을 카카오톡 알림톡으로 발송해드리겠습니다.";
+          }
+
+          var parsedGuestCount = parseInt(guestCount || "", 10);
+          if (!parsedGuestCount || parsedGuestCount < 1) {
+            parsedGuestCount = Math.max(
+              1,
+              2 + (parseInt(extraGuests || "0", 10) || 0),
+            );
+          }
+          document.getElementById("complete-guest-count").textContent =
+            String(parsedGuestCount) + "명";
+
+          var prefix = ROOM_IMAGE_PREFIX[room] || "A";
+          var images = [
+            "images/" + prefix + "00.jpg",
+            "images/" + prefix + "01.jpg",
+            "images/" + prefix + "02.jpg",
+          ];
+          var mainImg = document.getElementById("complete-gallery-main");
+          var prevBtn = document.getElementById("complete-gallery-prev");
+          var nextBtn = document.getElementById("complete-gallery-next");
+          var galleryIndex = 0;
+          var galleryFadeMs = 280;
+          var galleryTimer = null;
+
+          function renderGallery(withFade) {
+            if (!mainImg || !images.length) return;
+            var src = images[galleryIndex];
+            var altText =
+              (ROOM_LABEL[room] || room) + " 사진 " + (galleryIndex + 1);
+            if (!withFade) {
+              mainImg.src = src;
+              mainImg.alt = altText;
+              return;
+            }
+
+            mainImg.classList.add("is-switching");
+            if (galleryTimer) {
+              window.clearTimeout(galleryTimer);
+              galleryTimer = null;
+            }
+            galleryTimer = window.setTimeout(function () {
+              mainImg.src = src;
+              mainImg.alt = altText;
+              var done = function () {
+                mainImg.removeEventListener("load", done);
+                mainImg.classList.remove("is-switching");
+              };
+              mainImg.addEventListener("load", done);
+              if (mainImg.complete) {
+                mainImg.classList.remove("is-switching");
+              }
+            }, galleryFadeMs);
+          }
+          if (mainImg) {
+            renderGallery(false);
+          }
+          if (prevBtn) {
+            prevBtn.addEventListener("click", function () {
+              galleryIndex = (galleryIndex - 1 + images.length) % images.length;
+              renderGallery(true);
+            });
+          }
+          if (nextBtn) {
+            nextBtn.addEventListener("click", function () {
+              galleryIndex = (galleryIndex + 1) % images.length;
+              renderGallery(true);
+            });
+          }
+
+          var cancelLink = document.getElementById("complete-link-cancel");
+          if (cancelLink) {
+            sessionStorage.setItem(
+              "graffordCancelPayload",
+              JSON.stringify({
+                orderNo: orderNo || "",
+                name: guestName || "",
+                contact: contact || "",
+                room: room || "",
+                checkIn: checkIn || "",
+                checkOut: checkOut || "",
+                amount: String(discountedAmount || 0),
+                extraGuests: String(extraGuests || "0"),
+                payMethod: payMethod || "",
+                bankConfirmed: bankConfirmed === true,
+                request: guestRequest || "",
+                cancelToken: cancelToken || "",
+              }),
+            );
+            cancelLink.href = "reserve-delete.html";
+          }
         });
-      });
-    </script>
-  
+      </script>
+      <script defer src="js/grafford-page-fade.js"></script>
+      <script src="js/site-business-footer.js"></script>
+      <script>
+        document.addEventListener("DOMContentLoaded", function () {
+          window.initSiteBusinessFooter({
+            instagram: {
+              href: "https://www.instagram.com/p/DWaqvQKkzye/",
+              imgSrc: "images/insta.png",
+            },
+            lines: [
+              "대표 : GRAFFORD",
+              "주소 : 제주특별자치도 서귀포시 토산중앙로 22",
+              "사업자등록번호 : 123-45-67890",
+              "전화 : 010-1234-5678",
+              "이메일 : info@grafford.com",
+              " ",
+              "© 2026 GRAFFORD. all rights reserved.",
+            ],
+          });
+        });
+      </script>
     </div>
     <div class="lang-en">
-    <main class="content-section confirm-page reserve-complete-page">
-      <div class="reserve-complete-mark" aria-hidden="true">
-        <img src="images/icons/confirm.png" alt="" />
-      </div>
-      <h1 class="confirm-title"></h1>
-      <section
-        class="room-bridge-copy"
-        aria-label="완료 안내 문구"
-      >
-        <p></p>
-      </section>
-      <div class="confirm-layout-grid">
-        <div class="confirm-layout-col">
-          <section
-            class="confirm-section"
-          >
-            <p class="reserve-complete-room-name"></p>
-            <div class="reserve-complete-gallery">
-              <div class="gallery-main-wrap reserve-complete-gallery-main-wrap">
-                <button
-                  type="button"
-                  class="gallery-nav gallery-prev"
-                  aria-label="이전 사진"
-                ></button>
-                <img
-                  class="gallery-main-img"
-                  src="images/A00.jpg"
-                  alt="예약 객실 대표 이미지"
-                  loading="lazy"
-                  decoding="async"
-                />
-                <button
-                  type="button"
-                  class="gallery-nav gallery-next"
-                  aria-label="다음 사진"
-                ></button>
+      <main class="content-section confirm-page reserve-complete-page">
+        <div class="reserve-complete-mark" aria-hidden="true">
+          <img src="images/icons/confirm.png" alt="" />
+        </div>
+        <h1 class="confirm-title">Reservation Complete</h1>
+        <section class="room-bridge-copy" aria-label="완료 안내 문구">
+          <p>The ground that gives you the ground is waiting for you</p>
+        </section>
+        <div class="confirm-layout-grid">
+          <div class="confirm-layout-col">
+            <section class="confirm-section">
+              <p class="reserve-complete-room-name"></p>
+              <div class="reserve-complete-gallery">
+                <div
+                  class="gallery-main-wrap reserve-complete-gallery-main-wrap"
+                >
+                  <button
+                    type="button"
+                    class="gallery-nav gallery-prev"
+                    aria-label="이전 사진"
+                  >
+                    &#10094;
+                  </button>
+                  <img
+                    class="gallery-main-img"
+                    src="images/A00.jpg"
+                    alt="예약 객실 대표 이미지"
+                    loading="lazy"
+                    decoding="async"
+                  />
+                  <button
+                    type="button"
+                    class="gallery-nav gallery-next"
+                    aria-label="다음 사진"
+                  >
+                    &#10095;
+                  </button>
+                </div>
               </div>
-            </div>
-          </section>
+            </section>
 
-          <section class="confirm-section">
-            <h2 class="confirm-section-title"></h2>
-            <p class="confirm-guide-content"></p>
-          </section>
+            <section class="confirm-section">
+              <h2 class="confirm-section-title">
+                Important Notice Before Check-In
+              </h2>
+              <p class="confirm-guide-content">
+                The check-in date is the day you make your reservation. Please
+                ensure the exact number of guests is recorded at the time of
+                booking.
+              </p>
+            </section>
 
-          <section class="confirm-section">
-            <h2 class="confirm-section-title"></h2>
-            <p class="confirm-guide-content"></p>
-          </section>
+            <section class="confirm-section">
+              <h2 class="confirm-section-title"></h2>
+              <p class="confirm-guide-content"></p>
+            </section>
 
-          <section class="confirm-section">
-            <h2 class="confirm-section-title"></h2>
-            <p class="confirm-guide-content"></p>
-          </section>
-        </div>
+            <section class="confirm-section">
+              <h2 class="confirm-section-title"></h2>
+              <p class="confirm-guide-content"></p>
+            </section>
+          </div>
 
-        <div class="confirm-layout-col confirm-layout-col--right">
-          <section
-            class="confirm-section"
-          >
-            <h2 class="confirm-section-title"></h2>
-            <dl class="reserve-delete-dl">
-              <dt></dt>
-              <dd>
-                <span></span>
-                <span
-                  class="reserve-complete-bank-status"
-                  hidden
-                ><span></span><span></span></span>
-              </dd>
-              <dt></dt>
-              <dd></dd>
-              <dt></dt>
-              <dd></dd>
-            </dl>
-          </section>
+          <div class="confirm-layout-col confirm-layout-col--right">
+            <section class="confirm-section">
+              <h2 class="confirm-section-title"></h2>
+              <dl class="reserve-delete-dl">
+                <dt></dt>
+                <dd>
+                  <span></span>
+                  <span class="reserve-complete-bank-status" hidden
+                    ><span></span><span></span
+                  ></span>
+                </dd>
+                <dt></dt>
+                <dd></dd>
+                <dt></dt>
+                <dd></dd>
+              </dl>
+            </section>
 
-          <section
-            class="confirm-section"
-          >
-            <h2 class="confirm-section-title"></h2>
-            <dl class="reserve-delete-dl">
-              <dt></dt>
-              <dd></dd>
-              <dt></dt>
-              <dd></dd>
-              <dt></dt>
-              <dd></dd>
-              <dt></dt>
-              <dd></dd>
-            </dl>
-          </section>
+            <section class="confirm-section">
+              <h2 class="confirm-section-title"></h2>
+              <dl class="reserve-delete-dl">
+                <dt></dt>
+                <dd></dd>
+                <dt></dt>
+                <dd></dd>
+                <dt></dt>
+                <dd></dd>
+                <dt></dt>
+                <dd></dd>
+              </dl>
+            </section>
 
-          <section class="confirm-section">
-            <div class="confirm-actions reserve-complete-actions">
-              <a href="index.html" class="reserve-complete-action-link"
-                ></a
-              >
-              <a
-                href="reserve-delete.html"
-                class="reserve-complete-action-link"
-                ></a
-              >
-            </div>
-          </section>
-        </div>
-      </div>
-      <div
-        class="reserve-delete-modal-backdrop"
-        hidden
-      >
-        <div
-          class="reserve-delete-modal"
-          role="dialog"
-          aria-modal="true"
-        >
-          <p
-            class="reserve-delete-modal-title"
-          ></p>
-          <div class="reserve-delete-modal-actions">
-            <button
-              type="button"
-              class="btn reserve-btn"
-            ></button>
+            <section class="confirm-section">
+              <div class="confirm-actions reserve-complete-actions">
+                <a href="index.html" class="reserve-complete-action-link"></a>
+                <a
+                  href="reserve-delete.html"
+                  class="reserve-complete-action-link"
+                ></a>
+              </div>
+            </section>
           </div>
         </div>
-      </div>
-      <footer
-        class="site-footer site-business-footer"
-        hidden
-      ></footer>
-    </main>
-
-    
-    
-    
-    
-    
-  
-    
+        <div class="reserve-delete-modal-backdrop" hidden>
+          <div class="reserve-delete-modal" role="dialog" aria-modal="true">
+            <p class="reserve-delete-modal-title"></p>
+            <div class="reserve-delete-modal-actions">
+              <button type="button" class="btn reserve-btn"></button>
+            </div>
+          </div>
+        </div>
+        <footer class="site-footer site-business-footer" hidden></footer>
+      </main>
     </div>
-</body>
+  </body>
 </html>

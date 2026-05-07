@@ -2460,6 +2460,50 @@ iframe.map {
   text-align: left;
 }
 
+.payment-summary-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 0.75rem;
+  padding: 0.45rem 0;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.07);
+  font-size: 0.93rem;
+}
+.payment-summary-row:last-child {
+  border-bottom: none;
+}
+.payment-summary-row--total {
+  padding-top: 0.75rem;
+  font-weight: 600;
+}
+.payment-summary-label {
+  color: var(--grafford-mud2);
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.payment-summary-value {
+  text-align: right;
+  color: var(--grafford-mud);
+}
+.payment-summary-row--total .payment-summary-value {
+  font-size: 1.05rem;
+}
+
+.payment-status-msg {
+  text-align: center;
+  color: var(--grafford-mud2);
+  font-size: 0.93rem;
+  margin: 1.25rem 0;
+}
+.payment-status-msg--error {
+  color: #b24a2e;
+  white-space: pre-wrap;
+}
+
+.payment-actions {
+  margin-top: 1.25rem;
+}
+
 .confirm-title {
   color: var(--grafford-mud2);
   margin: 0;

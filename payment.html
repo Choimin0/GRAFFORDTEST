@@ -8,6 +8,8 @@
     <link rel="stylesheet" href="css/style.css" />
     <script src="js/mobile-nav.js" defer></script>
     <script src="js/site-language.js" defer></script>
+    <!-- PortOne v2 Browser SDK -->
+    <script src="https://cdn.portone.io/v2/browser-sdk.js"></script>
   </head>
   <body>
     <div id="grafford-react-fade-root"></div>
@@ -51,118 +53,663 @@
         <a href="RESERVATION.html">RESERVATION</a>
       </div>
     </nav>
+
     <div class="lang-kr">
+      <main class="content-section confirm-page payment-page">
+        <h1 class="confirm-title">결제 진행</h1>
 
-    <main class="content-section confirm-page payment-page">
-      <h1 class="confirm-title">결제 진행</h1>
-      <p class="confirm-summary">
-        실제 결제 모듈을 연결하기 전 단계의 데모 페이지입니다.
-      </p>
-      <div class="confirm-total-box payment-summary-box" id="payment-summary" hidden>
-        <p class="confirm-total-line" id="payment-order-line"></p>
-        <p class="confirm-total-line" id="payment-amount-line"></p>
-      </div>
-      <p class="confirm-back">
-        <a href="RESERVATION.html">예약으로</a>
-        ·
-        <a href="GROUND.html">객실 안내</a>
-      </p>
-      <footer
-        id="site-business-footer-mount"
-        class="site-footer site-business-footer"
-        hidden
-      ></footer>
-    </main>
-    <script src="js/booking-pricing.js"></script>
-    <script>
-      document.addEventListener("DOMContentLoaded", function () {
-        var P = window.GraffordBookingPricing;
-        var saved = null;
-        try {
-          saved = JSON.parse(sessionStorage.getItem("graffordPaymentData") || "null");
-        } catch (e) {
-          saved = null;
-        }
-        var orderNo = (saved && saved.orderNo) || "";
-        var total = (saved && saved.totalAmount) || "";
-        var room = ((saved && saved.room) || "").toUpperCase();
-        var checkIn = (saved && saved.checkIn) || "";
-        var checkOut = (saved && saved.checkOut) || "";
-        var extraGuests = parseInt((saved && saved.extraGuests) || "0", 10) || 0;
-        var box = document.getElementById("payment-summary");
-        function getDiscountedAmount() {
-          if (P && room && checkIn && checkOut) {
-            var quote = P.computeStay(room, checkIn, checkOut, extraGuests);
-            if (quote && quote.nights > 0) {
-              return quote.discountedGrandTotal || 0;
-            }
+        <!-- 로딩 상태 -->
+        <p class="payment-status-msg" id="payment-loading-msg">결제 정보를 불러오는 중...</p>
+
+        <!-- 결제 데이터 없음 -->
+        <div id="payment-no-data" hidden>
+          <p class="payment-status-msg">결제 정보가 없습니다.</p>
+          <p class="confirm-back">
+            <a href="RESERVATION.html">예약으로</a>
+            ·
+            <a href="GROUND.html">객실 안내</a>
+          </p>
+        </div>
+
+        <!-- 결제 요약 박스 -->
+        <div class="confirm-total-box payment-summary-box" id="payment-summary" hidden>
+          <div class="payment-summary-row">
+            <span class="payment-summary-label">예약번호</span>
+            <span class="payment-summary-value" id="pay-order-no">—</span>
+          </div>
+          <div class="payment-summary-row">
+            <span class="payment-summary-label">객실</span>
+            <span class="payment-summary-value" id="pay-room">—</span>
+          </div>
+          <div class="payment-summary-row">
+            <span class="payment-summary-label">일정</span>
+            <span class="payment-summary-value" id="pay-schedule">—</span>
+          </div>
+          <div class="payment-summary-row">
+            <span class="payment-summary-label">예약자</span>
+            <span class="payment-summary-value" id="pay-guest">—</span>
+          </div>
+          <div class="payment-summary-row payment-summary-row--total">
+            <span class="payment-summary-label">결제 금액</span>
+            <span class="payment-summary-value" id="pay-amount">—</span>
+          </div>
+        </div>
+
+        <!-- 결제 버튼 영역 -->
+        <div class="confirm-actions payment-actions" id="payment-btn-area" hidden>
+          <button
+            type="button"
+            id="payment-submit-btn"
+            class="btn reserve-btn confirm-pay-submit"
+          >
+            KG이니시스로 결제하기
+          </button>
+        </div>
+
+        <!-- 결제 처리 중 -->
+        <p class="payment-status-msg" id="payment-processing-msg" hidden>
+          결제창을 불러오는 중입니다...
+        </p>
+
+        <!-- 결제 오류 메시지 -->
+        <div id="payment-error-area" hidden>
+          <p class="payment-status-msg payment-status-msg--error" id="payment-error-msg"></p>
+          <div class="confirm-actions payment-actions">
+            <button
+              type="button"
+              id="payment-retry-btn"
+              class="btn reserve-btn confirm-pay-submit"
+            >
+              다시 시도
+            </button>
+          </div>
+        </div>
+
+        <p class="confirm-back" id="payment-back-link">
+          <a href="RESERVATION.html">예약으로</a>
+          ·
+          <a href="GROUND.html">객실 안내</a>
+        </p>
+
+        <footer
+          id="site-business-footer-mount"
+          data-site-business-footer-mount
+          class="site-footer site-business-footer"
+          hidden
+        ></footer>
+      </main>
+
+      <script src="js/booking-pricing.js"></script>
+      <script>
+        document.addEventListener("DOMContentLoaded", function () {
+          var P = window.GraffordBookingPricing;
+
+          var saved = null;
+          try {
+            saved = JSON.parse(
+              sessionStorage.getItem("graffordPaymentData") || "null",
+            );
+          } catch (e) {
+            saved = null;
           }
-          return Number(total || 0);
-        }
-        var discountedAmount = getDiscountedAmount();
 
-        if (!orderNo && !total) {
-          return;
-        }
-        box.hidden = false;
-        if (orderNo) {
-          document.getElementById("payment-order-line").textContent =
-            "예약번호(서버 저장): " + orderNo;
-        }
-        if (total) {
-          document.getElementById("payment-amount-line").textContent =
-            "결제 금액: " +
-            Number(discountedAmount).toLocaleString("ko-KR") +
-            "원";
-        }
-      });
-    </script>
-    <script defer src="js/grafford-page-fade.js"></script>
-    <script src="js/site-business-footer.js"></script>
-    <script>
-      document.addEventListener("DOMContentLoaded", function () {
-        window.initSiteBusinessFooter({
-          instagram: {
-            href: "https://www.instagram.com/p/DWaqvQKkzye/",
-            imgSrc: "images/insta.png",
-          },
-          lines: [
-            "대표 : GRAFFORD",
-            "주소 : 제주특별자치도 서귀포시 토산중앙로 22",
-            "사업자등록번호 : 123-45-67890",
-            "전화 : 010-1234-5678",
-            "이메일 : info@grafford.com",
-            " ",
-            "© 2026 GRAFFORD. all rights reserved.",
-          ],
+          var loadingMsg = document.getElementById("payment-loading-msg");
+          var noDataEl = document.getElementById("payment-no-data");
+          var summaryEl = document.getElementById("payment-summary");
+          var btnArea = document.getElementById("payment-btn-area");
+          var submitBtn = document.getElementById("payment-submit-btn");
+          var processingMsg = document.getElementById("payment-processing-msg");
+          var errorArea = document.getElementById("payment-error-area");
+          var errorMsg = document.getElementById("payment-error-msg");
+          var retryBtn = document.getElementById("payment-retry-btn");
+
+          function hideLoading() {
+            if (loadingMsg) loadingMsg.hidden = true;
+          }
+
+          if (!saved || !saved.orderNo) {
+            hideLoading();
+            if (noDataEl) noDataEl.hidden = false;
+            return;
+          }
+
+          var orderNo = saved.orderNo || "";
+          var room = (saved.room || "").toUpperCase();
+          var checkIn = saved.checkIn || "";
+          var checkOut = saved.checkOut || "";
+          var extraGuests =
+            parseInt(saved.extraGuests || "0", 10) || 0;
+          var guestName = saved.guestName || "";
+          var contact = saved.contact || "";
+          var guestRequest = saved.guestRequest || "";
+          var guestCount = parseInt(saved.guestCount || "2", 10) || 2;
+          var payMethod = saved.payMethod || "card";
+          var cancelToken = saved.cancelToken || "";
+
+          function computeAmount() {
+            if (P && room && checkIn && checkOut) {
+              var quote = P.computeStay(room, checkIn, checkOut, extraGuests);
+              if (quote && quote.nights > 0) {
+                return quote.discountedGrandTotal || 0;
+              }
+            }
+            return Number(saved.totalAmount || 0);
+          }
+
+          var finalAmount = computeAmount();
+
+          var ROOM_LABELS = {
+            G1: "그라포드 G1",
+            G2: "그라포드 G2",
+            G3: "그라포드 G3",
+            G4: "그라포드 G4",
+          };
+
+          function formatDate(ymd) {
+            if (!ymd) return "—";
+            var parts = ymd.split("-");
+            if (parts.length !== 3) return ymd;
+            return parts[0] + "년 " + parseInt(parts[1], 10) + "월 " + parseInt(parts[2], 10) + "일";
+          }
+
+          hideLoading();
+          if (summaryEl) summaryEl.hidden = false;
+          if (btnArea) btnArea.hidden = false;
+
+          var orderNoEl = document.getElementById("pay-order-no");
+          var roomEl = document.getElementById("pay-room");
+          var scheduleEl = document.getElementById("pay-schedule");
+          var guestEl = document.getElementById("pay-guest");
+          var amountEl = document.getElementById("pay-amount");
+
+          if (orderNoEl) orderNoEl.textContent = orderNo;
+          if (roomEl) roomEl.textContent = ROOM_LABELS[room] || room;
+          if (scheduleEl)
+            scheduleEl.textContent =
+              formatDate(checkIn) + " ~ " + formatDate(checkOut);
+          if (guestEl) guestEl.textContent = guestName || "—";
+          if (amountEl)
+            amountEl.textContent =
+              Number(finalAmount).toLocaleString("ko-KR") + "원";
+
+          function showError(msg) {
+            if (processingMsg) processingMsg.hidden = true;
+            if (submitBtn) submitBtn.disabled = false;
+            if (errorMsg) errorMsg.textContent = msg || "결제 중 오류가 발생했습니다.";
+            if (errorArea) errorArea.hidden = false;
+          }
+
+          function clearError() {
+            if (errorArea) errorArea.hidden = true;
+            if (errorMsg) errorMsg.textContent = "";
+          }
+
+          async function startPayment() {
+            clearError();
+            if (submitBtn) submitBtn.disabled = true;
+            if (processingMsg) processingMsg.hidden = false;
+
+            var config = null;
+            try {
+              var cfgRes = await fetch("/api/payment-config");
+              if (!cfgRes.ok) throw new Error("설정 조회 실패");
+              config = await cfgRes.json();
+            } catch (e) {
+              showError(
+                "결제 설정을 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.\n(" +
+                  (e && e.message ? e.message : "네트워크 오류") + ")",
+              );
+              return;
+            }
+
+            if (!config.storeId || !config.channelKey) {
+              showError("결제 설정이 올바르지 않습니다. 관리자에게 문의하세요.");
+              return;
+            }
+
+            if (processingMsg) processingMsg.hidden = true;
+
+            var portone = window.PortOne;
+            if (!portone || typeof portone.requestPayment !== "function") {
+              showError(
+                "결제 모듈을 불러오지 못했습니다. 페이지를 새로고침 후 다시 시도해 주세요.",
+              );
+              return;
+            }
+
+            var response;
+            try {
+              response = await portone.requestPayment({
+                storeId: config.storeId,
+                channelKey: config.channelKey,
+                paymentId: orderNo,
+                orderName: "GRAFFORD 숙박 예약 (" + (ROOM_LABELS[room] || room) + ")",
+                totalAmount: finalAmount,
+                currency: "KRW",
+                payMethod: "CARD",
+                customer: {
+                  fullName: guestName || undefined,
+                  phoneNumber: contact || undefined,
+                },
+                locale: "KO_KR",
+                redirectUrl:
+                  window.location.origin +
+                  window.location.pathname.replace("payment.html", "") +
+                  "payment.html",
+              });
+            } catch (e) {
+              showError(
+                "결제창 실행 중 오류가 발생했습니다.\n(" +
+                  (e && e.message ? e.message : String(e)) + ")",
+              );
+              return;
+            }
+
+            if (!response || response.code) {
+              var cancelMsg =
+                response && response.message
+                  ? response.message
+                  : "결제가 취소되었습니다.";
+              showError(cancelMsg);
+              return;
+            }
+
+            try {
+              var verifyRes = await fetch("/api/payment-confirm", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  paymentId: response.paymentId,
+                  expectedAmount: finalAmount,
+                }),
+              });
+              var verifyData = await verifyRes.json();
+              if (!verifyRes.ok || !verifyData.ok) {
+                showError(
+                  "결제 검증에 실패했습니다. 결제가 정상적으로 이루어졌다면 고객센터로 문의해 주세요.\n" +
+                    (verifyData.error || ""),
+                );
+                return;
+              }
+            } catch (e) {
+              showError(
+                "결제 검증 중 네트워크 오류가 발생했습니다. 결제가 정상적으로 이루어졌다면 고객센터로 문의해 주세요.\n(" +
+                  (e && e.message ? e.message : String(e)) + ")",
+              );
+              return;
+            }
+
+            sessionStorage.setItem(
+              "graffordReserveCompleteData",
+              JSON.stringify({
+                orderNo: orderNo,
+                room: room,
+                checkIn: checkIn,
+                checkOut: checkOut,
+                guestName: guestName,
+                contact: contact,
+                guestRequest: guestRequest,
+                guestCount: String(guestCount),
+                extraGuests: String(extraGuests),
+                totalAmount: String(finalAmount),
+                payMethod: payMethod,
+                cancelToken: cancelToken,
+                bankConfirmed: false,
+              }),
+            );
+
+            window.location.href = "reserve-complete.html";
+          }
+
+          if (submitBtn) {
+            submitBtn.addEventListener("click", function () {
+              startPayment();
+            });
+          }
+
+          if (retryBtn) {
+            retryBtn.addEventListener("click", function () {
+              startPayment();
+            });
+          }
         });
-      });
-    </script>
-  
+      </script>
+      <script defer src="js/grafford-page-fade.js"></script>
+      <script src="js/site-business-footer.js"></script>
+      <script>
+        document.addEventListener("DOMContentLoaded", function () {
+          window.initSiteBusinessFooter({
+            instagram: {
+              href: "https://www.instagram.com/p/DWaqvQKkzye/",
+              imgSrc: "images/insta.png",
+            },
+            lines: [
+              "대표 : GRAFFORD",
+              "주소 : 제주특별자치도 서귀포시 토산중앙로 22",
+              "사업자등록번호 : 123-45-67890",
+              "전화 : 010-1234-5678",
+              "이메일 : info@grafford.com",
+              " ",
+              "© 2026 GRAFFORD. all rights reserved.",
+            ],
+          });
+        });
+      </script>
     </div>
+
     <div class="lang-en">
-    <main class="content-section confirm-page payment-page">
-      <h1 class="confirm-title"></h1>
-      <p class="confirm-summary"></p>
-      <div class="confirm-total-box payment-summary-box" hidden>
-        <p class="confirm-total-line"></p>
-        <p class="confirm-total-line"></p>
-      </div>
-      <p class="confirm-back">
-        <a href="RESERVATION.html"></a><a href="GROUND.html"></a>
-      </p>
-      <footer
-        class="site-footer site-business-footer"
-        hidden
-      ></footer>
-    </main>
-    
-    
-    
-    
-    
-  
-    
+      <main class="content-section confirm-page payment-page">
+        <h1 class="confirm-title">Payment</h1>
+        <p class="payment-status-msg" id="payment-loading-msg-en">Loading payment information...</p>
+
+        <div id="payment-no-data-en" hidden>
+          <p class="payment-status-msg">No payment information found.</p>
+          <p class="confirm-back">
+            <a href="RESERVATION.html">Back to Reservation</a>
+            ·
+            <a href="GROUND.html">Rooms</a>
+          </p>
+        </div>
+
+        <div class="confirm-total-box payment-summary-box" id="payment-summary-en" hidden>
+          <div class="payment-summary-row">
+            <span class="payment-summary-label">Reservation No.</span>
+            <span class="payment-summary-value" id="pay-order-no-en">—</span>
+          </div>
+          <div class="payment-summary-row">
+            <span class="payment-summary-label">Room</span>
+            <span class="payment-summary-value" id="pay-room-en">—</span>
+          </div>
+          <div class="payment-summary-row">
+            <span class="payment-summary-label">Schedule</span>
+            <span class="payment-summary-value" id="pay-schedule-en">—</span>
+          </div>
+          <div class="payment-summary-row">
+            <span class="payment-summary-label">Guest</span>
+            <span class="payment-summary-value" id="pay-guest-en">—</span>
+          </div>
+          <div class="payment-summary-row payment-summary-row--total">
+            <span class="payment-summary-label">Total</span>
+            <span class="payment-summary-value" id="pay-amount-en">—</span>
+          </div>
+        </div>
+
+        <div class="confirm-actions payment-actions" id="payment-btn-area-en" hidden>
+          <button
+            type="button"
+            id="payment-submit-btn-en"
+            class="btn reserve-btn confirm-pay-submit"
+          >
+            Pay with KG Inicis
+          </button>
+        </div>
+
+        <p class="payment-status-msg" id="payment-processing-msg-en" hidden>
+          Opening payment window...
+        </p>
+
+        <div id="payment-error-area-en" hidden>
+          <p class="payment-status-msg payment-status-msg--error" id="payment-error-msg-en"></p>
+          <div class="confirm-actions payment-actions">
+            <button
+              type="button"
+              id="payment-retry-btn-en"
+              class="btn reserve-btn confirm-pay-submit"
+            >
+              Retry
+            </button>
+          </div>
+        </div>
+
+        <p class="confirm-back">
+          <a href="RESERVATION.html">Back to Reservation</a>
+          ·
+          <a href="GROUND.html">Rooms</a>
+        </p>
+
+        <footer
+          data-site-business-footer-mount
+          class="site-footer site-business-footer"
+          hidden
+        ></footer>
+      </main>
+
+      <script>
+        document.addEventListener("DOMContentLoaded", function () {
+          var P = window.GraffordBookingPricing;
+
+          var saved = null;
+          try {
+            saved = JSON.parse(
+              sessionStorage.getItem("graffordPaymentData") || "null",
+            );
+          } catch (e) {
+            saved = null;
+          }
+
+          var loadingMsg = document.getElementById("payment-loading-msg-en");
+          var noDataEl = document.getElementById("payment-no-data-en");
+          var summaryEl = document.getElementById("payment-summary-en");
+          var btnArea = document.getElementById("payment-btn-area-en");
+          var submitBtn = document.getElementById("payment-submit-btn-en");
+          var processingMsg = document.getElementById("payment-processing-msg-en");
+          var errorArea = document.getElementById("payment-error-area-en");
+          var errorMsg = document.getElementById("payment-error-msg-en");
+          var retryBtn = document.getElementById("payment-retry-btn-en");
+
+          function hideLoading() {
+            if (loadingMsg) loadingMsg.hidden = true;
+          }
+
+          if (!saved || !saved.orderNo) {
+            hideLoading();
+            if (noDataEl) noDataEl.hidden = false;
+            return;
+          }
+
+          var orderNo = saved.orderNo || "";
+          var room = (saved.room || "").toUpperCase();
+          var checkIn = saved.checkIn || "";
+          var checkOut = saved.checkOut || "";
+          var extraGuests = parseInt(saved.extraGuests || "0", 10) || 0;
+          var guestName = saved.guestName || "";
+          var contact = saved.contact || "";
+          var guestRequest = saved.guestRequest || "";
+          var guestCount = parseInt(saved.guestCount || "2", 10) || 2;
+          var payMethod = saved.payMethod || "card";
+          var cancelToken = saved.cancelToken || "";
+
+          function computeAmount() {
+            if (P && room && checkIn && checkOut) {
+              var quote = P.computeStay(room, checkIn, checkOut, extraGuests);
+              if (quote && quote.nights > 0) {
+                return quote.discountedGrandTotal || 0;
+              }
+            }
+            return Number(saved.totalAmount || 0);
+          }
+
+          var finalAmount = computeAmount();
+
+          var ROOM_LABELS = {
+            G1: "Grafford G1",
+            G2: "Grafford G2",
+            G3: "Grafford G3",
+            G4: "Grafford G4",
+          };
+
+          function formatDate(ymd) {
+            if (!ymd) return "—";
+            var parts = ymd.split("-");
+            if (parts.length !== 3) return ymd;
+            return parts[1] + "/" + parts[2] + "/" + parts[0];
+          }
+
+          hideLoading();
+          if (summaryEl) summaryEl.hidden = false;
+          if (btnArea) btnArea.hidden = false;
+
+          var orderNoEl = document.getElementById("pay-order-no-en");
+          var roomEl = document.getElementById("pay-room-en");
+          var scheduleEl = document.getElementById("pay-schedule-en");
+          var guestEl = document.getElementById("pay-guest-en");
+          var amountEl = document.getElementById("pay-amount-en");
+
+          if (orderNoEl) orderNoEl.textContent = orderNo;
+          if (roomEl) roomEl.textContent = ROOM_LABELS[room] || room;
+          if (scheduleEl)
+            scheduleEl.textContent =
+              formatDate(checkIn) + " – " + formatDate(checkOut);
+          if (guestEl) guestEl.textContent = guestName || "—";
+          if (amountEl)
+            amountEl.textContent =
+              "₩" + Number(finalAmount).toLocaleString("ko-KR");
+
+          function showError(msg) {
+            if (processingMsg) processingMsg.hidden = true;
+            if (submitBtn) submitBtn.disabled = false;
+            if (errorMsg) errorMsg.textContent = msg || "A payment error occurred.";
+            if (errorArea) errorArea.hidden = false;
+          }
+
+          function clearError() {
+            if (errorArea) errorArea.hidden = true;
+            if (errorMsg) errorMsg.textContent = "";
+          }
+
+          async function startPayment() {
+            clearError();
+            if (submitBtn) submitBtn.disabled = true;
+            if (processingMsg) processingMsg.hidden = false;
+
+            var config = null;
+            try {
+              var cfgRes = await fetch("/api/payment-config");
+              if (!cfgRes.ok) throw new Error("Config fetch failed");
+              config = await cfgRes.json();
+            } catch (e) {
+              showError(
+                "Failed to load payment configuration. Please try again.\n(" +
+                  (e && e.message ? e.message : "Network error") + ")",
+              );
+              return;
+            }
+
+            if (!config.storeId || !config.channelKey) {
+              showError("Payment configuration is invalid. Please contact support.");
+              return;
+            }
+
+            if (processingMsg) processingMsg.hidden = true;
+
+            var portone = window.PortOne;
+            if (!portone || typeof portone.requestPayment !== "function") {
+              showError(
+                "Payment module could not be loaded. Please refresh the page and try again.",
+              );
+              return;
+            }
+
+            var response;
+            try {
+              response = await portone.requestPayment({
+                storeId: config.storeId,
+                channelKey: config.channelKey,
+                paymentId: orderNo,
+                orderName:
+                  "GRAFFORD Stay Reservation (" + (ROOM_LABELS[room] || room) + ")",
+                totalAmount: finalAmount,
+                currency: "KRW",
+                payMethod: "CARD",
+                customer: {
+                  fullName: guestName || undefined,
+                  phoneNumber: contact || undefined,
+                },
+                locale: "EN_US",
+                redirectUrl:
+                  window.location.origin +
+                  window.location.pathname.replace("payment.html", "") +
+                  "payment.html",
+              });
+            } catch (e) {
+              showError(
+                "An error occurred while opening the payment window.\n(" +
+                  (e && e.message ? e.message : String(e)) + ")",
+              );
+              return;
+            }
+
+            if (!response || response.code) {
+              var cancelMsg =
+                response && response.message
+                  ? response.message
+                  : "Payment was cancelled.";
+              showError(cancelMsg);
+              return;
+            }
+
+            try {
+              var verifyRes = await fetch("/api/payment-confirm", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  paymentId: response.paymentId,
+                  expectedAmount: finalAmount,
+                }),
+              });
+              var verifyData = await verifyRes.json();
+              if (!verifyRes.ok || !verifyData.ok) {
+                showError(
+                  "Payment verification failed. If you believe your payment went through, please contact support.\n" +
+                    (verifyData.error || ""),
+                );
+                return;
+              }
+            } catch (e) {
+              showError(
+                "Network error during payment verification. If you believe your payment went through, please contact support.\n(" +
+                  (e && e.message ? e.message : String(e)) + ")",
+              );
+              return;
+            }
+
+            sessionStorage.setItem(
+              "graffordReserveCompleteData",
+              JSON.stringify({
+                orderNo: orderNo,
+                room: room,
+                checkIn: checkIn,
+                checkOut: checkOut,
+                guestName: guestName,
+                contact: contact,
+                guestRequest: guestRequest,
+                guestCount: String(guestCount),
+                extraGuests: String(extraGuests),
+                totalAmount: String(finalAmount),
+                payMethod: payMethod,
+                cancelToken: cancelToken,
+                bankConfirmed: false,
+              }),
+            );
+
+            window.location.href = "reserve-complete.html";
+          }
+
+          if (submitBtn) {
+            submitBtn.addEventListener("click", function () {
+              startPayment();
+            });
+          }
+
+          if (retryBtn) {
+            retryBtn.addEventListener("click", function () {
+              startPayment();
+            });
+          }
+        });
+      </script>
     </div>
-</body>
+
+    <script defer src="js/grafford-page-fade.js"></script>
+  </body>
 </html>

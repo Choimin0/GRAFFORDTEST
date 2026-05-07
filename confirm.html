@@ -985,6 +985,15 @@
                       checkIn: checkIn,
                       checkOut: checkOut,
                       extraGuests: String(extraGuests || 0),
+                      guestName: guestName,
+                      contact: contact,
+                      guestRequest: guestRequestInput
+                        ? guestRequestInput.value.trim()
+                        : "",
+                      guestCount: String(guestCount),
+                      payMethod: payInput.value,
+                      cancelToken:
+                        (result.data && result.data.cancelToken) || "",
                     }),
                   );
                   window.location.href = "payment.html";
