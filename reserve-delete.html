@@ -36,7 +36,11 @@
         <a href="RESERVATION.html">RESERVATION</a>
       </aside>
       <div class="desktop-nav-links" aria-label="데스크톱 메뉴">
-        <div class="lang-switch" data-language-switch aria-label="Language switch">
+        <div
+          class="lang-switch"
+          data-language-switch
+          aria-label="Language switch"
+        >
           <button type="button" class="lang-switch__btn" data-lang-option="kr">
             KR
           </button>
@@ -52,614 +56,756 @@
       </div>
     </nav>
     <div class="lang-kr">
-
-    <main class="content-section confirm-page reserve-delete-page">
-      <div class="confirm-topbar">
-        <a
-          href="reserveinfo.html"
-          class="confirm-back-inline"
-          aria-label="예약조회로 돌아가기"
-          >&lt;</a
-        >
-        <h1 class="confirm-title">예약 취소</h1>
-      </div>
-      <p class="confirm-summary">
-        예약 취소 전 환불 규정과 예상 환불 금액을 확인해 주세요.
-      </p>
-
-      <div class="confirm-layout-grid">
-        <div class="confirm-layout-col">
-          <section
-            class="confirm-section"
-            aria-labelledby="refund-policy-title"
+      <main class="content-section confirm-page reserve-delete-page">
+        <div class="confirm-topbar">
+          <a
+            href="reserveinfo.html"
+            class="confirm-back-inline"
+            aria-label="예약조회로 돌아가기"
+            >&lt;</a
           >
-            <h2 class="confirm-section-title" id="refund-policy-title">
-              환불 규정
-            </h2>
-            <p class="confirm-guide-content">
-              입실일까지 남은 날짜에 따라 환불 수수료가 차등 적용됩니다. 예상
-              환불 금액은 결제 금액에서 환불 수수료를 차감한 금액입니다.
-            </p>
-            <p class="confirm-guide-content" id="refund-rule-summary"></p>
-            <div class="reserve-delete-refund-box">
-              <p class="reserve-delete-refund-label">예상 환불 금액</p>
-              <p class="reserve-delete-refund-amount" id="refund-amount">—</p>
-            </div>
-          </section>
+          <h1 class="confirm-title">예약 취소</h1>
+        </div>
+        <p class="confirm-summary">
+          예약 취소 전 환불 규정과 예상 환불 금액을 확인해 주세요.
+        </p>
+
+        <div class="confirm-layout-grid">
+          <div class="confirm-layout-col">
+            <section
+              class="confirm-section"
+              aria-labelledby="refund-policy-title"
+            >
+              <h2 class="confirm-section-title" id="refund-policy-title">
+                환불 규정
+              </h2>
+              <p class="confirm-guide-content">
+                입실일까지 남은 날짜에 따라 환불 수수료가 차등 적용됩니다. 예상
+                환불 금액은 결제 금액에서 환불 수수료를 차감한 금액입니다.
+              </p>
+              <p class="confirm-guide-content" id="refund-rule-summary"></p>
+              <div class="reserve-delete-refund-box">
+                <p class="reserve-delete-refund-label">예상 환불 금액</p>
+                <p class="reserve-delete-refund-amount" id="refund-amount">—</p>
+              </div>
+            </section>
+          </div>
+
+          <div class="confirm-layout-col confirm-layout-col--right">
+            <section
+              class="confirm-section"
+              aria-labelledby="cancel-booking-title"
+            >
+              <h2 class="confirm-section-title" id="cancel-booking-title">
+                예약 정보 확인
+              </h2>
+              <dl class="reserve-delete-dl">
+                <dt>예약번호</dt>
+                <dd id="cancel-order">
+                  <span id="cancel-order-text">—</span>
+                  <span
+                    id="cancel-bank-status"
+                    class="reserve-complete-bank-status"
+                    hidden
+                  >
+                    [
+                    <span id="cancel-bank-status-pending">예약대기</span>
+                    /
+                    <span id="cancel-bank-status-confirmed">예약확정</span>
+                    ]
+                  </span>
+                </dd>
+                <dt>객실</dt>
+                <dd id="cancel-room">—</dd>
+                <dt>일정</dt>
+                <dd id="cancel-schedule">—</dd>
+                <dt>결제 금액</dt>
+                <dd id="cancel-amount">—</dd>
+              </dl>
+            </section>
+
+            <section
+              class="confirm-section"
+              aria-labelledby="cancel-user-title"
+            >
+              <h2 class="confirm-section-title" id="cancel-user-title">
+                예약자 정보 확인
+              </h2>
+              <dl class="reserve-delete-dl">
+                <dt>성함</dt>
+                <dd id="cancel-name">—</dd>
+                <dt>연락처</dt>
+                <dd id="cancel-contact">—</dd>
+                <dt>이메일</dt>
+                <dd id="cancel-email">—</dd>
+              </dl>
+            </section>
+
+            <section
+              class="confirm-section"
+              aria-labelledby="cancel-reason-title"
+            >
+              <h2 class="confirm-section-title" id="cancel-reason-title">
+                취소 사유
+              </h2>
+              <div class="confirm-agree-list reserve-delete-reason-row">
+                <label class="confirm-check">
+                  <input type="radio" name="cancelReason" value="mind-change" />
+                  단순 변심
+                </label>
+                <label class="confirm-check">
+                  <input
+                    type="radio"
+                    name="cancelReason"
+                    value="schedule-change"
+                  />
+                  일정 변경
+                </label>
+                <label class="confirm-check">
+                  <input type="radio" name="cancelReason" value="other-hotel" />
+                  타숙소 예약
+                </label>
+              </div>
+              <div class="reserve-delete-other-row">
+                <label class="confirm-check">
+                  <input type="radio" name="cancelReason" value="other" />
+                  기타
+                </label>
+                <label class="confirm-label reserve-delete-other-label">
+                  <input
+                    type="text"
+                    id="cancel-reason-other"
+                    placeholder="기타 사유를 입력해 주세요."
+                  />
+                </label>
+              </div>
+              <div class="confirm-actions">
+                <button
+                  type="button"
+                  class="btn reserve-btn confirm-pay-submit"
+                  id="cancel-submit-btn"
+                >
+                  예약 취소
+                </button>
+              </div>
+            </section>
+          </div>
         </div>
 
-        <div class="confirm-layout-col confirm-layout-col--right">
-          <section
-            class="confirm-section"
-            aria-labelledby="cancel-booking-title"
+        <div class="reserve-delete-modal-backdrop" id="cancel-modal" hidden>
+          <div
+            class="reserve-delete-modal"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="cancel-modal-title"
           >
-            <h2 class="confirm-section-title" id="cancel-booking-title">
-              예약 정보 확인
-            </h2>
-            <dl class="reserve-delete-dl">
-              <dt>예약번호</dt>
-              <dd id="cancel-order">
-                <span id="cancel-order-text">—</span>
-                <span
-                  id="cancel-bank-status"
-                  class="reserve-complete-bank-status"
-                  hidden
-                >
-                  [
-                  <span id="cancel-bank-status-pending">예약대기</span>
-                  /
-                  <span id="cancel-bank-status-confirmed">예약확정</span>
-                  ]
-                </span>
-              </dd>
-              <dt>객실</dt>
-              <dd id="cancel-room">—</dd>
-              <dt>일정</dt>
-              <dd id="cancel-schedule">—</dd>
-              <dt>결제 금액</dt>
-              <dd id="cancel-amount">—</dd>
-            </dl>
-          </section>
-
-          <section class="confirm-section" aria-labelledby="cancel-user-title">
-            <h2 class="confirm-section-title" id="cancel-user-title">
-              예약자 정보 확인
-            </h2>
-            <dl class="reserve-delete-dl">
-              <dt>성함</dt>
-              <dd id="cancel-name">—</dd>
-              <dt>연락처</dt>
-              <dd id="cancel-contact">—</dd>
-              <dt>이메일</dt>
-              <dd id="cancel-email">—</dd>
-            </dl>
-          </section>
-
-          <section
-            class="confirm-section"
-            aria-labelledby="cancel-reason-title"
-          >
-            <h2 class="confirm-section-title" id="cancel-reason-title">
-              취소 사유
-            </h2>
-            <div class="confirm-agree-list reserve-delete-reason-row">
-              <label class="confirm-check">
-                <input type="radio" name="cancelReason" value="mind-change" />
-                단순 변심
-              </label>
-              <label class="confirm-check">
-                <input
-                  type="radio"
-                  name="cancelReason"
-                  value="schedule-change"
-                />
-                일정 변경
-              </label>
-              <label class="confirm-check">
-                <input type="radio" name="cancelReason" value="other-hotel" />
-                타숙소 예약
-              </label>
-            </div>
-            <div class="reserve-delete-other-row">
-              <label class="confirm-check">
-                <input type="radio" name="cancelReason" value="other" />
-                기타
-              </label>
-              <label class="confirm-label reserve-delete-other-label">
-                <input
-                  type="text"
-                  id="cancel-reason-other"
-                  placeholder="기타 사유를 입력해 주세요."
-                />
-              </label>
-            </div>
-            <div class="confirm-actions">
+            <p id="cancel-modal-title" class="reserve-delete-modal-title">
+              예약을 취소하시겠습니까? <br />
+              취소 후에는 복구가 불가능합니다.
+            </p>
+            <div class="reserve-delete-modal-actions">
               <button
                 type="button"
-                class="btn reserve-btn confirm-pay-submit"
-                id="cancel-submit-btn"
+                class="btn reserve-btn"
+                id="cancel-modal-yes"
               >
-                예약 취소
+                예
+              </button>
+              <button
+                type="button"
+                class="btn reserve-btn"
+                id="cancel-modal-no"
+              >
+                아니오
               </button>
             </div>
-          </section>
-        </div>
-      </div>
-
-      <div class="reserve-delete-modal-backdrop" id="cancel-modal" hidden>
-        <div
-          class="reserve-delete-modal"
-          role="dialog"
-          aria-modal="true"
-          aria-labelledby="cancel-modal-title"
-        >
-          <p id="cancel-modal-title" class="reserve-delete-modal-title">
-            예약을 취소하시겠습니까? <br />
-            취소 후에는 복구가 불가능합니다.
-          </p>
-          <div class="reserve-delete-modal-actions">
-            <button type="button" class="btn reserve-btn" id="cancel-modal-yes">
-              예
-            </button>
-            <button type="button" class="btn reserve-btn" id="cancel-modal-no">
-              아니오
-            </button>
+            <p class="reserve-delete-modal-note">
+              * 환불 소요 기간 안내 <br />
+              카드사에 따라 영업일 기준 3~5일 소요될 수 있습니다.
+            </p>
           </div>
-          <p class="reserve-delete-modal-note">
-            * 환불 소요 기간 안내 <br />
-            카드사에 따라 영업일 기준 3~5일 소요될 수 있습니다.
-          </p>
         </div>
-      </div>
 
-      <footer
-        id="site-business-footer-mount"
-        class="site-footer site-business-footer"
-        hidden
-      ></footer>
-    </main>
+        <footer
+          id="site-business-footer-mount"
+          class="site-footer site-business-footer"
+          hidden
+        ></footer>
+      </main>
 
-    <script src="js/booking-pricing.js"></script>
-    <script>
-      document.addEventListener("DOMContentLoaded", function () {
-        var P = window.GraffordBookingPricing;
-        var ROOM_LABEL = {
-          G1: "G1",
-          G2: "G2",
-          G3: "G3",
-          G4: "G4",
-        };
-        var saved = null;
-        try {
-          saved = JSON.parse(
-            sessionStorage.getItem("graffordCancelPayload") || "null",
+      <script src="js/booking-pricing.js"></script>
+      <script>
+        document.addEventListener("DOMContentLoaded", function () {
+          var P = window.GraffordBookingPricing;
+          var ROOM_LABEL = {
+            G1: "G1",
+            G2: "G2",
+            G3: "G3",
+            G4: "G4",
+          };
+          var saved = null;
+          try {
+            saved = JSON.parse(
+              sessionStorage.getItem("graffordCancelPayload") || "null",
+            );
+          } catch (e) {
+            saved = null;
+          }
+          var orderNo = (saved && saved.orderNo) || "—";
+          var name = (saved && saved.name) || "—";
+          var contact = (saved && saved.contact) || "—";
+          var email = (saved && saved.email) || "";
+          var room = (saved && saved.room) || "";
+          var checkIn = (saved && saved.checkIn) || "";
+          var checkOut = (saved && saved.checkOut) || "";
+          var extraGuests =
+            parseInt((saved && saved.extraGuests) || "0", 10) || 0;
+          var totalAmount = parseInt((saved && saved.amount) || "0", 10) || 0;
+          var payMethod = (saved && saved.payMethod) || "";
+          var bankConfirmed = saved && saved.bankConfirmed === true;
+          var cancelToken = (saved && saved.cancelToken) || "";
+
+          function formatKRW(n) {
+            return Number(n || 0).toLocaleString("ko-KR") + "원";
+          }
+          function formatKRWEn(n) {
+            return Number(n || 0).toLocaleString("en-US") + " KRW";
+          }
+
+          function reservationsApiUrl() {
+            var base = "";
+            if (typeof window !== "undefined" && window.__GRAFFORD_API_BASE__) {
+              base = String(window.__GRAFFORD_API_BASE__).replace(/\/$/, "");
+            }
+            return base + "/api/reservations";
+          }
+
+          function parseYMD(s) {
+            if (!/^\d{4}-\d{2}-\d{2}$/.test(s || "")) {
+              return null;
+            }
+            var p = s.split("-");
+            return new Date(Number(p[0]), Number(p[1]) - 1, Number(p[2]));
+          }
+
+          function getDiscountedAmount() {
+            if (P && checkIn && checkOut) {
+              var quote = P.computeStay(room, checkIn, checkOut, extraGuests);
+              if (quote && quote.nights > 0) {
+                return quote.discountedGrandTotal || 0;
+              }
+            }
+            return totalAmount;
+          }
+          var discountedAmount = getDiscountedAmount();
+
+          var today = new Date();
+          var todayDate = new Date(
+            today.getFullYear(),
+            today.getMonth(),
+            today.getDate(),
           );
-        } catch (e) {
-          saved = null;
-        }
-        var orderNo = (saved && saved.orderNo) || "—";
-        var name = (saved && saved.name) || "—";
-        var contact = (saved && saved.contact) || "—";
-        var email = (saved && saved.email) || "";
-        var room = (saved && saved.room) || "";
-        var checkIn = (saved && saved.checkIn) || "";
-        var checkOut = (saved && saved.checkOut) || "";
-        var extraGuests = parseInt((saved && saved.extraGuests) || "0", 10) || 0;
-        var totalAmount = parseInt((saved && saved.amount) || "0", 10) || 0;
-        var payMethod = (saved && saved.payMethod) || "";
-        var bankConfirmed = saved && saved.bankConfirmed === true;
-        var cancelToken = (saved && saved.cancelToken) || "";
-
-        function formatKRW(n) {
-          return Number(n || 0).toLocaleString("ko-KR") + "원";
-        }
-
-        function reservationsApiUrl() {
-          var base = "";
-          if (typeof window !== "undefined" && window.__GRAFFORD_API_BASE__) {
-            base = String(window.__GRAFFORD_API_BASE__).replace(/\/$/, "");
+          var checkInDate = parseYMD(checkIn);
+          var remainDate = 0;
+          if (checkInDate) {
+            remainDate = Math.floor((checkInDate - todayDate) / 86400000);
           }
-          return base + "/api/reservations";
-        }
 
-        function parseYMD(s) {
-          if (!/^\d{4}-\d{2}-\d{2}$/.test(s || "")) {
-            return null;
+          var refundCharge = 100;
+          if (remainDate > 15) {
+            refundCharge = 0;
+          } else if (remainDate >= 12) {
+            refundCharge = 20;
+          } else if (remainDate >= 9) {
+            refundCharge = 30;
+          } else if (remainDate >= 7) {
+            refundCharge = 40;
+          } else if (remainDate >= 5) {
+            refundCharge = 50;
+          } else {
+            refundCharge = 100;
           }
-          var p = s.split("-");
-          return new Date(Number(p[0]), Number(p[1]) - 1, Number(p[2]));
-        }
 
-        function getDiscountedAmount() {
-          if (P && checkIn && checkOut) {
-            var quote = P.computeStay(room, checkIn, checkOut, extraGuests);
-            if (quote && quote.nights > 0) {
-              return quote.discountedGrandTotal || 0;
+          var refundAmount = Math.max(
+            0,
+            Math.round(discountedAmount * ((100 - refundCharge) / 100)),
+          );
+
+          var cancelOrderTextEl = document.getElementById("cancel-order-text");
+          var cancelOrderTextEnEl = document.getElementById("cancel-order-text-en");
+          if (cancelOrderTextEl) {
+            cancelOrderTextEl.textContent = orderNo;
+          }
+          if (cancelOrderTextEnEl) {
+            cancelOrderTextEnEl.textContent = orderNo;
+          }
+          var cancelBankStatusEl =
+            document.getElementById("cancel-bank-status");
+          var cancelBankStatusEnEl =
+            document.getElementById("cancel-bank-status-en");
+          var cancelPendingEl = document.getElementById(
+            "cancel-bank-status-pending",
+          );
+          var cancelPendingEnEl = document.getElementById(
+            "cancel-bank-status-pending-en",
+          );
+          var cancelConfirmedEl = document.getElementById(
+            "cancel-bank-status-confirmed",
+          );
+          var cancelConfirmedEnEl = document.getElementById(
+            "cancel-bank-status-confirmed-en",
+          );
+          if (payMethod === "bank") {
+            if (cancelBankStatusEl) cancelBankStatusEl.hidden = false;
+            if (cancelBankStatusEnEl) cancelBankStatusEnEl.hidden = false;
+            if (bankConfirmed) {
+              if (cancelPendingEl) cancelPendingEl.classList.remove("is-active");
+              if (cancelConfirmedEl) cancelConfirmedEl.classList.add("is-active");
+              if (cancelPendingEnEl)
+                cancelPendingEnEl.classList.remove("is-active");
+              if (cancelConfirmedEnEl)
+                cancelConfirmedEnEl.classList.add("is-active");
+            } else {
+              if (cancelPendingEl) cancelPendingEl.classList.add("is-active");
+              if (cancelConfirmedEl)
+                cancelConfirmedEl.classList.remove("is-active");
+              if (cancelPendingEnEl) cancelPendingEnEl.classList.add("is-active");
+              if (cancelConfirmedEnEl)
+                cancelConfirmedEnEl.classList.remove("is-active");
             }
           }
-          return totalAmount;
-        }
-        var discountedAmount = getDiscountedAmount();
+          var roomText = ROOM_LABEL[room] || room || "—";
+          var scheduleText = (checkIn || "—") + " ~ " + (checkOut || "—");
+          var amountTextKr = formatKRW(discountedAmount);
+          var amountTextEn = formatKRWEn(discountedAmount);
+          var refundTextKr = formatKRW(refundAmount);
+          var refundTextEn = formatKRWEn(refundAmount);
 
-        var today = new Date();
-        var todayDate = new Date(
-          today.getFullYear(),
-          today.getMonth(),
-          today.getDate(),
-        );
-        var checkInDate = parseYMD(checkIn);
-        var remainDate = 0;
-        if (checkInDate) {
-          remainDate = Math.floor((checkInDate - todayDate) / 86400000);
-        }
-
-        var refundCharge = 100;
-        if (remainDate > 15) {
-          refundCharge = 0;
-        } else if (remainDate >= 12) {
-          refundCharge = 20;
-        } else if (remainDate >= 9) {
-          refundCharge = 30;
-        } else if (remainDate >= 7) {
-          refundCharge = 40;
-        } else if (remainDate >= 5) {
-          refundCharge = 50;
-        } else {
-          refundCharge = 100;
-        }
-
-        var refundAmount = Math.max(
-          0,
-          Math.round(discountedAmount * ((100 - refundCharge) / 100)),
-        );
-
-        var cancelOrderTextEl = document.getElementById("cancel-order-text");
-        if (cancelOrderTextEl) {
-          cancelOrderTextEl.textContent = orderNo;
-        }
-        var cancelBankStatusEl = document.getElementById("cancel-bank-status");
-        var cancelPendingEl = document.getElementById(
-          "cancel-bank-status-pending",
-        );
-        var cancelConfirmedEl = document.getElementById(
-          "cancel-bank-status-confirmed",
-        );
-        if (payMethod === "bank" && cancelBankStatusEl) {
-          cancelBankStatusEl.hidden = false;
-          if (bankConfirmed) {
-            cancelPendingEl.classList.remove("is-active");
-            cancelConfirmedEl.classList.add("is-active");
-          } else {
-            cancelPendingEl.classList.add("is-active");
-            cancelConfirmedEl.classList.remove("is-active");
+          function setText(id, value) {
+            var el = document.getElementById(id);
+            if (el) el.textContent = value;
           }
-        }
-        document.getElementById("cancel-room").textContent =
-          ROOM_LABEL[room] || room || "—";
-        document.getElementById("cancel-schedule").textContent =
-          (checkIn || "—") + " ~ " + (checkOut || "—");
-        document.getElementById("cancel-amount").textContent =
-          formatKRW(discountedAmount);
-        document.getElementById("cancel-name").textContent = name;
-        document.getElementById("cancel-contact").textContent = contact;
-        document.getElementById("cancel-email").textContent = email || "—";
-        document.getElementById("refund-amount").textContent =
-          formatKRW(refundAmount);
-        document.getElementById("refund-rule-summary").textContent =
-          "입실일로부터 남은 날짜 " +
-          remainDate +
-          "일 기준, 환불 수수료 " +
-          refundCharge +
-          "%가 적용됩니다.";
 
-        var modal = document.getElementById("cancel-modal");
-        var openBtn = document.getElementById("cancel-submit-btn");
-        var yesBtn = document.getElementById("cancel-modal-yes");
-        var noBtn = document.getElementById("cancel-modal-no");
-        var modalActionsEl = document.querySelector(".reserve-delete-modal-actions");
-        var modalTitleEl = document.getElementById("cancel-modal-title");
-        var modalNoteEl = document.querySelector(".reserve-delete-modal-note");
-        var reasonOtherInput = document.getElementById("cancel-reason-other");
-        var reasonInputs = document.querySelectorAll(
-          'input[name="cancelReason"]',
-        );
-        var missingMode = false;
+          // Korean
+          setText("cancel-room", roomText);
+          setText("cancel-schedule", scheduleText);
+          setText("cancel-amount", amountTextKr);
+          setText("cancel-name", name);
+          setText("cancel-contact", contact);
+          setText("cancel-email", email || "—");
 
-        function syncOtherReasonState() {
-          if (!reasonOtherInput) {
-            return;
-          }
-          var selected = document.querySelector(
-            'input[name="cancelReason"]:checked',
+          // English
+          setText("cancel-room-en", roomText);
+          setText("cancel-schedule-en", scheduleText);
+          setText("cancel-amount-en", amountTextEn);
+          setText("cancel-name-en", name);
+          setText("cancel-contact-en", contact);
+          setText("cancel-email-en", email || "—");
+
+          document.getElementById("refund-rule-summary").textContent =
+            "입실일로부터 남은 날짜 " +
+            remainDate +
+            "일 기준, 환불 수수료 " +
+            refundCharge +
+            "%가 적용됩니다.";
+          document.getElementById("refund-rule-summary-en").textContent =
+            "Based on the remaining days until the check-in date (" +
+            remainDate +
+            " days) , the refund fee of " +
+            refundCharge +
+            "% will be applied.";
+          setText("refund-amount", "예상 환불 금액: " + refundTextKr);
+          setText("refund-amount-en", "Estimated Refund Amount: " + refundTextEn);
+
+          var enRoot = document.querySelector(".lang-en");
+          var enVisible =
+            !!enRoot && window.getComputedStyle(enRoot).display !== "none";
+          var reasonName = enVisible ? "cancelReasonEn" : "cancelReason";
+          var modal = document.getElementById(
+            enVisible ? "cancel-modal-en" : "cancel-modal",
           );
-          var isOther = !!(selected && selected.value === "other");
-          reasonOtherInput.disabled = !isOther;
-          if (!isOther) {
-            reasonOtherInput.value = "";
-          }
-        }
-
-        reasonInputs.forEach(function (el) {
-          el.addEventListener("change", syncOtherReasonState);
-        });
-        syncOtherReasonState();
-
-        function applyMissingReservationMode() {
-          if (!modalTitleEl) {
-            return;
-          }
-          missingMode = true;
-          modalTitleEl.textContent = "예약 내용을 불러올 수 없습니다";
-          yesBtn.textContent = "예";
-          if (noBtn) {
-            noBtn.hidden = true;
-            noBtn.style.display = "none";
-          }
-          if (modalActionsEl) {
-            modalActionsEl.style.justifyContent = "center";
-          }
-          if (modalNoteEl) {
-            modalNoteEl.hidden = true;
-          }
-          if (openBtn) {
-            openBtn.disabled = true;
-          }
-          modal.hidden = false;
-        }
-
-        function syncDeletedStateOnEntry() {
-          var deletedOrderMarker = sessionStorage.getItem(
-            "graffordDeletedReservationOrderNo",
+          var openBtn = document.getElementById(
+            enVisible ? "cancel-submit-btn-en" : "cancel-submit-btn",
           );
-          if (deletedOrderMarker && deletedOrderMarker === String(orderNo || "")) {
-            applyMissingReservationMode();
-          }
-        }
-        syncDeletedStateOnEntry();
-        window.addEventListener("pageshow", syncDeletedStateOnEntry);
+          var yesBtn = document.getElementById(
+            enVisible ? "cancel-modal-yes-en" : "cancel-modal-yes",
+          );
+          var noBtn = document.getElementById(
+            enVisible ? "cancel-modal-no-en" : "cancel-modal-no",
+          );
+          var modalActionsEl = modal
+            ? modal.querySelector(".reserve-delete-modal-actions")
+            : null;
+          var modalTitleEl = document.getElementById(
+            enVisible ? "cancel-modal-title-en" : "cancel-modal-title",
+          );
+          var modalNoteEl = modal
+            ? modal.querySelector(".reserve-delete-modal-note")
+            : null;
+          var reasonOtherInput = document.getElementById(
+            enVisible ? "cancel-reason-other-en" : "cancel-reason-other",
+          );
+          var reasonInputs = document.querySelectorAll(
+            'input[name="' + reasonName + '"]',
+          );
+          var missingMode = false;
 
-        openBtn.addEventListener("click", function () {
-          if (missingMode) {
+          function syncOtherReasonState() {
+            if (!reasonOtherInput) {
+              return;
+            }
+            var selected = document.querySelector(
+              'input[name="' + reasonName + '"]:checked',
+            );
+            var isOther = !!(selected && selected.value === "other");
+            reasonOtherInput.disabled = !isOther;
+            if (!isOther) {
+              reasonOtherInput.value = "";
+            }
+          }
+
+          reasonInputs.forEach(function (el) {
+            el.addEventListener("change", syncOtherReasonState);
+          });
+          syncOtherReasonState();
+
+          function applyMissingReservationMode() {
+            if (!modalTitleEl) {
+              return;
+            }
+            missingMode = true;
+            modalTitleEl.textContent = enVisible
+              ? "Unable to load reservation details"
+              : "예약 내용을 불러올 수 없습니다";
+            yesBtn.textContent = enVisible ? "OK" : "예";
+            if (noBtn) {
+              noBtn.hidden = true;
+              noBtn.style.display = "none";
+            }
+            if (modalActionsEl) {
+              modalActionsEl.style.justifyContent = "center";
+            }
+            if (modalNoteEl) {
+              modalNoteEl.hidden = true;
+            }
+            if (openBtn) {
+              openBtn.disabled = true;
+            }
             modal.hidden = false;
-            return;
           }
-          modal.hidden = false;
-        });
-        noBtn.addEventListener("click", function () {
-          modal.hidden = true;
-        });
-        yesBtn.addEventListener("click", function () {
-          if (missingMode) {
-            sessionStorage.removeItem("graffordDeletedReservationOrderNo");
-            window.location.href = "index.html";
-            return;
+
+          function syncDeletedStateOnEntry() {
+            var deletedOrderMarker = sessionStorage.getItem(
+              "graffordDeletedReservationOrderNo",
+            );
+            if (
+              deletedOrderMarker &&
+              deletedOrderMarker === String(orderNo || "")
+            ) {
+              applyMissingReservationMode();
+            }
           }
-          var selectedReasonEl = document.querySelector(
-            'input[name="cancelReason"]:checked',
-          );
-          var selectedReasonCode = selectedReasonEl ? selectedReasonEl.value : "";
-          var selectedReasonDetail = "";
-          var selectedReason = selectedReasonCode;
-          if (selectedReasonCode === "other") {
-            selectedReasonDetail = String(
-              (reasonOtherInput && reasonOtherInput.value) || "",
-            ).trim();
-            selectedReason = selectedReasonDetail || "other";
-          }
-          yesBtn.disabled = true;
-          noBtn.disabled = true;
-          fetch(reservationsApiUrl(), {
-            method: "DELETE",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              reservationNumber: orderNo,
-              guestName: name,
-              cancelToken: cancelToken,
-              cancelReason: selectedReason,
-            }),
-          })
-            .then(function (resp) {
-              return resp
-                .json()
-                .catch(function () {
-                  return {};
-                })
-                .then(function (data) {
-                  return { ok: resp.ok, status: resp.status, data: data };
-                });
-            })
-            .then(function (result) {
-              if (!result.ok || !result.data || !result.data.ok) {
-                var msg =
-                  (result.data && result.data.error) ||
-                  "예약 취소 처리에 실패했습니다. (" + result.status + ")";
-                throw new Error(msg);
+          syncDeletedStateOnEntry();
+          window.addEventListener("pageshow", syncDeletedStateOnEntry);
+
+          if (openBtn) {
+            openBtn.addEventListener("click", function () {
+              if (missingMode) {
+                modal.hidden = false;
+                return;
               }
-              sessionStorage.setItem(
-                "graffordDeletedReservationOrderNo",
-                String(orderNo || ""),
-              );
-              sessionStorage.setItem(
-                "graffordDeleteCompleteData",
-                JSON.stringify({
-                  orderNo: orderNo || "",
-                  name: name || "",
-                  contact: contact || "",
-                  room: room || "",
-                  checkIn: checkIn || "",
-                  checkOut: checkOut || "",
-                  extraGuests: String(extraGuests || 0),
-                  amount: String(discountedAmount || 0),
-                  paymentMethod: payMethod || "",
-                  reservedAt: String(orderNo || "").slice(0, 8),
-                  cancelledAt: new Date().toISOString(),
-                  cancelReason: selectedReason || "",
-                  cancelReasonCode: selectedReasonCode || "",
-                  cancelReasonDetail: selectedReasonDetail || "",
-                  refundAmount: String(refundAmount || 0),
-                }),
-              );
-              window.location.href = "delete-complete.html";
-            })
-            .catch(function (err) {
-              window.alert(
-                "DB에서 예약을 삭제하지 못했습니다.\n" +
-                  (err && err.message ? err.message : "네트워크 오류"),
-              );
-            })
-            .finally(function () {
-              yesBtn.disabled = false;
-              noBtn.disabled = false;
+              modal.hidden = false;
             });
+          }
+          if (noBtn) {
+            noBtn.addEventListener("click", function () {
+              modal.hidden = true;
+            });
+          }
+          if (yesBtn) {
+            yesBtn.addEventListener("click", function () {
+              if (missingMode) {
+                sessionStorage.removeItem("graffordDeletedReservationOrderNo");
+                window.location.href = "index.html";
+                return;
+              }
+              var selectedReasonEl = document.querySelector(
+                'input[name="' + reasonName + '"]:checked',
+              );
+              var selectedReasonCode = selectedReasonEl
+                ? selectedReasonEl.value
+                : "";
+              var selectedReasonDetail = "";
+              var selectedReason = selectedReasonCode;
+              if (selectedReasonCode === "other") {
+                selectedReasonDetail = String(
+                  (reasonOtherInput && reasonOtherInput.value) || "",
+                ).trim();
+                selectedReason = selectedReasonDetail || "other";
+              }
+              yesBtn.disabled = true;
+              if (noBtn) {
+                noBtn.disabled = true;
+              }
+              fetch(reservationsApiUrl(), {
+                method: "DELETE",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  reservationNumber: orderNo,
+                  guestName: name,
+                  cancelToken: cancelToken,
+                  cancelReason: selectedReason,
+                }),
+              })
+                .then(function (resp) {
+                  return resp
+                    .json()
+                    .catch(function () {
+                      return {};
+                    })
+                    .then(function (data) {
+                      return { ok: resp.ok, status: resp.status, data: data };
+                    });
+                })
+                .then(function (result) {
+                  if (!result.ok || !result.data || !result.data.ok) {
+                    var msg =
+                      (result.data && result.data.error) ||
+                      (enVisible
+                        ? "Failed to process reservation cancellation. (" +
+                          result.status +
+                          ")"
+                        : "예약 취소 처리에 실패했습니다. (" + result.status + ")");
+                    throw new Error(msg);
+                  }
+                  sessionStorage.setItem(
+                    "graffordDeletedReservationOrderNo",
+                    String(orderNo || ""),
+                  );
+                  sessionStorage.setItem(
+                    "graffordDeleteCompleteData",
+                    JSON.stringify({
+                      orderNo: orderNo || "",
+                      name: name || "",
+                      contact: contact || "",
+                      room: room || "",
+                      checkIn: checkIn || "",
+                      checkOut: checkOut || "",
+                      extraGuests: String(extraGuests || 0),
+                      amount: String(discountedAmount || 0),
+                      paymentMethod: payMethod || "",
+                      reservedAt: String(orderNo || "").slice(0, 8),
+                      cancelledAt: new Date().toISOString(),
+                      cancelReason: selectedReason || "",
+                      cancelReasonCode: selectedReasonCode || "",
+                      cancelReasonDetail: selectedReasonDetail || "",
+                      refundAmount: String(refundAmount || 0),
+                    }),
+                  );
+                  window.location.href = "delete-complete.html";
+                })
+                .catch(function (err) {
+                  window.alert(
+                    (enVisible
+                      ? "Failed to delete reservation from DB.\n"
+                      : "DB에서 예약을 삭제하지 못했습니다.\n") +
+                      (err && err.message ? err.message : "Network error"),
+                  );
+                })
+                .finally(function () {
+                  yesBtn.disabled = false;
+                  if (noBtn) {
+                    noBtn.disabled = false;
+                  }
+                });
+            });
+          }
         });
-      });
-    </script>
-    <script defer src="js/grafford-page-fade.js"></script>
-    <script src="js/site-business-footer.js"></script>
-    <script>
-      document.addEventListener("DOMContentLoaded", function () {
-        window.initSiteBusinessFooter({
-          instagram: {
-            href: "https://www.instagram.com/p/DWaqvQKkzye/",
-            imgSrc: "images/insta.png",
-          },
-          lines: [
-            "대표 : GRAFFORD",
-            "주소 : 제주특별자치도 서귀포시 토산중앙로 22",
-            "사업자등록번호 : 123-45-67890",
-            "전화 : 010-1234-5678",
-            "이메일 : info@grafford.com",
-            " ",
-            "© 2026 GRAFFORD. all rights reserved.",
-          ],
+      </script>
+      <script defer src="js/grafford-page-fade.js"></script>
+      <script src="js/site-business-footer.js"></script>
+      <script>
+        document.addEventListener("DOMContentLoaded", function () {
+          window.initSiteBusinessFooter({
+            instagram: {
+              href: "https://www.instagram.com/p/DWaqvQKkzye/",
+              imgSrc: "images/insta.png",
+            },
+            lines: [
+              "대표 : GRAFFORD",
+              "주소 : 제주특별자치도 서귀포시 토산중앙로 22",
+              "사업자등록번호 : 587-23-00957",
+              "전화 : 010-6830-1105",
+              "이메일 : tilkoas35@naver.com",
+              " ",
+              "© 2026 GRAFFORD. all rights reserved.",
+            ],
+          });
         });
-      });
-    </script>
-  
+      </script>
     </div>
     <div class="lang-en">
-    <main class="content-section confirm-page reserve-delete-page">
-      <div class="confirm-topbar">
-        <a
-          href="reserveinfo.html"
-          class="confirm-back-inline"
-          aria-label="예약조회로 돌아가기"
-          ></a
-        >
-        <h1 class="confirm-title"></h1>
-      </div>
-      <p class="confirm-summary"></p>
+      <main class="content-section confirm-page reserve-delete-page">
+        <div class="confirm-topbar">
+          <a
+            href="reserveinfo.html"
+            class="confirm-back-inline"
+            aria-label="예약조회로 돌아가기"
+          ></a>
+          <h1 class="confirm-title">Cancel Reservation</h1>
+        </div>
+        <p class="confirm-summary">
+          Before canceling your reservation, please review the cancellation
+          policy and refund amount.
+        </p>
 
-      <div class="confirm-layout-grid">
-        <div class="confirm-layout-col">
-          <section
-            class="confirm-section"
-          >
-            <h2 class="confirm-section-title"></h2>
-            <p class="confirm-guide-content"></p>
-            <p class="confirm-guide-content"></p>
-            <div class="reserve-delete-refund-box">
-              <p class="reserve-delete-refund-label"></p>
-              <p class="reserve-delete-refund-amount"></p>
-            </div>
-          </section>
+        <div class="confirm-layout-grid">
+          <div class="confirm-layout-col">
+            <section class="confirm-section">
+              <h2 class="confirm-section-title">Cancellation Policy</h2>
+              <p class="confirm-guide-content">
+                Refund fees will be differentially applied depending on the
+                remaining days until the check-in date. The estimated refund
+                amount is the amount of the payment minus the refund fee.
+              </p>
+              <p class="confirm-guide-content" id="refund-rule-summary-en"></p>
+              <div class="reserve-delete-refund-box">
+                <p class="reserve-delete-refund-label">
+                  Estimated Refund Amount
+                </p>
+                <p
+                  class="reserve-delete-refund-amount"
+                  id="refund-amount-en"
+                ></p>
+              </div>
+            </section>
+          </div>
+
+          <div class="confirm-layout-col confirm-layout-col--right">
+            <section class="confirm-section">
+              <h2 class="confirm-section-title">Reservation Information</h2>
+              <dl class="reserve-delete-dl">
+                <dt>Reservation Number</dt>
+                <dd id="cancel-order-no-en">
+                  <span id="cancel-order-text-en">—</span>
+                  <span
+                    id="cancel-bank-status-en"
+                    class="reserve-complete-bank-status"
+                    hidden
+                  >
+                    [
+                    <span id="cancel-bank-status-pending-en">Pending</span>
+                    /
+                    <span id="cancel-bank-status-confirmed-en">Confirmed</span>
+                    ]
+                  </span>
+                </dd>
+                <dt>Room</dt>
+                <dd id="cancel-room-en">—</dd>
+                <dt>Schedule</dt>
+                <dd id="cancel-schedule-en">—</dd>
+                <dt>Payment Amount</dt>
+                <dd id="cancel-amount-en">—</dd>
+              </dl>
+            </section>
+
+            <section class="confirm-section">
+              <h2 class="confirm-section-title">Guest Information</h2>
+              <dl class="reserve-delete-dl">
+                <dt>Name</dt>
+                <dd id="cancel-name-en">—</dd>
+                <dt>Contact</dt>
+                <dd id="cancel-contact-en">—</dd>
+                <dt>Email</dt>
+                <dd id="cancel-email-en">—</dd>
+              </dl>
+            </section>
+
+            <section class="confirm-section">
+              <h2 class="confirm-section-title">Cancel Reason</h2>
+              <div class="confirm-agree-list reserve-delete-reason-row">
+                <label class="confirm-check">
+                  <input
+                    type="radio"
+                    name="cancelReasonEn"
+                    value="mind-change"
+                  />
+                  Mind Change
+                </label>
+                <label class="confirm-check">
+                  <input
+                    type="radio"
+                    name="cancelReasonEn"
+                    value="schedule-change"
+                  />
+                  Schedule Changed
+                </label>
+                <label class="confirm-check">
+                  <input
+                    type="radio"
+                    name="cancelReasonEn"
+                    value="other-hotel"
+                  />
+                  Other Hotel Reservation
+                </label>
+              </div>
+              <div class="reserve-delete-other-row">
+                <label class="confirm-check">
+                  <input type="radio" name="cancelReasonEn" value="other" />
+                  Other
+                </label>
+                <label class="confirm-label reserve-delete-other-label">
+                  <input
+                    type="text"
+                    id="cancel-reason-other-en"
+                    placeholder="Enter other reason."
+                  />
+                </label>
+              </div>
+              <div class="confirm-actions">
+                <button
+                  type="button"
+                  class="btn reserve-btn confirm-pay-submit"
+                  id="cancel-submit-btn-en"
+                >
+                  Cancel Reservation
+                </button>
+              </div>
+            </section>
+          </div>
         </div>
 
-        <div class="confirm-layout-col confirm-layout-col--right">
-          <section
-            class="confirm-section"
-          >
-            <h2 class="confirm-section-title"></h2>
-            <dl class="reserve-delete-dl">
-              <dt></dt>
-              <dd>
-                <span></span>
-                <span
-                  class="reserve-complete-bank-status"
-                  hidden
-                ><span></span><span></span></span>
-              </dd>
-              <dt></dt>
-              <dd></dd>
-              <dt></dt>
-              <dd></dd>
-              <dt></dt>
-              <dd></dd>
-            </dl>
-          </section>
-
-          <section class="confirm-section">
-            <h2 class="confirm-section-title"></h2>
-            <dl class="reserve-delete-dl">
-              <dt></dt>
-              <dd></dd>
-              <dt></dt>
-              <dd></dd>
-            </dl>
-          </section>
-
-          <section
-            class="confirm-section"
-          >
-            <h2 class="confirm-section-title"></h2>
-            <div class="confirm-agree-list reserve-delete-reason-row">
-              <label class="confirm-check">
-                <input type="radio" name="cancelReason" value="" /></label>
-              <label class="confirm-check">
-                <input
-                  type="radio"
-                  name="cancelReason" value=""
-                /></label>
-              <label class="confirm-check">
-                <input type="radio" name="cancelReason" value="" /></label>
-            </div>
-            <div class="reserve-delete-other-row">
-              <label class="confirm-check">
-                <input type="radio" name="cancelReason" value="" /></label>
-              <label class="confirm-label reserve-delete-other-label">
-                <input
-                  type="text" placeholder=""
-                />
-              </label>
-            </div>
-            <div class="confirm-actions">
+        <div class="reserve-delete-modal-backdrop" id="cancel-modal-en" hidden>
+          <div class="reserve-delete-modal" role="dialog" aria-modal="true">
+            <p class="reserve-delete-modal-title" id="cancel-modal-title-en">
+              Are you sure you want to cancel your reservation?<br />
+              After cancellation, reservation cannot be restored.
+            </p>
+            <div class="reserve-delete-modal-actions">
               <button
                 type="button"
-                class="btn reserve-btn confirm-pay-submit"
-              ></button>
+                class="btn reserve-btn"
+                id="cancel-modal-yes-en"
+              >
+                Yes
+              </button>
+              <button
+                type="button"
+                class="btn reserve-btn"
+                id="cancel-modal-no-en"
+              >
+                No
+              </button>
             </div>
-          </section>
-        </div>
-      </div>
-
-      <div class="reserve-delete-modal-backdrop" hidden>
-        <div
-          class="reserve-delete-modal"
-          role="dialog"
-          aria-modal="true"
-        >
-          <p class="reserve-delete-modal-title"><br /></p>
-          <div class="reserve-delete-modal-actions">
-            <button type="button" class="btn reserve-btn"></button>
-            <button type="button" class="btn reserve-btn"></button>
+            <p class="reserve-delete-modal-note" id="cancel-modal-note-en">
+              * Refund Time Notification<br />
+              Refunds will be processed within 3~5 business days.
+            </p>
           </div>
-          <p class="reserve-delete-modal-note"><br /></p>
         </div>
-      </div>
 
-      <footer
-        class="site-footer site-business-footer"
-        hidden
-      ></footer>
-    </main>
-
-    
-    
-    
-    
-    
-  
-    
+        <footer class="site-footer site-business-footer" hidden></footer>
+      </main>
     </div>
-</body>
+  </body>
 </html>
