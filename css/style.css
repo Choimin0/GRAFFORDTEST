@@ -3511,14 +3511,18 @@ iframe.map {
 }
 .admin-status-top-grid {
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: 6fr 4fr;
+  align-items: stretch;
   gap: 0.8rem;
   margin-bottom: 1rem;
 }
 .admin-status-card {
+  display: flex;
+  flex-direction: column;
   border: 1px solid rgba(58, 53, 49, 0.16);
   background: var(--grafford-beige);
   padding: 0.7rem 0.8rem;
+  min-height: 0;
 }
 .admin-status-card-head {
   display: flex;
@@ -3530,7 +3534,7 @@ iframe.map {
 .admin-status-card-title {
   margin: 0;
   font-size: 0.96rem;
-  color: var(--grafford-dark-brown);
+  color: var(--grafford-mud2);
 }
 .admin-inline-date-nav {
   display: inline-flex;
@@ -3552,13 +3556,18 @@ iframe.map {
 .admin-status-list {
   display: grid;
   gap: 0.5rem;
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
 }
 .admin-checkin-table-wrap {
   overflow-x: auto;
+  overflow-y: auto;
+  height: 100%;
 }
 .admin-checkin-table {
   width: 100%;
-  min-width: 640px;
+  table-layout: fixed;
   border-collapse: collapse;
   background: transparent;
 }
@@ -3567,20 +3576,42 @@ iframe.map {
   border: 1px solid rgba(58, 53, 49, 0.14);
   padding: 0.55rem 0.5rem;
   text-align: center;
-  vertical-align: top;
+  vertical-align: middle;
   font-size: 0.86rem;
+  overflow: hidden;
 }
 .admin-checkin-table th {
   color: var(--grafford-mud2);
   font-weight: 700;
   white-space: nowrap;
 }
-.admin-checkin-table tbody th {
-  width: 3.2rem;
+.admin-checkin-table thead th:nth-child(1) {
+  width: 4rem;
 }
-.admin-checkin-request-cell {
-  min-width: 9rem;
-  white-space: pre-wrap;
+.admin-checkin-table thead th:nth-child(2) {
+  width: 5.5rem;
+}
+.admin-checkin-table thead th:nth-child(3) {
+  width: 4rem;
+}
+.admin-checkin-table thead th:nth-child(4) {
+  width: 5.5rem;
+}
+.admin-checkin-table thead th:nth-child(5) {
+  width: 5.5rem;
+}
+.admin-checkin-table thead th:nth-child(6) {
+  width: 5.5rem;
+}
+.admin-checkin-table tbody th {
+  width: 5.5rem;
+}
+.admin-checkin-request-cell,
+.admin-checkin-manage-cell {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  cursor: default;
 }
 .admin-checkin-send-btn {
   border: 1px solid transparent;
@@ -3591,7 +3622,7 @@ iframe.map {
   font-size: 0.82rem;
 }
 #admin-room-status-list {
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  display: block;
 }
 .admin-status-item {
   border: 1px solid rgba(58, 53, 49, 0.14);
@@ -3608,6 +3639,84 @@ iframe.map {
 }
 .admin-room-line {
   color: var(--grafford-mud2);
+}
+.admin-room-week-wrap {
+  overflow-x: auto;
+}
+.admin-room-week-table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+.admin-room-week-table th,
+.admin-room-week-table td {
+  border: 1px solid rgba(58, 53, 49, 0.18);
+  text-align: center;
+  font-size: 0.82rem;
+  height: 2.55rem;
+  padding: 0;
+}
+.admin-room-week-table thead th {
+  padding: 0.35rem 0.25rem;
+  font-weight: 700;
+  color: var(--grafford-mud2);
+  white-space: nowrap;
+}
+.admin-room-week-table thead th.is-today {
+  color: var(--grafford-dark-brown);
+  font-weight: 900;
+  border-bottom: 2px solid var(--grafford-dark-brown);
+}
+.admin-room-week-table tbody th {
+  padding: 0.3rem 0.4rem;
+  font-weight: 700;
+  color: var(--grafford-mud2);
+  white-space: nowrap;
+  width: 2.8rem;
+}
+.admin-room-week-cell {
+  position: relative;
+}
+.admin-room-week-cell.is-filled {
+  cursor: pointer;
+  transition: filter 0.12s;
+}
+.admin-room-week-cell.is-filled:hover {
+  filter: brightness(0.88);
+}
+.admin-room-week-cell.is-split {
+  overflow: hidden;
+}
+.room-week-half {
+  position: absolute;
+  top: 0;
+  height: 100%;
+  width: 50%;
+  cursor: pointer;
+  transition: filter 0.12s;
+}
+.room-week-half:hover {
+  filter: brightness(0.88);
+}
+.room-week-half-left {
+  left: 0;
+  border-right: 1px solid rgba(255, 255, 255, 0.45);
+}
+.room-week-half-right {
+  right: 0;
+}
+.admin-room-week-tooltip {
+  position: fixed;
+  z-index: 9999;
+  background: rgba(38, 32, 28, 0.9);
+  color: #f5f0eb;
+  font-size: 0.8rem;
+  padding: 0.28rem 0.65rem;
+  border-radius: 4px;
+  pointer-events: none;
+  white-space: nowrap;
+  display: none;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.22);
 }
 .admin-calendar-nav {
   display: inline-flex;
@@ -3639,7 +3748,7 @@ iframe.map {
   gap: 0.45rem;
 }
 .admin-calendar-cell {
-  min-height: 74px;
+  min-height: 120px;
   border: 1px solid rgba(58, 53, 49, 0.16);
   background: var(--grafford-beige);
   padding: 0.45rem;
@@ -3750,9 +3859,34 @@ iframe.map {
   background: var(--grafford-beige);
   padding: 0.34rem 0.45rem;
 }
+.admin-res-tabs {
+  display: flex;
+  gap: 0;
+  border-bottom: 1px solid rgba(58, 53, 49, 0.18);
+  margin-bottom: 0.75rem;
+}
+.admin-res-tab-btn {
+  border: none;
+  border-bottom: 2px solid transparent;
+  background: transparent;
+  color: var(--grafford-mud2);
+  font-size: 0.9rem;
+  padding: 0.5rem 1.1rem;
+  cursor: pointer;
+  margin-bottom: -1px;
+  transition: color 0.12s;
+}
+.admin-res-tab-btn:hover {
+  color: var(--grafford-dark-brown);
+}
+.admin-res-tab-btn.is-active {
+  color: var(--grafford-dark-brown);
+  border-bottom-color: var(--grafford-dark-brown);
+  font-weight: 700;
+}
 .admin-search-row {
   display: grid;
-  grid-template-columns: minmax(180px, 1fr) minmax(180px, 1fr) auto auto auto;
+  grid-template-columns: minmax(180px, 1fr) minmax(180px, 1fr) auto auto;
   gap: 0.55rem;
   margin-top: 1.5rem;
   align-items: end;
@@ -3845,9 +3979,6 @@ iframe.map {
 }
 @media (max-width: 900px) {
   .admin-status-top-grid {
-    grid-template-columns: 1fr;
-  }
-  #admin-room-status-list {
     grid-template-columns: 1fr;
   }
   .admin-search-row {
