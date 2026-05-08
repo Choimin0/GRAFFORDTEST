@@ -174,6 +174,8 @@
           var guestRequest = saved.guestRequest || "";
           var guestCount = parseInt(saved.guestCount || "2", 10) || 2;
           var payMethod = saved.payMethod || "card";
+          var reservationPreSaved = String(saved.reservationPreSaved || "") === "1";
+          var preSavedCancelToken = String(saved.cancelToken || "");
 
           function reservationsApiUrl() {
             if (typeof window !== "undefined" && window.__GRAFFORD_API_BASE__) {
@@ -360,50 +362,52 @@
               processingMsg.textContent = "예약 정보를 저장하는 중입니다...";
             }
 
-            var saveRes, saveData;
-            try {
-              saveRes = await fetch(reservationsApiUrl(), {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                  reservationNumber: orderNo,
-                  guestName: guestName,
-                  contact: contact,
-                  email: email,
-                  guestRequest: guestRequest,
-                  roomType: room,
-                  checkIn: checkIn,
-                  checkOut: checkOut,
-                  stayNights: stayNights,
-                  extraGuests: extraGuests,
-                  totalAmount: finalAmount,
-                  paymentMethod: payMethod,
-                  guestCount: guestCount,
-                }),
-              });
-              saveData = await saveRes.json();
-            } catch (e) {
-              showError(
-                "결제는 완료되었으나 예약 저장 중 오류가 발생했습니다.\n고객센터로 문의해 주세요.\n(결제번호: " +
-                  orderNo +
-                  ")\n(" +
-                  (e && e.message ? e.message : String(e)) +
-                  ")",
-              );
-              return;
-            }
+            var fetchedCancelToken = preSavedCancelToken;
+            if (!(payMethod === "naver" && reservationPreSaved)) {
+              var saveRes, saveData;
+              try {
+                saveRes = await fetch(reservationsApiUrl(), {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({
+                    reservationNumber: orderNo,
+                    guestName: guestName,
+                    contact: contact,
+                    email: email,
+                    guestRequest: guestRequest,
+                    roomType: room,
+                    checkIn: checkIn,
+                    checkOut: checkOut,
+                    stayNights: stayNights,
+                    extraGuests: extraGuests,
+                    totalAmount: finalAmount,
+                    paymentMethod: payMethod,
+                    guestCount: guestCount,
+                  }),
+                });
+                saveData = await saveRes.json();
+              } catch (e) {
+                showError(
+                  "결제는 완료되었으나 예약 저장 중 오류가 발생했습니다.\n고객센터로 문의해 주세요.\n(결제번호: " +
+                    orderNo +
+                    ")\n(" +
+                    (e && e.message ? e.message : String(e)) +
+                    ")",
+                );
+                return;
+              }
 
-            if (!saveRes.ok || !saveData.ok) {
-              showError(
-                "결제는 완료되었으나 예약 저장에 실패했습니다.\n고객센터로 문의해 주세요.\n(결제번호: " +
-                  orderNo +
-                  ")\n" +
-                  (saveData.error || ""),
-              );
-              return;
+              if (!saveRes.ok || !saveData.ok) {
+                showError(
+                  "결제는 완료되었으나 예약 저장에 실패했습니다.\n고객센터로 문의해 주세요.\n(결제번호: " +
+                    orderNo +
+                    ")\n" +
+                    (saveData.error || ""),
+                );
+                return;
+              }
+              fetchedCancelToken = saveData.cancelToken || fetchedCancelToken;
             }
-
-            var fetchedCancelToken = saveData.cancelToken || "";
             sessionStorage.removeItem("graffordInPaymentFlow");
 
             sessionStorage.setItem(
@@ -761,50 +765,52 @@
               processingMsg.textContent = "Saving reservation...";
             }
 
-            var saveRes2, saveData2;
-            try {
-              saveRes2 = await fetch(reservationsApiUrl(), {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                  reservationNumber: orderNo,
-                  guestName: guestName,
-                  contact: contact,
-                  email: email,
-                  guestRequest: guestRequest,
-                  roomType: room,
-                  checkIn: checkIn,
-                  checkOut: checkOut,
-                  stayNights: stayNights,
-                  extraGuests: extraGuests,
-                  totalAmount: finalAmount,
-                  paymentMethod: payMethod,
-                  guestCount: guestCount,
-                }),
-              });
-              saveData2 = await saveRes2.json();
-            } catch (e) {
-              showError(
-                "Payment completed but reservation save failed. Please contact support.\n(Payment ID: " +
-                  orderNo +
-                  ")\n(" +
-                  (e && e.message ? e.message : String(e)) +
-                  ")",
-              );
-              return;
-            }
+            var fetchedCancelToken2 = preSavedCancelToken;
+            if (!(payMethod === "naver" && reservationPreSaved)) {
+              var saveRes2, saveData2;
+              try {
+                saveRes2 = await fetch(reservationsApiUrl(), {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({
+                    reservationNumber: orderNo,
+                    guestName: guestName,
+                    contact: contact,
+                    email: email,
+                    guestRequest: guestRequest,
+                    roomType: room,
+                    checkIn: checkIn,
+                    checkOut: checkOut,
+                    stayNights: stayNights,
+                    extraGuests: extraGuests,
+                    totalAmount: finalAmount,
+                    paymentMethod: payMethod,
+                    guestCount: guestCount,
+                  }),
+                });
+                saveData2 = await saveRes2.json();
+              } catch (e) {
+                showError(
+                  "Payment completed but reservation save failed. Please contact support.\n(Payment ID: " +
+                    orderNo +
+                    ")\n(" +
+                    (e && e.message ? e.message : String(e)) +
+                    ")",
+                );
+                return;
+              }
 
-            if (!saveRes2.ok || !saveData2.ok) {
-              showError(
-                "Payment completed but reservation save failed. Please contact support.\n(Payment ID: " +
-                  orderNo +
-                  ")\n" +
-                  (saveData2.error || ""),
-              );
-              return;
+              if (!saveRes2.ok || !saveData2.ok) {
+                showError(
+                  "Payment completed but reservation save failed. Please contact support.\n(Payment ID: " +
+                    orderNo +
+                    ")\n" +
+                    (saveData2.error || ""),
+                );
+                return;
+              }
+              fetchedCancelToken2 = saveData2.cancelToken || fetchedCancelToken2;
             }
-
-            var fetchedCancelToken2 = saveData2.cancelToken || "";
             sessionStorage.removeItem("graffordInPaymentFlow");
 
             sessionStorage.setItem(

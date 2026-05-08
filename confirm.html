@@ -1044,7 +1044,7 @@
               guestCount: guestCount,
             };
 
-            if (payInput.value === "bank") {
+            if (payInput.value === "bank" || payInput.value === "naver") {
               if (paySubmitBtn) paySubmitBtn.disabled = true;
 
               fetch(bookingApiUrl(), {
@@ -1106,7 +1106,35 @@
                       ),
                     }),
                   );
-                  window.location.href = "reserve-complete.html";
+                  if (payInput.value === "bank") {
+                    window.location.href = "reserve-complete.html";
+                    return;
+                  }
+                  sessionStorage.setItem("graffordInPaymentFlow", "1");
+                  sessionStorage.setItem(
+                    "graffordPaymentData",
+                    JSON.stringify({
+                      orderNo: orderNumber,
+                      totalAmount: String(totalAmount || 0),
+                      room: room,
+                      checkIn: checkIn,
+                      checkOut: checkOut,
+                      stayNights: String(nights),
+                      extraGuests: String(extraGuests || 0),
+                      guestName: guestName,
+                      contact: contact,
+                      email: emailVal,
+                      guestRequest: guestRequestInput
+                        ? guestRequestInput.value.trim()
+                        : "",
+                      guestCount: String(guestCount),
+                      payMethod: payInput.value,
+                      reservationPreSaved: "1",
+                      cancelToken:
+                        (result.data && result.data.cancelToken) || "",
+                    }),
+                  );
+                  window.location.href = "payment.html";
                 })
                 .catch(function (err) {
                   window.alert(
