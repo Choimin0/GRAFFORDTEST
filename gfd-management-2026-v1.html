@@ -1438,9 +1438,7 @@
                 var statusText = input ? input.value : "";
                 btn.disabled = true;
                 saveRoomStatusManageRow(roomName, statusText)
-                  .then(function () {
-                    showMessage(roomName + " 객실 상태가 저장되었습니다.");
-                  })
+                  .then(function () {})
                   .catch(function (err) {
                     showMessage((err && err.message) || "객실 상태 저장 실패");
                   })
