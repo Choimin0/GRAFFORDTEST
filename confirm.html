@@ -285,15 +285,6 @@
                   예약 정보
                 </h2>
                 <div class="confirm-booking-card">
-                  <img
-                    class="confirm-room-thumb"
-                    id="booking-room-img"
-                    src="images/A00.jpg"
-                    alt=""
-                    width="120"
-                    height="90"
-                    decoding="async"
-                  />
                   <div class="confirm-booking-details">
                     <p class="confirm-room-name" id="booking-room-name"></p>
                     <p class="confirm-schedule" id="booking-schedule"></p>
@@ -424,19 +415,8 @@
                     <input type="radio" name="paymentMethod" value="naver" />
                     네이버페이
                   </label>
-                  <label class="confirm-radio">
-                    <input type="radio" name="paymentMethod" value="bank" />
-                    무통장입금
-                  </label>
                 </fieldset>
-                <div
-                  id="bank-transfer-notice"
-                  class="confirm-check-detail"
-                  hidden
-                >
-                  12시간 내 미입금 시 예약이 자동 취소됩니다. 취소된 예약은
-                  복구가 불가합니다.
-                </div>
+
                 <div class="confirm-actions">
                   <button
                     type="submit"
@@ -500,13 +480,6 @@
             G3: "G3",
             G4: "G4",
           };
-          var ROOM_IMAGE_PREFIX = {
-            G1: "A",
-            G2: "B",
-            G3: "C",
-            G4: "D",
-          };
-
           var confirmDraft = null;
           try {
             confirmDraft = JSON.parse(
@@ -531,6 +504,14 @@
             10,
           );
           var extraGuests = P ? P.clampExtra(roomRaw, extraGuestsRaw) : 0;
+
+          function getDisplayGuestCount() {
+            var baseGuests = 2;
+            if ((roomRaw === "G3" || roomRaw === "G4") && extraGuests > 0) {
+              return baseGuests + extraGuests;
+            }
+            return baseGuests;
+          }
 
           function formatKRW(n) {
             return n.toLocaleString("ko-KR") + "원";
@@ -579,27 +560,24 @@
                   "Check-in " +
                     formatDisplayYMD(checkIn) +
                     " · Check-out " +
-                    formatDisplayYMD(checkOut),
-                  "(" +
+                    formatDisplayYMD(checkOut) +
+                    " (" +
                     quote.nights +
                     " night" +
                     (quote.nights > 1 ? "s" : "") +
-                    ", extra guests " +
-                    quote.extraGuests +
                     ")",
+                  "Guests " + getDisplayGuestCount(),
                 ].join("\n");
               }
               return [
                 "체크인 " +
                   formatDisplayYMD(checkIn) +
                   " · 체크아웃 " +
-                  formatDisplayYMD(checkOut),
-                "(" +
+                  formatDisplayYMD(checkOut) +
+                  " (" +
                   quote.nights +
-                  "박, " +
-                  "추가인원 " +
-                  quote.extraGuests +
-                  "명)",
+                  "박)",
+                "투숙인원 " + getDisplayGuestCount() + "명",
               ].join("\n");
             }
             return isEn
@@ -611,17 +589,11 @@
             if (!scope) {
               return;
             }
-            var imgEl = scope.querySelector(".confirm-room-thumb");
             var roomNameEl = scope.querySelector(".confirm-room-name");
             var schedEl = scope.querySelector(".confirm-schedule");
-            if (!imgEl || !roomNameEl || !schedEl) {
+            if (!roomNameEl || !schedEl) {
               return;
             }
-            var roomImagePrefix = ROOM_IMAGE_PREFIX[roomRaw] || "A";
-            imgEl.src = "images/" + roomImagePrefix + "00.jpg";
-            imgEl.alt =
-              ROOM_LABEL[roomRaw] +
-              (language === "en" ? " hero image" : " 대표 이미지");
             roomNameEl.textContent = ROOM_LABEL[roomRaw];
             schedEl.textContent = buildBookingScheduleText(language);
           }
@@ -1531,14 +1503,6 @@
               <section class="confirm-section">
                 <h2 class="confirm-section-title">Booking Details</h2>
                 <div class="confirm-booking-card">
-                  <img
-                    class="confirm-room-thumb"
-                    src="images/A00.jpg"
-                    alt=""
-                    width="120"
-                    height="90"
-                    decoding="async"
-                  />
                   <div class="confirm-booking-details">
                     <p class="confirm-room-name"></p>
                     <p class="confirm-schedule"></p>

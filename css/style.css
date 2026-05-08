@@ -2713,7 +2713,7 @@ iframe.map {
 .confirm-room-name {
   font-weight: 600;
   margin: 0 0 0.35rem;
-  color: var(--grafford-mud2);
+  color: var(--grafford-dark-brown);
 }
 
 .confirm-schedule,
@@ -2736,7 +2736,7 @@ iframe.map {
   display: flex;
   flex-direction: column;
   gap: 0.75rem;
-  margin-bottom: 1rem;
+  margin: 0 0.7rem 0.85rem;
 }
 
 .confirm-guide-item {
@@ -2993,7 +2993,7 @@ iframe.map {
 
 .confirm-check--all {
   font-weight: 600;
-  margin-bottom: 0.35rem;
+  margin: 0 0.7rem 0.85rem;
   padding-bottom: 0;
   border-bottom: none;
 }
@@ -3868,7 +3868,7 @@ iframe.map {
 .admin-res-tabs {
   display: flex;
   gap: 0;
-  border-bottom: 1px solid rgba(58, 53, 49, 0.18);
+  margin-top: 0.75rem;
   margin-bottom: 0.75rem;
 }
 .admin-res-tab-btn {

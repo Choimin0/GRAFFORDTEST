@@ -210,15 +210,6 @@
         aria-labelledby="admin-bank-title"
         hidden
       >
-        <div class="admin-table-head">
-          <label class="admin-sort-control" for="admin-sort-select">
-            정렬 기준
-            <select id="admin-sort-select">
-              <option value="checkin">입실일</option>
-              <option value="reservationDate">예약일</option>
-            </select>
-          </label>
-        </div>
         <div
           class="admin-res-tabs"
           id="admin-res-tabs"
@@ -242,6 +233,16 @@
             취소된 예약
           </button>
         </div>
+        <div class="admin-table-head">
+          <label class="admin-sort-control" for="admin-sort-select">
+            정렬 기준
+            <select id="admin-sort-select">
+              <option value="checkin">입실일</option>
+              <option value="reservationDate">예약일</option>
+            </select>
+          </label>
+        </div>
+
         <form
           id="admin-search-form"
           class="admin-search-row"
