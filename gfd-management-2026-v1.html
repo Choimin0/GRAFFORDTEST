@@ -1312,7 +1312,7 @@
           var xLabels = opts.xLabels || [];
           var yValues = opts.yValues || [];
           var n = xLabels.length;
-          var color = opts.color || "#8b7e6a";
+          var color = opts.color || "#3a3531";
           var baseUnit = opts.baseUnit || 100000;
 
           // Y축 최대값 및 눈금 계산
@@ -1362,7 +1362,7 @@
               "stroke",
               yv === 0 ? "rgba(58,53,49,0.22)" : "rgba(58,53,49,0.09)",
             );
-            gridLine.setAttribute("stroke-width", "1");
+            gridLine.setAttribute("stroke-width", "1"); //점을 잇는 연결선 굵기
             svg.appendChild(gridLine);
 
             var yText = document.createElementNS(NS, "text");
@@ -1388,7 +1388,7 @@
             svg.appendChild(xText);
           });
 
-          // 연결선
+          // 연결선 디자인
           if (yValues.length > 1) {
             var pathD = "";
             yValues.forEach(function (v, i) {
@@ -1405,7 +1405,7 @@
             svg.appendChild(linePath);
           }
 
-          // 데이터 점
+          // 데이터 점 디자인
           yValues.forEach(function (v, i) {
             var isCurrent = opts.currentIdx === i;
             var dot = document.createElementNS(NS, "circle");
@@ -1413,8 +1413,8 @@
             dot.setAttribute("cy", yPos(v));
             dot.setAttribute("r", isCurrent ? "5.5" : "4");
             dot.setAttribute("fill", color);
-            dot.setAttribute("stroke", "white");
-            dot.setAttribute("stroke-width", "1.5");
+            dot.setAttribute("stroke", "none");
+            dot.setAttribute("stroke-width", "0");
             svg.appendChild(dot);
           });
 
