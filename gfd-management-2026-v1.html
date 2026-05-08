@@ -1194,6 +1194,7 @@
             { label: "GRAFFORD", value: totalRevenue, color: "#7EB8D4" },
           ];
           var roomData = (data && data.roomRevenue) || [];
+          var occupancyByDay = (data && data.occupancyByDay) || [];
 
           var CHANNEL_COLORS = {
             GRAFFORD: "#7EB8D4",
@@ -1291,9 +1292,117 @@
             return wrap;
           }
 
+          function makeHeatmapCard(title) {
+            var wrap = document.createElement("div");
+            wrap.className = "admin-sales-chart-wrap";
+
+            var titleEl = document.createElement("h3");
+            titleEl.className = "admin-sales-chart-title";
+            titleEl.textContent = title;
+            wrap.appendChild(titleEl);
+
+            var heatmapWrap = document.createElement("div");
+            heatmapWrap.className = "admin-sales-heatmap-wrap";
+            drawMonthlyOccupancyHeatmap(heatmapWrap, occupancyByDay);
+            wrap.appendChild(heatmapWrap);
+
+            return wrap;
+          }
+
           chartsRow.appendChild(makeChart("판매채널별 매출금", channelData));
           chartsRow.appendChild(makeChart("객실별 매출금", roomData));
+          chartsRow.appendChild(makeHeatmapCard("월간 예약 히트맵"));
           salesMonthlyPanel.appendChild(chartsRow);
+        }
+
+        function drawMonthlyOccupancyHeatmap(containerEl, occupancyByDay) {
+          if (!containerEl) return;
+          containerEl.innerHTML = "";
+
+          var now = new Date();
+          var year = now.getFullYear();
+          var month = now.getMonth() + 1;
+          if (occupancyByDay && occupancyByDay.length) {
+            var first = String(occupancyByDay[0].date || "");
+            var mm = first.match(/^(\d{4})-(\d{2})-/);
+            if (mm) {
+              year = Number(mm[1]) || year;
+              month = Number(mm[2]) || month;
+            }
+          }
+
+          var HEAT_COLORS = [
+            "#e8e1d5", // 0
+            "#d3c7b1", // 1
+            "#b8aa94", // 2
+            "#8e8172", // 3
+            "#3a3531", // 4
+          ];
+
+          var maxCount = 0;
+          var occupancyMap = {};
+          (occupancyByDay || []).forEach(function (row) {
+            var dateKey = String(row && row.date ? row.date : "");
+            var c = Number(row && row.count) || 0;
+            occupancyMap[dateKey] = c;
+            if (c > maxCount) maxCount = c;
+          });
+
+          function levelByCount(c) {
+            if (c <= 0 || maxCount <= 0) return 0;
+            return Math.min(4, Math.ceil((c / maxCount) * 4));
+          }
+
+          function ymd(y, m, d) {
+            return (
+              String(y) +
+              "-" +
+              String(m).padStart(2, "0") +
+              "-" +
+              String(d).padStart(2, "0")
+            );
+          }
+
+          var title = document.createElement("div");
+          title.className = "admin-sales-heatmap-title";
+
+          containerEl.appendChild(title);
+
+          var weekHeader = document.createElement("div");
+          weekHeader.className = "admin-sales-heatmap-weekhead";
+          ["일", "월", "화", "수", "목", "금", "토"].forEach(function (w) {
+            var el = document.createElement("span");
+            el.textContent = w;
+            weekHeader.appendChild(el);
+          });
+          containerEl.appendChild(weekHeader);
+
+          var grid = document.createElement("div");
+          grid.className = "admin-sales-heatmap-grid";
+
+          var firstDow = new Date(year, month - 1, 1).getDay();
+          var daysInMonth = new Date(year, month, 0).getDate();
+          var totalCells = 42;
+
+          for (var i = 0; i < totalCells; i++) {
+            var cell = document.createElement("div");
+            if (i < firstDow || i >= firstDow + daysInMonth) {
+              cell.className = "admin-sales-heatmap-cell is-empty";
+              grid.appendChild(cell);
+              continue;
+            }
+            var dayNum = i - firstDow + 1;
+            var key = ymd(year, month, dayNum);
+            var count = Number(occupancyMap[key]) || 0;
+            var level = levelByCount(count);
+            cell.className = "admin-sales-heatmap-cell";
+            cell.style.background = HEAT_COLORS[level];
+            cell.title = key + " · 예약객실 " + count + "개";
+            cell.textContent = String(dayNum);
+            grid.appendChild(cell);
+          }
+
+          containerEl.appendChild(grid);
         }
 
         // ── 라인 차트 공통 렌더러 ──────────────────────────────────────────

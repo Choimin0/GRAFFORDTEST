@@ -4067,7 +4067,7 @@ iframe.map {
 }
 .admin-sales-charts-row {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 1.2rem;
 }
 .admin-sales-chart-wrap {
@@ -4095,6 +4095,55 @@ iframe.map {
 .admin-sales-donut-wrap svg {
   width: 100%;
   height: 100%;
+}
+.admin-sales-heatmap-wrap {
+  width: 100%;
+  height: 80%;
+  flex-shrink: 0;
+  background: transparent;
+  padding: 0.4rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.24rem;
+}
+.admin-sales-heatmap-title {
+  font-size: 0.62rem;
+  font-weight: 700;
+  color: #3a3531;
+  text-align: center;
+  line-height: 1.2;
+}
+.admin-sales-heatmap-weekhead {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+}
+.admin-sales-heatmap-weekhead span {
+  font-size: 0.54rem;
+  color: rgba(58, 53, 49, 0.65);
+  text-align: center;
+  line-height: 1;
+}
+.admin-sales-heatmap-grid {
+  flex: 1;
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  grid-auto-rows: 1fr;
+  gap: 2px;
+}
+.admin-sales-heatmap-cell {
+  border: 1px solid rgba(58, 53, 49, 0.08);
+  border-radius: 2px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.52rem;
+  color: rgba(58, 53, 49, 0.86);
+  line-height: 1;
+}
+.admin-sales-heatmap-cell.is-empty {
+  border: 1px dashed rgba(58, 53, 49, 0.08);
+  background: transparent;
 }
 .admin-sales-legend {
   list-style: none;

@@ -123,9 +123,48 @@ async function getMonthlySalesData(pool) {
     WHERE DATE_TRUNC('month', COALESCE(cancelled_at, created_at)) = DATE_TRUNC('month', CURRENT_DATE)
   `;
 
-  const [statsResult, cancelResult] = await Promise.all([
+  const occupancyQuery = `
+    WITH month_bounds AS (
+      SELECT
+        DATE_TRUNC('month', CURRENT_DATE)::date AS month_start,
+        (DATE_TRUNC('month', CURRENT_DATE) + INTERVAL '1 month')::date AS next_month_start
+    ),
+    all_res AS (
+      SELECT check_in_date, check_out_date
+      FROM ${ACTIVE_TABLE}, month_bounds
+      WHERE check_out_date > month_start
+        AND check_in_date < next_month_start
+      UNION ALL
+      SELECT check_in_date, check_out_date
+      FROM ${PAST_TABLE}, month_bounds
+      WHERE check_out_date > month_start
+        AND check_in_date < next_month_start
+    ),
+    days AS (
+      SELECT generate_series(
+        (SELECT month_start FROM month_bounds),
+        (SELECT next_month_start FROM month_bounds) - INTERVAL '1 day',
+        INTERVAL '1 day'
+      )::date AS day
+    )
+    SELECT
+      day,
+      COUNT(*) FILTER (
+        WHERE all_res.check_in_date <= day
+          AND all_res.check_out_date > day
+      )::int AS occupied_rooms
+    FROM days
+    LEFT JOIN all_res
+      ON all_res.check_in_date <= day
+     AND all_res.check_out_date > day
+    GROUP BY day
+    ORDER BY day
+  `;
+
+  const [statsResult, cancelResult, occupancyResult] = await Promise.all([
     pool.query(statsQuery),
     pool.query(cancelQuery),
+    pool.query(occupancyQuery),
   ]);
 
   var cancelCount =
@@ -174,12 +213,23 @@ async function getMonthlySalesData(pool) {
       };
     });
 
+  var occupancyByDay = (occupancyResult.rows || []).map(function (row) {
+    return {
+      date:
+        row.day instanceof Date
+          ? row.day.toISOString().slice(0, 10)
+          : String(row.day || "").slice(0, 10),
+      count: Number(row.occupied_rooms) || 0,
+    };
+  });
+
   return {
     reservationCount: reservationCount,
     totalRevenue: totalRevenue,
     cancelCount: cancelCount,
     channelRevenue: channelRevenue,
     roomRevenue: roomRevenue,
+    occupancyByDay: occupancyByDay,
   };
 }
 
