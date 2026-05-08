@@ -398,6 +398,7 @@
         var latestCalendarRows = [];
         var reservationListRows = [];
         var roomStatusManageRows = [];
+        var roomStatusByRoom = { G1: "", G2: "", G3: "", G4: "" };
         var activeResTab = "current";
         var currentPage = 1;
         var PAGE_SIZE = 20;
@@ -536,6 +537,32 @@
           return String(raw) + "명";
         }
 
+        function setRoomStatusRows(rows) {
+          var nextMap = { G1: "", G2: "", G3: "", G4: "" };
+          (rows || []).forEach(function (row) {
+            var room = String((row && row.roomName) || "")
+              .trim()
+              .toUpperCase();
+            if (!nextMap.hasOwnProperty(room)) {
+              return;
+            }
+            nextMap[room] = String((row && row.statusText) || "");
+          });
+          roomStatusByRoom = nextMap;
+        }
+
+        function getManageCellDisplay(text) {
+          var full = String(text || "").trim();
+          if (!full) {
+            return { display: "—", tooltip: "" };
+          }
+          var MAX_LEN = 14;
+          if (full.length <= MAX_LEN) {
+            return { display: full, tooltip: "" };
+          }
+          return { display: full.slice(0, MAX_LEN) + "...", tooltip: full };
+        }
+
         function renderTodayStatusPanels() {
           if (!todayCheckinListEl || !roomStatusListEl) {
             return;
@@ -617,13 +644,13 @@
               "admin-checkin-request-cell",
             );
             requestTd.dataset.tooltip = requestText;
-            var manageText = "—";
+            var manageInfo = getManageCellDisplay(roomStatusByRoom[room] || "");
             var manageTd = appendCheckinCell(
               tr,
-              manageText,
+              manageInfo.display,
               "admin-checkin-manage-cell",
             );
-            manageTd.dataset.tooltip = manageText;
+            manageTd.dataset.tooltip = manageInfo.tooltip;
             tbody.appendChild(tr);
           });
           table.appendChild(tbody);
@@ -1108,6 +1135,12 @@
             },
           ]);
           reservationListRows = latestRows.slice();
+          setRoomStatusRows([
+            { roomName: "G1", statusText: "정상 운영 중" },
+            { roomName: "G2", statusText: "청소 완료" },
+            { roomName: "G3", statusText: "점검 예정 (17:00~18:00)" },
+            { roomName: "G4", statusText: "" },
+          ]);
           renderStatusCalendar();
           renderTodayStatusPanels();
           setActiveCategory("status");
@@ -1450,6 +1483,14 @@
         }
 
         function loadRoomStatusManageRows() {
+          return loadRoomStatusRows().then(function (rows) {
+            roomStatusManageRows = rows || [];
+            renderRoomManageTable();
+            showMessage("");
+          });
+        }
+
+        function loadRoomStatusRows() {
           var auth = getAuthPayload();
           return fetch(adminRoomStatusApiUrl(), {
             method: "POST",
@@ -1469,9 +1510,9 @@
               if (!result.ok || !result.data.ok) {
                 throw new Error(result.data.error || "객실 상태 조회 실패");
               }
-              roomStatusManageRows = result.data.rows || [];
-              renderRoomManageTable();
-              showMessage("");
+              var rows = result.data.rows || [];
+              setRoomStatusRows(rows);
+              return rows;
             });
         }
 
@@ -1498,7 +1539,11 @@
                 throw new Error(result.data.error || "객실 상태 저장 실패");
               }
               roomStatusManageRows = result.data.rows || [];
+              setRoomStatusRows(roomStatusManageRows);
               renderRoomManageTable();
+              if (!statusSection.hidden) {
+                renderTodayStatusPanels();
+              }
             });
         }
 
@@ -1583,10 +1628,16 @@
               }
               latestRows = result.data.rows || [];
               latestCalendarRows = result.data.calendarRows || latestRows || [];
-              renderStatusCalendar();
-              renderTodayStatusPanels();
-              setActiveCategory("status");
-              showMessage("");
+              return loadRoomStatusRows()
+                .catch(function () {
+                  setRoomStatusRows([]);
+                })
+                .then(function () {
+                  renderStatusCalendar();
+                  renderTodayStatusPanels();
+                  setActiveCategory("status");
+                  showMessage("");
+                });
             });
         }
 
