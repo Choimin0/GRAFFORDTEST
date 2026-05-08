@@ -325,13 +325,36 @@
       </section>
 
       <section
-        class="confirm-section admin-empty-section"
+        class="confirm-section"
         id="admin-sales-section"
         aria-labelledby="admin-sales-title"
         hidden
       >
-        <h2 class="confirm-section-title" id="admin-sales-title">매출 현황</h2>
-        <p class="confirm-info-text">매출 현황 레이아웃 준비 중입니다.</p>
+        <div
+          class="admin-res-tabs"
+          id="admin-sales-tabs"
+          aria-label="매출 현황 탭"
+        >
+          <button
+            type="button"
+            class="admin-res-tab-btn is-active"
+            data-sales-tab="monthly"
+          >
+            한달 통계
+          </button>
+          <button
+            type="button"
+            class="admin-res-tab-btn"
+            data-sales-tab="annual"
+          >
+            연별 통계
+          </button>
+        </div>
+
+        <div id="admin-sales-monthly" class="admin-sales-panel"></div>
+        <div id="admin-sales-annual" class="admin-sales-panel" hidden>
+          <p class="admin-sales-pending">연별 통계 준비 중입니다.</p>
+        </div>
       </section>
     </main>
 
@@ -350,6 +373,12 @@
           "admin-room-manage-section",
         );
         var salesSection = document.getElementById("admin-sales-section");
+        var salesMonthlyPanel = document.getElementById("admin-sales-monthly");
+        var salesAnnualPanel = document.getElementById("admin-sales-annual");
+        var salesTabsEl = document.getElementById("admin-sales-tabs");
+        var salesTabBtns = salesTabsEl
+          ? salesTabsEl.querySelectorAll(".admin-res-tab-btn")
+          : [];
         var tableSection = bankSection;
         var tableBody = document.getElementById("admin-table-body");
         var roomManageBody = document.getElementById("admin-room-manage-body");
@@ -400,6 +429,7 @@
         var roomStatusManageRows = [];
         var roomStatusByRoom = { G1: "", G2: "", G3: "", G4: "" };
         var activeResTab = "current";
+        var activeSalesTab = "monthly";
         var currentPage = 1;
         var PAGE_SIZE = 20;
         var sortKey = "checkin";
@@ -999,6 +1029,466 @@
           }
         }
 
+        function adminSalesApiUrl() {
+          var base = "";
+          if (typeof window !== "undefined" && window.__GRAFFORD_API_BASE__) {
+            base = String(window.__GRAFFORD_API_BASE__).replace(/\/$/, "");
+          }
+          return base + "/api/admin-sales";
+        }
+
+        function loadSalesData(tab) {
+          var type = tab === "annual" ? "annual" : "monthly";
+          var auth = getAuthPayload();
+          return fetch(adminSalesApiUrl(), {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              type: type,
+              adminId: auth.adminId,
+              adminPw: auth.adminPw,
+            }),
+          })
+            .then(function (r) {
+              return r.json().then(function (data) {
+                return { ok: r.ok, data: data || {} };
+              });
+            })
+            .then(function (result) {
+              if (!result.ok || !result.data.ok) {
+                throw new Error(result.data.error || "매출 조회 실패");
+              }
+              return result.data;
+            });
+        }
+
+        function setActiveSalesTab(tab) {
+          activeSalesTab = tab;
+          salesTabBtns.forEach(function (btn) {
+            btn.classList.toggle(
+              "is-active",
+              btn.getAttribute("data-sales-tab") === tab,
+            );
+          });
+          if (salesMonthlyPanel) {
+            salesMonthlyPanel.hidden = tab !== "monthly";
+          }
+          if (salesAnnualPanel) {
+            salesAnnualPanel.hidden = tab !== "annual";
+          }
+          if (tab === "monthly") {
+            loadSalesData("monthly")
+              .then(function (data) {
+                renderSalesMonthly(data);
+              })
+              .catch(function (err) {
+                showMessage(
+                  (err && err.message) || "매출 조회 중 오류가 발생했습니다.",
+                );
+              });
+          }
+          if (tab === "annual") {
+            if (salesAnnualPanel) salesAnnualPanel.innerHTML = "";
+            loadSalesData("annual")
+              .then(function (data) {
+                renderSalesAnnual(data);
+              })
+              .catch(function (err) {
+                showMessage(
+                  (err && err.message) || "매출 조회 중 오류가 발생했습니다.",
+                );
+              });
+          }
+        }
+
+        function drawDonutChart(containerEl, segments, emptyColor) {
+          // segments: [{label, value, color}]
+          var NS = "http://www.w3.org/2000/svg";
+          var SIZE = 160; //원 자체의 크기
+          var cx = SIZE / 2;
+          var cy = SIZE / 2;
+          var R = 55; //원 반지름
+          var strokeW = 18; //링 두께
+          var gap = 0.018; // 세그먼트 사이 간격
+
+          var svg = document.createElementNS(NS, "svg");
+          svg.setAttribute("viewBox", "0 0 " + SIZE + " " + SIZE);
+          svg.setAttribute("aria-hidden", "true");
+
+          var total = segments.reduce(function (s, d) {
+            return s + (d.value || 0);
+          }, 0);
+
+          if (!total) {
+            var emptyCircle = document.createElementNS(NS, "circle");
+            emptyCircle.setAttribute("cx", cx);
+            emptyCircle.setAttribute("cy", cy);
+            emptyCircle.setAttribute("r", R);
+            emptyCircle.setAttribute("fill", "none");
+            emptyCircle.setAttribute(
+              "stroke",
+              emptyColor || "rgba(58,53,49,0.1)",
+            );
+            emptyCircle.setAttribute("stroke-width", strokeW);
+            svg.appendChild(emptyCircle);
+            containerEl.appendChild(svg);
+            return;
+          }
+
+          var startAngle = -Math.PI / 2;
+          segments.forEach(function (seg) {
+            if (!seg.value) {
+              return;
+            }
+            var fraction = seg.value / total;
+            var sweep =
+              fraction * 2 * Math.PI - (segments.length > 1 ? gap : 0);
+            var endAngle = startAngle + sweep;
+
+            var x1 = cx + R * Math.cos(startAngle);
+            var y1 = cy + R * Math.sin(startAngle);
+            var x2 = cx + R * Math.cos(endAngle);
+            var y2 = cy + R * Math.sin(endAngle);
+            var largeArc = sweep > Math.PI ? 1 : 0;
+
+            var path = document.createElementNS(NS, "path");
+            path.setAttribute(
+              "d",
+              "M " +
+                x1 +
+                " " +
+                y1 +
+                " A " +
+                R +
+                " " +
+                R +
+                " 0 " +
+                largeArc +
+                " 1 " +
+                x2 +
+                " " +
+                y2,
+            );
+            path.setAttribute("fill", "none");
+            path.setAttribute("stroke", seg.color);
+            path.setAttribute("stroke-width", strokeW);
+            path.setAttribute("stroke-linecap", "round");
+            svg.appendChild(path);
+
+            startAngle += fraction * 2 * Math.PI;
+          });
+
+          containerEl.appendChild(svg);
+        }
+
+        function renderSalesMonthly(data) {
+          if (!salesMonthlyPanel) {
+            return;
+          }
+          salesMonthlyPanel.innerHTML = "";
+
+          var reservationCount = (data && data.reservationCount) || 0;
+          var totalRevenue = (data && data.totalRevenue) || 0;
+          var cancelCount = (data && data.cancelCount) || 0;
+          var channelData = (data && data.channelRevenue) || [
+            { label: "GRAFFORD", value: totalRevenue, color: "#7EB8D4" },
+          ];
+          var roomData = (data && data.roomRevenue) || [];
+
+          var CHANNEL_COLORS = {
+            GRAFFORD: "#7EB8D4",
+            야놀자: "#E07B7B",
+            에어비앤비: "#F0A87C",
+            "Booking.com": "#88C9A0",
+            기타: "#A48FCF",
+          };
+          var ROOM_COLORS = {
+            G1: "#d3c7b1",
+            G2: "#8b7e6a",
+            G3: "#6f675c",
+            G4: "#5a5247",
+          };
+
+          channelData = channelData.map(function (d) {
+            return {
+              label: d.label,
+              value: d.value,
+              color: d.color || CHANNEL_COLORS[d.label] || "#c8c8c8",
+            };
+          });
+          roomData = roomData.map(function (d) {
+            return {
+              label: d.label,
+              value: d.value,
+              color: d.color || ROOM_COLORS[d.label] || "#c8c8c8",
+            };
+          });
+
+          // ── 상단 통계 3개 ──
+          var statsRow = document.createElement("div");
+          statsRow.className = "admin-sales-stats-row";
+
+          [
+            { value: reservationCount + "건", label: "예약건수" },
+            {
+              value: Number(totalRevenue).toLocaleString("ko-KR") + "원",
+              label: "매출금",
+            },
+            { value: cancelCount + "건", label: "취소건수" },
+          ].forEach(function (item) {
+            var card = document.createElement("div");
+            card.className = "admin-sales-stat-card";
+            var num = document.createElement("strong");
+            num.className = "admin-sales-stat-num";
+            num.textContent = item.value;
+            var lbl = document.createElement("span");
+            lbl.className = "admin-sales-stat-label";
+            lbl.textContent = item.label;
+            card.appendChild(num);
+            card.appendChild(lbl);
+            statsRow.appendChild(card);
+          });
+          salesMonthlyPanel.appendChild(statsRow);
+
+          // ── 도넛 차트 2개 ──
+          var chartsRow = document.createElement("div");
+          chartsRow.className = "admin-sales-charts-row";
+
+          function makeChart(title, segments) {
+            var wrap = document.createElement("div");
+            wrap.className = "admin-sales-chart-wrap";
+
+            var titleEl = document.createElement("h3");
+            titleEl.className = "admin-sales-chart-title";
+            titleEl.textContent = title;
+            wrap.appendChild(titleEl);
+
+            var donutWrap = document.createElement("div");
+            donutWrap.className = "admin-sales-donut-wrap";
+            drawDonutChart(donutWrap, segments);
+            wrap.appendChild(donutWrap);
+
+            var legend = document.createElement("ul");
+            legend.className = "admin-sales-legend";
+            segments.forEach(function (seg) {
+              var li = document.createElement("li");
+              li.className = "admin-sales-legend-item";
+              var dot = document.createElement("span");
+              dot.className = "admin-sales-legend-dot";
+              dot.style.background = seg.color;
+              var text = document.createElement("span");
+              text.className = "admin-sales-legend-text";
+              text.textContent =
+                seg.label +
+                "  " +
+                Number(seg.value).toLocaleString("ko-KR") +
+                "원";
+              li.appendChild(dot);
+              li.appendChild(text);
+              legend.appendChild(li);
+            });
+            wrap.appendChild(legend);
+            return wrap;
+          }
+
+          chartsRow.appendChild(makeChart("판매채널별 매출금", channelData));
+          chartsRow.appendChild(makeChart("객실별 매출금", roomData));
+          salesMonthlyPanel.appendChild(chartsRow);
+        }
+
+        // ── 라인 차트 공통 렌더러 ──────────────────────────────────────────
+        // opts: { xLabels, yValues, baseUnit, color, currentIdx }
+        function drawLineChart(containerEl, opts) {
+          var NS = "http://www.w3.org/2000/svg";
+          var VW = 600,
+            VH = 220;
+          var mL = 60,
+            mR = 18,
+            mT = 18,
+            mB = 40;
+          var chartW = VW - mL - mR;
+          var chartH = VH - mT - mB;
+
+          var xLabels = opts.xLabels || [];
+          var yValues = opts.yValues || [];
+          var n = xLabels.length;
+          var color = opts.color || "#8b7e6a";
+          var baseUnit = opts.baseUnit || 100000;
+
+          // Y축 최대값 및 눈금 계산
+          var maxVal = Math.max.apply(null, yValues.concat([0]));
+          var rawMax = Math.ceil(maxVal / baseUnit) * baseUnit || baseUnit * 5;
+          var targetTicks = 5;
+          var rawStep = rawMax / targetTicks;
+          var step = Math.max(
+            baseUnit,
+            Math.ceil(rawStep / baseUnit) * baseUnit,
+          );
+          var yMax = Math.ceil(rawMax / step) * step;
+
+          var yTicks = [];
+          for (var v = 0; v <= yMax + 0.001; v += step) {
+            yTicks.push(Math.round(v));
+          }
+
+          function xPos(i) {
+            if (n <= 1) return mL + chartW / 2;
+            return mL + (i / (n - 1)) * chartW;
+          }
+          function yPos(val) {
+            return mT + chartH - (val / yMax) * chartH;
+          }
+          function fmtY(v) {
+            if (v === 0) return "0";
+            return v / 10000 + "만";
+          }
+
+          var svg = document.createElementNS(NS, "svg");
+          svg.setAttribute("viewBox", "0 0 " + VW + " " + VH);
+          svg.setAttribute("preserveAspectRatio", "xMidYMid meet");
+          svg.style.width = "100%";
+          svg.style.height = "auto";
+          svg.style.display = "block";
+
+          // 수평 격자선 + Y 레이블
+          yTicks.forEach(function (yv) {
+            var y = yPos(yv);
+            var gridLine = document.createElementNS(NS, "line");
+            gridLine.setAttribute("x1", mL);
+            gridLine.setAttribute("y1", y);
+            gridLine.setAttribute("x2", mL + chartW);
+            gridLine.setAttribute("y2", y);
+            gridLine.setAttribute(
+              "stroke",
+              yv === 0 ? "rgba(58,53,49,0.22)" : "rgba(58,53,49,0.09)",
+            );
+            gridLine.setAttribute("stroke-width", "1");
+            svg.appendChild(gridLine);
+
+            var yText = document.createElementNS(NS, "text");
+            yText.setAttribute("x", mL - 7);
+            yText.setAttribute("y", y);
+            yText.setAttribute("text-anchor", "end");
+            yText.setAttribute("dominant-baseline", "middle");
+            yText.setAttribute("font-size", "10");
+            yText.setAttribute("fill", "rgba(58,53,49,0.45)");
+            yText.textContent = fmtY(yv);
+            svg.appendChild(yText);
+          });
+
+          // X축 레이블
+          xLabels.forEach(function (lbl, i) {
+            var xText = document.createElementNS(NS, "text");
+            xText.setAttribute("x", xPos(i));
+            xText.setAttribute("y", VH - mB + 16);
+            xText.setAttribute("text-anchor", "middle");
+            xText.setAttribute("font-size", "10");
+            xText.setAttribute("fill", "rgba(58,53,49,0.5)");
+            xText.textContent = lbl;
+            svg.appendChild(xText);
+          });
+
+          // 연결선
+          if (yValues.length > 1) {
+            var pathD = "";
+            yValues.forEach(function (v, i) {
+              pathD +=
+                (i === 0 ? "M" : "L") + " " + xPos(i) + " " + yPos(v) + " ";
+            });
+            var linePath = document.createElementNS(NS, "path");
+            linePath.setAttribute("d", pathD.trim());
+            linePath.setAttribute("fill", "none");
+            linePath.setAttribute("stroke", color);
+            linePath.setAttribute("stroke-width", "1.5");
+            linePath.setAttribute("stroke-linejoin", "round");
+            linePath.setAttribute("stroke-linecap", "round");
+            svg.appendChild(linePath);
+          }
+
+          // 데이터 점
+          yValues.forEach(function (v, i) {
+            var isCurrent = opts.currentIdx === i;
+            var dot = document.createElementNS(NS, "circle");
+            dot.setAttribute("cx", xPos(i));
+            dot.setAttribute("cy", yPos(v));
+            dot.setAttribute("r", isCurrent ? "5.5" : "4");
+            dot.setAttribute("fill", color);
+            dot.setAttribute("stroke", "white");
+            dot.setAttribute("stroke-width", "1.5");
+            svg.appendChild(dot);
+          });
+
+          containerEl.appendChild(svg);
+        }
+
+        // ── 연별 통계 렌더러 ──────────────────────────────────────────────
+        function renderSalesAnnual(data) {
+          if (!salesAnnualPanel) return;
+          salesAnnualPanel.innerHTML = "";
+
+          var monthlyRevenue =
+            (data && data.monthlyRevenue) || Array(12).fill(0);
+          var annualRevenue = (data && data.annualRevenue) || [
+            { year: 2026, revenue: 0 },
+          ];
+
+          var currentMonth = new Date().getMonth(); // 0-indexed
+
+          // 이달의 매출 차트
+          var monthBlock = document.createElement("div");
+          monthBlock.className = "admin-sales-annual-block";
+          var monthTitle = document.createElement("h3");
+          monthTitle.className = "admin-sales-chart-title";
+          monthTitle.textContent = "이달의 매출";
+          monthBlock.appendChild(monthTitle);
+          var monthChartWrap = document.createElement("div");
+          monthChartWrap.className = "admin-sales-linechart-wrap";
+          drawLineChart(monthChartWrap, {
+            xLabels: [
+              "1월",
+              "2월",
+              "3월",
+              "4월",
+              "5월",
+              "6월",
+              "7월",
+              "8월",
+              "9월",
+              "10월",
+              "11월",
+              "12월",
+            ],
+            yValues: monthlyRevenue,
+            baseUnit: 100000,
+            color: "#8b7e6a",
+            currentIdx: currentMonth,
+          });
+          monthBlock.appendChild(monthChartWrap);
+          salesAnnualPanel.appendChild(monthBlock);
+
+          // 연도별 매출 차트
+          var yearBlock = document.createElement("div");
+          yearBlock.className = "admin-sales-annual-block";
+          var yearTitle = document.createElement("h3");
+          yearTitle.className = "admin-sales-chart-title";
+          yearTitle.textContent = "연도별 매출";
+          yearBlock.appendChild(yearTitle);
+          var yearChartWrap = document.createElement("div");
+          yearChartWrap.className = "admin-sales-linechart-wrap";
+          drawLineChart(yearChartWrap, {
+            xLabels: annualRevenue.map(function (d) {
+              return String(d.year) + "년";
+            }),
+            yValues: annualRevenue.map(function (d) {
+              return d.revenue;
+            }),
+            baseUnit: 2000000,
+            color: "#6f675c",
+          });
+          yearBlock.appendChild(yearChartWrap);
+          salesAnnualPanel.appendChild(yearBlock);
+        }
+
         function setActiveCategory(category) {
           activeCategory = category;
           categoryButtons.forEach(function (btn) {
@@ -1039,6 +1529,9 @@
                   "객실 상태 조회 중 오류가 발생했습니다.",
               );
             });
+          }
+          if (category === "sales") {
+            setActiveSalesTab(activeSalesTab);
           }
         }
 
@@ -1144,6 +1637,26 @@
           renderStatusCalendar();
           renderTodayStatusPanels();
           setActiveCategory("status");
+          renderSalesMonthly({
+            reservationCount: 12,
+            totalRevenue: 8640000,
+            cancelCount: 2,
+            channelRevenue: [
+              { label: "GRAFFORD", value: 8640000, color: "#7EB8D4" },
+            ],
+            roomRevenue: [
+              { label: "G1", value: 2160000, color: "#7EB8D4" },
+              { label: "G2", value: 1920000, color: "#F0A87C" },
+              { label: "G3", value: 2880000, color: "#88C9A0" },
+              { label: "G4", value: 1680000, color: "#E07B7B" },
+            ],
+          });
+          renderSalesAnnual({
+            monthlyRevenue: [
+              0, 0, 0, 3200000, 5400000, 8640000, 0, 0, 0, 0, 0, 0,
+            ],
+            annualRevenue: [{ year: 2026, revenue: 17240000 }],
+          });
           showMessage(
             "로컬 레이아웃 프리뷰 모드입니다. (URL: ?adminPreview=1)",
           );
@@ -1670,6 +2183,15 @@
               return;
             }
             setActiveResTab(btn.getAttribute("data-res-tab"));
+          });
+        });
+
+        salesTabBtns.forEach(function (btn) {
+          btn.addEventListener("click", function () {
+            if (salesSection.hidden) {
+              return;
+            }
+            setActiveSalesTab(btn.getAttribute("data-sales-tab"));
           });
         });
 

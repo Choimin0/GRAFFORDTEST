@@ -4027,3 +4027,128 @@ iframe.map {
     grid-template-columns: 1fr;
   }
 }
+
+/* ── 매출 현황 ─────────────────────────────────── */
+.admin-sales-panel {
+  padding-top: 0.5rem;
+}
+.admin-sales-pending {
+  color: var(--grafford-mud2);
+  font-size: 0.9rem;
+  padding: 2rem 0;
+  text-align: center;
+}
+.admin-sales-stats-row {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+.admin-sales-stat-card {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.35rem;
+  border: 1px solid rgba(58, 53, 49, 0.14);
+  background: var(--grafford-beige);
+  padding: 1.2rem 0.8rem 1rem;
+}
+.admin-sales-stat-num {
+  font-size: 2rem;
+  font-weight: 800;
+  color: var(--grafford-dark-brown);
+  letter-spacing: -0.02em;
+  line-height: 1.1;
+}
+.admin-sales-stat-label {
+  font-size: 0.78rem;
+  color: var(--grafford-mud2);
+  letter-spacing: 0.04em;
+}
+.admin-sales-charts-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.2rem;
+}
+.admin-sales-chart-wrap {
+  border: 1px solid rgba(58, 53, 49, 0.14);
+  background: var(--grafford-beige);
+  padding: 1rem 1.2rem 1.2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.6rem;
+}
+.admin-sales-chart-title {
+  margin: 0;
+  font-size: 0.88rem;
+  font-weight: 700;
+  color: var(--grafford-dark-brown);
+  text-align: center;
+  width: 100%;
+}
+.admin-sales-donut-wrap {
+  width: 160px;
+  height: 160px;
+  flex-shrink: 0;
+}
+.admin-sales-donut-wrap svg {
+  width: 100%;
+  height: 100%;
+}
+.admin-sales-legend {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+.admin-sales-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.82rem;
+  color: var(--grafford-mud2);
+}
+.admin-sales-legend-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.admin-sales-legend-text {
+  white-space: nowrap;
+}
+/* ── 연별 통계 라인 차트 ── */
+.admin-sales-annual-block {
+  border: 1px solid rgba(58, 53, 49, 0.14);
+  background: var(--grafford-beige);
+  padding: 1rem 1.2rem 1.2rem;
+  margin-bottom: 1rem;
+}
+.admin-sales-annual-block:last-child {
+  margin-bottom: 0;
+}
+.admin-sales-annual-block .admin-sales-chart-title {
+  text-align: left;
+  margin-bottom: 0.7rem;
+}
+.admin-sales-linechart-wrap {
+  width: 100%;
+  overflow: hidden;
+}
+.admin-sales-linechart-wrap svg {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+@media (max-width: 700px) {
+  .admin-sales-stats-row {
+    flex-direction: column;
+  }
+  .admin-sales-charts-row {
+    grid-template-columns: 1fr;
+  }
+}
