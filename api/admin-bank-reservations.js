@@ -4,6 +4,13 @@ const { Pool } = pg;
 const ACTIVE_TABLE = "reservations";
 const PAST_TABLE = "past_reservations";
 const DELETED_TABLE = "delete_reservations";
+const MAX_ADMIN_LOGIN_FAILS = 5;
+const ADMIN_BLOCK_MINUTES = Math.max(
+  1,
+  parseInt(process.env.ADMIN_LOGIN_BLOCK_MINUTES || "60", 10) || 60,
+);
+
+var adminLoginAttemptStore = new Map();
 
 function getDatabaseUrl() {
   return String(
@@ -112,6 +119,60 @@ function isAdminOk(body) {
     return { ok: false, error: "관리자 인증에 실패했습니다." };
   }
   return { ok: true };
+}
+
+function getClientIp(req) {
+  var forwarded = String(
+    (req &&
+      req.headers &&
+      (req.headers["x-forwarded-for"] || req.headers["X-Forwarded-For"])) ||
+      "",
+  )
+    .split(",")[0]
+    .trim();
+  var realIp = String(
+    (req &&
+      req.headers &&
+      (req.headers["x-real-ip"] || req.headers["X-Real-IP"])) ||
+      "",
+  ).trim();
+  var socketIp =
+    (req && req.socket && String(req.socket.remoteAddress || "").trim()) || "";
+  return forwarded || realIp || socketIp || "unknown";
+}
+
+function getIpAttemptState(ip, now) {
+  var state = adminLoginAttemptStore.get(ip);
+  if (!state) {
+    return null;
+  }
+  if (state.blockedUntil && state.blockedUntil <= now) {
+    adminLoginAttemptStore.delete(ip);
+    return null;
+  }
+  return state;
+}
+
+function getIpBlockedUntil(ip, now) {
+  var state = getIpAttemptState(ip, now);
+  if (!state || !state.blockedUntil || state.blockedUntil <= now) {
+    return 0;
+  }
+  return state.blockedUntil;
+}
+
+function registerLoginFailure(ip, now) {
+  var state = getIpAttemptState(ip, now) || { fails: 0, blockedUntil: 0 };
+  state.fails += 1;
+  if (state.fails >= MAX_ADMIN_LOGIN_FAILS) {
+    state.blockedUntil = now + ADMIN_BLOCK_MINUTES * 60 * 1000;
+  }
+  adminLoginAttemptStore.set(ip, state);
+  return state;
+}
+
+function clearLoginFailures(ip) {
+  adminLoginAttemptStore.delete(ip);
 }
 
 async function archivePastReservations(pool) {
@@ -251,11 +312,38 @@ export default async function handler(req, res) {
     return;
   }
 
+  var clientIp = getClientIp(req);
+  var now = Date.now();
+  var blockedUntil = getIpBlockedUntil(clientIp, now);
+  if (blockedUntil > now) {
+    var remainingMinutes = Math.ceil((blockedUntil - now) / (60 * 1000));
+    json(res, 429, {
+      ok: false,
+      error:
+        "로그인 실패 5회 이상으로 차단되었습니다. 약 " +
+        remainingMinutes +
+        "분 후 다시 시도해 주세요.",
+    });
+    return;
+  }
+
   var auth = isAdminOk(body);
   if (!auth.ok) {
+    var state = registerLoginFailure(clientIp, now);
+    if (state.blockedUntil && state.blockedUntil > now) {
+      json(res, 429, {
+        ok: false,
+        error:
+          "로그인 실패 5회 이상으로 차단되었습니다. 약 " +
+          ADMIN_BLOCK_MINUTES +
+          "분 후 다시 시도해 주세요.",
+      });
+      return;
+    }
     json(res, 401, { ok: false, error: auth.error });
     return;
   }
+  clearLoginFailures(clientIp);
 
   var action = String(body.action || "list").trim().toLowerCase();
   try {
