@@ -3477,6 +3477,12 @@ iframe.map {
 .admin-login-form[hidden] {
   display: none !important;
 }
+.admin-category-nav[hidden],
+#admin-status-section[hidden],
+#admin-bank-section[hidden],
+#admin-sales-section[hidden] {
+  display: none !important;
+}
 .admin-login-section {
   width: 100%;
   max-width: 560px;

@@ -381,6 +381,19 @@
         var isLayoutPreviewMode =
           isLocalhost && query.get("adminPreview") === "1";
 
+        function setLoggedOutView() {
+          if (categoryNav) {
+            categoryNav.hidden = true;
+          }
+          statusSection.hidden = true;
+          bankSection.hidden = true;
+          salesSection.hidden = true;
+          loginForm.hidden = false;
+          if (loginTitleEl) {
+            loginTitleEl.hidden = false;
+          }
+        }
+
         function dateKey(ymd) {
           return String(ymd || "").slice(0, 10);
         }
@@ -1527,6 +1540,8 @@
 
         if (isLayoutPreviewMode) {
           enableLayoutPreviewMode();
+        } else {
+          setLoggedOutView();
         }
       });
     </script>
