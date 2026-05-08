@@ -3952,6 +3952,7 @@ iframe.map {
 }
 .admin-room-name-cell {
   font-weight: 700;
+  font-size: 0.93rem;
   color: var(--grafford-mud2);
 }
 .admin-room-status-input {
@@ -3959,7 +3960,7 @@ iframe.map {
   min-height: 72px;
   resize: vertical;
   border: 1px solid #d4cdc5;
-  background: #fff;
+  background: transparent;
   padding: 0.5rem 0.55rem;
   font-family: inherit;
   font-size: 0.92rem;

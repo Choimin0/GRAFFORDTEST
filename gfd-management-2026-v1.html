@@ -310,12 +310,6 @@
         aria-labelledby="admin-room-manage-title"
         hidden
       >
-        <h2 class="confirm-section-title" id="admin-room-manage-title">
-          객실 관리
-        </h2>
-        <p class="confirm-info-text">
-          객실명은 고정이며, 객실 상태 텍스트만 수정 후 저장할 수 있습니다.
-        </p>
         <div class="admin-table-wrap">
           <table class="admin-table admin-room-manage-table">
             <thead>
@@ -1014,7 +1008,8 @@
             }
             loadRoomStatusManageRows().catch(function (err) {
               showMessage(
-                (err && err.message) || "객실 상태 조회 중 오류가 발생했습니다.",
+                (err && err.message) ||
+                  "객실 상태 조회 중 오류가 발생했습니다.",
               );
             });
           }
@@ -1432,28 +1427,28 @@
               "</td>";
             roomManageBody.appendChild(tr);
           });
-          roomManageBody.querySelectorAll(".admin-room-save-btn").forEach(function (
-            btn,
-          ) {
-            btn.addEventListener("click", function () {
-              var roomName = btn.getAttribute("data-room-name") || "";
-              var input = roomManageBody.querySelector(
-                ".admin-room-status-input[data-room-name='" + roomName + "']",
-              );
-              var statusText = input ? input.value : "";
-              btn.disabled = true;
-              saveRoomStatusManageRow(roomName, statusText)
-                .then(function () {
-                  showMessage(roomName + " 객실 상태가 저장되었습니다.");
-                })
-                .catch(function (err) {
-                  showMessage((err && err.message) || "객실 상태 저장 실패");
-                })
-                .finally(function () {
-                  btn.disabled = false;
-                });
+          roomManageBody
+            .querySelectorAll(".admin-room-save-btn")
+            .forEach(function (btn) {
+              btn.addEventListener("click", function () {
+                var roomName = btn.getAttribute("data-room-name") || "";
+                var input = roomManageBody.querySelector(
+                  ".admin-room-status-input[data-room-name='" + roomName + "']",
+                );
+                var statusText = input ? input.value : "";
+                btn.disabled = true;
+                saveRoomStatusManageRow(roomName, statusText)
+                  .then(function () {
+                    showMessage(roomName + " 객실 상태가 저장되었습니다.");
+                  })
+                  .catch(function (err) {
+                    showMessage((err && err.message) || "객실 상태 저장 실패");
+                  })
+                  .finally(function () {
+                    btn.disabled = false;
+                  });
+              });
             });
-          });
         }
 
         function loadRoomStatusManageRows() {
