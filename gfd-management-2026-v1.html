@@ -36,6 +36,13 @@
         <button
           type="button"
           class="admin-category-btn"
+          data-admin-category="room-manage"
+        >
+          객실 관리
+        </button>
+        <button
+          type="button"
+          class="admin-category-btn"
           data-admin-category="sales"
         >
           매출 현황
@@ -298,6 +305,32 @@
       </section>
 
       <section
+        class="confirm-section"
+        id="admin-room-manage-section"
+        aria-labelledby="admin-room-manage-title"
+        hidden
+      >
+        <h2 class="confirm-section-title" id="admin-room-manage-title">
+          객실 관리
+        </h2>
+        <p class="confirm-info-text">
+          객실명은 고정이며, 객실 상태 텍스트만 수정 후 저장할 수 있습니다.
+        </p>
+        <div class="admin-table-wrap">
+          <table class="admin-table admin-room-manage-table">
+            <thead>
+              <tr>
+                <th>객실 이름</th>
+                <th>객실 상태</th>
+                <th>저장</th>
+              </tr>
+            </thead>
+            <tbody id="admin-room-manage-body"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section
         class="confirm-section admin-empty-section"
         id="admin-sales-section"
         aria-labelledby="admin-sales-title"
@@ -319,9 +352,13 @@
         var categoryButtons = document.querySelectorAll(".admin-category-btn");
         var statusSection = document.getElementById("admin-status-section");
         var bankSection = document.getElementById("admin-bank-section");
+        var roomManageSection = document.getElementById(
+          "admin-room-manage-section",
+        );
         var salesSection = document.getElementById("admin-sales-section");
         var tableSection = bankSection;
         var tableBody = document.getElementById("admin-table-body");
+        var roomManageBody = document.getElementById("admin-room-manage-body");
         var sortSelect = document.getElementById("admin-sort-select");
         var resTabs = document.getElementById("admin-res-tabs");
         var resTabBtns = resTabs
@@ -366,6 +403,7 @@
         var latestRows = [];
         var latestCalendarRows = [];
         var reservationListRows = [];
+        var roomStatusManageRows = [];
         var activeResTab = "current";
         var currentPage = 1;
         var PAGE_SIZE = 20;
@@ -388,6 +426,7 @@
           }
           statusSection.hidden = true;
           bankSection.hidden = true;
+          roomManageSection.hidden = true;
           salesSection.hidden = true;
           loginForm.hidden = false;
           if (loginTitleEl) {
@@ -949,6 +988,7 @@
           });
           statusSection.hidden = category !== "status";
           bankSection.hidden = category !== "bank";
+          roomManageSection.hidden = category !== "room-manage";
           salesSection.hidden = category !== "sales";
           if (category === "status") {
             renderStatusCalendar();
@@ -958,6 +998,23 @@
             loadReservationList(activeResTab).catch(function (err) {
               showMessage(
                 (err && err.message) || "목록 조회 중 오류가 발생했습니다.",
+              );
+            });
+          }
+          if (category === "room-manage") {
+            if (isLayoutPreviewMode) {
+              roomStatusManageRows = [
+                { roomName: "G1", statusText: "정상 운영 중" },
+                { roomName: "G2", statusText: "청소 완료" },
+                { roomName: "G3", statusText: "점검 예정 (17:00~18:00)" },
+                { roomName: "G4", statusText: "" },
+              ];
+              renderRoomManageTable();
+              return;
+            }
+            loadRoomStatusManageRows().catch(function (err) {
+              showMessage(
+                (err && err.message) || "객실 상태 조회 중 오류가 발생했습니다.",
               );
             });
           }
@@ -1322,6 +1379,134 @@
             base = String(window.__GRAFFORD_API_BASE__).replace(/\/$/, "");
           }
           return base + "/api/admin-reservations";
+        }
+
+        function adminRoomStatusApiUrl() {
+          var base = "";
+          if (typeof window !== "undefined" && window.__GRAFFORD_API_BASE__) {
+            base = String(window.__GRAFFORD_API_BASE__).replace(/\/$/, "");
+          }
+          return base + "/api/admin-room-status";
+        }
+
+        function escapeHtml(text) {
+          return String(text || "")
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+            .replace(/"/g, "&quot;")
+            .replace(/'/g, "&#39;");
+        }
+
+        function renderRoomManageTable() {
+          if (!roomManageBody) {
+            return;
+          }
+          roomManageBody.innerHTML = "";
+          if (!roomStatusManageRows.length) {
+            var emptyTr = document.createElement("tr");
+            var emptyTd = document.createElement("td");
+            emptyTd.colSpan = 3;
+            emptyTd.textContent = "객실 상태 데이터가 없습니다.";
+            emptyTr.appendChild(emptyTd);
+            roomManageBody.appendChild(emptyTr);
+            return;
+          }
+          roomStatusManageRows.forEach(function (row) {
+            var tr = document.createElement("tr");
+            tr.innerHTML =
+              "<td class='admin-room-name-cell'>" +
+              escapeHtml(row.roomName || "—") +
+              "</td>" +
+              "<td>" +
+              "<textarea class='admin-room-status-input' data-room-name='" +
+              escapeHtml(row.roomName || "") +
+              "' rows='2'>" +
+              escapeHtml(row.statusText || "") +
+              "</textarea>" +
+              "</td>" +
+              "<td>" +
+              "<button type='button' class='admin-confirm-btn admin-room-save-btn' data-room-name='" +
+              escapeHtml(row.roomName || "") +
+              "'>저장</button>" +
+              "</td>";
+            roomManageBody.appendChild(tr);
+          });
+          roomManageBody.querySelectorAll(".admin-room-save-btn").forEach(function (
+            btn,
+          ) {
+            btn.addEventListener("click", function () {
+              var roomName = btn.getAttribute("data-room-name") || "";
+              var input = roomManageBody.querySelector(
+                ".admin-room-status-input[data-room-name='" + roomName + "']",
+              );
+              var statusText = input ? input.value : "";
+              btn.disabled = true;
+              saveRoomStatusManageRow(roomName, statusText)
+                .then(function () {
+                  showMessage(roomName + " 객실 상태가 저장되었습니다.");
+                })
+                .catch(function (err) {
+                  showMessage((err && err.message) || "객실 상태 저장 실패");
+                })
+                .finally(function () {
+                  btn.disabled = false;
+                });
+            });
+          });
+        }
+
+        function loadRoomStatusManageRows() {
+          var auth = getAuthPayload();
+          return fetch(adminRoomStatusApiUrl(), {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              action: "list",
+              adminId: auth.adminId,
+              adminPw: auth.adminPw,
+            }),
+          })
+            .then(function (r) {
+              return r.json().then(function (data) {
+                return { ok: r.ok, data: data || {} };
+              });
+            })
+            .then(function (result) {
+              if (!result.ok || !result.data.ok) {
+                throw new Error(result.data.error || "객실 상태 조회 실패");
+              }
+              roomStatusManageRows = result.data.rows || [];
+              renderRoomManageTable();
+              showMessage("");
+            });
+        }
+
+        function saveRoomStatusManageRow(roomName, statusText) {
+          var auth = getAuthPayload();
+          return fetch(adminRoomStatusApiUrl(), {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              action: "save",
+              roomName: roomName,
+              statusText: statusText,
+              adminId: auth.adminId,
+              adminPw: auth.adminPw,
+            }),
+          })
+            .then(function (r) {
+              return r.json().then(function (data) {
+                return { ok: r.ok, data: data || {} };
+              });
+            })
+            .then(function (result) {
+              if (!result.ok || !result.data.ok) {
+                throw new Error(result.data.error || "객실 상태 저장 실패");
+              }
+              roomStatusManageRows = result.data.rows || [];
+              renderRoomManageTable();
+            });
         }
 
         function setActiveResTab(tab) {
