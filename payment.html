@@ -10,6 +10,45 @@
     <script src="js/site-language.js" defer></script>
     <!-- PortOne v2 Browser SDK -->
     <script src="https://cdn.portone.io/v2/browser-sdk.js"></script>
+    <style>
+      .page-loading-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.55);
+        z-index: 9999;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        pointer-events: all;
+      }
+      .page-loading-overlay[hidden] {
+        display: none;
+      }
+      .page-loading-overlay__box {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.75rem;
+        color: #fff;
+      }
+      .page-loading-overlay__spinner {
+        width: 48px;
+        height: 48px;
+        border: 4px solid rgba(255, 255, 255, 0.25);
+        border-top-color: #fff;
+        border-radius: 50%;
+        animation: page-loading-spin 0.8s linear infinite;
+      }
+      .page-loading-overlay__text {
+        font-size: 0.95rem;
+        letter-spacing: 0.02em;
+      }
+      @keyframes page-loading-spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+    </style>
   </head>
   <body>
     <div id="grafford-react-fade-root"></div>
@@ -172,6 +211,25 @@
           var errorArea = document.getElementById("payment-error-area");
           var errorMsg = document.getElementById("payment-error-msg");
           var retryBtn = document.getElementById("payment-retry-btn");
+          var pageLoadingOverlay = document.getElementById(
+            "page-loading-overlay",
+          );
+          var pageLoadingText = document.getElementById("page-loading-text");
+
+          function showPageLoading(msg) {
+            if (pageLoadingText) {
+              pageLoadingText.textContent = msg || "로딩 중입니다...";
+            }
+            if (pageLoadingOverlay) {
+              pageLoadingOverlay.hidden = false;
+            }
+          }
+
+          function hidePageLoading() {
+            if (pageLoadingOverlay) {
+              pageLoadingOverlay.hidden = true;
+            }
+          }
 
           function hideLoading() {
             if (loadingMsg) loadingMsg.hidden = true;
@@ -269,6 +327,7 @@
               Number(finalAmount).toLocaleString("ko-KR") + "원";
 
           function showError(msg) {
+            hidePageLoading();
             if (processingMsg) processingMsg.hidden = true;
             if (submitBtn) submitBtn.disabled = false;
             if (errorMsg)
@@ -359,6 +418,7 @@
 
             var verifiedPgTid = null;
             try {
+              showPageLoading("결제 확인 중입니다...");
               var verifyRes = await fetch("/api/payment-confirm", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
@@ -397,6 +457,7 @@
             if (!(payMethod === "naver" && reservationPreSaved)) {
               var saveRes, saveData;
               try {
+                showPageLoading("예약 정보를 저장하는 중입니다...");
                 saveRes = await fetch(reservationsApiUrl(), {
                   method: "POST",
                   headers: { "Content-Type": "application/json" },
@@ -462,6 +523,7 @@
               }),
             );
 
+            showPageLoading("완료 화면으로 이동하는 중입니다...");
             window.location.href = "reserve-complete.html";
           }
 
@@ -611,6 +673,25 @@
           var errorArea = document.getElementById("payment-error-area-en");
           var errorMsg = document.getElementById("payment-error-msg-en");
           var retryBtn = document.getElementById("payment-retry-btn-en");
+          var pageLoadingOverlay = document.getElementById(
+            "page-loading-overlay",
+          );
+          var pageLoadingText = document.getElementById("page-loading-text");
+
+          function showPageLoading(msg) {
+            if (pageLoadingText) {
+              pageLoadingText.textContent = msg || "Loading...";
+            }
+            if (pageLoadingOverlay) {
+              pageLoadingOverlay.hidden = false;
+            }
+          }
+
+          function hidePageLoading() {
+            if (pageLoadingOverlay) {
+              pageLoadingOverlay.hidden = true;
+            }
+          }
 
           function hideLoading() {
             if (loadingMsg) loadingMsg.hidden = true;
@@ -699,6 +780,7 @@
               "₩" + Number(finalAmount).toLocaleString("ko-KR");
 
           function showError(msg) {
+            hidePageLoading();
             if (processingMsg) processingMsg.hidden = true;
             if (submitBtn) submitBtn.disabled = false;
             if (errorMsg)
@@ -791,6 +873,7 @@
 
             var verifiedPgTid2 = null;
             try {
+              showPageLoading("Verifying payment...");
               var verifyRes = await fetch("/api/payment-confirm", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
@@ -829,6 +912,7 @@
             if (!(payMethod === "naver" && reservationPreSaved)) {
               var saveRes2, saveData2;
               try {
+                showPageLoading("Saving reservation...");
                 saveRes2 = await fetch(reservationsApiUrl(), {
                   method: "POST",
                   headers: { "Content-Type": "application/json" },
@@ -895,6 +979,7 @@
               }),
             );
 
+            showPageLoading("Moving to completion page...");
             window.location.href = "reserve-complete.html";
           }
 
@@ -913,6 +998,14 @@
       </script>
     </div>
 
+    <div id="page-loading-overlay" class="page-loading-overlay" hidden>
+      <div class="page-loading-overlay__box" role="status" aria-live="polite">
+        <div class="page-loading-overlay__spinner" aria-hidden="true"></div>
+        <p id="page-loading-text" class="page-loading-overlay__text">
+          로딩 중입니다...
+        </p>
+      </div>
+    </div>
     <script defer src="js/grafford-page-fade.js"></script>
   </body>
 </html>
