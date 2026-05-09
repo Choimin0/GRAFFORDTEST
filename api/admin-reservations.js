@@ -1,9 +1,7 @@
 import pg from "pg";
 
 const { Pool } = pg;
-const ACTIVE_TABLE = "reservations";
-const PAST_TABLE = "past_reservations";
-const DELETED_TABLE = "delete_reservations";
+const BOOKING_TABLE = "booking";
 const MAX_ADMIN_LOGIN_FAILS = 5;
 const ADMIN_BLOCK_MINUTES = Math.max(
   1,
@@ -12,10 +10,11 @@ const ADMIN_BLOCK_MINUTES = Math.max(
 
 var adminLoginAttemptStore = new Map();
 
+// collection → booking 테이블 status 필터 매핑
 const ALLOWED_COLLECTIONS = {
-  reservations: ACTIVE_TABLE,
-  "past-reservations": PAST_TABLE,
-  "delete-reservations": DELETED_TABLE,
+  reservations: "confirm",
+  "past-reservations": "completed",
+  "delete-reservations": "cancelled",
 };
 
 function getDatabaseUrl() {
@@ -183,62 +182,23 @@ function clearLoginFailures(ip) {
 
 async function archivePastReservations(pool) {
   await pool.query(
-    `WITH moved AS (
-      DELETE FROM ${ACTIVE_TABLE}
-      WHERE check_in_date < CURRENT_DATE
-      RETURNING *
-    )
-    INSERT INTO ${PAST_TABLE}
-    SELECT * FROM moved
-    ON CONFLICT (reservation_number) DO NOTHING`,
+    `UPDATE ${BOOKING_TABLE}
+     SET status = 'completed'
+     WHERE status = 'confirm'
+       AND check_in_date < CURRENT_DATE`,
   );
 }
 
 async function autoCancelUnpaidReservations(pool) {
   await pool.query(
-    `WITH moved AS (
-      DELETE FROM ${ACTIVE_TABLE}
-      WHERE coalesce(lower(trim(payment_method)), 'bank') IN ('bank', '무통장입금')
-        AND bank_confirmed IS NOT TRUE
-        AND created_at <= NOW() - INTERVAL '12 hours'
-      RETURNING *
-    )
-    INSERT INTO ${DELETED_TABLE} (
-      reservation_number, guest_name, contact, room_type,
-      check_in_date, check_out_date, guest_count, created_at,
-      stay_nights, extra_guests, total_amount, payment_method,
-      guest_request, bank_confirmed, cancel_reason
-    )
-    SELECT
-      reservation_number, guest_name, contact, room_type,
-      check_in_date, check_out_date, guest_count, created_at,
-      stay_nights, extra_guests, total_amount, payment_method,
-      guest_request, bank_confirmed, 'not paid'
-    FROM moved
-    ON CONFLICT (reservation_number) DO NOTHING`,
-  );
-
-  await pool.query(
-    `WITH moved AS (
-      DELETE FROM ${PAST_TABLE}
-      WHERE coalesce(lower(trim(payment_method)), 'bank') IN ('bank', '무통장입금')
-        AND bank_confirmed IS NOT TRUE
-        AND created_at <= NOW() - INTERVAL '12 hours'
-      RETURNING *
-    )
-    INSERT INTO ${DELETED_TABLE} (
-      reservation_number, guest_name, contact, room_type,
-      check_in_date, check_out_date, guest_count, created_at,
-      stay_nights, extra_guests, total_amount, payment_method,
-      guest_request, bank_confirmed, cancel_reason
-    )
-    SELECT
-      reservation_number, guest_name, contact, room_type,
-      check_in_date, check_out_date, guest_count, created_at,
-      stay_nights, extra_guests, total_amount, payment_method,
-      guest_request, bank_confirmed, 'not paid'
-    FROM moved
-    ON CONFLICT (reservation_number) DO NOTHING`,
+    `UPDATE ${BOOKING_TABLE}
+     SET status        = 'cancelled',
+         cancel_reason = 'not paid',
+         cancelled_at  = NOW()
+     WHERE status IN ('confirm', 'completed')
+       AND coalesce(lower(trim(payment_method)), 'bank') IN ('bank', '무통장입금')
+       AND bank_confirmed IS NOT TRUE
+       AND created_at <= NOW() - INTERVAL '12 hours'`,
   );
 }
 
@@ -335,21 +295,19 @@ export default async function handler(req, res) {
     return;
   }
 
-  var tableName = ALLOWED_COLLECTIONS[collection];
+  var statusFilter = ALLOWED_COLLECTIONS[collection];
   var isDeleted = collection === "delete-reservations";
   var isActive = collection === "reservations";
 
-  if (isActive) {
-    try {
-      await archivePastReservations(pool);
-      await autoCancelUnpaidReservations(pool);
-    } catch (e) {
-      json(res, 500, {
-        ok: false,
-        error: String((e && e.message) || e || "archive failed"),
-      });
-      return;
-    }
+  try {
+    await archivePastReservations(pool);
+    await autoCancelUnpaidReservations(pool);
+  } catch (e) {
+    json(res, 500, {
+      ok: false,
+      error: String((e && e.message) || e || "archive failed"),
+    });
+    return;
   }
 
   try {
@@ -374,8 +332,10 @@ export default async function handler(req, res) {
         payment_method,
         created_at
         ${extraCols}
-      FROM ${tableName}
+      FROM ${BOOKING_TABLE}
+      WHERE status = $1
       ${orderClause}`,
+      [statusFilter],
     );
 
     var rows = (sel.rows || []).map(function (row) {
@@ -385,20 +345,15 @@ export default async function handler(req, res) {
     var result = { ok: true, rows: rows };
 
     if (isActive) {
+      // 달력용: confirm + completed 모두 포함
       var calSel = await pool.query(
         `SELECT
           reservation_number, guest_name, contact, room_type,
           check_in_date, check_out_date, guest_count, total_amount,
           stay_nights, guest_request, payment_method, bank_confirmed,
-          created_at, FALSE AS is_past
-        FROM ${ACTIVE_TABLE}
-        UNION ALL
-        SELECT
-          reservation_number, guest_name, contact, room_type,
-          check_in_date, check_out_date, guest_count, total_amount,
-          stay_nights, guest_request, payment_method, bank_confirmed,
-          created_at, TRUE AS is_past
-        FROM ${PAST_TABLE}
+          created_at, (status = 'completed') AS is_past
+        FROM ${BOOKING_TABLE}
+        WHERE status IN ('confirm', 'completed')
         ORDER BY check_in_date ASC, created_at DESC`,
       );
       result.calendarRows = (calSel.rows || []).map(function (row) {

@@ -17,9 +17,7 @@ const MAX_GUEST_REQUEST = 2000;
 const MAX_CANCEL_REASON = 1000;
 const MAX_EMAIL = 255;
 const DEFAULT_CANCEL_TOKEN_TTL_MS = 10 * 60 * 1000;
-const ACTIVE_TABLE = "reservations";
-const PAST_TABLE = "past_reservations";
-const DELETED_TABLE = "delete_reservations";
+const BOOKING_TABLE = "booking";
 const ICAL_FETCH_TIMEOUT_MS = 8000;
 
 /** Neon/Vercel에서 오는 URL 이름이 달라도 사용 (TCP — Neon's HTTP 404 회피) */
@@ -57,10 +55,10 @@ function humanDbError(e) {
   }
   var c = e.code;
   if (c === "42703") {
-    return "DB에 필요한 컬럼이 없습니다. db/migrations/002~011 마이그레이션 SQL을 순서대로 실행하세요. (최신: 011_add_pg_tid_to_reservations.sql)";
+    return "DB에 필요한 컬럼이 없습니다. db/migrations/015_create_booking_table.sql 을 실행하세요.";
   }
   if (c === "42P01") {
-    return "필수 테이블이 없습니다. db/migrations/001_create_reservations.sql 과 db/migrations/006_split_reservation_tables.sql 을 실행하세요.";
+    return "booking 테이블이 없습니다. db/migrations/015_create_booking_table.sql 을 실행하세요.";
   }
   if (c === "23505") {
     return "Duplicate reservation number";
@@ -388,107 +386,26 @@ function todayYMDUtc() {
 }
 
 async function archivePastReservations(pool) {
+  // 체크인일이 지난 'confirm' 예약을 'completed'로 상태 전환
   await pool.query(
-    `WITH moved AS (
-      DELETE FROM ${ACTIVE_TABLE}
-      WHERE check_in_date < CURRENT_DATE
-      RETURNING *
-    )
-    INSERT INTO ${PAST_TABLE}
-    SELECT * FROM moved
-    ON CONFLICT (reservation_number) DO NOTHING`,
+    `UPDATE ${BOOKING_TABLE}
+     SET status = 'completed'
+     WHERE status = 'confirm'
+       AND check_in_date < CURRENT_DATE`,
   );
 }
 
 async function autoCancelUnpaidReservations(pool) {
+  // 미입금 무통장(12시간 경과)을 'cancelled'로 상태 전환
   await pool.query(
-    `WITH moved AS (
-      DELETE FROM ${ACTIVE_TABLE}
-      WHERE coalesce(lower(trim(payment_method)), 'bank') IN ('bank', '무통장입금')
-        AND bank_confirmed IS NOT TRUE
-        AND created_at <= NOW() - INTERVAL '12 hours'
-      RETURNING *
-    )
-    INSERT INTO ${DELETED_TABLE} (
-      reservation_number,
-      guest_name,
-      contact,
-      room_type,
-      check_in_date,
-      check_out_date,
-      guest_count,
-      created_at,
-      stay_nights,
-      extra_guests,
-      total_amount,
-      payment_method,
-      guest_request,
-      bank_confirmed,
-      cancel_reason
-    )
-    SELECT
-      reservation_number,
-      guest_name,
-      contact,
-      room_type,
-      check_in_date,
-      check_out_date,
-      guest_count,
-      created_at,
-      stay_nights,
-      extra_guests,
-      total_amount,
-      payment_method,
-      guest_request,
-      bank_confirmed,
-      'not paid'
-    FROM moved
-    ON CONFLICT (reservation_number) DO NOTHING`,
-  );
-
-  await pool.query(
-    `WITH moved AS (
-      DELETE FROM ${PAST_TABLE}
-      WHERE coalesce(lower(trim(payment_method)), 'bank') IN ('bank', '무통장입금')
-        AND bank_confirmed IS NOT TRUE
-        AND created_at <= NOW() - INTERVAL '12 hours'
-      RETURNING *
-    )
-    INSERT INTO ${DELETED_TABLE} (
-      reservation_number,
-      guest_name,
-      contact,
-      room_type,
-      check_in_date,
-      check_out_date,
-      guest_count,
-      created_at,
-      stay_nights,
-      extra_guests,
-      total_amount,
-      payment_method,
-      guest_request,
-      bank_confirmed,
-      cancel_reason
-    )
-    SELECT
-      reservation_number,
-      guest_name,
-      contact,
-      room_type,
-      check_in_date,
-      check_out_date,
-      guest_count,
-      created_at,
-      stay_nights,
-      extra_guests,
-      total_amount,
-      payment_method,
-      guest_request,
-      bank_confirmed,
-      'not paid'
-    FROM moved
-    ON CONFLICT (reservation_number) DO NOTHING`,
+    `UPDATE ${BOOKING_TABLE}
+     SET status        = 'cancelled',
+         cancel_reason = 'not paid',
+         cancelled_at  = NOW()
+     WHERE status IN ('confirm', 'completed')
+       AND coalesce(lower(trim(payment_method)), 'bank') IN ('bank', '무통장입금')
+       AND bank_confirmed IS NOT TRUE
+       AND created_at <= NOW() - INTERVAL '12 hours'`,
   );
 }
 
@@ -684,16 +601,19 @@ export default async function handler(req, res) {
           var legacyRoom = ROOM_TO_LEGACY[roomFilter] || "";
           rowsForIcal = await pool.query(
             `SELECT reservation_number, room_type, check_in_date, check_out_date
-             FROM ${ACTIVE_TABLE}
-             WHERE room_type = ANY($1::text[]) AND check_out_date IS NOT NULL
+             FROM ${BOOKING_TABLE}
+             WHERE status = 'confirm'
+               AND room_type = ANY($1::text[])
+               AND check_out_date IS NOT NULL
              ORDER BY check_in_date`,
             [[roomFilter, legacyRoom]],
           );
         } else {
           rowsForIcal = await pool.query(
             `SELECT reservation_number, room_type, check_in_date, check_out_date
-             FROM ${ACTIVE_TABLE}
-             WHERE check_out_date IS NOT NULL
+             FROM ${BOOKING_TABLE}
+             WHERE status = 'confirm'
+               AND check_out_date IS NOT NULL
              ORDER BY check_in_date`,
           );
         }
@@ -727,8 +647,10 @@ export default async function handler(req, res) {
         var roomForCalLegacy = ROOM_TO_LEGACY[roomForCal] || "";
         var calRows = await pool.query(
           `SELECT check_in_date, check_out_date
-           FROM ${ACTIVE_TABLE}
-           WHERE room_type = ANY($1::text[]) AND check_out_date IS NOT NULL
+           FROM ${BOOKING_TABLE}
+           WHERE status = 'confirm'
+             AND room_type = ANY($1::text[])
+             AND check_out_date IS NOT NULL
            ORDER BY check_in_date`,
           [[roomForCal, roomForCalLegacy]],
         );
@@ -793,24 +715,13 @@ export default async function handler(req, res) {
     try {
       var sel = await pool.query(
         `SELECT
-          id,
-          reservation_number,
-          guest_name,
-          contact,
-          email,
-          room_type,
-          check_in_date,
-          check_out_date,
-          guest_count,
-          stay_nights,
-          extra_guests,
-          total_amount,
-          guest_request,
-          payment_method,
-          bank_confirmed,
-          created_at
-        FROM ${ACTIVE_TABLE}
-        WHERE reservation_number = $1`,
+          id, reservation_number, guest_name, contact, email,
+          room_type, check_in_date, check_out_date, guest_count,
+          stay_nights, extra_guests, total_amount, guest_request,
+          payment_method, bank_confirmed, created_at
+        FROM ${BOOKING_TABLE}
+        WHERE reservation_number = $1
+          AND status = 'confirm'`,
         [normOrder],
       );
       if (!sel.rows || !sel.rows.length) {
@@ -835,12 +746,9 @@ export default async function handler(req, res) {
           checkIn: toYMD(dbRow.check_in_date),
           checkOut: toYMD(dbRow.check_out_date),
           guestCount: dbRow.guest_count,
-          stayNights:
-            dbRow.stay_nights != null ? Number(dbRow.stay_nights) : null,
-          extraGuests:
-            dbRow.extra_guests != null ? Number(dbRow.extra_guests) : null,
-          totalAmount:
-            dbRow.total_amount != null ? Number(dbRow.total_amount) : null,
+          stayNights: dbRow.stay_nights != null ? Number(dbRow.stay_nights) : null,
+          extraGuests: dbRow.extra_guests != null ? Number(dbRow.extra_guests) : null,
+          totalAmount: dbRow.total_amount != null ? Number(dbRow.total_amount) : null,
           guestRequest: dbRow.guest_request || "",
           paymentMethod: dbRow.payment_method || null,
           bankConfirmed: dbRow.bank_confirmed === true,
@@ -848,70 +756,8 @@ export default async function handler(req, res) {
         },
       });
     } catch (e) {
-      if (e && e.code === "42703") {
-        try {
-          var selBasic = await pool.query(
-            `SELECT
-              id,
-              reservation_number,
-              guest_name,
-              contact,
-              room_type,
-              check_in_date,
-              check_out_date,
-              guest_count,
-              created_at
-            FROM ${ACTIVE_TABLE}
-            WHERE reservation_number = $1`,
-            [normOrder],
-          );
-          if (!selBasic.rows || !selBasic.rows.length) {
-            json(res, 404, { ok: false, error: "Not found" });
-            return;
-          }
-          var br = selBasic.rows[0];
-          if (normalizeLookupName(br.guest_name) !== normName) {
-            json(res, 404, { ok: false, error: "Not found" });
-            return;
-          }
-          json(res, 200, {
-            ok: true,
-            source: "database",
-            row: {
-              id: br.id,
-              reservationNumber: br.reservation_number,
-              guestName: br.guest_name,
-              contact: br.contact,
-              roomType: normalizeRoomType(br.room_type) || br.room_type,
-              checkIn: toYMD(br.check_in_date),
-              checkOut: toYMD(br.check_out_date),
-              guestCount: br.guest_count,
-              stayNights: null,
-              extraGuests: null,
-              totalAmount: null,
-              paymentMethod: null,
-              bankConfirmed: false,
-              createdAt: formatDateTimeKst(br.created_at),
-            },
-            warning:
-              "일부 컬럼이 DB에 없습니다. db/migrations/002_reservations_booking_columns.sql 을 실행하세요.",
-          });
-        } catch (e2) {
-          console.error("reservations lookup fallback", e2);
-          json(res, 500, {
-            ok: false,
-            error: humanDbError(e2),
-            code: e2.code || null,
-          });
-        }
-        return;
-      }
       console.error("reservations lookup", e);
-      json(res, 500, {
-        ok: false,
-        error: humanDbError(e),
-        code: e.code || null,
-      });
+      json(res, 500, { ok: false, error: humanDbError(e), code: e.code || null });
     }
     return;
   }
@@ -977,94 +823,30 @@ export default async function handler(req, res) {
     }
 
     try {
-      var client = await pool.connect();
-      var deletedRow = null;
-      try {
-        await client.query("BEGIN");
-        var delLive = await client.query(
-          `DELETE FROM ${ACTIVE_TABLE}
-           WHERE reservation_number = $1
-             AND guest_name = $2
-           RETURNING *`,
-          [delReservationNumber, delGuestName],
-        );
-        if (delLive.rows && delLive.rows.length) {
-          deletedRow = delLive.rows[0];
-        } else {
-          var delPast = await client.query(
-            `DELETE FROM ${PAST_TABLE}
-             WHERE reservation_number = $1
-               AND guest_name = $2
-             RETURNING *`,
-            [delReservationNumber, delGuestName],
-          );
-          if (delPast.rows && delPast.rows.length) {
-            deletedRow = delPast.rows[0];
-          }
-        }
-        if (!deletedRow) {
-          await client.query("ROLLBACK");
-          json(res, 404, { ok: false, error: "삭제할 예약을 찾을 수 없습니다." });
-          return;
-        }
-        await client.query(
-          `INSERT INTO ${DELETED_TABLE} (
-            reservation_number,
-            guest_name,
-            contact,
-            room_type,
-            check_in_date,
-            check_out_date,
-            guest_count,
-            created_at,
-            stay_nights,
-            extra_guests,
-            total_amount,
-            payment_method,
-            guest_request,
-            bank_confirmed,
-            cancel_reason
-          ) VALUES (
-            $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15
-          )`,
-          [
-            deletedRow.reservation_number,
-            deletedRow.guest_name,
-            deletedRow.contact,
-            deletedRow.room_type,
-            deletedRow.check_in_date,
-            deletedRow.check_out_date,
-            deletedRow.guest_count,
-            deletedRow.created_at,
-            deletedRow.stay_nights,
-            deletedRow.extra_guests,
-            deletedRow.total_amount,
-            deletedRow.payment_method,
-            deletedRow.guest_request,
-            deletedRow.bank_confirmed,
-            cancelReason,
-          ],
-        );
-        await client.query("COMMIT");
-      } catch (txErr) {
-        await client.query("ROLLBACK");
-        throw txErr;
-      } finally {
-        client.release();
+      var upd = await pool.query(
+        `UPDATE ${BOOKING_TABLE}
+         SET status        = 'cancelled',
+             cancel_reason = $3,
+             cancelled_at  = NOW()
+         WHERE reservation_number = $1
+           AND guest_name = $2
+           AND status IN ('confirm', 'completed')
+         RETURNING reservation_number`,
+        [delReservationNumber, delGuestName, cancelReason || null],
+      );
+      if (!upd.rows || !upd.rows.length) {
+        json(res, 404, { ok: false, error: "삭제할 예약을 찾을 수 없습니다." });
+        return;
       }
       json(res, 200, {
         ok: true,
         deleted: true,
-        reservationNumber: deletedRow.reservation_number,
+        reservationNumber: upd.rows[0].reservation_number,
         cancelledAt: formatDateTimeKst(new Date()),
       });
     } catch (e) {
       console.error("reservations delete", e);
-      json(res, 500, {
-        ok: false,
-        error: humanDbError(e),
-        code: e.code || null,
-      });
+      json(res, 500, { ok: false, error: humanDbError(e), code: e.code || null });
     }
     return;
   }
@@ -1159,11 +941,13 @@ export default async function handler(req, res) {
   var sn = Math.floor(stayNights);
   var eg = Math.floor(extraGuests);
   var ta = Math.floor(totalAmount);
-  var insertTargetTable = checkIn < todayYMDUtc() ? PAST_TABLE : ACTIVE_TABLE;
+  // 체크인일이 이미 지났으면 'completed', 아니면 'confirm'
+  var insertStatus = checkIn < todayYMDUtc() ? "completed" : "confirm";
 
   var insertSql = `
-    INSERT INTO ${insertTargetTable} (
+    INSERT INTO ${BOOKING_TABLE} (
       reservation_number,
+      status,
       guest_name,
       contact,
       email,
@@ -1179,13 +963,14 @@ export default async function handler(req, res) {
       bank_confirmed,
       pg_tid
     ) VALUES (
-      $1, $2, $3, $4, $5, $6::date, $7::date, $8, $9, $10, $11, $12, $13, $14, $15
+      $1, $2, $3, $4, $5, $6, $7::date, $8::date, $9, $10, $11, $12, $13, $14, $15, $16
     )
     RETURNING id, reservation_number, created_at
   `;
 
   var params = [
     reservationNumber,
+    insertStatus,
     guestName,
     contact,
     email || null,

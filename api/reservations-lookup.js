@@ -4,9 +4,7 @@ import crypto from "node:crypto";
 const { Pool } = pg;
 const LEGACY_TO_ROOM = { A: "G1", B: "G2", C: "G3", D: "G4" };
 const DEFAULT_CANCEL_TOKEN_TTL_MS = 10 * 60 * 1000;
-const ACTIVE_TABLE = "reservations";
-const PAST_TABLE = "past_reservations";
-const DELETED_TABLE = "delete_reservations";
+const BOOKING_TABLE = "booking";
 
 function getDatabaseUrl() {
   return String(
@@ -176,112 +174,26 @@ function issueCancelToken(reservationNumber, guestName) {
 
 async function archivePastReservations(pool) {
   await pool.query(
-    `WITH moved AS (
-      DELETE FROM ${ACTIVE_TABLE}
-      WHERE check_in_date < CURRENT_DATE
-      RETURNING *
-    )
-    INSERT INTO ${PAST_TABLE}
-    SELECT * FROM moved
-    ON CONFLICT (reservation_number) DO NOTHING`,
+    `UPDATE ${BOOKING_TABLE}
+     SET status = 'completed'
+     WHERE status = 'confirm'
+       AND check_in_date < CURRENT_DATE`,
   );
 }
 
 async function autoCancelUnpaidReservations(pool) {
-  var resActive = await pool.query(
-    `WITH moved AS (
-      DELETE FROM ${ACTIVE_TABLE}
-      WHERE coalesce(lower(trim(payment_method)), 'bank') IN ('bank', '무통장입금')
-        AND bank_confirmed IS NOT TRUE
-        AND created_at <= NOW() - INTERVAL '12 hours'
-      RETURNING *
-    )
-    INSERT INTO ${DELETED_TABLE} (
-      reservation_number,
-      guest_name,
-      contact,
-      room_type,
-      check_in_date,
-      check_out_date,
-      guest_count,
-      created_at,
-      stay_nights,
-      extra_guests,
-      total_amount,
-      payment_method,
-      guest_request,
-      bank_confirmed,
-      cancel_reason
-    )
-    SELECT
-      reservation_number,
-      guest_name,
-      contact,
-      room_type,
-      check_in_date,
-      check_out_date,
-      guest_count,
-      created_at,
-      stay_nights,
-      extra_guests,
-      total_amount,
-      payment_method,
-      guest_request,
-      bank_confirmed,
-      'not paid'
-    FROM moved
-    ON CONFLICT (reservation_number) DO NOTHING
-    RETURNING reservation_number`,
+  var res = await pool.query(
+    `UPDATE ${BOOKING_TABLE}
+     SET status        = 'cancelled',
+         cancel_reason = 'not paid',
+         cancelled_at  = NOW()
+     WHERE status IN ('confirm', 'completed')
+       AND coalesce(lower(trim(payment_method)), 'bank') IN ('bank', '무통장입금')
+       AND bank_confirmed IS NOT TRUE
+       AND created_at <= NOW() - INTERVAL '12 hours'
+     RETURNING reservation_number`,
   );
-  var resPast = await pool.query(
-    `WITH moved AS (
-      DELETE FROM ${PAST_TABLE}
-      WHERE coalesce(lower(trim(payment_method)), 'bank') IN ('bank', '무통장입금')
-        AND bank_confirmed IS NOT TRUE
-        AND created_at <= NOW() - INTERVAL '12 hours'
-      RETURNING *
-    )
-    INSERT INTO ${DELETED_TABLE} (
-      reservation_number,
-      guest_name,
-      contact,
-      room_type,
-      check_in_date,
-      check_out_date,
-      guest_count,
-      created_at,
-      stay_nights,
-      extra_guests,
-      total_amount,
-      payment_method,
-      guest_request,
-      bank_confirmed,
-      cancel_reason
-    )
-    SELECT
-      reservation_number,
-      guest_name,
-      contact,
-      room_type,
-      check_in_date,
-      check_out_date,
-      guest_count,
-      created_at,
-      stay_nights,
-      extra_guests,
-      total_amount,
-      payment_method,
-      guest_request,
-      bank_confirmed,
-      'not paid'
-    FROM moved
-    ON CONFLICT (reservation_number) DO NOTHING
-    RETURNING reservation_number`,
-  );
-  return {
-    movedFromActive: (resActive.rows || []).length,
-    movedFromPast: (resPast.rows || []).length,
-  };
+  return { cancelled: (res.rows || []).length };
 }
 
 export default async function handler(req, res) {
@@ -330,39 +242,36 @@ export default async function handler(req, res) {
 
   try {
     await archivePastReservations(pool);
-    var autoCancelStats = await autoCancelUnpaidReservations(pool);
+    await autoCancelUnpaidReservations(pool);
+
+    // booking 테이블에서 status 기준으로 한 번에 조회
     var sel = await pool.query(
       `SELECT
-        id,
-        reservation_number,
-        guest_name,
-        contact,
-        room_type,
-        check_in_date,
-        check_out_date,
-        guest_count,
-        stay_nights,
-        extra_guests,
-        total_amount,
-        guest_request,
-        payment_method,
-        bank_confirmed,
-        created_at
-      FROM (
-        SELECT * FROM ${ACTIVE_TABLE}
-        UNION ALL
-        SELECT * FROM ${PAST_TABLE}
-      ) AS merged_reservations
+        id, reservation_number, guest_name, contact, room_type,
+        check_in_date, check_out_date, guest_count, stay_nights,
+        extra_guests, total_amount, guest_request, payment_method,
+        bank_confirmed, created_at, status, cancel_reason
+      FROM ${BOOKING_TABLE}
       WHERE reservation_number = $1
       LIMIT 1`,
       [normOrder],
     );
-    if (sel.rows && sel.rows.length) {
-      var row = sel.rows[0];
-      if (normalizeLookupName(row.guest_name) !== normName) {
-        json(res, 404, { ok: false, error: "Not found" });
-        return;
-      }
+
+    if (!sel.rows || !sel.rows.length) {
+      json(res, 404, { ok: false, error: "Not found" });
+      return;
+    }
+
+    var row = sel.rows[0];
+    if (normalizeLookupName(row.guest_name) !== normName) {
+      json(res, 404, { ok: false, error: "Not found" });
+      return;
+    }
+
+    var isCancelled = row.status === "cancelled";
+
+    if (!isCancelled) {
+      // confirm 또는 completed: 정상 예약
       json(res, 200, {
         ok: true,
         source: "database",
@@ -376,10 +285,8 @@ export default async function handler(req, res) {
           checkOut: toYMD(row.check_out_date),
           guestCount: row.guest_count,
           stayNights: row.stay_nights != null ? Number(row.stay_nights) : null,
-          extraGuests:
-            row.extra_guests != null ? Number(row.extra_guests) : null,
-          totalAmount:
-            row.total_amount != null ? Number(row.total_amount) : null,
+          extraGuests: row.extra_guests != null ? Number(row.extra_guests) : null,
+          totalAmount: row.total_amount != null ? Number(row.total_amount) : null,
           guestRequest: row.guest_request || "",
           paymentMethod: row.payment_method || null,
           bankConfirmed: row.bank_confirmed === true,
@@ -390,71 +297,28 @@ export default async function handler(req, res) {
       return;
     }
 
-    var deletedSel = await pool.query(
-      `SELECT
-        reservation_number,
-        guest_name,
-        contact,
-        room_type,
-        check_in_date,
-        check_out_date,
-        guest_count,
-        stay_nights,
-        extra_guests,
-        total_amount,
-        guest_request,
-        payment_method,
-        bank_confirmed,
-        created_at,
-        cancel_reason
-      FROM ${DELETED_TABLE}
-      WHERE reservation_number = $1
-      LIMIT 1`,
-      [normOrder],
-    );
-    if (!deletedSel.rows || !deletedSel.rows.length) {
-      json(res, 404, { ok: false, error: "Not found" });
-      return;
-    }
-    var deletedRow = deletedSel.rows[0];
-    if (normalizeLookupName(deletedRow.guest_name) !== normName) {
-      json(res, 404, { ok: false, error: "Not found" });
-      return;
-    }
+    // cancelled: 취소된 예약
     json(res, 200, {
       ok: true,
       source: "database",
       deleted: true,
-      deleteReason: String(deletedRow.cancel_reason || "").toLowerCase(),
+      deleteReason: String(row.cancel_reason || "").toLowerCase(),
       row: {
-        reservationNumber: deletedRow.reservation_number,
-        guestName: deletedRow.guest_name,
-        contact: deletedRow.contact,
-        roomType:
-          normalizeRoomType(deletedRow.room_type) || deletedRow.room_type,
-        checkIn: toYMD(deletedRow.check_in_date),
-        checkOut: toYMD(deletedRow.check_out_date),
-        guestCount:
-          deletedRow.guest_count != null
-            ? Number(deletedRow.guest_count)
-            : null,
-        stayNights:
-          deletedRow.stay_nights != null
-            ? Number(deletedRow.stay_nights)
-            : null,
-        extraGuests:
-          deletedRow.extra_guests != null
-            ? Number(deletedRow.extra_guests)
-            : null,
-        totalAmount:
-          deletedRow.total_amount != null
-            ? Number(deletedRow.total_amount)
-            : null,
-        guestRequest: deletedRow.guest_request || "",
-        paymentMethod: deletedRow.payment_method || null,
-        bankConfirmed: deletedRow.bank_confirmed === true,
-        createdAt: formatDateTimeKst(deletedRow.created_at),
-        cancelReason: deletedRow.cancel_reason || "",
+        reservationNumber: row.reservation_number,
+        guestName: row.guest_name,
+        contact: row.contact,
+        roomType: normalizeRoomType(row.room_type) || row.room_type,
+        checkIn: toYMD(row.check_in_date),
+        checkOut: toYMD(row.check_out_date),
+        guestCount: row.guest_count != null ? Number(row.guest_count) : null,
+        stayNights: row.stay_nights != null ? Number(row.stay_nights) : null,
+        extraGuests: row.extra_guests != null ? Number(row.extra_guests) : null,
+        totalAmount: row.total_amount != null ? Number(row.total_amount) : null,
+        guestRequest: row.guest_request || "",
+        paymentMethod: row.payment_method || null,
+        bankConfirmed: row.bank_confirmed === true,
+        createdAt: formatDateTimeKst(row.created_at),
+        cancelReason: row.cancel_reason || "",
       },
     });
   } catch (e) {

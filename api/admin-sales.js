@@ -1,9 +1,7 @@
 import pg from "pg";
 
 const { Pool } = pg;
-const ACTIVE_TABLE = "reservations";
-const PAST_TABLE = "past_reservations";
-const DELETED_TABLE = "delete_reservations";
+const BOOKING_TABLE = "booking";
 
 function getDatabaseUrl() {
   return String(
@@ -97,30 +95,23 @@ const CHANNEL_COLORS = {
 };
 
 async function getMonthlySalesData(pool) {
-  // 이번 달 범위: 1일 00:00 ~ 다음달 1일 00:00 (UTC 기준 날짜 비교)
   const statsQuery = `
-    WITH monthly AS (
-      SELECT total_amount, payment_method, room_type
-      FROM ${ACTIVE_TABLE}
-      WHERE DATE_TRUNC('month', check_in_date) = DATE_TRUNC('month', CURRENT_DATE)
-      UNION ALL
-      SELECT total_amount, payment_method, room_type
-      FROM ${PAST_TABLE}
-      WHERE DATE_TRUNC('month', check_in_date) = DATE_TRUNC('month', CURRENT_DATE)
-    )
     SELECT
-      COUNT(*)::int                         AS reservation_count,
+      COUNT(*)::int                          AS reservation_count,
       COALESCE(SUM(total_amount), 0)::bigint AS total_revenue,
       payment_method,
       room_type
-    FROM monthly
+    FROM ${BOOKING_TABLE}
+    WHERE status IN ('confirm', 'completed')
+      AND DATE_TRUNC('month', check_in_date) = DATE_TRUNC('month', CURRENT_DATE)
     GROUP BY payment_method, room_type
   `;
 
   const cancelQuery = `
     SELECT COUNT(*)::int AS cancel_count
-    FROM ${DELETED_TABLE}
-    WHERE DATE_TRUNC('month', COALESCE(cancelled_at, created_at)) = DATE_TRUNC('month', CURRENT_DATE)
+    FROM ${BOOKING_TABLE}
+    WHERE status = 'cancelled'
+      AND DATE_TRUNC('month', COALESCE(cancelled_at, created_at)) = DATE_TRUNC('month', CURRENT_DATE)
   `;
 
   const occupancyQuery = `
@@ -131,13 +122,9 @@ async function getMonthlySalesData(pool) {
     ),
     all_res AS (
       SELECT check_in_date, check_out_date
-      FROM ${ACTIVE_TABLE}, month_bounds
-      WHERE check_out_date > month_start
-        AND check_in_date < next_month_start
-      UNION ALL
-      SELECT check_in_date, check_out_date
-      FROM ${PAST_TABLE}, month_bounds
-      WHERE check_out_date > month_start
+      FROM ${BOOKING_TABLE}, month_bounds
+      WHERE status IN ('confirm', 'completed')
+        AND check_out_date > month_start
         AND check_in_date < next_month_start
     ),
     days AS (
@@ -235,34 +222,23 @@ async function getMonthlySalesData(pool) {
 
 async function getAnnualSalesData(pool) {
   const monthlyQuery = `
-    WITH all_res AS (
-      SELECT check_in_date, total_amount
-      FROM ${ACTIVE_TABLE}
-      WHERE EXTRACT(YEAR FROM check_in_date) = EXTRACT(YEAR FROM CURRENT_DATE)
-      UNION ALL
-      SELECT check_in_date, total_amount
-      FROM ${PAST_TABLE}
-      WHERE EXTRACT(YEAR FROM check_in_date) = EXTRACT(YEAR FROM CURRENT_DATE)
-    )
     SELECT
       EXTRACT(MONTH FROM check_in_date)::int AS month,
       COALESCE(SUM(total_amount), 0)::bigint AS revenue
-    FROM all_res
+    FROM ${BOOKING_TABLE}
+    WHERE status IN ('confirm', 'completed')
+      AND EXTRACT(YEAR FROM check_in_date) = EXTRACT(YEAR FROM CURRENT_DATE)
     GROUP BY month
     ORDER BY month
   `;
 
   const annualQuery = `
-    WITH all_res AS (
-      SELECT check_in_date, total_amount FROM ${ACTIVE_TABLE}
-      UNION ALL
-      SELECT check_in_date, total_amount FROM ${PAST_TABLE}
-    )
     SELECT
       EXTRACT(YEAR FROM check_in_date)::int AS year,
       COALESCE(SUM(total_amount), 0)::bigint AS revenue
-    FROM all_res
-    WHERE EXTRACT(YEAR FROM check_in_date) >= 2026
+    FROM ${BOOKING_TABLE}
+    WHERE status IN ('confirm', 'completed')
+      AND EXTRACT(YEAR FROM check_in_date) >= 2026
     GROUP BY year
     ORDER BY year
   `;

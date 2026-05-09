@@ -8,7 +8,7 @@
  * 3. pg_tid가 있으면 PortOne v2 결제 취소 API 호출
  *    - paymentId = reservationNumber (결제 시 사용한 PortOne paymentId)
  *    - refundAmount < totalAmount 이면 부분 취소, 같으면 전액 취소
- * 4. 성공 시 DB에서 예약 삭제 (delete_reservations 테이블로 이동)
+ * 4. 성공 시 booking 테이블 status를 'cancelled'로 업데이트
  *
  * Body: { reservationNumber, guestName, cancelToken, cancelReason, refundAmount }
  * Response: { ok: true, pgCancelled, pgTid, cancelledAt } | { error }
@@ -18,9 +18,7 @@ import crypto from "node:crypto";
 
 const { Pool } = pg;
 
-const ACTIVE_TABLE = "reservations";
-const PAST_TABLE = "past_reservations";
-const DELETED_TABLE = "delete_reservations";
+const BOOKING_TABLE = "booking";
 const DEFAULT_CANCEL_TOKEN_TTL_MS = 10 * 60 * 1000;
 const MAX_CANCEL_REASON = 1000;
 
@@ -322,11 +320,11 @@ export default async function handler(req, res) {
   }
 
   try {
-    // 예약 조회 — pg_tid 포함
+    // 예약 조회 — booking 테이블에서 confirm/completed 상태만
     var sel = await client.query(
-      `SELECT *, 'active' AS _source FROM ${ACTIVE_TABLE} WHERE reservation_number = $1
-       UNION ALL
-       SELECT *, 'past' AS _source FROM ${PAST_TABLE} WHERE reservation_number = $1
+      `SELECT * FROM ${BOOKING_TABLE}
+       WHERE reservation_number = $1
+         AND status IN ('confirm', 'completed')
        LIMIT 1`,
       [reservationNumber],
     );
@@ -357,7 +355,6 @@ export default async function handler(req, res) {
 
     var pgTid = row.pg_tid ? String(row.pg_tid).trim() : null;
     var totalAmount = row.total_amount != null ? Number(row.total_amount) : null;
-    var source = String(row._source || "active");
     // payment_method: "bank" / "무통장입금" 이면 PG 취소 불필요; 그 외(card 등)는 PortOne 취소
     var paymentMethodDb = String(row.payment_method || "").toLowerCase().trim();
     var isBankTransfer =
@@ -430,88 +427,31 @@ export default async function handler(req, res) {
       }
     }
 
-    // DB에서 예약 삭제 후 delete_reservations로 이동
+    // booking 테이블에서 status를 'cancelled'로 업데이트
     try {
-      await client.query("BEGIN");
-
-      var sourceTable = source === "past" ? PAST_TABLE : ACTIVE_TABLE;
-      var delResult = await client.query(
-        `DELETE FROM ${sourceTable}
-         WHERE reservation_number = $1 AND guest_name = $2
-         RETURNING *`,
-        [reservationNumber, row.guest_name],
-      );
-
-      // active에 없으면 past에서도 시도
-      if ((!delResult.rows || !delResult.rows.length) && source !== "past") {
-        delResult = await client.query(
-          `DELETE FROM ${PAST_TABLE}
-           WHERE reservation_number = $1 AND guest_name = $2
-           RETURNING *`,
-          [reservationNumber, row.guest_name],
-        );
-      }
-
-      if (!delResult.rows || !delResult.rows.length) {
-        await client.query("ROLLBACK");
-        client.release();
-        json(res, 404, { ok: false, error: "삭제할 예약을 찾을 수 없습니다." });
-        return;
-      }
-
-      var deletedRow = delResult.rows[0];
-
-      await client.query(
-        `INSERT INTO ${DELETED_TABLE} (
-          reservation_number,
-          guest_name,
-          contact,
-          email,
-          room_type,
-          check_in_date,
-          check_out_date,
-          guest_count,
-          created_at,
-          stay_nights,
-          extra_guests,
-          total_amount,
-          payment_method,
-          guest_request,
-          bank_confirmed,
-          pg_tid,
-          cancel_reason,
-          refunded_count,
-          refund_amount
-        ) VALUES (
-          $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19
-        ) ON CONFLICT (reservation_number) DO NOTHING`,
+      var updResult = await client.query(
+        `UPDATE ${BOOKING_TABLE}
+         SET status        = 'cancelled',
+             cancel_reason = $3,
+             cancelled_at  = NOW(),
+             refunded_count = 1,
+             refund_amount  = $4
+         WHERE reservation_number = $1
+           AND guest_name = $2
+           AND status IN ('confirm', 'completed')
+         RETURNING reservation_number`,
         [
-          deletedRow.reservation_number,
-          deletedRow.guest_name,
-          deletedRow.contact,
-          deletedRow.email || null,
-          deletedRow.room_type,
-          deletedRow.check_in_date,
-          deletedRow.check_out_date,
-          deletedRow.guest_count,
-          deletedRow.created_at,
-          deletedRow.stay_nights,
-          deletedRow.extra_guests,
-          deletedRow.total_amount,
-          deletedRow.payment_method,
-          deletedRow.guest_request,
-          deletedRow.bank_confirmed,
-          deletedRow.pg_tid || null,
+          reservationNumber,
+          row.guest_name,
           cancelReason || null,
-          1,                // 취소 완료: refunded_count = 1
-          safeRefundAmount, // 실제 환불 처리된 금액 (0이면 환불 없음)
+          safeRefundAmount,
         ],
       );
 
-      await client.query("COMMIT");
-    } catch (txErr) {
-      await client.query("ROLLBACK");
-      throw txErr;
+      if (!updResult.rows || !updResult.rows.length) {
+        json(res, 404, { ok: false, error: "삭제할 예약을 찾을 수 없습니다." });
+        return;
+      }
     } finally {
       client.release();
     }
