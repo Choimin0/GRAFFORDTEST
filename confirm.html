@@ -272,6 +272,7 @@
                 <label class="confirm-label">
                   <textarea
                     name="guestRequest"
+                    id="guest-request-kr"
                     class="confirm-textarea"
                     rows="1"
                   ></textarea>
@@ -590,6 +591,25 @@
             quote.discountedGrandTotal,
           );
 
+          function syncConfirmEnHiddenFields() {
+            var pairs = [
+              ["f-room", "f-room-en"],
+              ["f-checkin", "f-checkin-en"],
+              ["f-checkout", "f-checkout-en"],
+              ["f-nights", "f-nights-en"],
+              ["f-extra-guests", "f-extra-guests-en"],
+              ["f-total-amount", "f-total-amount-en"],
+            ];
+            pairs.forEach(function (pair) {
+              var fromEl = document.getElementById(pair[0]);
+              var toEl = document.getElementById(pair[1]);
+              if (fromEl && toEl) {
+                toEl.value = fromEl.value;
+              }
+            });
+          }
+          syncConfirmEnHiddenFields();
+
           function buildBookingScheduleText(language) {
             var isEn = language === "en";
             if (checkIn && checkOut && quote.nights > 0) {
@@ -757,9 +777,7 @@
           var guestNameInput = document.getElementById("f-name");
           var contactInput = document.getElementById("f-contact");
           var emailInput = document.getElementById("f-email");
-          var guestRequestInput = document.querySelector(
-            'textarea[name="guestRequest"]',
-          );
+          var guestRequestInput = document.getElementById("guest-request-kr");
           var hasTriedSubmit = false;
 
           // ── 뒤로가기 가드 ──────────────────────────────────────────
@@ -864,25 +882,43 @@
               if (guestRequestInput && prevPayData.guestRequest) {
                 guestRequestInput.value = prevPayData.guestRequest;
               }
+              var guestNameInputEn = document.getElementById("f-name-en");
+              var contactInputEn = document.getElementById("f-contact-en");
+              var emailInputEn = document.getElementById("f-email-en");
+              var guestRequestInputEn = document.getElementById(
+                "guest-request-en",
+              );
+              if (guestNameInputEn && prevPayData.guestName) {
+                guestNameInputEn.value = prevPayData.guestName;
+              }
+              if (contactInputEn && prevPayData.contact) {
+                contactInputEn.value = prevPayData.contact;
+              }
+              if (emailInputEn && prevPayData.email) {
+                emailInputEn.value = prevPayData.email;
+              }
+              if (guestRequestInputEn && prevPayData.guestRequest) {
+                guestRequestInputEn.value = prevPayData.guestRequest;
+              }
             }
           }
           // ───────────────────────────────────────────────────────────
 
-          if (contactInput) {
-            function formatPhoneKRMobile(value) {
-              var d = String(value || "").replace(/\D/g, "");
-              if (d.startsWith("82")) {
-                d = "0" + d.slice(2);
-              }
-              d = d.slice(0, 11);
-              if (d.length <= 3) {
-                return d;
-              }
-              if (d.length <= 7) {
-                return d.slice(0, 3) + "-" + d.slice(3);
-              }
-              return d.slice(0, 3) + "-" + d.slice(3, 7) + "-" + d.slice(7);
+          function formatPhoneKRMobile(value) {
+            var d = String(value || "").replace(/\D/g, "");
+            if (d.startsWith("82")) {
+              d = "0" + d.slice(2);
             }
+            d = d.slice(0, 11);
+            if (d.length <= 3) {
+              return d;
+            }
+            if (d.length <= 7) {
+              return d.slice(0, 3) + "-" + d.slice(3);
+            }
+            return d.slice(0, 3) + "-" + d.slice(3, 7) + "-" + d.slice(7);
+          }
+          if (contactInput) {
             contactInput.addEventListener("input", function () {
               var cur = contactInput.value;
               var next = formatPhoneKRMobile(cur);
@@ -892,6 +928,19 @@
             });
             contactInput.addEventListener("blur", function () {
               contactInput.value = formatPhoneKRMobile(contactInput.value);
+            });
+          }
+          var contactInputEn = document.getElementById("f-contact-en");
+          if (contactInputEn) {
+            contactInputEn.addEventListener("input", function () {
+              var cur = contactInputEn.value;
+              var next = formatPhoneKRMobile(cur);
+              if (cur !== next) {
+                contactInputEn.value = next;
+              }
+            });
+            contactInputEn.addEventListener("blur", function () {
+              contactInputEn.value = formatPhoneKRMobile(contactInputEn.value);
             });
           }
 
@@ -1291,6 +1340,407 @@
               }
             });
           }
+
+          var confirmFormEn = document.getElementById("confirm-form-en");
+          if (confirmFormEn) {
+            var paySubmitBtnEn =
+              confirmFormEn.querySelector(".confirm-pay-submit");
+            var payMethodInputsEn = confirmFormEn.querySelectorAll(
+              'input[name="paymentMethod"]',
+            );
+            var agreeAllEn = document.getElementById("agree-all-en");
+            var agreePrivacyEn = document.getElementById("agree-privacy-en");
+            var agreePurchaseEn = document.getElementById("agree-purchase-en");
+            var agreePrivacyToggleEn = document.getElementById(
+              "agree-privacy-toggle-en",
+            );
+            var agreePrivacyDetailEn = document.getElementById(
+              "agree-privacy-detail-en",
+            );
+            var agreeSectionEn = document.getElementById("sec-agree-en");
+            var guideSectionEn = document.getElementById("sec-guide-en");
+            var paySectionEn = document.getElementById("sec-pay-en");
+            var guestNameInputEn = document.getElementById("f-name-en");
+            var emailInputEn = document.getElementById("f-email-en");
+            var guestRequestInputEn = document.getElementById("guest-request-en");
+            var hasTriedSubmitEn = false;
+
+            function refreshConsentErrorsEn() {
+              if (!hasTriedSubmitEn) {
+                return;
+              }
+              markSectionError(
+                agreeSectionEn,
+                !(
+                  agreePrivacyEn &&
+                  agreePrivacyEn.checked &&
+                  agreePurchaseEn &&
+                  agreePurchaseEn.checked
+                ),
+              );
+              markSectionError(
+                guideSectionEn,
+                !(agreeAllEn && agreeAllEn.checked),
+              );
+            }
+
+            confirmFormEn.addEventListener("submit", function (e) {
+              e.preventDefault();
+              hasTriedSubmitEn = true;
+              syncConfirmEnHiddenFields();
+
+              var hasAgreeError = !(
+                agreePrivacyEn &&
+                agreePrivacyEn.checked &&
+                agreePurchaseEn &&
+                agreePurchaseEn.checked
+              );
+              var hasGuideError = !(agreeAllEn && agreeAllEn.checked);
+              var hasNameError = !(
+                guestNameInputEn && guestNameInputEn.value.trim()
+              );
+              var normalizedContactEn = contactInputEn
+                ? formatPhoneKRMobile(contactInputEn.value)
+                : "";
+              if (contactInputEn) {
+                contactInputEn.value = normalizedContactEn;
+              }
+              var hasContactError = !/^\d{3}-\d{4}-\d{4}$/.test(
+                normalizedContactEn,
+              );
+
+              var payInputEn = confirmFormEn.querySelector(
+                'input[name="paymentMethod"]:checked',
+              );
+              var hasPaymentError = !payInputEn;
+
+              markSectionError(agreeSectionEn, hasAgreeError);
+              markSectionError(guideSectionEn, hasGuideError);
+              markSectionError(paySectionEn, hasPaymentError);
+              markInputError(guestNameInputEn, hasNameError);
+              markInputError(contactInputEn, hasContactError);
+
+              if (
+                hasAgreeError ||
+                hasGuideError ||
+                hasNameError ||
+                hasContactError ||
+                hasPaymentError
+              ) {
+                if (hasAgreeError && agreeSectionEn) {
+                  agreeSectionEn.scrollIntoView({
+                    behavior: "smooth",
+                    block: "center",
+                  });
+                  return;
+                }
+                if (hasGuideError && guideSectionEn) {
+                  guideSectionEn.scrollIntoView({
+                    behavior: "smooth",
+                    block: "center",
+                  });
+                  return;
+                }
+                if (hasNameError && guestNameInputEn) {
+                  guestNameInputEn.focus();
+                  guestNameInputEn.scrollIntoView({
+                    behavior: "smooth",
+                    block: "center",
+                  });
+                  return;
+                }
+                if (hasContactError && contactInputEn) {
+                  contactInputEn.focus();
+                  contactInputEn.scrollIntoView({
+                    behavior: "smooth",
+                    block: "center",
+                  });
+                  return;
+                }
+                if (hasPaymentError && paySectionEn) {
+                  paySectionEn.scrollIntoView({
+                    behavior: "smooth",
+                    block: "center",
+                  });
+                }
+                return;
+              }
+
+              markSectionError(agreeSectionEn, false);
+              markSectionError(guideSectionEn, false);
+              markSectionError(paySectionEn, false);
+              markInputError(guestNameInputEn, false);
+              markInputError(contactInputEn, false);
+
+              var nightsEn = parseInt(
+                document.getElementById("f-nights-en").value,
+                10,
+              );
+              if (!nightsEn || nightsEn < 1) {
+                window.alert(
+                  "Check-in and check-out are not valid. Please select your stay on the reservation page.",
+                );
+                return;
+              }
+              if (!R || typeof R.generateOrderNumber !== "function") {
+                window.alert(
+                  "Reservation module could not be loaded. Please refresh and try again.",
+                );
+                return;
+              }
+
+              var guestNameEn = guestNameInputEn.value.trim();
+              var contactEn = normalizedContactEn;
+              if (!/^\d{3}-\d{4}-\d{4}$/.test(contactEn)) {
+                window.alert(
+                  "Please enter your phone number as 010-1234-5678 (11 digits).",
+                );
+                return;
+              }
+              var emailValEn = emailInputEn ? emailInputEn.value.trim() : "";
+              if (
+                !emailValEn ||
+                !/^[^\s@]{1,64}@[^\s@]{1,255}\.[^\s@]{1,63}$/.test(emailValEn)
+              ) {
+                window.alert("Please enter a valid email address.");
+                if (emailInputEn) {
+                  emailInputEn.focus();
+                }
+                return;
+              }
+
+              var orderNumberEn = R.generateOrderNumber();
+              var roomEn = document.getElementById("f-room-en").value;
+              var checkInEn = document.getElementById("f-checkin-en").value;
+              var checkOutEn = document.getElementById("f-checkout-en").value;
+              var extraGuestsEn =
+                parseInt(
+                  document.getElementById("f-extra-guests-en").value,
+                  10,
+                ) || 0;
+              var totalAmountEn =
+                parseInt(
+                  document.getElementById("f-total-amount-en").value,
+                  10,
+                ) || 0;
+              var guestCountEn = Math.min(50, Math.max(1, 2 + extraGuestsEn));
+
+              var payloadEn = {
+                reservationNumber: orderNumberEn,
+                guestName: guestNameEn,
+                contact: contactEn,
+                email: emailValEn,
+                guestRequest: guestRequestInputEn
+                  ? guestRequestInputEn.value.trim()
+                  : "",
+                roomType: roomEn,
+                checkIn: checkInEn,
+                checkOut: checkOutEn,
+                stayNights: nightsEn,
+                extraGuests: extraGuestsEn,
+                totalAmount: totalAmountEn,
+                paymentMethod: payInputEn.value,
+                guestCount: guestCountEn,
+              };
+
+              if (payInputEn.value === "naver") {
+                if (paySubmitBtnEn) {
+                  paySubmitBtnEn.disabled = true;
+                }
+
+                fetch(bookingApiUrl(), {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify(payloadEn),
+                })
+                  .then(function (resp) {
+                    return resp.json().then(function (data) {
+                      return { ok: resp.ok, status: resp.status, data: data };
+                    });
+                  })
+                  .then(function (result) {
+                    if (!result.ok) {
+                      var msgEn =
+                        (result.data && result.data.error) ||
+                        "Save failed. (" + result.status + ")";
+                      if (result.data && result.data.code) {
+                        msgEn += " [code: " + result.data.code + "]";
+                      }
+                      throw new Error(msgEn);
+                    }
+                    var recordEn = {
+                      orderNumber: orderNumberEn,
+                      guestName: guestNameEn,
+                      contact: contactEn,
+                      guestRequest: guestRequestInputEn
+                        ? guestRequestInputEn.value.trim()
+                        : "",
+                      room: roomEn,
+                      checkIn: checkInEn,
+                      checkOut: checkOutEn,
+                      nights: nightsEn,
+                      extraGuests: extraGuestsEn,
+                      totalAmount: totalAmountEn,
+                      paymentMethod: payInputEn.value,
+                      createdAt: Date.now(),
+                    };
+                    R.save(recordEn);
+                    sessionStorage.setItem(
+                      "graffordReserveCompleteData",
+                      JSON.stringify({
+                        orderNo: orderNumberEn,
+                        room: roomEn,
+                        checkIn: checkInEn,
+                        checkOut: checkOutEn,
+                        guestName: guestNameEn,
+                        contact: contactEn,
+                        email: emailValEn,
+                        guestRequest: recordEn.guestRequest || "",
+                        guestCount: String(guestCountEn),
+                        extraGuests: String(extraGuestsEn),
+                        totalAmount: String(totalAmountEn),
+                        payMethod: payInputEn.value,
+                        cancelToken:
+                          (result.data && result.data.cancelToken) || "",
+                        bankConfirmed: !!(
+                          result.data && result.data.bankConfirmed === true
+                        ),
+                      }),
+                    );
+                    sessionStorage.setItem("graffordInPaymentFlow", "1");
+                    sessionStorage.setItem(
+                      "graffordPaymentData",
+                      JSON.stringify({
+                        orderNo: orderNumberEn,
+                        totalAmount: String(totalAmountEn || 0),
+                        room: roomEn,
+                        checkIn: checkInEn,
+                        checkOut: checkOutEn,
+                        stayNights: String(nightsEn),
+                        extraGuests: String(extraGuestsEn || 0),
+                        guestName: guestNameEn,
+                        contact: contactEn,
+                        email: emailValEn,
+                        guestRequest: guestRequestInputEn
+                          ? guestRequestInputEn.value.trim()
+                          : "",
+                        guestCount: String(guestCountEn),
+                        payMethod: payInputEn.value,
+                        reservationPreSaved: "1",
+                        cancelToken:
+                          (result.data && result.data.cancelToken) || "",
+                      }),
+                    );
+                    window.location.href = "payment.html";
+                  })
+                  .catch(function (err) {
+                    window.alert(
+                      "Could not save the reservation.\n" +
+                        (err && err.message ? err.message : "Network error") +
+                        "\n\nIf you opened this file locally, run the site with API support (e.g. vercel dev).",
+                    );
+                  })
+                  .finally(function () {
+                    if (paySubmitBtnEn) {
+                      paySubmitBtnEn.disabled = false;
+                    }
+                  });
+              } else {
+                sessionStorage.setItem("graffordInPaymentFlow", "1");
+                sessionStorage.setItem(
+                  "graffordPaymentData",
+                  JSON.stringify({
+                    orderNo: orderNumberEn,
+                    totalAmount: String(totalAmountEn || 0),
+                    room: roomEn,
+                    checkIn: checkInEn,
+                    checkOut: checkOutEn,
+                    stayNights: String(nightsEn),
+                    extraGuests: String(extraGuestsEn || 0),
+                    guestName: guestNameEn,
+                    contact: contactEn,
+                    email: emailValEn,
+                    guestRequest: guestRequestInputEn
+                      ? guestRequestInputEn.value.trim()
+                      : "",
+                    guestCount: String(guestCountEn),
+                    payMethod: payInputEn.value,
+                  }),
+                );
+                window.location.href = "payment.html";
+              }
+            });
+
+            [guestNameInputEn, contactInputEn].forEach(function (el) {
+              if (!el) {
+                return;
+              }
+              el.addEventListener("input", function () {
+                if (!hasTriedSubmitEn) {
+                  return;
+                }
+                markInputError(
+                  guestNameInputEn,
+                  !(guestNameInputEn && guestNameInputEn.value.trim()),
+                );
+                markInputError(
+                  contactInputEn,
+                  !(
+                    contactInputEn &&
+                    /^\d{3}-\d{4}-\d{4}$/.test(
+                      formatPhoneKRMobile(contactInputEn.value),
+                    )
+                  ),
+                );
+              });
+            });
+
+            payMethodInputsEn.forEach(function (el) {
+              el.addEventListener("change", function () {
+                markSectionError(paySectionEn, false);
+              });
+            });
+
+            [agreeAllEn, agreePrivacyEn, agreePurchaseEn].forEach(function (
+              el,
+            ) {
+              if (!el) {
+                return;
+              }
+              el.addEventListener("change", refreshConsentErrorsEn);
+            });
+
+            if (agreePrivacyToggleEn && agreePrivacyDetailEn) {
+              var detailFadeMsEn = 220;
+              agreePrivacyToggleEn.addEventListener("click", function () {
+                var expanded =
+                  agreePrivacyToggleEn.getAttribute("aria-expanded") ===
+                  "true";
+                var next = !expanded;
+                agreePrivacyToggleEn.setAttribute(
+                  "aria-expanded",
+                  String(next),
+                );
+                agreePrivacyToggleEn.textContent = next ? "△" : "▽";
+                if (next) {
+                  agreePrivacyDetailEn.hidden = false;
+                  window.requestAnimationFrame(function () {
+                    agreePrivacyDetailEn.classList.add("is-open");
+                  });
+                } else {
+                  agreePrivacyDetailEn.classList.remove("is-open");
+                  window.setTimeout(function () {
+                    if (
+                      agreePrivacyToggleEn.getAttribute("aria-expanded") ===
+                      "false"
+                    ) {
+                      agreePrivacyDetailEn.hidden = true;
+                    }
+                  }, detailFadeMsEn);
+                }
+              });
+            }
+          }
         });
       </script>
       <script defer src="js/grafford-page-fade.js"></script>
@@ -1329,20 +1779,21 @@
 
         <form
           class="confirm-form checkout-form"
+          id="confirm-form-en"
           action="payment.html"
           method="get"
           novalidate
         >
-          <input type="hidden" name="room" />
-          <input type="hidden" name="checkIn" />
-          <input type="hidden" name="checkOut" />
-          <input type="hidden" name="nights" value="" />
-          <input type="hidden" name="extraGuests" value="" />
-          <input type="hidden" name="totalAmount" value="" />
+          <input type="hidden" name="room" id="f-room-en" />
+          <input type="hidden" name="checkIn" id="f-checkin-en" />
+          <input type="hidden" name="checkOut" id="f-checkout-en" />
+          <input type="hidden" name="nights" id="f-nights-en" value="0" />
+          <input type="hidden" name="extraGuests" id="f-extra-guests-en" value="0" />
+          <input type="hidden" name="totalAmount" id="f-total-amount-en" value="0" />
 
           <div class="confirm-layout-grid">
             <div class="confirm-layout-col">
-              <section class="confirm-section">
+              <section class="confirm-section" id="sec-guide-en">
                 <h2 class="confirm-section-title">
                   Guest Guidelines & Policies
                 </h2>
@@ -1549,7 +2000,8 @@
                   </div>
                 </div>
                 <label class="confirm-check confirm-check--all">
-                  <input type="checkbox" />Agree-all</label
+                  <input type="checkbox" id="agree-all-en" />
+                  Agree-all</label
                 >
               </section>
 
@@ -1558,6 +2010,7 @@
                 <label class="confirm-label">
                   <textarea
                     name="guestRequest"
+                    id="guest-request-en"
                     class="confirm-textarea"
                     rows="1"
                   ></textarea>
@@ -1586,6 +2039,7 @@
                   <input
                     type="text"
                     name="guestName"
+                    id="f-name-en"
                     required
                     autocomplete="name"
                     placeholder=""
@@ -1596,6 +2050,7 @@
                   <input
                     type="tel"
                     name="contact"
+                    id="f-contact-en"
                     required
                     autocomplete="tel"
                     inputmode="numeric"
@@ -1610,6 +2065,7 @@
                   <input
                     type="email"
                     name="email"
+                    id="f-email-en"
                     required
                     autocomplete="email"
                     inputmode="email"
@@ -1620,7 +2076,7 @@
                 </label>
               </section>
 
-              <section class="confirm-section">
+              <section class="confirm-section" id="sec-agree-en">
                 <h2 class="confirm-section-title">Individual Agreement</h2>
                 <div class="confirm-agree-list">
                   <div class="confirm-check-item">
@@ -1628,26 +2084,37 @@
                       <input
                         type="checkbox"
                         name="agreePrivacy"
-                        value=""
+                        id="agree-privacy-en"
+                        value="1"
                       />Consent to collecting and using personal
                       information</label
                     >
                     <button
                       type="button"
                       class="confirm-check-toggle"
+                      id="agree-privacy-toggle-en"
                       aria-expanded="false"
-                      aria-controls="agree-privacy-detail"
-                      aria-label="개인정보 수집 및 이용 동의 상세 내용 펼치기"
+                      aria-controls="agree-privacy-detail-en"
+                      aria-label="Show privacy policy details"
                     >
                       ▽
                     </button>
                   </div>
-                  <div class="confirm-check-detail" hidden></div>
+                  <div
+                    id="agree-privacy-detail-en"
+                    class="confirm-check-detail"
+                    hidden
+                  >
+                    Personal information is collected for reservation processing,
+                    guest notifications, and support, and is securely deleted
+                    after the retention period required by applicable law.
+                  </div>
                   <label class="confirm-check">
                     <input
                       type="checkbox"
                       name="agreePurchase"
-                      value=""
+                      id="agree-purchase-en"
+                      value="1"
                     />Confirmation of purchase conditions and consent to proceed
                     with payment</label
                   >
@@ -1665,24 +2132,21 @@
                 </div>
               </section>
 
-              <section class="confirm-section">
-                <h2 class="confirm-section-title"></h2>
+              <section class="confirm-section" id="sec-pay-en">
+                <h2 class="confirm-section-title" id="sec-pay-en-title">
+                  Payment
+                </h2>
                 <fieldset class="confirm-fieldset">
-                  <legend class="visually-hidden"></legend>
+                  <legend class="visually-hidden">Payment method</legend>
                   <label class="confirm-radio">
-                    <input type="radio" name="paymentMethod" value="" />Credit
-                    Card</label
+                    <input type="radio" name="paymentMethod" value="card" />
+                    Credit Card</label
                   >
                   <label class="confirm-radio">
-                    <input type="radio" name="paymentMethod" value="" />Naver
-                    Pay</label
-                  >
-                  <label class="confirm-radio">
-                    <input type="radio" name="paymentMethod" value="" />Bank
-                    Transfer</label
+                    <input type="radio" name="paymentMethod" value="naver" />
+                    Naver Pay</label
                   >
                 </fieldset>
-                <div class="confirm-check-detail" hidden></div>
                 <div class="confirm-actions">
                   <button
                     type="submit"
