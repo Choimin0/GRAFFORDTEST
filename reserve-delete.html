@@ -280,6 +280,14 @@
             return base + "/api/reservations";
           }
 
+          function paymentCancelApiUrl() {
+            var base = "";
+            if (typeof window !== "undefined" && window.__GRAFFORD_API_BASE__) {
+              base = String(window.__GRAFFORD_API_BASE__).replace(/\/$/, "");
+            }
+            return base + "/api/payment-cancel";
+          }
+
           function parseYMD(s) {
             if (!/^\d{4}-\d{2}-\d{2}$/.test(s || "")) {
               return null;
@@ -524,14 +532,18 @@
               yesBtn.disabled = true;
               if (noBtn) noBtn.disabled = true;
 
-              fetch(reservationsApiUrl(), {
-                method: "DELETE",
+              // POST /api/payment-cancel:
+              // - DB에서 pg_tid 조회 후 PortOne 결제 취소 (pg_tid 있는 경우)
+              // - 이후 예약 레코드를 delete_reservations로 이동
+              fetch(paymentCancelApiUrl(), {
+                method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                   reservationNumber: orderNo,
                   guestName: name,
                   cancelToken: cancelToken,
                   cancelReason: selectedReason,
+                  refundAmount: refundAmount,
                 }),
               })
                 .then(function (resp) {
@@ -584,8 +596,8 @@
                 .catch(function (err) {
                   window.alert(
                     (config.isEn
-                      ? "Failed to delete reservation from DB.\n"
-                      : "DB에서 예약을 삭제하지 못했습니다.\n") +
+                      ? "Cancellation failed.\n"
+                      : "예약 취소에 실패했습니다.\n") +
                       (err && err.message ? err.message : "Network error"),
                   );
                 })

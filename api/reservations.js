@@ -57,7 +57,7 @@ function humanDbError(e) {
   }
   var c = e.code;
   if (c === "42703") {
-    return "DB에 필요한 컬럼이 없습니다. db/migrations/002_reservations_booking_columns.sql, db/migrations/004_add_guest_request_to_reservations.sql, db/migrations/005_add_bank_confirmed_to_reservations.sql 을 실행하세요.";
+    return "DB에 필요한 컬럼이 없습니다. db/migrations/002~011 마이그레이션 SQL을 순서대로 실행하세요. (최신: 011_add_pg_tid_to_reservations.sql)";
   }
   if (c === "42P01") {
     return "필수 테이블이 없습니다. db/migrations/001_create_reservations.sql 과 db/migrations/006_split_reservation_tables.sql 을 실행하세요.";
@@ -1099,6 +1099,7 @@ export default async function handler(req, res) {
     .trim()
     .toLowerCase();
   var guestCount = Number(body.guestCount);
+  var pgTid = body.pgTid ? String(body.pgTid).trim().slice(0, 255) : null;
 
   if (!reservationNumber || reservationNumber.length > MAX_RESV) {
     json(res, 400, { ok: false, error: "Invalid reservationNumber" });
@@ -1165,9 +1166,10 @@ export default async function handler(req, res) {
       total_amount,
       guest_request,
       payment_method,
-      bank_confirmed
+      bank_confirmed,
+      pg_tid
     ) VALUES (
-      $1, $2, $3, $4, $5, $6::date, $7::date, $8, $9, $10, $11, $12, $13, $14
+      $1, $2, $3, $4, $5, $6::date, $7::date, $8, $9, $10, $11, $12, $13, $14, $15
     )
     RETURNING id, reservation_number, created_at
   `;
@@ -1187,6 +1189,7 @@ export default async function handler(req, res) {
     guestRequest,
     paymentMethod,
     paymentMethod === "bank" ? false : true,
+    pgTid || null,
   ];
 
   try {

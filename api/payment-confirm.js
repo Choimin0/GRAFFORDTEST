@@ -118,12 +118,27 @@ export default async function handler(req, res) {
       return;
     }
 
+    // PortOne v2: PG사 거래번호(TID)는 transactions[0].pgTxId 에 위치합니다.
+    // KG이니시스 결제 취소 시 이 값이 필요합니다.
+    var pgTid = null;
+    if (
+      payment.transactions &&
+      Array.isArray(payment.transactions) &&
+      payment.transactions.length > 0 &&
+      payment.transactions[0].pgTxId
+    ) {
+      pgTid = String(payment.transactions[0].pgTxId);
+    } else if (payment.pgTxId) {
+      pgTid = String(payment.pgTxId);
+    }
+
     res.statusCode = 200;
     res.end(
       JSON.stringify({
         ok: true,
         paymentId: payment.id,
         status: payment.status,
+        pgTid: pgTid,
       }),
     );
   } catch (e) {
