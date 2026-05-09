@@ -424,19 +424,17 @@
                 "payment.html",
             };
 
-            // 네이버페이 숙박 상품 정보 (옵션)
+            // 네이버페이 상품 정보 (PortOne v2 유효한 값 사용)
             if (isNaverPay) {
               portoneParams.naverpay = {
                 useCfmYmdt: (checkOut || "").replace(/-/g, ""),
                 productItems: [
                   {
-                    categoryType: "TRAVEL",
-                    categoryId: "HOTEL",
+                    categoryType: "PRODUCT",
+                    categoryId: "GENERAL",
                     uid: orderNo,
                     name:
                       "GRAFFORD 숙박 예약 (" + (ROOM_LABELS[room] || room) + ")",
-                    startDate: (checkIn || "").replace(/-/g, ""),
-                    endDate: (checkOut || "").replace(/-/g, ""),
                     count: 1,
                   },
                 ],
@@ -448,9 +446,8 @@
               response = await portone.requestPayment(portoneParams);
             } catch (e) {
               showError(
-                "결제창 실행 중 오류가 발생했습니다.\n(" +
-                  (e && e.message ? e.message : String(e)) +
-                  ")",
+                "결제창 실행 중 오류가 발생했습니다.\n오류 상세: " +
+                  (e && e.message ? e.message : String(e)),
               );
               return;
             }
@@ -502,7 +499,7 @@
             }
 
             var fetchedCancelToken = preSavedCancelToken;
-            if (!(payMethod === "naver" && reservationPreSaved)) {
+            {
               var saveRes, saveData;
               try {
                 showPageLoading("예약 정보를 저장하는 중입니다...");
@@ -538,7 +535,8 @@
                 return;
               }
 
-              if (!saveRes.ok || !saveData.ok) {
+              // 409: 이미 저장된 예약 (선저장 경로) → 성공으로 처리
+              if (saveRes.status !== 409 && (!saveRes.ok || !saveData.ok)) {
                 showError(
                   "결제는 완료되었으나 예약 저장에 실패했습니다.\n고객센터로 문의해 주세요.\n(결제번호: " +
                     orderNo +
@@ -547,7 +545,7 @@
                 );
                 return;
               }
-              fetchedCancelToken = saveData.cancelToken || fetchedCancelToken;
+              fetchedCancelToken = (saveData && saveData.cancelToken) || fetchedCancelToken;
             }
             sessionStorage.removeItem("graffordInPaymentFlow");
 
@@ -928,21 +926,19 @@
                 "payment.html",
             };
 
-            // Naver Pay accommodation item info (optional but recommended)
+            // Naver Pay item info (using valid PortOne v2 values)
             if (isNaverPay) {
               portoneParams.naverpay = {
                 useCfmYmdt: (checkOut || "").replace(/-/g, ""),
                 productItems: [
                   {
-                    categoryType: "TRAVEL",
-                    categoryId: "HOTEL",
+                    categoryType: "PRODUCT",
+                    categoryId: "GENERAL",
                     uid: orderNo,
                     name:
                       "GRAFFORD Stay Reservation (" +
                       (ROOM_LABELS[room] || room) +
                       ")",
-                    startDate: (checkIn || "").replace(/-/g, ""),
-                    endDate: (checkOut || "").replace(/-/g, ""),
                     count: 1,
                   },
                 ],
@@ -954,9 +950,8 @@
               response = await portone.requestPayment(portoneParams);
             } catch (e) {
               showError(
-                "An error occurred while opening the payment window.\n(" +
-                  (e && e.message ? e.message : String(e)) +
-                  ")",
+                "An error occurred while opening the payment window.\nError: " +
+                  (e && e.message ? e.message : String(e)),
               );
               return;
             }
@@ -1008,7 +1003,7 @@
             }
 
             var fetchedCancelToken2 = preSavedCancelToken;
-            if (!(payMethod === "naver" && reservationPreSaved)) {
+            {
               var saveRes2, saveData2;
               try {
                 showPageLoading("Saving reservation...");
@@ -1044,7 +1039,8 @@
                 return;
               }
 
-              if (!saveRes2.ok || !saveData2.ok) {
+              // 409: already saved (pre-save path) → treat as success
+              if (saveRes2.status !== 409 && (!saveRes2.ok || !saveData2.ok)) {
                 showError(
                   "Payment completed but reservation save failed. Please contact support.\n(Payment ID: " +
                     orderNo +
@@ -1054,7 +1050,7 @@
                 return;
               }
               fetchedCancelToken2 =
-                saveData2.cancelToken || fetchedCancelToken2;
+                (saveData2 && saveData2.cancelToken) || fetchedCancelToken2;
             }
             sessionStorage.removeItem("graffordInPaymentFlow");
 

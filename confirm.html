@@ -1131,7 +1131,7 @@
               guestCount: guestCount,
             };
 
-            if (payInput.value === "bank" || payInput.value === "naver") {
+            if (payInput.value === "bank") {
               if (paySubmitBtn) paySubmitBtn.disabled = true;
 
               fetch(bookingApiUrl(), {
@@ -1193,35 +1193,7 @@
                       ),
                     }),
                   );
-                  if (payInput.value === "bank") {
-                    window.location.href = "reserve-complete.html";
-                    return;
-                  }
-                  sessionStorage.setItem("graffordInPaymentFlow", "1");
-                  sessionStorage.setItem(
-                    "graffordPaymentData",
-                    JSON.stringify({
-                      orderNo: orderNumber,
-                      totalAmount: String(totalAmount || 0),
-                      room: room,
-                      checkIn: checkIn,
-                      checkOut: checkOut,
-                      stayNights: String(nights),
-                      extraGuests: String(extraGuests || 0),
-                      guestName: guestName,
-                      contact: contact,
-                      email: emailVal,
-                      guestRequest: guestRequestInput
-                        ? guestRequestInput.value.trim()
-                        : "",
-                      guestCount: String(guestCount),
-                      payMethod: payInput.value,
-                      reservationPreSaved: "1",
-                      cancelToken:
-                        (result.data && result.data.cancelToken) || "",
-                    }),
-                  );
-                  window.location.href = "payment.html";
+                  window.location.href = "reserve-complete.html";
                 })
                 .catch(function (err) {
                   window.alert(
@@ -1543,132 +1515,28 @@
                 guestCount: guestCountEn,
               };
 
-              if (payInputEn.value === "naver") {
-                if (paySubmitBtnEn) {
-                  paySubmitBtnEn.disabled = true;
-                }
-
-                fetch(bookingApiUrl(), {
-                  method: "POST",
-                  headers: { "Content-Type": "application/json" },
-                  body: JSON.stringify(payloadEn),
-                })
-                  .then(function (resp) {
-                    return resp.json().then(function (data) {
-                      return { ok: resp.ok, status: resp.status, data: data };
-                    });
-                  })
-                  .then(function (result) {
-                    if (!result.ok) {
-                      var msgEn =
-                        (result.data && result.data.error) ||
-                        "Save failed. (" + result.status + ")";
-                      if (result.data && result.data.code) {
-                        msgEn += " [code: " + result.data.code + "]";
-                      }
-                      throw new Error(msgEn);
-                    }
-                    var recordEn = {
-                      orderNumber: orderNumberEn,
-                      guestName: guestNameEn,
-                      contact: contactEn,
-                      guestRequest: guestRequestInputEn
-                        ? guestRequestInputEn.value.trim()
-                        : "",
-                      room: roomEn,
-                      checkIn: checkInEn,
-                      checkOut: checkOutEn,
-                      nights: nightsEn,
-                      extraGuests: extraGuestsEn,
-                      totalAmount: totalAmountEn,
-                      paymentMethod: payInputEn.value,
-                      createdAt: Date.now(),
-                    };
-                    R.save(recordEn);
-                    sessionStorage.setItem(
-                      "graffordReserveCompleteData",
-                      JSON.stringify({
-                        orderNo: orderNumberEn,
-                        room: roomEn,
-                        checkIn: checkInEn,
-                        checkOut: checkOutEn,
-                        guestName: guestNameEn,
-                        contact: contactEn,
-                        email: emailValEn,
-                        guestRequest: recordEn.guestRequest || "",
-                        guestCount: String(guestCountEn),
-                        extraGuests: String(extraGuestsEn),
-                        totalAmount: String(totalAmountEn),
-                        payMethod: payInputEn.value,
-                        cancelToken:
-                          (result.data && result.data.cancelToken) || "",
-                        bankConfirmed: !!(
-                          result.data && result.data.bankConfirmed === true
-                        ),
-                      }),
-                    );
-                    sessionStorage.setItem("graffordInPaymentFlow", "1");
-                    sessionStorage.setItem(
-                      "graffordPaymentData",
-                      JSON.stringify({
-                        orderNo: orderNumberEn,
-                        totalAmount: String(totalAmountEn || 0),
-                        room: roomEn,
-                        checkIn: checkInEn,
-                        checkOut: checkOutEn,
-                        stayNights: String(nightsEn),
-                        extraGuests: String(extraGuestsEn || 0),
-                        guestName: guestNameEn,
-                        contact: contactEn,
-                        email: emailValEn,
-                        guestRequest: guestRequestInputEn
-                          ? guestRequestInputEn.value.trim()
-                          : "",
-                        guestCount: String(guestCountEn),
-                        payMethod: payInputEn.value,
-                        reservationPreSaved: "1",
-                        cancelToken:
-                          (result.data && result.data.cancelToken) || "",
-                      }),
-                    );
-                    window.location.href = "payment.html";
-                  })
-                  .catch(function (err) {
-                    window.alert(
-                      "Could not save the reservation.\n" +
-                        (err && err.message ? err.message : "Network error") +
-                        "\n\nIf you opened this file locally, run the site with API support (e.g. vercel dev).",
-                    );
-                  })
-                  .finally(function () {
-                    if (paySubmitBtnEn) {
-                      paySubmitBtnEn.disabled = false;
-                    }
-                  });
-              } else {
-                sessionStorage.setItem("graffordInPaymentFlow", "1");
-                sessionStorage.setItem(
-                  "graffordPaymentData",
-                  JSON.stringify({
-                    orderNo: orderNumberEn,
-                    totalAmount: String(totalAmountEn || 0),
-                    room: roomEn,
-                    checkIn: checkInEn,
-                    checkOut: checkOutEn,
-                    stayNights: String(nightsEn),
-                    extraGuests: String(extraGuestsEn || 0),
-                    guestName: guestNameEn,
-                    contact: contactEn,
-                    email: emailValEn,
-                    guestRequest: guestRequestInputEn
-                      ? guestRequestInputEn.value.trim()
-                      : "",
-                    guestCount: String(guestCountEn),
-                    payMethod: payInputEn.value,
-                  }),
-                );
-                window.location.href = "payment.html";
-              }
+              sessionStorage.setItem("graffordInPaymentFlow", "1");
+              sessionStorage.setItem(
+                "graffordPaymentData",
+                JSON.stringify({
+                  orderNo: orderNumberEn,
+                  totalAmount: String(totalAmountEn || 0),
+                  room: roomEn,
+                  checkIn: checkInEn,
+                  checkOut: checkOutEn,
+                  stayNights: String(nightsEn),
+                  extraGuests: String(extraGuestsEn || 0),
+                  guestName: guestNameEn,
+                  contact: contactEn,
+                  email: emailValEn,
+                  guestRequest: guestRequestInputEn
+                    ? guestRequestInputEn.value.trim()
+                    : "",
+                  guestCount: String(guestCountEn),
+                  payMethod: payInputEn.value,
+                }),
+              );
+              window.location.href = "payment.html";
             });
 
             [guestNameInputEn, contactInputEn].forEach(function (el) {
