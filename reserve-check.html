@@ -278,6 +278,13 @@
 
           document.getElementById("complete-room-name").textContent =
             ROOM_LABEL[room] || room || "객실 정보 없음";
+          var roomNameEnCheck = document.getElementById(
+            "complete-room-name-en-check",
+          );
+          if (roomNameEnCheck) {
+            roomNameEnCheck.textContent =
+              ROOM_LABEL[room] || room || "Room information unavailable";
+          }
           var scheduleText = (checkIn || "—") + " ~ " + (checkOut || "—");
           var amountTextKr =
             Number(discountedAmount || 0).toLocaleString("ko-KR") + "원";
@@ -341,77 +348,127 @@
           var mainImg = document.getElementById("complete-gallery-main");
           var prevBtn = document.getElementById("complete-gallery-prev");
           var nextBtn = document.getElementById("complete-gallery-next");
+          var mainImgEnChk = document.getElementById(
+            "complete-gallery-main-en-check",
+          );
+          var prevBtnEnChk = document.getElementById(
+            "complete-gallery-prev-en-check",
+          );
+          var nextBtnEnChk = document.getElementById(
+            "complete-gallery-next-en-check",
+          );
           var galleryIndex = 0;
           var galleryFadeMs = 280;
           var galleryTimer = null;
+          var galleryTimerEnChk = null;
 
           function renderGallery(withFade) {
-            if (!mainImg || !images.length) return;
-            var src = images[galleryIndex];
-            var altText =
-              (ROOM_LABEL[room] || room) + " 사진 " + (galleryIndex + 1);
-            if (!withFade) {
-              mainImg.src = src;
-              mainImg.alt = altText;
+            if (!images.length) {
               return;
             }
+            var src = images[galleryIndex];
+            var altTextKr =
+              (ROOM_LABEL[room] || room) + " 사진 " + (galleryIndex + 1);
+            var altTextEn =
+              (ROOM_LABEL[room] || room) + " photo " + (galleryIndex + 1);
 
-            mainImg.classList.add("is-switching");
-            if (galleryTimer) {
-              window.clearTimeout(galleryTimer);
-              galleryTimer = null;
-            }
-            galleryTimer = window.setTimeout(function () {
-              mainImg.src = src;
-              mainImg.alt = altText;
-              var done = function () {
-                mainImg.removeEventListener("load", done);
-                mainImg.classList.remove("is-switching");
-              };
-              mainImg.addEventListener("load", done);
-              if (mainImg.complete) {
-                mainImg.classList.remove("is-switching");
+            function applyToImg(img, alt, timerRef, withFadeInner) {
+              if (!img) {
+                return;
               }
-            }, galleryFadeMs);
+              if (!withFadeInner) {
+                img.src = src;
+                img.alt = alt;
+                return;
+              }
+              if (timerRef.val) {
+                window.clearTimeout(timerRef.val);
+                timerRef.val = null;
+              }
+              img.classList.add("is-switching");
+              timerRef.val = window.setTimeout(function () {
+                img.src = src;
+                img.alt = alt;
+                var done = function () {
+                  img.removeEventListener("load", done);
+                  img.classList.remove("is-switching");
+                };
+                img.addEventListener("load", done);
+                if (img.complete) {
+                  img.classList.remove("is-switching");
+                }
+              }, galleryFadeMs);
+            }
+
+            var krRef = { val: galleryTimer };
+            applyToImg(mainImg, altTextKr, krRef, withFade);
+            galleryTimer = krRef.val;
+            var enRef = { val: galleryTimerEnChk };
+            applyToImg(mainImgEnChk, altTextEn, enRef, withFade);
+            galleryTimerEnChk = enRef.val;
           }
-          if (mainImg) {
+          if (mainImg || mainImgEnChk) {
             renderGallery(false);
+          }
+          function stepGallery(delta) {
+            galleryIndex = (galleryIndex + delta + images.length) % images.length;
+            renderGallery(true);
           }
           if (prevBtn) {
             prevBtn.addEventListener("click", function () {
-              galleryIndex = (galleryIndex - 1 + images.length) % images.length;
-              renderGallery(true);
+              stepGallery(-1);
             });
           }
           if (nextBtn) {
             nextBtn.addEventListener("click", function () {
-              galleryIndex = (galleryIndex + 1) % images.length;
-              renderGallery(true);
+              stepGallery(1);
+            });
+          }
+          if (prevBtnEnChk) {
+            prevBtnEnChk.addEventListener("click", function () {
+              stepGallery(-1);
+            });
+          }
+          if (nextBtnEnChk) {
+            nextBtnEnChk.addEventListener("click", function () {
+              stepGallery(1);
             });
           }
 
+          var cancelPayloadCheck = {
+            orderNo: orderNo || "",
+            name: guestName || "",
+            contact: contact || "",
+            email: email || "",
+            room: room || "",
+            checkIn: checkIn || "",
+            checkOut: checkOut || "",
+            amount: String(paidAmount || 0),
+            totalAmount: String(paidAmount || 0),
+            extraGuests: String(extraGuests || "0"),
+            payMethod: payMethod || "",
+            bankConfirmed: bankConfirmed === true,
+            request: guestRequest || "",
+            cancelToken: cancelToken || "",
+          };
+          var cancelPayloadCheckStr = JSON.stringify(cancelPayloadCheck);
           var cancelLink = document.getElementById("complete-link-cancel");
           if (cancelLink) {
             sessionStorage.setItem(
               "graffordCancelPayload",
-              JSON.stringify({
-                orderNo: orderNo || "",
-                name: guestName || "",
-                contact: contact || "",
-                email: email || "",
-                room: room || "",
-                checkIn: checkIn || "",
-                checkOut: checkOut || "",
-                amount: String(paidAmount || 0),
-                totalAmount: String(paidAmount || 0),
-                extraGuests: String(extraGuests || "0"),
-                payMethod: payMethod || "",
-                bankConfirmed: bankConfirmed === true,
-                request: guestRequest || "",
-                cancelToken: cancelToken || "",
-              }),
+              cancelPayloadCheckStr,
             );
             cancelLink.href = "reserve-delete.html";
+          }
+          var cancelLinkEnChk = document.getElementById(
+            "complete-link-cancel-en-check",
+          );
+          if (cancelLinkEnChk) {
+            sessionStorage.setItem(
+              "graffordCancelPayload",
+              cancelPayloadCheckStr,
+            );
+            cancelLinkEnChk.href = "reserve-delete.html";
           }
         });
       </script>
@@ -446,7 +503,12 @@
         <div class="confirm-layout-grid">
           <div class="confirm-layout-col">
             <section class="confirm-section">
-              <p class="reserve-complete-room-name"></p>
+              <p
+                class="reserve-complete-room-name"
+                id="complete-room-name-en-check"
+              >
+                —
+              </p>
               <div class="reserve-complete-gallery">
                 <div
                   class="gallery-main-wrap reserve-complete-gallery-main-wrap"
@@ -454,21 +516,24 @@
                   <button
                     type="button"
                     class="gallery-nav gallery-prev"
-                    aria-label="이전 사진"
+                    id="complete-gallery-prev-en-check"
+                    aria-label="Previous photo"
                   >
                     &#10094;
                   </button>
                   <img
                     class="gallery-main-img"
+                    id="complete-gallery-main-en-check"
                     src="images/A00.jpg"
-                    alt="예약 객실 대표 이미지"
+                    alt="Room photo"
                     loading="lazy"
                     decoding="async"
                   />
                   <button
                     type="button"
                     class="gallery-nav gallery-next"
-                    aria-label="다음 사진"
+                    id="complete-gallery-next-en-check"
+                    aria-label="Next photo"
                   >
                     &#10095;
                   </button>
@@ -538,6 +603,7 @@
                 >
                 <a
                   href="reserve-delete.html"
+                  id="complete-link-cancel-en-check"
                   class="reserve-complete-action-link"
                   >Cancel Reservation</a
                 >

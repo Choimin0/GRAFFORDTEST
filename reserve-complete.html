@@ -132,7 +132,7 @@
               </h2>
               <p
                 class="confirm-guide-content"
-                id="complete-checkin-guide-en"
+                id="complete-checkin-guide"
               ></p>
             </section>
 
@@ -313,12 +313,23 @@
           if (orderTextEl) {
             orderTextEl.textContent = orderNo || "번호를 확인할 수 없습니다.";
           }
+          var orderTextEnEl = document.getElementById("complete-order-no-text-en");
+          if (orderTextEnEl) {
+            orderTextEnEl.textContent = orderNo || "—";
+          }
           var bankStatusEl = document.getElementById("complete-bank-status");
           var pendingStatusEl = document.getElementById(
             "complete-bank-status-pending",
           );
           var confirmedStatusEl = document.getElementById(
             "complete-bank-status-confirmed",
+          );
+          var bankStatusEnEl = document.getElementById("complete-bank-status-en");
+          var pendingStatusEnEl = document.getElementById(
+            "complete-bank-status-pending-en",
+          );
+          var confirmedStatusEnEl = document.getElementById(
+            "complete-bank-status-confirmed-en",
           );
           if (payMethod === "bank" && bankStatusEl) {
             bankStatusEl.hidden = false;
@@ -330,20 +341,43 @@
               confirmedStatusEl.classList.remove("is-active");
             }
           }
+          if (payMethod === "bank" && bankStatusEnEl) {
+            bankStatusEnEl.hidden = false;
+            if (bankConfirmed) {
+              if (pendingStatusEnEl) pendingStatusEnEl.classList.remove("is-active");
+              if (confirmedStatusEnEl) confirmedStatusEnEl.classList.add("is-active");
+            } else {
+              if (pendingStatusEnEl) pendingStatusEnEl.classList.add("is-active");
+              if (confirmedStatusEnEl)
+                confirmedStatusEnEl.classList.remove("is-active");
+            }
+          }
 
           // 표시 금액 = reservations.total_amount (DB 저장값). 재계산 없음.
           var paidAmount =
             parseInt(String(totalAmount || "0").replace(/,/g, ""), 10) || 0;
           var discountedAmount = paidAmount;
 
+          var scheduleText = (checkIn || "—") + " ~ " + (checkOut || "—");
           document.getElementById("complete-room-name").textContent =
             ROOM_LABEL[room] || room || "객실 정보 없음";
-          document.getElementById("complete-room-name-en").textContent =
-            ROOM_LABEL[room] || room || "Room Information Not Available";
-          document.getElementById("complete-schedule").textContent =
-            (checkIn || "—") + " ~ " + (checkOut || "—");
+          var roomNameEnEl = document.getElementById("complete-room-name-en");
+          if (roomNameEnEl) {
+            roomNameEnEl.textContent =
+              ROOM_LABEL[room] || room || "Room Information Not Available";
+          }
+          document.getElementById("complete-schedule").textContent = scheduleText;
+          var scheduleEnEl = document.getElementById("complete-schedule-en");
+          if (scheduleEnEl) {
+            scheduleEnEl.textContent = scheduleText;
+          }
           document.getElementById("complete-total-amount").textContent =
             Number(discountedAmount || 0).toLocaleString("ko-KR") + "원";
+          var totalEnEl = document.getElementById("complete-total-amount-en");
+          if (totalEnEl) {
+            totalEnEl.textContent =
+              Number(discountedAmount || 0).toLocaleString("en-US") + " KRW";
+          }
           document.getElementById("complete-guest-name").textContent =
             guestName || "—";
           document.getElementById("complete-contact").textContent =
@@ -351,6 +385,16 @@
           document.getElementById("complete-email").textContent = email || "—";
           document.getElementById("complete-request").textContent =
             guestRequest || "—";
+          function setTextEn(id, value) {
+            var el = document.getElementById(id);
+            if (el) {
+              el.textContent = value;
+            }
+          }
+          setTextEn("complete-guest-name-en", guestName || "—");
+          setTextEn("complete-contact-en", contact || "—");
+          setTextEn("complete-email-en", email || "—");
+          setTextEn("complete-request-en", guestRequest || "—");
           var checkinGuideEl = document.getElementById(
             "complete-checkin-guide",
           );
@@ -382,6 +426,7 @@
           }
           document.getElementById("complete-guest-count").textContent =
             String(parsedGuestCount) + "명";
+          setTextEn("complete-guest-count-en", String(parsedGuestCount));
 
           var prefix = ROOM_IMAGE_PREFIX[room] || "A";
           var images = [
@@ -392,77 +437,113 @@
           var mainImg = document.getElementById("complete-gallery-main");
           var prevBtn = document.getElementById("complete-gallery-prev");
           var nextBtn = document.getElementById("complete-gallery-next");
+          var mainImgEn = document.getElementById("complete-gallery-main-en");
+          var prevBtnEn = document.getElementById("complete-gallery-prev-en");
+          var nextBtnEn = document.getElementById("complete-gallery-next-en");
           var galleryIndex = 0;
           var galleryFadeMs = 280;
           var galleryTimer = null;
+          var galleryTimerEn = null;
 
           function renderGallery(withFade) {
-            if (!mainImg || !images.length) return;
-            var src = images[galleryIndex];
-            var altText =
-              (ROOM_LABEL[room] || room) + " 사진 " + (galleryIndex + 1);
-            if (!withFade) {
-              mainImg.src = src;
-              mainImg.alt = altText;
+            if (!images.length) {
               return;
             }
+            var src = images[galleryIndex];
+            var altTextKr =
+              (ROOM_LABEL[room] || room) + " 사진 " + (galleryIndex + 1);
+            var altTextEn =
+              (ROOM_LABEL[room] || room) + " photo " + (galleryIndex + 1);
 
-            mainImg.classList.add("is-switching");
-            if (galleryTimer) {
-              window.clearTimeout(galleryTimer);
-              galleryTimer = null;
-            }
-            galleryTimer = window.setTimeout(function () {
-              mainImg.src = src;
-              mainImg.alt = altText;
-              var done = function () {
-                mainImg.removeEventListener("load", done);
-                mainImg.classList.remove("is-switching");
-              };
-              mainImg.addEventListener("load", done);
-              if (mainImg.complete) {
-                mainImg.classList.remove("is-switching");
+            function applyToImg(img, alt, timerRef, withFadeInner) {
+              if (!img) {
+                return;
               }
-            }, galleryFadeMs);
+              if (!withFadeInner) {
+                img.src = src;
+                img.alt = alt;
+                return;
+              }
+              if (timerRef.val) {
+                window.clearTimeout(timerRef.val);
+                timerRef.val = null;
+              }
+              img.classList.add("is-switching");
+              timerRef.val = window.setTimeout(function () {
+                img.src = src;
+                img.alt = alt;
+                var done = function () {
+                  img.removeEventListener("load", done);
+                  img.classList.remove("is-switching");
+                };
+                img.addEventListener("load", done);
+                if (img.complete) {
+                  img.classList.remove("is-switching");
+                }
+              }, galleryFadeMs);
+            }
+
+            var krTimerRef = { val: galleryTimer };
+            applyToImg(mainImg, altTextKr, krTimerRef, withFade);
+            galleryTimer = krTimerRef.val;
+            var enTimerRef = { val: galleryTimerEn };
+            applyToImg(mainImgEn, altTextEn, enTimerRef, withFade);
+            galleryTimerEn = enTimerRef.val;
           }
-          if (mainImg) {
+          if (mainImg || mainImgEn) {
             renderGallery(false);
+          }
+          function stepGallery(delta) {
+            galleryIndex = (galleryIndex + delta + images.length) % images.length;
+            renderGallery(true);
           }
           if (prevBtn) {
             prevBtn.addEventListener("click", function () {
-              galleryIndex = (galleryIndex - 1 + images.length) % images.length;
-              renderGallery(true);
+              stepGallery(-1);
             });
           }
           if (nextBtn) {
             nextBtn.addEventListener("click", function () {
-              galleryIndex = (galleryIndex + 1) % images.length;
-              renderGallery(true);
+              stepGallery(1);
+            });
+          }
+          if (prevBtnEn) {
+            prevBtnEn.addEventListener("click", function () {
+              stepGallery(-1);
+            });
+          }
+          if (nextBtnEn) {
+            nextBtnEn.addEventListener("click", function () {
+              stepGallery(1);
             });
           }
 
+          var cancelPayload = {
+            orderNo: orderNo || "",
+            name: guestName || "",
+            contact: contact || "",
+            email: email || "",
+            room: room || "",
+            checkIn: checkIn || "",
+            checkOut: checkOut || "",
+            amount: String(paidAmount || 0),
+            totalAmount: String(paidAmount || 0),
+            extraGuests: String(extraGuests || "0"),
+            payMethod: payMethod || "",
+            bankConfirmed: bankConfirmed === true,
+            request: guestRequest || "",
+            cancelToken: cancelToken || "",
+          };
+          var cancelPayloadStr = JSON.stringify(cancelPayload);
           var cancelLink = document.getElementById("complete-link-cancel");
           if (cancelLink) {
-            sessionStorage.setItem(
-              "graffordCancelPayload",
-              JSON.stringify({
-                orderNo: orderNo || "",
-                name: guestName || "",
-                contact: contact || "",
-                email: email || "",
-                room: room || "",
-                checkIn: checkIn || "",
-                checkOut: checkOut || "",
-                amount: String(paidAmount || 0),
-                totalAmount: String(paidAmount || 0),
-                extraGuests: String(extraGuests || "0"),
-                payMethod: payMethod || "",
-                bankConfirmed: bankConfirmed === true,
-                request: guestRequest || "",
-                cancelToken: cancelToken || "",
-              }),
-            );
+            sessionStorage.setItem("graffordCancelPayload", cancelPayloadStr);
             cancelLink.href = "reserve-delete.html";
+          }
+          var cancelLinkEn = document.getElementById("complete-link-cancel-en");
+          if (cancelLinkEn) {
+            sessionStorage.setItem("graffordCancelPayload", cancelPayloadStr);
+            cancelLinkEn.href = "reserve-delete.html";
           }
         });
       </script>
@@ -510,21 +591,24 @@
                   <button
                     type="button"
                     class="gallery-nav gallery-prev"
-                    aria-label="이전 사진"
+                    id="complete-gallery-prev-en"
+                    aria-label="Previous photo"
                   >
                     &#10094;
                   </button>
                   <img
                     class="gallery-main-img"
+                    id="complete-gallery-main-en"
                     src="images/A00.jpg"
-                    alt="예약 객실 대표 이미지"
+                    alt="Room photo"
                     loading="lazy"
                     decoding="async"
                   />
                   <button
                     type="button"
                     class="gallery-nav gallery-next"
-                    aria-label="다음 사진"
+                    id="complete-gallery-next-en"
+                    aria-label="Next photo"
                   >
                     &#10095;
                   </button>
@@ -543,7 +627,10 @@
 
             <section class="confirm-section">
               <h2 class="confirm-section-title">Contactless Check-in Guide</h2>
-              <p class="confirm-guide-content" id="complete-checkin-guide"></p>
+              <p
+                class="confirm-guide-content"
+                id="complete-checkin-guide-en"
+              ></p>
             </section>
 
             <section class="confirm-section">
@@ -559,28 +646,28 @@
               <h2 class="confirm-section-title">Reservation Details</h2>
               <dl class="reserve-delete-dl">
                 <dt>Reservation Number</dt>
-                <dd id="complete-order-no-text">
-                  <span id="complete-order-no-text">—</span>
+                <dd id="complete-order-no-en">
+                  <span id="complete-order-no-text-en">—</span>
                   <span
-                    id="complete-bank-status"
+                    id="complete-bank-status-en"
                     class="reserve-complete-bank-status"
                     hidden
                   >
                     [
-                    <span id="complete-bank-status-pending"
+                    <span id="complete-bank-status-pending-en"
                       >Reservation Pending</span
                     >
                     /
-                    <span id="complete-bank-status-confirmed"
+                    <span id="complete-bank-status-confirmed-en"
                       >Reservation Confirmed</span
                     >
                     ]
                   </span>
                 </dd>
                 <dt>Check-in/Check-out</dt>
-                <dd id="complete-schedule">—</dd>
+                <dd id="complete-schedule-en">—</dd>
                 <dt>Total Amount</dt>
-                <dd id="complete-total-amount">—</dd>
+                <dd id="complete-total-amount-en">—</dd>
               </dl>
             </section>
 
@@ -588,15 +675,15 @@
               <h2 class="confirm-section-title">Guest Information</h2>
               <dl class="reserve-delete-dl">
                 <dt>Guests</dt>
-                <dd id="complete-guest-count">—</dd>
+                <dd id="complete-guest-count-en">—</dd>
                 <dt>Guest Name</dt>
-                <dd id="complete-guest-name">—</dd>
+                <dd id="complete-guest-name-en">—</dd>
                 <dt>Guest Contact</dt>
-                <dd id="complete-contact">—</dd>
+                <dd id="complete-contact-en">—</dd>
                 <dt>Guest Email</dt>
-                <dd id="complete-email">—</dd>
+                <dd id="complete-email-en">—</dd>
                 <dt>Special Requests</dt>
-                <dd id="complete-request">—</dd>
+                <dd id="complete-request-en">—</dd>
               </dl>
             </section>
 
@@ -607,6 +694,7 @@
                 >
                 <a
                   href="reserve-delete.html"
+                  id="complete-link-cancel-en"
                   class="reserve-complete-action-link"
                   >Cancel Reservation</a
                 >

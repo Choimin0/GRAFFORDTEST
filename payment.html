@@ -174,7 +174,8 @@
           var guestRequest = saved.guestRequest || "";
           var guestCount = parseInt(saved.guestCount || "2", 10) || 2;
           var payMethod = saved.payMethod || "card";
-          var reservationPreSaved = String(saved.reservationPreSaved || "") === "1";
+          var reservationPreSaved =
+            String(saved.reservationPreSaved || "") === "1";
           var preSavedCancelToken = String(saved.cancelToken || "");
 
           function reservationsApiUrl() {
@@ -533,12 +534,6 @@
           </button>
         </div>
 
-        <p class="confirm-back">
-          <a href="RESERVATION.html">Back to Reservation</a>
-          ·
-          <a href="GROUND.html">Rooms</a>
-        </p>
-
         <footer
           data-site-business-footer-mount
           class="site-footer site-business-footer"
@@ -827,7 +822,8 @@
                 );
                 return;
               }
-              fetchedCancelToken2 = saveData2.cancelToken || fetchedCancelToken2;
+              fetchedCancelToken2 =
+                saveData2.cancelToken || fetchedCancelToken2;
             }
             sessionStorage.removeItem("graffordInPaymentFlow");
 
