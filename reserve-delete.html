@@ -233,10 +233,8 @@
         ></footer>
       </main>
 
-      <script src="js/booking-pricing.js"></script>
       <script>
         document.addEventListener("DOMContentLoaded", function () {
-          var P = window.GraffordBookingPricing;
           var ROOM_LABEL = {
             G1: "G1",
             G2: "G2",
@@ -260,7 +258,6 @@
           var checkOut = (saved && saved.checkOut) || "";
           var extraGuests =
             parseInt((saved && saved.extraGuests) || "0", 10) || 0;
-          var totalAmount = parseInt((saved && saved.amount) || "0", 10) || 0;
           var payMethod = (saved && saved.payMethod) || "";
           var bankConfirmed = saved && saved.bankConfirmed === true;
           var cancelToken = (saved && saved.cancelToken) || "";
@@ -296,16 +293,12 @@
             return new Date(Number(p[0]), Number(p[1]) - 1, Number(p[2]));
           }
 
-          function getDiscountedAmount() {
-            if (P && checkIn && checkOut) {
-              var quote = P.computeStay(room, checkIn, checkOut, extraGuests);
-              if (quote && quote.nights > 0) {
-                return quote.discountedGrandTotal || 0;
-              }
-            }
-            return totalAmount;
-          }
-          var discountedAmount = getDiscountedAmount();
+          // 결제·환불 기준 금액: reservations.total_amount (세션 payload의 amount / totalAmount)
+          // booking-pricing 재계산은 사용하지 않음(현재 room-rate와 무관하게 실제 청구액 표시)
+          var paidAmount =
+            parseInt((saved && saved.amount) || "0", 10) ||
+            parseInt((saved && saved.totalAmount) || "0", 10) ||
+            0;
 
           var today = new Date();
           var todayDate = new Date(
@@ -336,7 +329,7 @@
 
           var refundAmount = Math.max(
             0,
-            Math.round(discountedAmount * ((100 - refundCharge) / 100)),
+            Math.round(paidAmount * ((100 - refundCharge) / 100)),
           );
 
           var cancelOrderTextEl = document.getElementById("cancel-order-text");
@@ -384,8 +377,8 @@
           }
           var roomText = ROOM_LABEL[room] || room || "—";
           var scheduleText = (checkIn || "—") + " ~ " + (checkOut || "—");
-          var amountTextKr = formatKRW(discountedAmount);
-          var amountTextEn = formatKRWEn(discountedAmount);
+          var amountTextKr = formatKRW(paidAmount);
+          var amountTextEn = formatKRWEn(paidAmount);
           var refundTextKr = formatKRW(refundAmount);
           var refundTextEn = formatKRWEn(refundAmount);
 
@@ -581,7 +574,7 @@
                       checkIn: checkIn || "",
                       checkOut: checkOut || "",
                       extraGuests: String(extraGuests || 0),
-                      amount: String(discountedAmount || 0),
+                      amount: String(paidAmount || 0),
                       paymentMethod: payMethod || "",
                       reservedAt: String(orderNo || "").slice(0, 8),
                       cancelledAt: new Date().toISOString(),

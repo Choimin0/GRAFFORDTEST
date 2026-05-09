@@ -333,7 +333,7 @@
             }
           }
 
-          function getDiscountedAmount() {
+          function getDiscountedAmountFallback() {
             if (P && checkIn && checkOut) {
               var parsedExtraGuests = parseInt(extraGuests || "0", 10) || 0;
               var quote = P.computeStay(
@@ -346,9 +346,14 @@
                 return quote.discountedGrandTotal || 0;
               }
             }
-            return parseInt(totalAmount || "0", 10) || 0;
+            return 0;
           }
-          var discountedAmount = getDiscountedAmount();
+          var paidAmount =
+            parseInt(String(totalAmount || "0").replace(/,/g, ""), 10) || 0;
+          if (!paidAmount) {
+            paidAmount = getDiscountedAmountFallback();
+          }
+          var discountedAmount = paidAmount;
 
           document.getElementById("complete-room-name").textContent =
             ROOM_LABEL[room] || room || "객실 정보 없음";
@@ -467,7 +472,8 @@
                 room: room || "",
                 checkIn: checkIn || "",
                 checkOut: checkOut || "",
-                amount: String(discountedAmount || 0),
+                amount: String(paidAmount || 0),
+                totalAmount: String(paidAmount || 0),
                 extraGuests: String(extraGuests || "0"),
                 payMethod: payMethod || "",
                 bankConfirmed: bankConfirmed === true,

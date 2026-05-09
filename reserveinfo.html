@@ -134,6 +134,14 @@
             return parseInt((data && data.totalAmount) || 0, 10) || 0;
           }
 
+          function resolveStoredTotalAmount(data) {
+            var dbTotal = Number(data && data.totalAmount);
+            if (Number.isFinite(dbTotal) && dbTotal >= 0) {
+              return Math.floor(dbTotal);
+            }
+            return getDiscountedAmount(data);
+          }
+
           function goToReserveComplete(data) {
             sessionStorage.setItem(
               "graffordReserveCheckData",
@@ -148,7 +156,7 @@
                 guestRequest: data.guestRequest || "",
                 guestCount: String(data.guestCount || ""),
                 extraGuests: String(data.extraGuests || 0),
-                totalAmount: String(getDiscountedAmount(data)),
+                totalAmount: String(resolveStoredTotalAmount(data)),
                 payMethod: data.payMethod || "",
                 bankConfirmed: data.bankConfirmed === true,
                 cancelToken: data.cancelToken || "",
@@ -172,7 +180,7 @@
                 name: data.guestName || "",
                 contact: data.contact || "",
                 extraGuests: String(data.extraGuests || 0),
-                amount: String(getDiscountedAmount(data)),
+                amount: String(resolveStoredTotalAmount(data)),
                 paymentMethod: data.payMethod || "",
                 reservedAt: data.createdAt || "",
                 cancelledAt: data.cancelledAt || new Date().toISOString(),
