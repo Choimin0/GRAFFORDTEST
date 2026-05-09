@@ -411,7 +411,7 @@
                 "GRAFFORD 숙박 예약 (" + (ROOM_LABELS[room] || room) + ")",
               totalAmount: finalAmount,
               currency: "KRW",
-              payMethod: isNaverPay ? "NAVERPAY" : "CARD",
+              payMethod: isNaverPay ? "EASY_PAY" : "CARD",
               customer: {
                 fullName: guestName || undefined,
                 phoneNumber: contact || undefined,
@@ -424,8 +424,9 @@
                 "payment.html",
             };
 
-            // 네이버페이 상품 정보 (PortOne v2 유효한 값 사용)
+            // 네이버페이: easyPay + naverpay 상품 정보
             if (isNaverPay) {
+              portoneParams.easyPay = { easyPayProvider: "NAVERPAY" };
               portoneParams.naverpay = {
                 useCfmYmdt: (checkOut || "").replace(/-/g, ""),
                 productItems: [
@@ -913,7 +914,7 @@
                 ")",
               totalAmount: finalAmount,
               currency: "KRW",
-              payMethod: isNaverPay ? "NAVERPAY" : "CARD",
+              payMethod: isNaverPay ? "EASY_PAY" : "CARD",
               customer: {
                 fullName: guestName || undefined,
                 phoneNumber: contact || undefined,
@@ -926,8 +927,9 @@
                 "payment.html",
             };
 
-            // Naver Pay item info (using valid PortOne v2 values)
+            // Naver Pay: easyPay + naverpay item info
             if (isNaverPay) {
+              portoneParams.easyPay = { easyPayProvider: "NAVERPAY" };
               portoneParams.naverpay = {
                 useCfmYmdt: (checkOut || "").replace(/-/g, ""),
                 productItems: [
