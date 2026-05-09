@@ -350,7 +350,7 @@
               <tbody id="admin-room-rate-body"></tbody>
             </table>
           </div>
-          <div class="admin-table-wrap" style="margin-top:24px">
+          <div class="admin-table-wrap" style="margin-top: 24px">
             <table class="admin-table admin-room-manage-table">
               <thead>
                 <tr>
@@ -381,7 +381,11 @@
             </table>
           </div>
         </div>
-        <div id="admin-room-manage-block-panel" class="admin-sales-panel" hidden>
+        <div
+          id="admin-room-manage-block-panel"
+          class="admin-sales-panel"
+          hidden
+        >
           <p class="admin-sales-pending">준비 중입니다.</p>
         </div>
       </section>
@@ -494,9 +498,9 @@
         var roomRateRows = [];
         var roomChargeRows = [];
         var CHARGE_LABELS = {
-          "weekend-charge":   { label: "주말 요금", unit: "원/박" },
+          "weekend-charge": { label: "주말 요금", unit: "원/박" },
           "consecutive-sale": { label: "연박 할인", unit: "원/박" },
-          "promotion":        { label: "프로모션 할인", unit: "%" },
+          promotion: { label: "프로모션 할인", unit: "%" },
         };
         var roomStatusByRoom = { G1: "", G2: "", G3: "", G4: "" };
         var activeResTab = "current";
@@ -506,7 +510,9 @@
         var PAGE_SIZE = 20;
         var sortKey = "checkin";
         var activeCategory = "bank";
-        var roomManageTabsEl = document.getElementById("admin-room-manage-tabs");
+        var roomManageTabsEl = document.getElementById(
+          "admin-room-manage-tabs",
+        );
         var roomManageTabBtns = roomManageTabsEl
           ? roomManageTabsEl.querySelectorAll(".admin-res-tab-btn")
           : [];
@@ -1421,7 +1427,7 @@
             "#d3c7b1", // 1
             "#b8aa94", // 2
             "#8e8172", // 3
-            "#3a3531", // 4
+            "#433d34", // 4
           ];
 
           var maxCount = 0;
@@ -1450,7 +1456,7 @@
 
           var title = document.createElement("div");
           title.className = "admin-sales-heatmap-title";
-          
+
           containerEl.appendChild(title);
 
           var weekHeader = document.createElement("div");
@@ -2201,31 +2207,33 @@
         }
 
         function attachRateSaveBtns(tbody) {
-          tbody.querySelectorAll(".admin-room-rate-save-btn").forEach(function (btn) {
-            btn.addEventListener("click", function () {
-              var roomName = btn.getAttribute("data-room-name") || "";
-              var input = tbody.querySelector(
-                ".admin-room-rate-input[data-room-name='" + roomName + "']",
-              );
-              var val = input ? Number(input.value) : NaN;
-              if (!Number.isFinite(val) || val < 0) {
-                showMessage("요금은 0 이상의 숫자로 입력해 주세요.");
-                return;
-              }
-              if (roomName === "promotion" && val > 100) {
-                showMessage("프로모션 할인율은 0~100% 사이로 입력해 주세요.");
-                return;
-              }
-              btn.disabled = true;
-              saveRoomRateRow(roomName, val)
-                .catch(function (err) {
-                  showMessage((err && err.message) || "저장 실패");
-                })
-                .finally(function () {
-                  btn.disabled = false;
-                });
+          tbody
+            .querySelectorAll(".admin-room-rate-save-btn")
+            .forEach(function (btn) {
+              btn.addEventListener("click", function () {
+                var roomName = btn.getAttribute("data-room-name") || "";
+                var input = tbody.querySelector(
+                  ".admin-room-rate-input[data-room-name='" + roomName + "']",
+                );
+                var val = input ? Number(input.value) : NaN;
+                if (!Number.isFinite(val) || val < 0) {
+                  showMessage("요금은 0 이상의 숫자로 입력해 주세요.");
+                  return;
+                }
+                if (roomName === "promotion" && val > 100) {
+                  showMessage("프로모션 할인율은 0~100% 사이로 입력해 주세요.");
+                  return;
+                }
+                btn.disabled = true;
+                saveRoomRateRow(roomName, val)
+                  .catch(function (err) {
+                    showMessage((err && err.message) || "저장 실패");
+                  })
+                  .finally(function () {
+                    btn.disabled = false;
+                  });
+              });
             });
-          });
         }
 
         function renderRoomRateTable() {
@@ -2242,12 +2250,17 @@
             roomRateRows.forEach(function (row) {
               var tr = document.createElement("tr");
               tr.innerHTML =
-                "<td class='admin-room-name-cell'>" + escapeHtml(row.roomName || "—") + "</td>" +
+                "<td class='admin-room-name-cell'>" +
+                escapeHtml(row.roomName || "—") +
+                "</td>" +
                 "<td><input class='admin-room-status-input admin-room-rate-input' data-room-name='" +
-                escapeHtml(row.roomName || "") + "' type='number' min='0' step='1000' value='" +
-                String(Number(row.weekdayBaseRate || 0)) + "' /></td>" +
+                escapeHtml(row.roomName || "") +
+                "' type='number' min='0' step='1000' value='" +
+                String(Number(row.weekdayBaseRate || 0)) +
+                "' /></td>" +
                 "<td><button type='button' class='admin-confirm-btn admin-room-rate-save-btn' data-room-name='" +
-                escapeHtml(row.roomName || "") + "'>저장</button></td>";
+                escapeHtml(row.roomName || "") +
+                "'>저장</button></td>";
               roomRateBody.appendChild(tr);
             });
             attachRateSaveBtns(roomRateBody);
@@ -2264,18 +2277,31 @@
             roomChargeBody.appendChild(cEmptyTr);
           } else {
             roomChargeRows.forEach(function (row) {
-              var meta = CHARGE_LABELS[row.roomName] || { label: row.roomName, unit: "원" };
+              var meta = CHARGE_LABELS[row.roomName] || {
+                label: row.roomName,
+                unit: "원",
+              };
               var step = row.roomName === "promotion" ? "1" : "1000";
               var maxAttr = row.roomName === "promotion" ? " max='100'" : "";
               var tr = document.createElement("tr");
               tr.innerHTML =
-                "<td class='admin-room-name-cell'>" + escapeHtml(meta.label) +
-                " <span style='color:#888;font-size:0.82em'>(" + escapeHtml(meta.unit) + ")</span></td>" +
+                "<td class='admin-room-name-cell'>" +
+                escapeHtml(meta.label) +
+                " <span style='color:#888;font-size:0.82em'>(" +
+                escapeHtml(meta.unit) +
+                ")</span></td>" +
                 "<td><input class='admin-room-status-input admin-room-rate-input' data-room-name='" +
-                escapeHtml(row.roomName) + "' type='number' min='0' step='" + step + "'" + maxAttr +
-                " value='" + String(Number(row.weekdayBaseRate || 0)) + "' /></td>" +
+                escapeHtml(row.roomName) +
+                "' type='number' min='0' step='" +
+                step +
+                "'" +
+                maxAttr +
+                " value='" +
+                String(Number(row.weekdayBaseRate || 0)) +
+                "' /></td>" +
                 "<td><button type='button' class='admin-confirm-btn admin-room-rate-save-btn' data-room-name='" +
-                escapeHtml(row.roomName) + "'>저장</button></td>";
+                escapeHtml(row.roomName) +
+                "'>저장</button></td>";
               roomChargeBody.appendChild(tr);
             });
             attachRateSaveBtns(roomChargeBody);
@@ -2316,7 +2342,11 @@
             });
         }
 
-        var CHARGE_NAME_SET = ["weekend-charge", "consecutive-sale", "promotion"];
+        var CHARGE_NAME_SET = [
+          "weekend-charge",
+          "consecutive-sale",
+          "promotion",
+        ];
 
         function splitRateRows(rows) {
           roomRateRows = [];
@@ -2405,7 +2435,8 @@
           if (activeRoomManageTab === "rate" && !isLayoutPreviewMode) {
             loadRoomRateRows().catch(function (err) {
               showMessage(
-                (err && err.message) || "객실 요금 조회 중 오류가 발생했습니다.",
+                (err && err.message) ||
+                  "객실 요금 조회 중 오류가 발생했습니다.",
               );
             });
           }
