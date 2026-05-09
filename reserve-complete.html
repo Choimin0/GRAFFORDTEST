@@ -252,7 +252,6 @@
         ></footer>
       </main>
 
-      <script src="js/booking-pricing.js"></script>
       <script>
         document.addEventListener("DOMContentLoaded", function () {
           function blockBackNavigation() {
@@ -281,7 +280,6 @@
           }
           blockBackNavigation();
 
-          var P = window.GraffordBookingPricing;
           var ROOM_LABEL = {
             G1: "G1",
             G2: "G2",
@@ -333,26 +331,9 @@
             }
           }
 
-          function getDiscountedAmountFallback() {
-            if (P && checkIn && checkOut) {
-              var parsedExtraGuests = parseInt(extraGuests || "0", 10) || 0;
-              var quote = P.computeStay(
-                room,
-                checkIn,
-                checkOut,
-                parsedExtraGuests,
-              );
-              if (quote && quote.nights > 0) {
-                return quote.discountedGrandTotal || 0;
-              }
-            }
-            return 0;
-          }
+          // 표시 금액 = reservations.total_amount (DB 저장값). 재계산 없음.
           var paidAmount =
             parseInt(String(totalAmount || "0").replace(/,/g, ""), 10) || 0;
-          if (!paidAmount) {
-            paidAmount = getDiscountedAmountFallback();
-          }
           var discountedAmount = paidAmount;
 
           document.getElementById("complete-room-name").textContent =

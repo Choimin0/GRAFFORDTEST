@@ -7,7 +7,6 @@
     <title>예약 조회 - GRAFFORD</title>
     <link rel="stylesheet" href="css/style.css" />
     <script src="js/mobile-nav.js" defer></script>
-    <script src="js/booking-pricing.js" defer></script>
     <script src="js/booking-reservations.js" defer></script>
     <script src="js/site-language.js" defer></script>
   </head>
@@ -108,7 +107,6 @@
       <script>
         document.addEventListener("DOMContentLoaded", function () {
           var R = window.GraffordReservations;
-          var P = window.GraffordBookingPricing;
           var forms = document.querySelectorAll(".reserveinfo-form");
 
           function lookupApiUrl() {
@@ -119,27 +117,13 @@
             return base + "/api/reservations-lookup";
           }
 
-          function getDiscountedAmount(data) {
-            if (P && data && data.room && data.checkIn && data.checkOut) {
-              var quote = P.computeStay(
-                String(data.room).toUpperCase(),
-                data.checkIn,
-                data.checkOut,
-                parseInt(data.extraGuests || 0, 10) || 0,
-              );
-              if (quote && quote.nights > 0) {
-                return quote.discountedGrandTotal || 0;
-              }
-            }
-            return parseInt((data && data.totalAmount) || 0, 10) || 0;
-          }
-
           function resolveStoredTotalAmount(data) {
+            // DB 저장 금액(total_amount)을 직접 반환. 재계산 없음.
             var dbTotal = Number(data && data.totalAmount);
-            if (Number.isFinite(dbTotal) && dbTotal >= 0) {
+            if (Number.isFinite(dbTotal) && dbTotal > 0) {
               return Math.floor(dbTotal);
             }
-            return getDiscountedAmount(data);
+            return 0;
           }
 
           function goToReserveComplete(data) {
@@ -181,6 +165,7 @@
                 contact: data.contact || "",
                 extraGuests: String(data.extraGuests || 0),
                 amount: String(resolveStoredTotalAmount(data)),
+                totalAmount: String(resolveStoredTotalAmount(data)),
                 paymentMethod: data.payMethod || "",
                 reservedAt: data.createdAt || "",
                 cancelledAt: data.cancelledAt || new Date().toISOString(),
