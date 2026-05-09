@@ -518,7 +518,7 @@
               }
             } catch (_e) {}
             try {
-              var rateRes = await fetch(roomRateApiUrl());
+              var rateRes = await fetch(roomRateApiUrl(), { cache: "no-store" });
               var rateData = await rateRes.json();
               if (rateRes.ok && rateData && rateData.ok && rateData.rates) {
                 if (typeof P.setRoomWeekdayBase === "function") P.setRoomWeekdayBase(rateData.rates);

@@ -866,7 +866,7 @@
                   applyRoomRates(cachedMap, cachedCharges);
                 }
               } catch (_e) {}
-              return fetch(roomRateApiUrl())
+              return fetch(roomRateApiUrl(), { cache: "no-store" })
                 .then(function (r) {
                   return r.json().then(function (data) {
                     return { ok: r.ok, data: data || {} };
