@@ -188,13 +188,17 @@
           }
 
           function computeAmount() {
+            var savedAmount = Number(saved.totalAmount || 0);
+            if (savedAmount > 0) {
+              return savedAmount;
+            }
             if (P && room && checkIn && checkOut) {
               var quote = P.computeStay(room, checkIn, checkOut, extraGuests);
               if (quote && quote.nights > 0) {
                 return quote.discountedGrandTotal || 0;
               }
             }
-            return Number(saved.totalAmount || 0);
+            return savedAmount;
           }
 
           var finalAmount = computeAmount();
@@ -601,13 +605,17 @@
           }
 
           function computeAmount() {
+            var savedAmount = Number(saved.totalAmount || 0);
+            if (savedAmount > 0) {
+              return savedAmount;
+            }
             if (P && room && checkIn && checkOut) {
               var quote = P.computeStay(room, checkIn, checkOut, extraGuests);
               if (quote && quote.nights > 0) {
                 return quote.discountedGrandTotal || 0;
               }
             }
-            return Number(saved.totalAmount || 0);
+            return savedAmount;
           }
 
           var finalAmount = computeAmount();

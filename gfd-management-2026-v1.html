@@ -310,17 +310,67 @@
         aria-labelledby="admin-room-manage-title"
         hidden
       >
-        <div class="admin-table-wrap">
-          <table class="admin-table admin-room-manage-table">
-            <thead>
-              <tr>
-                <th>객실 이름</th>
-                <th>객실 상태</th>
-                <th></th>
-              </tr>
-            </thead>
-            <tbody id="admin-room-manage-body"></tbody>
-          </table>
+        <div
+          class="admin-res-tabs"
+          id="admin-room-manage-tabs"
+          aria-label="객실 관리 탭"
+        >
+          <button
+            type="button"
+            class="admin-res-tab-btn is-active"
+            data-room-manage-tab="rate"
+          >
+            객실료
+          </button>
+          <button
+            type="button"
+            class="admin-res-tab-btn"
+            data-room-manage-tab="status"
+          >
+            객실 현황
+          </button>
+          <button
+            type="button"
+            class="admin-res-tab-btn"
+            data-room-manage-tab="block"
+          >
+            예약 막기
+          </button>
+        </div>
+        <div id="admin-room-manage-rate-panel" class="admin-sales-panel">
+          <div class="admin-table-wrap">
+            <table class="admin-table admin-room-manage-table">
+              <thead>
+                <tr>
+                  <th>객실 이름</th>
+                  <th>평일 기본 요금</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody id="admin-room-rate-body"></tbody>
+            </table>
+          </div>
+        </div>
+        <div
+          id="admin-room-manage-status-panel"
+          class="admin-sales-panel"
+          hidden
+        >
+          <div class="admin-table-wrap">
+            <table class="admin-table admin-room-manage-table">
+              <thead>
+                <tr>
+                  <th>객실 이름</th>
+                  <th>객실 상태</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody id="admin-room-manage-body"></tbody>
+            </table>
+          </div>
+        </div>
+        <div id="admin-room-manage-block-panel" class="admin-sales-panel" hidden>
+          <p class="admin-sales-pending">준비 중입니다.</p>
         </div>
       </section>
 
@@ -382,6 +432,7 @@
         var tableSection = bankSection;
         var tableBody = document.getElementById("admin-table-body");
         var roomManageBody = document.getElementById("admin-room-manage-body");
+        var roomRateBody = document.getElementById("admin-room-rate-body");
         var sortSelect = document.getElementById("admin-sort-select");
         var resTabs = document.getElementById("admin-res-tabs");
         var resTabBtns = resTabs
@@ -427,13 +478,28 @@
         var latestCalendarRows = [];
         var reservationListRows = [];
         var roomStatusManageRows = [];
+        var roomRateRows = [];
         var roomStatusByRoom = { G1: "", G2: "", G3: "", G4: "" };
         var activeResTab = "current";
         var activeSalesTab = "monthly";
+        var activeRoomManageTab = "rate";
         var currentPage = 1;
         var PAGE_SIZE = 20;
         var sortKey = "checkin";
         var activeCategory = "bank";
+        var roomManageTabsEl = document.getElementById("admin-room-manage-tabs");
+        var roomManageTabBtns = roomManageTabsEl
+          ? roomManageTabsEl.querySelectorAll(".admin-res-tab-btn")
+          : [];
+        var roomManageRatePanel = document.getElementById(
+          "admin-room-manage-rate-panel",
+        );
+        var roomManageStatusPanel = document.getElementById(
+          "admin-room-manage-status-panel",
+        );
+        var roomManageBlockPanel = document.getElementById(
+          "admin-room-manage-block-panel",
+        );
         var calendarViewDate = new Date();
         calendarViewDate.setDate(1);
         var selectedCheckinDate = getTodayYmdKst();
@@ -1623,6 +1689,13 @@
           }
           if (category === "room-manage") {
             if (isLayoutPreviewMode) {
+              roomRateRows = [
+                { roomName: "G1", weekdayBaseRate: 250000 },
+                { roomName: "G2", weekdayBaseRate: 250000 },
+                { roomName: "G3", weekdayBaseRate: 300000 },
+                { roomName: "G4", weekdayBaseRate: 350000 },
+              ];
+              renderRoomRateTable();
               roomStatusManageRows = [
                 { roomName: "G1", statusText: "정상 운영 중" },
                 { roomName: "G2", statusText: "청소 완료" },
@@ -1630,14 +1703,10 @@
                 { roomName: "G4", statusText: "" },
               ];
               renderRoomManageTable();
+              setActiveRoomManageTab(activeRoomManageTab || "rate");
               return;
             }
-            loadRoomStatusManageRows().catch(function (err) {
-              showMessage(
-                (err && err.message) ||
-                  "객실 상태 조회 중 오류가 발생했습니다.",
-              );
-            });
+            setActiveRoomManageTab(activeRoomManageTab || "rate");
           }
           if (category === "sales") {
             setActiveSalesTab(activeSalesTab);
@@ -2039,6 +2108,14 @@
           return base + "/api/admin-room-status";
         }
 
+        function adminRoomRateApiUrl() {
+          var base = "";
+          if (typeof window !== "undefined" && window.__GRAFFORD_API_BASE__) {
+            base = String(window.__GRAFFORD_API_BASE__).replace(/\/$/, "");
+          }
+          return base + "/api/admin-room-rate";
+        }
+
         function escapeHtml(text) {
           return String(text || "")
             .replace(/&/g, "&amp;")
@@ -2104,6 +2181,65 @@
             });
         }
 
+        function renderRoomRateTable() {
+          if (!roomRateBody) {
+            return;
+          }
+          roomRateBody.innerHTML = "";
+          if (!roomRateRows.length) {
+            var emptyTr = document.createElement("tr");
+            var emptyTd = document.createElement("td");
+            emptyTd.colSpan = 3;
+            emptyTd.textContent = "객실 요금 데이터가 없습니다.";
+            emptyTr.appendChild(emptyTd);
+            roomRateBody.appendChild(emptyTr);
+            return;
+          }
+          roomRateRows.forEach(function (row) {
+            var tr = document.createElement("tr");
+            tr.innerHTML =
+              "<td class='admin-room-name-cell'>" +
+              escapeHtml(row.roomName || "—") +
+              "</td>" +
+              "<td>" +
+              "<input class='admin-room-status-input admin-room-rate-input' data-room-name='" +
+              escapeHtml(row.roomName || "") +
+              "' type='number' min='0' step='1000' value='" +
+              String(Number(row.weekdayBaseRate || 0)) +
+              "' />" +
+              "</td>" +
+              "<td>" +
+              "<button type='button' class='admin-confirm-btn admin-room-rate-save-btn' data-room-name='" +
+              escapeHtml(row.roomName || "") +
+              "'>저장</button>" +
+              "</td>";
+            roomRateBody.appendChild(tr);
+          });
+          roomRateBody
+            .querySelectorAll(".admin-room-rate-save-btn")
+            .forEach(function (btn) {
+              btn.addEventListener("click", function () {
+                var roomName = btn.getAttribute("data-room-name") || "";
+                var input = roomRateBody.querySelector(
+                  ".admin-room-rate-input[data-room-name='" + roomName + "']",
+                );
+                var weekdayBaseRate = input ? Number(input.value) : NaN;
+                if (!Number.isFinite(weekdayBaseRate) || weekdayBaseRate < 0) {
+                  showMessage("요금은 0 이상의 숫자로 입력해 주세요.");
+                  return;
+                }
+                btn.disabled = true;
+                saveRoomRateRow(roomName, weekdayBaseRate)
+                  .catch(function (err) {
+                    showMessage((err && err.message) || "객실 요금 저장 실패");
+                  })
+                  .finally(function () {
+                    btn.disabled = false;
+                  });
+              });
+            });
+        }
+
         function loadRoomStatusManageRows() {
           return loadRoomStatusRows().then(function (rows) {
             roomStatusManageRows = rows || [];
@@ -2136,6 +2272,96 @@
               setRoomStatusRows(rows);
               return rows;
             });
+        }
+
+        function loadRoomRateRows() {
+          var auth = getAuthPayload();
+          return fetch(adminRoomRateApiUrl(), {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              action: "list",
+              adminId: auth.adminId,
+              adminPw: auth.adminPw,
+            }),
+          })
+            .then(function (r) {
+              return r.json().then(function (data) {
+                return { ok: r.ok, data: data || {} };
+              });
+            })
+            .then(function (result) {
+              if (!result.ok || !result.data.ok) {
+                throw new Error(result.data.error || "객실 요금 조회 실패");
+              }
+              roomRateRows = result.data.rows || [];
+              renderRoomRateTable();
+              showMessage("");
+              return roomRateRows;
+            });
+        }
+
+        function saveRoomRateRow(roomName, weekdayBaseRate) {
+          var auth = getAuthPayload();
+          return fetch(adminRoomRateApiUrl(), {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              action: "save",
+              roomName: roomName,
+              weekdayBaseRate: Math.floor(weekdayBaseRate),
+              adminId: auth.adminId,
+              adminPw: auth.adminPw,
+            }),
+          })
+            .then(function (r) {
+              return r.json().then(function (data) {
+                return { ok: r.ok, data: data || {} };
+              });
+            })
+            .then(function (result) {
+              if (!result.ok || !result.data.ok) {
+                throw new Error(result.data.error || "객실 요금 저장 실패");
+              }
+              roomRateRows = result.data.rows || [];
+              renderRoomRateTable();
+              showMessage("");
+            });
+        }
+
+        function setActiveRoomManageTab(tab) {
+          activeRoomManageTab = tab || "rate";
+          roomManageTabBtns.forEach(function (btn) {
+            btn.classList.toggle(
+              "is-active",
+              btn.getAttribute("data-room-manage-tab") === activeRoomManageTab,
+            );
+          });
+          if (roomManageRatePanel) {
+            roomManageRatePanel.hidden = activeRoomManageTab !== "rate";
+          }
+          if (roomManageStatusPanel) {
+            roomManageStatusPanel.hidden = activeRoomManageTab !== "status";
+          }
+          if (roomManageBlockPanel) {
+            roomManageBlockPanel.hidden = activeRoomManageTab !== "block";
+          }
+
+          if (activeRoomManageTab === "rate" && !isLayoutPreviewMode) {
+            loadRoomRateRows().catch(function (err) {
+              showMessage(
+                (err && err.message) || "객실 요금 조회 중 오류가 발생했습니다.",
+              );
+            });
+          }
+          if (activeRoomManageTab === "status" && !isLayoutPreviewMode) {
+            loadRoomStatusManageRows().catch(function (err) {
+              showMessage(
+                (err && err.message) ||
+                  "객실 상태 조회 중 오류가 발생했습니다.",
+              );
+            });
+          }
         }
 
         function saveRoomStatusManageRow(roomName, statusText) {
@@ -2301,6 +2527,15 @@
               return;
             }
             setActiveSalesTab(btn.getAttribute("data-sales-tab"));
+          });
+        });
+
+        roomManageTabBtns.forEach(function (btn) {
+          btn.addEventListener("click", function () {
+            if (roomManageSection.hidden) {
+              return;
+            }
+            setActiveRoomManageTab(btn.getAttribute("data-room-manage-tab"));
           });
         });
 

@@ -15,6 +15,18 @@
   /** 추가 투숙 가능 인원 (기준 인원 외) */
   var MAX_EXTRA_GUESTS = { G1: 0, G2: 0, G3: 2, G4: 4 };
 
+  function setRoomWeekdayBase(nextMap) {
+    if (!nextMap || typeof nextMap !== "object") {
+      return;
+    }
+    ["G1", "G2", "G3", "G4"].forEach(function (room) {
+      var n = Number(nextMap[room]);
+      if (Number.isFinite(n) && n >= 0) {
+        ROOM_WEEKDAY_BASE[room] = Math.floor(n);
+      }
+    });
+  }
+
   function parseYMD(str) {
     if (!str || !/^\d{4}-\d{2}-\d{2}$/.test(str)) {
       return null;
@@ -136,5 +148,6 @@
     isWeekendNight: isWeekendNight,
     clampExtra: clampExtra,
     computeStay: computeStay,
+    setRoomWeekdayBase: setRoomWeekdayBase,
   };
 })(typeof window !== "undefined" ? window : this);

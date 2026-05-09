@@ -1,0 +1,97 @@
+import pg from "pg";
+
+const { Pool } = pg;
+const TABLE_NAME = '"room-rate"';
+
+var poolSingleton = null;
+
+function getDatabaseUrl() {
+  return String(
+    process.env.POSTGRES_URL ||
+      process.env.POSTGRES_PRISMA_URL ||
+      process.env.POSTGRES_URL_NON_POOLING ||
+      process.env.DATABASE_URL ||
+      "",
+  ).trim();
+}
+
+function getPool() {
+  var databaseUrl = getDatabaseUrl();
+  if (!databaseUrl) {
+    return null;
+  }
+  if (!poolSingleton) {
+    poolSingleton = new Pool({
+      connectionString: databaseUrl,
+      max: 1,
+      connectionTimeoutMillis: 20000,
+      idleTimeoutMillis: 15000,
+    });
+  }
+  return poolSingleton;
+}
+
+function json(res, status, body) {
+  res.statusCode = status;
+  res.setHeader("Content-Type", "application/json; charset=utf-8");
+  res.setHeader("Access-Control-Allow-Origin", "*");
+  res.setHeader("Access-Control-Allow-Methods", "GET, OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+  res.end(JSON.stringify(body));
+}
+
+async function ensureRoomRateTable(pool) {
+  await pool.query(
+    `CREATE TABLE IF NOT EXISTS ${TABLE_NAME} (
+      room_name VARCHAR(16) PRIMARY KEY,
+      weekday_base_rate BIGINT NOT NULL CHECK (weekday_base_rate >= 0),
+      updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+    )`,
+  );
+  await pool.query(
+    `INSERT INTO ${TABLE_NAME} (room_name, weekday_base_rate)
+     VALUES ('G1', 250000), ('G2', 250000), ('G3', 300000), ('G4', 350000)
+     ON CONFLICT (room_name) DO NOTHING`,
+  );
+}
+
+export default async function handler(req, res) {
+  if (req.method === "OPTIONS") {
+    res.statusCode = 204;
+    res.setHeader("Access-Control-Allow-Origin", "*");
+    res.setHeader("Access-Control-Allow-Methods", "GET, OPTIONS");
+    res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+    res.end();
+    return;
+  }
+
+  if (req.method !== "GET") {
+    json(res, 405, { ok: false, error: "Method not allowed" });
+    return;
+  }
+
+  var pool = getPool();
+  if (!pool) {
+    json(res, 503, { ok: false, error: "DB 연결 정보가 없습니다." });
+    return;
+  }
+
+  try {
+    await ensureRoomRateTable(pool);
+    var sel = await pool.query(
+      `SELECT room_name, weekday_base_rate
+       FROM ${TABLE_NAME}
+       ORDER BY room_name ASC`,
+    );
+    var map = {};
+    (sel.rows || []).forEach(function (row) {
+      map[row.room_name] = Number(row.weekday_base_rate || 0);
+    });
+    json(res, 200, { ok: true, rates: map });
+  } catch (e) {
+    json(res, 500, {
+      ok: false,
+      error: String((e && e.message) || e || "lookup failed"),
+    });
+  }
+}

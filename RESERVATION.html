@@ -646,6 +646,7 @@
             var calCheckoutEl = scope.querySelector("#cal-checkout");
             var availabilityEl = scope.querySelector("#availability-note");
             var P = window.GraffordBookingPricing;
+            var roomRatesLoaded = false;
             var extraGuestsBlock = scope.querySelector(
               ".reservation-extra-block",
             );
@@ -813,6 +814,53 @@
                   String(map.day || "01"),
                 hour: Number(map.hour || 0),
               };
+            }
+
+            function roomRateApiUrl() {
+              var base = "";
+              if (typeof window !== "undefined" && window.__GRAFFORD_API_BASE__) {
+                base = String(window.__GRAFFORD_API_BASE__).replace(/\/$/, "");
+              }
+              return base + "/api/room-rate";
+            }
+
+            function applyRoomRates(rates) {
+              if (!P || typeof P.setRoomWeekdayBase !== "function") {
+                return;
+              }
+              if (!rates || typeof rates !== "object") {
+                return;
+              }
+              P.setRoomWeekdayBase(rates);
+            }
+
+            function loadRoomRatesForNewBooking() {
+              return fetch(roomRateApiUrl())
+                .then(function (r) {
+                  return r.json().then(function (data) {
+                    return { ok: r.ok, data: data || {} };
+                  });
+                })
+                .then(function (result) {
+                  if (!result.ok || !result.data.ok || !result.data.rates) {
+                    return;
+                  }
+                  try {
+                    sessionStorage.setItem(
+                      "graffordRoomRateMap",
+                      JSON.stringify(result.data.rates),
+                    );
+                  } catch (_e) {}
+                  applyRoomRates(result.data.rates);
+                })
+                .catch(function () {
+                  // 요금 로드 실패 시 기존 기본 요금으로 동작
+                })
+                .finally(function () {
+                  roomRatesLoaded = true;
+                  updateWeekdayRateDisplay();
+                  updatePricingSummary();
+                });
             }
 
             function parseYMDLocal(ymd) {
@@ -1549,6 +1597,9 @@
                 ? savedRoom
                 : "G1";
             setRoom(initialRoom);
+            if (!roomRatesLoaded) {
+              loadRoomRatesForNewBooking();
+            }
             if (savedRoom && allowedRooms.indexOf(savedRoom) !== -1) {
               var bookingAnchor = scope.querySelector(".reservation-booking");
               if (bookingAnchor) {

@@ -474,6 +474,16 @@
       <script>
         document.addEventListener("DOMContentLoaded", function () {
           var P = window.GraffordBookingPricing;
+          if (P && typeof P.setRoomWeekdayBase === "function") {
+            try {
+              var savedRateMap = JSON.parse(
+                sessionStorage.getItem("graffordRoomRateMap") || "null",
+              );
+              if (savedRateMap && typeof savedRateMap === "object") {
+                P.setRoomWeekdayBase(savedRateMap);
+              }
+            } catch (_e) {}
+          }
           var ROOM_LABEL = {
             G1: "G1",
             G2: "G2",
