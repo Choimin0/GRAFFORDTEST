@@ -324,6 +324,17 @@ export default async function handler(req, res) {
       return;
     }
 
+    // refunded_count가 0이 아니면 이미 취소(환불) 처리된 예약
+    var refundedCount = row.refunded_count != null ? Number(row.refunded_count) : 0;
+    if (refundedCount !== 0) {
+      client.release();
+      json(res, 409, {
+        ok: false,
+        error: "이미 취소(환불) 처리된 예약입니다. 중복 취소는 불가합니다.",
+      });
+      return;
+    }
+
     var pgTid = row.pg_tid ? String(row.pg_tid).trim() : null;
     var totalAmount = row.total_amount != null ? Number(row.total_amount) : null;
     var source = String(row._source || "active");
@@ -414,9 +425,10 @@ export default async function handler(req, res) {
           guest_request,
           bank_confirmed,
           pg_tid,
-          cancel_reason
+          cancel_reason,
+          refunded_count
         ) VALUES (
-          $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17
+          $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18
         ) ON CONFLICT (reservation_number) DO NOTHING`,
         [
           deletedRow.reservation_number,
@@ -436,6 +448,7 @@ export default async function handler(req, res) {
           deletedRow.bank_confirmed,
           deletedRow.pg_tid || null,
           cancelReason || null,
+          1, // 취소 완료: refunded_count = 1
         ],
       );
 
