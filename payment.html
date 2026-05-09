@@ -138,6 +138,10 @@
             <span class="payment-summary-label">예약자 성함</span>
             <span class="payment-summary-value" id="pay-guest">—</span>
           </div>
+          <div class="payment-summary-row">
+            <span class="payment-summary-label">결제 수단</span>
+            <span class="payment-summary-value" id="pay-method">—</span>
+          </div>
           <div class="payment-summary-row payment-summary-row--total">
             <span class="payment-summary-label">최종 결제 금액</span>
             <span class="payment-summary-value" id="pay-amount">—</span>
@@ -314,6 +318,13 @@
           var guestEl = document.getElementById("pay-guest");
           var guestCountEl = document.getElementById("pay-guest-count");
           var amountEl = document.getElementById("pay-amount");
+          var payMethodEl = document.getElementById("pay-method");
+
+          var PAY_METHOD_LABELS = {
+            card: "신용카드",
+            naver: "네이버페이",
+            bank: "무통장입금",
+          };
 
           if (orderNoEl) orderNoEl.textContent = orderNo;
           if (roomEl) roomEl.textContent = ROOM_LABELS[room] || room;
@@ -325,6 +336,13 @@
           if (amountEl)
             amountEl.textContent =
               Number(finalAmount).toLocaleString("ko-KR") + "원";
+          if (payMethodEl)
+            payMethodEl.textContent = PAY_METHOD_LABELS[payMethod] || payMethod || "—";
+
+          // 네이버페이 선택 시 버튼 레이블 교체
+          if (payMethod === "naver" && submitBtn) {
+            submitBtn.textContent = "네이버페이로 결제하기";
+          }
 
           function showError(msg) {
             hidePageLoading();
@@ -359,9 +377,17 @@
               return;
             }
 
-            if (!config.storeId || !config.channelKey) {
+            // 네이버페이 여부 판단
+            var isNaverPay = payMethod === "naver";
+            var activeChannelKey = isNaverPay
+              ? config.naverPayChannelKey
+              : config.channelKey;
+
+            if (!config.storeId || !activeChannelKey) {
               showError(
-                "결제 설정이 올바르지 않습니다. 관리자에게 문의하세요.",
+                isNaverPay
+                  ? "네이버페이 채널 키가 설정되지 않았습니다.\n.env 파일에 NAVER_PAY_CHANNEL_KEY를 등록하고 서버를 재시작해 주세요."
+                  : "결제 설정이 올바르지 않습니다. 관리자에게 문의하세요.",
               );
               return;
             }
@@ -376,28 +402,50 @@
               return;
             }
 
+            // PortOne v2 결제 요청 파라미터 구성
+            var portoneParams = {
+              storeId: config.storeId,
+              channelKey: activeChannelKey,
+              paymentId: orderNo,
+              orderName:
+                "GRAFFORD 숙박 예약 (" + (ROOM_LABELS[room] || room) + ")",
+              totalAmount: finalAmount,
+              currency: "KRW",
+              payMethod: isNaverPay ? "NAVERPAY" : "CARD",
+              customer: {
+                fullName: guestName || undefined,
+                phoneNumber: contact || undefined,
+                email: email || undefined,
+              },
+              locale: "KO_KR",
+              redirectUrl:
+                window.location.origin +
+                window.location.pathname.replace("payment.html", "") +
+                "payment.html",
+            };
+
+            // 네이버페이 숙박 상품 정보 (옵션)
+            if (isNaverPay) {
+              portoneParams.naverpay = {
+                useCfmYmdt: (checkOut || "").replace(/-/g, ""),
+                productItems: [
+                  {
+                    categoryType: "TRAVEL",
+                    categoryId: "HOTEL",
+                    uid: orderNo,
+                    name:
+                      "GRAFFORD 숙박 예약 (" + (ROOM_LABELS[room] || room) + ")",
+                    startDate: (checkIn || "").replace(/-/g, ""),
+                    endDate: (checkOut || "").replace(/-/g, ""),
+                    count: 1,
+                  },
+                ],
+              };
+            }
+
             var response;
             try {
-              response = await portone.requestPayment({
-                storeId: config.storeId,
-                channelKey: config.channelKey,
-                paymentId: orderNo,
-                orderName:
-                  "GRAFFORD 숙박 예약 (" + (ROOM_LABELS[room] || room) + ")",
-                totalAmount: finalAmount,
-                currency: "KRW",
-                payMethod: "CARD",
-                customer: {
-                  fullName: guestName || undefined,
-                  phoneNumber: contact || undefined,
-                  email: email || undefined,
-                },
-                locale: "KO_KR",
-                redirectUrl:
-                  window.location.origin +
-                  window.location.pathname.replace("payment.html", "") +
-                  "payment.html",
-              });
+              response = await portone.requestPayment(portoneParams);
             } catch (e) {
               showError(
                 "결제창 실행 중 오류가 발생했습니다.\n(" +
@@ -600,6 +648,10 @@
             <span class="payment-summary-label">Guest</span>
             <span class="payment-summary-value" id="pay-guest-en">—</span>
           </div>
+          <div class="payment-summary-row">
+            <span class="payment-summary-label">Payment Method</span>
+            <span class="payment-summary-value" id="pay-method-en">—</span>
+          </div>
           <div class="payment-summary-row payment-summary-row--total">
             <span class="payment-summary-label">Total</span>
             <span class="payment-summary-value" id="pay-amount-en">—</span>
@@ -768,6 +820,13 @@
           var scheduleEl = document.getElementById("pay-schedule-en");
           var guestEl = document.getElementById("pay-guest-en");
           var amountEl = document.getElementById("pay-amount-en");
+          var payMethodElEn = document.getElementById("pay-method-en");
+
+          var PAY_METHOD_LABELS_EN = {
+            card: "Credit Card",
+            naver: "Naver Pay",
+            bank: "Bank Transfer",
+          };
 
           if (orderNoEl) orderNoEl.textContent = orderNo;
           if (roomEl) roomEl.textContent = ROOM_LABELS[room] || room;
@@ -778,6 +837,14 @@
           if (amountEl)
             amountEl.textContent =
               "₩" + Number(finalAmount).toLocaleString("ko-KR");
+          if (payMethodElEn)
+            payMethodElEn.textContent =
+              PAY_METHOD_LABELS_EN[payMethod] || payMethod || "—";
+
+          // Naver Pay: update button label
+          if (payMethod === "naver" && submitBtn) {
+            submitBtn.textContent = "Pay with Naver Pay";
+          }
 
           function showError(msg) {
             hidePageLoading();
@@ -812,9 +879,17 @@
               return;
             }
 
-            if (!config.storeId || !config.channelKey) {
+            // Naver Pay detection
+            var isNaverPay = payMethod === "naver";
+            var activeChannelKey = isNaverPay
+              ? config.naverPayChannelKey
+              : config.channelKey;
+
+            if (!config.storeId || !activeChannelKey) {
               showError(
-                "Payment configuration is invalid. Please contact support.",
+                isNaverPay
+                  ? "Naver Pay channel key is not configured. Please contact support."
+                  : "Payment configuration is invalid. Please contact support.",
               );
               return;
             }
@@ -829,30 +904,54 @@
               return;
             }
 
+            // PortOne v2 request params
+            var portoneParams = {
+              storeId: config.storeId,
+              channelKey: activeChannelKey,
+              paymentId: orderNo,
+              orderName:
+                "GRAFFORD Stay Reservation (" +
+                (ROOM_LABELS[room] || room) +
+                ")",
+              totalAmount: finalAmount,
+              currency: "KRW",
+              payMethod: isNaverPay ? "NAVERPAY" : "CARD",
+              customer: {
+                fullName: guestName || undefined,
+                phoneNumber: contact || undefined,
+                email: email || undefined,
+              },
+              locale: isNaverPay ? "KO_KR" : "EN_US",
+              redirectUrl:
+                window.location.origin +
+                window.location.pathname.replace("payment.html", "") +
+                "payment.html",
+            };
+
+            // Naver Pay accommodation item info (optional but recommended)
+            if (isNaverPay) {
+              portoneParams.naverpay = {
+                useCfmYmdt: (checkOut || "").replace(/-/g, ""),
+                productItems: [
+                  {
+                    categoryType: "TRAVEL",
+                    categoryId: "HOTEL",
+                    uid: orderNo,
+                    name:
+                      "GRAFFORD Stay Reservation (" +
+                      (ROOM_LABELS[room] || room) +
+                      ")",
+                    startDate: (checkIn || "").replace(/-/g, ""),
+                    endDate: (checkOut || "").replace(/-/g, ""),
+                    count: 1,
+                  },
+                ],
+              };
+            }
+
             var response;
             try {
-              response = await portone.requestPayment({
-                storeId: config.storeId,
-                channelKey: config.channelKey,
-                paymentId: orderNo,
-                orderName:
-                  "GRAFFORD Stay Reservation (" +
-                  (ROOM_LABELS[room] || room) +
-                  ")",
-                totalAmount: finalAmount,
-                currency: "KRW",
-                payMethod: "CARD",
-                customer: {
-                  fullName: guestName || undefined,
-                  phoneNumber: contact || undefined,
-                  email: email || undefined,
-                },
-                locale: "EN_US",
-                redirectUrl:
-                  window.location.origin +
-                  window.location.pathname.replace("payment.html", "") +
-                  "payment.html",
-              });
+              response = await portone.requestPayment(portoneParams);
             } catch (e) {
               showError(
                 "An error occurred while opening the payment window.\n(" +
