@@ -175,7 +175,8 @@ async function getJsonBody(req) {
 /**
  * PortOne v2 결제 취소 요청.
  * paymentId = reservationNumber (결제 시 portone.requestPayment({ paymentId: orderNo }) 에 사용한 값).
- * refundAmount가 totalAmount와 다르면 부분 취소, 같으면 전액 취소로 처리합니다.
+ * refundAmount < totalAmount 이면 부분 취소(amount + currentCancellableAmount 지정),
+ * 같으면 전액 취소(amount 없이 호출).
  * refundAmount === 0 인 경우(100% 취소 수수료)는 호출하지 않아야 합니다 — 호출 전 확인 필요.
  */
 async function requestPortoneCancellation(paymentId, cancelReason, refundAmount, totalAmount) {
@@ -184,33 +185,50 @@ async function requestPortoneCancellation(paymentId, cancelReason, refundAmount,
     return { ok: false, error: "PORTONE_API_SECRET 환경변수가 설정되지 않았습니다." };
   }
 
-  var cancelBody = { reason: cancelReason || "고객 요청 취소" };
-  // 부분 취소: 환불 금액이 결제 금액보다 적고 0보다 클 때만 amount 지정
-  // 전액 취소: amount 없이 호출 → PortOne이 전액 환불 처리
-  if (
+  var isPartial =
     Number.isFinite(refundAmount) &&
     Number.isFinite(totalAmount) &&
     refundAmount > 0 &&
-    refundAmount < totalAmount
-  ) {
+    refundAmount < totalAmount;
+
+  var cancelBody = { reason: cancelReason || "고객 요청 취소" };
+
+  if (isPartial) {
+    // 부분 취소: 환불할 금액(amount)과 현재 취소 가능 잔액(currentCancellableAmount) 모두 지정
+    // currentCancellableAmount는 검증용 — 첫 취소이므로 totalAmount와 동일
     cancelBody.amount = refundAmount;
+    cancelBody.currentCancellableAmount = totalAmount;
   }
+  // 전액 취소: amount 없이 호출 → PortOne이 전액 환불 처리
+
+  var cancelUrl =
+    "https://api.portone.io/payments/" + encodeURIComponent(paymentId) + "/cancel";
+
+  console.log(
+    "[payment-cancel] PortOne 취소 요청 →",
+    cancelUrl,
+    "| paymentId:", paymentId,
+    "| 부분취소:", isPartial,
+    "| body:", JSON.stringify(cancelBody),
+  );
 
   try {
-    var portoneRes = await fetch(
-      "https://api.portone.io/payments/" + encodeURIComponent(paymentId) + "/cancel",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: "PortOne " + apiSecret,
-        },
-        body: JSON.stringify(cancelBody),
+    var portoneRes = await fetch(cancelUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "PortOne " + apiSecret,
       },
-    );
+      body: JSON.stringify(cancelBody),
+    });
 
     var resData = {};
     try { resData = await portoneRes.json(); } catch (_) {}
+
+    console.log(
+      "[payment-cancel] PortOne 취소 응답 HTTP", portoneRes.status,
+      "| body:", JSON.stringify(resData),
+    );
 
     if (!portoneRes.ok) {
       return {
@@ -340,6 +358,12 @@ export default async function handler(req, res) {
     var pgTid = row.pg_tid ? String(row.pg_tid).trim() : null;
     var totalAmount = row.total_amount != null ? Number(row.total_amount) : null;
     var source = String(row._source || "active");
+    // payment_method: "bank" / "무통장입금" 이면 PG 취소 불필요; 그 외(card 등)는 PortOne 취소
+    var paymentMethodDb = String(row.payment_method || "").toLowerCase().trim();
+    var isBankTransfer =
+      paymentMethodDb === "bank" ||
+      paymentMethodDb === "무통장입금" ||
+      paymentMethodDb === "bank_transfer";
 
     // refundAmount 유효성 체크: totalAmount 초과 불가
     var safeRefundAmount = refundAmount;
@@ -354,29 +378,56 @@ export default async function handler(req, res) {
       safeRefundAmount = totalAmount;
     }
 
+    console.log(
+      "[payment-cancel] 예약번호:", reservationNumber,
+      "| pg_tid:", pgTid,
+      "| payment_method(DB):", paymentMethodDb,
+      "| isBankTransfer:", isBankTransfer,
+      "| totalAmount:", totalAmount,
+      "| safeRefundAmount:", safeRefundAmount,
+    );
+
     var pgCancelled = false;
     var pgError = null;
 
-    // pg_tid가 있고 환불액이 0보다 클 때만 PortOne v2 결제 취소 요청.
+    // 카드/PG 결제(무통장입금 제외)이고 환불액이 0보다 클 때 PortOne v2 결제 취소 요청.
     // safeRefundAmount === 0 이면 100% 취소 수수료 적용 → 환불 없음, PG 취소 API 호출 불필요.
-    if (pgTid && safeRefundAmount > 0) {
+    // pg_tid 유무에 관계없이 payment_method 기준으로 판단 (pg_tid가 누락될 수 있으므로).
+    if (!isBankTransfer && safeRefundAmount > 0) {
       var portoneResult = await requestPortoneCancellation(
-        reservationNumber, // PortOne paymentId = orderNo (결제 시 사용한 값)
+        reservationNumber, // PortOne paymentId = 결제 시 사용한 orderNo (= reservationNumber)
         cancelReason || "고객 요청 취소",
         safeRefundAmount,
         totalAmount,
       );
       if (!portoneResult.ok) {
-        client.release();
-        json(res, 502, {
-          ok: false,
-          error:
-            "결제 취소에 실패했습니다. 고객센터로 문의해 주세요.\n" + portoneResult.error,
-          pgError: portoneResult.error,
-        });
-        return;
+        // PortOne에 해당 결제가 없는 경우(404/payment not found)는 DB 취소만 진행
+        var portoneErrStr = portoneResult.error || "";
+        var portoneDetail = portoneResult.detail || {};
+        var isNotFound =
+          (portoneDetail.type && portoneDetail.type === "PAYMENT_NOT_FOUND") ||
+          portoneErrStr.includes("PAYMENT_NOT_FOUND") ||
+          portoneErrStr.includes("404");
+        if (isNotFound) {
+          console.warn(
+            "[payment-cancel] PortOne에서 결제건을 찾을 수 없음(PAYMENT_NOT_FOUND) → DB 취소만 진행.",
+            "reservationNumber:", reservationNumber,
+          );
+          pgCancelled = false;
+          pgError = portoneResult.error;
+        } else {
+          client.release();
+          json(res, 502, {
+            ok: false,
+            error:
+              "결제 취소에 실패했습니다. 고객센터로 문의해 주세요.\n" + portoneResult.error,
+            pgError: portoneResult.error,
+          });
+          return;
+        }
+      } else {
+        pgCancelled = true;
       }
-      pgCancelled = true;
     }
 
     // DB에서 예약 삭제 후 delete_reservations로 이동
