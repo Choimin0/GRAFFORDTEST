@@ -3196,7 +3196,7 @@ iframe.map {
   display: flex;
   align-items: center;
   gap: 0.9rem;
-  margin-bottom: 0.8rem;
+  margin: 0 0.7rem 0.85rem;
   padding-left: 0.15rem;
 }
 

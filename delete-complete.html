@@ -132,7 +132,6 @@
         ></footer>
       </main>
 
-      <script src="js/booking-pricing.js"></script>
       <script>
         document.addEventListener("DOMContentLoaded", function () {
           function blockBackNavigation() {
@@ -161,7 +160,6 @@
           }
           blockBackNavigation();
 
-          var P = window.GraffordBookingPricing;
           var ROOM_LABEL = { G1: "G1", G2: "G2", G3: "G3", G4: "G4" };
           var saved = null;
           try {
@@ -175,11 +173,19 @@
           var room = (saved && saved.room) || "";
           var checkIn = (saved && saved.checkIn) || "";
           var checkOut = (saved && saved.checkOut) || "";
-          var extraGuests =
-            parseInt((saved && saved.extraGuests) || "0", 10) || 0;
           var name = (saved && saved.name) || "—";
           var contact = (saved && saved.contact) || "—";
-          var amount = parseInt((saved && saved.amount) || "0", 10) || 0;
+          // reservations.total_amount (세션: amount / totalAmount). 재계산 없음.
+          var paidAmount =
+            parseInt(
+              String((saved && saved.amount) || "0").replace(/,/g, ""),
+              10,
+            ) ||
+            parseInt(
+              String((saved && saved.totalAmount) || "0").replace(/,/g, ""),
+              10,
+            ) ||
+            0;
           var paymentMethod = String(
             (saved && saved.paymentMethod) || "",
           ).trim();
@@ -202,17 +208,6 @@
           function formatKRWEn(n) {
             return Number(n || 0).toLocaleString("en-US") + " KRW";
           }
-
-          function getDiscountedAmount() {
-            if (P && checkIn && checkOut) {
-              var quote = P.computeStay(room, checkIn, checkOut, extraGuests);
-              if (quote && quote.nights > 0) {
-                return quote.discountedGrandTotal || 0;
-              }
-            }
-            return amount;
-          }
-          var discountedAmount = getDiscountedAmount();
 
           function formatDateOnly(v) {
             if (!v) {
@@ -318,7 +313,7 @@
           var refundAmount = Number(refundAmountRaw);
           if (!isFinite(refundAmount)) {
             refundAmount =
-              paymentMethod.toLowerCase() === "bank" ? 0 : discountedAmount;
+              paymentMethod.toLowerCase() === "bank" ? 0 : paidAmount;
           }
 
           function setText(id, value) {
@@ -339,7 +334,7 @@
           setText("done-schedule", scheduleText);
           setText("done-name", name);
           setText("done-contact", contact);
-          setText("done-amount", formatKRW(discountedAmount));
+          setText("done-amount", formatKRW(paidAmount));
           setText("done-pay-method", paymentLabel(paymentMethod));
           setText("done-reserve-cancel-date", reserveCancelDateText);
           setText(
@@ -358,7 +353,7 @@
           setText("done-schedule-en", scheduleText);
           setText("done-name-en", name);
           setText("done-contact-en", contact);
-          setText("done-amount-en", formatKRWEn(discountedAmount));
+          setText("done-amount-en", formatKRWEn(paidAmount));
           setText("done-pay-method-en", paymentLabelEn(paymentMethod));
           setText("done-reserve-cancel-date-en", reserveCancelDateText);
           setText(
