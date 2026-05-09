@@ -824,14 +824,14 @@
               return base + "/api/room-rate";
             }
 
-            function applyRoomRates(rates) {
-              if (!P || typeof P.setRoomWeekdayBase !== "function") {
-                return;
+            function applyRoomRates(rates, charges) {
+              if (!P) return;
+              if (rates && typeof rates === "object" && typeof P.setRoomWeekdayBase === "function") {
+                P.setRoomWeekdayBase(rates);
               }
-              if (!rates || typeof rates !== "object") {
-                return;
+              if (charges && typeof charges === "object" && typeof P.setCharges === "function") {
+                P.setCharges(charges);
               }
-              P.setRoomWeekdayBase(rates);
             }
 
             function loadRoomRatesForNewBooking() {
@@ -839,8 +839,11 @@
                 var cachedMap = JSON.parse(
                   sessionStorage.getItem("graffordRoomRateMap") || "null",
                 );
+                var cachedCharges = JSON.parse(
+                  sessionStorage.getItem("graffordChargesMap") || "null",
+                );
                 if (cachedMap && typeof cachedMap === "object") {
-                  applyRoomRates(cachedMap);
+                  applyRoomRates(cachedMap, cachedCharges);
                 }
               } catch (_e) {}
               return fetch(roomRateApiUrl())
@@ -863,8 +866,14 @@
                       "graffordRoomRateMap",
                       JSON.stringify(result.data.rates),
                     );
+                    if (result.data.charges) {
+                      sessionStorage.setItem(
+                        "graffordChargesMap",
+                        JSON.stringify(result.data.charges),
+                      );
+                    }
                   } catch (_e) {}
-                  applyRoomRates(result.data.rates);
+                  applyRoomRates(result.data.rates, result.data.charges);
                 })
                 .catch(function () {
                   console.warn("[room-rate] network error while loading rates");

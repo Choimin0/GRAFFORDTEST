@@ -10,8 +10,9 @@
     G4: 350000,
   };
   var EXTRA_PER_PERSON_PER_NIGHT = 30000;
-  var WEEKEND_SURCHARGE_PER_NIGHT = 20000;
-  var CONSECUTIVE_SALE_PER_NIGHT = 20000;
+  var WEEKEND_SURCHARGE_PER_NIGHT = 20000;   // 기본값 (DB에서 덮어씀)
+  var CONSECUTIVE_SALE_PER_NIGHT = 20000;    // 기본값 (DB에서 덮어씀)
+  var PROMOTION_PERCENT = 0;                  // 기본 프로모션 할인율 (%)
   /** 추가 투숙 가능 인원 (기준 인원 외) */
   var MAX_EXTRA_GUESTS = { G1: 0, G2: 0, G3: 2, G4: 4 };
 
@@ -25,6 +26,24 @@
         ROOM_WEEKDAY_BASE[room] = Math.floor(n);
       }
     });
+  }
+
+  function setCharges(charges) {
+    if (!charges || typeof charges !== "object") {
+      return;
+    }
+    var wc = Number(charges.weekendCharge);
+    if (Number.isFinite(wc) && wc >= 0) {
+      WEEKEND_SURCHARGE_PER_NIGHT = Math.floor(wc);
+    }
+    var cs = Number(charges.consecutiveSale);
+    if (Number.isFinite(cs) && cs >= 0) {
+      CONSECUTIVE_SALE_PER_NIGHT = Math.floor(cs);
+    }
+    var pr = Number(charges.promotion);
+    if (Number.isFinite(pr) && pr >= 0 && pr <= 100) {
+      PROMOTION_PERCENT = pr;
+    }
   }
 
   function parseYMD(str) {
@@ -119,7 +138,9 @@
     var grandTotal = baseTotal + weekendSurcharge + extraGuestTotal;
     var consecutiveSale =
       nights >= 2 ? (nights - 1) * CONSECUTIVE_SALE_PER_NIGHT : 0;
-    var discountedGrandTotal = Math.max(0, grandTotal - consecutiveSale);
+    // 프로모션: 기본 객실료(baseTotal)에서 PROMOTION_PERCENT% 할인
+    var promotionDiscount = Math.floor(baseTotal * PROMOTION_PERCENT / 100);
+    var discountedGrandTotal = Math.max(0, grandTotal - consecutiveSale - promotionDiscount);
 
     return {
       room: room,
@@ -132,6 +153,8 @@
       extraGuestTotal: extraGuestTotal,
       grandTotal: grandTotal,
       consecutiveSale: consecutiveSale,
+      promotionDiscount: promotionDiscount,
+      promotionPercent: PROMOTION_PERCENT,
       discountedGrandTotal: discountedGrandTotal,
     };
   }
@@ -142,6 +165,7 @@
     EXTRA_PER_PERSON_PER_NIGHT: EXTRA_PER_PERSON_PER_NIGHT,
     WEEKEND_SURCHARGE_PER_NIGHT: WEEKEND_SURCHARGE_PER_NIGHT,
     CONSECUTIVE_SALE_PER_NIGHT: CONSECUTIVE_SALE_PER_NIGHT,
+    PROMOTION_PERCENT: PROMOTION_PERCENT,
     parseYMD: parseYMD,
     countNights: countNights,
     eachNightDate: eachNightDate,
@@ -149,5 +173,6 @@
     clampExtra: clampExtra,
     computeStay: computeStay,
     setRoomWeekdayBase: setRoomWeekdayBase,
+    setCharges: setCharges,
   };
 })(typeof window !== "undefined" ? window : this);

@@ -135,10 +135,14 @@ function clearLoginFailures(ip) {
   adminLoginAttemptStore.delete(ip);
 }
 
+var SPECIAL_CHARGE_NAMES = ["weekend-charge", "consecutive-sale", "promotion"];
+
 function normalizeRoomName(v) {
-  return String(v || "")
-    .trim()
-    .toUpperCase();
+  var trimmed = String(v || "").trim();
+  if (SPECIAL_CHARGE_NAMES.includes(trimmed.toLowerCase())) {
+    return trimmed.toLowerCase();
+  }
+  return trimmed.toUpperCase();
 }
 
 async function ensureRoomRateTable(pool) {
@@ -151,7 +155,8 @@ async function ensureRoomRateTable(pool) {
   );
   await pool.query(
     `INSERT INTO ${TABLE_NAME} (room_name, weekday_base_rate)
-     VALUES ('G1', 250000), ('G2', 250000), ('G3', 300000), ('G4', 350000)
+     VALUES ('G1', 250000), ('G2', 250000), ('G3', 300000), ('G4', 350000),
+            ('weekend-charge', 20000), ('consecutive-sale', 20000), ('promotion', 0)
      ON CONFLICT (room_name) DO NOTHING`,
   );
 }
@@ -232,12 +237,18 @@ export default async function handler(req, res) {
   if (action === "save") {
     var roomName = normalizeRoomName(body.roomName || "");
     var weekdayBaseRate = Number(body.weekdayBaseRate);
-    if (!/^G[1-4]$/.test(roomName)) {
+    var isGRoom = /^G[1-4]$/.test(roomName);
+    var isCharge = SPECIAL_CHARGE_NAMES.includes(roomName);
+    if (!isGRoom && !isCharge) {
       json(res, 400, { ok: false, error: "유효하지 않은 객실명입니다." });
       return;
     }
     if (!Number.isFinite(weekdayBaseRate) || weekdayBaseRate < 0) {
       json(res, 400, { ok: false, error: "유효하지 않은 요금입니다." });
+      return;
+    }
+    if (roomName === "promotion" && weekdayBaseRate > 100) {
+      json(res, 400, { ok: false, error: "프로모션 할인율은 0~100% 사이로 입력해 주세요." });
       return;
     }
     try {

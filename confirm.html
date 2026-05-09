@@ -482,25 +482,32 @@
             }
             return base + "/api/room-rate";
           }
-          if (P && typeof P.setRoomWeekdayBase === "function") {
+          if (P) {
             try {
               var savedRateMap = JSON.parse(
                 sessionStorage.getItem("graffordRoomRateMap") || "null",
               );
-              if (savedRateMap && typeof savedRateMap === "object") {
+              if (savedRateMap && typeof savedRateMap === "object" && typeof P.setRoomWeekdayBase === "function") {
                 P.setRoomWeekdayBase(savedRateMap);
+              }
+              var savedChargesMap = JSON.parse(
+                sessionStorage.getItem("graffordChargesMap") || "null",
+              );
+              if (savedChargesMap && typeof savedChargesMap === "object" && typeof P.setCharges === "function") {
+                P.setCharges(savedChargesMap);
               }
             } catch (_e) {}
             try {
               var rateRes = await fetch(roomRateApiUrl());
               var rateData = await rateRes.json();
               if (rateRes.ok && rateData && rateData.ok && rateData.rates) {
-                P.setRoomWeekdayBase(rateData.rates);
+                if (typeof P.setRoomWeekdayBase === "function") P.setRoomWeekdayBase(rateData.rates);
+                if (rateData.charges && typeof P.setCharges === "function") P.setCharges(rateData.charges);
                 try {
-                  sessionStorage.setItem(
-                    "graffordRoomRateMap",
-                    JSON.stringify(rateData.rates),
-                  );
+                  sessionStorage.setItem("graffordRoomRateMap", JSON.stringify(rateData.rates));
+                  if (rateData.charges) {
+                    sessionStorage.setItem("graffordChargesMap", JSON.stringify(rateData.charges));
+                  }
                 } catch (_e2) {}
               } else {
                 console.warn(

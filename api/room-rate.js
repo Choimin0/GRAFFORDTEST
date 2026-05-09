@@ -50,7 +50,8 @@ async function ensureRoomRateTable(pool) {
   );
   await pool.query(
     `INSERT INTO ${TABLE_NAME} (room_name, weekday_base_rate)
-     VALUES ('G1', 250000), ('G2', 250000), ('G3', 300000), ('G4', 350000)
+     VALUES ('G1', 250000), ('G2', 250000), ('G3', 300000), ('G4', 350000),
+            ('weekend-charge', 20000), ('consecutive-sale', 20000), ('promotion', 0)
      ON CONFLICT (room_name) DO NOTHING`,
   );
 }
@@ -83,11 +84,22 @@ export default async function handler(req, res) {
        FROM ${TABLE_NAME}
        ORDER BY room_name ASC`,
     );
-    var map = {};
+    var rates = {};
+    var charges = { weekendCharge: 20000, consecutiveSale: 20000, promotion: 0 };
+    var chargeKeyMap = {
+      "weekend-charge": "weekendCharge",
+      "consecutive-sale": "consecutiveSale",
+      "promotion": "promotion",
+    };
     (sel.rows || []).forEach(function (row) {
-      map[row.room_name] = Number(row.weekday_base_rate || 0);
+      var n = Number(row.weekday_base_rate || 0);
+      if (chargeKeyMap[row.room_name] !== undefined) {
+        charges[chargeKeyMap[row.room_name]] = n;
+      } else {
+        rates[row.room_name] = n;
+      }
     });
-    json(res, 200, { ok: true, rates: map });
+    json(res, 200, { ok: true, rates: rates, charges: charges });
   } catch (e) {
     json(res, 500, {
       ok: false,

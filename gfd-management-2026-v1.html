@@ -350,6 +350,18 @@
               <tbody id="admin-room-rate-body"></tbody>
             </table>
           </div>
+          <div class="admin-table-wrap" style="margin-top:24px">
+            <table class="admin-table admin-room-manage-table">
+              <thead>
+                <tr>
+                  <th>요금 정책</th>
+                  <th>금액</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody id="admin-room-charge-body"></tbody>
+            </table>
+          </div>
         </div>
         <div
           id="admin-room-manage-status-panel"
@@ -433,6 +445,7 @@
         var tableBody = document.getElementById("admin-table-body");
         var roomManageBody = document.getElementById("admin-room-manage-body");
         var roomRateBody = document.getElementById("admin-room-rate-body");
+        var roomChargeBody = document.getElementById("admin-room-charge-body");
         var sortSelect = document.getElementById("admin-sort-select");
         var resTabs = document.getElementById("admin-res-tabs");
         var resTabBtns = resTabs
@@ -479,6 +492,12 @@
         var reservationListRows = [];
         var roomStatusManageRows = [];
         var roomRateRows = [];
+        var roomChargeRows = [];
+        var CHARGE_LABELS = {
+          "weekend-charge":   { label: "주말 요금", unit: "원/박" },
+          "consecutive-sale": { label: "연박 할인", unit: "원/박" },
+          "promotion":        { label: "프로모션 할인", unit: "%" },
+        };
         var roomStatusByRoom = { G1: "", G2: "", G3: "", G4: "" };
         var activeResTab = "current";
         var activeSalesTab = "monthly";
@@ -2181,10 +2200,36 @@
             });
         }
 
+        function attachRateSaveBtns(tbody) {
+          tbody.querySelectorAll(".admin-room-rate-save-btn").forEach(function (btn) {
+            btn.addEventListener("click", function () {
+              var roomName = btn.getAttribute("data-room-name") || "";
+              var input = tbody.querySelector(
+                ".admin-room-rate-input[data-room-name='" + roomName + "']",
+              );
+              var val = input ? Number(input.value) : NaN;
+              if (!Number.isFinite(val) || val < 0) {
+                showMessage("요금은 0 이상의 숫자로 입력해 주세요.");
+                return;
+              }
+              if (roomName === "promotion" && val > 100) {
+                showMessage("프로모션 할인율은 0~100% 사이로 입력해 주세요.");
+                return;
+              }
+              btn.disabled = true;
+              saveRoomRateRow(roomName, val)
+                .catch(function (err) {
+                  showMessage((err && err.message) || "저장 실패");
+                })
+                .finally(function () {
+                  btn.disabled = false;
+                });
+            });
+          });
+        }
+
         function renderRoomRateTable() {
-          if (!roomRateBody) {
-            return;
-          }
+          if (!roomRateBody) return;
           roomRateBody.innerHTML = "";
           if (!roomRateRows.length) {
             var emptyTr = document.createElement("tr");
@@ -2193,51 +2238,48 @@
             emptyTd.textContent = "객실 요금 데이터가 없습니다.";
             emptyTr.appendChild(emptyTd);
             roomRateBody.appendChild(emptyTr);
-            return;
-          }
-          roomRateRows.forEach(function (row) {
-            var tr = document.createElement("tr");
-            tr.innerHTML =
-              "<td class='admin-room-name-cell'>" +
-              escapeHtml(row.roomName || "—") +
-              "</td>" +
-              "<td>" +
-              "<input class='admin-room-status-input admin-room-rate-input' data-room-name='" +
-              escapeHtml(row.roomName || "") +
-              "' type='number' min='0' step='1000' value='" +
-              String(Number(row.weekdayBaseRate || 0)) +
-              "' />" +
-              "</td>" +
-              "<td>" +
-              "<button type='button' class='admin-confirm-btn admin-room-rate-save-btn' data-room-name='" +
-              escapeHtml(row.roomName || "") +
-              "'>저장</button>" +
-              "</td>";
-            roomRateBody.appendChild(tr);
-          });
-          roomRateBody
-            .querySelectorAll(".admin-room-rate-save-btn")
-            .forEach(function (btn) {
-              btn.addEventListener("click", function () {
-                var roomName = btn.getAttribute("data-room-name") || "";
-                var input = roomRateBody.querySelector(
-                  ".admin-room-rate-input[data-room-name='" + roomName + "']",
-                );
-                var weekdayBaseRate = input ? Number(input.value) : NaN;
-                if (!Number.isFinite(weekdayBaseRate) || weekdayBaseRate < 0) {
-                  showMessage("요금은 0 이상의 숫자로 입력해 주세요.");
-                  return;
-                }
-                btn.disabled = true;
-                saveRoomRateRow(roomName, weekdayBaseRate)
-                  .catch(function (err) {
-                    showMessage((err && err.message) || "객실 요금 저장 실패");
-                  })
-                  .finally(function () {
-                    btn.disabled = false;
-                  });
-              });
+          } else {
+            roomRateRows.forEach(function (row) {
+              var tr = document.createElement("tr");
+              tr.innerHTML =
+                "<td class='admin-room-name-cell'>" + escapeHtml(row.roomName || "—") + "</td>" +
+                "<td><input class='admin-room-status-input admin-room-rate-input' data-room-name='" +
+                escapeHtml(row.roomName || "") + "' type='number' min='0' step='1000' value='" +
+                String(Number(row.weekdayBaseRate || 0)) + "' /></td>" +
+                "<td><button type='button' class='admin-confirm-btn admin-room-rate-save-btn' data-room-name='" +
+                escapeHtml(row.roomName || "") + "'>저장</button></td>";
+              roomRateBody.appendChild(tr);
             });
+            attachRateSaveBtns(roomRateBody);
+          }
+
+          if (!roomChargeBody) return;
+          roomChargeBody.innerHTML = "";
+          if (!roomChargeRows.length) {
+            var cEmptyTr = document.createElement("tr");
+            var cEmptyTd = document.createElement("td");
+            cEmptyTd.colSpan = 3;
+            cEmptyTd.textContent = "요금 정책 데이터가 없습니다.";
+            cEmptyTr.appendChild(cEmptyTd);
+            roomChargeBody.appendChild(cEmptyTr);
+          } else {
+            roomChargeRows.forEach(function (row) {
+              var meta = CHARGE_LABELS[row.roomName] || { label: row.roomName, unit: "원" };
+              var step = row.roomName === "promotion" ? "1" : "1000";
+              var maxAttr = row.roomName === "promotion" ? " max='100'" : "";
+              var tr = document.createElement("tr");
+              tr.innerHTML =
+                "<td class='admin-room-name-cell'>" + escapeHtml(meta.label) +
+                " <span style='color:#888;font-size:0.82em'>(" + escapeHtml(meta.unit) + ")</span></td>" +
+                "<td><input class='admin-room-status-input admin-room-rate-input' data-room-name='" +
+                escapeHtml(row.roomName) + "' type='number' min='0' step='" + step + "'" + maxAttr +
+                " value='" + String(Number(row.weekdayBaseRate || 0)) + "' /></td>" +
+                "<td><button type='button' class='admin-confirm-btn admin-room-rate-save-btn' data-room-name='" +
+                escapeHtml(row.roomName) + "'>저장</button></td>";
+              roomChargeBody.appendChild(tr);
+            });
+            attachRateSaveBtns(roomChargeBody);
+          }
         }
 
         function loadRoomStatusManageRows() {
@@ -2274,6 +2316,20 @@
             });
         }
 
+        var CHARGE_NAME_SET = ["weekend-charge", "consecutive-sale", "promotion"];
+
+        function splitRateRows(rows) {
+          roomRateRows = [];
+          roomChargeRows = [];
+          (rows || []).forEach(function (row) {
+            if (CHARGE_NAME_SET.includes(row.roomName)) {
+              roomChargeRows.push(row);
+            } else {
+              roomRateRows.push(row);
+            }
+          });
+        }
+
         function loadRoomRateRows() {
           var auth = getAuthPayload();
           return fetch(adminRoomRateApiUrl(), {
@@ -2294,10 +2350,9 @@
               if (!result.ok || !result.data.ok) {
                 throw new Error(result.data.error || "객실 요금 조회 실패");
               }
-              roomRateRows = result.data.rows || [];
+              splitRateRows(result.data.rows || []);
               renderRoomRateTable();
               showMessage("");
-              return roomRateRows;
             });
         }
 
@@ -2321,11 +2376,11 @@
             })
             .then(function (result) {
               if (!result.ok || !result.data.ok) {
-                throw new Error(result.data.error || "객실 요금 저장 실패");
+                throw new Error(result.data.error || "저장 실패");
               }
-              roomRateRows = result.data.rows || [];
+              splitRateRows(result.data.rows || []);
               renderRoomRateTable();
-              showMessage("");
+              showMessage("저장되었습니다.");
             });
         }
 
