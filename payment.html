@@ -546,6 +546,7 @@
         ></footer>
       </main>
 
+      <script src="js/booking-pricing.js"></script>
       <script>
         document.addEventListener("DOMContentLoaded", function () {
           var P = window.GraffordBookingPricing;
@@ -593,6 +594,9 @@
           var guestRequest = saved.guestRequest || "";
           var guestCount = parseInt(saved.guestCount || "2", 10) || 2;
           var payMethod = saved.payMethod || "card";
+          var reservationPreSaved =
+            String(saved.reservationPreSaved || "") === "1";
+          var preSavedCancelToken = String(saved.cancelToken || "");
 
           function reservationsApiUrl() {
             if (typeof window !== "undefined" && window.__GRAFFORD_API_BASE__) {
