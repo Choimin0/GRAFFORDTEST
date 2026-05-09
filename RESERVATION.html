@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="css/style.css" />
     <script src="js/nav-hero.js" defer></script>
     <script src="js/mobile-nav.js" defer></script>
-    <script src="js/booking-pricing.js" defer></script>
+    <script src="js/booking-pricing.js?v=3" defer></script>
     <script src="js/site-language.js" defer></script>
   </head>
   <body class="home-page page-hero-nav-sync reservation-page">
@@ -901,6 +901,9 @@
                     result.data.charges ||
                       extractChargesFromRatesMap(result.data.rates),
                   );
+                  // 요율 적용 직후 즉시 업데이트 (사용자가 이미 날짜 선택한 경우)
+                  updateWeekdayRateDisplay();
+                  updatePricingSummary();
                 })
                 .catch(function () {
                   console.warn("[room-rate] network error while loading rates");

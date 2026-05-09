@@ -470,11 +470,13 @@
         ></footer>
       </main>
 
-      <script src="js/booking-pricing.js"></script>
+      <script src="js/booking-pricing.js?v=3"></script>
       <script src="js/booking-reservations.js"></script>
       <script>
         document.addEventListener("DOMContentLoaded", async function () {
           var P = window.GraffordBookingPricing;
+
+          // ── 헬퍼 ────────────────────────────────────────────────
           function roomRateApiUrl() {
             var base = "";
             if (typeof window !== "undefined" && window.__GRAFFORD_API_BASE__) {
@@ -483,28 +485,67 @@
             return base + "/api/room-rate";
           }
           function extractChargesFromRatesMap(rateMap) {
-            if (!rateMap || typeof rateMap !== "object") {
-              return null;
-            }
-            var hasAny =
-              rateMap["weekend-charge"] != null ||
-              rateMap["consecutive-sale"] != null ||
-              rateMap["promotion"] != null;
-            if (!hasAny) {
-              return null;
-            }
+            if (!rateMap || typeof rateMap !== "object") return null;
+            if (
+              rateMap["weekend-charge"] == null &&
+              rateMap["consecutive-sale"] == null &&
+              rateMap["promotion"] == null
+            ) return null;
             return {
-              weekendCharge: Number(rateMap["weekend-charge"] || 0),
+              weekendCharge:   Number(rateMap["weekend-charge"]   || 0),
               consecutiveSale: Number(rateMap["consecutive-sale"] || 0),
-              promotion: Number(rateMap["promotion"] || 0),
+              promotion:       Number(rateMap["promotion"]        || 0),
             };
           }
+
+          var ROOM_LABEL = { G1: "G1", G2: "G2", G3: "G3", G4: "G4" };
+
+          // ── 예약 정보 (if(P) 블록보다 먼저 읽어야 내부에서 재계산 가능) ──
+          var confirmDraft = null;
+          try {
+            confirmDraft = JSON.parse(
+              sessionStorage.getItem("graffordConfirmDraft") || "null",
+            );
+          } catch (e) { confirmDraft = null; }
+
+          var roomRaw = ((confirmDraft && confirmDraft.room) || "G1").toUpperCase();
+          if (!P) { roomRaw = "G1"; }
+          else if (!P.ROOM_WEEKDAY_BASE.hasOwnProperty(roomRaw)) { roomRaw = "G1"; }
+
+          var checkIn  = (confirmDraft && confirmDraft.checkIn)  || "";
+          var checkOut = (confirmDraft && confirmDraft.checkOut) || "";
+          var extraGuestsRaw = parseInt(
+            (confirmDraft && confirmDraft.extraGuests) || "0", 10,
+          );
+          var extraGuests = P ? P.clampExtra(roomRaw, extraGuestsRaw) : 0;
+
+          // ── 요금 계산 + DOM 반영 (재사용 가능한 함수) ───────────
+          var quote = {
+            nights: 0,
+            baseNightly: P ? P.ROOM_WEEKDAY_BASE[roomRaw] : 0,
+            baseTotal: 0, weekendNights: 0, weekendSurcharge: 0,
+            extraGuestTotal: 0, grandTotal: 0,
+            consecutiveSale: 0, promotionDiscount: 0,
+            discountedGrandTotal: 0, extraGuests: extraGuests,
+          };
+
+          function recomputeAndApplyQuote() {
+            if (P && checkIn && checkOut) {
+              quote = P.computeStay(roomRaw, checkIn, checkOut, extraGuests);
+            }
+            document.getElementById("f-total-amount").value =
+              String(quote.discountedGrandTotal);
+            var enEl = document.getElementById("f-total-amount-en");
+            if (enEl) enEl.value = String(quote.discountedGrandTotal);
+          }
+
+          // ── 1) 캐시된 요율로 1차 계산 ──────────────────────────
           if (P) {
             try {
               var savedRateMap = JSON.parse(
                 sessionStorage.getItem("graffordRoomRateMap") || "null",
               );
-              if (savedRateMap && typeof savedRateMap === "object" && typeof P.setRoomWeekdayBase === "function") {
+              if (savedRateMap && typeof P.setRoomWeekdayBase === "function") {
                 P.setRoomWeekdayBase(savedRateMap);
               }
               var savedChargesMap = JSON.parse(
@@ -513,64 +554,51 @@
               if (!savedChargesMap) {
                 savedChargesMap = extractChargesFromRatesMap(savedRateMap);
               }
-              if (savedChargesMap && typeof savedChargesMap === "object" && typeof P.setCharges === "function") {
+              if (savedChargesMap && typeof P.setCharges === "function") {
                 P.setCharges(savedChargesMap);
               }
-            } catch (_e) {}
+            } catch (_ec) {}
+            recomputeAndApplyQuote(); // 캐시 기반 1차 결과
+
+            // ── 2) API 최신값으로 2차 계산 ────────────────────────
             try {
               var rateRes = await fetch(roomRateApiUrl(), { cache: "no-store" });
               var rateData = await rateRes.json();
               if (rateRes.ok && rateData && rateData.ok && rateData.rates) {
-                if (typeof P.setRoomWeekdayBase === "function") P.setRoomWeekdayBase(rateData.rates);
-                var runtimeCharges = rateData.charges || extractChargesFromRatesMap(rateData.rates);
-                if (runtimeCharges && typeof P.setCharges === "function") P.setCharges(runtimeCharges);
+                if (typeof P.setRoomWeekdayBase === "function")
+                  P.setRoomWeekdayBase(rateData.rates);
+                var runtimeCharges =
+                  rateData.charges ||
+                  extractChargesFromRatesMap(rateData.rates);
+                if (runtimeCharges && typeof P.setCharges === "function")
+                  P.setCharges(runtimeCharges);
                 try {
-                  sessionStorage.setItem("graffordRoomRateMap", JSON.stringify(rateData.rates));
+                  sessionStorage.setItem(
+                    "graffordRoomRateMap", JSON.stringify(rateData.rates),
+                  );
                   if (runtimeCharges) {
-                    sessionStorage.setItem("graffordChargesMap", JSON.stringify(runtimeCharges));
+                    sessionStorage.setItem(
+                      "graffordChargesMap", JSON.stringify(runtimeCharges),
+                    );
                   }
-                } catch (_e2) {}
+                } catch (_es) {}
+                // ★ 최신 요율로 재계산 → DOM 재반영
+                recomputeAndApplyQuote();
               } else {
-                console.warn(
-                  "[room-rate] confirm load failed:",
-                  rateRes.status,
-                  (rateData && rateData.error) || "unknown error",
-                );
+                console.warn("[room-rate] load failed:", rateRes.status,
+                  (rateData && rateData.error) || "");
               }
-            } catch (_e3) {
-              console.warn("[room-rate] confirm network error");
+            } catch (_ef) {
+              console.warn("[room-rate] confirm network error:", _ef);
             }
           }
-          var ROOM_LABEL = {
-            G1: "G1",
-            G2: "G2",
-            G3: "G3",
-            G4: "G4",
-          };
-          var confirmDraft = null;
-          try {
-            confirmDraft = JSON.parse(
-              sessionStorage.getItem("graffordConfirmDraft") || "null",
-            );
-          } catch (e) {
-            confirmDraft = null;
-          }
-          var roomRaw = (
-            (confirmDraft && confirmDraft.room) ||
-            "G1"
-          ).toUpperCase();
-          if (!P) {
-            roomRaw = "G1";
-          } else if (!P.ROOM_WEEKDAY_BASE.hasOwnProperty(roomRaw)) {
-            roomRaw = "G1";
-          }
-          var checkIn = (confirmDraft && confirmDraft.checkIn) || "";
-          var checkOut = (confirmDraft && confirmDraft.checkOut) || "";
-          var extraGuestsRaw = parseInt(
-            (confirmDraft && confirmDraft.extraGuests) || "0",
-            10,
-          );
-          var extraGuests = P ? P.clampExtra(roomRaw, extraGuestsRaw) : 0;
+
+          // ── 히든 필드 초기화 (quote는 이미 최신) ─────────────────
+          document.getElementById("f-room").value  = roomRaw;
+          document.getElementById("f-checkin").value  = checkIn;
+          document.getElementById("f-checkout").value = checkOut;
+          document.getElementById("f-nights").value = String(quote.nights);
+          document.getElementById("f-extra-guests").value = String(quote.extraGuests);
 
           function getDisplayGuestCount() {
             var baseGuests = 2;
@@ -585,39 +613,10 @@
           }
 
           function formatDisplayYMD(s) {
-            if (!P || !P.parseYMD(s)) {
-              return s || "—";
-            }
+            if (!P || !P.parseYMD(s)) { return s || "—"; }
             var p = s.split("-");
             return p[0] + "." + p[1] + "." + p[2];
           }
-
-          var quote =
-            P && checkIn && checkOut
-              ? P.computeStay(roomRaw, checkIn, checkOut, extraGuests)
-              : {
-                  nights: 0,
-                  baseNightly: P ? P.ROOM_WEEKDAY_BASE[roomRaw] : 0,
-                  baseTotal: 0,
-                  weekendNights: 0,
-                  weekendSurcharge: 0,
-                  extraGuestTotal: 0,
-                  grandTotal: 0,
-                  consecutiveSale: 0,
-                  discountedGrandTotal: 0,
-                  extraGuests: extraGuests,
-                };
-
-          document.getElementById("f-room").value = roomRaw;
-          document.getElementById("f-checkin").value = checkIn;
-          document.getElementById("f-checkout").value = checkOut;
-          document.getElementById("f-nights").value = String(quote.nights);
-          document.getElementById("f-extra-guests").value = String(
-            quote.extraGuests,
-          );
-          document.getElementById("f-total-amount").value = String(
-            quote.discountedGrandTotal,
-          );
 
           function syncConfirmEnHiddenFields() {
             var pairs = [
@@ -762,6 +761,14 @@
                 addBreakLine(
                   (isEn ? "Consecutive stay discount: -" : "연박할인 : -") +
                     formatMoneyByLanguage(quote.consecutiveSale, language),
+                );
+              }
+              if ((quote.promotionDiscount || 0) > 0) {
+                addBreakLine(
+                  (isEn
+                    ? "Promotion (" + (quote.promotionPercent || 0) + "% off): -"
+                    : "프로모션 (" + (quote.promotionPercent || 0) + "% 할인) : -") +
+                    formatMoneyByLanguage(quote.promotionDiscount, language),
                 );
               }
               totalDisplayEl.textContent = formatMoneyByLanguage(
