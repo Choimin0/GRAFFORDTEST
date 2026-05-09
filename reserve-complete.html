@@ -130,10 +130,7 @@
               <h2 class="confirm-section-title" id="complete-notice-2">
                 비대면 체크인 안내사항
               </h2>
-              <p
-                class="confirm-guide-content"
-                id="complete-checkin-guide"
-              ></p>
+              <p class="confirm-guide-content" id="complete-checkin-guide"></p>
             </section>
 
             <section
@@ -313,7 +310,9 @@
           if (orderTextEl) {
             orderTextEl.textContent = orderNo || "번호를 확인할 수 없습니다.";
           }
-          var orderTextEnEl = document.getElementById("complete-order-no-text-en");
+          var orderTextEnEl = document.getElementById(
+            "complete-order-no-text-en",
+          );
           if (orderTextEnEl) {
             orderTextEnEl.textContent = orderNo || "—";
           }
@@ -324,7 +323,9 @@
           var confirmedStatusEl = document.getElementById(
             "complete-bank-status-confirmed",
           );
-          var bankStatusEnEl = document.getElementById("complete-bank-status-en");
+          var bankStatusEnEl = document.getElementById(
+            "complete-bank-status-en",
+          );
           var pendingStatusEnEl = document.getElementById(
             "complete-bank-status-pending-en",
           );
@@ -344,10 +345,13 @@
           if (payMethod === "bank" && bankStatusEnEl) {
             bankStatusEnEl.hidden = false;
             if (bankConfirmed) {
-              if (pendingStatusEnEl) pendingStatusEnEl.classList.remove("is-active");
-              if (confirmedStatusEnEl) confirmedStatusEnEl.classList.add("is-active");
+              if (pendingStatusEnEl)
+                pendingStatusEnEl.classList.remove("is-active");
+              if (confirmedStatusEnEl)
+                confirmedStatusEnEl.classList.add("is-active");
             } else {
-              if (pendingStatusEnEl) pendingStatusEnEl.classList.add("is-active");
+              if (pendingStatusEnEl)
+                pendingStatusEnEl.classList.add("is-active");
               if (confirmedStatusEnEl)
                 confirmedStatusEnEl.classList.remove("is-active");
             }
@@ -366,7 +370,8 @@
             roomNameEnEl.textContent =
               ROOM_LABEL[room] || room || "Room Information Not Available";
           }
-          document.getElementById("complete-schedule").textContent = scheduleText;
+          document.getElementById("complete-schedule").textContent =
+            scheduleText;
           var scheduleEnEl = document.getElementById("complete-schedule-en");
           if (scheduleEnEl) {
             scheduleEnEl.textContent = scheduleText;
@@ -494,7 +499,8 @@
             renderGallery(false);
           }
           function stepGallery(delta) {
-            galleryIndex = (galleryIndex + delta + images.length) % images.length;
+            galleryIndex =
+              (galleryIndex + delta + images.length) % images.length;
             renderGallery(true);
           }
           if (prevBtn) {
@@ -664,7 +670,7 @@
                     ]
                   </span>
                 </dd>
-                <dt>Check-in/Check-out</dt>
+                <dt>Check-in/<br />Check-out</dt>
                 <dd id="complete-schedule-en">—</dd>
                 <dt>Total Amount</dt>
                 <dd id="complete-total-amount-en">—</dd>
