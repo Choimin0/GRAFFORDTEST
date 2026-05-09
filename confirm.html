@@ -482,6 +482,23 @@
             }
             return base + "/api/room-rate";
           }
+          function extractChargesFromRatesMap(rateMap) {
+            if (!rateMap || typeof rateMap !== "object") {
+              return null;
+            }
+            var hasAny =
+              rateMap["weekend-charge"] != null ||
+              rateMap["consecutive-sale"] != null ||
+              rateMap["promotion"] != null;
+            if (!hasAny) {
+              return null;
+            }
+            return {
+              weekendCharge: Number(rateMap["weekend-charge"] || 0),
+              consecutiveSale: Number(rateMap["consecutive-sale"] || 0),
+              promotion: Number(rateMap["promotion"] || 0),
+            };
+          }
           if (P) {
             try {
               var savedRateMap = JSON.parse(
@@ -493,6 +510,9 @@
               var savedChargesMap = JSON.parse(
                 sessionStorage.getItem("graffordChargesMap") || "null",
               );
+              if (!savedChargesMap) {
+                savedChargesMap = extractChargesFromRatesMap(savedRateMap);
+              }
               if (savedChargesMap && typeof savedChargesMap === "object" && typeof P.setCharges === "function") {
                 P.setCharges(savedChargesMap);
               }
@@ -502,11 +522,12 @@
               var rateData = await rateRes.json();
               if (rateRes.ok && rateData && rateData.ok && rateData.rates) {
                 if (typeof P.setRoomWeekdayBase === "function") P.setRoomWeekdayBase(rateData.rates);
-                if (rateData.charges && typeof P.setCharges === "function") P.setCharges(rateData.charges);
+                var runtimeCharges = rateData.charges || extractChargesFromRatesMap(rateData.rates);
+                if (runtimeCharges && typeof P.setCharges === "function") P.setCharges(runtimeCharges);
                 try {
                   sessionStorage.setItem("graffordRoomRateMap", JSON.stringify(rateData.rates));
-                  if (rateData.charges) {
-                    sessionStorage.setItem("graffordChargesMap", JSON.stringify(rateData.charges));
+                  if (runtimeCharges) {
+                    sessionStorage.setItem("graffordChargesMap", JSON.stringify(runtimeCharges));
                   }
                 } catch (_e2) {}
               } else {

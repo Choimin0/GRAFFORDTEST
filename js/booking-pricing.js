@@ -32,17 +32,33 @@
     if (!charges || typeof charges !== "object") {
       return;
     }
-    var wc = Number(charges.weekendCharge);
+    var wc = Number(
+      charges.weekendCharge !== undefined
+        ? charges.weekendCharge
+        : charges["weekend-charge"],
+    );
     if (Number.isFinite(wc) && wc >= 0) {
       WEEKEND_SURCHARGE_PER_NIGHT = Math.floor(wc);
     }
-    var cs = Number(charges.consecutiveSale);
+    var cs = Number(
+      charges.consecutiveSale !== undefined
+        ? charges.consecutiveSale
+        : charges["consecutive-sale"],
+    );
     if (Number.isFinite(cs) && cs >= 0) {
       CONSECUTIVE_SALE_PER_NIGHT = Math.floor(cs);
     }
     var pr = Number(charges.promotion);
     if (Number.isFinite(pr) && pr >= 0 && pr <= 100) {
-      PROMOTION_PERCENT = pr;
+      PROMOTION_PERCENT = Math.floor(pr);
+    }
+    // 외부 코드에서 읽는 공개 상수도 동기화
+    if (root && root.GraffordBookingPricing) {
+      root.GraffordBookingPricing.WEEKEND_SURCHARGE_PER_NIGHT =
+        WEEKEND_SURCHARGE_PER_NIGHT;
+      root.GraffordBookingPricing.CONSECUTIVE_SALE_PER_NIGHT =
+        CONSECUTIVE_SALE_PER_NIGHT;
+      root.GraffordBookingPricing.PROMOTION_PERCENT = PROMOTION_PERCENT;
     }
   }
 

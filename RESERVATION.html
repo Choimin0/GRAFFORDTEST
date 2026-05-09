@@ -823,6 +823,23 @@
               }
               return base + "/api/room-rate";
             }
+            function extractChargesFromRatesMap(rateMap) {
+              if (!rateMap || typeof rateMap !== "object") {
+                return null;
+              }
+              var hasAny =
+                rateMap["weekend-charge"] != null ||
+                rateMap["consecutive-sale"] != null ||
+                rateMap["promotion"] != null;
+              if (!hasAny) {
+                return null;
+              }
+              return {
+                weekendCharge: Number(rateMap["weekend-charge"] || 0),
+                consecutiveSale: Number(rateMap["consecutive-sale"] || 0),
+                promotion: Number(rateMap["promotion"] || 0),
+              };
+            }
 
             function applyRoomRates(rates, charges) {
               if (!P) return;
@@ -842,6 +859,9 @@
                 var cachedCharges = JSON.parse(
                   sessionStorage.getItem("graffordChargesMap") || "null",
                 );
+                if (!cachedCharges) {
+                  cachedCharges = extractChargesFromRatesMap(cachedMap);
+                }
                 if (cachedMap && typeof cachedMap === "object") {
                   applyRoomRates(cachedMap, cachedCharges);
                 }
@@ -866,14 +886,21 @@
                       "graffordRoomRateMap",
                       JSON.stringify(result.data.rates),
                     );
-                    if (result.data.charges) {
+                    var runtimeCharges =
+                      result.data.charges ||
+                      extractChargesFromRatesMap(result.data.rates);
+                    if (runtimeCharges) {
                       sessionStorage.setItem(
                         "graffordChargesMap",
-                        JSON.stringify(result.data.charges),
+                        JSON.stringify(runtimeCharges),
                       );
                     }
                   } catch (_e) {}
-                  applyRoomRates(result.data.rates, result.data.charges);
+                  applyRoomRates(
+                    result.data.rates,
+                    result.data.charges ||
+                      extractChargesFromRatesMap(result.data.rates),
+                  );
                 })
                 .catch(function () {
                   console.warn("[room-rate] network error while loading rates");
