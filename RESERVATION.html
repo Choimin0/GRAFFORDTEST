@@ -835,6 +835,14 @@
             }
 
             function loadRoomRatesForNewBooking() {
+              try {
+                var cachedMap = JSON.parse(
+                  sessionStorage.getItem("graffordRoomRateMap") || "null",
+                );
+                if (cachedMap && typeof cachedMap === "object") {
+                  applyRoomRates(cachedMap);
+                }
+              } catch (_e) {}
               return fetch(roomRateApiUrl())
                 .then(function (r) {
                   return r.json().then(function (data) {
@@ -843,6 +851,11 @@
                 })
                 .then(function (result) {
                   if (!result.ok || !result.data.ok || !result.data.rates) {
+                    console.warn(
+                      "[room-rate] failed:",
+                      result.status,
+                      (result.data && result.data.error) || "unknown error",
+                    );
                     return;
                   }
                   try {
@@ -854,7 +867,7 @@
                   applyRoomRates(result.data.rates);
                 })
                 .catch(function () {
-                  // 요금 로드 실패 시 기존 기본 요금으로 동작
+                  console.warn("[room-rate] network error while loading rates");
                 })
                 .finally(function () {
                   roomRatesLoaded = true;
@@ -1596,9 +1609,12 @@
               savedRoom && allowedRooms.indexOf(savedRoom) !== -1
                 ? savedRoom
                 : "G1";
-            setRoom(initialRoom);
             if (!roomRatesLoaded) {
-              loadRoomRatesForNewBooking();
+              loadRoomRatesForNewBooking().finally(function () {
+                setRoom(initialRoom);
+              });
+            } else {
+              setRoom(initialRoom);
             }
             if (savedRoom && allowedRooms.indexOf(savedRoom) !== -1) {
               var bookingAnchor = scope.querySelector(".reservation-booking");

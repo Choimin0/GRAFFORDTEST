@@ -472,8 +472,15 @@
       <script src="js/booking-pricing.js"></script>
       <script src="js/booking-reservations.js"></script>
       <script>
-        document.addEventListener("DOMContentLoaded", function () {
+        document.addEventListener("DOMContentLoaded", async function () {
           var P = window.GraffordBookingPricing;
+          function roomRateApiUrl() {
+            var base = "";
+            if (typeof window !== "undefined" && window.__GRAFFORD_API_BASE__) {
+              base = String(window.__GRAFFORD_API_BASE__).replace(/\/$/, "");
+            }
+            return base + "/api/room-rate";
+          }
           if (P && typeof P.setRoomWeekdayBase === "function") {
             try {
               var savedRateMap = JSON.parse(
@@ -483,6 +490,27 @@
                 P.setRoomWeekdayBase(savedRateMap);
               }
             } catch (_e) {}
+            try {
+              var rateRes = await fetch(roomRateApiUrl());
+              var rateData = await rateRes.json();
+              if (rateRes.ok && rateData && rateData.ok && rateData.rates) {
+                P.setRoomWeekdayBase(rateData.rates);
+                try {
+                  sessionStorage.setItem(
+                    "graffordRoomRateMap",
+                    JSON.stringify(rateData.rates),
+                  );
+                } catch (_e2) {}
+              } else {
+                console.warn(
+                  "[room-rate] confirm load failed:",
+                  rateRes.status,
+                  (rateData && rateData.error) || "unknown error",
+                );
+              }
+            } catch (_e3) {
+              console.warn("[room-rate] confirm network error");
+            }
           }
           var ROOM_LABEL = {
             G1: "G1",
