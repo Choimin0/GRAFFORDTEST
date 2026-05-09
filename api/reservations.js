@@ -1102,42 +1102,52 @@ export default async function handler(req, res) {
   var pgTid = body.pgTid ? String(body.pgTid).trim().slice(0, 255) : null;
 
   if (!reservationNumber || reservationNumber.length > MAX_RESV) {
+    console.error("[reservations POST] Invalid reservationNumber:", JSON.stringify(reservationNumber));
     json(res, 400, { ok: false, error: "Invalid reservationNumber" });
     return;
   }
   if (!guestName || guestName.length > MAX_NAME) {
+    console.error("[reservations POST] Invalid guestName:", JSON.stringify(guestName));
     json(res, 400, { ok: false, error: "Invalid guestName" });
     return;
   }
   if (!contact || contact.length > MAX_CONTACT) {
+    console.error("[reservations POST] Invalid contact:", JSON.stringify(contact));
     json(res, 400, { ok: false, error: "Invalid contact" });
     return;
   }
   if (!ALLOWED_ROOMS.has(roomType)) {
+    console.error("[reservations POST] Invalid roomType:", JSON.stringify(roomType), "raw:", JSON.stringify(body.roomType));
     json(res, 400, { ok: false, error: "Invalid roomType" });
     return;
   }
   if (!DATE_RE.test(checkIn) || !DATE_RE.test(checkOut)) {
+    console.error("[reservations POST] Invalid dates: checkIn=" + checkIn + " checkOut=" + checkOut);
     json(res, 400, { ok: false, error: "Invalid checkIn or checkOut" });
     return;
   }
   if (!Number.isFinite(stayNights) || stayNights < 1 || stayNights > 365) {
+    console.error("[reservations POST] Invalid stayNights:", stayNights, "raw:", body.stayNights);
     json(res, 400, { ok: false, error: "Invalid stayNights" });
     return;
   }
   if (!Number.isFinite(extraGuests) || extraGuests < 0 || extraGuests > 20) {
+    console.error("[reservations POST] Invalid extraGuests:", extraGuests, "raw:", body.extraGuests);
     json(res, 400, { ok: false, error: "Invalid extraGuests" });
     return;
   }
   if (!Number.isFinite(totalAmount) || totalAmount < 0 || totalAmount > 1e12) {
+    console.error("[reservations POST] Invalid totalAmount:", totalAmount, "raw:", body.totalAmount);
     json(res, 400, { ok: false, error: "Invalid totalAmount" });
     return;
   }
   if (!ALLOWED_PAY.has(paymentMethod)) {
+    console.error("[reservations POST] Invalid paymentMethod:", JSON.stringify(paymentMethod));
     json(res, 400, { ok: false, error: "Invalid paymentMethod" });
     return;
   }
   if (email && !EMAIL_RE.test(email)) {
+    console.error("[reservations POST] Invalid email:", JSON.stringify(email));
     json(res, 400, { ok: false, error: "Invalid email format" });
     return;
   }

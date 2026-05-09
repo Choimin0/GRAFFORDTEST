@@ -79,10 +79,12 @@ export default async function handler(req, res) {
       try {
         errData = await portoneRes.json();
       } catch (_) {}
+      console.error("[payment-confirm] PortOne API error", portoneRes.status, errData);
       res.statusCode = 400;
       res.end(
         JSON.stringify({
-          error: "PortOne API 조회 실패 (HTTP " + portoneRes.status + ")",
+          ok: false,
+          error: "PortOne API 조회 실패 (HTTP " + portoneRes.status + "): " + (errData.message || errData.error || JSON.stringify(errData)),
           detail: errData,
         }),
       );
@@ -95,24 +97,40 @@ export default async function handler(req, res) {
       res.statusCode = 400;
       res.end(
         JSON.stringify({
-          error: "결제가 완료되지 않았습니다.",
+          ok: false,
+          error: "결제가 완료되지 않았습니다. (status: " + payment.status + ")",
           status: payment.status,
         }),
       );
       return;
     }
 
+    // PortOne v2 응답의 amount 구조는 PG사에 따라 다를 수 있으므로 방어적으로 파싱합니다.
+    // { amount: { total: N } } 또는 { amount: N } 또는 { totalAmount: N } 형태 모두 대응.
+    var actualAmount = null;
+    if (payment.amount != null) {
+      if (typeof payment.amount === "object" && payment.amount.total != null) {
+        actualAmount = Number(payment.amount.total);
+      } else if (typeof payment.amount === "number") {
+        actualAmount = Number(payment.amount);
+      }
+    }
+    if (actualAmount == null && payment.totalAmount != null) {
+      actualAmount = Number(payment.totalAmount);
+    }
+
     if (
       expectedAmount !== null &&
-      payment.amount &&
-      payment.amount.total !== expectedAmount
+      actualAmount !== null &&
+      Number(actualAmount) !== Number(expectedAmount)
     ) {
       res.statusCode = 400;
       res.end(
         JSON.stringify({
+          ok: false,
           error: "결제 금액이 일치하지 않습니다.",
           expected: expectedAmount,
-          actual: payment.amount.total,
+          actual: actualAmount,
         }),
       );
       return;

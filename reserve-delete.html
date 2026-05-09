@@ -219,7 +219,7 @@
                 아니오
               </button>
             </div>
-            <p class="reserve-delete-modal-note">
+            <p class="reserve-delete-modal-note" id="cancel-modal-note">
               * 환불 소요 기간 안내 <br />
               카드사에 따라 영업일 기준 3~5일 소요될 수 있습니다.
             </p>
@@ -493,6 +493,46 @@
             window.addEventListener("pageshow", syncDeletedStateOnEntry);
 
             openBtn.addEventListener("click", function () {
+              // 모달 오픈 시 예상 환불 금액을 note 영역에 동적 표시
+              var noteEl = modal ? modal.querySelector(".reserve-delete-modal-note") : null;
+              if (noteEl) {
+                if (payMethod === "bank") {
+                  // 은행이체: PG 자동 환불 없음 → 관리자 수동 환불 안내
+                  if (refundAmount <= 0) {
+                    noteEl.innerHTML = config.isEn
+                      ? "* No Refund<br>Based on the cancellation policy, no refund will be issued."
+                      : "* 환불 없음<br>취소 정책에 따라 환불되는 금액이 없습니다.";
+                  } else {
+                    var bankRefundStr = config.isEn
+                      ? refundAmount.toLocaleString("en-US") + " KRW"
+                      : refundAmount.toLocaleString("ko-KR") + "원";
+                    noteEl.innerHTML = config.isEn
+                      ? "* Estimated Refund: <strong>" + bankRefundStr + "</strong><br>Bank transfer refunds require manual processing. Please contact us."
+                      : "* 예상 환불금: <strong>" + bankRefundStr + "</strong><br>무통장입금 환불은 관리자가 직접 처리합니다. 고객센터로 문의해 주세요.";
+                  }
+                } else if (refundAmount <= 0) {
+                  // 카드/네이버페이 — 환불 없음 (취소 수수료 100%)
+                  noteEl.innerHTML = config.isEn
+                    ? "* No Refund<br>Based on the cancellation policy, no refund will be issued."
+                    : "* 환불 없음<br>취소 정책에 따라 환불되는 금액이 없습니다.";
+                } else if (Number.isFinite(paidAmount) && refundAmount < paidAmount) {
+                  // 카드/네이버페이 — 부분 환불
+                  var partialRefundStr = config.isEn
+                    ? refundAmount.toLocaleString("en-US") + " KRW"
+                    : refundAmount.toLocaleString("ko-KR") + "원";
+                  noteEl.innerHTML = config.isEn
+                    ? "* Estimated Refund: <strong>" + partialRefundStr + "</strong><br>Refunds will be processed within 3~5 business days."
+                    : "* 예상 환불금: <strong>" + partialRefundStr + "</strong><br>카드사에 따라 영업일 기준 3~5일 소요될 수 있습니다.";
+                } else {
+                  // 카드/네이버페이 — 전액 환불
+                  var fullRefundStr = config.isEn
+                    ? refundAmount.toLocaleString("en-US") + " KRW"
+                    : refundAmount.toLocaleString("ko-KR") + "원";
+                  noteEl.innerHTML = config.isEn
+                    ? "* Full Refund: <strong>" + fullRefundStr + "</strong><br>Refunds will be processed within 3~5 business days."
+                    : "* 전액 환불: <strong>" + fullRefundStr + "</strong><br>카드사에 따라 영업일 기준 3~5일 소요될 수 있습니다.";
+                }
+              }
               modal.hidden = false;
             });
             if (noBtn) {

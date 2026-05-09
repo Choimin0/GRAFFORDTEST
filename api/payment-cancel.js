@@ -175,7 +175,8 @@ async function getJsonBody(req) {
 /**
  * PortOne v2 결제 취소 요청.
  * paymentId = reservationNumber (결제 시 portone.requestPayment({ paymentId: orderNo }) 에 사용한 값).
- * refundAmount가 totalAmount와 다르면 부분 취소로 처리합니다.
+ * refundAmount가 totalAmount와 다르면 부분 취소, 같으면 전액 취소로 처리합니다.
+ * refundAmount === 0 인 경우(100% 취소 수수료)는 호출하지 않아야 합니다 — 호출 전 확인 필요.
  */
 async function requestPortoneCancellation(paymentId, cancelReason, refundAmount, totalAmount) {
   var apiSecret = (process.env.PORTONE_API_SECRET || "").trim();
@@ -184,12 +185,13 @@ async function requestPortoneCancellation(paymentId, cancelReason, refundAmount,
   }
 
   var cancelBody = { reason: cancelReason || "고객 요청 취소" };
-  // 부분 취소: 환불 금액이 결제 금액보다 작을 때만 amount 지정
+  // 부분 취소: 환불 금액이 결제 금액보다 적고 0보다 클 때만 amount 지정
+  // 전액 취소: amount 없이 호출 → PortOne이 전액 환불 처리
   if (
     Number.isFinite(refundAmount) &&
     Number.isFinite(totalAmount) &&
-    refundAmount < totalAmount &&
-    refundAmount >= 0
+    refundAmount > 0 &&
+    refundAmount < totalAmount
   ) {
     cancelBody.amount = refundAmount;
   }
@@ -355,8 +357,9 @@ export default async function handler(req, res) {
     var pgCancelled = false;
     var pgError = null;
 
-    // pg_tid가 있으면 PortOne v2 결제 취소 요청
-    if (pgTid) {
+    // pg_tid가 있고 환불액이 0보다 클 때만 PortOne v2 결제 취소 요청.
+    // safeRefundAmount === 0 이면 100% 취소 수수료 적용 → 환불 없음, PG 취소 API 호출 불필요.
+    if (pgTid && safeRefundAmount > 0) {
       var portoneResult = await requestPortoneCancellation(
         reservationNumber, // PortOne paymentId = orderNo (결제 시 사용한 값)
         cancelReason || "고객 요청 취소",
@@ -426,9 +429,10 @@ export default async function handler(req, res) {
           bank_confirmed,
           pg_tid,
           cancel_reason,
-          refunded_count
+          refunded_count,
+          refund_amount
         ) VALUES (
-          $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18
+          $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19
         ) ON CONFLICT (reservation_number) DO NOTHING`,
         [
           deletedRow.reservation_number,
@@ -448,7 +452,8 @@ export default async function handler(req, res) {
           deletedRow.bank_confirmed,
           deletedRow.pg_tid || null,
           cancelReason || null,
-          1, // 취소 완료: refunded_count = 1
+          1,                // 취소 완료: refunded_count = 1
+          safeRefundAmount, // 실제 환불 처리된 금액 (0이면 환불 없음)
         ],
       );
 
@@ -466,6 +471,9 @@ export default async function handler(req, res) {
       pgTid: pgTid,
       cancelledAt: formatDateTimeKst(new Date()),
       reservationNumber: reservationNumber,
+      refundAmount: safeRefundAmount,    // 실제 환불 처리된 금액
+      totalAmount: totalAmount,          // 원래 결제 금액
+      isPartialRefund: pgCancelled && Number.isFinite(safeRefundAmount) && Number.isFinite(totalAmount) && safeRefundAmount > 0 && safeRefundAmount < totalAmount,
     });
   } catch (e) {
     try { client.release(); } catch (_) {}

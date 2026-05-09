@@ -316,6 +316,15 @@
               paymentMethod.toLowerCase() === "bank" ? 0 : paidAmount;
           }
 
+          function formatRefundKRW(n) {
+            if (!Number.isFinite(n) || n <= 0) return "환불 없음";
+            return Number(n).toLocaleString("ko-KR") + "원";
+          }
+          function formatRefundKRWEn(n) {
+            if (!Number.isFinite(n) || n <= 0) return "No Refund";
+            return Number(n).toLocaleString("en-US") + " KRW";
+          }
+
           function setText(id, value) {
             var el = document.getElementById(id);
             if (el) {
@@ -345,7 +354,7 @@
               cancelReasonDetail,
             ),
           );
-          setText("done-refund-amount", formatKRW(refundAmount));
+          setText("done-refund-amount", formatRefundKRW(refundAmount));
 
           // English
           setText("done-order-en", orderNo);
@@ -364,7 +373,7 @@
               cancelReasonDetail,
             ),
           );
-          setText("done-refund-amount-en", formatKRWEn(refundAmount));
+          setText("done-refund-amount-en", formatRefundKRWEn(refundAmount));
         });
       </script>
       <script defer src="js/grafford-page-fade.js"></script>

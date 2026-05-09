@@ -120,6 +120,27 @@
           </button>
         </div>
 
+        <!-- 처리 중 메시지 -->
+        <p class="payment-status-msg" id="payment-processing-msg" hidden>
+          결제를 처리하는 중입니다...
+        </p>
+
+        <!-- 오류 영역 -->
+        <div id="payment-error-area" hidden style="margin-top:1rem;">
+          <p
+            id="payment-error-msg"
+            style="color:#c00;white-space:pre-wrap;font-size:.95rem;line-height:1.6;"
+          ></p>
+          <button
+            type="button"
+            id="payment-retry-btn"
+            class="btn reserve-btn"
+            style="margin-top:.75rem;"
+          >
+            다시 시도
+          </button>
+        </div>
+
         <footer
           id="site-business-footer-mount"
           data-site-business-footer-mount
@@ -348,9 +369,12 @@
               });
               var verifyData = await verifyRes.json();
               if (!verifyRes.ok || !verifyData.ok) {
+                var verifyErrMsg = verifyData.error || verifyData.message || "";
+                if (verifyData.expected != null && verifyData.actual != null) {
+                  verifyErrMsg += "\n(결제 금액: 예상 " + verifyData.expected + "원 / 실제 " + verifyData.actual + "원)";
+                }
                 showError(
-                  "결제 검증에 실패했습니다. 결제가 정상적으로 이루어졌다면 고객센터로 문의해 주세요.\n" +
-                    (verifyData.error || ""),
+                  "결제 검증에 실패했습니다. 결제가 정상적으로 이루어졌다면 고객센터로 문의해 주세요.\n" + verifyErrMsg,
                 );
                 return;
               }
@@ -531,6 +555,27 @@
             class="btn reserve-btn confirm-pay-submit"
           >
             Pay
+          </button>
+        </div>
+
+        <!-- Processing message -->
+        <p class="payment-status-msg" id="payment-processing-msg-en" hidden>
+          Processing payment...
+        </p>
+
+        <!-- Error area -->
+        <div id="payment-error-area-en" hidden style="margin-top:1rem;">
+          <p
+            id="payment-error-msg-en"
+            style="color:#c00;white-space:pre-wrap;font-size:.95rem;line-height:1.6;"
+          ></p>
+          <button
+            type="button"
+            id="payment-retry-btn-en"
+            class="btn reserve-btn"
+            style="margin-top:.75rem;"
+          >
+            Try Again
           </button>
         </div>
 
@@ -756,9 +801,12 @@
               });
               var verifyData = await verifyRes.json();
               if (!verifyRes.ok || !verifyData.ok) {
+                var verifyErrMsgEn = verifyData.error || verifyData.message || "";
+                if (verifyData.expected != null && verifyData.actual != null) {
+                  verifyErrMsgEn += "\n(Expected: " + verifyData.expected + " KRW / Actual: " + verifyData.actual + " KRW)";
+                }
                 showError(
-                  "Payment verification failed. If you believe your payment went through, please contact support.\n" +
-                    (verifyData.error || ""),
+                  "Payment verification failed. If you believe your payment went through, please contact support.\n" + verifyErrMsgEn,
                 );
                 return;
               }
