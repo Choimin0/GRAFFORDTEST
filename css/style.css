@@ -1882,6 +1882,7 @@ main:has(> .site-footer.site-business-footer) {
 main.content-section:has(> .site-footer.site-business-footer) {
   justify-content: flex-start;
   padding-bottom: 0;
+  box-shadow: none;
 }
 
 .site-footer.site-business-footer {
