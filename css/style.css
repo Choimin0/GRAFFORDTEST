@@ -521,6 +521,7 @@ main {
 .fullpage-section {
   min-height: 100svh;
   scroll-snap-align: start;
+  box-shadow: none;
 }
 
 /* 메인페이지 첫 화면 */
