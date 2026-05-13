@@ -653,9 +653,12 @@ main {
   }
 }
 
-/* index.html features — STORY .feature-story-1 과 동일 열 비율·이미지 높이 */
+/* index.html features — GROUND/FACILITIES와 동일: 섹션 풀블리드, 카드는 100% */
 .features--index {
-  width: 100%;
+  width: 100vw;
+  max-width: 100vw;
+  margin-left: calc(50% - 50vw);
+  margin-right: calc(50% - 50vw);
 }
 
 .features--index .feature-media {
@@ -802,9 +805,15 @@ main {
   gap: 0;
   align-items: stretch;
   box-sizing: border-box;
-  width: 100vw;
-  margin-left: calc(50% - 50vw);
-  margin-right: calc(50% - 50vw);
+  width: 100%;
+  margin-left: 0;
+  margin-right: 0;
+}
+
+.features--index .feature {
+  width: 100%;
+  margin-left: 0;
+  margin-right: 0;
 }
 
 .features--index .feature-index-2 .feature-media,
@@ -864,9 +873,12 @@ main {
   }
 }
 
-/* STORY 페이지: feature 2개 — 100vw, 첫 feature와 동일 60/40·40/60 */
+/* STORY 페이지 — GROUND/FACILITIES와 동일: 섹션 풀블리드, 카드는 100% */
 .features--story {
-  width: 100%;
+  width: 100vw;
+  max-width: 100vw;
+  margin-left: calc(50% - 50vw);
+  margin-right: calc(50% - 50vw);
 }
 
 .features--story .feature-media {
@@ -906,9 +918,9 @@ main {
   gap: 0;
   align-items: stretch;
   box-sizing: border-box;
-  width: 100vw;
-  margin-left: calc(50% - 50vw);
-  margin-right: calc(50% - 50vw);
+  width: 100%;
+  margin-left: 0;
+  margin-right: 0;
 }
 
 .features--story .feature-story-1 .feature-media,
@@ -920,11 +932,11 @@ main {
 
 @media (min-width: 768px) {
   .features--story .feature-story-1 {
-    grid-template-columns: minmax(0, 60%) minmax(0, 40%);
+    grid-template-columns: var(--feature-ref-grid-img-text);
   }
 
   .features--story .feature-story-2 {
-    grid-template-columns: minmax(0, 40%) minmax(0, 60%);
+    grid-template-columns: var(--feature-ref-grid-text-img);
   }
 
   .features--story .feature-story-1 .feature-media,
