@@ -6,24 +6,6 @@
     <link rel="icon" href="images/LOGO-transparent.png" type="image/png" />
     <title>GROUND - GRAFFORD</title>
     <link rel="stylesheet" href="css/style.css" />
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-      tailwind.config = {
-        theme: {
-          extend: {
-            screens: { md: "768px" },
-            colors: {
-              grafford: {
-                beige: "#e8e1d5",
-                mud: "#5a5247",
-                dark: "#3a3531",
-                chocolate: "#d3c7b1",
-              },
-            },
-          },
-        },
-      };
-    </script>
     <script src="js/nav-hero.js" defer></script>
     <script src="js/mobile-nav.js" defer></script>
     <script src="js/site-language.js" defer></script>
@@ -103,10 +85,10 @@
       <main class="content-section fullpage-section" id="content">
         <section class="features rooms-features">
           <article
-            class="feature room-feature scroll-fade my-[8vh] flex flex-col gap-0 bg-[var(--chocolate-brown)] text-[var(--grafford-beige)] md:my-[8vh] md:grid md:min-h-[36svh] md:grid-cols-2 md:items-stretch md:gap-0"
+            class="feature room-feature scroll-fade"
           >
             <div
-              class="room-image-slot room-image-slot--carousel w-full shrink-0"
+              class="room-image-slot room-image-slot--carousel"
               data-room="G1"
               aria-label="Room G1 photos"
             >
@@ -120,7 +102,7 @@
                     &#10094;
                   </button>
                   <img
-                    class="room-slot-main-img w-full min-h-0 object-cover"
+                    class="room-slot-main-img"
                     src="images/A00.jpg"
                     alt="Room G1"
                   />
@@ -136,15 +118,15 @@
               </div>
             </div>
             <div
-              class="feature-text flex h-full min-h-0 w-full flex-col justify-start gap-3 px-4 py-6 md:gap-[0.85rem] md:px-[clamp(1.25rem,3vw,3rem)] md:pb-6 md:pt-[1.6rem]"
+              class="feature-text feature-text--room"
             >
               <h3
-                class="feature-heading text-2xl font-semibold tracking-wide text-white/95 md:text-4xl"
+                class="feature-heading feature-heading--room"
               >
                 G1
               </h3>
               <div
-                class="feature-body room-intro-layout text-sm leading-relaxed text-[var(--newmaincolor)] md:text-[0.95rem] md:leading-relaxed"
+                class="feature-body room-intro-layout"
               >
                 <p class="room-intro-desc">
                   창밖을 바라보면 바다가 보이는 첫번째 그라운드 입니다.<br />
@@ -224,10 +206,10 @@
             </div>
           </article>
           <article
-            class="feature room-feature scroll-fade my-[8vh] flex flex-col gap-0 bg-[var(--chocolate-brown)] text-[var(--grafford-beige)] md:my-[8vh] md:grid md:min-h-[36svh] md:grid-cols-2 md:items-stretch md:gap-0"
+            class="feature room-feature scroll-fade"
           >
             <div
-              class="room-image-slot room-image-slot--carousel w-full shrink-0"
+              class="room-image-slot room-image-slot--carousel"
               data-room="G2"
               aria-label="Room G2 photos"
             >
@@ -241,7 +223,7 @@
                     &#10094;
                   </button>
                   <img
-                    class="room-slot-main-img w-full min-h-0 object-cover"
+                    class="room-slot-main-img"
                     src="images/B00.jpg"
                     alt="Room G2"
                   />
@@ -257,15 +239,15 @@
               </div>
             </div>
             <div
-              class="feature-text flex h-full min-h-0 w-full flex-col justify-start gap-3 px-4 py-6 md:gap-[0.85rem] md:px-[clamp(1.25rem,3vw,3rem)] md:pb-6 md:pt-[1.6rem]"
+              class="feature-text feature-text--room"
             >
               <h3
-                class="feature-heading text-2xl font-semibold tracking-wide text-white/95 md:text-4xl"
+                class="feature-heading feature-heading--room"
               >
                 G2
               </h3>
               <div
-                class="feature-body room-intro-layout text-sm leading-relaxed text-[var(--newmaincolor)] md:text-[0.95rem] md:leading-relaxed"
+                class="feature-body room-intro-layout"
               >
                 <p class="room-intro-desc">
                   아늑함 속에서도 여유로운 공간을 내어주기 위해 만든 두번째
@@ -345,10 +327,10 @@
             </div>
           </article>
           <article
-            class="feature room-feature scroll-fade my-[8vh] flex flex-col gap-0 bg-[var(--chocolate-brown)] text-[var(--grafford-beige)] md:my-[8vh] md:grid md:min-h-[36svh] md:grid-cols-2 md:items-stretch md:gap-0"
+            class="feature room-feature scroll-fade"
           >
             <div
-              class="room-image-slot room-image-slot--carousel w-full shrink-0"
+              class="room-image-slot room-image-slot--carousel"
               data-room="G3"
               aria-label="Room G3 photos"
             >
@@ -362,7 +344,7 @@
                     &#10094;
                   </button>
                   <img
-                    class="room-slot-main-img w-full min-h-0 object-cover"
+                    class="room-slot-main-img"
                     src="images/C00.jpg"
                     alt="Room G3"
                   />
@@ -378,15 +360,15 @@
               </div>
             </div>
             <div
-              class="feature-text flex h-full min-h-0 w-full flex-col justify-start gap-3 px-4 py-6 md:gap-[0.85rem] md:px-[clamp(1.25rem,3vw,3rem)] md:pb-6 md:pt-[1.6rem]"
+              class="feature-text feature-text--room"
             >
               <h3
-                class="feature-heading text-2xl font-semibold tracking-wide text-white/95 md:text-4xl"
+                class="feature-heading feature-heading--room"
               >
                 G3
               </h3>
               <div
-                class="feature-body room-intro-layout text-sm leading-relaxed text-[var(--newmaincolor)] md:text-[0.95rem] md:leading-relaxed"
+                class="feature-body room-intro-layout"
               >
                 <p class="room-intro-desc">
                   세번째 그라운드는 게스트분들 누구에게나 그 필요를 채워주는
@@ -466,10 +448,10 @@
             </div>
           </article>
           <article
-            class="feature room-feature scroll-fade my-[8vh] flex flex-col gap-0 bg-[var(--chocolate-brown)] text-[var(--grafford-beige)] md:my-[8vh] md:grid md:min-h-[36svh] md:grid-cols-2 md:items-stretch md:gap-0"
+            class="feature room-feature scroll-fade"
           >
             <div
-              class="room-image-slot room-image-slot--carousel w-full shrink-0"
+              class="room-image-slot room-image-slot--carousel"
               data-room="G4"
               aria-label="Room G4 photos"
             >
@@ -483,7 +465,7 @@
                     &#10094;
                   </button>
                   <img
-                    class="room-slot-main-img w-full min-h-0 object-cover"
+                    class="room-slot-main-img"
                     src="images/D00.jpg"
                     alt="Room G4"
                   />
@@ -499,15 +481,15 @@
               </div>
             </div>
             <div
-              class="feature-text flex h-full min-h-0 w-full flex-col justify-start gap-3 px-4 py-6 md:gap-[0.85rem] md:px-[clamp(1.25rem,3vw,3rem)] md:pb-6 md:pt-[1.6rem]"
+              class="feature-text feature-text--room"
             >
               <h3
-                class="feature-heading text-2xl font-semibold tracking-wide text-white/95 md:text-4xl"
+                class="feature-heading feature-heading--room"
               >
                 G4
               </h3>
               <div
-                class="feature-body room-intro-layout text-sm leading-relaxed text-[var(--newmaincolor)] md:text-[0.95rem] md:leading-relaxed"
+                class="feature-body room-intro-layout"
               >
                 <p class="room-intro-desc">
                   네번째 그라운드에 들어서면, 동쪽으로 나있는 창문을 통해 빛이
@@ -799,10 +781,10 @@
       <main class="content-section fullpage-section">
         <section class="features rooms-features">
           <article
-            class="feature room-feature scroll-fade my-[8vh] flex flex-col gap-0 bg-[var(--chocolate-brown)] text-[var(--grafford-beige)] md:my-[8vh] md:grid md:min-h-[36svh] md:grid-cols-2 md:items-stretch md:gap-0"
+            class="feature room-feature scroll-fade"
           >
             <div
-              class="room-image-slot room-image-slot--carousel w-full shrink-0"
+              class="room-image-slot room-image-slot--carousel"
               data-room="G1"
               aria-label="Room G1 photos"
             >
@@ -816,7 +798,7 @@
                     &#10094;
                   </button>
                   <img
-                    class="room-slot-main-img w-full min-h-0 object-cover"
+                    class="room-slot-main-img"
                     src="images/A00.jpg"
                     alt="Room G1"
                   />
@@ -832,15 +814,15 @@
               </div>
             </div>
             <div
-              class="feature-text flex h-full min-h-0 w-full flex-col justify-start gap-3 px-4 py-6 md:gap-[0.85rem] md:px-[clamp(1.25rem,3vw,3rem)] md:pb-6 md:pt-[1.6rem]"
+              class="feature-text feature-text--room"
             >
               <h3
-                class="feature-heading text-2xl font-semibold tracking-wide text-white/95 md:text-4xl"
+                class="feature-heading feature-heading--room"
               >
                 G1
               </h3>
               <div
-                class="feature-body room-intro-layout text-sm leading-relaxed text-[var(--newmaincolor)] md:text-[0.95rem] md:leading-relaxed"
+                class="feature-body room-intro-layout"
               >
                 <p class="room-intro-desc">
                   Ground 01 offers a view where the sea unfolds before your
@@ -925,10 +907,10 @@
             </div>
           </article>
           <article
-            class="feature room-feature scroll-fade my-[8vh] flex flex-col gap-0 bg-[var(--chocolate-brown)] text-[var(--grafford-beige)] md:my-[8vh] md:grid md:min-h-[36svh] md:grid-cols-2 md:items-stretch md:gap-0"
+            class="feature room-feature scroll-fade"
           >
             <div
-              class="room-image-slot room-image-slot--carousel w-full shrink-0"
+              class="room-image-slot room-image-slot--carousel"
               data-room="G2"
               aria-label="Room G2 photos"
             >
@@ -942,7 +924,7 @@
                     &#10094;
                   </button>
                   <img
-                    class="room-slot-main-img w-full min-h-0 object-cover"
+                    class="room-slot-main-img"
                     src="images/B00.jpg"
                     alt="Room G2"
                   />
@@ -958,15 +940,15 @@
               </div>
             </div>
             <div
-              class="feature-text flex h-full min-h-0 w-full flex-col justify-start gap-3 px-4 py-6 md:gap-[0.85rem] md:px-[clamp(1.25rem,3vw,3rem)] md:pb-6 md:pt-[1.6rem]"
+              class="feature-text feature-text--room"
             >
               <h3
-                class="feature-heading text-2xl font-semibold tracking-wide text-white/95 md:text-4xl"
+                class="feature-heading feature-heading--room"
               >
                 G2
               </h3>
               <div
-                class="feature-body room-intro-layout text-sm leading-relaxed text-[var(--newmaincolor)] md:text-[0.95rem] md:leading-relaxed"
+                class="feature-body room-intro-layout"
               >
                 <p class="room-intro-desc">
                   Ground 02 is designed to offer a spacious sense of freedom
@@ -1050,10 +1032,10 @@
             </div>
           </article>
           <article
-            class="feature room-feature scroll-fade my-[8vh] flex flex-col gap-0 bg-[var(--chocolate-brown)] text-[var(--grafford-beige)] md:my-[8vh] md:grid md:min-h-[36svh] md:grid-cols-2 md:items-stretch md:gap-0"
+            class="feature room-feature scroll-fade"
           >
             <div
-              class="room-image-slot room-image-slot--carousel w-full shrink-0"
+              class="room-image-slot room-image-slot--carousel"
               data-room="G3"
               aria-label="Room G3 photos"
             >
@@ -1067,7 +1049,7 @@
                     &#10094;
                   </button>
                   <img
-                    class="room-slot-main-img w-full min-h-0 object-cover"
+                    class="room-slot-main-img"
                     src="images/C00.jpg"
                     alt="Room G3"
                   />
@@ -1083,15 +1065,15 @@
               </div>
             </div>
             <div
-              class="feature-text flex h-full min-h-0 w-full flex-col justify-start gap-3 px-4 py-6 md:gap-[0.85rem] md:px-[clamp(1.25rem,3vw,3rem)] md:pb-6 md:pt-[1.6rem]"
+              class="feature-text feature-text--room"
             >
               <h3
-                class="feature-heading text-2xl font-semibold tracking-wide text-white/95 md:text-4xl"
+                class="feature-heading feature-heading--room"
               >
                 G3
               </h3>
               <div
-                class="feature-body room-intro-layout text-sm leading-relaxed text-[var(--newmaincolor)] md:text-[0.95rem] md:leading-relaxed"
+                class="feature-body room-intro-layout"
               >
                 <p class="room-intro-desc">
                   Ground 03 is a space designed to fulfill the unique needs of
@@ -1175,10 +1157,10 @@
             </div>
           </article>
           <article
-            class="feature room-feature scroll-fade my-[8vh] flex flex-col gap-0 bg-[var(--chocolate-brown)] text-[var(--grafford-beige)] md:my-[8vh] md:grid md:min-h-[36svh] md:grid-cols-2 md:items-stretch md:gap-0"
+            class="feature room-feature scroll-fade"
           >
             <div
-              class="room-image-slot room-image-slot--carousel w-full shrink-0"
+              class="room-image-slot room-image-slot--carousel"
               data-room="G4"
               aria-label="Room G4 photos"
             >
@@ -1192,7 +1174,7 @@
                     &#10094;
                   </button>
                   <img
-                    class="room-slot-main-img w-full min-h-0 object-cover"
+                    class="room-slot-main-img"
                     src="images/D00.jpg"
                     alt="Room G4"
                   />
@@ -1208,15 +1190,15 @@
               </div>
             </div>
             <div
-              class="feature-text flex h-full min-h-0 w-full flex-col justify-start gap-3 px-4 py-6 md:gap-[0.85rem] md:px-[clamp(1.25rem,3vw,3rem)] md:pb-6 md:pt-[1.6rem]"
+              class="feature-text feature-text--room"
             >
               <h3
-                class="feature-heading text-2xl font-semibold tracking-wide text-white/95 md:text-4xl"
+                class="feature-heading feature-heading--room"
               >
                 G4
               </h3>
               <div
-                class="feature-body room-intro-layout text-sm leading-relaxed text-[var(--newmaincolor)] md:text-[0.95rem] md:leading-relaxed"
+                class="feature-body room-intro-layout"
               >
                 <p class="room-intro-desc">
                   As you step into Ground 04, the morning light gently drifts in

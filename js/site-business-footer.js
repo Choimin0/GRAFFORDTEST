@@ -6,10 +6,13 @@
  * @param {string[]} [options.lines=[]] - (레거시) 왼쪽에 표시할 줄 단위 문자열 배열
  * @param {string[]} [options.linesKr=[]] - 한국어 줄 단위 문자열 배열
  * @param {string[]} [options.linesEn=[]] - 영어 줄 단위 문자열 배열
- * @param {{ href: string, imgSrc?: string }} [options.instagram] - 첫 줄 위에 인스타 아이콘 링크
- * @param {string} [options.logoSrc='images/LOGO-circle.png'] - 오른쪽 로고 이미지 경로
+ * @param {{ href: string, imgSrc?: string }} [options.instagram] - 인스타 링크(href). 아이콘은 인라인 SVG로 표시되며 imgSrc는 호환용입니다.
+ * @param {string} [options.logoSrc='images/LOGO-circle-transparent.png'] - 오른쪽 로고 이미지 경로
  * @param {string} [options.logoAlt='GRAFFORD'] - 로고 alt 텍스트
  * @param {boolean} [options.naverMapAddress=false] - true이면 `주소 : …` 줄에서 콜론 뒤만 네이버 지도 검색으로 연결
+ * @param {string} [options.brandTagline] - 브랜드명 아래 태그라인 (KR/EN 공통 기본값: GROUND · AFFORD · JEJU)
+ * @param {string} [options.brandTaglineKr] - 한국어 페이지용 태그라인
+ * @param {string} [options.brandTaglineEn] - 영어 페이지용 태그라인
  */
 
 var SITE_LEGAL_MODAL_CONTENT = {
@@ -79,29 +82,154 @@ function resolveFooterLanguage() {
   return "kr";
 }
 
-function isFooterEmailLine(lineStr, language) {
-  var s = String(lineStr || "");
-  if (language === "en") {
-    return /^\s*Email\s*:/i.test(s);
-  }
-  return /^\s*이메일\s*:/.test(s);
-}
-
-function buildFooterLegalRowHtml(language) {
+function buildFooterLegalButtonsHtml(language) {
   var isEn = language === "en";
   var termsLabel = isEn ? "Terms of Use" : "이용약관";
   var privacyLabel = isEn ? "Privacy Policy" : "개인정보 처리방침";
   return (
-    '<p class="site-business-footer__text-line site-business-footer__legal-line">' +
     '<button type="button" class="site-business-footer__legal-btn" data-site-legal-open="terms">' +
     termsLabel +
     "</button>" +
-    '<span class="site-business-footer__legal-sep" aria-hidden="true"> | </span>' +
     '<button type="button" class="site-business-footer__legal-btn" data-site-legal-open="privacy">' +
     privacyLabel +
-    "</button>" +
-    "</p>"
+    "</button>"
   );
+}
+
+function naverMapSearchUrl(query) {
+  return (
+    "https://map.naver.com/v5/search/" +
+    encodeURIComponent(String(query).trim())
+  );
+}
+
+function parseBusinessFooterLines(selectedLines, language, naverMapAddr) {
+  var infoRows = [];
+  var copyrightLine = null;
+
+  for (var i = 0; i < selectedLines.length; i++) {
+    var raw = selectedLines[i];
+    if (raw == null) {
+      continue;
+    }
+    var lineStr = String(raw);
+    if (lineStr === " ") {
+      continue;
+    }
+    if (String(lineStr).trim() === "") {
+      continue;
+    }
+    if (/©/.test(lineStr)) {
+      copyrightLine = lineStr.trim();
+      continue;
+    }
+
+    var trimmed = lineStr.trim();
+    var m;
+    var treatAsKr = /[가-힣]/.test(trimmed);
+
+    if (treatAsKr || language !== "en") {
+      m = /^대표\s*:\s*(.+)$/.exec(trimmed);
+      if (m) {
+        infoRows.push({ label: "대표", value: m[1].trim(), mapHref: null });
+        continue;
+      }
+      m = /^주소\s*:\s*(.+)$/.exec(trimmed);
+      if (m) {
+        var addrKr = m[1].trim();
+        infoRows.push({
+          label: "주소",
+          value: addrKr,
+          mapHref: naverMapAddr ? naverMapSearchUrl(addrKr) : null,
+        });
+        continue;
+      }
+      m = /^사업자등록번호\s*:\s*(.+)$/.exec(trimmed);
+      if (m) {
+        infoRows.push({ label: "사업자", value: m[1].trim(), mapHref: null });
+        continue;
+      }
+      m = /^전화\s*:\s*(.+)$/.exec(trimmed);
+      if (m) {
+        infoRows.push({ label: "전화", value: m[1].trim(), mapHref: null });
+        continue;
+      }
+      m = /^이메일\s*:\s*(.+)$/.exec(trimmed);
+      if (m) {
+        infoRows.push({ label: "이메일", value: m[1].trim(), mapHref: null });
+        continue;
+      }
+    }
+
+    m = /^(Representative|CEO)\s*:\s*(.+)$/i.exec(trimmed);
+    if (m) {
+      infoRows.push({
+        label: "Representative",
+        value: m[2].trim(),
+        mapHref: null,
+      });
+      continue;
+    }
+    m = /^Address\s*:\s*(.+)$/i.exec(trimmed);
+    if (m) {
+      var addrEn = m[1].trim();
+      infoRows.push({
+        label: "Address",
+        value: addrEn,
+        mapHref: naverMapAddr ? naverMapSearchUrl(addrEn) : null,
+      });
+      continue;
+    }
+    m =
+      /^(Business registration(?:\s+number)?|Business no\.)\s*:\s*(.+)$/i.exec(
+        trimmed,
+      );
+    if (m) {
+      infoRows.push({
+        label: "Business no.",
+        value: m[2].trim(),
+        mapHref: null,
+      });
+      continue;
+    }
+    m = /^(Phone|Tel)\s*:\s*(.+)$/i.exec(trimmed);
+    if (m) {
+      infoRows.push({ label: "Phone", value: m[2].trim(), mapHref: null });
+      continue;
+    }
+    m = /^Email\s*:\s*(.+)$/i.exec(trimmed);
+    if (m) {
+      infoRows.push({ label: "Email", value: m[1].trim(), mapHref: null });
+      continue;
+    }
+  }
+
+  return { infoRows: infoRows, copyrightLine: copyrightLine };
+}
+
+function buildFooterInfoGridHtml(rows, escapeHtmlFn) {
+  if (!rows.length) {
+    return "";
+  }
+  var parts = ['<dl class="site-business-footer__info-grid">'];
+  for (var j = 0; j < rows.length; j++) {
+    var r = rows[j];
+    parts.push("<dt>" + escapeHtmlFn(r.label) + "</dt><dd>");
+    if (r.mapHref) {
+      parts.push(
+        '<a class="site-business-footer__info-value-link" href="' +
+          escapeHtmlFn(r.mapHref) +
+          '" target="_blank" rel="noopener noreferrer">' +
+          escapeHtmlFn(r.value) +
+          "</a>",
+      );
+    } else {
+      parts.push(escapeHtmlFn(r.value));
+    }
+    parts.push("</dd>");
+  }
+  parts.push("</dl>");
+  return parts.join("");
 }
 
 function ensureSiteLegalModal() {
@@ -229,7 +357,7 @@ function initSiteBusinessFooter(options) {
     linesEn = [];
   }
 
-  var logoSrc = options.logoSrc || "images/LOGO-circle.png";
+  var logoSrc = options.logoSrc || "images/LOGO-circle-transparent.png";
   var logoAlt = options.logoAlt || "GRAFFORD";
 
   function escapeHtml(s) {
@@ -241,29 +369,8 @@ function initSiteBusinessFooter(options) {
   }
 
   var instaCfg = options.instagram;
-  var instaHtml = "";
-  if (instaCfg && instaCfg.href) {
-    var instaHref = String(instaCfg.href).trim();
-    var instaSrc = escapeHtml(instaCfg.imgSrc || "images/insta.png");
-    instaHtml =
-      '<p class="site-business-footer__text-line site-business-footer__insta-line">' +
-      '<a class="site-business-footer__insta-link" href="' +
-      escapeHtml(instaHref) +
-      '" target="_blank" rel="noopener noreferrer">' +
-      '<img class="site-business-footer__insta-icon" src="' +
-      instaSrc +
-      '" alt="Instagram에서 GRAFFORD 보기" decoding="async" />' +
-      "</a></p>";
-  }
 
   var naverMapAddr = options.naverMapAddress === true;
-
-  function naverSearchUrl(query) {
-    return (
-      "https://map.naver.com/v5/search/" +
-      encodeURIComponent(String(query).trim())
-    );
-  }
 
   function renderByLanguage(language) {
     var selectedLines = language === "en" ? linesEn : linesKr;
@@ -271,75 +378,80 @@ function initSiteBusinessFooter(options) {
       selectedLines = linesKr;
     }
 
-    var textParts = [];
-    var legalRowInserted = false;
-    for (var i = 0; i < selectedLines.length; i++) {
-      var line = selectedLines[i];
-      if (line === " ") {
-        textParts.push(
-          '<p class="site-business-footer__text-line site-business-footer__text-line--spacer" aria-hidden="true">&nbsp;</p>',
-        );
-        continue;
-      }
-      if (line == null || String(line).trim() === "") {
-        continue;
-      }
-      var lineStr = String(line);
-      var addrRegex =
-        language === "en" ? /^\s*Address\s*:\s*(.+)$/i : /^\s*주소\s*:\s*(.+)$/;
-      var addrLabel = language === "en" ? "Address : " : "주소 : ";
-      var addrMatch = addrRegex.exec(lineStr);
-      if (naverMapAddr && addrMatch) {
-        var addrRight = addrMatch[1].trim();
-        var mapHref = naverSearchUrl(addrRight);
-        textParts.push(
-          '<p class="site-business-footer__text-line site-business-footer__text-line--address">' +
-            '<span class="site-business-footer__addr-label">' +
-            escapeHtml(addrLabel) +
-            "</span>" +
-            '<a class="site-business-footer__map-link" href="' +
-            escapeHtml(mapHref) +
-            '" target="_blank" rel="noopener noreferrer">' +
-            escapeHtml(addrRight) +
-            "</a></p>",
-        );
-        continue;
-      }
-      textParts.push(
-        '<p class="site-business-footer__text-line">' +
-          escapeHtml(lineStr) +
-          "</p>",
-      );
-      if (isFooterEmailLine(lineStr, language)) {
-        textParts.push(buildFooterLegalRowHtml(language));
-        legalRowInserted = true;
-      }
+    var parsed = parseBusinessFooterLines(
+      selectedLines,
+      language,
+      naverMapAddr,
+    );
+    var infoGridHtml = buildFooterInfoGridHtml(parsed.infoRows, escapeHtml);
+    var copyrightText =
+      parsed.copyrightLine || "© 2026 GRAFFORD. all rights reserved.";
+
+    var tagline =
+      (language === "en" ? options.brandTaglineEn : options.brandTaglineKr) ||
+      options.brandTagline ||
+      "GROUND · AFFORD · JEJU";
+
+    var instaRow = "";
+    if (instaCfg && instaCfg.href) {
+      var instaHref = String(instaCfg.href).trim();
+      var instaSvg =
+        '<svg class="site-business-footer__ig-icon" viewBox="0 0 24 24" aria-hidden="true">' +
+        '<rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect>' +
+        '<circle cx="12" cy="12" r="4"></circle>' +
+        '<circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"></circle>' +
+        "</svg>";
+      instaRow =
+        '<a class="site-business-footer__instagram-row" href="' +
+        escapeHtml(instaHref) +
+        '" target="_blank" rel="noopener noreferrer">' +
+        instaSvg +
+        '<span class="site-business-footer__instagram-label">INSTAGRAM</span>' +
+        "</a>";
     }
 
-    if (!legalRowInserted && textParts.length > 0) {
-      textParts.push(buildFooterLegalRowHtml(language));
-    }
+    var legalNav =
+      '<nav class="site-business-footer__legal-nav" aria-label="' +
+      escapeHtml(language === "en" ? "Legal" : "법적 고지") +
+      '">' +
+      buildFooterLegalButtonsHtml(language) +
+      "</nav>";
 
-    var innerText = instaHtml + textParts.join("");
-    var textBlock =
-      innerText.length > 0
-        ? '<div class="site-business-footer__text">' + innerText + "</div>"
-        : '<div class="site-business-footer__text site-business-footer__text--empty" aria-hidden="true"></div>';
+    var shellHtml =
+      '<div class="site-business-footer__shell">' +
+      '<div class="site-business-footer__grid">' +
+      '<div class="site-business-footer__col site-business-footer__col--brand">' +
+      '<span class="site-business-footer__brand-name">GRAFFORD</span>' +
+      '<p class="site-business-footer__brand-tagline">' +
+      escapeHtml(tagline) +
+      "</p>" +
+      instaRow +
+      "</div>" +
+      '<div class="site-business-footer__divider" aria-hidden="true"></div>' +
+      '<div class="site-business-footer__col site-business-footer__col--info">' +
+      infoGridHtml +
+      "</div>" +
+      '<div class="site-business-footer__divider" aria-hidden="true"></div>' +
+      '<div class="site-business-footer__col site-business-footer__col--logo">' +
+      '<img class="site-business-footer__logo" src="' +
+      escapeHtml(logoSrc) +
+      '" alt="' +
+      escapeHtml(logoAlt) +
+      '" decoding="async" />' +
+      "</div>" +
+      "</div>" +
+      '<div class="site-business-footer__bottom">' +
+      '<p class="site-business-footer__copyright">' +
+      escapeHtml(copyrightText) +
+      "</p>" +
+      legalNav +
+      "</div>" +
+      '<div class="site-business-footer__gold-line" aria-hidden="true"></div>' +
+      "</div>";
 
     roots.forEach(function (root) {
       root.className = "site-footer site-business-footer";
-      root.innerHTML =
-        '<div class="site-business-footer__rule" aria-hidden="true"></div>' +
-        '<div class="site-business-footer__inner">' +
-        textBlock +
-        '<div class="site-business-footer__logo-wrap">' +
-        '<img class="site-business-footer__logo" src="' +
-        escapeHtml(logoSrc) +
-        '" alt="' +
-        escapeHtml(logoAlt) +
-        '" decoding="async" />' +
-        "</div>" +
-        "</div>";
+      root.innerHTML = shellHtml;
       root.hidden = false;
     });
   }

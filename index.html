@@ -10,24 +10,6 @@
     <link rel="icon" href="images/LOGO-transparent.png" type="image/png" />
     <title>GRAFFORD</title>
     <link rel="stylesheet" href="css/style.css" />
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-      tailwind.config = {
-        theme: {
-          extend: {
-            screens: { md: "768px" },
-            colors: {
-              grafford: {
-                beige: "#e8e1d5",
-                mud: "#5a5247",
-                dark: "#3a3531",
-                chocolate: "#d3c7b1",
-              },
-            },
-          },
-        },
-      };
-    </script>
     <script src="js/nav-hero.js" defer></script>
     <script src="js/mobile-nav.js" defer></script>
     <script src="js/site-language.js" defer></script>
@@ -111,20 +93,20 @@
       <main class="content-section fullpage-section" id="content">
         <section class="features features--index">
           <article
-            class="feature feature-index-1 scroll-fade my-[8vh] bg-[var(--chocolate-brown)] text-[var(--grafford-beige)] md:my-[8vh]"
+            class="feature feature-index-1 scroll-fade"
           >
-            <div class="feature-media w-full min-h-0 shrink-0">
+            <div class="feature-media">
               <img
                 src="images/mainimg1.jpg"
                 alt="High Quality 객실 이미지"
-                class="feature-image block max-w-full"
+                class="feature-image"
               />
             </div>
             <div
-              class="feature-text flex min-h-0 flex-col justify-center gap-3 px-4 py-6 text-left md:px-[clamp(1.25rem,3vw,3rem)] md:py-8"
+              class="feature-text"
             >
               <p
-                class="feature-body text-[0.9375rem] leading-relaxed text-grafford-mud md:text-lg md:leading-[1.65]"
+                class="feature-body"
               >
                 발끝으로 대지를 밟는 순간, 묵직한 안도감이 스며들었습니다.
                 <br />
@@ -135,13 +117,13 @@
             </div>
           </article>
           <article
-            class="feature feature-index-2 scroll-fade my-[8vh] bg-[var(--chocolate-brown)] text-[var(--grafford-beige)] md:my-[8vh]"
+            class="feature feature-index-2 scroll-fade"
           >
             <div
-              class="feature-text flex min-h-0 flex-col justify-center gap-3 px-4 py-6 text-left md:px-[clamp(1.25rem,3vw,3rem)] md:py-8"
+              class="feature-text"
             >
               <p
-                class="feature-body text-[0.9375rem] leading-relaxed text-grafford-mud md:text-lg md:leading-[1.65]"
+                class="feature-body"
               >
                 그라포드는 시각적인 자극을 통해 방문객의 이목을 집중시키기 보다
                 빛이 들어오는 방향, 마감재의 질감, 창밖의 풍경 같은 기본
@@ -152,22 +134,22 @@
                 그것이 그라포드가 생각하는 공간의 본질입니다.
               </p>
             </div>
-            <div class="feature-media w-full min-h-0 shrink-0">
+            <div class="feature-media">
               <img
                 src="images/mainimg2.jpg"
                 alt="Private Terrace 이미지"
-                class="feature-image block max-w-full"
+                class="feature-image"
               />
             </div>
           </article>
           <article
-            class="feature feature-index-3 scroll-fade my-[8vh] bg-[var(--chocolate-brown)] text-[var(--grafford-beige)] md:my-[8vh]"
+            class="feature feature-index-3 scroll-fade"
           >
             <div
-              class="feature-media feature-media--index-gallery w-full min-h-0 shrink-0"
+              class="feature-media feature-media--index-gallery"
             >
               <div
-                class="room-image-slot room-image-slot--carousel w-full shrink-0"
+                class="room-image-slot room-image-slot--carousel"
                 id="index-all-rooms-gallery"
                 aria-label="전체 객실 사진"
               >
@@ -181,7 +163,7 @@
                       &#10094;
                     </button>
                     <img
-                      class="room-slot-main-img w-full min-h-0 object-cover"
+                      class="room-slot-main-img"
                       src="images/A00.jpg"
                       alt="객실 사진"
                     />
@@ -198,10 +180,10 @@
               </div>
             </div>
             <div
-              class="feature-text flex min-h-0 flex-col justify-center gap-3 px-4 py-6 text-left md:px-[clamp(1.25rem,3vw,3rem)] md:py-8"
+              class="feature-text"
             >
               <p
-                class="feature-body text-[0.9375rem] leading-relaxed text-grafford-mud md:text-lg md:leading-[1.65]"
+                class="feature-body"
               >
                 오랜 시간 물길에 다듬어진 바위는 모서리가 둥글고 표면이
                 단단합니다.<br />
@@ -212,34 +194,34 @@
             </div>
           </article>
           <article
-            class="feature feature-index-4 scroll-fade my-[8vh] bg-[var(--chocolate-brown)] text-[var(--grafford-beige)] md:my-[8vh]"
+            class="feature feature-index-4 scroll-fade"
           >
             <div
-              class="feature-text flex min-h-0 flex-col justify-center gap-3 px-4 py-6 text-left md:px-[clamp(1.25rem,3vw,3rem)] md:py-8"
+              class="feature-text"
             >
               <h3
-                class="feature-heading text-lg font-semibold tracking-wide text-grafford-dark md:text-3xl md:font-medium"
+                class="feature-heading"
               >
                 <a
                   href="https://map.naver.com/v5/search/%EC%A0%9C%EC%A3%BC%ED%8A%B9%EB%B3%84%EC%9E%90%EC%B9%98%EB%8F%84%20%EC%84%9C%EA%B7%80%ED%8F%AC%EC%8B%9C%20%ED%86%A0%EC%82%B0%EC%A4%91%EC%95%99%EB%A1%9C%2022"
                   target="_blank"
                   rel="noopener noreferrer"
-                  class="underline decoration-current underline-offset-4 hover:opacity-80"
+                  class="feature-heading__link"
                   aria-label="네이버 지도에서 주소 보기"
                   >Location</a
                 >
               </h3>
               <p
-                class="feature-body text-[0.9375rem] leading-relaxed text-grafford-mud md:text-lg md:leading-[1.65]"
+                class="feature-body"
               >
                 제주특별자치도 서귀포시 토산중앙로 22
               </p>
             </div>
-            <div class="feature-media w-full min-h-0 shrink-0">
+            <div class="feature-media">
               <img
                 src="images/story02.jpg"
                 alt="스토리 이미지"
-                class="feature-image block max-w-full"
+                class="feature-image"
               />
             </div>
           </article>
@@ -590,20 +572,20 @@
       <main class="content-section fullpage-section">
         <section class="features features--index">
           <article
-            class="feature feature-index-1 scroll-fade my-[8vh] bg-[var(--chocolate-brown)] text-[var(--grafford-beige)] md:my-[8vh]"
+            class="feature feature-index-1 scroll-fade"
           >
-            <div class="feature-media w-full min-h-0 shrink-0">
+            <div class="feature-media">
               <img
                 src="images/mainimg1.jpg"
                 alt="High Quality 객실 이미지"
-                class="feature-image block max-w-full"
+                class="feature-image"
               />
             </div>
             <div
-              class="feature-text flex min-h-0 flex-col justify-center gap-3 px-4 py-6 text-left md:px-[clamp(1.25rem,3vw,3rem)] md:py-8"
+              class="feature-text"
             >
               <p
-                class="feature-body text-[0.9375rem] leading-relaxed text-grafford-mud md:text-lg md:leading-[1.65]"
+                class="feature-body"
               >
                 The moment my toes touched the earth, a profound sense of relief
                 swept over me—like a steadfast center that holds me even in
@@ -613,13 +595,13 @@
             </div>
           </article>
           <article
-            class="feature feature-index-2 scroll-fade my-[8vh] bg-[var(--chocolate-brown)] text-[var(--grafford-beige)] md:my-[8vh]"
+            class="feature feature-index-2 scroll-fade"
           >
             <div
-              class="feature-text flex min-h-0 flex-col justify-center gap-3 px-4 py-6 text-left md:px-[clamp(1.25rem,3vw,3rem)] md:py-8"
+              class="feature-text"
             >
               <p
-                class="feature-body text-[0.9375rem] leading-relaxed text-grafford-mud md:text-lg md:leading-[1.65]"
+                class="feature-body"
               >
                 Rather than capturing attention through fleeting visual
                 stimulation, Grafford meticulously refines the most fundamental
@@ -632,22 +614,22 @@
                 Grafford.
               </p>
             </div>
-            <div class="feature-media w-full min-h-0 shrink-0">
+            <div class="feature-media">
               <img
                 src="images/mainimg2.jpg"
                 alt="Private Terrace 이미지"
-                class="feature-image block max-w-full"
+                class="feature-image"
               />
             </div>
           </article>
           <article
-            class="feature feature-index-3 scroll-fade my-[8vh] bg-[var(--chocolate-brown)] text-[var(--grafford-beige)] md:my-[8vh]"
+            class="feature feature-index-3 scroll-fade"
           >
             <div
-              class="feature-media feature-media--index-gallery w-full min-h-0 shrink-0"
+              class="feature-media feature-media--index-gallery"
             >
               <div
-                class="room-image-slot room-image-slot--carousel w-full shrink-0"
+                class="room-image-slot room-image-slot--carousel"
                 id="index-all-rooms-gallery-en"
                 aria-label="전체 객실 사진"
               >
@@ -661,7 +643,7 @@
                       <
                     </button>
                     <img
-                      class="room-slot-main-img w-full min-h-0 object-cover"
+                      class="room-slot-main-img"
                       src="images/A00.jpg"
                       alt="객실 사진"
                     />
@@ -678,10 +660,10 @@
               </div>
             </div>
             <div
-              class="feature-text flex min-h-0 flex-col justify-center gap-3 px-4 py-6 text-left md:px-[clamp(1.25rem,3vw,3rem)] md:py-8"
+              class="feature-text"
             >
               <p
-                class="feature-body text-[0.9375rem] leading-relaxed text-grafford-mud md:text-lg md:leading-[1.65]"
+                class="feature-body"
               >
                 Boulders shaped by the flow of water over many years have
                 rounded edges and a solid surface.<br />
@@ -693,35 +675,35 @@
             </div>
           </article>
           <article
-            class="feature feature-index-4 scroll-fade my-[8vh] bg-[var(--chocolate-brown)] text-[var(--grafford-beige)] md:my-[8vh]"
+            class="feature feature-index-4 scroll-fade"
           >
             <div
-              class="feature-text flex min-h-0 flex-col justify-center gap-3 px-4 py-6 text-left md:px-[clamp(1.25rem,3vw,3rem)] md:py-8"
+              class="feature-text"
             >
               <h3
-                class="feature-heading text-lg font-semibold tracking-wide text-grafford-dark md:text-3xl md:font-medium"
+                class="feature-heading"
               >
                 <a
                   href="https://maps.app.goo.gl/DwCUk5h4F91oSJBC8"
                   target="_blank"
                   rel="noopener noreferrer"
-                  class="underline decoration-current underline-offset-4 hover:opacity-80"
+                  class="feature-heading__link"
                   aria-label="Open location in Google Maps"
                   >Location</a
                 >
               </h3>
               <p
-                class="feature-body text-[0.9375rem] leading-relaxed text-grafford-mud md:text-lg md:leading-[1.65]"
+                class="feature-body"
               >
                 22, Tosanjungang-ro, Pyoseon-myeon, Seogwipo-si, Jeju-do,
                 Republic of Korea
               </p>
             </div>
-            <div class="feature-media w-full min-h-0 shrink-0">
+            <div class="feature-media">
               <img
                 src="images/story02.jpg"
                 alt="스토리 이미지"
-                class="feature-image block max-w-full"
+                class="feature-image"
               />
             </div>
           </article>
