@@ -4,12 +4,12 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="icon" href="images/LOGO-transparent.png" type="image/png" />
-    <title>예약 조회 - GRAFFORD</title>
+    <title>예약 확인 - GRAFFORD</title>
     <link rel="stylesheet" href="css/style.css" />
     <script src="js/mobile-nav.js" defer></script>
     <script src="js/site-language.js" defer></script>
   </head>
-  <body>
+  <body class="reserve-check-page">
     <div id="grafford-react-fade-root"></div>
     <nav class="site-nav top-right-nav">
       <a href="index.html" class="nav-logo" aria-label="홈으로 이동">
@@ -56,161 +56,246 @@
       </div>
     </nav>
     <div class="lang-kr">
-      <main class="content-section confirm-page reserve-complete-page">
-        <h1 class="confirm-title">예약 조회</h1>
-        <section
-          id="complete-bridge-copy"
-          class="room-bridge-copy"
-          aria-label="완료 안내 문구"
-        >
-          <p>대지가 내어주는 그라운드가 당신을 기다립니다</p>
-        </section>
-        <div class="confirm-layout-grid">
-          <div class="confirm-layout-col">
-            <section
-              class="confirm-section"
-              aria-labelledby="complete-room-title"
-            >
-              <p class="reserve-complete-room-name" id="complete-room-name">
-                —
-              </p>
-              <div class="reserve-complete-gallery">
-                <div
-                  class="gallery-main-wrap reserve-complete-gallery-main-wrap"
-                >
-                  <button
-                    type="button"
-                    class="gallery-nav gallery-prev"
-                    id="complete-gallery-prev"
-                    aria-label="이전 사진"
-                  >
-                    &#10094;
-                  </button>
-                  <img
-                    class="gallery-main-img"
-                    id="complete-gallery-main"
-                    src="images/A00.jpg"
-                    alt="예약 객실 대표 이미지"
-                    loading="lazy"
-                    decoding="async"
-                  />
-                  <button
-                    type="button"
-                    class="gallery-nav gallery-next"
-                    id="complete-gallery-next"
-                    aria-label="다음 사진"
-                  >
-                    &#10095;
-                  </button>
-                </div>
-              </div>
-            </section>
-
-            <section
-              class="confirm-section"
-              aria-labelledby="complete-notice-1"
-            >
-              <h2 class="confirm-section-title" id="complete-notice-1">
-                입실 전 유의사항
-              </h2>
-              <p class="confirm-guide-content">
-                입실 당일 오전에 체크인 안내 메시지가 발송됩니다. 기준 인원을
-                초과한 입실은 불가하며, 추가 인원은 사전 신청 내역 기준으로만
-                인정됩니다.
-              </p>
-            </section>
-
-            <section
-              class="confirm-section"
-              aria-labelledby="complete-notice-2"
-            >
-              <h2 class="confirm-section-title" id="complete-notice-2">
-                비대면 체크인 안내사항
-              </h2>
-              <p class="confirm-guide-content" id="complete-checkin-guide"></p>
-            </section>
-
-            <section
-              class="confirm-section"
-              aria-labelledby="complete-notice-3"
-            >
-              <h2 class="confirm-section-title" id="complete-notice-3">
-                주차 안내
-              </h2>
-              <p class="confirm-guide-content">객실 당 1대 주차 가능합니다.</p>
-            </section>
+      <main
+        class="content-section confirm-page reserve-complete-page reserve-check-main"
+      >
+        <header class="reserve-check-page-band" aria-label="예약 확인 헤더">
+          <div class="reserve-check-page-band__left">
+            <p class="reserve-check-page-band__eyebrow">RESERVATION CONFIRMED</p>
+            <h1 class="reserve-check-page-band__title">예약 확인</h1>
+            <p class="reserve-check-page-band__subtitle">
+              대지가 내어주는 그라운드가 당신을 기다립니다
+            </p>
           </div>
-
-          <div class="confirm-layout-col confirm-layout-col--right">
-            <section
-              class="confirm-section"
-              aria-labelledby="complete-booking-info-title"
+          <div class="reserve-check-page-band__right">
+            <p class="reserve-check-page-band__label">BOOKING NO</p>
+            <p
+              class="reserve-check-page-band__booking-no"
+              id="reserve-check-booking-no-kr"
             >
-              <h2
-                class="confirm-section-title"
-                id="complete-booking-info-title"
+              —
+            </p>
+          </div>
+        </header>
+
+        <div class="reserve-check-content">
+          <div class="reserve-check-top-grid">
+            <div class="reserve-check-col reserve-check-col--gallery">
+              <section
+                class="reserve-check-panel"
+                aria-labelledby="reserve-check-room-booking-heading"
               >
-                예약 정보
-              </h2>
-              <dl class="reserve-delete-dl">
-                <dt>예약 번호</dt>
-                <dd id="complete-order-no">
-                  <span id="check-order-no-text">—</span>
-                  <span
-                    id="check-bank-status"
-                    class="reserve-complete-bank-status"
-                    hidden
+                <div class="reserve-check-section-head">
+                  <h2
+                    class="reserve-check-section-kicker"
+                    id="reserve-check-room-booking-heading"
                   >
-                    [
-                    <span id="check-bank-status-pending">예약대기</span>
-                    /
-                    <span id="check-bank-status-confirmed">예약확정</span>
-                    ]
-                  </span>
-                </dd>
-                <dt>체크인/체크아웃</dt>
-                <dd id="complete-schedule">—</dd>
-                <dt>결제 금액</dt>
-                <dd id="complete-total-amount">—</dd>
-              </dl>
-            </section>
+                    ROOM &amp; BOOKING
+                  </h2>
+                  <span
+                    class="reserve-check-section-head__line"
+                    aria-hidden="true"
+                  ></span>
+                </div>
+                <p class="reserve-check-room-label">ROOM</p>
+                <p class="reserve-check-room-name" id="complete-room-name">—</p>
+                <div class="reserve-complete-gallery">
+                  <div
+                    class="gallery-main-wrap reserve-complete-gallery-main-wrap"
+                  >
+                    <button
+                      type="button"
+                      class="gallery-nav gallery-prev"
+                      id="complete-gallery-prev"
+                      aria-label="이전 사진"
+                    >
+                      &#10094;
+                    </button>
+                    <img
+                      class="gallery-main-img"
+                      id="complete-gallery-main"
+                      src="images/A00.jpg"
+                      alt="예약 객실 대표 이미지"
+                      loading="lazy"
+                      decoding="async"
+                    />
+                    <button
+                      type="button"
+                      class="gallery-nav gallery-next"
+                      id="complete-gallery-next"
+                      aria-label="다음 사진"
+                    >
+                      &#10095;
+                    </button>
+                  </div>
+                </div>
+              </section>
+            </div>
 
-            <section
-              class="confirm-section"
-              aria-labelledby="complete-guest-info-title"
-            >
-              <h2 class="confirm-section-title" id="complete-guest-info-title">
-                예약자 정보
-              </h2>
-              <dl class="reserve-delete-dl">
-                <dt>방문 인원</dt>
-                <dd id="complete-guest-count">—</dd>
-                <dt>예약자 성함</dt>
-                <dd id="complete-guest-name">—</dd>
-                <dt>예약자 연락처</dt>
-                <dd id="complete-contact">—</dd>
-                <dt>예약자 이메일</dt>
-                <dd id="complete-email">—</dd>
-                <dt>요청사항</dt>
-                <dd id="complete-request">—</dd>
-              </dl>
-            </section>
+            <div class="reserve-check-col reserve-check-col--info">
+              <section
+                class="reserve-check-panel reserve-check-panel--stacked"
+                aria-labelledby="reserve-check-booking-info-heading"
+              >
+                <h2
+                  class="reserve-check-section-kicker"
+                  id="reserve-check-booking-info-heading"
+                >
+                  BOOKING INFO
+                </h2>
+                <dl class="reserve-delete-dl reserve-check-dl">
+                  <dt>예약 번호</dt>
+                  <dd id="complete-order-no">
+                    <span id="check-order-no-text">—</span>
+                    <span
+                      id="check-bank-status"
+                      class="reserve-complete-bank-status"
+                      hidden
+                    >
+                      [
+                      <span id="check-bank-status-pending">예약대기</span>
+                      /
+                      <span id="check-bank-status-confirmed">예약확정</span>
+                      ]
+                    </span>
+                  </dd>
+                  <dt>체크인</dt>
+                  <dd id="complete-checkin-line-kr">—</dd>
+                  <dt>체크아웃</dt>
+                  <dd id="complete-checkout-line-kr">—</dd>
+                  <dt>결제 금액</dt>
+                  <dd
+                    id="complete-total-amount"
+                    class="reserve-check-amount-highlight"
+                  >
+                    —
+                  </dd>
+                </dl>
+              </section>
 
-            <section class="confirm-section">
-              <div class="confirm-actions reserve-complete-actions">
-                <a href="index.html" class="reserve-complete-action-link"
-                  >메인으로</a
+              <hr class="reserve-check-rule" />
+
+              <section
+                class="reserve-check-panel reserve-check-panel--stacked"
+                aria-labelledby="reserve-check-guest-info-heading"
+              >
+                <h2
+                  class="reserve-check-section-kicker"
+                  id="reserve-check-guest-info-heading"
                 >
-                <a
-                  href="reserve-delete.html"
-                  id="complete-link-cancel"
-                  class="reserve-complete-action-link"
-                  >예약취소</a
-                >
-              </div>
-            </section>
+                  GUEST INFO
+                </h2>
+                <dl class="reserve-delete-dl reserve-check-dl">
+                  <dt>방문 인원</dt>
+                  <dd id="complete-guest-count">—</dd>
+                  <dt>예약자</dt>
+                  <dd id="complete-guest-name">—</dd>
+                  <dt>연락처</dt>
+                  <dd id="complete-contact">—</dd>
+                  <dt>이메일</dt>
+                  <dd id="complete-email">—</dd>
+                  <dt>요청사항</dt>
+                  <dd id="complete-request">—</dd>
+                </dl>
+              </section>
+            </div>
           </div>
+
+          <section
+            class="reserve-check-stay-guide"
+            aria-labelledby="reserve-check-stay-guide-heading"
+          >
+            <div class="reserve-check-section-head reserve-check-section-head--wide">
+              <h2
+                class="reserve-check-section-kicker"
+                id="reserve-check-stay-guide-heading"
+              >
+                STAY GUIDE
+              </h2>
+              <span
+                class="reserve-check-section-head__line"
+                aria-hidden="true"
+              ></span>
+            </div>
+            <div class="reserve-check-guide-grid">
+              <article
+                class="reserve-check-guide-card"
+                tabindex="0"
+              >
+                <p class="reserve-check-guide-card__index" aria-hidden="true">
+                  01
+                </p>
+                <h3 class="reserve-check-guide-card__title">입실 전 유의사항</h3>
+                <div class="reserve-check-guide-card__body">
+                  <p>입실 당일 오전에 체크인 안내 메시지가 발송됩니다.</p>
+                  <p>기준 인원을 초과한 입실은 불가하며,</p>
+                  <p>추가 인원은 사전 신청 내역 기준으로만 인정됩니다.</p>
+                </div>
+              </article>
+              <article
+                class="reserve-check-guide-card"
+                tabindex="0"
+              >
+                <p class="reserve-check-guide-card__index" aria-hidden="true">
+                  02
+                </p>
+                <h3 class="reserve-check-guide-card__title">비대면 체크인</h3>
+                <div class="reserve-check-guide-card__body">
+                  <p>
+                    체크인 당일 예약 시 기입된 연락처 뒷번호 4자리(<strong
+                      class="reserve-complete-pin"
+                      ><span id="reserve-check-pin-kr">----</span></strong
+                    >)로 도어락 비밀번호가 설정될 예정입니다.
+                  </p>
+                  <p>
+                    입실 당일 관련 안내 사항은 카카오톡 알림톡으로 발송해
+                    드리겠습니다.
+                  </p>
+                </div>
+              </article>
+              <article
+                class="reserve-check-guide-card"
+                tabindex="0"
+              >
+                <p class="reserve-check-guide-card__index" aria-hidden="true">
+                  03
+                </p>
+                <h3 class="reserve-check-guide-card__title">주차 안내</h3>
+                <div class="reserve-check-guide-card__body">
+                  <p>객실 당 1대 주차 가능합니다.</p>
+                  <p>
+                    추가 차량이 있으신 경우 사전에 문의해 주시기 바랍니다.
+                  </p>
+                </div>
+              </article>
+            </div>
+          </section>
+
+          <footer class="reserve-check-footer">
+            <div class="reserve-check-footer__contact">
+              <p class="reserve-check-footer__contact-title">
+                문의가 있으신가요?
+              </p>
+              <p class="reserve-check-footer__contact-line">
+                010-6830-1105 · tilkoas35@naver.com
+              </p>
+            </div>
+            <div class="reserve-check-footer__actions">
+              <a
+                href="reserve-delete.html"
+                id="complete-link-cancel"
+                class="reserve-check-footer-btn reserve-check-footer-btn--secondary"
+                >예약 취소</a
+              >
+              <a
+                href="index.html"
+                class="reserve-check-footer-btn reserve-check-footer-btn--primary"
+                >메인으로 -></a
+              >
+            </div>
+          </footer>
         </div>
+
         <footer
           id="site-business-footer-mount"
           class="site-footer site-business-footer"
@@ -250,8 +335,17 @@
           var bankConfirmed = saved && saved.bankConfirmed === true;
           var cancelToken = (saved && saved.cancelToken) || "";
           var orderTextEl = document.getElementById("check-order-no-text");
+          var orderDisplayKr = orderNo || "번호를 확인할 수 없습니다.";
           if (orderTextEl) {
-            orderTextEl.textContent = orderNo || "번호를 확인할 수 없습니다.";
+            orderTextEl.textContent = orderDisplayKr;
+          }
+          var bandKr = document.getElementById("reserve-check-booking-no-kr");
+          var bandEn = document.getElementById("reserve-check-booking-no-en");
+          if (bandKr) {
+            bandKr.textContent = orderNo || "—";
+          }
+          if (bandEn) {
+            bandEn.textContent = orderNo || "—";
           }
           var bankStatusEl = document.getElementById("check-bank-status");
           var pendingStatusEl = document.getElementById(
@@ -276,8 +370,30 @@
             parseInt(String(totalAmount || "0").replace(/,/g, ""), 10) || 0;
           var discountedAmount = paidAmount;
 
-          document.getElementById("complete-room-name").textContent =
-            ROOM_LABEL[room] || room || "객실 정보 없음";
+          function parseYmdLocal(ymd) {
+            var s = String(ymd || "").trim();
+            if (!/^\d{4}-\d{2}-\d{2}$/.test(s)) {
+              return null;
+            }
+            var p = s.split("-");
+            return new Date(Number(p[0]), Number(p[1]) - 1, Number(p[2]));
+          }
+
+          function countStayNights(ciStr, coStr) {
+            var a = parseYmdLocal(ciStr);
+            var b = parseYmdLocal(coStr);
+            if (!a || !b) {
+              return 0;
+            }
+            var diff = Math.round((b - a) / 86400000);
+            return diff > 0 ? diff : 0;
+          }
+
+          var roomNameKr = document.getElementById("complete-room-name");
+          if (roomNameKr) {
+            roomNameKr.textContent =
+              ROOM_LABEL[room] || room || "객실 정보 없음";
+          }
           var roomNameEnCheck = document.getElementById(
             "complete-room-name-en-check",
           );
@@ -285,7 +401,46 @@
             roomNameEnCheck.textContent =
               ROOM_LABEL[room] || room || "Room information unavailable";
           }
-          var scheduleText = (checkIn || "—") + " ~ " + (checkOut || "—");
+          var ciDate = parseYmdLocal(checkIn);
+          var coDate = parseYmdLocal(checkOut);
+          var stayNights = countStayNights(checkIn, checkOut);
+          var checkInKrLine = ciDate
+            ? ciDate.toLocaleDateString("ko-KR", {
+                year: "numeric",
+                month: "long",
+                day: "numeric",
+                weekday: "short",
+              })
+            : "—";
+          var checkOutKrLine = coDate
+            ? coDate.toLocaleDateString("ko-KR", {
+                year: "numeric",
+                month: "long",
+                day: "numeric",
+                weekday: "short",
+              }) + (stayNights > 0 ? " · " + stayNights + "박" : "")
+            : "—";
+          var checkInEnLine = ciDate
+            ? ciDate.toLocaleDateString("en-US", {
+                year: "numeric",
+                month: "long",
+                day: "numeric",
+                weekday: "short",
+              })
+            : "—";
+          var checkOutEnLine = coDate
+            ? coDate.toLocaleDateString("en-US", {
+                year: "numeric",
+                month: "long",
+                day: "numeric",
+                weekday: "short",
+              }) +
+              (stayNights > 0
+                ? " · " +
+                  stayNights +
+                  (stayNights === 1 ? " night" : " nights")
+                : "")
+            : "—";
           var amountTextKr =
             Number(discountedAmount || 0).toLocaleString("ko-KR") + "원";
           var amountTextEn =
@@ -299,24 +454,18 @@
           }
 
           // Korean targets
-          setText("complete-schedule", scheduleText);
+          setText("complete-checkin-line-kr", checkInKrLine);
+          setText("complete-checkout-line-kr", checkOutKrLine);
           setText("complete-total-amount", amountTextKr);
           setText("complete-guest-name", guestName || "—");
           setText("complete-contact", contact || "—");
           setText("complete-email", email || "—");
           setText("complete-request", guestRequest || "—");
-          var checkinGuideEl = document.getElementById(
-            "complete-checkin-guide",
-          );
-          if (checkinGuideEl) {
-            var contactDigits = String(contact || "").replace(/\D/g, "");
-            var contactLast4 =
-              contactDigits.length >= 4 ? contactDigits.slice(-4) : "----";
-            checkinGuideEl.innerHTML =
-              '체크인 당일 예약 시 기입된 연락처 뒷번호 4자리(<strong class="reserve-complete-pin">' +
-              contactLast4 +
-              "</strong>)로 설정될 예정입니다.<br />예약시 입력해주신 연락처를 통해 입실 당일 관련 안내 사항을 카카오톡 알림톡으로 발송해드리겠습니다.";
-          }
+          var contactDigits = String(contact || "").replace(/\D/g, "");
+          var contactLast4 =
+            contactDigits.length >= 4 ? contactDigits.slice(-4) : "----";
+          setText("reserve-check-pin-kr", contactLast4);
+          setText("reserve-check-pin-en", contactLast4);
 
           var parsedGuestCount = parseInt(guestCount || "", 10);
           if (!parsedGuestCount || parsedGuestCount < 1) {
@@ -331,7 +480,8 @@
 
           // English targets
           setText("complete-order-no-en", orderNo || "—");
-          setText("complete-schedule-en", scheduleText);
+          setText("complete-checkin-line-en", checkInEnLine);
+          setText("complete-checkout-line-en", checkOutEnLine);
           setText("complete-total-amount-en", amountTextEn);
           setText("complete-guest-count-en", guestCountEnText);
           setText("complete-guest-name-en", guestName || "—");
@@ -495,122 +645,238 @@
       </script>
     </div>
     <div class="lang-en">
-      <main class="content-section confirm-page reserve-complete-page">
-        <h1 class="confirm-title">Reservation Info</h1>
-        <section class="room-bridge-copy" aria-label="완료 안내 문구">
-          <p>The ground that the earth gives you is waiting for you</p>
-        </section>
-        <div class="confirm-layout-grid">
-          <div class="confirm-layout-col">
-            <section class="confirm-section">
-              <p
-                class="reserve-complete-room-name"
-                id="complete-room-name-en-check"
+      <main
+        class="content-section confirm-page reserve-complete-page reserve-check-main"
+      >
+        <header class="reserve-check-page-band" aria-label="Reservation header">
+          <div class="reserve-check-page-band__left">
+            <p class="reserve-check-page-band__eyebrow">RESERVATION CONFIRMED</p>
+            <h1 class="reserve-check-page-band__title">Reservation confirmed</h1>
+            <p class="reserve-check-page-band__subtitle">
+              The ground that the earth gives you is waiting for you
+            </p>
+          </div>
+          <div class="reserve-check-page-band__right">
+            <p class="reserve-check-page-band__label">BOOKING NO</p>
+            <p
+              class="reserve-check-page-band__booking-no"
+              id="reserve-check-booking-no-en"
+            >
+              —
+            </p>
+          </div>
+        </header>
+
+        <div class="reserve-check-content">
+          <div class="reserve-check-top-grid">
+            <div class="reserve-check-col reserve-check-col--gallery">
+              <section
+                class="reserve-check-panel"
+                aria-labelledby="reserve-check-room-booking-heading-en"
               >
-                —
-              </p>
-              <div class="reserve-complete-gallery">
-                <div
-                  class="gallery-main-wrap reserve-complete-gallery-main-wrap"
-                >
-                  <button
-                    type="button"
-                    class="gallery-nav gallery-prev"
-                    id="complete-gallery-prev-en-check"
-                    aria-label="Previous photo"
+                <div class="reserve-check-section-head">
+                  <h2
+                    class="reserve-check-section-kicker"
+                    id="reserve-check-room-booking-heading-en"
                   >
-                    &#10094;
-                  </button>
-                  <img
-                    class="gallery-main-img"
-                    id="complete-gallery-main-en-check"
-                    src="images/A00.jpg"
-                    alt="Room photo"
-                    loading="lazy"
-                    decoding="async"
-                  />
-                  <button
-                    type="button"
-                    class="gallery-nav gallery-next"
-                    id="complete-gallery-next-en-check"
-                    aria-label="Next photo"
-                  >
-                    &#10095;
-                  </button>
+                    ROOM &amp; BOOKING
+                  </h2>
+                  <span
+                    class="reserve-check-section-head__line"
+                    aria-hidden="true"
+                  ></span>
                 </div>
-              </div>
-            </section>
+                <p class="reserve-check-room-label">ROOM</p>
+                <p
+                  class="reserve-check-room-name"
+                  id="complete-room-name-en-check"
+                >
+                  —
+                </p>
+                <div class="reserve-complete-gallery">
+                  <div
+                    class="gallery-main-wrap reserve-complete-gallery-main-wrap"
+                  >
+                    <button
+                      type="button"
+                      class="gallery-nav gallery-prev"
+                      id="complete-gallery-prev-en-check"
+                      aria-label="Previous photo"
+                    >
+                      &#10094;
+                    </button>
+                    <img
+                      class="gallery-main-img"
+                      id="complete-gallery-main-en-check"
+                      src="images/A00.jpg"
+                      alt="Room photo"
+                      loading="lazy"
+                      decoding="async"
+                    />
+                    <button
+                      type="button"
+                      class="gallery-nav gallery-next"
+                      id="complete-gallery-next-en-check"
+                      aria-label="Next photo"
+                    >
+                      &#10095;
+                    </button>
+                  </div>
+                </div>
+              </section>
+            </div>
 
-            <section class="confirm-section">
-              <h2 class="confirm-section-title">Pre-arrival Notes</h2>
-              <p class="confirm-guide-content">
-                Your check-in guide will be sent on the morning of your arrival.
-                To ensure a peaceful stay for everyone, only the pre-registered
-                number of guests may enter.
-              </p>
-            </section>
+            <div class="reserve-check-col reserve-check-col--info">
+              <section
+                class="reserve-check-panel reserve-check-panel--stacked"
+                aria-labelledby="reserve-check-booking-info-heading-en"
+              >
+                <h2
+                  class="reserve-check-section-kicker"
+                  id="reserve-check-booking-info-heading-en"
+                >
+                  BOOKING INFO
+                </h2>
+                <dl class="reserve-delete-dl reserve-check-dl">
+                  <dt>Reservation number</dt>
+                  <dd id="complete-order-no-en">—</dd>
+                  <dt>Check-in</dt>
+                  <dd id="complete-checkin-line-en">—</dd>
+                  <dt>Check-out</dt>
+                  <dd id="complete-checkout-line-en">—</dd>
+                  <dt>Total amount</dt>
+                  <dd
+                    id="complete-total-amount-en"
+                    class="reserve-check-amount-highlight"
+                  >
+                    —
+                  </dd>
+                </dl>
+              </section>
 
-            <section class="confirm-section">
-              <h2 class="confirm-section-title">Contactless Check-in Guide</h2>
-              <p class="confirm-guide-content">
-                Your access code will be the last 4 digits of the phone number
-                used for your reservation (8867). Further check-in details will
-                be sent via KakaoTalk notification on the day of your arrival.
-              </p>
-            </section>
+              <hr class="reserve-check-rule" />
 
-            <section class="confirm-section">
-              <h2 class="confirm-section-title">Parking Guide</h2>
-              <p class="confirm-guide-content">
-                Complimentary parking is available for one vehicle per room.
-              </p>
-            </section>
+              <section
+                class="reserve-check-panel reserve-check-panel--stacked"
+                aria-labelledby="reserve-check-guest-info-heading-en"
+              >
+                <h2
+                  class="reserve-check-section-kicker"
+                  id="reserve-check-guest-info-heading-en"
+                >
+                  GUEST INFO
+                </h2>
+                <dl class="reserve-delete-dl reserve-check-dl">
+                  <dt>Guests</dt>
+                  <dd id="complete-guest-count-en">—</dd>
+                  <dt>Name</dt>
+                  <dd id="complete-guest-name-en">—</dd>
+                  <dt>Contact</dt>
+                  <dd id="complete-contact-en">—</dd>
+                  <dt>Email</dt>
+                  <dd id="complete-email-en">—</dd>
+                  <dt>Requests</dt>
+                  <dd id="complete-request-en">—</dd>
+                </dl>
+              </section>
+            </div>
           </div>
 
-          <div class="confirm-layout-col confirm-layout-col--right">
-            <section class="confirm-section">
-              <h2 class="confirm-section-title">Reservation Information</h2>
-              <dl class="reserve-delete-dl">
-                <dt>Reservation Number</dt>
-                <dd id="complete-order-no-en">—</dd>
-                <dt>Check-in/Check-out</dt>
-                <dd id="complete-schedule-en">—</dd>
-                <dt>Total Amount</dt>
-                <dd id="complete-total-amount-en">—</dd>
-              </dl>
-            </section>
+          <section
+            class="reserve-check-stay-guide"
+            aria-labelledby="reserve-check-stay-guide-heading-en"
+          >
+            <div class="reserve-check-section-head reserve-check-section-head--wide">
+              <h2
+                class="reserve-check-section-kicker"
+                id="reserve-check-stay-guide-heading-en"
+              >
+                STAY GUIDE
+              </h2>
+              <span
+                class="reserve-check-section-head__line"
+                aria-hidden="true"
+              ></span>
+            </div>
+            <div class="reserve-check-guide-grid">
+              <article class="reserve-check-guide-card" tabindex="0">
+                <p class="reserve-check-guide-card__index" aria-hidden="true">
+                  01
+                </p>
+                <h3 class="reserve-check-guide-card__title">Pre-arrival notes</h3>
+                <div class="reserve-check-guide-card__body">
+                  <p>
+                    Your check-in guide will be sent on the morning of your
+                    arrival.
+                  </p>
+                  <p>
+                    Check-in is not available beyond the registered guest count.
+                  </p>
+                  <p>
+                    Additional guests are only accepted according to your prior
+                    request on file.
+                  </p>
+                </div>
+              </article>
+              <article class="reserve-check-guide-card" tabindex="0">
+                <p class="reserve-check-guide-card__index" aria-hidden="true">
+                  02
+                </p>
+                <h3 class="reserve-check-guide-card__title">
+                  Contactless check-in
+                </h3>
+                <div class="reserve-check-guide-card__body">
+                  <p>
+                    On the day of check-in, your door lock will be set using the
+                    last 4 digits of the phone number provided at booking (<strong
+                      class="reserve-complete-pin"
+                      ><span id="reserve-check-pin-en">----</span></strong
+                    >).
+                  </p>
+                  <p>
+                    Arrival-day details will be sent via KakaoTalk notification.
+                  </p>
+                </div>
+              </article>
+              <article class="reserve-check-guide-card" tabindex="0">
+                <p class="reserve-check-guide-card__index" aria-hidden="true">
+                  03
+                </p>
+                <h3 class="reserve-check-guide-card__title">Parking</h3>
+                <div class="reserve-check-guide-card__body">
+                  <p>One vehicle may park per room.</p>
+                  <p>
+                    If you need space for an additional vehicle, please contact
+                    us in advance.
+                  </p>
+                </div>
+              </article>
+            </div>
+          </section>
 
-            <section class="confirm-section">
-              <h2 class="confirm-section-title">Guest Information</h2>
-              <dl class="reserve-delete-dl">
-                <dt>Guests</dt>
-                <dd id="complete-guest-count-en">—</dd>
-                <dt>Guest Name</dt>
-                <dd id="complete-guest-name-en">—</dd>
-                <dt>Guest Contact</dt>
-                <dd id="complete-contact-en">—</dd>
-                <dt>Guest Email</dt>
-                <dd id="complete-email-en">—</dd>
-                <dt>Special Requests</dt>
-                <dd id="complete-request-en">—</dd>
-              </dl>
-            </section>
-
-            <section class="confirm-section">
-              <div class="confirm-actions reserve-complete-actions">
-                <a href="index.html" class="reserve-complete-action-link"
-                  >Main</a
-                >
-                <a
-                  href="reserve-delete.html"
-                  id="complete-link-cancel-en-check"
-                  class="reserve-complete-action-link"
-                  >Cancel Reservation</a
-                >
-              </div>
-            </section>
-          </div>
+          <footer class="reserve-check-footer">
+            <div class="reserve-check-footer__contact">
+              <p class="reserve-check-footer__contact-title">Questions?</p>
+              <p class="reserve-check-footer__contact-line">
+                010-6830-1105 · tilkoas35@naver.com
+              </p>
+            </div>
+            <div class="reserve-check-footer__actions">
+              <a
+                href="reserve-delete.html"
+                id="complete-link-cancel-en-check"
+                class="reserve-check-footer-btn reserve-check-footer-btn--secondary"
+                >Cancel reservation</a
+              >
+              <a
+                href="index.html"
+                class="reserve-check-footer-btn reserve-check-footer-btn--primary"
+                >Main -></a
+              >
+            </div>
+          </footer>
         </div>
+
         <footer class="site-footer site-business-footer" hidden></footer>
       </main>
     </div>
