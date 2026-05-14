@@ -60,6 +60,8 @@
   );
   --color-nav-glass: color-mix(in srgb, var(--stone-200) 66%, transparent);
 
+  --reservation-calendar-bg: #f5f2ed;
+
   --color-shimmer-mid: color-mix(in srgb, var(--stone-50) 70%, transparent);
 
   /* design.md — spacing (4px scale) */
@@ -1552,6 +1554,8 @@ main {
 
 .room-intro-desc {
   margin: 0 0 0.85rem;
+  color: var(--grafford-mud);
+  font-weight: 300;
 }
 
 .room-intro-desc2 {
@@ -1959,6 +1963,11 @@ section ul li {
   background-color: var(--grafford-mud);
   border-color: var(--grafford-mud);
   animation: reserve-btn-shimmer 0.6s ease forwards;
+}
+
+.reserve-cta.reserve-cta--primary.btn.reserve-btn:hover,
+.reserve-cta.reserve-cta--primary.btn.reserve-btn:focus-visible {
+  animation: none;
 }
 
 @keyframes reserve-btn-shimmer {
@@ -2602,8 +2611,7 @@ main.content-section:has(> .site-footer.site-business-footer) {
 /* GROUND: 브리지–객실 사이 썸네일 (design.md: 모바일 거터 16px, 데스크톱 32px, 그리드 간 16/24px) */
 .ground-room-thumbs {
   margin: 0;
-  padding: var(--space-32) var(--layout-margin-side-mobile)
-    var(--space-32);
+  padding: var(--space-32) var(--layout-margin-side-mobile) var(--space-32);
   background-color: var(--grafford-beige);
   box-sizing: border-box;
 }
@@ -3002,8 +3010,9 @@ main.content-section:has(> .site-footer.site-business-footer) {
 
 .reservation-calendar-panel {
   min-width: 0;
-  padding: 1rem;
-  background-color: transparent;
+  padding: var(--space-24) var(--space-16);
+  background-color: var(--reservation-calendar-bg);
+  border-radius: 0;
 }
 
 .calendar-heading {
@@ -3027,7 +3036,7 @@ main.content-section:has(> .site-footer.site-business-footer) {
   padding: 0;
   font-size: 1.35rem;
   font-weight: 500;
-  color: var(--grafford-mud2);
+  color: var(--color-surface-nav);
   line-height: 1.2;
   text-align: right;
 }
@@ -3228,10 +3237,10 @@ main.content-section:has(> .site-footer.site-business-footer) {
 }
 
 .reservation-price-summary {
-  margin-bottom: 1rem;
-  padding: 0.85rem 1rem;
+  margin: 0 0 var(--space-8);
+  padding: var(--space-12) 0;
   background-color: transparent;
-  border-radius: 8px;
+  border-radius: 0;
 }
 
 .reservation-price-placeholder {
@@ -3283,7 +3292,570 @@ main.content-section:has(> .site-footer.site-business-footer) {
   filter: saturate(0.72);
 }
 
+/* RESERVATION v2: 탭, 갤러리 오버레이·하단 세그먼트, 달력 패널 */
+
+.reservation-booking .room-type-bar {
+  gap: 0;
+  border-bottom: 1px solid var(--stone-200);
+  padding: 0;
+}
+
+.reservation-booking .room-type-btn {
+  min-width: 2.75rem;
+  padding: 0.65rem 1rem 0.55rem;
+  border: 0;
+  border-radius: 0;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -1px;
+  background: none !important;
+  background-image: none !important;
+  color: var(--stone-400);
+  font-family: var(--font-family-nav-en);
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  cursor: pointer;
+  transition:
+    color 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.reservation-booking .room-type-btn:hover,
+.reservation-booking .room-type-btn:focus-visible {
+  animation: none;
+  color: var(--stone-800);
+  background: transparent !important;
+}
+
+.reservation-booking .room-type-btn.is-active {
+  border-bottom-color: var(--stone-800);
+  color: var(--stone-800);
+  background: transparent !important;
+}
+
+.reservation-gallery .gallery-main-wrap {
+  display: flex;
+  flex-direction: column;
+}
+
+.reservation-gallery .gallery-image-frame {
+  position: relative;
+  width: 100%;
+  overflow: hidden;
+  aspect-ratio: 4 / 3;
+  max-height: min(72vh, 460px);
+  background: var(--stone-900);
+}
+
+.reservation-gallery .gallery-image-frame .gallery-nav {
+  z-index: 2;
+}
+
+.reservation-gallery .gallery-main-img {
+  width: 100%;
+  height: 100%;
+  max-height: none;
+  object-fit: cover;
+}
+
+.reservation-gallery .gallery-image-overlay {
+  position: absolute;
+  inset: 0;
+  top: auto;
+  z-index: 1;
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: clamp(0.75rem, 2.2vw, 1.35rem);
+  pointer-events: none;
+  background: linear-gradient(
+    to top,
+    rgba(15, 13, 11, 0.58) 0%,
+    rgba(15, 13, 11, 0.12) 52%,
+    transparent 100%
+  );
+}
+
+.reservation-gallery .gallery-overlay-left {
+  min-width: 0;
+}
+
+.reservation-gallery .gallery-room-label {
+  display: block;
+  font-family: var(--font-family-nav-en);
+  font-size: clamp(1.15rem, 2.8vw, 1.5rem);
+  font-weight: 500;
+  letter-spacing: 0.08em;
+  color: var(--stone-50);
+}
+
+.reservation-gallery .gallery-room-tagline {
+  display: block;
+  margin-top: 0.25rem;
+  font-size: 0.8125rem;
+  line-height: 1.35;
+  color: rgba(250, 249, 247, 0.9);
+}
+
+.reservation-gallery .gallery-photo-index {
+  flex-shrink: 0;
+  font-family: var(--font-family-nav-en);
+  font-size: 0.8125rem;
+  letter-spacing: 0.06em;
+  color: rgba(250, 249, 247, 0.92);
+  align-self: flex-end;
+}
+
+.reservation-gallery .gallery-thumbs {
+  position: static;
+  left: auto;
+  right: auto;
+  bottom: auto;
+  width: 100%;
+  margin-top: var(--space-12);
+  padding: 0 var(--space-4);
+  box-sizing: border-box;
+  gap: var(--space-8);
+}
+
+.reservation-gallery .gallery-thumb {
+  flex: 1 1 0;
+  min-width: 0;
+  height: 3px;
+  border-radius: 0;
+  opacity: 0.35;
+}
+
+.reservation-gallery .gallery-thumb.is-active {
+  opacity: 1;
+  background-color: var(--stone-800);
+}
+
+.booking-calendar-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-16);
+  margin-bottom: var(--space-8);
+}
+
+.cal-picker-title {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: var(--stone-800);
+}
+
+.booking-calendar-head .cal-year-title {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 500;
+  color: var(--stone-400);
+}
+
+.reservation-stay-summary {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-12);
+  margin: var(--space-20) 0 var(--space-16);
+}
+
+.reservation-date-box {
+  padding: var(--space-12) var(--space-12);
+  background: var(--stone-50);
+  border: 1px solid var(--stone-200);
+  box-sizing: border-box;
+}
+
+.reservation-date-box__label {
+  display: block;
+  font-family: var(--font-family-nav-en);
+  font-size: 0.68rem;
+  letter-spacing: 0.12em;
+  color: var(--stone-400);
+  margin-bottom: 0.35rem;
+}
+
+.reservation-date-box__date {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--stone-800);
+  line-height: 1.35;
+}
+
+.reservation-date-box__dow {
+  margin: 0.25rem 0 0;
+  font-size: 0.8rem;
+  color: var(--stone-400);
+}
+
+.reservation-date-box__nights {
+  margin: 0.35rem 0 0;
+  font-size: 0.78rem;
+  color: var(--stone-400);
+}
+
+.cal-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-12) var(--space-16);
+  margin: var(--space-12) 0 var(--space-8);
+  font-size: 0.72rem;
+  color: var(--stone-400);
+}
+
+.cal-legend__item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.cal-legend__swatch {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border-radius: 2px;
+  border: 1px solid var(--stone-200);
+}
+
+.cal-legend__swatch--picked {
+  background: var(--stone-800);
+  border-color: var(--stone-800);
+}
+
+.cal-legend__swatch--range {
+  background: var(--stone-200);
+}
+
+.cal-legend__swatch--sold {
+  background: var(--stone-100);
+  color: var(--stone-400);
+}
+
+/* 할인 적용 현황 (달력 아래) */
+.reservation-discount-cards {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+  margin: var(--space-16) 0 var(--space-12);
+}
+
+.reservation-discount-card {
+  display: flex;
+  align-items: center;
+  gap: var(--space-12);
+  padding: var(--space-12) var(--space-12);
+  border-radius: 12px;
+  border: 1px solid var(--stone-200);
+  background: var(--stone-50);
+  color: var(--stone-400);
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease,
+    color 0.2s ease;
+}
+
+.reservation-discount-card__icon {
+  flex-shrink: 0;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--stone-200) 55%, transparent);
+  color: var(--stone-400);
+}
+
+.reservation-discount-card__svg {
+  width: 22px;
+  height: 22px;
+}
+
+.reservation-discount-card__text {
+  flex: 1;
+  min-width: 0;
+}
+
+.reservation-discount-card__title {
+  margin: 0 0 0.2rem;
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: var(--stone-400);
+  letter-spacing: -0.02em;
+}
+
+.reservation-discount-card__desc {
+  margin: 0;
+  font-size: 0.72rem;
+  line-height: 1.45;
+  color: var(--stone-400);
+}
+
+.reservation-discount-card__meta {
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.reservation-discount-card__rate {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--stone-400);
+  white-space: nowrap;
+}
+
+.reservation-discount-card__rate--won {
+  font-variant-numeric: tabular-nums;
+}
+
+.reservation-discount-card__rate--won .js-res-consecutive-unit {
+  font-size: 0.68rem;
+  font-weight: 600;
+  margin-left: 0.12rem;
+  opacity: 0.92;
+}
+
+.reservation-discount-card__pill {
+  display: inline-block;
+  padding: 0.28rem 0.55rem;
+  border-radius: 999px;
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  background: color-mix(in srgb, var(--gold-500) 35%, var(--stone-100));
+  color: var(--stone-800);
+}
+
+.reservation-discount-card__pill--muted {
+  background: var(--stone-100);
+  color: var(--stone-400);
+  font-weight: 600;
+}
+
+/* 활성(프로모션 기본 + 연박 조건 충족) — 따뜻한 베이지 톤 */
+.reservation-discount-card--on {
+  background: color-mix(in srgb, var(--gold-500) 12%, var(--stone-50));
+  border-color: color-mix(in srgb, var(--gold-500) 42%, var(--stone-200));
+  color: var(--grafford-dark-brown);
+}
+
+.reservation-discount-card--on .reservation-discount-card__icon {
+  background: color-mix(in srgb, var(--gold-500) 22%, var(--stone-50));
+  color: color-mix(in srgb, var(--gold-500) 55%, var(--stone-800));
+}
+
+.reservation-discount-card--on .reservation-discount-card__title {
+  color: var(--grafford-dark-brown);
+}
+
+.reservation-discount-card--on .reservation-discount-card__desc {
+  color: color-mix(in srgb, var(--grafford-mud2) 55%, var(--grafford-dark-brown));
+}
+
+.reservation-discount-card--on .reservation-discount-card__rate {
+  color: var(--grafford-dark-brown);
+}
+
+.reservation-discount-card--on .reservation-discount-card__pill:not(.reservation-discount-card__pill--muted) {
+  background: color-mix(in srgb, var(--gold-500) 58%, #e8c48a);
+  color: var(--stone-800);
+}
+
+.reservation-price-total-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-12);
+  padding: var(--space-12) var(--space-12);
+  background-color: var(--stone-50);
+  border: 1px solid var(--stone-200);
+}
+
+.reservation-price-total-left {
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: var(--stone-800);
+}
+
+.reservation-price-total-amount {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--stone-800);
+}
+
+.reserve-cta--primary {
+  background-color: var(--stone-800) !important;
+  color: var(--stone-50) !important;
+  border-color: var(--stone-800) !important;
+  font-family: var(--font-family-nav-en);
+  letter-spacing: 0.08em;
+  margin-top: var(--space-8);
+}
+
+.reserve-cta--primary:hover,
+.reserve-cta--primary:focus-visible {
+  background-color: var(--stone-900) !important;
+  border-color: var(--stone-900) !important;
+  color: var(--stone-50) !important;
+  filter: none;
+}
+
+/* 예약 CTA: 한 줄만 노출, 호버 시 아래 Reserve 줄 롤업 */
+.reserve-cta.reserve-cta--hover-roll.btn.reserve-btn {
+  display: flex;
+  position: relative;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: 0;
+  padding-bottom: 0;
+  padding-left: 1.2rem;
+  padding-right: 1.2rem;
+  height: 3.1rem;
+  max-height: 3.1rem;
+  min-height: 3.1rem;
+  overflow: hidden;
+  box-sizing: border-box;
+  margin-bottom: 1rem;
+}
+
+.reserve-cta--hover-roll .reserve-cta__roller {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  flex: 0 0 auto;
+  transition: transform 1.05s cubic-bezier(0.2, 0.85, 0.25, 1);
+}
+
+.reserve-cta--hover-roll .reserve-cta__pane {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 3.1rem;
+  min-height: 3.1rem;
+  max-height: 3.1rem;
+  flex: 0 0 3.1rem;
+  box-sizing: border-box;
+  white-space: nowrap;
+  margin-bottom: 1rem;
+}
+
+.reserve-cta--hover-roll .reserve-cta__pane--default {
+  letter-spacing: 0.06em;
+}
+
+.reserve-cta--hover-roll .reserve-cta__pane--hover {
+  color: var(--gold-500);
+  letter-spacing: 0.1em;
+  font-weight: 500;
+}
+
+.reserve-cta--hover-roll:hover:not(.is-disabled) .reserve-cta__roller,
+.reserve-cta--hover-roll:focus-visible:not(.is-disabled) .reserve-cta__roller {
+  transform: translateY(-50%);
+}
+
+.reserve-cta--hover-roll.is-disabled:hover .reserve-cta__roller,
+.reserve-cta--hover-roll.is-disabled:focus-visible .reserve-cta__roller {
+  transform: none;
+}
+
+.reserve-cta--primary.reserve-cta--hover-roll:hover .reserve-cta__pane--hover,
+.reserve-cta--primary.reserve-cta--hover-roll:focus-visible
+  .reserve-cta__pane--hover {
+  color: var(--gold-500) !important;
+}
+
+.reservation-inquiry-btn {
+  display: block;
+  width: 100%;
+  margin-top: var(--space-10);
+  padding: 0.65rem 1rem;
+  box-sizing: border-box;
+  text-align: center;
+  font-size: 0.92rem;
+  font-weight: 500;
+  color: var(--stone-800);
+  background: var(--stone-50);
+  border: 1px solid var(--stone-200);
+  cursor: pointer;
+  transition:
+    background-color 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.reservation-inquiry-btn:hover,
+.reservation-inquiry-btn:focus-visible {
+  border-color: var(--stone-400);
+  background: var(--stone-100);
+}
+
+.reservation-cta-footnote {
+  margin: var(--space-12) 0 0;
+  font-size: 0.72rem;
+  line-height: 1.45;
+  color: var(--stone-400);
+  text-align: center;
+}
+
+.reservation-page .cal-cell.cal-past {
+  opacity: 1;
+  color: var(--stone-400);
+}
+
+.reservation-page
+  .cal-grid.is-selecting-checkout
+  .cal-cell.cal-booked.cal-day:not(:disabled) {
+  color: var(--stone-800);
+}
+
+.reservation-page .cal-cell.cal-day.cal-today {
+  position: relative;
+  font-weight: 600;
+}
+
+.reservation-page
+  .cal-cell.cal-day.cal-today:not(.cal-checkin):not(.cal-checkout)::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: 5px;
+  width: 4px;
+  height: 4px;
+  margin-left: -2px;
+  border-radius: 50%;
+  background: var(--stone-800);
+}
+
+.reservation-page .cal-cell.cal-soldout {
+  color: var(--stone-400);
+  font-weight: 600;
+}
+
+.reservation-page .cal-cell.cal-range {
+  background: var(--stone-200);
+  color: var(--stone-800);
+}
+
+.reservation-page .cal-cell.cal-checkin,
+.reservation-page .cal-cell.cal-checkout {
+  background: var(--stone-800);
+  color: var(--stone-50);
+}
+
+.reservation-page .cal-cell.cal-checkin.cal-today::after,
+.reservation-page .cal-cell.cal-checkout.cal-today::after {
+  background: var(--stone-50);
+}
+
 @media (max-width: 900px) {
+  .reservation-gallery .gallery-main-img {
+    height: 100%;
+  }
+
   .reservation-split {
     grid-template-columns: 1fr;
   }
@@ -3914,38 +4486,335 @@ main.content-section:has(> .site-footer.site-business-footer) {
   line-height: 1.5;
 }
 
-/* 예약 조회 (reserveinfo.html) */
-.reserveinfo-form {
-  margin-top: 0.5rem;
+.confirm-page.reserveinfo-page {
+  /* .top-right-nav border-box min-height와 동일 — 내비 하단에 콘텐츠 정렬 */
+  --reserveinfo-nav-clearance: calc(2 * (0.55rem + 1.5rem + 0.55rem));
+  padding-left: 0;
+  padding-right: 0;
+  padding-bottom: 0;
+  padding-top: var(--reserveinfo-nav-clearance);
+  background: transparent;
+  box-shadow: none;
+}
+
+main.content-section.confirm-page.reserveinfo-page {
+  margin-top: 0;
+  padding-left: 0;
+  padding-right: 0;
+  box-shadow: none;
+  border-radius: 0;
+  background: transparent;
+  justify-content: flex-start;
+}
+
+/* 예약 조회 (reserveinfo.html) — design.md §2 Typography, §3 Palette */
+.reserveinfo-layout {
+  display: grid;
+  grid-template-columns: 1fr;
   width: 100%;
-  margin-left: auto;
-  margin-right: auto;
+  min-height: calc(100svh - var(--reserveinfo-nav-clearance));
+}
+
+@media (min-width: 900px) {
+  .reserveinfo-layout {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    align-items: stretch;
+    min-height: calc(100svh - var(--reserveinfo-nav-clearance));
+  }
+}
+
+.reserveinfo-hero {
+  position: relative;
+  box-sizing: border-box;
+  background: var(--stone-400);
+  color: var(--color-text-on-dark);
+  padding: clamp(var(--space-32), 6vw, var(--space-80))
+    clamp(var(--layout-margin-side-mobile), 5vw, var(--space-64))
+    clamp(var(--space-48), 8vh, var(--space-80));
+  display: flex;
+  flex-direction: column;
+  min-height: min(100%, 42svh);
+}
+
+@media (min-width: 900px) {
+  .reserveinfo-hero {
+    min-height: calc(100svh - var(--reserveinfo-nav-clearance));
+    padding-right: clamp(var(--space-48), 6vw, var(--space-80));
+  }
+}
+
+.reserveinfo-hero__gold-rule {
+  display: block;
+  width: 2.5rem;
+  height: 1px;
+  background: var(--gold-500);
+  margin-bottom: var(--space-32);
+}
+
+.reserveinfo-hero__copy {
+  margin-top: auto;
+  align-self: flex-start;
+  max-width: 28rem;
+}
+
+.reserveinfo-hero__rail {
+  position: absolute;
+  top: 50%;
+  right: clamp(var(--space-16), 2.5vw, var(--space-32));
+  margin: 0;
+  padding: 0;
+  font-family: var(--font-family-nav-en);
+  font-size: 0.65rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--stone-50) 85%, transparent);
+  writing-mode: vertical-rl;
+  transform: translateY(-50%) rotate(180deg);
+  user-select: none;
+}
+
+@media (max-width: 899px) {
+  .reserveinfo-hero__rail {
+    display: none;
+  }
+}
+
+/* design.md §2 — Navigation (EN): OptimaNova, uppercase */
+.reserveinfo-type-en-nav {
+  margin: 0 0 var(--space-16);
+  font-family: var(--font-family-nav-en);
+  font-size: 0.7rem;
+  font-weight: 400;
+  letter-spacing: var(--letter-spacing-nav);
+  text-transform: uppercase;
+  line-height: var(--line-height-heading);
+  color: color-mix(in srgb, var(--stone-50) 85%, var(--stone-50));
+}
+
+/* design.md §2 — Korean headline: AstaSans, line-height-heading */
+.reserveinfo-type-kr-display {
+  margin: 0 0 var(--space-24);
+  font-family: var(--font-family-body-kr);
+  font-size: clamp(1.65rem, 4.2vw, 2.35rem);
+  font-weight: 350;
+  line-height: var(--line-height-heading);
+  letter-spacing: -0.02em;
+  color: var(--stone-50);
+}
+
+/* design.md §2 — General English display (hero line on EN page) */
+.reserveinfo-type-en-display {
+  margin: 0 0 var(--space-24);
+  font-family: var(--font-family-body-en);
+  font-size: clamp(1.45rem, 3.6vw, 2rem);
+  font-weight: 400;
+  line-height: var(--line-height-heading);
+  letter-spacing: 0.02em;
+  color: var(--stone-50);
+}
+
+/* design.md §2 — Korean body + §4 line-height 1.6 */
+.reserveinfo-type-kr-body {
+  margin: 0 0 var(--space-16);
+  font-family: var(--font-family-body-kr);
+  font-size: var(--font-size-feature-body-md);
+  font-weight: 350;
+  line-height: var(--line-height-body);
+  color: color-mix(in srgb, var(--stone-50) 92%, var(--stone-400));
+}
+
+.reserveinfo-type-kr-body-muted {
+  margin: 0;
+  font-family: var(--font-family-body-kr);
+  font-size: var(--font-size-feature-body-sm);
+  font-weight: 350;
+  line-height: var(--line-height-body);
+  color: color-mix(in srgb, var(--stone-400) 55%, var(--stone-50));
+}
+
+.reserveinfo-type-en-body {
+  margin: 0 0 var(--space-16);
+  font-family: var(--font-family-body-en);
+  font-size: var(--font-size-feature-body-md);
+  line-height: var(--line-height-body);
+  color: color-mix(in srgb, var(--stone-50) 92%, var(--stone-400));
+}
+
+.reserveinfo-type-en-body-muted {
+  margin: 0;
+  font-family: var(--font-family-body-en);
+  font-size: var(--font-size-feature-body-sm);
+  line-height: var(--line-height-body);
+  color: color-mix(in srgb, var(--stone-400) 55%, var(--stone-50));
+}
+
+.reserveinfo-panel {
+  position: relative;
+  box-sizing: border-box;
+  background: var(--color-surface-page);
+  padding: clamp(var(--space-32), 5vw, var(--space-64))
+    clamp(var(--layout-margin-side-mobile), 5vw, var(--space-64))
+    var(--space-48);
+}
+
+@media (min-width: 900px) {
+  .reserveinfo-panel {
+    min-height: calc(100svh - var(--reserveinfo-nav-clearance));
+    padding-top: clamp(var(--space-48), 6vh, var(--space-80));
+  }
+}
+
+.reserveinfo-panel__corner-bracket {
+  position: absolute;
+  top: clamp(var(--space-24), 4vh, var(--space-48));
+  right: clamp(var(--space-16), 3vw, var(--space-32));
+  width: 1.25rem;
+  height: 1.25rem;
+  border-top: 1px solid var(--gold-500);
+  border-right: 1px solid var(--gold-500);
+  pointer-events: none;
+}
+
+.reserveinfo-type-panel-eyebrow {
+  margin: 0 0 var(--space-8);
+  font-family: var(--font-family-nav-en);
+  font-size: 0.7rem;
+  letter-spacing: var(--letter-spacing-nav);
+  text-transform: uppercase;
+  line-height: var(--line-height-heading);
+  color: var(--gold-500);
+}
+
+.reserveinfo-type-panel-title {
+  margin: 0 0 var(--space-16);
+  font-family: var(--font-family-body-kr);
+  font-size: clamp(1.35rem, 2.8vw, 1.75rem);
+  font-weight: 500;
+  line-height: var(--line-height-heading);
+  color: var(--stone-800);
+}
+
+.lang-en .reserveinfo-type-panel-title {
+  font-family: var(--font-family-body-en);
+}
+
+.reserveinfo-type-panel-lead {
+  margin: 0 0 var(--space-32);
+  max-width: 26rem;
+  font-family: var(--font-family-body-kr);
+  font-size: var(--font-size-feature-body-sm);
+  line-height: var(--line-height-body);
+  color: var(--stone-400);
+}
+
+.lang-en .reserveinfo-type-panel-lead {
+  font-family: var(--font-family-body-en);
+}
+
+.reserveinfo-order-hint {
+  margin: -0.35rem 0 var(--space-16);
+  padding-left: 0.7rem;
+  font-family: var(--font-family-body-kr);
+  font-size: 0.78rem;
+  line-height: var(--line-height-body);
+  color: var(--stone-400);
+}
+
+.lang-en .reserveinfo-order-hint {
+  font-family: var(--font-family-body-en);
+}
+
+.reserveinfo-form {
+  margin-top: 0;
+  width: 100%;
+  max-width: 100%;
+  margin-left: 0;
+  margin-right: 0;
 }
 
 .reserveinfo-form .confirm-label {
   width: 100%;
-  max-width: 560px;
-  margin-left: auto;
-  margin-right: auto;
+  max-width: 100%;
+  margin-left: 0;
+  margin-right: 0;
+  color: var(--stone-800);
 }
 
 .reserveinfo-form .confirm-label input {
   width: 100%;
+  border-radius: var(--radius-soft);
+  border-bottom-color: var(--stone-200);
+}
+
+.reserveinfo-form .confirm-label input:focus,
+.reserveinfo-form .confirm-label input:focus-visible {
+  border-bottom-color: var(--color-focus-ring);
 }
 
 .reserveinfo-form .confirm-actions {
-  margin-top: 1.2rem;
-  margin-bottom: 2rem;
+  margin-top: var(--space-32);
+  margin-bottom: var(--space-24);
   padding-top: 0;
   display: flex;
-  justify-content: center;
+  justify-content: stretch;
 }
 
 .reserveinfo-form .confirm-pay-submit {
-  width: auto;
-  min-width: 9rem;
-  padding: 0.7rem 1.4rem;
-  font-size: 0.98rem;
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+  padding: 0.9rem 1.25rem;
+  font-size: var(--font-size-feature-body-md);
+  border-radius: var(--btn-primary-radius);
+}
+
+/* design.md §3 — stone-800 / stone-900; gold-500 sweep on hover */
+.reserveinfo-form .reserveinfo-submit-btn.confirm-pay-submit.btn.reserve-btn {
+  background-color: var(--stone-800);
+  background-image: none;
+  color: var(--stone-50);
+  border: none;
+  position: relative;
+  isolation: isolate;
+}
+
+.reserveinfo-form
+  .reserveinfo-submit-btn.confirm-pay-submit.btn.reserve-btn::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 2px;
+  background: var(--gold-500);
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 0.42s cubic-bezier(0.22, 1, 0.36, 1);
+  z-index: 1;
+  pointer-events: none;
+}
+
+.reserveinfo-form
+  .reserveinfo-submit-btn.confirm-pay-submit.btn.reserve-btn:hover::after,
+.reserveinfo-form
+  .reserveinfo-submit-btn.confirm-pay-submit.btn.reserve-btn:focus-visible::after {
+  transform: scaleX(1);
+}
+
+.reserveinfo-form
+  .reserveinfo-submit-btn.confirm-pay-submit.btn.reserve-btn:hover,
+.reserveinfo-form
+  .reserveinfo-submit-btn.confirm-pay-submit.btn.reserve-btn:focus-visible {
+  animation: none;
+  background-color: var(--stone-900);
+  color: var(--stone-50);
+}
+
+.reserveinfo-form
+  .reserveinfo-submit-btn.confirm-pay-submit.btn.reserve-btn:active {
+  animation: none;
+  background-color: var(--stone-900);
+  color: var(--stone-50);
 }
 
 .reserveinfo-bottom-actions {

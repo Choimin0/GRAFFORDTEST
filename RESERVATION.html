@@ -111,28 +111,37 @@
           <div class="reservation-split">
             <div class="reservation-gallery">
               <div class="gallery-main-wrap">
-                <button
-                  type="button"
-                  class="gallery-nav gallery-prev"
-                  id="gallery-prev"
-                  aria-label="Previous photo"
-                >
-                  &#10094;
-                </button>
-                <img
-                  class="gallery-main-img"
-                  id="gallery-main-img"
-                  src="images/A00.jpg"
-                  alt="Room photo"
-                />
-                <button
-                  type="button"
-                  class="gallery-nav gallery-next"
-                  id="gallery-next"
-                  aria-label="Next photo"
-                >
-                  &#10095;
-                </button>
+                <div class="gallery-image-frame">
+                  <button
+                    type="button"
+                    class="gallery-nav gallery-prev"
+                    id="gallery-prev"
+                    aria-label="Previous photo"
+                  >
+                    &#10094;
+                  </button>
+                  <img
+                    class="gallery-main-img"
+                    id="gallery-main-img"
+                    src="images/A00.jpg"
+                    alt="Room photo"
+                  />
+                  <div class="gallery-image-overlay" aria-hidden="true">
+                    <div class="gallery-overlay-left">
+                      <span class="gallery-room-label">G1</span>
+                      <span class="gallery-room-tagline">바다 전망 · 53㎡</span>
+                    </div>
+                    <div class="gallery-photo-index">1 / 3</div>
+                  </div>
+                  <button
+                    type="button"
+                    class="gallery-nav gallery-next"
+                    id="gallery-next"
+                    aria-label="Next photo"
+                  >
+                    &#10095;
+                  </button>
+                </div>
                 <div class="gallery-thumbs" id="gallery-thumbs"></div>
               </div>
               <div class="room-copy-blocks">
@@ -505,8 +514,10 @@
             </div>
 
             <div class="reservation-calendar-panel">
-              <div class="booking-calendar" id="booking-calendar">
+              <div class="booking-calendar-head">
                 <h3 class="cal-year-title" id="cal-year-label"></h3>
+              </div>
+              <div class="booking-calendar" id="booking-calendar">
                 <div class="cal-header">
                   <button
                     type="button"
@@ -527,11 +538,44 @@
                   </button>
                 </div>
                 <div class="cal-weekdays">
-                  <span>Sun</span><span>Mon</span><span>Tue</span
-                  ><span>Wed</span><span>Thu</span><span>Fri</span
-                  ><span>Sat</span>
+                  <span>일</span><span>월</span><span>화</span><span>수</span
+                  ><span>목</span><span>금</span><span>토</span>
                 </div>
                 <div class="cal-grid" id="cal-grid"></div>
+              </div>
+              <div class="cal-legend" aria-hidden="true">
+                <span class="cal-legend__item"
+                  ><i class="cal-legend__swatch cal-legend__swatch--picked"></i
+                  >선택</span
+                >
+                <span class="cal-legend__item"
+                  ><i class="cal-legend__swatch cal-legend__swatch--range"></i
+                  >선택 범위</span
+                >
+                <span class="cal-legend__item"
+                  ><i class="cal-legend__swatch cal-legend__swatch--sold"></i
+                  >매진</span
+                >
+              </div>
+              <div class="reservation-stay-summary">
+                <div class="reservation-date-box">
+                  <span class="reservation-date-box__label">CHECK-IN</span>
+                  <p class="reservation-date-box__date js-cal-checkin-date">
+                    —
+                  </p>
+                  <p class="reservation-date-box__dow js-cal-checkin-dow"></p>
+                </div>
+                <div class="reservation-date-box">
+                  <span class="reservation-date-box__label">CHECK-OUT</span>
+                  <p class="reservation-date-box__date js-cal-checkout-date">
+                    —
+                  </p>
+                  <p class="reservation-date-box__dow js-cal-checkout-dow"></p>
+                  <p
+                    class="reservation-date-box__nights js-cal-stay-nights"
+                    hidden
+                  ></p>
+                </div>
               </div>
 
               <div class="reservation-extra-block">
@@ -567,27 +611,125 @@
                 <p class="reservation-extra-hint" id="extra-guests-hint"></p>
               </div>
               <div
+                class="reservation-discount-cards"
+                role="region"
+                aria-label="할인 적용 안내"
+              >
+                <article
+                  class="reservation-discount-card reservation-discount-card--promo reservation-discount-card--on"
+                >
+                  <div
+                    class="reservation-discount-card__icon"
+                    aria-hidden="true"
+                  >
+                    <svg
+                      class="reservation-discount-card__svg"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        d="M12 2H2v10l9.29 9.29c.94.94 2.48.94 3.42 0l6.58-6.58c.94-.94.94-2.48 0-3.42L12 2Z"
+                        stroke="currentColor"
+                        stroke-width="1.5"
+                        stroke-linejoin="round"
+                      />
+                      <circle cx="7" cy="7" r="1" fill="currentColor" />
+                    </svg>
+                  </div>
+                  <div class="reservation-discount-card__text">
+                    <h4 class="reservation-discount-card__title">프로모션</h4>
+                    <p class="reservation-discount-card__desc">
+                      6/1 ~ 6/30 예약 시
+                    </p>
+                  </div>
+                  <div class="reservation-discount-card__meta">
+                    <span
+                      class="reservation-discount-card__rate js-res-promo-rate"
+                      >—</span
+                    >
+                    <span class="reservation-discount-card__pill">적용 중</span>
+                  </div>
+                </article>
+                <article
+                  class="reservation-discount-card reservation-discount-card--consecutive js-res-consecutive-card"
+                >
+                  <div
+                    class="reservation-discount-card__icon"
+                    aria-hidden="true"
+                  >
+                    <svg
+                      class="reservation-discount-card__svg"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"
+                        stroke="currentColor"
+                        stroke-width="1.5"
+                        stroke-linejoin="round"
+                      />
+                    </svg>
+                  </div>
+                  <div class="reservation-discount-card__text">
+                    <h4 class="reservation-discount-card__title">연박 할인</h4>
+                    <p
+                      class="reservation-discount-card__desc js-res-consecutive-desc"
+                    ></p>
+                  </div>
+                  <div class="reservation-discount-card__meta">
+                    <span
+                      class="reservation-discount-card__rate reservation-discount-card__rate--won"
+                      ><span class="js-res-consecutive-rate">—</span
+                      ><span class="js-res-consecutive-unit">원</span></span
+                    >
+                    <span
+                      class="reservation-discount-card__pill reservation-discount-card__pill--muted js-res-consecutive-badge"
+                      >2박 이상</span
+                    >
+                  </div>
+                </article>
+              </div>
+              <div
                 class="reservation-price-summary"
                 id="reservation-price-summary"
               >
-                <p
-                  class="reservation-price-placeholder"
-                  id="reservation-price-placeholder"
-                >
-                  TOTAL 0원
-                </p>
-                <p
-                  class="reservation-price-total"
-                  id="reservation-price-total"
-                  hidden
-                ></p>
+                <div class="reservation-price-total-row">
+                  <span class="reservation-price-total-left js-res-price-left"
+                    >TOTAL · 0박</span
+                  >
+                  <span
+                    class="reservation-price-total-amount js-res-price-amount"
+                    >—</span
+                  >
+                </div>
               </div>
               <a
                 href="confirm.html"
-                class="btn reserve-btn reserve-cta"
+                class="btn reserve-btn reserve-cta reserve-cta--primary reserve-cta--hover-roll"
                 id="reserve-confirm-link"
-                >예약하기</a
+                aria-label="예약 확인 단계로 이동"
               >
+                <span class="reserve-cta__roller" aria-hidden="true">
+                  <span class="reserve-cta__pane reserve-cta__pane--default"
+                    >예약하기 -></span
+                  >
+                  <span class="reserve-cta__pane reserve-cta__pane--hover"
+                    >Reserve -></span
+                  >
+                </span>
+              </a>
+              <button
+                type="button"
+                class="btn reservation-inquiry-btn"
+                data-inquiry-href=""
+              >
+                문의하기
+              </button>
+              <p class="reservation-cta-footnote">
+                선택 후 예약 확정 페이지로 이동합니다
+              </p>
             </div>
           </div>
         </div>
@@ -609,6 +751,7 @@
           });
 
           function initReservationScope(scope) {
+            var isEnScope = scope.classList.contains("lang-en");
             var scrollButton = scope.querySelector(".scroll-down-btn");
             var nextSection = scope.querySelector("main.content-section");
             var fadeEl = scope.querySelector(
@@ -622,6 +765,13 @@
               G4: ["images/D00.jpg", "images/D01.jpg", "images/D02.jpg"],
             };
 
+            var galleryTaglines = {
+              G1: isEnScope ? "Warm sunlight · 53㎡" : "남향 햇살 · 53㎡",
+              G2: isEnScope ? "Wide courtyard · 53㎡" : "넓은 정원 · 53㎡",
+              G3: isEnScope ? "Space efficiency · 66㎡" : "공간 효율 · 66㎡",
+              G4: isEnScope ? "Courtyard · 92㎡" : "넓은 중정 · 92㎡",
+            };
+
             var currentRoom = "G1";
             var galleryIndex = 0;
             var galleryFadeMs = 650;
@@ -630,6 +780,13 @@
             var thumbsEl = scope.querySelector(".gallery-thumbs");
             var btnPrev = scope.querySelector(".gallery-prev");
             var btnNext = scope.querySelector(".gallery-next");
+            var galleryRoomLabelEl = scope.querySelector(".gallery-room-label");
+            var galleryRoomTaglineEl = scope.querySelector(
+              ".gallery-room-tagline",
+            );
+            var galleryPhotoIndexEl = scope.querySelector(
+              ".gallery-photo-index",
+            );
             var typeButtons = scope.querySelectorAll(".room-type-btn");
             var confirmLink = scope.querySelector(".reserve-cta");
             var roomCopies = scope.querySelectorAll(".room-copy");
@@ -642,8 +799,11 @@
               ".cal-nav[aria-label*='Previous']",
             );
             var calNext = scope.querySelector(".cal-nav[aria-label*='Next']");
-            var calCheckinEl = scope.querySelector("#cal-checkin");
-            var calCheckoutEl = scope.querySelector("#cal-checkout");
+            var calCheckinEl = scope.querySelector(".js-cal-checkin-date");
+            var calCheckinDowEl = scope.querySelector(".js-cal-checkin-dow");
+            var calCheckoutEl = scope.querySelector(".js-cal-checkout-date");
+            var calCheckoutDowEl = scope.querySelector(".js-cal-checkout-dow");
+            var calStayNightsEl = scope.querySelector(".js-cal-stay-nights");
             var availabilityEl = scope.querySelector("#availability-note");
             var P = window.GraffordBookingPricing;
             var roomRatesLoaded = false;
@@ -665,10 +825,22 @@
             var weekdayDisplay = scope.querySelector(
               "#reservation-weekday-display",
             );
-            var pricePlaceholder = scope.querySelector(
-              ".reservation-price-placeholder",
+            var resPriceLeftEl = scope.querySelector(".js-res-price-left");
+            var resPriceAmountEl = scope.querySelector(".js-res-price-amount");
+            var inquiryBtn = scope.querySelector(".reservation-inquiry-btn");
+            var promoRateEl = scope.querySelector(".js-res-promo-rate");
+            var consecutiveCardEl = scope.querySelector(
+              ".js-res-consecutive-card",
             );
-            var priceTotalEl = scope.querySelector(".reservation-price-total");
+            var consecutiveDescEl = scope.querySelector(
+              ".js-res-consecutive-desc",
+            );
+            var consecutiveRateEl = scope.querySelector(
+              ".js-res-consecutive-rate",
+            );
+            var consecutiveBadgeEl = scope.querySelector(
+              ".js-res-consecutive-badge",
+            );
             if (
               !mainImg ||
               !thumbsEl ||
@@ -818,7 +990,10 @@
 
             function roomRateApiUrl() {
               var base = "";
-              if (typeof window !== "undefined" && window.__GRAFFORD_API_BASE__) {
+              if (
+                typeof window !== "undefined" &&
+                window.__GRAFFORD_API_BASE__
+              ) {
                 base = String(window.__GRAFFORD_API_BASE__).replace(/\/$/, "");
               }
               return base + "/api/room-rate";
@@ -843,10 +1018,18 @@
 
             function applyRoomRates(rates, charges) {
               if (!P) return;
-              if (rates && typeof rates === "object" && typeof P.setRoomWeekdayBase === "function") {
+              if (
+                rates &&
+                typeof rates === "object" &&
+                typeof P.setRoomWeekdayBase === "function"
+              ) {
                 P.setRoomWeekdayBase(rates);
               }
-              if (charges && typeof charges === "object" && typeof P.setCharges === "function") {
+              if (
+                charges &&
+                typeof charges === "object" &&
+                typeof P.setCharges === "function"
+              ) {
                 P.setCharges(charges);
               }
             }
@@ -984,8 +1167,140 @@
               );
             }
 
+            function formatReservationDateLine(d) {
+              if (!d) return "—";
+              if (isEnScope) {
+                return d.toLocaleDateString("en-US", {
+                  month: "long",
+                  day: "numeric",
+                  year: "numeric",
+                });
+              }
+              return d.getMonth() + 1 + "월 " + d.getDate() + "일";
+            }
+
+            function formatDowLine(d) {
+              if (!d) return "";
+              return d.toLocaleDateString(isEnScope ? "en-US" : "ko-KR", {
+                weekday: "long",
+              });
+            }
+
             function formatKRW(n) {
               return n.toLocaleString("ko-KR") + "원";
+            }
+
+            function formatMoneyTotal(n) {
+              if (isEnScope) {
+                return n.toLocaleString("en-US") + " KRW";
+              }
+              return formatKRW(n);
+            }
+
+            function syncDateSummary() {
+              if (calCheckinEl) {
+                calCheckinEl.textContent = formatReservationDateLine(checkIn);
+              }
+              if (calCheckinDowEl) {
+                calCheckinDowEl.textContent = checkIn
+                  ? formatDowLine(checkIn)
+                  : "";
+              }
+              if (calCheckoutEl) {
+                calCheckoutEl.textContent = checkOut
+                  ? formatReservationDateLine(checkOut)
+                  : "—";
+              }
+              if (calCheckoutDowEl) {
+                calCheckoutDowEl.textContent = checkOut
+                  ? formatDowLine(checkOut)
+                  : "";
+              }
+              if (calStayNightsEl && P && typeof P.countNights === "function") {
+                var ci = checkIn ? formatYMD(checkIn) : "";
+                var co = checkOut ? formatYMD(checkOut) : "";
+                var n = ci && co ? P.countNights(ci, co) : 0;
+                if (n > 0) {
+                  calStayNightsEl.hidden = false;
+                  calStayNightsEl.textContent = isEnScope
+                    ? n + (n === 1 ? " night" : " nights")
+                    : n + "박";
+                } else {
+                  calStayNightsEl.hidden = true;
+                  calStayNightsEl.textContent = "";
+                }
+              }
+            }
+
+            function updateDiscountCards() {
+              var pricing = window.GraffordBookingPricing;
+              if (promoRateEl) {
+                var pct = pricing
+                  ? Math.max(
+                      0,
+                      Math.floor(Number(pricing.PROMOTION_PERCENT || 0)),
+                    )
+                  : 0;
+                if (pct > 0) {
+                  promoRateEl.textContent = "−" + pct + "%";
+                } else {
+                  promoRateEl.textContent = isEnScope ? "On" : "-10%";
+                }
+              }
+              var nights = 0;
+              if (
+                checkIn &&
+                checkOut &&
+                pricing &&
+                typeof pricing.countNights === "function"
+              ) {
+                nights = pricing.countNights(
+                  formatYMD(checkIn),
+                  formatYMD(checkOut),
+                );
+              }
+              var stayOn = nights >= 2;
+              var perNight = pricing
+                ? Math.max(
+                    0,
+                    Math.floor(Number(pricing.CONSECUTIVE_SALE_PER_NIGHT || 0)),
+                  )
+                : 20000;
+              if (!perNight) {
+                perNight = 20000;
+              }
+              if (consecutiveCardEl) {
+                consecutiveCardEl.classList.toggle(
+                  "reservation-discount-card--on",
+                  stayOn,
+                );
+              }
+              if (consecutiveDescEl) {
+                consecutiveDescEl.textContent = isEnScope
+                  ? "For stays of 2 nights or more: −" +
+                    perNight.toLocaleString("en-US") +
+                    " KRW per night."
+                  : "2박 이상 시 1박 당 −" +
+                    perNight.toLocaleString("ko-KR") +
+                    "원";
+              }
+              if (consecutiveRateEl) {
+                consecutiveRateEl.textContent =
+                  "−" + perNight.toLocaleString(isEnScope ? "en-US" : "ko-KR");
+              }
+              if (consecutiveBadgeEl) {
+                consecutiveBadgeEl.textContent = stayOn
+                  ? isEnScope
+                    ? "Applied"
+                    : "적용 중"
+                  : isEnScope
+                    ? "2+ nights"
+                    : "2박 이상";
+                consecutiveBadgeEl.classList.toggle(
+                  "reservation-discount-card__pill--muted",
+                  !stayOn,
+                );
+              }
             }
 
             function isSameMonth(a, b) {
@@ -1016,7 +1331,6 @@
               }
               var targetKey = toDateKey(toStartOfDay(dateObj));
               var limitKey = checkoutMode ? maxCheckOutKey : maxCheckInKey;
-              console.log("targetKey", targetKey);
               return targetKey > limitKey;
             }
 
@@ -1113,27 +1427,33 @@
             }
 
             function updatePricingSummary() {
+              updateDiscountCards();
               updateConfirmCtaState();
-              if (!P || !pricePlaceholder || !priceTotalEl) {
+              if (!P) {
                 return;
               }
               var ci = checkIn ? formatYMD(checkIn) : "";
               var co = checkOut ? formatYMD(checkOut) : "";
+              if (!resPriceLeftEl || !resPriceAmountEl) {
+                return;
+              }
               if (!checkIn || !checkOut || !P.countNights(ci, co)) {
-                pricePlaceholder.hidden = false;
-                priceTotalEl.hidden = true;
-                priceTotalEl.textContent = "";
+                resPriceLeftEl.textContent = isEnScope
+                  ? "TOTAL · 0 nights"
+                  : "TOTAL · 0박";
+                resPriceAmountEl.textContent = "—";
                 return;
               }
               var eg = P.clampExtra(currentRoom, getExtraGuests());
               setExtraGuests(eg);
               var q = P.computeStay(currentRoom, ci, co, eg);
-              pricePlaceholder.hidden = true;
-              priceTotalEl.hidden = false;
-              priceTotalEl.textContent =
-                "TOTAL " +
-                q.discountedGrandTotal.toLocaleString("ko-KR") +
-                "원";
+              var nights = q.nights || 0;
+              resPriceLeftEl.textContent = isEnScope
+                ? "TOTAL · " + nights + (nights === 1 ? " night" : " nights")
+                : "TOTAL · " + nights + "박";
+              resPriceAmountEl.textContent = formatMoneyTotal(
+                q.discountedGrandTotal,
+              );
             }
 
             function hasValidStaySelection() {
@@ -1186,6 +1506,15 @@
               });
             }
 
+            if (inquiryBtn) {
+              inquiryBtn.addEventListener("click", function () {
+                var href = inquiryBtn.getAttribute("data-inquiry-href");
+                if (href && String(href).trim() !== "") {
+                  window.location.href = href;
+                }
+              });
+            }
+
             function syncRoomCopy() {
               roomCopies.forEach(function (el) {
                 var r = el.getAttribute("data-room");
@@ -1199,6 +1528,25 @@
               });
             }
 
+            function updateGalleryOverlay() {
+              if (galleryRoomLabelEl) {
+                galleryRoomLabelEl.textContent = currentRoom;
+              }
+              if (galleryRoomTaglineEl) {
+                galleryRoomTaglineEl.textContent =
+                  galleryTaglines[currentRoom] || "";
+              }
+              var list = roomImages[currentRoom] || [];
+              if (galleryPhotoIndexEl) {
+                if (!list.length) {
+                  galleryPhotoIndexEl.textContent = "";
+                } else {
+                  galleryPhotoIndexEl.textContent =
+                    galleryIndex + 1 + " / " + list.length;
+                }
+              }
+            }
+
             function renderGallery() {
               var imgs = roomImages[currentRoom] || [];
               var label = "Room " + currentRoom;
@@ -1206,6 +1554,7 @@
                 mainImg.removeAttribute("src");
                 mainImg.alt = "No photos";
                 thumbsEl.innerHTML = "";
+                updateGalleryOverlay();
                 return;
               }
               galleryIndex = Math.min(galleryIndex, imgs.length - 1);
@@ -1226,6 +1575,7 @@
                 });
                 thumbsEl.appendChild(b);
               });
+              updateGalleryOverlay();
               mainImg.classList.add("is-switching");
               window.setTimeout(function () {
                 mainImg.src = imgs[galleryIndex];
@@ -1254,15 +1604,11 @@
               galleryIndex = 0;
               checkIn = null;
               checkOut = null;
-              if (calCheckinEl) {
-                calCheckinEl.textContent = "—";
-              }
-              if (calCheckoutEl) {
-                calCheckoutEl.textContent = "—";
-              }
+              syncDateSummary();
               if (availabilityEl) {
-                availabilityEl.textContent =
-                  "Select check-in and check-out to see availability for this room.";
+                availabilityEl.textContent = isEnScope
+                  ? "Select check-in and check-out to see availability for this room."
+                  : "체크인·체크아웃을 선택하면 해당 객실 예약 가능 여부를 안내합니다.";
                 availabilityEl.classList.remove("is-ok");
               }
               typeButtons.forEach(function (btn) {
@@ -1430,7 +1776,7 @@
                 "DECEMBER",
               ];
               if (calYearLabel) {
-                calYearLabel.textContent = y + "년";
+                calYearLabel.textContent = isEnScope ? String(y) : y;
               }
               if (calMonthLabel) {
                 calMonthLabel.textContent = monthNames[m];
@@ -1529,6 +1875,18 @@
                   btn.classList.add("cal-range");
                 }
 
+                if (sameDay(cellDate, todayDateOnly)) {
+                  btn.classList.add("cal-today");
+                }
+                if (
+                  disabled &&
+                  disabledReason === "occupied-night" &&
+                  !isPast
+                ) {
+                  btn.textContent = "\u2013";
+                  btn.classList.add("cal-soldout");
+                }
+
                 (function (dateCopy, btnEl) {
                   btnEl.addEventListener("click", function () {
                     if (btnEl.disabled) return;
@@ -1562,14 +1920,7 @@
                         checkOut = new Date(dateCopy);
                       }
                     }
-                    if (calCheckinEl) {
-                      calCheckinEl.textContent = formatDisplay(checkIn);
-                    }
-                    if (calCheckoutEl) {
-                      calCheckoutEl.textContent = checkOut
-                        ? formatDisplay(checkOut)
-                        : "—";
-                    }
+                    syncDateSummary();
 
                     if (availabilityEl) {
                       if (checkIn && checkOut) {
@@ -1742,25 +2093,34 @@
           <div class="reservation-split">
             <div class="reservation-gallery">
               <div class="gallery-main-wrap">
-                <button
-                  type="button"
-                  class="gallery-nav gallery-prev"
-                  aria-label="Previous photo"
-                >
-                  ＜
-                </button>
-                <img
-                  class="gallery-main-img"
-                  src="images/A00.jpg"
-                  alt="Room photo"
-                />
-                <button
-                  type="button"
-                  class="gallery-nav gallery-next"
-                  aria-label="Next photo"
-                >
-                  ＞
-                </button>
+                <div class="gallery-image-frame">
+                  <button
+                    type="button"
+                    class="gallery-nav gallery-prev"
+                    aria-label="Previous photo"
+                  >
+                    ＜
+                  </button>
+                  <img
+                    class="gallery-main-img"
+                    src="images/A00.jpg"
+                    alt="Room photo"
+                  />
+                  <div class="gallery-image-overlay" aria-hidden="true">
+                    <div class="gallery-overlay-left">
+                      <span class="gallery-room-label">G1</span>
+                      <span class="gallery-room-tagline">Sea view · 53㎡</span>
+                    </div>
+                    <div class="gallery-photo-index">1 / 3</div>
+                  </div>
+                  <button
+                    type="button"
+                    class="gallery-nav gallery-next"
+                    aria-label="Next photo"
+                  >
+                    ＞
+                  </button>
+                </div>
                 <div class="gallery-thumbs"></div>
               </div>
               <div class="room-copy-blocks">
@@ -2134,8 +2494,11 @@
             </div>
 
             <div class="reservation-calendar-panel">
-              <div class="booking-calendar">
+              <div class="booking-calendar-head">
+                <span class="cal-picker-title">Select dates</span>
                 <h3 class="cal-year-title"></h3>
+              </div>
+              <div class="booking-calendar">
                 <div class="cal-header">
                   <button
                     type="button"
@@ -2155,6 +2518,40 @@
                   ><span>Sat</span>
                 </div>
                 <div class="cal-grid"></div>
+              </div>
+              <div class="cal-legend" aria-hidden="true">
+                <span class="cal-legend__item"
+                  ><i class="cal-legend__swatch cal-legend__swatch--picked"></i
+                  >Selected</span
+                >
+                <span class="cal-legend__item"
+                  ><i class="cal-legend__swatch cal-legend__swatch--range"></i
+                  >Range</span
+                >
+                <span class="cal-legend__item"
+                  ><i class="cal-legend__swatch cal-legend__swatch--sold"></i
+                  >Sold out</span
+                >
+              </div>
+              <div class="reservation-stay-summary">
+                <div class="reservation-date-box">
+                  <span class="reservation-date-box__label">CHECK-IN</span>
+                  <p class="reservation-date-box__date js-cal-checkin-date">
+                    —
+                  </p>
+                  <p class="reservation-date-box__dow js-cal-checkin-dow"></p>
+                </div>
+                <div class="reservation-date-box">
+                  <span class="reservation-date-box__label">CHECK-OUT</span>
+                  <p class="reservation-date-box__date js-cal-checkout-date">
+                    —
+                  </p>
+                  <p class="reservation-date-box__dow js-cal-checkout-dow"></p>
+                  <p
+                    class="reservation-date-box__nights js-cal-stay-nights"
+                    hidden
+                  ></p>
+                </div>
               </div>
 
               <div class="reservation-extra-block">
@@ -2183,13 +2580,125 @@
                 </div>
                 <p class="reservation-extra-hint"></p>
               </div>
-              <div class="reservation-price-summary">
-                <p class="reservation-price-placeholder">TOTAL 0 KRW</p>
-                <p class="reservation-price-total" hidden></p>
+              <div
+                class="reservation-discount-cards"
+                role="region"
+                aria-label="Discounts"
+              >
+                <article
+                  class="reservation-discount-card reservation-discount-card--promo reservation-discount-card--on"
+                >
+                  <div
+                    class="reservation-discount-card__icon"
+                    aria-hidden="true"
+                  >
+                    <svg
+                      class="reservation-discount-card__svg"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        d="M12 2H2v10l9.29 9.29c.94.94 2.48.94 3.42 0l6.58-6.58c.94-.94.94-2.48 0-3.42L12 2Z"
+                        stroke="currentColor"
+                        stroke-width="1.5"
+                        stroke-linejoin="round"
+                      />
+                      <circle cx="7" cy="7" r="1" fill="currentColor" />
+                    </svg>
+                  </div>
+                  <div class="reservation-discount-card__text">
+                    <h4 class="reservation-discount-card__title">Promotion</h4>
+                    <p class="reservation-discount-card__desc">
+                      A room-rate discount applies automatically to all bookings
+                      made during the promotional period.
+                    </p>
+                  </div>
+                  <div class="reservation-discount-card__meta">
+                    <span
+                      class="reservation-discount-card__rate js-res-promo-rate"
+                      >—</span
+                    >
+                    <span class="reservation-discount-card__pill">Applied</span>
+                  </div>
+                </article>
+                <article
+                  class="reservation-discount-card reservation-discount-card--consecutive js-res-consecutive-card"
+                >
+                  <div
+                    class="reservation-discount-card__icon"
+                    aria-hidden="true"
+                  >
+                    <svg
+                      class="reservation-discount-card__svg"
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"
+                        stroke="currentColor"
+                        stroke-width="1.5"
+                        stroke-linejoin="round"
+                      />
+                    </svg>
+                  </div>
+                  <div class="reservation-discount-card__text">
+                    <h4 class="reservation-discount-card__title">
+                      Consecutive-night discount
+                    </h4>
+                    <p
+                      class="reservation-discount-card__desc js-res-consecutive-desc"
+                    ></p>
+                  </div>
+                  <div class="reservation-discount-card__meta">
+                    <span
+                      class="reservation-discount-card__rate reservation-discount-card__rate--won"
+                      ><span class="js-res-consecutive-rate">—</span
+                      ><span class="js-res-consecutive-unit"> KRW</span></span
+                    >
+                    <span
+                      class="reservation-discount-card__pill reservation-discount-card__pill--muted js-res-consecutive-badge"
+                      >2+ nights</span
+                    >
+                  </div>
+                </article>
               </div>
-              <a href="confirm.html" class="btn reserve-btn reserve-cta">
-                Reserve Now
+              <div class="reservation-price-summary">
+                <div class="reservation-price-total-row">
+                  <span class="reservation-price-total-left js-res-price-left"
+                    >TOTAL · 0 nights</span
+                  >
+                  <span
+                    class="reservation-price-total-amount js-res-price-amount"
+                    >—</span
+                  >
+                </div>
+              </div>
+              <a
+                href="confirm.html"
+                class="btn reserve-btn reserve-cta reserve-cta--primary reserve-cta--hover-roll"
+                aria-label="Continue to reservation confirmation"
+              >
+                <span class="reserve-cta__roller" aria-hidden="true">
+                  <span class="reserve-cta__pane reserve-cta__pane--default"
+                    >Reservation -></span
+                  >
+                  <span class="reserve-cta__pane reserve-cta__pane--hover"
+                    >Reserve -></span
+                  >
+                </span>
               </a>
+              <button
+                type="button"
+                class="btn reservation-inquiry-btn"
+                data-inquiry-href=""
+              >
+                Contact us
+              </button>
+              <p class="reservation-cta-footnote">
+                You will proceed to the confirmation page after selecting dates.
+              </p>
             </div>
           </div>
         </div>

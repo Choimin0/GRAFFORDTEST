@@ -58,47 +58,86 @@
     </nav>
     <div class="lang-kr">
       <main class="content-section confirm-page reserveinfo-page">
-        <h1 class="confirm-title">예약 조회</h1>
-        <p class="confirm-summary">
-          예약 시 입력하신 성함과 발급된 예약번호(주문번호)를 입력해 주세요.
-        </p>
+        <div class="reserveinfo-layout">
+          <aside class="reserveinfo-hero" aria-label="예약 조회 안내">
+            <span class="reserveinfo-hero__gold-rule" aria-hidden="true"></span>
+            <div class="reserveinfo-hero__copy">
+              <p class="reserveinfo-type-en-nav">RESERVATION LOOKUP</p>
+              <h1 class="reserveinfo-type-kr-display">예약을 확인합니다</h1>
+              <p class="reserveinfo-type-kr-body">
+                성함과 예약번호를 입력하시면 예약 내역을 안내해 드립니다.
+              </p>
+              <p class="reserveinfo-type-kr-body-muted">
+                문의사항은 카카오톡 채팅으로 연락 부탁드립니다.
+              </p>
+            </div>
+            <p class="reserveinfo-hero__rail" aria-hidden="true">
+              GROUND · AFFORD · JEJU
+            </p>
+          </aside>
 
-        <form
-          class="reserveinfo-form checkout-form"
-          id="reserveinfo-form"
-          novalidate
-        >
-          <label class="confirm-label">
-            성함
-            <input
-              type="text"
-              name="lookupName"
-              id="lookup-name"
-              required
-              autocomplete="name"
-              placeholder="예약 시 입력한 이름"
-            />
-          </label>
-          <label class="confirm-label">
-            예약번호
-            <input
-              type="text"
-              name="lookupOrder"
-              id="lookup-order"
-              required
-              autocomplete="off"
-              placeholder="예: 연월일8자리-XXXXXX"
-            />
-          </label>
-          <div class="confirm-actions">
-            <button type="submit" class="btn reserve-btn confirm-pay-submit">
-              조회하기
-            </button>
-          </div>
-        </form>
+          <section
+            class="reserveinfo-panel"
+            aria-labelledby="reserveinfo-panel-heading-kr"
+          >
+            <span
+              class="reserveinfo-panel__corner-bracket"
+              aria-hidden="true"
+            ></span>
+            <p class="reserveinfo-type-panel-eyebrow">RESERVATION</p>
+            <h2
+              class="reserveinfo-type-panel-title"
+              id="reserveinfo-panel-heading-kr"
+            >
+              예약 조회
+            </h2>
+            <p class="reserveinfo-type-panel-lead">
+              예약 시 입력하신 성함과 발급된 예약번호를 입력해 주세요.
+            </p>
+
+            <form
+              class="reserveinfo-form checkout-form"
+              id="reserveinfo-form"
+              novalidate
+            >
+              <label class="confirm-label">
+                성함
+                <input
+                  type="text"
+                  name="lookupName"
+                  id="lookup-name"
+                  required
+                  autocomplete="name"
+                  placeholder="예약 시 입력한 이름"
+                />
+              </label>
+              <label class="confirm-label">
+                예약번호
+                <input
+                  type="text"
+                  name="lookupOrder"
+                  id="lookup-order"
+                  required
+                  autocomplete="off"
+                  placeholder="연월일 8자리 - XXXXXX"
+                />
+              </label>
+              <p class="reserveinfo-order-hint">예 : 20260526-AB1234</p>
+              <div class="confirm-actions">
+                <button
+                  type="submit"
+                  class="btn reserve-btn confirm-pay-submit reserveinfo-submit-btn"
+                >
+                  조회하기 →
+                </button>
+              </div>
+            </form>
+          </section>
+        </div>
 
         <footer
           id="site-business-footer-mount"
+          data-site-business-footer-mount
           class="site-footer site-business-footer"
           hidden
         ></footer>
@@ -106,39 +145,82 @@
     </div>
     <div class="lang-en">
       <main class="content-section confirm-page reserveinfo-page">
-        <h1 class="confirm-title">View Reservation</h1>
-        <p class="confirm-summary">
-          Please enter the name and reservation number you used when making your
-          reservation.
-        </p>
+        <div class="reserveinfo-layout">
+          <aside class="reserveinfo-hero" aria-label="Reservation lookup intro">
+            <span class="reserveinfo-hero__gold-rule" aria-hidden="true"></span>
+            <div class="reserveinfo-hero__copy">
+              <p class="reserveinfo-type-en-nav">RESERVATION LOOKUP</p>
+              <h1 class="reserveinfo-type-en-display">Look up your stay</h1>
+              <p class="reserveinfo-type-en-body">
+                Enter the name and reservation number you used when booking, and
+                we will show your reservation details.
+              </p>
+              <p class="reserveinfo-type-en-body-muted">
+                If you need help, contact us using KakaoTalk.
+              </p>
+            </div>
+            <p class="reserveinfo-hero__rail" aria-hidden="true">
+              GROUND · AFFORD · JEJU
+            </p>
+          </aside>
 
-        <form class="reserveinfo-form checkout-form" novalidate>
-          <label class="confirm-label"
-            >Name<input
-              type="text"
-              name="lookupName"
-              required
-              autocomplete="name"
-              placeholder=""
-            />
-          </label>
-          <label class="confirm-label"
-            >Reservation Number<input
-              type="text"
-              name="lookupOrder"
-              required
-              autocomplete="off"
-              placeholder=""
-            />
-          </label>
-          <div class="confirm-actions">
-            <button type="submit" class="btn reserve-btn confirm-pay-submit">
-              Search
-            </button>
-          </div>
-        </form>
+          <section
+            class="reserveinfo-panel"
+            aria-labelledby="reserveinfo-panel-heading-en"
+          >
+            <span
+              class="reserveinfo-panel__corner-bracket"
+              aria-hidden="true"
+            ></span>
+            <p class="reserveinfo-type-panel-eyebrow">RESERVATION</p>
+            <h2
+              class="reserveinfo-type-panel-title"
+              id="reserveinfo-panel-heading-en"
+            >
+              View reservation
+            </h2>
+            <p class="reserveinfo-type-panel-lead">
+              Please enter the name and reservation number from your booking
+              confirmation.
+            </p>
 
-        <footer class="site-footer site-business-footer" hidden></footer>
+            <form class="reserveinfo-form checkout-form" novalidate>
+              <label class="confirm-label"
+                >Name<input
+                  type="text"
+                  name="lookupName"
+                  required
+                  autocomplete="name"
+                  placeholder="Name on the reservation"
+                />
+              </label>
+              <label class="confirm-label"
+                >Reservation number<input
+                  type="text"
+                  name="lookupOrder"
+                  required
+                  autocomplete="off"
+                  placeholder="YYYYMMDD - XXXXXX"
+                />
+              </label>
+              <p class="reserveinfo-order-hint">e.g. 20261231-AB1234</p>
+              <div class="confirm-actions">
+                <button
+                  type="submit"
+                  class="btn reserve-btn confirm-pay-submit reserveinfo-submit-btn"
+                >
+                  Search →
+                </button>
+              </div>
+            </form>
+          </section>
+        </div>
+
+        <footer
+          data-site-business-footer-mount
+          class="site-footer site-business-footer"
+          hidden
+        ></footer>
       </main>
     </div>
 
