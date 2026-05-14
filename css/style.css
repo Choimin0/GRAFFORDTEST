@@ -380,7 +380,7 @@ html {
   font: inherit;
   line-height: 1;
   padding: 0.06rem 0.12rem;
-  transition: color 0.2s ease;
+  transition: color 0.3s ease;
 }
 
 .lang-switch__btn.is-active {
@@ -390,6 +390,7 @@ html {
 .lang-switch__divider {
   color: var(--stone-400);
   line-height: 1;
+  transition: color 0.3s ease;
 }
 
 .lang-switch__btn:focus-visible {
@@ -481,7 +482,15 @@ body[data-site-language="en"] .lang-en .hero-slide:first-child {
   pointer-events: auto;
   transition:
     opacity 0.6s ease,
-    visibility 0.6s ease;
+    visibility 0.6s ease,
+    background-color 0.3s ease,
+    backdrop-filter 0.3s ease,
+    -webkit-backdrop-filter 0.3s ease;
+}
+
+.top-right-nav .desktop-nav-links a,
+.top-right-nav .mobile-menu-btn {
+  transition: color 0.3s ease;
 }
 
 .top-right-nav.nav-hero-hidden {
@@ -494,13 +503,37 @@ body[data-site-language="en"] .lang-en .hero-slide:first-child {
 .page-hero-nav-sync .top-right-nav {
   transition:
     opacity var(--hero-slide-fade) ease,
-    visibility var(--hero-slide-fade) ease;
+    visibility var(--hero-slide-fade) ease,
+    background-color 0.3s ease,
+    backdrop-filter 0.3s ease,
+    -webkit-backdrop-filter 0.3s ease;
 }
 
 .page-hero-nav-sync .top-right-nav.nav-hero-sync-hidden {
   opacity: 0;
   visibility: visible;
   pointer-events: none;
+}
+
+/* 히어로를 벗어나 콘텐츠 구간: stone 톤 글래스 + 메뉴 글자 (언어 토글은 히어로와 동일 규칙) */
+.top-right-nav.nav-in-content-section {
+  background-color: color-mix(in srgb, var(--stone-400) 66%, transparent);
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+.top-right-nav.nav-in-content-section .desktop-nav-links a,
+.top-right-nav.nav-in-content-section .mobile-menu-btn {
+  color: var(--stone-50);
+}
+
+.top-right-nav.nav-in-content-section .lang-switch__divider,
+.top-right-nav.nav-in-content-section .lang-switch__btn:not(.is-active) {
+  color: var(--stone-400);
+}
+
+.top-right-nav.nav-in-content-section .lang-switch__btn.is-active {
+  color: var(--stone-50);
 }
 
 main {
@@ -870,6 +903,65 @@ main {
   .features--index .feature-index-4 .feature-media {
     padding: 0;
     box-sizing: border-box;
+  }
+}
+
+/* index Location feature: 세로 액센트 + 주소 + VIEW ON MAP */
+.features--index .feature-index-4 .index-location-card {
+  margin: 0;
+  padding-left: clamp(1rem, 2.8vw, 1.35rem);
+  border-left: 2px solid var(--stone-400);
+}
+
+.features--index .feature-index-4 .index-location-card__line {
+  margin: 0;
+  font-family: var(--font-stack-body);
+  font-size: var(--font-size-feature-body-sm);
+  font-weight: 400;
+  line-height: 1.55;
+  color: var(--color-text-primary);
+  letter-spacing: -0.01em;
+}
+
+.features--index
+  .feature-index-4
+  .index-location-card__line
+  + .index-location-card__line {
+  margin-top: 0.2em;
+}
+
+.features--index .feature-index-4 .index-location-card__map-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  margin-top: 1.35rem;
+  font-family: var(--font-family-nav-en);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  text-decoration: none;
+  color: var(--stone-400);
+  transition:
+    color 0.2s ease,
+    opacity 0.2s ease;
+}
+
+.features--index .feature-index-4 .index-location-card__map-link:hover,
+.features--index .feature-index-4 .index-location-card__map-link:focus-visible {
+  color: var(--color-text-primary);
+}
+
+.features--index .feature-index-4 .loc-pin {
+  width: 1.125rem;
+  height: 1.125rem;
+  flex-shrink: 0;
+  display: block;
+}
+
+@media (min-width: 768px) {
+  .features--index .feature-index-4 .index-location-card__line {
+    font-size: var(--font-size-feature-body-lg);
   }
 }
 
@@ -2463,15 +2555,145 @@ main.content-section:has(> .site-footer.site-business-footer) {
   line-height: 1.6;
 }
 
+/* GROUND: 히어로–객실 사이 태그라인 (overline / main / sub) */
+.room-bridge-copy.room-bridge-copy--ground-tagline {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(0.85rem, 2.5vw, 1.35rem);
+  color: var(--color-text-primary);
+}
+
+.room-bridge-copy.room-bridge-copy--ground-tagline .tagline-overline,
+.room-bridge-copy.room-bridge-copy--ground-tagline .tagline-sub {
+  margin: 0;
+  text-align: center;
+  font-size: clamp(0.7rem, 1.85vw, 0.8125rem);
+  font-weight: 500;
+  line-height: 1.45;
+  color: var(--stone-400);
+}
+
+.room-bridge-copy.room-bridge-copy--ground-tagline .tagline-overline {
+  font-family: var(--font-family-nav-en);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.room-bridge-copy.room-bridge-copy--ground-tagline .tagline-sub {
+  font-family: var(--font-stack-body);
+  letter-spacing: 0.04em;
+  font-weight: 400;
+  text-transform: none;
+}
+
+.room-bridge-copy.room-bridge-copy--ground-tagline .tagline-main {
+  margin: 0;
+  max-width: 36em;
+  text-align: center;
+  font-size: clamp(1rem, 3.2vw, 1.35rem);
+  font-weight: 400;
+  line-height: 1.55;
+  letter-spacing: -0.02em;
+  color: var(--color-text-primary);
+}
+
+/* GROUND: 브리지–객실 사이 썸네일 (design.md: 모바일 거터 16px, 데스크톱 32px, 그리드 간 16/24px) */
+.ground-room-thumbs {
+  margin: 0;
+  padding: var(--space-32) var(--layout-margin-side-mobile)
+    var(--space-32);
+  background-color: var(--grafford-beige);
+  box-sizing: border-box;
+}
+
+.ground-room-thumbs__inner {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: var(--space-16);
+  width: 100%;
+  max-width: var(--layout-content-max);
+  margin: 0 auto;
+}
+
+.ground-room-thumb {
+  position: relative;
+  display: block;
+  overflow: hidden;
+  aspect-ratio: 4 / 3;
+  background: var(--stone-200);
+  text-decoration: none;
+  color: inherit;
+  border-radius: 0;
+}
+
+.ground-room-thumb:focus-visible {
+  outline: 2px solid var(--color-focus-ring);
+  outline-offset: 3px;
+}
+
+.ground-room-thumb__img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.ground-room-thumb .room-name {
+  position: absolute;
+  left: clamp(10px, 2.5vw, 14px);
+  bottom: clamp(10px, 2.5vw, 14px);
+  margin: 0;
+  font-family: var(--font-family-nav-en);
+  font-size: 11px;
+  font-weight: 500;
+  line-height: 1.2;
+  color: rgba(255, 255, 255, 0.85);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  background: rgba(0, 0, 0, 0.22);
+  padding: 3px 8px;
+  border-radius: 2px;
+  pointer-events: none;
+}
+
+.feature.room-feature[id^="room-detail-g"] {
+  scroll-margin-top: 5.5rem;
+}
+
 @media (min-width: 768px) {
   .room-bridge-copy {
-    margin: 1rem 0 1rem;
+    margin: 1.8rem 0 1rem;
     padding: 2rem 3rem;
   }
 
   .room-bridge-copy p {
     font-size: clamp(0.5rem, 5vw, 1rem);
     line-height: 1.22;
+  }
+
+  .room-bridge-copy.room-bridge-copy--ground-tagline {
+    gap: clamp(1rem, 2vw, 1.5rem);
+  }
+
+  .room-bridge-copy.room-bridge-copy--ground-tagline .tagline-overline,
+  .room-bridge-copy.room-bridge-copy--ground-tagline .tagline-sub {
+    font-size: clamp(0.75rem, 1.1vw, 0.875rem);
+  }
+
+  .room-bridge-copy.room-bridge-copy--ground-tagline .tagline-main {
+    font-size: clamp(1.05rem, 1.75vw, 1.25rem);
+    line-height: 1.5;
+  }
+
+  .ground-room-thumbs {
+    padding-left: var(--layout-margin-side-tablet);
+    padding-right: var(--layout-margin-side-tablet);
+  }
+
+  .ground-room-thumbs__inner {
+    gap: var(--space-24);
   }
 }
 
