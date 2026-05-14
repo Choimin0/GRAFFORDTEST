@@ -1917,7 +1917,6 @@ section ul li {
 .admin-search-btn.btn.reserve-btn,
 .admin-refresh-btn.btn.reserve-btn,
 .admin-page-reset-btn.btn.reserve-btn,
-.reservation-lookup-btn.btn.reserve-btn,
 .reserve-cta.btn.reserve-btn,
 .confirm-pay-submit.btn.reserve-btn,
 .rooms-features .room-feature .btn.reserve-btn {
@@ -1944,8 +1943,6 @@ section ul li {
 .admin-page-reset-btn.btn.reserve-btn:focus-visible,
 .rooms-features .room-feature .btn.reserve-btn:hover,
 .rooms-features .room-feature .btn.reserve-btn:focus-visible,
-.reservation-lookup-btn.btn.reserve-btn:hover,
-.reservation-lookup-btn.btn.reserve-btn:focus-visible,
 .reserve-cta.btn.reserve-btn:hover,
 .reserve-cta.btn.reserve-btn:focus-visible,
 .confirm-pay-submit.btn.reserve-btn:hover,
@@ -1956,7 +1953,6 @@ section ul li {
   animation: reserve-btn-shimmer 0.3s ease forwards;
 }
 
-.reservation-lookup-btn.btn.reserve-btn:active,
 .reserve-cta.btn.reserve-btn:active,
 .confirm-pay-submit.btn.reserve-btn:active {
   color: var(--color-text-on-dark);
@@ -1977,6 +1973,50 @@ section ul li {
   100% {
     background-position: 190% 0;
   }
+}
+
+/* RESERVATION 페이지 예약조회 — reserveinfo 조회하기와 동일 (stone-800 / gold-500 sweep) */
+.reservation-lookup-btn.btn.reserve-btn {
+  background-color: var(--stone-800);
+  background-image: none;
+  color: var(--stone-50);
+  border: none;
+  position: relative;
+  isolation: isolate;
+  animation: none;
+}
+
+.reservation-lookup-btn.btn.reserve-btn::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 2px;
+  background: var(--gold-500);
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 0.42s cubic-bezier(0.22, 1, 0.36, 1);
+  z-index: 1;
+  pointer-events: none;
+}
+
+.reservation-lookup-btn.btn.reserve-btn:hover::after,
+.reservation-lookup-btn.btn.reserve-btn:focus-visible::after {
+  transform: scaleX(1);
+}
+
+.reservation-lookup-btn.btn.reserve-btn:hover,
+.reservation-lookup-btn.btn.reserve-btn:focus-visible {
+  animation: none;
+  background-color: var(--stone-900);
+  color: var(--stone-50);
+}
+
+.reservation-lookup-btn.btn.reserve-btn:active {
+  animation: none;
+  background-color: var(--stone-900);
+  color: var(--stone-50);
 }
 
 iframe.map {
@@ -3581,7 +3621,7 @@ main.content-section:has(> .site-footer.site-business-footer) {
 .reservation-discount-card__title {
   margin: 0 0 0.2rem;
   font-size: 0.92rem;
-  font-weight: 700;
+  font-weight: 400;
   color: var(--stone-400);
   letter-spacing: -0.02em;
 }
@@ -3603,7 +3643,7 @@ main.content-section:has(> .site-footer.site-business-footer) {
 
 .reservation-discount-card__rate {
   font-size: 1.05rem;
-  font-weight: 700;
+  font-weight: 400;
   color: var(--stone-400);
   white-space: nowrap;
 }
@@ -3752,6 +3792,7 @@ main.content-section:has(> .site-footer.site-business-footer) {
 
 .reserve-cta--hover-roll .reserve-cta__pane--default {
   letter-spacing: 0.06em;
+  font-weight: 400;
 }
 
 .reserve-cta--hover-roll .reserve-cta__pane--hover {
@@ -3784,7 +3825,7 @@ main.content-section:has(> .site-footer.site-business-footer) {
   box-sizing: border-box;
   text-align: center;
   font-size: 0.92rem;
-  font-weight: 500;
+  font-weight: 400;
   color: var(--stone-800);
   background: var(--stone-50);
   border: 1px solid var(--stone-200);
