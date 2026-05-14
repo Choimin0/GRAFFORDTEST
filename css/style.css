@@ -1555,7 +1555,7 @@ main {
 .room-intro-desc {
   margin: 0 0 0.85rem;
   color: var(--grafford-mud);
-  font-weight: 300;
+  font-weight: 400;
 }
 
 .room-intro-desc2 {
@@ -1587,6 +1587,7 @@ main {
 .room-meta-value {
   margin: 0.4rem 0 0;
   font-size: 0.82em;
+  font-weight: 400;
 }
 
 .room-facility {
@@ -1622,6 +1623,7 @@ main {
 .room-facility-desc {
   margin: 0.35rem 0 0;
   font-size: 0.82em;
+  font-weight: 400;
 }
 
 .room-plan-image-wrap {
@@ -1913,13 +1915,12 @@ section ul li {
   animation: reserve-btn-shimmer 0.6s ease forwards;
 }
 
-/* ROOMS 예약하기 버튼은 유지, 나머지 통일 버튼은 기본색 grafford-beige2 */
+/* 관리/결제 등 통일 버튼: grafford-beige2 (GROUND 예약하기는 data-reserve-room 별도 스타일) */
 .admin-search-btn.btn.reserve-btn,
 .admin-refresh-btn.btn.reserve-btn,
 .admin-page-reset-btn.btn.reserve-btn,
 .reserve-cta.btn.reserve-btn,
-.confirm-pay-submit.btn.reserve-btn,
-.rooms-features .room-feature .btn.reserve-btn {
+.confirm-pay-submit.btn.reserve-btn {
   background-color: var(--grafford-beige2);
   background-image: linear-gradient(
     110deg,
@@ -1941,8 +1942,6 @@ section ul li {
 .admin-refresh-btn.btn.reserve-btn:focus-visible,
 .admin-page-reset-btn.btn.reserve-btn:hover,
 .admin-page-reset-btn.btn.reserve-btn:focus-visible,
-.rooms-features .room-feature .btn.reserve-btn:hover,
-.rooms-features .room-feature .btn.reserve-btn:focus-visible,
 .reserve-cta.btn.reserve-btn:hover,
 .reserve-cta.btn.reserve-btn:focus-visible,
 .confirm-pay-submit.btn.reserve-btn:hover,
@@ -2014,6 +2013,50 @@ section ul li {
 }
 
 .reservation-lookup-btn.btn.reserve-btn:active {
+  animation: none;
+  background-color: var(--stone-900);
+  color: var(--stone-50);
+}
+
+/* GROUND 페이지 > 예약하기 — reserveinfo 조회하기와 동일 (stone-800 / gold-500 sweep) */
+.rooms-features a.btn.reserve-btn[data-reserve-room] {
+  background-color: var(--stone-800);
+  background-image: none;
+  color: var(--stone-50);
+  border: none;
+  position: relative;
+  isolation: isolate;
+  animation: none;
+}
+
+.rooms-features a.btn.reserve-btn[data-reserve-room]::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 2px;
+  background: var(--gold-500);
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 0.42s cubic-bezier(0.22, 1, 0.36, 1);
+  z-index: 1;
+  pointer-events: none;
+}
+
+.rooms-features a.btn.reserve-btn[data-reserve-room]:hover::after,
+.rooms-features a.btn.reserve-btn[data-reserve-room]:focus-visible::after {
+  transform: scaleX(1);
+}
+
+.rooms-features a.btn.reserve-btn[data-reserve-room]:hover,
+.rooms-features a.btn.reserve-btn[data-reserve-room]:focus-visible {
+  animation: none;
+  background-color: var(--stone-900);
+  color: var(--stone-50);
+}
+
+.rooms-features a.btn.reserve-btn[data-reserve-room]:active {
   animation: none;
   background-color: var(--stone-900);
   color: var(--stone-50);
@@ -2611,6 +2654,7 @@ main.content-section:has(> .site-footer.site-business-footer) {
   align-items: center;
   justify-content: center;
   gap: clamp(0.85rem, 2.5vw, 1.35rem);
+  margin-top: 3.2rem;
   color: var(--color-text-primary);
 }
 
@@ -5059,6 +5103,7 @@ main.content-section.confirm-page.reserveinfo-page {
 .reserve-check-page-band__subtitle {
   margin: 0;
   font-size: 0.95rem;
+  font-weight: 400;
   line-height: 1.6;
   color: var(--stone-400);
   max-width: 36rem;
@@ -5254,6 +5299,7 @@ main.content-section.confirm-page.reserveinfo-page {
 .reserve-check-guide-card__body {
   margin: 0;
   font-size: 0.875rem;
+  font-weight: 400;
   line-height: 1.6;
   color: var(--stone-400);
 }
@@ -5291,7 +5337,7 @@ main.content-section.confirm-page.reserveinfo-page {
 .reserve-check-footer__contact-title {
   margin: 0 0 var(--space-4);
   font-size: 0.95rem;
-  font-weight: 700;
+  font-weight: 400;
   color: var(--stone-800);
 }
 
@@ -5385,6 +5431,7 @@ main.content-section.confirm-page.reserveinfo-page {
 }
 
 .lang-en .reserve-check-guide-card__title {
+  font-weight: 500;
   font-family: var(--font-family-body-en), var(--font-stack-body);
 }
 

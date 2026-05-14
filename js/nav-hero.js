@@ -52,6 +52,22 @@
     nav.classList.toggle("nav-in-content-section", pastHero);
   }
 
+  /**
+   * 문서에 #hero 가 없는 페이지(예약 조회·결제 등): 진입 시점부터
+   * 스크롤 후 콘텐츠 구간과 동일한 내비 배경(.nav-in-content-section) 적용
+   */
+  function applyNoDocumentHeroNavTheme() {
+    if (document.getElementById("hero")) {
+      return;
+    }
+    var nav = document.querySelector(".top-right-nav");
+    if (!nav) {
+      return;
+    }
+    nav.classList.add("nav-in-content-section");
+    nav.classList.remove("nav-hero-hidden");
+  }
+
   function updateNavVisibility() {
     if (isHeroSyncPage()) {
       updateNavContentTheme();
@@ -124,8 +140,12 @@
     }
     enableHeroIntroFade();
     updateNavVisibility();
+    applyNoDocumentHeroNavTheme();
   });
-  document.addEventListener("grafford:languagechange", updateNavContentTheme);
+  document.addEventListener("grafford:languagechange", function () {
+    updateNavContentTheme();
+    applyNoDocumentHeroNavTheme();
+  });
   window.addEventListener("scroll", onScrollOrResize, { passive: true });
   document.addEventListener("scroll", onScrollOrResize, {
     passive: true,
