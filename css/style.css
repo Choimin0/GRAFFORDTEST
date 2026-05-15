@@ -4,10 +4,15 @@
   --stone-100: #f2efe9;
   --stone-200: #e4ddd2;
   --stone-400: #a89d8e;
+  --stone-500: #8c7f70;
+  --stone-600: #6b6155;
+  --stone-700: #4a433c;
   --stone-800: #211e1a;
   --stone-900: #0f0d0b;
   --gold-500: #a8833e;
-
+  --stone-red: #8c2b21;
+  --stone-green: #4a522a;
+  
   /* Semantic colors (components use these, not raw hex) */
   --color-text-primary: var(--stone-800);
   --color-text-muted: var(--stone-400);
@@ -1554,7 +1559,7 @@ main {
 
 .room-intro-desc {
   margin: 0 0 0.85rem;
-  color: var(--grafford-mud);
+  color: var(--stone-600);
   font-weight: 400;
 }
 
@@ -2926,6 +2931,122 @@ main.content-section:has(> .site-footer.site-business-footer) {
   margin-bottom: 0;
 }
 
+/* RESERVATION — 갤러리 하단 객실 정보 (design.md 팔레트·간격) */
+.room-copy-blocks .room-info-section {
+  margin-top: var(--space-32);
+}
+
+.room-copy-blocks .room-info-section:first-child {
+  margin-top: 2rem;
+}
+
+.room-copy-blocks .room-info-section__heading {
+  display: flex;
+  align-items: center;
+  gap: var(--space-12);
+  margin: 0 0 var(--space-16);
+  padding: 0;
+  font-size: 0.68rem;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--gold-500);
+  line-height: var(--line-height-heading);
+}
+
+.lang-en .room-copy-blocks .room-info-section__heading {
+  font-family: var(--font-family-body-en), var(--font-stack-body);
+}
+
+.room-copy-blocks .room-info-section__title {
+  flex-shrink: 0;
+}
+
+.room-copy-blocks .room-info-section__rule {
+  display: block;
+  width: 36px;
+  height: 1px;
+  flex-shrink: 0;
+  background: var(--stone-200);
+}
+
+.room-copy-blocks .room-about-text .room-intro-desc:last-child {
+  margin-bottom: 0;
+}
+
+.room-copy-blocks .room-spec-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0;
+}
+
+.room-copy-blocks .room-spec-cell {
+  min-width: 0;
+  padding: var(--space-8);
+  border-right: 1px solid var(--stone-200);
+  border-bottom: 1px solid var(--stone-200);
+}
+
+.room-copy-blocks .room-spec-cell:nth-child(2n) {
+  border-right: none;
+}
+
+.room-copy-blocks .room-spec-cell:nth-last-child(-n + 2) {
+  border-bottom: none;
+}
+
+.room-copy-blocks .room-spec-label {
+  display: block;
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: var(--stone-400);
+  letter-spacing: 0.02em;
+  margin-bottom: var(--space-8);
+}
+
+.room-copy-blocks .room-spec-value {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 400;
+  color: var(--stone-600);
+  line-height: var(--line-height-body);
+}
+
+.room-copy-blocks .room-notice-panel {
+  padding: var(--space-16) var(--space-16) var(--space-16) var(--space-20);
+  background: var(--stone-100);
+  border-left: 3px solid var(--stone-200);
+}
+
+.room-copy-blocks .room-notice-panel__text {
+  margin: 0;
+  font-size: 0.82rem;
+  line-height: var(--line-height-body);
+  color: var(--stone-600);
+}
+
+@media (max-width: 767px) {
+  .room-copy-blocks .room-spec-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .room-copy-blocks .room-spec-cell {
+    border-right: none;
+  }
+
+  .room-copy-blocks .room-spec-cell:not(:last-child) {
+    border-bottom: 1px solid var(--stone-200);
+  }
+
+  .room-copy-blocks .room-spec-cell:nth-last-child(-n + 2) {
+    border-bottom: 1px solid var(--stone-200);
+  }
+
+  .room-copy-blocks .room-spec-cell:last-child {
+    border-bottom: none;
+  }
+}
+
 .room-detail-intro {
   color: var(--grafford-mud2);
   font-size: 1rem;
@@ -3922,9 +4043,31 @@ main.content-section:has(> .site-footer.site-business-footer) {
   background: var(--stone-800);
 }
 
-.reservation-page .cal-cell.cal-soldout {
+/* 매진일: 지난 날과 같은 톤으로 일자 표시 + 상단에 en-dash */
+.reservation-page .cal-cell.cal-day.cal-soldout {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  padding-top: 1px;
+  line-height: 1;
   color: var(--stone-400);
+  font-weight: 400;
+}
+
+.reservation-page .cal-cell.cal-day.cal-soldout .cal-soldout-mark {
+  font-size: 0.68rem;
   font-weight: 600;
+  line-height: 1;
+  margin-bottom: 1px;
+  color: inherit;
+}
+
+.reservation-page .cal-cell.cal-day.cal-soldout .cal-soldout-day {
+  font-size: 0.85rem;
+  line-height: 1.05;
+  color: inherit;
 }
 
 .reservation-page .cal-cell.cal-range {
@@ -4289,7 +4432,7 @@ main.content-section:has(> .site-footer.site-business-footer) {
   margin: 0;
   font-size: 0.9rem;
   line-height: 1.6;
-  color: var(--grafford-mud2);
+  color: var(--stone-700);
 }
 
 .confirm-label {
@@ -4851,7 +4994,8 @@ main.content-section.confirm-page.reserveinfo-page {
   justify-content: stretch;
 }
 
-.reserveinfo-form .confirm-pay-submit {
+.reserveinfo-form .confirm-pay-submit,
+.confirm-form.checkout-form .confirm-pay-submit.reserveinfo-submit-btn {
   width: 100%;
   min-width: 0;
   max-width: 100%;
@@ -4860,8 +5004,8 @@ main.content-section.confirm-page.reserveinfo-page {
   border-radius: var(--btn-primary-radius);
 }
 
-/* design.md §3 — stone-800 / stone-900; gold-500 sweep on hover */
-.reserveinfo-form .reserveinfo-submit-btn.confirm-pay-submit.btn.reserve-btn {
+/* design.md §3 — stone-800 / stone-900; gold-500 sweep (reserveinfo 조회 · confirm 결제) */
+.reserveinfo-submit-btn.confirm-pay-submit.btn.reserve-btn {
   background-color: var(--stone-800);
   background-image: none;
   color: var(--stone-50);
@@ -4870,8 +5014,7 @@ main.content-section.confirm-page.reserveinfo-page {
   isolation: isolate;
 }
 
-.reserveinfo-form
-  .reserveinfo-submit-btn.confirm-pay-submit.btn.reserve-btn::after {
+.reserveinfo-submit-btn.confirm-pay-submit.btn.reserve-btn::after {
   content: "";
   position: absolute;
   left: 0;
@@ -4886,24 +5029,19 @@ main.content-section.confirm-page.reserveinfo-page {
   pointer-events: none;
 }
 
-.reserveinfo-form
-  .reserveinfo-submit-btn.confirm-pay-submit.btn.reserve-btn:hover::after,
-.reserveinfo-form
-  .reserveinfo-submit-btn.confirm-pay-submit.btn.reserve-btn:focus-visible::after {
+.reserveinfo-submit-btn.confirm-pay-submit.btn.reserve-btn:hover::after,
+.reserveinfo-submit-btn.confirm-pay-submit.btn.reserve-btn:focus-visible::after {
   transform: scaleX(1);
 }
 
-.reserveinfo-form
-  .reserveinfo-submit-btn.confirm-pay-submit.btn.reserve-btn:hover,
-.reserveinfo-form
-  .reserveinfo-submit-btn.confirm-pay-submit.btn.reserve-btn:focus-visible {
+.reserveinfo-submit-btn.confirm-pay-submit.btn.reserve-btn:hover,
+.reserveinfo-submit-btn.confirm-pay-submit.btn.reserve-btn:focus-visible {
   animation: none;
   background-color: var(--stone-900);
   color: var(--stone-50);
 }
 
-.reserveinfo-form
-  .reserveinfo-submit-btn.confirm-pay-submit.btn.reserve-btn:active {
+.reserveinfo-submit-btn.confirm-pay-submit.btn.reserve-btn:active {
   animation: none;
   background-color: var(--stone-900);
   color: var(--stone-50);
