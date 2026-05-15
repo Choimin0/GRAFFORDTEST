@@ -100,76 +100,282 @@
 
     <div class="lang-kr">
       <main class="content-section confirm-page payment-page">
-        <h1 class="confirm-title">결제 진행</h1>
-
-        <!-- 로딩 상태 -->
         <p class="payment-status-msg" id="payment-loading-msg">
           결제 정보를 불러오는 중...
         </p>
 
-        <!-- 결제 데이터 없음 -->
         <div id="payment-no-data" hidden>
           <p class="payment-status-msg">결제 정보가 없습니다.</p>
         </div>
 
-        <!-- 결제 요약 박스 -->
-        <div
-          class="confirm-total-box payment-summary-box"
-          id="payment-summary"
-          hidden
-        >
-          <div class="payment-summary-row">
-            <span class="payment-summary-label">예약번호</span>
-            <span class="payment-summary-value" id="pay-order-no">—</span>
-          </div>
-          <div class="payment-summary-row">
-            <span class="payment-summary-label">객실</span>
-            <span class="payment-summary-value" id="pay-room">—</span>
-          </div>
-          <div class="payment-summary-row">
-            <span class="payment-summary-label">일정</span>
-            <span class="payment-summary-value" id="pay-schedule">—</span>
-          </div>
-          <div class="payment-summary-row">
-            <span class="payment-summary-label">방문 인원</span>
-            <span class="payment-summary-value" id="pay-guest-count">—</span>
-          </div>
-
-          <div class="payment-summary-row">
-            <span class="payment-summary-label">예약자 성함</span>
-            <span class="payment-summary-value" id="pay-guest">—</span>
-          </div>
-          <div class="payment-summary-row">
-            <span class="payment-summary-label">결제 수단</span>
-            <span class="payment-summary-value" id="pay-method">—</span>
-          </div>
-          <div class="payment-summary-row payment-summary-row--total">
-            <span class="payment-summary-label">최종 결제 금액</span>
-            <span class="payment-summary-value" id="pay-amount">—</span>
-          </div>
-        </div>
-
-        <!-- 결제 버튼 영역 -->
-        <div
-          class="confirm-actions payment-actions"
-          id="payment-btn-area"
-          hidden
-        >
-          <button
-            type="button"
-            id="payment-submit-btn"
-            class="btn reserve-btn confirm-pay-submit"
+        <div id="payment-layout-kr" class="payment-page-shell" hidden>
+          <header
+            class="reserve-check-page-band payment-page-shell__band"
+            aria-label="결제 진행 헤더"
           >
-            결제하기
-          </button>
+            <div class="reserve-check-page-band__left">
+              <p class="reserve-check-page-band__eyebrow">SECURE CHECKOUT</p>
+              <h1 class="reserve-check-page-band__title">결제 진행</h1>
+              <p class="reserve-check-page-band__subtitle">
+                예약 내용을 확인한 뒤 결제를 완료해 주세요.
+              </p>
+            </div>
+            <div class="reserve-check-page-band__right">
+              <p class="reserve-check-page-band__label">STEP_3</p>
+              <div
+                class="payment-page-step-indicator"
+                role="img"
+                aria-label="예약 진행 3단계 중 3단계, 결제"
+              >
+                <span
+                  class="payment-page-step-indicator__dot"
+                  aria-hidden="true"
+                ></span>
+                <span
+                  class="payment-page-step-indicator__dot"
+                  aria-hidden="true"
+                ></span>
+                <span
+                  class="payment-page-step-indicator__dot payment-page-step-indicator__dot--current"
+                  aria-hidden="true"
+                ></span>
+              </div>
+            </div>
+          </header>
+          <div class="payment-layout">
+            <div class="payment-layout__main">
+              <section
+                class="payment-panel"
+                aria-labelledby="pay-kr-booking-summary-title"
+              >
+                <h2
+                  class="payment-section-head"
+                  id="pay-kr-booking-summary-title"
+                >
+                  <span class="payment-section-head__label"
+                    >BOOKING SUMMARY</span
+                  >
+                  <span
+                    class="payment-section-head__rule"
+                    aria-hidden="true"
+                  ></span>
+                </h2>
+                <dl class="payment-kv">
+                  <div class="payment-kv__row">
+                    <dt>BOOKING NO.</dt>
+                    <dd id="pay-kr-booking-no">—</dd>
+                  </div>
+                  <div class="payment-kv__row">
+                    <dt>ROOM</dt>
+                    <dd id="pay-kr-room">—</dd>
+                  </div>
+                  <div class="payment-kv__row">
+                    <dt>CHECK-IN</dt>
+                    <dd id="pay-kr-checkin">—</dd>
+                  </div>
+                  <div class="payment-kv__row">
+                    <dt>CHECK-OUT</dt>
+                    <dd id="pay-kr-checkout">—</dd>
+                  </div>
+                  <div class="payment-kv__row">
+                    <dt>GUESTS</dt>
+                    <dd id="pay-kr-guests">—</dd>
+                  </div>
+                  <div class="payment-kv__row">
+                    <dt>NAME</dt>
+                    <dd id="pay-kr-name">—</dd>
+                  </div>
+                  <div class="payment-kv__row">
+                    <dt>PAYMENT</dt>
+                    <dd id="pay-kr-payment-method">—</dd>
+                  </div>
+                </dl>
+              </section>
+
+              <section
+                class="payment-panel"
+                aria-labelledby="pay-kr-price-title"
+              >
+                <h2 class="payment-section-head" id="pay-kr-price-title">
+                  <span class="payment-section-head__label"
+                    >PRICE BREAKDOWN</span
+                  >
+                  <span
+                    class="payment-section-head__rule"
+                    aria-hidden="true"
+                  ></span>
+                </h2>
+                <div id="pay-kr-breakdown" class="payment-breakdown"></div>
+                <div class="payment-total-bar" aria-live="polite">
+                  <span class="payment-total-bar__label">TOTAL</span>
+                  <span class="payment-total-bar__amount" id="pay-kr-total-bar"
+                    >—</span
+                  >
+                </div>
+              </section>
+
+              <section
+                class="payment-panel"
+                aria-labelledby="pay-kr-cancel-title"
+              >
+                <h2 class="payment-section-head" id="pay-kr-cancel-title">
+                  <span class="payment-section-head__label"
+                    >CANCELLATION POLICY</span
+                  >
+                  <span
+                    class="payment-section-head__rule"
+                    aria-hidden="true"
+                  ></span>
+                </h2>
+                <p class="payment-policy-lead">
+                  결제 완료 시 아래 환불 규정에 동의한 것으로 간주됩니다. 취소
+                  전 반드시 확인해 주세요.
+                </p>
+                <table class="payment-refund-table" aria-label="환불 규정">
+                  <thead>
+                    <tr>
+                      <th scope="col">취소 시점</th>
+                      <th scope="col">환불율</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>입실일로부터 15일 전</td>
+                      <td>100%</td>
+                    </tr>
+                    <tr>
+                      <td>입실일로부터 12일 전</td>
+                      <td>80%</td>
+                    </tr>
+                    <tr>
+                      <td>입실일로부터 9일 전</td>
+                      <td>70%</td>
+                    </tr>
+                    <tr>
+                      <td>입실일로부터 7일 전</td>
+                      <td>60%</td>
+                    </tr>
+                    <tr>
+                      <td>입실일로부터 5일 전</td>
+                      <td>50%</td>
+                    </tr>
+                    <tr class="payment-refund-table__row--danger">
+                      <td>입실일로부터 5일 이내</td>
+                      <td>환불 불가</td>
+                    </tr>
+                  </tbody>
+                </table>
+                <div
+                  id="pay-kr-refund-callout"
+                  class="payment-callout payment-callout--red"
+                  hidden
+                ></div>
+                <div class="payment-callout payment-callout--green">
+                  <strong class="payment-callout__strong">특약</strong>
+                  — 천재 지변 또는 기상 악화로 인한 비행기·배 결항 시, 관련 서류
+                  제출 시 100% 환불됩니다.
+                </div>
+              </section>
+            </div>
+
+            <aside class="payment-layout__sidebar" aria-label="결제 요약">
+              <div class="payment-sidebar-sticky">
+                <div class="payment-side-card payment-side-card--header">
+                  <span class="payment-side-card__room" id="pay-kr-side-room"
+                    >—</span
+                  >
+                  <span
+                    class="payment-side-card__nights"
+                    id="pay-kr-side-nights"
+                    >—</span
+                  >
+                </div>
+                <div class="payment-side-card payment-side-card--stack">
+                  <div class="payment-side-mini">
+                    <span class="payment-side-mini__k">CHECK-IN</span>
+                    <span class="payment-side-mini__v" id="pay-kr-side-in"
+                      >—</span
+                    >
+                  </div>
+                  <div class="payment-side-mini">
+                    <span class="payment-side-mini__k">CHECK-OUT</span>
+                    <span class="payment-side-mini__v" id="pay-kr-side-out"
+                      >—</span
+                    >
+                  </div>
+                  <div class="payment-side-mini">
+                    <span class="payment-side-mini__k">GUESTS</span>
+                    <span class="payment-side-mini__v" id="pay-kr-side-guests"
+                      >—</span
+                    >
+                  </div>
+                  <div class="payment-side-mini">
+                    <span class="payment-side-mini__k">BOOKING NO.</span>
+                    <span class="payment-side-mini__v" id="pay-kr-side-order"
+                      >—</span
+                    >
+                  </div>
+                </div>
+                <div class="payment-side-card payment-side-card--payrow">
+                  <span class="payment-side-payrow__k">PAYMENT</span>
+                  <span class="payment-side-payrow__v" id="pay-kr-side-method"
+                    >—</span
+                  >
+                  <button
+                    type="button"
+                    id="pay-kr-method-drawer-open"
+                    class="payment-side-payrow__change"
+                  >
+                    변경
+                  </button>
+                </div>
+                <div class="payment-side-card payment-side-card--total">
+                  <span class="payment-side-total__k">FINAL TOTAL</span>
+                  <span class="payment-side-total__v" id="pay-kr-side-total"
+                    >—</span
+                  >
+                </div>
+                <div class="payment-side-actions" id="payment-btn-area">
+                  <button
+                    type="button"
+                    id="payment-submit-btn"
+                    class="btn reserve-btn confirm-pay-submit reserveinfo-submit-btn payment-submit-cta"
+                  >
+                    결제하기
+                  </button>
+                </div>
+                <p class="payment-side-foot payment-side-foot--ssl">
+                  <span class="lock" aria-hidden="true"></span>
+                  SSL SECURED · 개인정보 암호화 전송
+                </p>
+                <div class="payment-side-divider" aria-hidden="true"></div>
+                <p class="payment-side-foot payment-side-foot--legal">
+                  결제 버튼 클릭 시
+                  <a
+                    class="payment-legal-link"
+                    href="confirm.html"
+                    target="_blank"
+                    rel="noopener"
+                    >이용약관</a
+                  >
+                  및<br />
+                  <a
+                    class="payment-legal-link"
+                    href="confirm.html"
+                    target="_blank"
+                    rel="noopener"
+                    >환불·취소 규정</a
+                  >에 동의한 것으로 간주됩니다.
+                </p>
+              </div>
+            </aside>
+          </div>
         </div>
 
-        <!-- 처리 중 메시지 -->
         <p class="payment-status-msg" id="payment-processing-msg" hidden>
           결제를 처리하는 중입니다...
         </p>
 
-        <!-- 오류 영역 -->
         <div id="payment-error-area" class="payment-error-area" hidden>
           <p id="payment-error-msg" class="payment-error-msg"></p>
           <button
@@ -189,7 +395,144 @@
         ></footer>
       </main>
 
-      <script src="js/booking-pricing.js?v=3"></script>
+      <div
+        id="payment-method-drawer-kr"
+        class="payment-method-drawer"
+        hidden
+        aria-hidden="true"
+      >
+        <div
+          class="payment-method-drawer__backdrop"
+          data-payment-drawer-close
+          tabindex="-1"
+        ></div>
+        <div
+          class="payment-method-drawer__panel"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="payment-method-drawer-title-kr"
+        >
+          <header class="payment-method-drawer__head">
+            <h2
+              id="payment-method-drawer-title-kr"
+              class="payment-method-drawer__head-title"
+            >
+              PAYMENT METHOD
+            </h2>
+            <button
+              type="button"
+              class="payment-method-drawer__close"
+              id="payment-method-drawer-close-kr"
+              aria-label="닫기"
+            >
+              <span aria-hidden="true">×</span>
+            </button>
+          </header>
+          <div class="payment-method-drawer__body">
+            <div class="payment-method-drawer__section-head">
+              <span class="payment-method-drawer__section-kicker"
+                >SELECT METHOD</span
+              >
+              <span
+                class="payment-method-drawer__section-rule"
+                aria-hidden="true"
+              ></span>
+            </div>
+            <div
+              class="payment-method-drawer__options"
+              role="radiogroup"
+              aria-labelledby="payment-method-drawer-section-kr"
+            >
+              <span
+                id="payment-method-drawer-section-kr"
+                class="visually-hidden"
+                >결제 수단 선택</span
+              >
+              <label class="payment-method-option">
+                <input
+                  type="radio"
+                  name="payment-drawer-method-kr"
+                  value="card"
+                  class="visually-hidden"
+                />
+                <span class="payment-method-option__icon" aria-hidden="true">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="28"
+                    height="22"
+                    viewBox="0 0 28 22"
+                    fill="none"
+                    aria-hidden="true"
+                  >
+                    <rect
+                      x="1"
+                      y="4"
+                      width="26"
+                      height="14"
+                      rx="2"
+                      stroke="currentColor"
+                      stroke-width="1.25"
+                    />
+                    <line
+                      x1="1"
+                      y1="9"
+                      x2="27"
+                      y2="9"
+                      stroke="currentColor"
+                      stroke-width="1.25"
+                    />
+                  </svg>
+                </span>
+                <span class="payment-method-option__text">
+                  <span class="payment-method-option__title">신용카드</span>
+                  <span class="payment-method-option__desc"
+                    >국내외 모든 카드 사용 가능</span
+                  >
+                </span>
+                <span
+                  class="payment-method-option__check"
+                  aria-hidden="true"
+                ></span>
+              </label>
+              <label class="payment-method-option">
+                <input
+                  type="radio"
+                  name="payment-drawer-method-kr"
+                  value="naver"
+                  class="visually-hidden"
+                />
+                <span
+                  class="payment-method-option__icon payment-method-option__icon--naver"
+                  aria-hidden="true"
+                >
+                  <span class="payment-method-option__naver-n">N</span>
+                </span>
+                <span class="payment-method-option__text">
+                  <span class="payment-method-option__title">네이버페이</span>
+                  <span class="payment-method-option__desc"
+                    >네이버페이 간편결제</span
+                  >
+                </span>
+                <span
+                  class="payment-method-option__check"
+                  aria-hidden="true"
+                ></span>
+              </label>
+            </div>
+            <div class="payment-method-drawer__footer">
+              <button
+                type="button"
+                id="payment-method-drawer-done-kr"
+                class="btn reserve-btn confirm-pay-submit reserveinfo-submit-btn payment-method-drawer__done"
+              >
+                선택 완료
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <script src="js/booking-pricing.js?v=4"></script>
       <script>
         document.addEventListener("DOMContentLoaded", function () {
           var P = window.GraffordBookingPricing;
@@ -205,7 +548,7 @@
 
           var loadingMsg = document.getElementById("payment-loading-msg");
           var noDataEl = document.getElementById("payment-no-data");
-          var summaryEl = document.getElementById("payment-summary");
+          var layoutKr = document.getElementById("payment-layout-kr");
           var btnArea = document.getElementById("payment-btn-area");
           var submitBtn = document.getElementById("payment-submit-btn");
           var processingMsg = document.getElementById("payment-processing-msg");
@@ -216,6 +559,9 @@
             "page-loading-overlay",
           );
           var pageLoadingText = document.getElementById("page-loading-text");
+
+          var quote = null;
+          var finalAmount = 0;
 
           function showPageLoading(msg) {
             if (pageLoadingText) {
@@ -236,6 +582,11 @@
             if (loadingMsg) loadingMsg.hidden = true;
           }
 
+          function setText(id, text) {
+            var node = document.getElementById(id);
+            if (node) node.textContent = text;
+          }
+
           if (!saved || !saved.orderNo) {
             hideLoading();
             if (noDataEl) noDataEl.hidden = false;
@@ -254,6 +605,16 @@
           var guestRequest = saved.guestRequest || "";
           var guestCount = parseInt(saved.guestCount || "2", 10) || 2;
           var payMethod = saved.payMethod || "card";
+          if (payMethod !== "card" && payMethod !== "naver") {
+            payMethod = "card";
+            saved.payMethod = "card";
+            try {
+              sessionStorage.setItem(
+                "graffordPaymentData",
+                JSON.stringify(saved),
+              );
+            } catch (_pm) {}
+          }
           var reservationPreSaved =
             String(saved.reservationPreSaved || "") === "1";
           var preSavedCancelToken = String(saved.cancelToken || "");
@@ -268,21 +629,32 @@
             return "/api/reservations";
           }
 
-          function computeAmount() {
-            var savedAmount = Number(saved.totalAmount || 0);
-            if (savedAmount > 0) {
-              return savedAmount;
+          function roomRateApiUrl() {
+            var base = "";
+            if (typeof window !== "undefined" && window.__GRAFFORD_API_BASE__) {
+              base = String(window.__GRAFFORD_API_BASE__).replace(/\/$/, "");
             }
-            if (P && room && checkIn && checkOut) {
-              var quote = P.computeStay(room, checkIn, checkOut, extraGuests);
-              if (quote && quote.nights > 0) {
-                return quote.discountedGrandTotal || 0;
-              }
-            }
-            return savedAmount;
+            return base + "/api/room-rate";
           }
 
-          var finalAmount = computeAmount();
+          async function hydrateRates() {
+            if (!P) return;
+            try {
+              var rateRes = await fetch(roomRateApiUrl());
+              if (!rateRes.ok) return;
+              var rateData = await rateRes.json();
+              if (
+                rateData.rates &&
+                typeof P.setRoomWeekdayBase === "function"
+              ) {
+                P.setRoomWeekdayBase(rateData.rates);
+              }
+              var ch = rateData.charges || rateData;
+              if (ch && typeof P.setCharges === "function") {
+                P.setCharges(ch);
+              }
+            } catch (_err) {}
+          }
 
           var ROOM_LABELS = {
             G1: "그라포드 G1",
@@ -291,31 +663,154 @@
             G4: "그라포드 G4",
           };
 
-          function formatDate(ymd) {
-            if (!ymd) return "—";
-            var parts = ymd.split("-");
-            if (parts.length !== 3) return ymd;
-            return (
-              parts[0] +
-              "년 " +
-              parseInt(parts[1], 10) +
-              "월 " +
-              parseInt(parts[2], 10) +
-              "일"
-            );
+          var KR_WD = ["일", "월", "화", "수", "목", "금", "토"];
+
+          function formatKrw(n) {
+            return Number(n || 0).toLocaleString("ko-KR") + "원";
           }
 
-          hideLoading();
-          if (summaryEl) summaryEl.hidden = false;
-          if (btnArea) btnArea.hidden = false;
+          function formatYmdLongKo(ymd, timeStr) {
+            var d = P && P.parseYMD ? P.parseYMD(ymd) : null;
+            if (!d) return "—";
+            var wd = KR_WD[d.getDay()];
+            return (
+              d.getFullYear() +
+              "년 " +
+              (d.getMonth() + 1) +
+              "월 " +
+              d.getDate() +
+              "일 (" +
+              wd +
+              ") " +
+              (timeStr || "")
+            ).trim();
+          }
 
-          var orderNoEl = document.getElementById("pay-order-no");
-          var roomEl = document.getElementById("pay-room");
-          var scheduleEl = document.getElementById("pay-schedule");
-          var guestEl = document.getElementById("pay-guest");
-          var guestCountEl = document.getElementById("pay-guest-count");
-          var amountEl = document.getElementById("pay-amount");
-          var payMethodEl = document.getElementById("pay-method");
+          function formatSideDateKo(ymd, timeStr) {
+            var d = P && P.parseYMD ? P.parseYMD(ymd) : null;
+            if (!d) return "—";
+            var m = String(d.getMonth() + 1).padStart(2, "0");
+            var day = String(d.getDate()).padStart(2, "0");
+            return (
+              m +
+              ". " +
+              day +
+              " (" +
+              KR_WD[d.getDay()] +
+              ") " +
+              (timeStr || "")
+            ).trim();
+          }
+
+          function renderBreakdownKr(q) {
+            var el = document.getElementById("pay-kr-breakdown");
+            if (!el) return;
+            if (!q || !q.nights) {
+              el.innerHTML = "";
+              return;
+            }
+            var rows = [];
+            function row(label, amount, isDiscount) {
+              var v = Number(amount || 0);
+              var showNeg = isDiscount && v > 0;
+              rows.push(
+                '<div class="payment-breakdown__row">' +
+                  '<span class="payment-breakdown__label">' +
+                  label +
+                  "</span>" +
+                  '<span class="payment-breakdown__amount">' +
+                  (showNeg ? "- " : "") +
+                  formatKrw(showNeg ? v : v) +
+                  "</span></div>",
+              );
+            }
+            if (q.weekdayNights > 0) {
+              row(
+                room +
+                  " (평일) " +
+                  formatKrw(q.baseNightly) +
+                  " × " +
+                  q.weekdayNights +
+                  "박",
+                q.weekdaySubtotal,
+                false,
+              );
+            }
+            if (q.weekendNights > 0) {
+              row(
+                room +
+                  " (주말) " +
+                  formatKrw(q.weekendRatePerNight) +
+                  " × " +
+                  q.weekendNights +
+                  "박",
+                q.weekendSubtotal,
+                false,
+              );
+            }
+            if (q.extraGuestTotal > 0 && P) {
+              row(
+                "인원 추가 " +
+                  formatKrw(P.EXTRA_PER_PERSON_PER_NIGHT) +
+                  " × " +
+                  q.extraGuests +
+                  "명 × " +
+                  q.nights +
+                  "박",
+                q.extraGuestTotal,
+                false,
+              );
+            }
+            if ((q.consecutiveSale || 0) > 0) {
+              row(
+                "연박 할인 (" + q.nights + "박 일정)",
+                q.consecutiveSale,
+                true,
+              );
+            }
+            if ((q.promotionDiscount || 0) > 0) {
+              row(
+                "프로모션 할인 (" + (q.promotionPercent || 0) + "%)",
+                q.promotionDiscount,
+                true,
+              );
+            }
+            el.innerHTML = rows.join("");
+          }
+
+          function renderRefundCalloutKr(checkInYmd) {
+            var el = document.getElementById("pay-kr-refund-callout");
+            if (!el || !P || !P.parseYMD) return;
+            var ci = P.parseYMD(checkInYmd);
+            if (!ci) {
+              el.hidden = true;
+              return;
+            }
+            var today = new Date();
+            var t0 = new Date(
+              today.getFullYear(),
+              today.getMonth(),
+              today.getDate(),
+            );
+            var remain = Math.floor((ci - t0) / 86400000);
+            var refundPct;
+            if (remain > 15) refundPct = 100;
+            else if (remain >= 12) refundPct = 80;
+            else if (remain >= 9) refundPct = 70;
+            else if (remain >= 7) refundPct = 60;
+            else if (remain >= 5) refundPct = 50;
+            else refundPct = 0;
+            var md = ci.getMonth() + 1 + "월 " + ci.getDate() + "일";
+            el.innerHTML =
+              "현재 체크인(" +
+              md +
+              ')까지 <span class="payment-callout__accent">' +
+              remain +
+              '일</span> 남았습니다. 지금 취소 시 <span class="payment-callout__accent">' +
+              refundPct +
+              "% 환불</span>이 적용됩니다.";
+            el.hidden = false;
+          }
 
           var PAY_METHOD_LABELS = {
             card: "신용카드",
@@ -323,23 +818,168 @@
             bank: "무통장입금",
           };
 
-          if (orderNoEl) orderNoEl.textContent = orderNo;
-          if (roomEl) roomEl.textContent = ROOM_LABELS[room] || room;
-          if (scheduleEl)
-            scheduleEl.textContent =
-              formatDate(checkIn) + " ~ " + formatDate(checkOut);
-          if (guestEl) guestEl.textContent = guestName || "—";
-          if (guestCountEl) guestCountEl.textContent = guestCount + "명" || "—";
-          if (amountEl)
-            amountEl.textContent =
-              Number(finalAmount).toLocaleString("ko-KR") + "원";
-          if (payMethodEl)
-            payMethodEl.textContent = PAY_METHOD_LABELS[payMethod] || payMethod || "—";
-
-          // 네이버페이 선택 시 버튼 레이블 교체
-          if (payMethod === "naver" && submitBtn) {
-            submitBtn.textContent = "네이버페이로 결제하기";
+          function effectiveDrawerMethod() {
+            return payMethod === "naver" ? "naver" : "card";
           }
+
+          function persistSaved() {
+            try {
+              sessionStorage.setItem(
+                "graffordPaymentData",
+                JSON.stringify(saved),
+              );
+            } catch (e0) {}
+          }
+
+          function refreshPaymentMethodUiKr() {
+            var pmLabel = PAY_METHOD_LABELS[payMethod] || payMethod || "—";
+            setText("pay-kr-payment-method", pmLabel);
+            setText("pay-kr-side-method", pmLabel);
+            if (submitBtn) {
+              //amtStr ; 결제 금액 원 단위 표시 제거
+              var amtStr = Number(finalAmount).toLocaleString("ko-KR");
+              if (payMethod === "naver") {
+                submitBtn.textContent = "결제하기 →"; // 네이버페이로 결제하기 →
+              } else {
+                submitBtn.textContent = "결제하기 →";
+              }
+            }
+          }
+
+          var drawerKr = document.getElementById("payment-method-drawer-kr");
+          var drawerKrBackdrop = drawerKr
+            ? drawerKr.querySelector(".payment-method-drawer__backdrop")
+            : null;
+          var drawerKrPanel = drawerKr
+            ? drawerKr.querySelector(".payment-method-drawer__panel")
+            : null;
+          var drawerKrClose = document.getElementById(
+            "payment-method-drawer-close-kr",
+          );
+          var drawerKrDone = document.getElementById(
+            "payment-method-drawer-done-kr",
+          );
+          var drawerKrOpen = document.getElementById(
+            "pay-kr-method-drawer-open",
+          );
+
+          function syncDrawerRadiosKr() {
+            if (!drawerKr) return;
+            var v = effectiveDrawerMethod();
+            var inputs = drawerKr.querySelectorAll(
+              'input[name="payment-drawer-method-kr"]',
+            );
+            for (var i = 0; i < inputs.length; i++) {
+              inputs[i].checked = inputs[i].value === v;
+            }
+          }
+
+          function openDrawerKr() {
+            if (!drawerKr) return;
+            syncDrawerRadiosKr();
+            drawerKr.hidden = false;
+            drawerKr.classList.add("is-open");
+            drawerKr.setAttribute("aria-hidden", "false");
+            document.body.style.overflow = "hidden";
+            requestAnimationFrame(function () {
+              drawerKr.classList.add("is-visible");
+            });
+          }
+
+          function closeDrawerKr() {
+            if (!drawerKr) return;
+            drawerKr.classList.remove("is-visible");
+            document.body.style.overflow = "";
+            window.setTimeout(function () {
+              if (!drawerKr.classList.contains("is-visible")) {
+                drawerKr.classList.remove("is-open");
+                drawerKr.hidden = true;
+                drawerKr.setAttribute("aria-hidden", "true");
+              }
+            }, 280);
+          }
+
+          function applyDrawerSelectionKr() {
+            if (!drawerKr) return;
+            var checked = drawerKr.querySelector(
+              'input[name="payment-drawer-method-kr"]:checked',
+            );
+            var v = checked ? checked.value : effectiveDrawerMethod();
+            payMethod = v === "naver" ? "naver" : "card";
+            saved.payMethod = payMethod;
+            persistSaved();
+            refreshPaymentMethodUiKr();
+            closeDrawerKr();
+          }
+
+          if (drawerKrOpen) {
+            drawerKrOpen.addEventListener("click", function () {
+              openDrawerKr();
+            });
+          }
+          if (drawerKrClose) {
+            drawerKrClose.addEventListener("click", function () {
+              closeDrawerKr();
+            });
+          }
+          if (drawerKrBackdrop) {
+            drawerKrBackdrop.addEventListener("click", function () {
+              closeDrawerKr();
+            });
+          }
+          if (drawerKrDone) {
+            drawerKrDone.addEventListener("click", function () {
+              applyDrawerSelectionKr();
+            });
+          }
+
+          async function bootstrapKr() {
+            await hydrateRates();
+            quote = P
+              ? P.computeStay(room, checkIn, checkOut, extraGuests)
+              : null;
+            var savedAmt = Number(saved.totalAmount || 0);
+            finalAmount =
+              savedAmt > 0
+                ? savedAmt
+                : quote && quote.discountedGrandTotal
+                  ? quote.discountedGrandTotal
+                  : 0;
+
+            hideLoading();
+            if (layoutKr) layoutKr.hidden = false;
+            if (btnArea) btnArea.hidden = false;
+
+            setText("pay-kr-booking-no", orderNo);
+            setText("pay-kr-room", ROOM_LABELS[room] || room);
+            setText("pay-kr-checkin", formatYmdLongKo(checkIn, "16:00"));
+            setText(
+              "pay-kr-checkout",
+              formatYmdLongKo(checkOut, "11:00") +
+                (stayNights > 0 ? " · " + stayNights + "박" : ""),
+            );
+            setText("pay-kr-guests", guestCount + "명");
+            setText("pay-kr-name", guestName || "—");
+
+            renderBreakdownKr(quote);
+            setText("pay-kr-total-bar", formatKrw(finalAmount));
+
+            setText("pay-kr-side-room", room + " · 그라포드");
+            setText("pay-kr-side-nights", stayNights + "박");
+            setText("pay-kr-side-in", formatSideDateKo(checkIn, "16:00"));
+            setText("pay-kr-side-out", formatSideDateKo(checkOut, "11:00"));
+            setText("pay-kr-side-guests", guestCount + "명");
+            setText("pay-kr-side-order", orderNo);
+            setText("pay-kr-side-total", formatKrw(finalAmount));
+
+            renderRefundCalloutKr(checkIn);
+
+            refreshPaymentMethodUiKr();
+          }
+
+          bootstrapKr().catch(function () {
+            hideLoading();
+          });
 
           function showError(msg) {
             hidePageLoading();
@@ -432,7 +1072,9 @@
                     categoryId: "GENERAL",
                     uid: orderNo,
                     name:
-                      "GRAFFORD 숙박 예약 (" + (ROOM_LABELS[room] || room) + ")",
+                      "GRAFFORD 숙박 예약 (" +
+                      (ROOM_LABELS[room] || room) +
+                      ")",
                     count: 1,
                   },
                 ],
@@ -474,10 +1116,16 @@
               if (!verifyRes.ok || !verifyData.ok) {
                 var verifyErrMsg = verifyData.error || verifyData.message || "";
                 if (verifyData.expected != null && verifyData.actual != null) {
-                  verifyErrMsg += "\n(결제 금액: 예상 " + verifyData.expected + "원 / 실제 " + verifyData.actual + "원)";
+                  verifyErrMsg +=
+                    "\n(결제 금액: 예상 " +
+                    verifyData.expected +
+                    "원 / 실제 " +
+                    verifyData.actual +
+                    "원)";
                 }
                 showError(
-                  "결제 검증에 실패했습니다. 결제가 정상적으로 이루어졌다면 고객센터로 문의해 주세요.\n" + verifyErrMsg,
+                  "결제 검증에 실패했습니다. 결제가 정상적으로 이루어졌다면 고객센터로 문의해 주세요.\n" +
+                    verifyErrMsg,
                 );
                 return;
               }
@@ -543,7 +1191,8 @@
                 );
                 return;
               }
-              fetchedCancelToken = (saveData && saveData.cancelToken) || fetchedCancelToken;
+              fetchedCancelToken =
+                (saveData && saveData.cancelToken) || fetchedCancelToken;
             }
             sessionStorage.removeItem("graffordInPaymentFlow");
 
@@ -609,7 +1258,6 @@
 
     <div class="lang-en">
       <main class="content-section confirm-page payment-page">
-        <h1 class="confirm-title">Payment</h1>
         <p class="payment-status-msg" id="payment-loading-msg-en">
           Loading payment information...
         </p>
@@ -623,57 +1271,274 @@
           </p>
         </div>
 
-        <div
-          class="confirm-total-box payment-summary-box"
-          id="payment-summary-en"
-          hidden
-        >
-          <div class="payment-summary-row">
-            <span class="payment-summary-label">Reservation No.</span>
-            <span class="payment-summary-value" id="pay-order-no-en">—</span>
-          </div>
-          <div class="payment-summary-row">
-            <span class="payment-summary-label">Room</span>
-            <span class="payment-summary-value" id="pay-room-en">—</span>
-          </div>
-          <div class="payment-summary-row">
-            <span class="payment-summary-label">Schedule</span>
-            <span class="payment-summary-value" id="pay-schedule-en">—</span>
-          </div>
-          <div class="payment-summary-row">
-            <span class="payment-summary-label">Guest</span>
-            <span class="payment-summary-value" id="pay-guest-en">—</span>
-          </div>
-          <div class="payment-summary-row">
-            <span class="payment-summary-label">Payment Method</span>
-            <span class="payment-summary-value" id="pay-method-en">—</span>
-          </div>
-          <div class="payment-summary-row payment-summary-row--total">
-            <span class="payment-summary-label">Total</span>
-            <span class="payment-summary-value" id="pay-amount-en">—</span>
-          </div>
-        </div>
-
-        <div
-          class="confirm-actions payment-actions"
-          id="payment-btn-area-en"
-          hidden
-        >
-          <button
-            type="button"
-            id="payment-submit-btn-en"
-            class="btn reserve-btn confirm-pay-submit"
+        <div id="payment-layout-en" class="payment-page-shell" hidden>
+          <header
+            class="reserve-check-page-band payment-page-shell__band"
+            aria-label="Payment header"
           >
-            Pay
-          </button>
+            <div class="reserve-check-page-band__left">
+              <p class="reserve-check-page-band__eyebrow">SECURE CHECKOUT</p>
+              <h1 class="reserve-check-page-band__title">Payment</h1>
+              <p class="reserve-check-page-band__subtitle">
+                Confirm your stay details and complete secure payment.
+              </p>
+            </div>
+            <div class="reserve-check-page-band__right">
+              <p class="reserve-check-page-band__label">STEP</p>
+              <div
+                class="payment-page-step-indicator"
+                role="img"
+                aria-label="Step 3 of 3: payment"
+              >
+                <span
+                  class="payment-page-step-indicator__dot"
+                  aria-hidden="true"
+                ></span>
+                <span
+                  class="payment-page-step-indicator__dot"
+                  aria-hidden="true"
+                ></span>
+                <span
+                  class="payment-page-step-indicator__dot payment-page-step-indicator__dot--current"
+                  aria-hidden="true"
+                ></span>
+              </div>
+            </div>
+          </header>
+          <div class="payment-layout">
+            <div class="payment-layout__main">
+              <section
+                class="payment-panel"
+                aria-labelledby="pay-en-booking-summary-title"
+              >
+                <h2
+                  class="payment-section-head"
+                  id="pay-en-booking-summary-title"
+                >
+                  <span class="payment-section-head__label"
+                    >BOOKING SUMMARY</span
+                  >
+                  <span
+                    class="payment-section-head__rule"
+                    aria-hidden="true"
+                  ></span>
+                </h2>
+                <dl class="payment-kv">
+                  <div class="payment-kv__row">
+                    <dt>BOOKING NO.</dt>
+                    <dd id="pay-en-booking-no">—</dd>
+                  </div>
+                  <div class="payment-kv__row">
+                    <dt>ROOM</dt>
+                    <dd id="pay-en-room">—</dd>
+                  </div>
+                  <div class="payment-kv__row">
+                    <dt>CHECK-IN</dt>
+                    <dd id="pay-en-checkin">—</dd>
+                  </div>
+                  <div class="payment-kv__row">
+                    <dt>CHECK-OUT</dt>
+                    <dd id="pay-en-checkout">—</dd>
+                  </div>
+                  <div class="payment-kv__row">
+                    <dt>GUESTS</dt>
+                    <dd id="pay-en-guests">—</dd>
+                  </div>
+                  <div class="payment-kv__row">
+                    <dt>NAME</dt>
+                    <dd id="pay-en-name">—</dd>
+                  </div>
+                  <div class="payment-kv__row">
+                    <dt>PAYMENT</dt>
+                    <dd id="pay-en-payment-method">—</dd>
+                  </div>
+                </dl>
+              </section>
+
+              <section
+                class="payment-panel"
+                aria-labelledby="pay-en-price-title"
+              >
+                <h2 class="payment-section-head" id="pay-en-price-title">
+                  <span class="payment-section-head__label"
+                    >PRICE BREAKDOWN</span
+                  >
+                  <span
+                    class="payment-section-head__rule"
+                    aria-hidden="true"
+                  ></span>
+                </h2>
+                <div id="pay-en-breakdown" class="payment-breakdown"></div>
+                <div class="payment-total-bar" aria-live="polite">
+                  <span class="payment-total-bar__label">TOTAL</span>
+                  <span class="payment-total-bar__amount" id="pay-en-total-bar"
+                    >—</span
+                  >
+                </div>
+              </section>
+
+              <section
+                class="payment-panel"
+                aria-labelledby="pay-en-cancel-title"
+              >
+                <h2 class="payment-section-head" id="pay-en-cancel-title">
+                  <span class="payment-section-head__label"
+                    >CANCELLATION POLICY</span
+                  >
+                  <span
+                    class="payment-section-head__rule"
+                    aria-hidden="true"
+                  ></span>
+                </h2>
+                <p class="payment-policy-lead">
+                  By completing payment, you agree to the cancellation and
+                  refund terms below. Please review before you cancel a stay.
+                </p>
+                <table class="payment-refund-table" aria-label="Refund policy">
+                  <thead>
+                    <tr>
+                      <th scope="col">Timing</th>
+                      <th scope="col">Refund</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>15+ days before check-in</td>
+                      <td>100%</td>
+                    </tr>
+                    <tr>
+                      <td>12 days before</td>
+                      <td>80%</td>
+                    </tr>
+                    <tr>
+                      <td>9 days before</td>
+                      <td>70%</td>
+                    </tr>
+                    <tr>
+                      <td>7 days before</td>
+                      <td>60%</td>
+                    </tr>
+                    <tr>
+                      <td>5 days before</td>
+                      <td>50%</td>
+                    </tr>
+                    <tr class="payment-refund-table__row--danger">
+                      <td>Within 5 days of check-in</td>
+                      <td>Non-refundable</td>
+                    </tr>
+                  </tbody>
+                </table>
+                <div
+                  id="pay-en-refund-callout"
+                  class="payment-callout payment-callout--red"
+                  hidden
+                ></div>
+                <div class="payment-callout payment-callout--green">
+                  <strong class="payment-callout__strong">Special terms</strong>
+                  — For flight or ferry cancellations due to force majeure or
+                  severe weather, submit supporting documents for a 100% refund.
+                </div>
+              </section>
+            </div>
+
+            <aside class="payment-layout__sidebar" aria-label="Payment summary">
+              <div class="payment-sidebar-sticky">
+                <div class="payment-side-card payment-side-card--header">
+                  <span class="payment-side-card__room" id="pay-en-side-room"
+                    >—</span
+                  >
+                  <span
+                    class="payment-side-card__nights"
+                    id="pay-en-side-nights"
+                    >—</span
+                  >
+                </div>
+                <div class="payment-side-card payment-side-card--stack">
+                  <div class="payment-side-mini">
+                    <span class="payment-side-mini__k">CHECK-IN</span>
+                    <span class="payment-side-mini__v" id="pay-en-side-in"
+                      >—</span
+                    >
+                  </div>
+                  <div class="payment-side-mini">
+                    <span class="payment-side-mini__k">CHECK-OUT</span>
+                    <span class="payment-side-mini__v" id="pay-en-side-out"
+                      >—</span
+                    >
+                  </div>
+                  <div class="payment-side-mini">
+                    <span class="payment-side-mini__k">GUESTS</span>
+                    <span class="payment-side-mini__v" id="pay-en-side-guests"
+                      >—</span
+                    >
+                  </div>
+                  <div class="payment-side-mini">
+                    <span class="payment-side-mini__k">BOOKING NO.</span>
+                    <span class="payment-side-mini__v" id="pay-en-side-order"
+                      >—</span
+                    >
+                  </div>
+                </div>
+                <div class="payment-side-card payment-side-card--payrow">
+                  <span class="payment-side-payrow__k">PAYMENT</span>
+                  <span class="payment-side-payrow__v" id="pay-en-side-method"
+                    >—</span
+                  >
+                  <button
+                    type="button"
+                    id="pay-en-method-drawer-open"
+                    class="payment-side-payrow__change"
+                  >
+                    Change
+                  </button>
+                </div>
+                <div class="payment-side-card payment-side-card--total">
+                  <span class="payment-side-total__k">FINAL TOTAL</span>
+                  <span class="payment-side-total__v" id="pay-en-side-total"
+                    >—</span
+                  >
+                </div>
+                <div class="payment-side-actions" id="payment-btn-area-en">
+                  <button
+                    type="button"
+                    id="payment-submit-btn-en"
+                    class="btn reserve-btn confirm-pay-submit reserveinfo-submit-btn payment-submit-cta"
+                  >
+                    Pay
+                  </button>
+                </div>
+                <p class="payment-side-foot payment-side-foot--ssl">
+                  <span class="lock" aria-hidden="true"></span>
+                  SSL SECURED · Encrypted transmission of personal data
+                </p>
+                <div class="payment-side-divider" aria-hidden="true"></div>
+                <p class="payment-side-foot payment-side-foot--legal">
+                  By paying, you agree to the
+                  <a
+                    class="payment-legal-link"
+                    href="confirm.html"
+                    target="_blank"
+                    rel="noopener"
+                    >Terms of Use</a
+                  >
+                  and
+                  <a
+                    class="payment-legal-link"
+                    href="confirm.html"
+                    target="_blank"
+                    rel="noopener"
+                    >Cancellation &amp; Refund Policy</a
+                  >.
+                </p>
+              </div>
+            </aside>
+          </div>
         </div>
 
-        <!-- Processing message -->
         <p class="payment-status-msg" id="payment-processing-msg-en" hidden>
           Processing payment...
         </p>
 
-        <!-- Error area -->
         <div id="payment-error-area-en" class="payment-error-area" hidden>
           <p id="payment-error-msg-en" class="payment-error-msg"></p>
           <button
@@ -692,7 +1557,144 @@
         ></footer>
       </main>
 
-      <script src="js/booking-pricing.js?v=3"></script>
+      <div
+        id="payment-method-drawer-en"
+        class="payment-method-drawer"
+        hidden
+        aria-hidden="true"
+      >
+        <div
+          class="payment-method-drawer__backdrop"
+          data-payment-drawer-close
+          tabindex="-1"
+        ></div>
+        <div
+          class="payment-method-drawer__panel"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="payment-method-drawer-title-en"
+        >
+          <header class="payment-method-drawer__head">
+            <h2
+              id="payment-method-drawer-title-en"
+              class="payment-method-drawer__head-title"
+            >
+              PAYMENT METHOD
+            </h2>
+            <button
+              type="button"
+              class="payment-method-drawer__close"
+              id="payment-method-drawer-close-en"
+              aria-label="Close"
+            >
+              <span aria-hidden="true">×</span>
+            </button>
+          </header>
+          <div class="payment-method-drawer__body">
+            <div class="payment-method-drawer__section-head">
+              <span class="payment-method-drawer__section-kicker"
+                >SELECT METHOD</span
+              >
+              <span
+                class="payment-method-drawer__section-rule"
+                aria-hidden="true"
+              ></span>
+            </div>
+            <div
+              class="payment-method-drawer__options"
+              role="radiogroup"
+              aria-labelledby="payment-method-drawer-section-en"
+            >
+              <span
+                id="payment-method-drawer-section-en"
+                class="visually-hidden"
+                >Select payment method</span
+              >
+              <label class="payment-method-option">
+                <input
+                  type="radio"
+                  name="payment-drawer-method-en"
+                  value="card"
+                  class="visually-hidden"
+                />
+                <span class="payment-method-option__icon" aria-hidden="true">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="28"
+                    height="22"
+                    viewBox="0 0 28 22"
+                    fill="none"
+                    aria-hidden="true"
+                  >
+                    <rect
+                      x="1"
+                      y="4"
+                      width="26"
+                      height="14"
+                      rx="2"
+                      stroke="currentColor"
+                      stroke-width="1.25"
+                    />
+                    <line
+                      x1="1"
+                      y1="9"
+                      x2="27"
+                      y2="9"
+                      stroke="currentColor"
+                      stroke-width="1.25"
+                    />
+                  </svg>
+                </span>
+                <span class="payment-method-option__text">
+                  <span class="payment-method-option__title">Credit card</span>
+                  <span class="payment-method-option__desc"
+                    >Domestic and international cards accepted</span
+                  >
+                </span>
+                <span
+                  class="payment-method-option__check"
+                  aria-hidden="true"
+                ></span>
+              </label>
+              <label class="payment-method-option">
+                <input
+                  type="radio"
+                  name="payment-drawer-method-en"
+                  value="naver"
+                  class="visually-hidden"
+                />
+                <span
+                  class="payment-method-option__icon payment-method-option__icon--naver"
+                  aria-hidden="true"
+                >
+                  <span class="payment-method-option__naver-n">N</span>
+                </span>
+                <span class="payment-method-option__text">
+                  <span class="payment-method-option__title">Naver Pay</span>
+                  <span class="payment-method-option__desc"
+                    >Pay quickly with Naver Pay</span
+                  >
+                </span>
+                <span
+                  class="payment-method-option__check"
+                  aria-hidden="true"
+                ></span>
+              </label>
+            </div>
+            <div class="payment-method-drawer__footer">
+              <button
+                type="button"
+                id="payment-method-drawer-done-en"
+                class="btn reserve-btn confirm-pay-submit reserveinfo-submit-btn payment-method-drawer__done"
+              >
+                Apply selection
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <script src="js/booking-pricing.js?v=4"></script>
       <script>
         document.addEventListener("DOMContentLoaded", function () {
           var P = window.GraffordBookingPricing;
@@ -708,7 +1710,7 @@
 
           var loadingMsg = document.getElementById("payment-loading-msg-en");
           var noDataEl = document.getElementById("payment-no-data-en");
-          var summaryEl = document.getElementById("payment-summary-en");
+          var layoutEn = document.getElementById("payment-layout-en");
           var btnArea = document.getElementById("payment-btn-area-en");
           var submitBtn = document.getElementById("payment-submit-btn-en");
           var processingMsg = document.getElementById(
@@ -721,6 +1723,9 @@
             "page-loading-overlay",
           );
           var pageLoadingText = document.getElementById("page-loading-text");
+
+          var quote = null;
+          var finalAmount = 0;
 
           function showPageLoading(msg) {
             if (pageLoadingText) {
@@ -741,6 +1746,11 @@
             if (loadingMsg) loadingMsg.hidden = true;
           }
 
+          function setText(id, text) {
+            var node = document.getElementById(id);
+            if (node) node.textContent = text;
+          }
+
           if (!saved || !saved.orderNo) {
             hideLoading();
             if (noDataEl) noDataEl.hidden = false;
@@ -759,6 +1769,16 @@
           var guestRequest = saved.guestRequest || "";
           var guestCount = parseInt(saved.guestCount || "2", 10) || 2;
           var payMethod = saved.payMethod || "card";
+          if (payMethod !== "card" && payMethod !== "naver") {
+            payMethod = "card";
+            saved.payMethod = "card";
+            try {
+              sessionStorage.setItem(
+                "graffordPaymentData",
+                JSON.stringify(saved),
+              );
+            } catch (_pm) {}
+          }
           var reservationPreSaved =
             String(saved.reservationPreSaved || "") === "1";
           var preSavedCancelToken = String(saved.cancelToken || "");
@@ -773,21 +1793,32 @@
             return "/api/reservations";
           }
 
-          function computeAmount() {
-            var savedAmount = Number(saved.totalAmount || 0);
-            if (savedAmount > 0) {
-              return savedAmount;
+          function roomRateApiUrl() {
+            var base = "";
+            if (typeof window !== "undefined" && window.__GRAFFORD_API_BASE__) {
+              base = String(window.__GRAFFORD_API_BASE__).replace(/\/$/, "");
             }
-            if (P && room && checkIn && checkOut) {
-              var quote = P.computeStay(room, checkIn, checkOut, extraGuests);
-              if (quote && quote.nights > 0) {
-                return quote.discountedGrandTotal || 0;
-              }
-            }
-            return savedAmount;
+            return base + "/api/room-rate";
           }
 
-          var finalAmount = computeAmount();
+          async function hydrateRates() {
+            if (!P) return;
+            try {
+              var rateRes = await fetch(roomRateApiUrl());
+              if (!rateRes.ok) return;
+              var rateData = await rateRes.json();
+              if (
+                rateData.rates &&
+                typeof P.setRoomWeekdayBase === "function"
+              ) {
+                P.setRoomWeekdayBase(rateData.rates);
+              }
+              var ch = rateData.charges || rateData;
+              if (ch && typeof P.setCharges === "function") {
+                P.setCharges(ch);
+              }
+            } catch (_err) {}
+          }
 
           var ROOM_LABELS = {
             G1: "Grafford G1",
@@ -796,23 +1827,195 @@
             G4: "Grafford G4",
           };
 
-          function formatDate(ymd) {
-            if (!ymd) return "—";
-            var parts = ymd.split("-");
-            if (parts.length !== 3) return ymd;
-            return parts[1] + "/" + parts[2] + "/" + parts[0];
+          var EN_WD = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
+
+          function formatKrwEn(n) {
+            return (
+              "₩" +
+              Number(n || 0).toLocaleString("en-US", {
+                maximumFractionDigits: 0,
+              })
+            );
           }
 
-          hideLoading();
-          if (summaryEl) summaryEl.hidden = false;
-          if (btnArea) btnArea.hidden = false;
+          function formatYmdLongEn(ymd, timeStr) {
+            var d = P && P.parseYMD ? P.parseYMD(ymd) : null;
+            if (!d) return "—";
+            var mo = [
+              "Jan",
+              "Feb",
+              "Mar",
+              "Apr",
+              "May",
+              "Jun",
+              "Jul",
+              "Aug",
+              "Sep",
+              "Oct",
+              "Nov",
+              "Dec",
+            ][d.getMonth()];
+            return (
+              mo +
+              " " +
+              d.getDate() +
+              ", " +
+              d.getFullYear() +
+              " (" +
+              EN_WD[d.getDay()] +
+              ") " +
+              (timeStr || "")
+            ).trim();
+          }
 
-          var orderNoEl = document.getElementById("pay-order-no-en");
-          var roomEl = document.getElementById("pay-room-en");
-          var scheduleEl = document.getElementById("pay-schedule-en");
-          var guestEl = document.getElementById("pay-guest-en");
-          var amountEl = document.getElementById("pay-amount-en");
-          var payMethodElEn = document.getElementById("pay-method-en");
+          function formatSideDateEn(ymd, timeStr) {
+            var d = P && P.parseYMD ? P.parseYMD(ymd) : null;
+            if (!d) return "—";
+            var m = String(d.getMonth() + 1).padStart(2, "0");
+            var day = String(d.getDate()).padStart(2, "0");
+            return (
+              m +
+              ". " +
+              day +
+              " (" +
+              EN_WD[d.getDay()] +
+              ") " +
+              (timeStr || "")
+            ).trim();
+          }
+
+          function renderBreakdownEn(q) {
+            var el = document.getElementById("pay-en-breakdown");
+            if (!el) return;
+            if (!q || !q.nights) {
+              el.innerHTML = "";
+              return;
+            }
+            var rows = [];
+            function row(label, amount, isDiscount) {
+              var v = Number(amount || 0);
+              var showNeg = isDiscount && v > 0;
+              rows.push(
+                '<div class="payment-breakdown__row">' +
+                  '<span class="payment-breakdown__label">' +
+                  label +
+                  "</span>" +
+                  '<span class="payment-breakdown__amount">' +
+                  (showNeg ? "- " : "") +
+                  formatKrwEn(showNeg ? v : v) +
+                  "</span></div>",
+              );
+            }
+            if (q.weekdayNights > 0) {
+              row(
+                room +
+                  " (weeknight) " +
+                  formatKrwEn(q.baseNightly) +
+                  " × " +
+                  q.weekdayNights +
+                  " night" +
+                  (q.weekdayNights > 1 ? "s" : ""),
+                q.weekdaySubtotal,
+                false,
+              );
+            }
+            if (q.weekendNights > 0) {
+              row(
+                room +
+                  " (weekend) " +
+                  formatKrwEn(q.weekendRatePerNight) +
+                  " × " +
+                  q.weekendNights +
+                  " night" +
+                  (q.weekendNights > 1 ? "s" : ""),
+                q.weekendSubtotal,
+                false,
+              );
+            }
+            if (q.extraGuestTotal > 0 && P) {
+              row(
+                "Extra guests " +
+                  formatKrwEn(P.EXTRA_PER_PERSON_PER_NIGHT) +
+                  " × " +
+                  q.extraGuests +
+                  " guest" +
+                  (q.extraGuests > 1 ? "s" : "") +
+                  " × " +
+                  q.nights +
+                  " night" +
+                  (q.nights > 1 ? "s" : ""),
+                q.extraGuestTotal,
+                false,
+              );
+            }
+            if ((q.consecutiveSale || 0) > 0) {
+              row(
+                "Multi-night discount (" + q.nights + " nights)",
+                q.consecutiveSale,
+                true,
+              );
+            }
+            if ((q.promotionDiscount || 0) > 0) {
+              row(
+                "Promotion (" + (q.promotionPercent || 0) + "% off)",
+                q.promotionDiscount,
+                true,
+              );
+            }
+            el.innerHTML = rows.join("");
+          }
+
+          function renderRefundCalloutEn(checkInYmd) {
+            var el = document.getElementById("pay-en-refund-callout");
+            if (!el || !P || !P.parseYMD) return;
+            var ci = P.parseYMD(checkInYmd);
+            if (!ci) {
+              el.hidden = true;
+              return;
+            }
+            var today = new Date();
+            var t0 = new Date(
+              today.getFullYear(),
+              today.getMonth(),
+              today.getDate(),
+            );
+            var remain = Math.floor((ci - t0) / 86400000);
+            var refundPct;
+            if (remain > 15) refundPct = 100;
+            else if (remain >= 12) refundPct = 80;
+            else if (remain >= 9) refundPct = 70;
+            else if (remain >= 7) refundPct = 60;
+            else if (remain >= 5) refundPct = 50;
+            else refundPct = 0;
+            var md =
+              [
+                "Jan",
+                "Feb",
+                "Mar",
+                "Apr",
+                "May",
+                "Jun",
+                "Jul",
+                "Aug",
+                "Sep",
+                "Oct",
+                "Nov",
+                "Dec",
+              ][ci.getMonth()] +
+              " " +
+              ci.getDate();
+            el.innerHTML =
+              'There are <span class="payment-callout__accent">' +
+              remain +
+              " day" +
+              (remain === 1 ? "" : "s") +
+              "</span> until check-in (" +
+              md +
+              '). If you cancel now, a <span class="payment-callout__accent">' +
+              refundPct +
+              "% refund</span> applies.";
+            el.hidden = false;
+          }
 
           var PAY_METHOD_LABELS_EN = {
             card: "Credit Card",
@@ -820,23 +2023,174 @@
             bank: "Bank Transfer",
           };
 
-          if (orderNoEl) orderNoEl.textContent = orderNo;
-          if (roomEl) roomEl.textContent = ROOM_LABELS[room] || room;
-          if (scheduleEl)
-            scheduleEl.textContent =
-              formatDate(checkIn) + " – " + formatDate(checkOut);
-          if (guestEl) guestEl.textContent = guestName || "—";
-          if (amountEl)
-            amountEl.textContent =
-              "₩" + Number(finalAmount).toLocaleString("ko-KR");
-          if (payMethodElEn)
-            payMethodElEn.textContent =
-              PAY_METHOD_LABELS_EN[payMethod] || payMethod || "—";
-
-          // Naver Pay: update button label
-          if (payMethod === "naver" && submitBtn) {
-            submitBtn.textContent = "Pay with Naver Pay";
+          function effectiveDrawerMethodEn() {
+            return payMethod === "naver" ? "naver" : "card";
           }
+
+          function persistSavedEn() {
+            try {
+              sessionStorage.setItem(
+                "graffordPaymentData",
+                JSON.stringify(saved),
+              );
+            } catch (e0) {}
+          }
+
+          function refreshPaymentMethodUiEn() {
+            var pmLabel = PAY_METHOD_LABELS_EN[payMethod] || payMethod || "—";
+            setText("pay-en-payment-method", pmLabel);
+            setText("pay-en-side-method", pmLabel);
+            if (submitBtn) {
+              var amtStr = formatKrwEn(finalAmount);
+              if (payMethod === "naver") {
+                submitBtn.textContent = "Pay with Naver Pay →";
+              } else {
+                submitBtn.textContent = "Pay now →";
+              }
+            }
+          }
+
+          var drawerEn = document.getElementById("payment-method-drawer-en");
+          var drawerEnBackdrop = drawerEn
+            ? drawerEn.querySelector(".payment-method-drawer__backdrop")
+            : null;
+          var drawerEnClose = document.getElementById(
+            "payment-method-drawer-close-en",
+          );
+          var drawerEnDone = document.getElementById(
+            "payment-method-drawer-done-en",
+          );
+          var drawerEnOpen = document.getElementById(
+            "pay-en-method-drawer-open",
+          );
+
+          function syncDrawerRadiosEn() {
+            if (!drawerEn) return;
+            var v = effectiveDrawerMethodEn();
+            var inputs = drawerEn.querySelectorAll(
+              'input[name="payment-drawer-method-en"]',
+            );
+            for (var i = 0; i < inputs.length; i++) {
+              inputs[i].checked = inputs[i].value === v;
+            }
+          }
+
+          function openDrawerEn() {
+            if (!drawerEn) return;
+            syncDrawerRadiosEn();
+            drawerEn.hidden = false;
+            drawerEn.classList.add("is-open");
+            drawerEn.setAttribute("aria-hidden", "false");
+            document.body.style.overflow = "hidden";
+            requestAnimationFrame(function () {
+              drawerEn.classList.add("is-visible");
+            });
+          }
+
+          function closeDrawerEn() {
+            if (!drawerEn) return;
+            drawerEn.classList.remove("is-visible");
+            document.body.style.overflow = "";
+            window.setTimeout(function () {
+              if (!drawerEn.classList.contains("is-visible")) {
+                drawerEn.classList.remove("is-open");
+                drawerEn.hidden = true;
+                drawerEn.setAttribute("aria-hidden", "true");
+              }
+            }, 280);
+          }
+
+          function applyDrawerSelectionEn() {
+            if (!drawerEn) return;
+            var checked = drawerEn.querySelector(
+              'input[name="payment-drawer-method-en"]:checked',
+            );
+            var v = checked ? checked.value : effectiveDrawerMethodEn();
+            payMethod = v === "naver" ? "naver" : "card";
+            saved.payMethod = payMethod;
+            persistSavedEn();
+            refreshPaymentMethodUiEn();
+            closeDrawerEn();
+          }
+
+          if (drawerEnOpen) {
+            drawerEnOpen.addEventListener("click", function () {
+              openDrawerEn();
+            });
+          }
+          if (drawerEnClose) {
+            drawerEnClose.addEventListener("click", function () {
+              closeDrawerEn();
+            });
+          }
+          if (drawerEnBackdrop) {
+            drawerEnBackdrop.addEventListener("click", function () {
+              closeDrawerEn();
+            });
+          }
+          if (drawerEnDone) {
+            drawerEnDone.addEventListener("click", function () {
+              applyDrawerSelectionEn();
+            });
+          }
+
+          async function bootstrapEn() {
+            await hydrateRates();
+            quote = P
+              ? P.computeStay(room, checkIn, checkOut, extraGuests)
+              : null;
+            var savedAmt = Number(saved.totalAmount || 0);
+            finalAmount =
+              savedAmt > 0
+                ? savedAmt
+                : quote && quote.discountedGrandTotal
+                  ? quote.discountedGrandTotal
+                  : 0;
+
+            hideLoading();
+            if (layoutEn) layoutEn.hidden = false;
+
+            setText("pay-en-booking-no", orderNo);
+            setText("pay-en-room", ROOM_LABELS[room] || room);
+            setText("pay-en-checkin", formatYmdLongEn(checkIn, "16:00"));
+            setText(
+              "pay-en-checkout",
+              formatYmdLongEn(checkOut, "11:00") +
+                (stayNights > 0
+                  ? " · " + stayNights + " night" + (stayNights > 1 ? "s" : "")
+                  : ""),
+            );
+            setText(
+              "pay-en-guests",
+              guestCount + " guest" + (guestCount > 1 ? "s" : ""),
+            );
+            setText("pay-en-name", guestName || "—");
+
+            renderBreakdownEn(quote);
+            setText("pay-en-total-bar", formatKrwEn(finalAmount));
+
+            setText("pay-en-side-room", room + " · Grafford");
+            setText(
+              "pay-en-side-nights",
+              stayNights + " night" + (stayNights > 1 ? "s" : ""),
+            );
+            setText("pay-en-side-in", formatSideDateEn(checkIn, "16:00"));
+            setText("pay-en-side-out", formatSideDateEn(checkOut, "11:00"));
+            setText(
+              "pay-en-side-guests",
+              guestCount + " guest" + (guestCount > 1 ? "s" : ""),
+            );
+            setText("pay-en-side-order", orderNo);
+            setText("pay-en-side-total", formatKrwEn(finalAmount));
+
+            renderRefundCalloutEn(checkIn);
+
+            refreshPaymentMethodUiEn();
+          }
+
+          bootstrapEn().catch(function () {
+            hideLoading();
+          });
 
           function showError(msg) {
             hidePageLoading();
@@ -973,12 +2327,19 @@
               });
               var verifyData = await verifyRes.json();
               if (!verifyRes.ok || !verifyData.ok) {
-                var verifyErrMsgEn = verifyData.error || verifyData.message || "";
+                var verifyErrMsgEn =
+                  verifyData.error || verifyData.message || "";
                 if (verifyData.expected != null && verifyData.actual != null) {
-                  verifyErrMsgEn += "\n(Expected: " + verifyData.expected + " KRW / Actual: " + verifyData.actual + " KRW)";
+                  verifyErrMsgEn +=
+                    "\n(Expected: " +
+                    verifyData.expected +
+                    " KRW / Actual: " +
+                    verifyData.actual +
+                    " KRW)";
                 }
                 showError(
-                  "Payment verification failed. If you believe your payment went through, please contact support.\n" + verifyErrMsgEn,
+                  "Payment verification failed. If you believe your payment went through, please contact support.\n" +
+                    verifyErrMsgEn,
                 );
                 return;
               }

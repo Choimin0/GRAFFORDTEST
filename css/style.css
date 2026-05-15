@@ -12,7 +12,7 @@
   --gold-500: #a8833e;
   --stone-red: #8c2b21;
   --stone-green: #4a522a;
-  
+
   /* Semantic colors (components use these, not raw hex) */
   --color-text-primary: var(--stone-800);
   --color-text-muted: var(--stone-400);
@@ -3751,7 +3751,7 @@ main.content-section:has(> .site-footer.site-business-footer) {
   align-items: center;
   gap: var(--space-12);
   padding: var(--space-12) var(--space-12);
-  border-radius: 12px;
+  border-radius: 0px;
   border: 1px solid var(--stone-200);
   background: var(--stone-50);
   color: var(--stone-400);
@@ -3845,6 +3845,7 @@ main.content-section:has(> .site-footer.site-business-footer) {
 .reservation-discount-card--on {
   background: color-mix(in srgb, var(--gold-500) 12%, var(--stone-50));
   border-color: color-mix(in srgb, var(--gold-500) 42%, var(--stone-200));
+  border-radius: 0px;
   color: var(--grafford-dark-brown);
 }
 
@@ -4113,13 +4114,801 @@ main.content-section:has(> .site-footer.site-business-footer) {
 }
 
 .payment-page {
-  width: 100vw;
+  width: 100%;
   max-width: 100%;
   min-height: 100svh;
   margin-left: auto;
   margin-right: auto;
+  align-items: flex-start;
+  justify-content: flex-start;
+  background: var(--stone-50);
+}
+
+main.content-section.confirm-page.payment-page {
+  justify-content: flex-start;
+  align-items: stretch;
+  box-shadow: none;
+  border-radius: 0;
+  padding-left: 0;
+  padding-right: 0;
+}
+
+main.content-section.confirm-page.payment-page > .payment-status-msg,
+main.content-section.confirm-page.payment-page > #payment-no-data,
+main.content-section.confirm-page.payment-page > #payment-no-data-en,
+main.content-section.confirm-page.payment-page > #payment-processing-msg,
+main.content-section.confirm-page.payment-page > #payment-processing-msg-en,
+main.content-section.confirm-page.payment-page > #payment-error-area,
+main.content-section.confirm-page.payment-page > #payment-error-area-en {
+  padding-left: clamp(var(--layout-margin-side-mobile), 4vw, var(--space-48));
+  padding-right: clamp(var(--layout-margin-side-mobile), 4vw, var(--space-48));
+  box-sizing: border-box;
+}
+
+@media (min-width: 768px) {
+  main.content-section.confirm-page.payment-page > .payment-status-msg,
+  main.content-section.confirm-page.payment-page > #payment-no-data,
+  main.content-section.confirm-page.payment-page > #payment-no-data-en,
+  main.content-section.confirm-page.payment-page > #payment-processing-msg,
+  main.content-section.confirm-page.payment-page > #payment-processing-msg-en,
+  main.content-section.confirm-page.payment-page > #payment-error-area,
+  main.content-section.confirm-page.payment-page > #payment-error-area-en {
+    padding-left: var(--layout-margin-side-tablet);
+    padding-right: var(--layout-margin-side-tablet);
+  }
+}
+
+.payment-page-shell {
+  width: 100vw;
+  max-width: 100vw;
+  margin-left: calc(50% - 50vw);
+  margin-right: calc(50% - 50vw);
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;
+  flex: 1 0 auto;
+  min-width: 0;
+}
+
+/* 셸 안에서는 reserve-check 밴드의 이중 100vw 브레이크아웃 제거 */
+.payment-page-shell .reserve-check-page-band.payment-page-shell__band {
+  width: 100%;
+  max-width: 100%;
+  margin-left: 0;
+  margin-right: 0;
+}
+
+.payment-page-step-indicator {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: 0.45rem;
+  margin: 0;
+  min-height: 1.35rem;
+}
+
+.payment-page-step-indicator__dot {
+  display: block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  box-sizing: border-box;
+  border: 1px solid var(--gold-500);
+  background: transparent;
+}
+
+.payment-page-step-indicator__dot--current {
+  border-color: var(--gold-500);
+  background: var(--gold-500);
+}
+
+.lang-kr .payment-page-shell .reserve-check-page-band__title,
+.lang-kr .payment-page-shell .reserve-check-page-band__subtitle {
+  font-family: var(--font-family-body-kr);
+}
+
+.lang-en .payment-page-shell .reserve-check-page-band__title,
+.lang-en .payment-page-shell .reserve-check-page-band__subtitle {
+  font-family: var(--font-family-body-en);
+}
+
+.payment-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(260px, min(38vw, 440px));
+  gap: clamp(1.25rem, 4vw, 2.75rem);
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding: var(--space-32)
+    clamp(var(--layout-margin-side-mobile), 4vw, var(--space-48))
+    var(--space-48);
+  box-sizing: border-box;
+  align-items: start;
+}
+
+@media (min-width: 768px) {
+  .payment-layout {
+    padding-left: var(--layout-margin-side-tablet);
+    padding-right: var(--layout-margin-side-tablet);
+  }
+}
+
+@media (max-width: 899px) {
+  .payment-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .payment-layout__sidebar {
+    order: -1;
+  }
+
+  .payment-sidebar-sticky {
+    position: static;
+    top: auto;
+  }
+}
+
+@media (min-width: 900px) {
+  .payment-layout__sidebar {
+    position: sticky;
+    top: calc(var(--site-nav-height) + 1rem);
+    align-self: start;
+  }
+}
+
+.payment-layout__main {
+  min-width: 0;
+}
+
+.payment-panel {
+  margin-bottom: clamp(2rem, 5vw, 3rem);
+}
+
+.payment-panel:last-child {
+  margin-bottom: 0;
+}
+
+.payment-section-head {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  margin: 0 0 1.15rem;
+}
+
+.payment-section-head__label {
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--gold-500);
+  white-space: nowrap;
+}
+
+.payment-section-head__rule {
+  flex: 1;
+  height: 1px;
+  background: color-mix(in srgb, var(--gold-500) 55%, var(--stone-200));
+  min-width: 1.5rem;
+}
+
+.payment-kv {
+  margin: 0;
+}
+
+.payment-kv__row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 1rem;
+  padding: 0.55rem 0;
+  border-bottom: 1px solid color-mix(in srgb, var(--stone-800) 8%, transparent);
+  font-size: var(--font-size-feature-body-sm);
+}
+
+.payment-kv__row:first-of-type {
+  padding-top: 0;
+}
+
+.payment-kv__row dt {
+  margin: 0;
+  font-weight: 500;
+  color: var(--stone-400);
+  letter-spacing: 0.04em;
+  font-size: 0.7rem;
+  text-transform: uppercase;
+}
+
+.payment-kv__row dd {
+  margin: 0;
+  text-align: right;
+  color: var(--stone-800);
+  font-weight: 500;
+}
+
+.payment-breakdown {
+  margin-bottom: 0.5rem;
+}
+
+.payment-breakdown__row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 1rem;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid color-mix(in srgb, var(--stone-800) 6%, transparent);
+  font-size: var(--font-size-feature-body-sm);
+}
+
+.payment-breakdown__label {
+  color: var(--stone-700);
+  text-align: left;
+}
+
+.payment-breakdown__amount {
+  color: var(--stone-800);
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.payment-total-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 0.35rem;
+  padding: 0.85rem 1rem;
+  background: var(--stone-900);
+  color: var(--stone-50);
+  border-radius: 0;
+}
+
+.payment-total-bar__label {
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+.payment-total-bar__amount {
+  font-size: clamp(1.1rem, 2.2vw, 1.35rem);
+  font-weight: 500;
+  letter-spacing: -0.02em;
+}
+
+.lang-kr .payment-total-bar,
+.lang-kr .payment-total-bar__label,
+.lang-kr .payment-total-bar__amount {
+  font-family: var(--font-family-body-kr);
+}
+
+.lang-en .payment-total-bar,
+.lang-en .payment-total-bar__label,
+.lang-en .payment-total-bar__amount {
+  font-family: var(--font-family-body-en);
+}
+
+.payment-policy-lead {
+  margin: 0 0 1rem;
+  font-size: var(--font-size-feature-body-sm);
+  line-height: 1.65;
+  color: var(--stone-500);
+}
+
+.payment-refund-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--font-size-feature-body-sm);
+  margin-bottom: 1.25rem;
+}
+
+.payment-refund-table th,
+.payment-refund-table td {
+  padding: 0.45rem 0;
+  text-align: left;
+  border: none;
+  border-bottom: 1px solid color-mix(in srgb, var(--stone-800) 8%, transparent);
+}
+
+.payment-refund-table th {
+  color: var(--stone-400);
+  font-weight: 500;
+  font-size: 0.72rem;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+.payment-refund-table td:last-child {
+  text-align: right;
+  white-space: nowrap;
+}
+
+.payment-refund-table__row--danger td {
+  color: var(--stone-red);
+  font-weight: 600;
+}
+
+.payment-callout {
+  padding: 0.85rem 1rem;
+  margin-top: 0.75rem;
+  border-radius: 2px;
+  font-size: var(--font-size-feature-body-sm);
+  line-height: 1.6;
+  color: var(--stone-800);
+}
+
+.payment-callout--red {
+  background: color-mix(in srgb, var(--stone-red) 10%, var(--stone-50));
+  border-left: 3px solid var(--stone-red);
+}
+
+.payment-callout__accent {
+  color: var(--stone-red);
+  font-weight: 700;
+}
+
+.payment-callout--green {
+  background: color-mix(in srgb, var(--stone-green) 10%, var(--stone-50));
+  border-left: 3px solid var(--stone-green);
+  color: var(--stone-800);
+}
+
+.payment-callout--green .payment-callout__strong {
+  color: var(--stone-green);
+  font-weight: 700;
+}
+
+.payment-sidebar-sticky {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.payment-side-card {
+  background: var(--stone-50);
+  border: 1px solid var(--stone-200);
+  border-radius: 2px;
+  padding: 0.75rem 0.85rem;
+  box-sizing: border-box;
+}
+
+.payment-side-card--header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 0.75rem;
+  background: var(--stone-900);
+  color: var(--stone-50);
+  border-color: var(--stone-900);
+}
+
+.payment-side-card__room {
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+
+.payment-side-card__nights {
+  font-size: 0.78rem;
+  color: color-mix(in srgb, var(--stone-50) 70%, transparent);
+  white-space: nowrap;
+}
+
+.payment-side-card--stack {
+  padding: 0;
+}
+
+.payment-side-mini {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.55rem 0.85rem;
+  border-bottom: 1px solid var(--stone-200);
+  font-size: 0.78rem;
+}
+
+.payment-side-mini:last-child {
+  border-bottom: none;
+}
+
+.payment-side-mini__k {
+  color: var(--stone-400);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+.payment-side-mini__v {
+  color: var(--stone-800);
+  font-weight: 500;
+  text-align: right;
+}
+
+.payment-side-card--payrow {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.35rem 0.5rem;
+  padding: 0.65rem 0.85rem;
+}
+
+.payment-side-payrow__k {
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--stone-400);
+}
+
+.payment-side-payrow__v {
+  font-size: 0.88rem;
+  color: var(--stone-800);
+  font-weight: 500;
+  text-align: center;
+}
+
+.payment-side-payrow__change {
+  font-size: 0.72rem;
+  color: var(--stone-600);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+  appearance: none;
+  background: transparent;
+  border: none;
+  padding: 0;
+  margin: 0;
+  font: inherit;
+  letter-spacing: inherit;
+  cursor: pointer;
+  text-align: inherit;
+}
+
+.payment-side-payrow__change:hover,
+.payment-side-payrow__change:focus-visible {
+  color: var(--stone-800);
+}
+
+.payment-side-payrow__change:focus-visible {
+  outline: 2px solid var(--gold-500);
+  outline-offset: 2px;
+}
+
+/* 결제 페이지 — PAYMENT METHOD 우측 슬라이드 패널 */
+.payment-method-drawer {
+  position: fixed;
+  inset: 0;
+  z-index: 10050;
+  overflow: hidden;
+}
+
+.payment-method-drawer__backdrop {
+  position: absolute;
+  inset: 0;
+  background: color-mix(in srgb, var(--stone-800) 42%, transparent);
+  opacity: 0;
+  transition: opacity 0.28s ease;
+}
+
+.payment-method-drawer.is-visible .payment-method-drawer__backdrop {
+  opacity: 1;
+}
+
+.payment-method-drawer__panel {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: min(22rem, 92vw);
+  max-width: 100%;
+  display: flex;
+  flex-direction: column;
+  background: var(--stone-50);
+  box-shadow: -12px 0 36px rgba(28, 25, 23, 0.14);
+  transform: translateX(100%);
+  transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.payment-method-drawer.is-visible .payment-method-drawer__panel {
+  transform: translateX(0);
+}
+
+.payment-method-drawer__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  flex-shrink: 0;
+  padding: 0.85rem 1rem;
+  background-color: color-mix(in srgb, var(--stone-400) 66%, transparent);
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(8px);
+  border-bottom: 1px solid color-mix(in srgb, var(--stone-400) 40%, transparent);
+}
+
+.payment-method-drawer__head-title {
+  margin: 0;
+  font-family: var(--font-family-nav-en);
+  font-size: clamp(0.78rem, 2.2vw, 0.95rem);
+  font-weight: 400;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--stone-50);
+  line-height: 1.2;
+}
+
+.payment-method-drawer__close {
+  flex-shrink: 0;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
+  margin: 0;
+  color: var(--stone-50);
+  background: transparent;
+  border: 1px solid var(--stone-50);
+  border-radius: 2px;
+  cursor: pointer;
+  font-size: 1.25rem;
+  line-height: 1;
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease,
+    border-color 0.2s ease;
+}
+
+.payment-method-drawer__close:hover,
+.payment-method-drawer__close:focus-visible {
+  background: color-mix(in srgb, var(--stone-50) 12%, transparent);
+}
+
+.payment-method-drawer__close:focus-visible {
+  outline: 2px solid var(--gold-500);
+  outline-offset: 2px;
+}
+
+.payment-method-drawer__body {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  background: var(--stone-50);
+}
+
+.payment-method-drawer__section-head {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 1rem 1rem 0.65rem;
+}
+
+.payment-method-drawer__section-kicker {
+  flex-shrink: 0;
+  font-family: var(--font-family-nav-en);
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--gold-500);
+}
+
+.payment-method-drawer__section-rule {
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(
+    to right,
+    color-mix(in srgb, var(--gold-500) 55%, transparent),
+    color-mix(in srgb, var(--stone-300) 80%, transparent)
+  );
+}
+
+.payment-method-drawer__options {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  padding: 0 0 0.5rem;
+}
+
+.payment-method-option {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 0.75rem 0.85rem;
+  margin: 0 0.65rem 0.5rem;
+  padding: 0.85rem 0.85rem 0.85rem calc(0.85rem - 3px);
+  border: 1px solid var(--stone-200);
+  border-left: 3px solid transparent;
+  background: var(--stone-50);
+  cursor: pointer;
+  transition:
+    border-color 0.2s ease,
+    background-color 0.2s ease;
+}
+
+.payment-method-option:hover {
+  background: var(--stone-100);
+}
+
+.payment-method-option:has(input:checked) {
+  border-left-color: var(--gold-500);
+  background: color-mix(in srgb, var(--stone-100) 65%, var(--stone-50));
+}
+
+.payment-method-option__icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  color: var(--stone-600);
+}
+
+.payment-method-option__icon--naver {
+  width: 2.5rem;
+  height: 1.65rem;
+  border-radius: 4px;
+  background: #03c75a;
+  color: #fff;
+}
+
+.payment-method-option__naver-n {
+  font-family: var(--font-family-body-en);
+  font-weight: 700;
+  font-size: 0.95rem;
+  line-height: 1;
+}
+
+.payment-method-option__text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  min-width: 0;
+}
+
+.lang-kr .payment-method-option__title {
+  font-family: var(--font-family-body-kr);
+}
+
+.lang-en .payment-method-option__title {
+  font-family: var(--font-family-body-en);
+}
+
+.payment-method-option__title {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--stone-800);
+}
+
+.payment-method-option__desc {
+  font-size: 0.78rem;
+  line-height: 1.35;
+  color: var(--stone-500);
+}
+
+.payment-method-option__check {
+  flex-shrink: 0;
+  width: 1.125rem;
+  height: 1.125rem;
+  border: 1px solid var(--stone-400);
+  border-radius: 2px;
+  background: var(--stone-50);
+  position: relative;
+  box-sizing: border-box;
+}
+
+.payment-method-option:has(input:checked) .payment-method-option__check {
+  background: var(--stone-800);
+  border-color: var(--stone-800);
+}
+
+.payment-method-option:has(input:checked) .payment-method-option__check::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 45%;
+  width: 0.28rem;
+  height: 0.55rem;
+  margin: 0;
+  border: solid var(--stone-50);
+  border-width: 0 2px 2px 0;
+  transform: translate(-50%, -50%) rotate(45deg);
+  box-sizing: border-box;
+}
+
+.payment-method-drawer__footer {
+  flex-shrink: 0;
+  padding: 1rem;
+  border-top: 1px solid var(--stone-200);
+  background: var(--stone-50);
+}
+
+.payment-method-drawer__done {
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.payment-side-card--total {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 1rem;
+  padding: 0.85rem;
+}
+
+.payment-side-total__k {
+  font-size: 0.72rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--stone-400);
+}
+
+.payment-side-total__v {
+  font-size: clamp(1.2rem, 2.4vw, 1.45rem);
+  font-weight: 500;
+  font-family: ui-serif, Georgia, "Times New Roman", serif;
+  color: var(--stone-800);
+}
+
+.payment-side-actions {
+  margin: 0;
+}
+
+.payment-submit-cta {
+  width: 100%;
+  max-width: 100%;
+  padding: 0.95rem 1rem;
+  font-size: var(--font-size-feature-body-md);
+  border-radius: var(--btn-primary-radius, 2px);
+}
+
+.payment-side-foot {
+  font-size: 0.7rem;
+  line-height: 1.5;
+  color: var(--stone-500);
+  text-align: center;
+  margin: 0;
+}
+
+.payment-side-foot--ssl {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  width: 100%;
+  text-align: left;
+}
+
+/* SSL 잠금 아이콘 — 본체(.lock) + 걸쇠(::before) */
+.payment-side-foot--ssl .lock {
+  display: inline-block;
+  flex-shrink: 0;
+  width: 10px;
+  height: 10px;
+  border: 1px solid var(--stone-200);
+  border-radius: 1px;
+  position: relative;
+  box-sizing: border-box;
+}
+
+.payment-side-foot--ssl .lock::before {
+  content: "";
+  position: absolute;
+  top: -5px;
+  left: 1px;
+  width: 6px;
+  height: 5px;
+  border: 1px solid var(--stone-200);
+  border-bottom: none;
+  border-radius: 3px 3px 0 0;
+  box-sizing: border-box;
+}
+
+.payment-side-divider {
+  height: 1px;
+  background: var(--stone-200);
+  margin: 0.25rem 0;
+}
+
+.payment-legal-link {
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 2px;
 }
 
 .payment-summary-box {
@@ -4187,7 +4976,7 @@ main.content-section:has(> .site-footer.site-business-footer) {
   margin-top: 1.25rem;
 }
 
-/* ── 페이지 이탈 확인 팝업 ─────────────────────────────── */
+/* ── confirm 페이지 이탈 확인 팝업 ───────────────────────── */
 .confirm-leave-overlay {
   display: none;
   position: fixed;
@@ -4205,56 +4994,202 @@ main.content-section:has(> .site-footer.site-business-footer) {
 }
 
 .confirm-leave-dialog {
-  background: var(--color-surface-page);
-  border-radius: 0.75rem;
-  padding: 2rem 1.75rem 1.5rem;
-  max-width: 340px;
+  background: var(--stone-50);
+  border-radius: 2px;
+  max-width: min(100%, 22rem);
   width: 100%;
+  overflow: hidden;
+  box-shadow:
+    0 4px 6px rgba(42, 37, 32, 0.06),
+    0 18px 48px rgba(42, 37, 32, 0.16);
+  padding: 0;
   text-align: center;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18);
 }
 
-.confirm-leave-msg {
-  color: var(--grafford-mud2);
-  font-size: 0.97rem;
-  line-height: 1.65;
-  margin: 0 0 1.5rem;
+.confirm-leave-dialog__accent {
+  display: block;
+  height: 3px;
+  width: 100%;
+  flex-shrink: 0;
+  background: linear-gradient(
+    90deg,
+    var(--stone-800) 0%,
+    var(--gold-500) 50%,
+    var(--stone-800) 100%
+  );
+}
+
+.confirm-leave-dialog__inner {
+  padding: clamp(1.35rem, 4vw, 1.85rem) clamp(1.2rem, 3.5vw, 1.6rem)
+    clamp(1.25rem, 3vw, 1.45rem);
+}
+
+.confirm-leave-eyebrow {
+  margin: 0 0 0.8rem;
+  font-size: 0.62rem;
+  letter-spacing: 0.18em;
+  font-weight: 600;
+  color: color-mix(in srgb, var(--gold-500) 88%, var(--stone-600));
+  text-align: center;
+  line-height: 1.4;
+}
+
+.confirm-leave-heading {
+  margin: 0 0 1rem;
+  font-size: clamp(1.12rem, 3.1vw, 1.32rem);
+  font-weight: 600;
+  color: var(--stone-800);
+  line-height: 1.38;
+  text-align: center;
+  letter-spacing: -0.01em;
+}
+
+.confirm-leave-rule {
+  display: block;
+  width: 2.5rem;
+  height: 1px;
+  margin: 0 auto 1.05rem;
+  background: var(--gold-500);
+}
+
+.confirm-leave-body {
+  margin: 0;
+  font-size: 0.875rem;
+  line-height: 1.62;
+  color: var(--stone-700);
+  text-align: center;
+}
+
+.confirm-leave-body strong {
+  font-weight: 600;
+  color: var(--stone-800);
 }
 
 .confirm-leave-actions {
   display: flex;
-  gap: 0.65rem;
+  flex-direction: row;
+  align-items: stretch;
+  width: 100%;
+  margin: 0;
+  padding: 0;
+  border-top: 1px solid color-mix(in srgb, var(--stone-400) 35%, transparent);
+  border-bottom: 1px solid color-mix(in srgb, var(--stone-400) 35%, transparent);
+}
+
+.confirm-leave-actions .confirm-leave-btn {
+  flex: 1 1 50%;
+  min-width: 0;
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  border-radius: 0;
+  padding: 0.9rem 0.5rem 1rem;
+  min-height: 4.75rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
   justify-content: center;
+  gap: 0.28rem;
+  cursor: pointer;
+  box-sizing: border-box;
 }
 
-.confirm-leave-btn {
-  min-width: 90px;
-  padding: 0.55rem 1.1rem;
-  font-size: 0.9rem;
+.confirm-leave-btn__label {
+  display: block;
+  font-size: 0.94rem;
+  font-weight: 600;
+  line-height: 1.25;
 }
 
-.confirm-leave-btn--stay {
+.confirm-leave-btn__hint {
+  display: block;
+  font-size: 0.65rem;
+  font-weight: 400;
+  line-height: 1.35;
+  letter-spacing: 0.01em;
+  color: var(--stone-500);
+}
+
+/* 왼쪽: 나가기 · 오른쪽: 계속 작성 (reserveinfo 조회하기와 동일 호버) */
+.confirm-leave-btn.confirm-leave-btn--continue.btn.reserve-btn {
+  background-color: var(--stone-800);
+  background-image: none;
+  color: var(--stone-50);
+  border: none;
+  border-left: 1px solid color-mix(in srgb, var(--stone-400) 38%, transparent);
+  position: relative;
+  isolation: isolate;
+  animation: none;
+}
+
+.confirm-leave-btn.confirm-leave-btn--continue.btn.reserve-btn::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 2px;
+  background: var(--gold-500);
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 0.42s cubic-bezier(0.22, 1, 0.36, 1);
+  z-index: 1;
+  pointer-events: none;
+}
+
+.confirm-leave-btn.confirm-leave-btn--continue.btn.reserve-btn:hover::after,
+.confirm-leave-btn.confirm-leave-btn--continue.btn.reserve-btn:focus-visible::after {
+  transform: scaleX(1);
+}
+
+.confirm-leave-btn.confirm-leave-btn--continue.btn.reserve-btn:hover,
+.confirm-leave-btn.confirm-leave-btn--continue.btn.reserve-btn:focus-visible {
+  animation: none;
+  background-color: var(--stone-900);
+  color: var(--stone-50);
+}
+
+.confirm-leave-btn.confirm-leave-btn--continue.btn.reserve-btn:active {
+  animation: none;
+  background-color: var(--stone-900);
+  color: var(--stone-50);
+}
+
+.confirm-leave-btn--continue .confirm-leave-btn__label {
+  color: var(--stone-50);
+}
+
+.confirm-leave-btn--continue .confirm-leave-btn__hint {
+  color: color-mix(in srgb, var(--stone-50) 68%, transparent);
+}
+
+/* 왼쪽: 나가기 */
+.confirm-leave-btn.confirm-leave-btn--leave.btn.reserve-btn {
   background-color: transparent;
-  color: var(--grafford-mud2);
-  border: 1px solid var(--grafford-mud2);
+  background-image: none;
+  border: none;
+  animation: none;
 }
 
-.confirm-leave-btn--stay:hover {
-  background-color: var(--grafford-mud2);
-  color: var(--color-text-on-dark);
-  border-color: var(--grafford-mud2);
+.confirm-leave-btn.confirm-leave-btn--leave.btn.reserve-btn:hover,
+.confirm-leave-btn.confirm-leave-btn--leave.btn.reserve-btn:focus-visible {
+  animation: none;
+  background-color: color-mix(in srgb, var(--stone-200) 45%, var(--stone-50));
+  background-image: none;
 }
 
-.confirm-leave-btn--leave {
-  background-color: var(--grafford-beige2);
-  color: var(--color-text-on-dark);
-  border-color: var(--grafford-beige2);
+.confirm-leave-btn.confirm-leave-btn--leave.btn.reserve-btn:active {
+  animation: none;
+  background-color: color-mix(in srgb, var(--stone-300) 35%, var(--stone-50));
+  background-image: none;
 }
 
-.confirm-leave-btn--leave:hover {
-  background-color: var(--grafford-mud);
-  border-color: var(--grafford-mud);
-  color: var(--color-text-on-dark);
+.confirm-leave-btn--leave .confirm-leave-btn__label {
+  color: color-mix(in srgb, var(--stone-500) 92%, var(--stone-700));
+}
+
+.confirm-leave-btn--leave .confirm-leave-btn__hint {
+  color: var(--stone-500);
 }
 
 .confirm-title {
@@ -5012,6 +5947,7 @@ main.content-section.confirm-page.reserveinfo-page {
   border: none;
   position: relative;
   isolation: isolate;
+  margin: 0;
 }
 
 .reserveinfo-submit-btn.confirm-pay-submit.btn.reserve-btn::after {
@@ -5045,6 +5981,14 @@ main.content-section.confirm-page.reserveinfo-page {
   animation: none;
   background-color: var(--stone-900);
   color: var(--stone-50);
+}
+
+.lang-kr .reserveinfo-submit-btn.confirm-pay-submit.btn.reserve-btn {
+  font-family: var(--font-family-body-kr);
+}
+
+.lang-en .reserveinfo-submit-btn.confirm-pay-submit.btn.reserve-btn {
+  font-family: var(--font-family-body-en);
 }
 
 .reserveinfo-bottom-actions {

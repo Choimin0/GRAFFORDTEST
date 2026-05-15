@@ -438,26 +438,38 @@
           class="confirm-leave-overlay"
           aria-modal="true"
           role="dialog"
-          aria-labelledby="confirm-leave-title"
+          aria-labelledby="confirm-leave-heading"
         >
           <div class="confirm-leave-dialog">
-            <p id="confirm-leave-title" class="confirm-leave-msg">
-              이 페이지를 나가면<br />작성한 내용이 사라집니다.
-            </p>
+            <div class="confirm-leave-dialog__accent" aria-hidden="true"></div>
+            <div class="confirm-leave-dialog__inner">
+              <p class="confirm-leave-eyebrow">WARNING — 페이지 이탈</p>
+              <h2 id="confirm-leave-heading" class="confirm-leave-heading">
+                지금 나가시면<br />작성한 내용이 모두 사라집니다
+              </h2>
+              <span class="confirm-leave-rule" aria-hidden="true"></span>
+              <p class="confirm-leave-body">
+                입력하신 <strong>예약자 정보</strong>와<br />
+                선택하신 <strong>결제 수단</strong>이 초기화됩니다.<br />
+                페이지를 유지하시겠습니까?
+              </p>
+            </div>
             <div class="confirm-leave-actions">
-              <button
-                type="button"
-                id="confirm-leave-cancel"
-                class="btn reserve-btn confirm-leave-btn confirm-leave-btn--stay"
-              >
-                취소
-              </button>
               <button
                 type="button"
                 id="confirm-leave-confirm"
                 class="btn reserve-btn confirm-leave-btn confirm-leave-btn--leave"
               >
-                확인
+                <span class="confirm-leave-btn__label">나가기</span>
+                <span class="confirm-leave-btn__hint">작성 내용 삭제</span>
+              </button>
+              <button
+                type="button"
+                id="confirm-leave-cancel"
+                class="btn reserve-btn confirm-leave-btn confirm-leave-btn--continue"
+              >
+                <span class="confirm-leave-btn__label">계속 작성하기 →</span>
+                <span class="confirm-leave-btn__hint">페이지 유지</span>
               </button>
             </div>
           </div>
@@ -471,7 +483,7 @@
         ></footer>
       </main>
 
-      <script src="js/booking-pricing.js?v=3"></script>
+      <script src="js/booking-pricing.js?v=4"></script>
       <script src="js/booking-reservations.js"></script>
       <script>
         document.addEventListener("DOMContentLoaded", async function () {
@@ -713,31 +725,65 @@
             var isEn = language === "en";
 
             if (quote.nights > 0 && P) {
-              addBreakLine(
-                ROOM_LABEL[roomRaw] +
-                  (isEn ? " (Weekday) " : " (평일) ") +
-                  formatMoneyByLanguage(quote.baseNightly, language) +
-                  " × " +
-                  quote.nights +
-                  (isEn ? " night" + (quote.nights > 1 ? "s" : "") : "박") +
-                  " = " +
-                  formatMoneyByLanguage(quote.baseTotal, language),
-              );
-              if (quote.weekendSurcharge > 0) {
+              if (
+                quote.weekdayNights !== undefined &&
+                quote.weekendNights !== undefined
+              ) {
+                if (quote.weekdayNights > 0) {
+                  addBreakLine(
+                    roomRaw +
+                      (isEn ? " (weeknight) " : " (평일) ") +
+                      formatMoneyByLanguage(quote.baseNightly, language) +
+                      " × " +
+                      quote.weekdayNights +
+                      (isEn
+                        ? " night" + (quote.weekdayNights > 1 ? "s" : "")
+                        : "박") +
+                      " = " +
+                      formatMoneyByLanguage(quote.weekdaySubtotal, language),
+                  );
+                }
+                if (quote.weekendNights > 0) {
+                  addBreakLine(
+                    roomRaw +
+                      (isEn ? " (weekend) " : " (주말) ") +
+                      formatMoneyByLanguage(quote.weekendRatePerNight, language) +
+                      " × " +
+                      quote.weekendNights +
+                      (isEn
+                        ? " night" + (quote.weekendNights > 1 ? "s" : "")
+                        : "박") +
+                      " = " +
+                      formatMoneyByLanguage(quote.weekendSubtotal, language),
+                  );
+                }
+              } else {
                 addBreakLine(
-                  (isEn ? "Weekend surcharge " : "주말(금·토) 추가 ") +
-                    formatMoneyByLanguage(
-                      P.WEEKEND_SURCHARGE_PER_NIGHT,
-                      language,
-                    ) +
+                  ROOM_LABEL[roomRaw] +
+                    (isEn ? " (Weekday) " : " (평일) ") +
+                    formatMoneyByLanguage(quote.baseNightly, language) +
                     " × " +
-                    quote.weekendNights +
-                    (isEn
-                      ? " night" + (quote.weekendNights > 1 ? "s" : "")
-                      : "박") +
+                    quote.nights +
+                    (isEn ? " night" + (quote.nights > 1 ? "s" : "") : "박") +
                     " = " +
-                    formatMoneyByLanguage(quote.weekendSurcharge, language),
+                    formatMoneyByLanguage(quote.baseTotal, language),
                 );
+                if (quote.weekendSurcharge > 0) {
+                  addBreakLine(
+                    (isEn ? "Weekend surcharge " : "주말(금·토) 추가 ") +
+                      formatMoneyByLanguage(
+                        P.WEEKEND_SURCHARGE_PER_NIGHT,
+                        language,
+                      ) +
+                      " × " +
+                      quote.weekendNights +
+                      (isEn
+                        ? " night" + (quote.weekendNights > 1 ? "s" : "")
+                        : "박") +
+                      " = " +
+                      formatMoneyByLanguage(quote.weekendSurcharge, language),
+                  );
+                }
               }
               if (quote.extraGuestTotal > 0) {
                 addBreakLine(
@@ -830,17 +876,59 @@
           var inPaymentFlow =
             sessionStorage.getItem("graffordInPaymentFlow") === "1";
 
-          var leaveOverlay = document.getElementById("confirm-leave-overlay");
+          var leaveOverlayKr = document.getElementById("confirm-leave-overlay");
+          var leaveOverlayEn = document.getElementById("confirm-leave-overlay-en");
           var leaveConfirmBtn = document.getElementById(
             "confirm-leave-confirm",
           );
           var leaveCancelBtn = document.getElementById("confirm-leave-cancel");
+          var leaveConfirmBtnEn = document.getElementById(
+            "confirm-leave-confirm-en",
+          );
+          var leaveCancelBtnEn = document.getElementById("confirm-leave-cancel-en");
+
+          function activeLeaveOverlay() {
+            var lang = document.body.getAttribute("data-site-language") || "kr";
+            return lang === "en" ? leaveOverlayEn : leaveOverlayKr;
+          }
 
           function showLeaveOverlay() {
-            if (leaveOverlay) leaveOverlay.classList.add("is-visible");
+            var el = activeLeaveOverlay();
+            if (el) el.classList.add("is-visible");
           }
           function hideLeaveOverlay() {
-            if (leaveOverlay) leaveOverlay.classList.remove("is-visible");
+            if (leaveOverlayKr) leaveOverlayKr.classList.remove("is-visible");
+            if (leaveOverlayEn) leaveOverlayEn.classList.remove("is-visible");
+          }
+
+          function bindLeaveConfirm(btn) {
+            if (!btn) return;
+            btn.addEventListener("click", function () {
+              sessionStorage.removeItem("graffordInPaymentFlow");
+              sessionStorage.removeItem("graffordPaymentData");
+              // replace 사용: confirm.html이 히스토리에서 제거되어 앞으로가기 불가
+              window.location.replace("RESERVATION.html");
+            });
+          }
+          function bindLeaveCancel(btn) {
+            if (!btn) return;
+            btn.addEventListener("click", hideLeaveOverlay);
+          }
+
+          bindLeaveConfirm(leaveConfirmBtn);
+          bindLeaveConfirm(leaveConfirmBtnEn);
+          bindLeaveCancel(leaveCancelBtn);
+          bindLeaveCancel(leaveCancelBtnEn);
+
+          if (leaveOverlayKr) {
+            leaveOverlayKr.addEventListener("click", function (e) {
+              if (e.target === leaveOverlayKr) hideLeaveOverlay();
+            });
+          }
+          if (leaveOverlayEn) {
+            leaveOverlayEn.addEventListener("click", function (e) {
+              if (e.target === leaveOverlayEn) hideLeaveOverlay();
+            });
           }
 
           // payment.html 왕복이 아닐 때만 가드 히스토리 항목을 추가
@@ -867,23 +955,6 @@
             history.pushState({ confirmGuard: true }, "", window.location.href);
             showLeaveOverlay();
           });
-
-          if (leaveConfirmBtn) {
-            leaveConfirmBtn.addEventListener("click", function () {
-              sessionStorage.removeItem("graffordInPaymentFlow");
-              sessionStorage.removeItem("graffordPaymentData");
-              // replace 사용: confirm.html이 히스토리에서 제거되어 앞으로가기 불가
-              window.location.replace("RESERVATION.html");
-            });
-          }
-          if (leaveCancelBtn) {
-            leaveCancelBtn.addEventListener("click", hideLeaveOverlay);
-          }
-          if (leaveOverlay) {
-            leaveOverlay.addEventListener("click", function (e) {
-              if (e.target === leaveOverlay) hideLeaveOverlay();
-            });
-          }
 
           // 인라인 뒤로가기(<) 버튼도 동일한 이탈 확인 팝업 사용
           var backLinks = document.querySelectorAll(".confirm-back-inline");
@@ -2070,27 +2141,38 @@
           class="confirm-leave-overlay"
           aria-modal="true"
           role="dialog"
-          aria-labelledby="confirm-leave-title-en"
+          aria-labelledby="confirm-leave-heading-en"
         >
           <div class="confirm-leave-dialog">
-            <p id="confirm-leave-title-en" class="confirm-leave-msg">
-              If you leave this page,<br />your entered information will be
-              lost.
-            </p>
+            <div class="confirm-leave-dialog__accent" aria-hidden="true"></div>
+            <div class="confirm-leave-dialog__inner">
+              <p class="confirm-leave-eyebrow">WARNING — Leaving this page</p>
+              <h2 id="confirm-leave-heading-en" class="confirm-leave-heading">
+                If you leave now,<br />everything you entered will be lost.
+              </h2>
+              <span class="confirm-leave-rule" aria-hidden="true"></span>
+              <p class="confirm-leave-body">
+                Your <strong>guest details</strong> and selected
+                <strong>payment method</strong> will be cleared.<br />
+                Would you like to stay on this page?
+              </p>
+            </div>
             <div class="confirm-leave-actions">
-              <button
-                type="button"
-                id="confirm-leave-cancel-en"
-                class="btn reserve-btn confirm-leave-btn confirm-leave-btn--stay"
-              >
-                Cancel
-              </button>
               <button
                 type="button"
                 id="confirm-leave-confirm-en"
                 class="btn reserve-btn confirm-leave-btn confirm-leave-btn--leave"
               >
-                Confirm
+                <span class="confirm-leave-btn__label">Leave</span>
+                <span class="confirm-leave-btn__hint">Discard progress</span>
+              </button>
+              <button
+                type="button"
+                id="confirm-leave-cancel-en"
+                class="btn reserve-btn confirm-leave-btn confirm-leave-btn--continue"
+              >
+                <span class="confirm-leave-btn__label">Continue editing →</span>
+                <span class="confirm-leave-btn__hint">Stay on this page</span>
               </button>
             </div>
           </div>

@@ -141,21 +141,29 @@
     }
 
     var baseNightly = ROOM_WEEKDAY_BASE[room];
-    var baseTotal = 0;
+    var weekdayNights = 0;
     var weekendNights = 0;
     nightsArr.forEach(function (d) {
-      baseTotal += baseNightly;
       if (isWeekendNight(d)) {
         weekendNights += 1;
+      } else {
+        weekdayNights += 1;
       }
     });
+    var weekendRatePerNight = baseNightly + WEEKEND_SURCHARGE_PER_NIGHT;
+    var weekdaySubtotal = weekdayNights * baseNightly;
+    var weekendSubtotal = weekendNights * weekendRatePerNight;
+    var baseTotal = weekdaySubtotal + weekendSubtotal;
     var weekendSurcharge = weekendNights * WEEKEND_SURCHARGE_PER_NIGHT;
     var extraGuestTotal = extraGuests * EXTRA_PER_PERSON_PER_NIGHT * nights;
-    var grandTotal = baseTotal + weekendSurcharge + extraGuestTotal;
+    var grandTotal = baseTotal + extraGuestTotal;
     var consecutiveSale =
       nights >= 2 ? (nights - 1) * CONSECUTIVE_SALE_PER_NIGHT : 0;
-    // 프로모션: 기본 객실료(baseTotal)에서 PROMOTION_PERCENT% 할인
-    var promotionDiscount = Math.floor(baseTotal * PROMOTION_PERCENT / 100);
+    // 프로모션: 평일 박요금 합(=전체 박 × 평일 단가) 기준 PROMOTION_PERCENT% — 기존 confirm과 동일
+    var promotionBase = nights * baseNightly;
+    var promotionDiscount = Math.floor(
+      (promotionBase * PROMOTION_PERCENT) / 100,
+    );
     var discountedGrandTotal = Math.max(0, grandTotal - consecutiveSale - promotionDiscount);
 
     return {
@@ -164,7 +172,11 @@
       extraGuests: extraGuests,
       baseNightly: baseNightly,
       baseTotal: baseTotal,
+      weekdayNights: weekdayNights,
       weekendNights: weekendNights,
+      weekdaySubtotal: weekdaySubtotal,
+      weekendSubtotal: weekendSubtotal,
+      weekendRatePerNight: weekendRatePerNight,
       weekendSurcharge: weekendSurcharge,
       extraGuestTotal: extraGuestTotal,
       grandTotal: grandTotal,
