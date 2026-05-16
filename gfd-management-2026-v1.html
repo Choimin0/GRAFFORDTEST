@@ -9,10 +9,6 @@
   </head>
   <body>
     <main class="content-section confirm-page admin-page">
-      <a href="index.html" class="admin-top-logo" aria-label="메인으로 이동">
-        <img src="images/LOGO-transparent.png" alt="GRAFFORD LOGO" />
-      </a>
-      <h1 class="confirm-title">관리자 페이지</h1>
       <nav
         id="admin-category-nav"
         class="admin-category-nav"
@@ -50,43 +46,90 @@
       </nav>
       <section
         class="confirm-section admin-login-section"
+        id="admin-login-section"
         aria-labelledby="admin-login-title"
       >
-        <h2 class="confirm-section-title" id="admin-login-title">
-          관리자 로그인
-        </h2>
-        <form
-          id="admin-login-form"
-          class="admin-login-form reserveinfo-form checkout-form"
-          novalidate
-        >
-          <label class="confirm-label">
-            ID
-            <input
-              id="admin-id"
-              type="text"
-              autocomplete="username"
-              required
-              placeholder="관리자 ID"
-            />
-          </label>
-          <label class="confirm-label">
-            PW
-            <input
-              id="admin-pw"
-              type="password"
-              autocomplete="current-password"
-              required
-              placeholder="관리자 비밀번호"
-            />
-          </label>
-          <div class="confirm-actions admin-login-actions">
-            <button type="submit" class="btn reserve-btn confirm-pay-submit">
-              조회하기
-            </button>
+        <div class="admin-login-shell">
+          <aside class="admin-login-visual" aria-label="관리자 페이지 소개">
+            <a
+              href="index.html"
+              class="admin-top-logo"
+              aria-label="메인으로 이동"
+            >
+              <img src="images/LOGO.png" alt="GRAFFORD" />
+            </a>
+            <div class="admin-login-copy">
+              <p class="admin-login-copy__title">ADMIN ONLY</p>
+              <h1 class="admin-login-copy__main">
+                그라포드의<br />
+                운영 공간입니다.
+              </h1>
+              <p class="admin-login-copy__sub">
+                승인된 관리자만 접근할 수 있습니다.<br />
+                계정 정보를 안전하게 관리해 주세요.
+              </p>
+            </div>
+            <p class="admin-login-rail" aria-hidden="true">ADMIN ACCESS</p>
+            <p class="admin-login-footer" aria-hidden="true">
+              GROUND · AFFORD · JEJU
+            </p>
+          </aside>
+          <div class="admin-login-panel">
+            <p class="admin-login-corner" aria-hidden="true">+ ADMIN</p>
+            <div class="admin-login-panel__inner">
+              <p class="admin-login-eyebrow">ADMIN LOGIN</p>
+              <h2 class="confirm-section-title" id="admin-login-title">
+                관리자 로그인
+              </h2>
+              <p class="admin-login-desc">
+                예약 및 운영 현황을 확인하려면<br />
+                관리자 계정으로 로그인해 주세요.
+              </p>
+              <form
+                id="admin-login-form"
+                class="admin-login-form reserveinfo-form checkout-form"
+                novalidate
+              >
+                <label class="confirm-label admin-login-label">
+                  ID
+                  <input
+                    id="admin-id"
+                    type="text"
+                    autocomplete="username"
+                    required
+                    placeholder="관리자 아이디"
+                  />
+                </label>
+                <label class="confirm-label admin-login-label">
+                  PASSWORD
+                  <input
+                    id="admin-pw"
+                    type="password"
+                    autocomplete="current-password"
+                    required
+                    placeholder="관리자 비밀번호"
+                  />
+                </label>
+                <div class="confirm-actions admin-login-actions">
+                  <button
+                    type="submit"
+                    class="btn reserve-btn confirm-pay-submit"
+                  >
+                    LOGIN
+                    <span aria-hidden="true">→</span>
+                  </button>
+                </div>
+              </form>
+              <p class="admin-login-note" aria-hidden="true">
+                로그인 후 예약 현황이 표시됩니다.
+              </p>
+              <p class="confirm-back" id="admin-message" hidden></p>
+              <a href="index.html" class="admin-login-home"
+                >← 홈으로 돌아가기</a
+              >
+            </div>
           </div>
-        </form>
-        <p class="confirm-back" id="admin-message" hidden></p>
+        </div>
       </section>
 
       <section
@@ -455,6 +498,7 @@
     <script>
       document.addEventListener("DOMContentLoaded", function () {
         var loginForm = document.getElementById("admin-login-form");
+        var loginSection = document.getElementById("admin-login-section");
         var loginTitleEl = document.getElementById("admin-login-title");
         var idInput = document.getElementById("admin-id");
         var pwInput = document.getElementById("admin-pw");
@@ -572,6 +616,9 @@
           bankSection.hidden = true;
           roomManageSection.hidden = true;
           salesSection.hidden = true;
+          if (loginSection) {
+            loginSection.hidden = false;
+          }
           loginForm.hidden = false;
           if (loginTitleEl) {
             loginTitleEl.hidden = false;
@@ -1767,6 +1814,9 @@
         }
 
         function enableLayoutPreviewMode() {
+          if (loginSection) {
+            loginSection.hidden = true;
+          }
           loginForm.hidden = true;
           if (loginTitleEl) {
             loginTitleEl.hidden = true;
@@ -2580,6 +2630,9 @@
             .then(function (result) {
               if (!result.ok || !result.data.ok) {
                 throw new Error(result.data.error || "목록 조회 실패");
+              }
+              if (loginSection) {
+                loginSection.hidden = true;
               }
               loginForm.hidden = true;
               if (loginTitleEl) {
