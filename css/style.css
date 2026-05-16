@@ -4293,7 +4293,8 @@ main.content-section.confirm-page.payment-page > #payment-error-area-en {
 
 .lang-kr .payment-page-shell .reserve-check-page-band__title,
 .lang-kr .payment-page-shell .reserve-check-page-band__subtitle {
-  font-family: var(--font-family-body-kr);
+  font-weight: 400;
+  color: var(--stone-800);
 }
 
 .lang-en .payment-page-shell .reserve-check-page-band__title,
@@ -5690,11 +5691,23 @@ main.content-section.confirm-page.payment-page > #payment-error-area-en {
   box-sizing: border-box;
 }
 
+.confirm-label input:-webkit-autofill,
+.confirm-label input:-webkit-autofill:hover,
+.confirm-label input:-webkit-autofill:focus,
+.confirm-label input:-webkit-autofill:active {
+  -webkit-box-shadow: 0 0 0 1000px transparent inset !important;
+  -webkit-text-fill-color: currentColor;
+  caret-color: currentColor;
+  background-color: transparent !important;
+  transition: background-color 9999s ease-out;
+}
+
 .confirm-label input:focus,
 .confirm-label input:focus-visible {
   outline: none;
   box-shadow: none;
   border-bottom: 2px solid var(--color-focus-ring);
+  background-color: transparent;
 }
 
 .confirm-input-error {
@@ -6874,6 +6887,10 @@ button.reserve-delete-submit-btn.confirm-pay-submit.btn.reserve-btn:not(
 }
 
 /* 무통장 입금 예약 완료 (reserve-complete.html) */
+.reserve-complete-page .payment-page-shell > .reserve-check-content {
+  width: calc(100% - clamp(2rem, 8vw, 6rem));
+}
+
 .reserve-complete-page .confirm-layout-col--right {
   position: static;
   top: auto;
@@ -7403,7 +7420,7 @@ button.reserve-delete-submit-btn.confirm-pay-submit.btn.reserve-btn:not(
   font-weight: 600;
   letter-spacing: 0.12em;
   text-transform: uppercase;
-  color: var(--stone-800);
+  color: var(--stone-400);
   line-height: 1.35;
   font-variant-numeric: tabular-nums;
 }
