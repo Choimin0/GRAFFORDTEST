@@ -101,6 +101,40 @@
             </div>
           </header>
 
+          <section
+            class="confirm-mobile-booking-band"
+            aria-label="예약 상세 정보"
+          >
+            <div class="confirm-mobile-booking-band__item">
+              <span class="confirm-mobile-booking-band__label">GROUND</span>
+              <strong
+                class="confirm-mobile-booking-band__value"
+                id="mobile-booking-room-name-kr"
+              ></strong>
+            </div>
+            <div class="confirm-mobile-booking-band__item">
+              <span class="confirm-mobile-booking-band__label">CHECK-IN</span>
+              <strong
+                class="confirm-mobile-booking-band__value"
+                id="mobile-booking-check-in-kr"
+              ></strong>
+            </div>
+            <div class="confirm-mobile-booking-band__item">
+              <span class="confirm-mobile-booking-band__label">CHECK-OUT</span>
+              <strong
+                class="confirm-mobile-booking-band__value"
+                id="mobile-booking-check-out-kr"
+              ></strong>
+            </div>
+            <div class="confirm-mobile-booking-band__item">
+              <span class="confirm-mobile-booking-band__label">GUESTS</span>
+              <strong
+                class="confirm-mobile-booking-band__value"
+                id="mobile-booking-guests-kr"
+              ></strong>
+            </div>
+          </section>
+
           <form
             class="confirm-form checkout-form confirm-page-shell__form"
             id="confirm-form"
@@ -267,12 +301,8 @@
                       aria-expanded="false"
                       aria-controls="confirm-guide-panel-kr"
                     >
-                      <span
-                        class="confirm-guide-expand-btn__chevron"
-                        aria-hidden="true"
-                      ></span>
-                      <span class="visually-hidden"
-                        >게스트 안내사항 전체 보기</span
+                      <span class="confirm-guide-expand-btn__label"
+                        >더 읽기</span
                       >
                     </button>
                   </div>
@@ -488,6 +518,7 @@
                       id="guest-request-kr"
                       class="confirm-textarea"
                       rows="1"
+                      placeholder="입실 시간, 특별한 요청 사항 등을 자유롭게 남겨주세요."
                     ></textarea>
                   </label>
                 </section>
@@ -813,8 +844,49 @@
             }
           }
 
+          function renderMobileBookingBand(scope, language) {
+            if (!scope) {
+              return;
+            }
+            var isEn = language === "en";
+            var roomEl = scope.querySelector(
+              isEn ? "#mobile-booking-room-name-en" : "#mobile-booking-room-name-kr",
+            );
+            var ciEl = scope.querySelector(
+              isEn ? "#mobile-booking-check-in-en" : "#mobile-booking-check-in-kr",
+            );
+            var coEl = scope.querySelector(
+              isEn ? "#mobile-booking-check-out-en" : "#mobile-booking-check-out-kr",
+            );
+            var guestsEl = scope.querySelector(
+              isEn ? "#mobile-booking-guests-en" : "#mobile-booking-guests-kr",
+            );
+            if (!roomEl || !ciEl || !coEl || !guestsEl) {
+              return;
+            }
+
+            roomEl.textContent = ROOM_LABEL[roomRaw];
+            if (checkIn && checkOut && quote.nights > 0) {
+              ciEl.textContent = formatDisplayYMD(checkIn);
+              coEl.textContent = formatDisplayYMD(checkOut);
+              guestsEl.textContent = isEn
+                ? getDisplayGuestCount() +
+                  " guests · " +
+                  quote.nights +
+                  " night" +
+                  (quote.nights > 1 ? "s" : "")
+                : getDisplayGuestCount() + "명 · " + quote.nights + "박";
+            } else {
+              ciEl.textContent = isEn ? "No schedule selected" : "일정이 없습니다";
+              coEl.textContent = "—";
+              guestsEl.textContent = "—";
+            }
+          }
+
           renderBookingDetails(document.querySelector(".lang-kr"), "kr");
           renderBookingDetails(document.querySelector(".lang-en"), "en");
+          renderMobileBookingBand(document.querySelector(".lang-kr"), "kr");
+          renderMobileBookingBand(document.querySelector(".lang-en"), "en");
 
           function formatMoneyByLanguage(amount, language) {
             if (language === "en") {
@@ -1842,6 +1914,40 @@
             </div>
           </header>
 
+          <section
+            class="confirm-mobile-booking-band"
+            aria-label="Booking details"
+          >
+            <div class="confirm-mobile-booking-band__item">
+              <span class="confirm-mobile-booking-band__label">GROUND</span>
+              <strong
+                class="confirm-mobile-booking-band__value"
+                id="mobile-booking-room-name-en"
+              ></strong>
+            </div>
+            <div class="confirm-mobile-booking-band__item">
+              <span class="confirm-mobile-booking-band__label">CHECK-IN</span>
+              <strong
+                class="confirm-mobile-booking-band__value"
+                id="mobile-booking-check-in-en"
+              ></strong>
+            </div>
+            <div class="confirm-mobile-booking-band__item">
+              <span class="confirm-mobile-booking-band__label">CHECK-OUT</span>
+              <strong
+                class="confirm-mobile-booking-band__value"
+                id="mobile-booking-check-out-en"
+              ></strong>
+            </div>
+            <div class="confirm-mobile-booking-band__item">
+              <span class="confirm-mobile-booking-band__label">GUESTS</span>
+              <strong
+                class="confirm-mobile-booking-band__value"
+                id="mobile-booking-guests-en"
+              ></strong>
+            </div>
+          </section>
+
           <form
             class="confirm-form checkout-form confirm-page-shell__form"
             id="confirm-form-en"
@@ -2038,12 +2144,8 @@
                       aria-expanded="false"
                       aria-controls="confirm-guide-panel-en"
                     >
-                      <span
-                        class="confirm-guide-expand-btn__chevron"
-                        aria-hidden="true"
-                      ></span>
-                      <span class="visually-hidden"
-                        >Show all guest guidelines</span
+                      <span class="confirm-guide-expand-btn__label"
+                        >Read more</span
                       >
                     </button>
                   </div>
@@ -2275,6 +2377,7 @@
                       id="guest-request-en"
                       class="confirm-textarea"
                       rows="1"
+                      placeholder="Share your arrival time or any special requests."
                     ></textarea>
                   </label>
                 </section>

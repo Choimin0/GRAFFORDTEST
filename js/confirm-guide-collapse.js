@@ -1,6 +1,4 @@
 (function () {
-  var MOBILE_MQ = window.matchMedia("(max-width: 767px)");
-
   function debounce(fn, ms) {
     var timer;
     return function () {
@@ -24,20 +22,36 @@
       block.classList.remove("is-collapsed", "is-expanded");
       viewport.style.maxHeight = "none";
       fullHeight = content.scrollHeight;
-      collapsedHeight = Math.max(Math.ceil(fullHeight / 2), 1);
+      collapsedHeight = getCollapsedHeight(content, fullHeight);
       applyState();
     }
 
-    function applyState() {
-      if (!MOBILE_MQ.matches) {
-        viewport.style.maxHeight = "";
-        block.classList.remove("is-collapsed", "is-expanded");
-        btn.hidden = true;
-        btn.setAttribute("aria-expanded", "false");
-        return;
+    function getCollapsedHeight(target, fallbackHeight) {
+      var rows = Array.prototype.slice.call(
+        target.querySelectorAll(".payment-kv__row--confirm-guide"),
+      );
+      var marker = rows.find(function (row) {
+        var title = row.querySelector("dd");
+        return (
+          title &&
+          /변상 규정|Damage and Liability/i.test(title.textContent.trim())
+        );
+      });
+
+      if (!marker) {
+        return Math.max(Math.ceil(fallbackHeight / 2), 1);
       }
 
-      btn.hidden = fullHeight <= collapsedHeight + 2;
+      return Math.max(
+        Math.ceil(marker.offsetTop + marker.offsetHeight * 0.5),
+        1,
+      );
+    }
+
+    function applyState() {
+      btn.hidden =
+        fullHeight <= collapsedHeight + 2 ||
+        block.classList.contains("is-expanded");
 
       if (block.classList.contains("is-expanded")) {
         viewport.style.maxHeight = fullHeight + "px";
@@ -52,15 +66,10 @@
     }
 
     btn.addEventListener("click", function () {
-      if (!MOBILE_MQ.matches) {
-        return;
-      }
-      var nextExpanded = !block.classList.contains("is-expanded");
-      block.classList.toggle("is-expanded", nextExpanded);
+      block.classList.add("is-expanded");
       applyState();
     });
 
-    MOBILE_MQ.addEventListener("change", measure);
     window.addEventListener("resize", debounce(measure, 150));
     measure();
 

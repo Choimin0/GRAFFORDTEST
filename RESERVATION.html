@@ -1731,12 +1731,12 @@
             }
 
             function createMobileStickyCta() {
-              var booking = scope.querySelector(".reservation-booking");
-              if (!booking || mobileStickyCta) {
+              if (mobileStickyCta) {
                 return;
               }
               mobileStickyCta = document.createElement("div");
               mobileStickyCta.className = "reservation-mobile-sticky";
+              mobileStickyCta.dataset.reservationScope = isEnScope ? "en" : "kr";
               mobileStickyCta.innerHTML =
                 '<div class="reservation-mobile-sticky__price">' +
                 '<span class="reservation-mobile-sticky__price-left"></span>' +
@@ -1757,7 +1757,7 @@
                 (isEnScope ? "Inquiry" : "문의하기") +
                 "</button>" +
                 "</div>";
-              booking.appendChild(mobileStickyCta);
+              document.body.appendChild(mobileStickyCta);
               mobilePriceLeftEl = mobileStickyCta.querySelector(
                 ".reservation-mobile-sticky__price-left",
               );
@@ -1938,7 +1938,7 @@
                 more._collapseTimer = window.setTimeout(function () {
                   more.hidden = true;
                   more._collapseTimer = null;
-                }, 360);
+                }, 620);
               } else {
                 more.hidden = false;
                 more.offsetHeight;

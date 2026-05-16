@@ -5227,9 +5227,9 @@ main.content-section:has(> .site-footer.site-business-footer) {
     line-height: var(--reservation-mobile-about-detail-line-height);
     letter-spacing: var(--reservation-mobile-about-detail-spacing);
     transition:
-      opacity 0.36s ease,
-      max-height 0.36s ease,
-      margin-top 0.36s ease;
+      opacity 0.62s ease,
+      max-height 0.62s ease,
+      margin-top 0.62s ease;
   }
 
   .reservation-room-about__more.is-collapsed {
@@ -5300,21 +5300,22 @@ main.content-section:has(> .site-footer.site-business-footer) {
   }
 
   .reservation-mobile-accordion__content {
-    padding: 0 0 var(--space-24);
-    background-color: var(--stone-50);
+    padding: 0 0 var(--space-48);
+    background-color: transparent;
   }
 
   .reservation-mobile-accordion__content .room-spec-grid {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 0;
+    background: transparent;
     border: 1px solid var(--reservation-mobile-stat-border);
     border-bottom: 0;
   }
 
   .reservation-mobile-accordion__content .room-spec-cell {
     min-height: 6rem;
-    padding: var(--space-20) var(--space-16);
+    padding: var(--space-12) var(--space-12);
     border-right: 1px solid var(--reservation-mobile-stat-border);
     border-bottom: 1px solid var(--reservation-mobile-stat-border);
   }
@@ -5378,12 +5379,21 @@ main.content-section:has(> .site-footer.site-business-footer) {
     right: 0;
     bottom: 0;
     z-index: 1002;
-    display: block;
+    display: none;
     padding: var(--space-12) var(--layout-margin-side-mobile)
       calc(var(--space-12) + env(safe-area-inset-bottom));
     background: var(--stone-50);
     border-top: 1px solid var(--stone-200);
     box-sizing: border-box;
+  }
+
+  body:not([data-site-language])
+    .reservation-mobile-sticky[data-reservation-scope="kr"],
+  body[data-site-language="kr"]
+    .reservation-mobile-sticky[data-reservation-scope="kr"],
+  body[data-site-language="en"]
+    .reservation-mobile-sticky[data-reservation-scope="en"] {
+    display: block;
   }
 
   .reservation-mobile-sticky__price {
@@ -5396,9 +5406,9 @@ main.content-section:has(> .site-footer.site-business-footer) {
     overflow: hidden;
     opacity: 0;
     transition:
-      opacity 0.36s ease,
-      max-height 0.36s ease,
-      margin-bottom 0.36s ease;
+      opacity 0.62s ease,
+      max-height 0.62s ease,
+      margin-bottom 0.62s ease;
   }
 
   .reservation-mobile-sticky__price.is-visible {
@@ -5560,6 +5570,10 @@ main.content-section.confirm-page.payment-page > #payment-error-area-en {
   margin-top: 0;
   padding: var(--space-32) var(--checkout-content-inset-x) var(--space-48);
   box-sizing: border-box;
+}
+
+.confirm-mobile-booking-band {
+  display: none;
 }
 
 @media (min-width: 768px) {
@@ -6264,7 +6278,7 @@ main.content-section.confirm-page.payment-page > #payment-error-area-en {
   margin: 0 0.65rem 0.85rem;
 }
 
-/* confirm — 모바일 게스트 안내사항 접기 (design.md: stone 보더 · 4px radius · scroll-down chevron) */
+/* confirm — 게스트 안내사항 접기 */
 @media (max-width: 767px) {
   .confirm-guide-collapse {
     margin: 0 0.65rem 0.85rem;
@@ -6301,61 +6315,107 @@ main.content-section.confirm-page.payment-page > #payment-error-area-en {
     opacity: 0;
   }
 
-  .confirm-guide-expand-btn {
-    display: flex;
-    width: 100%;
-    align-items: center;
-    justify-content: center;
-    margin-top: 0.5rem;
-    padding: 0.6rem;
-    border: 1px solid var(--stone-200);
-    border-radius: var(--radius-soft);
-    background: var(--stone-50);
-    cursor: pointer;
-    appearance: none;
-    font: inherit;
-    transition:
-      border-color 0.2s ease,
-      background-color 0.2s ease;
-  }
-
-  .confirm-guide-expand-btn:hover {
-    background: var(--stone-100);
-    border-color: color-mix(in srgb, var(--gold-500) 55%, var(--stone-200));
-  }
-
-  .confirm-guide-expand-btn:focus-visible {
-    outline: 2px solid var(--gold-500);
-    outline-offset: 2px;
-  }
-
-  .confirm-guide-expand-btn__chevron {
-    display: block;
-    width: 10px;
-    height: 10px;
-    border-right: 2px solid var(--stone-800);
-    border-bottom: 2px solid var(--stone-800);
-    transform: rotate(45deg) translateY(-2px);
-    transition: transform 0.25s ease;
-  }
-
-  .confirm-guide-collapse.is-expanded .confirm-guide-expand-btn__chevron {
-    transform: rotate(225deg) translateY(2px);
-  }
 }
 
-@media (min-width: 768px) {
-  .confirm-guide-expand-btn {
-    display: none;
+.confirm-guide-collapse__viewport {
+  position: relative;
+  overflow: hidden;
+  transition: max-height 0.35s ease;
+}
+
+.confirm-guide-collapse.is-collapsed .confirm-guide-collapse__viewport::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 2.5rem;
+  background: linear-gradient(
+    to bottom,
+    transparent,
+    var(--color-surface-page)
+  );
+  pointer-events: none;
+  transition: opacity 0.25s ease;
+}
+
+.confirm-guide-collapse.is-expanded .confirm-guide-collapse__viewport::after {
+  opacity: 0;
+}
+
+.confirm-guide-expand-btn {
+  display: inline-flex;
+  width: auto;
+  align-items: center;
+  justify-content: flex-start;
+  margin: 0.6rem 0 0.85rem 0.65rem;
+  padding: 0;
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  color: var(--gold-500);
+  cursor: pointer;
+  appearance: none;
+  font: inherit;
+  font-size: 0.86rem;
+  font-weight: 400;
+  letter-spacing: 0.08em;
+  line-height: 1.4;
+  text-align: left;
+  transition: color 0.2s ease;
+}
+
+.confirm-guide-expand-btn[hidden] {
+  display: none;
+}
+
+.confirm-guide-expand-btn:hover,
+.confirm-guide-expand-btn:focus-visible {
+  color: var(--stone-800);
+  background: transparent;
+}
+
+.confirm-guide-expand-btn:focus-visible {
+  outline: 1px solid var(--gold-500);
+  outline-offset: 3px;
+}
+
+@media (max-width: 767px) {
+  .confirm-mobile-booking-band {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1.55rem 1.35rem;
+    padding: 1.45rem 1.65rem 1.55rem;
+    background: var(--stone-900);
+    color: var(--stone-50);
+    box-sizing: border-box;
   }
 
-  .confirm-guide-collapse__viewport {
-    max-height: none !important;
+  .confirm-mobile-booking-band__item {
+    min-width: 0;
   }
 
-  .confirm-guide-collapse.is-collapsed
-    .confirm-guide-collapse__viewport::after {
-    display: none;
+  .confirm-mobile-booking-band__label {
+    display: block;
+    margin: 0 0 0.8rem;
+    font-family: var(--font-family-nav-en);
+    font-size: 0.72rem;
+    font-weight: 500;
+    letter-spacing: 0.36em;
+    line-height: 1.1;
+    color: color-mix(in srgb, var(--stone-50) 72%, transparent);
+  }
+
+  .confirm-mobile-booking-band__value {
+    display: block;
+    font-family: var(--font-family-body-en), var(--font-family-body-kr),
+      sans-serif;
+    font-size: 1.04rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    line-height: 1.2;
+    color: var(--stone-50);
+    overflow-wrap: anywhere;
   }
 }
 
@@ -7102,6 +7162,132 @@ main.content-section.confirm-page.payment-page > #payment-error-area-en {
 .confirm-total-amount {
   font-size: 1.25rem;
   color: var(--grafford-mud2);
+}
+
+@media (max-width: 767px) {
+  main.content-section.confirm-page.payment-page,
+  .confirm-page.payment-page .payment-page-shell,
+  .confirm-page.payment-page .confirm-page-shell__form {
+    background: var(--stone-200);
+  }
+
+  .confirm-page.payment-page .payment-page-shell__band {
+    background: var(--stone-50);
+  }
+
+  .confirm-mobile-booking-band {
+    display: grid;
+  }
+
+  .confirm-page.payment-page .confirm-layout-grid {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-12);
+    width: auto;
+    margin: 1rem var(--layout-margin-side-mobile) 2rem;
+    padding: 0;
+    background: transparent;
+  }
+
+  .confirm-layout-col {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-12);
+  }
+
+  .confirm-section[aria-labelledby="sec-booking"],
+  .confirm-section[aria-labelledby="sec-booking-en-title"] {
+    display: none;
+  }
+
+  .confirm-section {
+    margin-bottom: 0;
+    padding: 1.45rem 1.2rem 1.55rem;
+    background: var(--stone-50);
+    box-sizing: border-box;
+  }
+
+  .confirm-section:last-of-type {
+    margin-bottom: 0;
+  }
+
+  .confirm-page .payment-section-head,
+  .confirm-page .confirm-guide-kv,
+  .confirm-guide-collapse,
+  .confirm-page .confirm-consent-option,
+  .confirm-check-detail--after-option,
+  .confirm-info-text,
+  .confirm-label,
+  .confirm-total-box {
+    margin-left: 0.35rem;
+    margin-right: 0.35rem;
+  }
+
+  .confirm-page .payment-section-head {
+    margin-bottom: 1.15rem;
+  }
+
+  .confirm-label input,
+  .confirm-textarea,
+  .confirm-total-box {
+    width: 100%;
+  }
+
+  .confirm-section[aria-labelledby="sec-request"],
+  .confirm-section[aria-labelledby="sec-request-en"] {
+    margin-top: 0;
+  }
+
+  .confirm-section[aria-labelledby="sec-request"] .payment-section-head,
+  .confirm-section[aria-labelledby="sec-request-en"] .payment-section-head {
+    align-items: center;
+    gap: 0.65rem;
+    margin-bottom: 1.75rem;
+  }
+
+  .confirm-section[aria-labelledby="sec-request"]
+    .payment-section-head__label,
+  .confirm-section[aria-labelledby="sec-request-en"]
+    .payment-section-head__label {
+    color: var(--gold-500);
+    letter-spacing: 0.48em;
+  }
+
+  .confirm-section[aria-labelledby="sec-request"] .payment-section-head__rule,
+  .confirm-section[aria-labelledby="sec-request-en"]
+    .payment-section-head__rule {
+    background: linear-gradient(
+      to right,
+      var(--gold-500) 0 14%,
+      var(--stone-200) 14% 100%
+    );
+  }
+
+  .confirm-section[aria-labelledby="sec-request"] .confirm-label,
+  .confirm-section[aria-labelledby="sec-request-en"] .confirm-label {
+    margin-bottom: 0;
+  }
+
+  .confirm-textarea {
+    min-height: 7.45rem;
+    padding: 1.35rem 1.45rem;
+    border: none;
+    background: var(--stone-100);
+    color: var(--stone-700);
+    resize: none;
+  }
+
+  .confirm-textarea::placeholder {
+    color: var(--stone-400);
+    opacity: 1;
+  }
+
+  .confirm-textarea:focus,
+  .confirm-textarea:focus-visible {
+    border: none;
+    box-shadow: inset 0 0 0 1px var(--gold-500);
+    background: var(--stone-100);
+  }
 }
 
 .confirm-fieldset {
