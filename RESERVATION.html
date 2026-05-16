@@ -1042,6 +1042,11 @@
             var occupiedNightSet = new Set();
             var monthFadeTimer = null;
             var currentExtraGuests = 0;
+            var reservationMobileQuery = window.matchMedia("(max-width: 767px)");
+            var mobileStickyCta = null;
+            var mobilePriceLeftEl = null;
+            var mobilePriceAmountEl = null;
+            var mobileStickyPriceRow = null;
             var kstNowInfo = getKstNowInfo();
             var today = parseYMDLocal(kstNowInfo.todayYmd);
             if (!today) {
@@ -1612,11 +1617,13 @@
               updateDiscountCards();
               updateConfirmCtaState();
               if (!P) {
+                syncMobileStickyCta(false);
                 return;
               }
               var ci = checkIn ? formatYMD(checkIn) : "";
               var co = checkOut ? formatYMD(checkOut) : "";
               if (!resPriceLeftEl || !resPriceAmountEl) {
+                syncMobileStickyCta(false);
                 return;
               }
               if (!checkIn || !checkOut || !P.countNights(ci, co)) {
@@ -1624,6 +1631,7 @@
                   ? "TOTAL · 0 nights"
                   : "TOTAL · 0박";
                 resPriceAmountEl.textContent = "—";
+                syncMobileStickyCta(false);
                 return;
               }
               var eg = P.clampExtra(currentRoom, getExtraGuests());
@@ -1636,6 +1644,7 @@
               resPriceAmountEl.textContent = formatMoneyTotal(
                 q.discountedGrandTotal,
               );
+              syncMobileStickyCta(true);
             }
 
             function hasValidStaySelection() {
@@ -1680,6 +1689,107 @@
               confirmLink.href = "confirm.html";
             }
 
+            function syncMobileStickyCta(hasPrice) {
+              if (!mobileStickyCta) {
+                return;
+              }
+              var isReady = hasValidStaySelection();
+              var mobileReserveLink = mobileStickyCta.querySelector(
+                ".reservation-mobile-sticky__reserve",
+              );
+              var mobileInquiryBtn = mobileStickyCta.querySelector(
+                ".reservation-mobile-sticky__inquiry",
+              );
+              if (mobilePriceLeftEl && resPriceLeftEl) {
+                mobilePriceLeftEl.textContent = resPriceLeftEl.textContent;
+              }
+              if (mobilePriceAmountEl && resPriceAmountEl) {
+                mobilePriceAmountEl.textContent = resPriceAmountEl.textContent;
+              }
+              if (mobileStickyPriceRow) {
+                mobileStickyPriceRow.classList.toggle("is-visible", !!hasPrice);
+              }
+              if (mobileReserveLink && confirmLink) {
+                mobileReserveLink.href = confirmLink.href || "confirm.html";
+                mobileReserveLink.classList.toggle("is-disabled", !isReady);
+                mobileReserveLink.setAttribute(
+                  "aria-disabled",
+                  isReady ? "false" : "true",
+                );
+                if (isReady) {
+                  mobileReserveLink.removeAttribute("tabindex");
+                } else {
+                  mobileReserveLink.setAttribute("tabindex", "-1");
+                }
+              }
+              if (mobileInquiryBtn && inquiryBtn) {
+                mobileInquiryBtn.setAttribute(
+                  "data-inquiry-href",
+                  inquiryBtn.getAttribute("data-inquiry-href") || "",
+                );
+              }
+            }
+
+            function createMobileStickyCta() {
+              var booking = scope.querySelector(".reservation-booking");
+              if (!booking || mobileStickyCta) {
+                return;
+              }
+              mobileStickyCta = document.createElement("div");
+              mobileStickyCta.className = "reservation-mobile-sticky";
+              mobileStickyCta.innerHTML =
+                '<div class="reservation-mobile-sticky__price">' +
+                '<span class="reservation-mobile-sticky__price-left"></span>' +
+                '<span class="reservation-mobile-sticky__price-amount"></span>' +
+                "</div>" +
+                '<div class="reservation-mobile-sticky__actions">' +
+                '<a href="confirm.html" class="btn reserve-btn reserve-cta reserve-cta--primary reserve-cta--hover-roll reservation-mobile-sticky__reserve" aria-label="' +
+                (isEnScope ? "Go to reservation confirmation" : "예약 확인 단계로 이동") +
+                '">' +
+                '<span class="reserve-cta__roller" aria-hidden="true">' +
+                '<span class="reserve-cta__pane reserve-cta__pane--default">' +
+                (isEnScope ? "Reservation ->" : "예약하기 ->") +
+                "</span>" +
+                '<span class="reserve-cta__pane reserve-cta__pane--hover">Reserve -></span>' +
+                "</span>" +
+                "</a>" +
+                '<button type="button" class="btn reservation-inquiry-btn reservation-mobile-sticky__inquiry">' +
+                (isEnScope ? "Inquiry" : "문의하기") +
+                "</button>" +
+                "</div>";
+              booking.appendChild(mobileStickyCta);
+              mobilePriceLeftEl = mobileStickyCta.querySelector(
+                ".reservation-mobile-sticky__price-left",
+              );
+              mobilePriceAmountEl = mobileStickyCta.querySelector(
+                ".reservation-mobile-sticky__price-amount",
+              );
+              mobileStickyPriceRow = mobileStickyCta.querySelector(
+                ".reservation-mobile-sticky__price",
+              );
+              var mobileReserveLink = mobileStickyCta.querySelector(
+                ".reservation-mobile-sticky__reserve",
+              );
+              var mobileInquiryBtn = mobileStickyCta.querySelector(
+                ".reservation-mobile-sticky__inquiry",
+              );
+              if (mobileReserveLink) {
+                mobileReserveLink.addEventListener("click", function (event) {
+                  if (mobileReserveLink.classList.contains("is-disabled")) {
+                    event.preventDefault();
+                  }
+                });
+              }
+              if (mobileInquiryBtn) {
+                mobileInquiryBtn.addEventListener("click", function () {
+                  var href = mobileInquiryBtn.getAttribute("data-inquiry-href");
+                  if (href && String(href).trim() !== "") {
+                    window.location.href = href;
+                  }
+                });
+              }
+            }
+
             if (confirmLink) {
               confirmLink.addEventListener("click", function (e) {
                 if (confirmLink.classList.contains("is-disabled")) {
@@ -1697,6 +1807,21 @@
               });
             }
 
+            createMobileStickyCta();
+            if (reservationMobileQuery.addEventListener) {
+              reservationMobileQuery.addEventListener("change", function () {
+                enhanceMobileReservationRoomLayout();
+                updateMobileRoomAccordions();
+                syncMobileStickyCta(hasValidStaySelection());
+              });
+            } else {
+              reservationMobileQuery.addListener(function () {
+                enhanceMobileReservationRoomLayout();
+                updateMobileRoomAccordions();
+                syncMobileStickyCta(hasValidStaySelection());
+              });
+            }
+
             function syncRoomCopy() {
               roomCopies.forEach(function (el) {
                 var r = el.getAttribute("data-room");
@@ -1707,6 +1832,261 @@
                   el.hidden = true;
                   el.classList.remove("is-visible");
                 }
+              });
+              enhanceMobileReservationRoomLayout();
+              updateMobileRoomAccordions();
+            }
+
+            function createRoomSpecCell(label, value) {
+              var cell = document.createElement("div");
+              cell.className = "room-spec-cell";
+              cell.setAttribute("role", "listitem");
+              var labelEl = document.createElement("span");
+              labelEl.className = "room-spec-label";
+              labelEl.textContent = label;
+              var valueEl = document.createElement("p");
+              valueEl.className = "room-spec-value";
+              valueEl.textContent = value;
+              cell.appendChild(labelEl);
+              cell.appendChild(valueEl);
+              return cell;
+            }
+
+            function splitSpecTimes(value) {
+              var text = String(value || "");
+              var timeMatches = text.match(/[0-9]{1,2}:[0-9]{2}/g) || [];
+              return {
+                checkIn: timeMatches[0] || "",
+                checkOut: timeMatches[1] || "",
+              };
+            }
+
+            function enhanceMobileRoomSpec(copy) {
+              var specSection = Array.prototype.find.call(
+                copy.querySelectorAll(".room-info-section"),
+                function (section) {
+                  var title = section.querySelector(".room-info-section__title");
+                  return title && /ROOM SPEC/i.test(title.textContent);
+                },
+              );
+              if (!specSection) {
+                return;
+              }
+              var grid = specSection.querySelector(".room-spec-grid");
+              if (!grid) {
+                return;
+              }
+              if (!grid.dataset.originalHtml) {
+                grid.dataset.originalHtml = grid.innerHTML.trim();
+              }
+              grid.innerHTML = grid.dataset.originalHtml;
+              specSection.classList.add("reservation-mobile-room-spec");
+              if (!reservationMobileQuery.matches) {
+                specSection.classList.remove("reservation-mobile-room-spec");
+                return;
+              }
+              var cells = Array.prototype.slice.call(
+                grid.querySelectorAll(".room-spec-cell"),
+              );
+              var checkCell = cells.find(function (cell) {
+                var label = cell.querySelector(".room-spec-label");
+                return label && /체크인|check/i.test(label.textContent);
+              });
+              var areaCell = cells.find(function (cell) {
+                var label = cell.querySelector(".room-spec-label");
+                return label && /면적|area/i.test(label.textContent);
+              });
+              if (areaCell) {
+                areaCell.remove();
+              }
+              if (checkCell) {
+                var valueEl = checkCell.querySelector(".room-spec-value");
+                var times = splitSpecTimes(valueEl ? valueEl.textContent : "");
+                checkCell.insertAdjacentElement(
+                  "beforebegin",
+                  createRoomSpecCell("CHECK-IN", times.checkIn),
+                );
+                checkCell.insertAdjacentElement(
+                  "beforebegin",
+                  createRoomSpecCell("CHECK-OUT", times.checkOut),
+                );
+                checkCell.remove();
+              }
+              grid.querySelectorAll(".room-spec-label").forEach(function (label) {
+                if (/투숙|guest/i.test(label.textContent)) {
+                  label.textContent = "GUESTS";
+                  return;
+                }
+                if (/구성|configuration|room/i.test(label.textContent)) {
+                  label.textContent = "ROOM";
+                }
+              });
+            }
+
+            function setReservationAboutCollapsed(aboutText, isCollapsed) {
+              var more = aboutText.querySelector(".reservation-room-about__more");
+              var button = aboutText.querySelector(".reservation-room-about__toggle");
+              if (!more || !button) {
+                return;
+              }
+              if (more._collapseTimer) {
+                window.clearTimeout(more._collapseTimer);
+                more._collapseTimer = null;
+              }
+              if (isCollapsed) {
+                more.classList.add("is-collapsed");
+                more._collapseTimer = window.setTimeout(function () {
+                  more.hidden = true;
+                  more._collapseTimer = null;
+                }, 360);
+              } else {
+                more.hidden = false;
+                more.offsetHeight;
+                more.classList.remove("is-collapsed");
+              }
+              button.setAttribute("aria-expanded", String(!isCollapsed));
+              button.textContent = isCollapsed
+                ? button.dataset.moreLabel
+                : button.dataset.lessLabel;
+            }
+
+            function enhanceMobileRoomAbout(copy) {
+              var aboutText = copy.querySelector(".room-about-text");
+              if (!aboutText) {
+                return;
+              }
+              var aboutSection = aboutText.closest(".room-info-section");
+              if (aboutSection) {
+                aboutSection.classList.add("reservation-mobile-room-about");
+              }
+              if (!aboutText.dataset.originalHtml) {
+                aboutText.dataset.originalHtml = aboutText.innerHTML.trim();
+              }
+              aboutText.innerHTML = aboutText.dataset.originalHtml;
+              aboutText.classList.remove("is-mobile-enhanced");
+              if (!reservationMobileQuery.matches) {
+                if (aboutSection) {
+                  aboutSection.classList.remove("reservation-mobile-room-about");
+                }
+                return;
+              }
+              var paragraphs = Array.prototype.slice.call(
+                aboutText.querySelectorAll(".room-intro-desc"),
+              );
+              if (paragraphs.length <= 1) {
+                return;
+              }
+              var summary = paragraphs[0].cloneNode(true);
+              var more = document.createElement("div");
+              more.className = "reservation-room-about__more is-collapsed";
+              paragraphs.slice(1).forEach(function (paragraph) {
+                more.appendChild(paragraph.cloneNode(true));
+              });
+              var button = document.createElement("button");
+              button.type = "button";
+              button.className = "reservation-room-about__toggle";
+              button.dataset.moreLabel = isEnScope ? "READ MORE ↓" : "더 읽기 ↓";
+              button.dataset.lessLabel = isEnScope ? "CLOSE ↑" : "접기 ↑";
+              button.addEventListener("click", function () {
+                setReservationAboutCollapsed(aboutText, !more.hidden);
+              });
+              aboutText.innerHTML = "";
+              aboutText.classList.add("is-mobile-enhanced");
+              aboutText.appendChild(summary);
+              aboutText.appendChild(more);
+              aboutText.appendChild(button);
+              setReservationAboutCollapsed(aboutText, true);
+            }
+
+            function enhanceMobileReservationRoomLayout() {
+              roomCopies.forEach(function (copy) {
+                enhanceMobileRoomSpec(copy);
+                enhanceMobileRoomAbout(copy);
+              });
+            }
+
+            function buildMobileAccordionContent(sourceSection) {
+              var content = document.createElement("div");
+              content.className = "reservation-mobile-accordion__content";
+              if (!sourceSection) {
+                return content;
+              }
+              var clonedGrid = sourceSection.querySelector(".room-spec-grid");
+              var clonedNotice = sourceSection.querySelector(".room-notice-panel__text");
+              if (clonedGrid) {
+                content.appendChild(clonedGrid.cloneNode(true));
+              } else if (clonedNotice) {
+                var list = document.createElement("ul");
+                list.className = "reservation-mobile-notice-list";
+                clonedNotice.innerHTML
+                  .split(/<br\s*\/?>/i)
+                  .map(function (line) {
+                    return line.replace(/<[^>]*>/g, "").replace(/^[▸◆◇•\-\s]+/, "").trim();
+                  })
+                  .filter(Boolean)
+                  .forEach(function (line) {
+                    var item = document.createElement("li");
+                    item.textContent = line;
+                    list.appendChild(item);
+                  });
+                content.appendChild(list);
+              }
+              return content;
+            }
+
+            function updateMobileRoomAccordions() {
+              var calendarPanel = scope.querySelector(".reservation-calendar-panel");
+              if (!calendarPanel) {
+                return;
+              }
+              var mount = calendarPanel.querySelector(".reservation-mobile-accordions");
+              if (!mount) {
+                mount = document.createElement("div");
+                mount.className = "reservation-mobile-accordions";
+                var anchor = calendarPanel.querySelector(".cal-legend");
+                if (anchor) {
+                  anchor.insertAdjacentElement("afterend", mount);
+                } else {
+                  calendarPanel.insertBefore(mount, calendarPanel.firstChild);
+                }
+              }
+              mount.innerHTML = "";
+              var activeCopy = Array.prototype.find.call(roomCopies, function (copy) {
+                return copy.getAttribute("data-room") === currentRoom;
+              });
+              ["FACILITIES", "NOTICE"].forEach(function (label) {
+                var sourceSection = activeCopy
+                  ? Array.prototype.find.call(
+                      activeCopy.querySelectorAll(".room-info-section"),
+                      function (section) {
+                        var title = section.querySelector(".room-info-section__title");
+                        return title && title.textContent.trim().toUpperCase() === label;
+                      },
+                    )
+                  : null;
+                var item = document.createElement("section");
+                item.className = "reservation-mobile-accordion";
+                var button = document.createElement("button");
+                button.type = "button";
+                button.className = "reservation-mobile-accordion__trigger";
+                button.setAttribute("aria-expanded", "false");
+                button.innerHTML =
+                  '<span class="reservation-mobile-accordion__label">' +
+                  label +
+                  "</span>" +
+                  '<span class="reservation-mobile-accordion__icon" aria-hidden="true">↓</span>';
+                var content = buildMobileAccordionContent(sourceSection);
+                content.hidden = true;
+                button.addEventListener("click", function () {
+                  var isOpen = button.getAttribute("aria-expanded") === "true";
+                  button.setAttribute("aria-expanded", String(!isOpen));
+                  content.hidden = isOpen;
+                  button.querySelector(".reservation-mobile-accordion__icon").textContent =
+                    isOpen ? "↓" : "↑";
+                });
+                item.appendChild(button);
+                item.appendChild(content);
+                mount.appendChild(item);
               });
             }
 

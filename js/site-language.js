@@ -88,8 +88,8 @@
   function ensureMobileLanguageSwitch() {
     var navs = document.querySelectorAll(".site-nav");
     navs.forEach(function (nav) {
-      var mobileBtn = nav.querySelector(".mobile-menu-btn");
-      if (!mobileBtn) return;
+      var drawerFooter = nav.querySelector(".mobile-nav-drawer__footer");
+      if (!drawerFooter) return;
       if (nav.querySelector(".mobile-lang-switch")) return;
 
       var wrapper = document.createElement("div");
@@ -100,7 +100,7 @@
         '<button type="button" class="lang-switch__btn" data-lang-option="kr">KR</button>' +
         '<span class="lang-switch__divider" aria-hidden="true">|</span>' +
         '<button type="button" class="lang-switch__btn" data-lang-option="en">EN</button>';
-      nav.insertBefore(wrapper, mobileBtn);
+      drawerFooter.insertBefore(wrapper, drawerFooter.firstChild);
     });
   }
 
