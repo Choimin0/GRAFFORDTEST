@@ -1480,7 +1480,7 @@ main {
   .content-section .features .feature .feature-text {
     order: 2;
     font-weight: 400;
-    margin-top: var(--space-24);
+    margin-top: var(--space-48);
     margin-left: var(--space-16);
     margin-right: var(--space-16);
   }
@@ -5055,6 +5055,10 @@ main.content-section:has(> .site-footer.site-business-footer) {
   display: none;
 }
 
+.reservation-mobile-accordions {
+  display: none;
+}
+
 @media (max-width: 767px) {
   .reservation-page {
     padding-bottom: 9.5rem;
@@ -5064,8 +5068,46 @@ main.content-section:has(> .site-footer.site-business-footer) {
   .reservation-page .lang-en .content-section {
     margin-top: 0;
   }
-
+  /*모바일 화면 reservation 페이지 디자인 정리 */
   .reservation-booking {
+    --reservation-mobile-stat-border: var(--stone-200);
+    --reservation-mobile-stat-label-color: var(--stone-400);
+    --reservation-mobile-stat-label-font: var(--font-family-nav-en);
+    --reservation-mobile-stat-label-size: 0.62rem;
+    --reservation-mobile-stat-label-weight: 500;
+    --reservation-mobile-stat-label-spacing: 0.34em;
+    --reservation-mobile-stat-label-line-height: 1.4;
+    --reservation-mobile-stat-value-color: var(--stone-700);
+    --reservation-mobile-stat-value-size: clamp(1rem, 3vw, 1.35rem);
+    --reservation-mobile-stat-value-weight: 400;
+    --reservation-mobile-stat-value-line-height: 1.55;
+    --reservation-mobile-stat-value-spacing: 0.04em;
+    /*room intro desc (summary, detail)*/
+    --reservation-mobile-about-summary-color: var(--stone-700);
+    --reservation-mobile-about-summary-size: clamp(1.12rem, 2.5vw, 1.48rem);
+    --reservation-mobile-about-summary-weight: 400;
+    --reservation-mobile-about-summary-line-height: 1.65;
+    --reservation-mobile-about-summary-spacing: 0.06em;
+    --reservation-mobile-about-detail-color: var(--stone-400);
+    --reservation-mobile-about-detail-size: clamp(0.94rem, 4.2vw, 1.08rem);
+    --reservation-mobile-about-detail-weight: 400;
+    --reservation-mobile-about-detail-line-height: 2;
+    --reservation-mobile-about-detail-spacing: 0.06em;
+    --reservation-mobile-about-toggle-color: var(--stone-400);
+    --reservation-mobile-about-toggle-size: 0.82rem;
+    --reservation-mobile-about-toggle-spacing: 0.24em;
+    --reservation-mobile-accordion-trigger-color: var(--stone-800);
+    --reservation-mobile-accordion-trigger-font: var(--font-family-nav-en);
+    --reservation-mobile-accordion-trigger-size: 0.82rem;
+    --reservation-mobile-accordion-trigger-spacing: 0.34em;
+    --reservation-mobile-accordion-icon-color: var(--gold-500);
+    --reservation-mobile-facility-label-spacing: 0.24em;
+    --reservation-mobile-facility-value-color: var(--stone-800);
+    --reservation-mobile-facility-value-size: 0.82rem;
+    --reservation-mobile-facility-value-line-height: 1.6;
+    --reservation-mobile-notice-color: var(--stone-800);
+    --reservation-mobile-notice-size: 0.95rem;
+    --reservation-mobile-notice-line-height: 1.9;
     padding-bottom: var(--space-24);
   }
 
@@ -5077,10 +5119,13 @@ main.content-section:has(> .site-footer.site-business-footer) {
   .reservation-gallery {
     display: flex;
     flex-direction: column;
+    margin-bottom: var(--space-16);
+    background: var(--reservation-calendar-bg);
   }
 
   .room-copy-blocks {
     margin-top: 0;
+    padding: 0 var(--space-16) var(--space-24);
   }
 
   .room-detail-intro.is-visible {
@@ -5098,7 +5143,8 @@ main.content-section:has(> .site-footer.site-business-footer) {
     margin-top: var(--space-32);
   }
 
-  .room-copy-blocks .room-info-section:not(.reservation-mobile-room-spec):not(
+  .room-copy-blocks
+    .room-info-section:not(.reservation-mobile-room-spec):not(
       .reservation-mobile-room-about
     ),
   .room-copy-blocks .room-plan-image-wrap {
@@ -5112,20 +5158,22 @@ main.content-section:has(> .site-footer.site-business-footer) {
   .room-copy-blocks .reservation-mobile-room-spec .room-spec-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 0;
-    border-top: 1px solid var(--stone-200);
-    border-bottom: 1px solid var(--stone-200);
+    border-top: 1px solid var(--reservation-mobile-stat-border);
+    border-bottom: 1px solid var(--reservation-mobile-stat-border);
   }
 
   .room-copy-blocks .reservation-mobile-room-spec .room-spec-cell {
     min-height: 6.35rem;
     padding: var(--space-24) var(--space-16);
     border-right: 0;
-    border-bottom: 1px solid var(--stone-200);
+    border-bottom: 1px solid var(--reservation-mobile-stat-border);
     box-sizing: border-box;
   }
 
-  .room-copy-blocks .reservation-mobile-room-spec .room-spec-cell:nth-child(odd) {
-    border-right: 1px solid var(--stone-200);
+  .room-copy-blocks
+    .reservation-mobile-room-spec
+    .room-spec-cell:nth-child(odd) {
+    border-right: 1px solid var(--reservation-mobile-stat-border);
   }
 
   .room-copy-blocks
@@ -5136,35 +5184,37 @@ main.content-section:has(> .site-footer.site-business-footer) {
 
   .room-copy-blocks .reservation-mobile-room-spec .room-spec-label {
     margin: 0;
-    color: var(--stone-400);
-    font-family: var(--font-family-nav-en);
-    font-size: 0.62rem;
-    font-weight: 500;
-    letter-spacing: 0.34em;
-    line-height: 1.4;
+    color: var(--reservation-mobile-stat-label-color);
+    font-family: var(--reservation-mobile-stat-label-font);
+    font-size: var(--reservation-mobile-stat-label-size);
+    font-weight: var(--reservation-mobile-stat-label-weight);
+    letter-spacing: var(--reservation-mobile-stat-label-spacing);
+    line-height: var(--reservation-mobile-stat-label-line-height);
     text-transform: uppercase;
   }
 
   .room-copy-blocks .reservation-mobile-room-spec .room-spec-value {
     margin-top: var(--space-16);
-    color: var(--stone-900);
-    font-size: clamp(1rem, 5vw, 1.35rem);
-    font-weight: 400;
-    line-height: 1.55;
-    letter-spacing: 0.04em;
+    color: var(--reservation-mobile-stat-value-color);
+    font-size: var(--reservation-mobile-stat-value-size);
+    font-weight: var(--reservation-mobile-stat-value-weight);
+    line-height: var(--reservation-mobile-stat-value-line-height);
+    letter-spacing: var(--reservation-mobile-stat-value-spacing);
   }
 
   .room-copy-blocks .reservation-mobile-room-about .room-about-text {
-    color: var(--stone-900);
+    color: var(--reservation-mobile-about-summary-color);
   }
 
-  .room-copy-blocks .reservation-mobile-room-about .room-intro-desc:first-child {
+  .room-copy-blocks
+    .reservation-mobile-room-about
+    .room-intro-desc:first-child {
     margin-bottom: 0;
-    color: var(--stone-900);
-    font-size: clamp(1.12rem, 5.7vw, 1.48rem);
-    font-weight: 400;
-    line-height: 1.75;
-    letter-spacing: 0.06em;
+    color: var(--reservation-mobile-about-summary-color);
+    font-size: var(--reservation-mobile-about-summary-size);
+    font-weight: var(--reservation-mobile-about-summary-weight);
+    line-height: var(--reservation-mobile-about-summary-line-height);
+    letter-spacing: var(--reservation-mobile-about-summary-spacing);
   }
 
   .reservation-room-about__more {
@@ -5172,10 +5222,10 @@ main.content-section:has(> .site-footer.site-business-footer) {
     max-height: 20rem;
     margin-top: var(--space-24);
     opacity: 1;
-    color: var(--stone-400);
-    font-size: clamp(0.94rem, 4.2vw, 1.08rem);
-    line-height: 2;
-    letter-spacing: 0.06em;
+    color: var(--reservation-mobile-about-detail-color);
+    font-size: var(--reservation-mobile-about-detail-size);
+    line-height: var(--reservation-mobile-about-detail-line-height);
+    letter-spacing: var(--reservation-mobile-about-detail-spacing);
     transition:
       opacity 0.36s ease,
       max-height 0.36s ease,
@@ -5197,10 +5247,10 @@ main.content-section:has(> .site-footer.site-business-footer) {
     padding: 0;
     border: 0;
     background: transparent;
-    color: var(--stone-400);
+    color: var(--reservation-mobile-about-toggle-color);
     font-family: var(--font-family-body-kr);
-    font-size: 0.82rem;
-    letter-spacing: 0.24em;
+    font-size: var(--reservation-mobile-about-toggle-size);
+    letter-spacing: var(--reservation-mobile-about-toggle-spacing);
     cursor: pointer;
   }
 
@@ -5210,11 +5260,17 @@ main.content-section:has(> .site-footer.site-business-footer) {
 
   .reservation-calendar-panel {
     margin-top: var(--space-32);
+    margin-bottom: var(--space-16);
+    background: var(--reservation-calendar-bg);
   }
 
   .reservation-mobile-accordions {
-    margin: var(--space-24) 0 var(--space-16);
+    display: block;
+    margin: 0 0 var(--space-24);
+    padding: 0 var(--space-16) var(--space-16);
+    background: var(--reservation-calendar-bg);
     border-top: 1px solid var(--stone-200);
+    box-sizing: border-box;
   }
 
   .reservation-mobile-accordion {
@@ -5230,36 +5286,37 @@ main.content-section:has(> .site-footer.site-business-footer) {
     padding: 0;
     border: 0;
     background: transparent;
-    color: var(--stone-800);
-    font-family: var(--font-family-nav-en);
-    font-size: 0.82rem;
-    letter-spacing: 0.34em;
+    color: var(--reservation-mobile-accordion-trigger-color);
+    font-family: var(--reservation-mobile-accordion-trigger-font);
+    font-size: var(--reservation-mobile-accordion-trigger-size);
+    letter-spacing: var(--reservation-mobile-accordion-trigger-spacing);
     text-align: left;
     cursor: pointer;
   }
 
   .reservation-mobile-accordion__icon {
-    color: var(--gold-500);
+    color: var(--reservation-mobile-accordion-icon-color);
     letter-spacing: 0;
   }
 
   .reservation-mobile-accordion__content {
     padding: 0 0 var(--space-24);
+    background-color: var(--stone-50);
   }
 
   .reservation-mobile-accordion__content .room-spec-grid {
     display: grid;
     grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 0;
-    border: 1px solid var(--stone-200);
+    border: 1px solid var(--reservation-mobile-stat-border);
     border-bottom: 0;
   }
 
   .reservation-mobile-accordion__content .room-spec-cell {
     min-height: 6rem;
     padding: var(--space-20) var(--space-16);
-    border-right: 1px solid var(--stone-200);
-    border-bottom: 1px solid var(--stone-200);
+    border-right: 1px solid var(--reservation-mobile-stat-border);
+    border-bottom: 1px solid var(--reservation-mobile-stat-border);
   }
 
   .reservation-mobile-accordion__content .room-spec-cell:nth-child(2n) {
@@ -5267,32 +5324,32 @@ main.content-section:has(> .site-footer.site-business-footer) {
   }
 
   .reservation-mobile-accordion__content .room-spec-label {
-    color: var(--stone-400);
-    font-family: var(--font-family-nav-en);
-    font-size: 0.62rem;
-    letter-spacing: 0.24em;
+    color: var(--reservation-mobile-stat-label-color);
+    font-family: var(--reservation-mobile-stat-label-font);
+    font-size: var(--reservation-mobile-stat-label-size);
+    letter-spacing: var(--reservation-mobile-facility-label-spacing);
   }
 
   .reservation-mobile-accordion__content .room-spec-value {
     margin-top: var(--space-12);
-    color: var(--stone-800);
-    font-size: 0.82rem;
-    line-height: 1.6;
+    color: var(--reservation-mobile-facility-value-color);
+    font-size: var(--reservation-mobile-facility-value-size);
+    line-height: var(--reservation-mobile-facility-value-line-height);
   }
 
   .reservation-mobile-notice-list {
     margin: 0;
     padding: var(--space-24) var(--space-24);
-    border: 1px solid var(--stone-200);
+    border: 1px solid var(--reservation-mobile-stat-border);
     list-style: none;
-    color: var(--stone-800);
+    color: var(--reservation-mobile-notice-color);
   }
 
   .reservation-mobile-notice-list li {
     position: relative;
     padding-left: 1.55rem;
-    font-size: 0.95rem;
-    line-height: 1.9;
+    font-size: var(--reservation-mobile-notice-size);
+    line-height: var(--reservation-mobile-notice-line-height);
   }
 
   .reservation-mobile-notice-list li + li {
@@ -5304,7 +5361,7 @@ main.content-section:has(> .site-footer.site-business-footer) {
     position: absolute;
     left: 0;
     top: 0;
-    color: var(--stone-800);
+    color: var(--reservation-mobile-notice-color);
     font-family: var(--font-stack-body);
   }
 

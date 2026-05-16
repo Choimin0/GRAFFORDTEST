@@ -2039,16 +2039,11 @@
               if (!calendarPanel) {
                 return;
               }
-              var mount = calendarPanel.querySelector(".reservation-mobile-accordions");
+              var mount = scope.querySelector(".reservation-mobile-accordions");
               if (!mount) {
                 mount = document.createElement("div");
                 mount.className = "reservation-mobile-accordions";
-                var anchor = calendarPanel.querySelector(".cal-legend");
-                if (anchor) {
-                  anchor.insertAdjacentElement("afterend", mount);
-                } else {
-                  calendarPanel.insertBefore(mount, calendarPanel.firstChild);
-                }
+                calendarPanel.insertAdjacentElement("afterend", mount);
               }
               mount.innerHTML = "";
               var activeCopy = Array.prototype.find.call(roomCopies, function (copy) {
