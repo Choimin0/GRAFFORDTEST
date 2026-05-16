@@ -57,45 +57,144 @@
       </div>
     </nav>
     <div class="lang-kr">
-      <main class="content-section confirm-page delete-complete-page">
-        <div class="delete-complete-mark" aria-hidden="true">
-          <img src="images/icons/confirm.png" alt="" />
-        </div>
-        <h1 class="confirm-title delete-complete-title">
-          예약 취소가 정상적으로 완료되었습니다.
-        </h1>
-        <p class="confirm-summary delete-complete-subtitle">
-          기다려주신 마음을 잘 알기에 아쉬움이 큽니다.
-        </p>
+      <main
+        class="content-section confirm-page payment-page delete-complete-page"
+      >
+        <div class="payment-page-shell">
+          <header
+            class="reserve-check-page-band payment-page-shell__band delete-complete-band"
+            aria-label="예약 취소 완료 헤더"
+          >
+            <div class="reserve-check-page-band__left">
+              <p class="reserve-check-page-band__eyebrow">
+                RESERVATION — CANCELLED
+              </p>
+              <h1 class="reserve-check-page-band__title">예약 취소 완료</h1>
+            </div>
+            <div class="reserve-check-page-band__right">
+              <p
+                class="delete-complete-band-meta-line"
+                id="band-booking-line-kr"
+              >
+                BOOKING NO. —
+              </p>
+              <p
+                class="delete-complete-band-meta-line delete-complete-band-meta-line--room"
+                id="band-ground-line-kr"
+              >
+                GROUND —
+              </p>
+            </div>
+          </header>
 
-        <section class="confirm-section delete-complete-info">
-          <h2 class="confirm-section-title">예약 취소 정보</h2>
-          <dl class="reserve-delete-dl">
-            <dt>예약번호</dt>
-            <dd id="done-order">—</dd>
-            <dt>객실</dt>
-            <dd id="done-room">—</dd>
-            <dt>체크인/체크아웃</dt>
-            <dd id="done-schedule">—</dd>
-            <dt>예약자 성함</dt>
-            <dd id="done-name">—</dd>
-            <dt>예약자 연락처</dt>
-            <dd id="done-contact">—</dd>
-            <dt>결제 금액</dt>
-            <dd id="done-amount">—</dd>
-            <dt>결제 수단</dt>
-            <dd id="done-pay-method">—</dd>
-            <dt>예약일 / 취소일</dt>
-            <dd id="done-reserve-cancel-date">—</dd>
-            <dt>취소 사유</dt>
-            <dd id="done-cancel-reason">—</dd>
-            <dt>환불 금액</dt>
-            <dd id="done-refund-amount">—</dd>
-          </dl>
-        </section>
+          <div class="payment-layout delete-complete-layout">
+            <div class="payment-layout__main delete-complete-main">
+              <div class="delete-complete-status-icon" aria-hidden="true"></div>
+              <h2 class="delete-complete-lead">예약이 취소되었습니다.</h2>
+              <p class="delete-complete-copy">
+                기다려주신 마음을 잘 알기에 아쉬움이 큽니다.<br />
+                다음에 더 나은 모습으로 다시 뵐 수 있기를 바랍니다.
+              </p>
 
-        <div class="confirm-actions delete-complete-actions">
-          <a href="index.html" class="reserve-complete-action-link">메인으로</a>
+              <div class="delete-complete-refund-box">
+                <h3 class="payment-section-head delete-complete-refund-head">
+                  <span class="payment-section-head__label">REFUND INFO</span>
+                  <span
+                    class="payment-section-head__rule"
+                    aria-hidden="true"
+                  ></span>
+                </h3>
+                <p
+                  class="delete-complete-refund-summary"
+                  id="delete-refund-summary-kr"
+                >
+                  —
+                </p>
+                <p
+                  class="delete-complete-refund-detail"
+                  id="delete-refund-detail-kr"
+                >
+                  —
+                </p>
+              </div>
+
+              <div class="delete-complete-main-actions">
+                <a
+                  href="index.html"
+                  class="btn reserve-btn confirm-pay-submit reserveinfo-submit-btn delete-complete-home-btn"
+                  >메인으로 →</a
+                >
+              </div>
+            </div>
+
+            <aside
+              class="payment-layout__sidebar delete-complete-sidebar"
+              aria-label="예약 취소 상세"
+            >
+              <section class="delete-complete-panel">
+                <h3 class="payment-section-head" id="delete-cancel-info-kr">
+                  <span class="payment-section-head__label"
+                    >CANCELLATION INFO</span
+                  >
+                  <span
+                    class="payment-section-head__rule"
+                    aria-hidden="true"
+                  ></span>
+                </h3>
+                <dl
+                  class="payment-kv delete-complete-kv"
+                  aria-labelledby="delete-cancel-info-kr"
+                >
+                  <div class="payment-kv__row">
+                    <dt>예약번호</dt>
+                    <dd id="done-order">—</dd>
+                  </div>
+                  <div class="payment-kv__row">
+                    <dt>객실</dt>
+                    <dd id="done-room">—</dd>
+                  </div>
+                  <div class="payment-kv__row">
+                    <dt>체크인 / 체크아웃</dt>
+                    <dd id="done-schedule">—</dd>
+                  </div>
+                  <div class="payment-kv__row">
+                    <dt>예약자</dt>
+                    <dd id="done-name">—</dd>
+                  </div>
+                  <div class="payment-kv__row">
+                    <dt>연락처</dt>
+                    <dd id="done-contact">—</dd>
+                  </div>
+                  <div class="payment-kv__row">
+                    <dt>결제 금액</dt>
+                    <dd id="done-amount">—</dd>
+                  </div>
+                  <div class="payment-kv__row">
+                    <dt>결제 수단</dt>
+                    <dd id="done-pay-method">—</dd>
+                  </div>
+                  <div class="payment-kv__row">
+                    <dt>예약일 / 취소일</dt>
+                    <dd id="done-reserve-cancel-date">—</dd>
+                  </div>
+                  <div class="payment-kv__row">
+                    <dt>취소 사유</dt>
+                    <dd>
+                      <span
+                        class="delete-complete-reason-pill"
+                        id="done-cancel-reason"
+                        >—</span
+                      >
+                    </dd>
+                  </div>
+                  <div class="payment-kv__row delete-complete-kv__row--refund">
+                    <dt>환불 금액</dt>
+                    <dd id="done-refund-amount">—</dd>
+                  </div>
+                </dl>
+              </section>
+            </aside>
+          </div>
         </div>
         <div
           class="reserve-delete-modal-backdrop"
@@ -235,6 +334,31 @@
             }).format(d);
           }
 
+          function formatDateIsoSeoul(v) {
+            if (!v) {
+              return "—";
+            }
+            var ymd = String(v).trim();
+            if (/^\d{8}$/.test(ymd)) {
+              return (
+                ymd.slice(0, 4) + "-" + ymd.slice(4, 6) + "-" + ymd.slice(6, 8)
+              );
+            }
+            if (/^\d{4}-\d{2}-\d{2}$/.test(ymd)) {
+              return ymd;
+            }
+            var d = new Date(v);
+            if (isNaN(d.getTime())) {
+              return ymd;
+            }
+            return new Intl.DateTimeFormat("en-CA", {
+              timeZone: "Asia/Seoul",
+              year: "numeric",
+              month: "2-digit",
+              day: "2-digit",
+            }).format(d);
+          }
+
           function paymentLabel(v) {
             var key = String(v || "")
               .trim()
@@ -334,9 +458,67 @@
           }
 
           var roomLabel = ROOM_LABEL[room] || room || "—";
-          var scheduleText = (checkIn || "—") + " ~ " + (checkOut || "—");
+          var scheduleText =
+            formatDateIsoSeoul(checkIn) + " - " + formatDateIsoSeoul(checkOut);
           var reserveCancelDateText =
             formatDateOnly(reservedAt) + " / " + formatDateOnly(cancelledAt);
+          var methodKey = paymentMethod.toLowerCase();
+
+          function refundSummaryKr(n) {
+            if (!Number.isFinite(n) || n <= 0) {
+              return "환불 없음";
+            }
+            return Number(n).toLocaleString("ko-KR") + "원 전액 환불";
+          }
+          function refundSummaryEn(n) {
+            if (!Number.isFinite(n) || n <= 0) {
+              return "No refund";
+            }
+            return (
+              "Full refund of " + Number(n).toLocaleString("en-US") + " KRW"
+            );
+          }
+          function refundDetailKr(n, key) {
+            if (!Number.isFinite(n) || n <= 0) {
+              if (key === "bank" || key === "무통장입금") {
+                return "무통장 입금 건은 안내에 따라 별도 처리될 수 있습니다.";
+              }
+              return "환불 대상 금액이 없습니다.";
+            }
+            return (
+              "결제 수단에 따라 영업일 기준 3~5일 내 환불이 완료될 수 있습니다. (" +
+              paymentLabel(paymentMethod) +
+              ")"
+            );
+          }
+          function refundDetailEn(n, key) {
+            if (!Number.isFinite(n) || n <= 0) {
+              if (key === "bank" || key === "무통장입금") {
+                return "Bank transfers may be handled separately per our policy.";
+              }
+              return "There is no refund amount for this cancellation.";
+            }
+            return (
+              "Refunds are typically processed within 3–5 business days depending on your payment provider (" +
+              paymentLabelEn(paymentMethod) +
+              ")."
+            );
+          }
+
+          setText("band-booking-line-kr", "BOOKING NO. " + orderNo);
+          setText("band-ground-line-kr", "GROUND " + roomLabel);
+          setText("band-booking-line-en", "BOOKING NO. " + orderNo);
+          setText("band-ground-line-en", "GROUND " + roomLabel);
+          setText("delete-refund-summary-kr", refundSummaryKr(refundAmount));
+          setText("delete-refund-summary-en", refundSummaryEn(refundAmount));
+          setText(
+            "delete-refund-detail-kr",
+            refundDetailKr(refundAmount, methodKey),
+          );
+          setText(
+            "delete-refund-detail-en",
+            refundDetailEn(refundAmount, methodKey),
+          );
 
           // Korean
           setText("done-order", orderNo);
@@ -400,47 +582,148 @@
       </script>
     </div>
     <div class="lang-en">
-      <main class="content-section confirm-page delete-complete-page">
-        <div class="delete-complete-mark" aria-hidden="true">
-          <img src="images/icons/confirm.png" alt="" />
-        </div>
-        <h1 class="confirm-title delete-complete-title">
-          Reservation Cancellation Complete
-        </h1>
-        <p class="confirm-summary delete-complete-subtitle">
-          We are sorry to see you go.
-        </p>
+      <main
+        class="content-section confirm-page payment-page delete-complete-page"
+      >
+        <div class="payment-page-shell">
+          <header
+            class="reserve-check-page-band payment-page-shell__band delete-complete-band"
+            aria-label="Reservation cancelled header"
+          >
+            <div class="reserve-check-page-band__left">
+              <p class="reserve-check-page-band__eyebrow">
+                RESERVATION — CANCELLED
+              </p>
+              <h1 class="reserve-check-page-band__title">
+                Reservation Cancelled
+              </h1>
+            </div>
+            <div class="reserve-check-page-band__right">
+              <p
+                class="delete-complete-band-meta-line"
+                id="band-booking-line-en"
+              >
+                BOOKING NO. —
+              </p>
+              <p
+                class="delete-complete-band-meta-line delete-complete-band-meta-line--room"
+                id="band-ground-line-en"
+              >
+                GROUND —
+              </p>
+            </div>
+          </header>
 
-        <section class="confirm-section delete-complete-info">
-          <h2 class="confirm-section-title">
-            Reservation Cancellation Information
-          </h2>
-          <dl class="reserve-delete-dl">
-            <dt>Reserve NO.</dt>
-            <dd id="done-order-en">—</dd>
-            <dt>Room</dt>
-            <dd id="done-room-en">—</dd>
-            <dt>Check-in/<br />Check-out</dt>
-            <dd id="done-schedule-en">—</dd>
-            <dt>Guest Name</dt>
-            <dd id="done-name-en">—</dd>
-            <dt>Guest Contact</dt>
-            <dd id="done-contact-en">—</dd>
-            <dt>Total Amount</dt>
-            <dd id="done-amount-en">—</dd>
-            <dt>Payment Method</dt>
-            <dd id="done-pay-method-en">—</dd>
-            <dt>Reservation Date / Cancellation Date</dt>
-            <dd id="done-reserve-cancel-date-en">—</dd>
-            <dt>Cancellation Reason</dt>
-            <dd id="done-cancel-reason-en">—</dd>
-            <dt>Refund Amount</dt>
-            <dd id="done-refund-amount-en">—</dd>
-          </dl>
-        </section>
+          <div class="payment-layout delete-complete-layout">
+            <div class="payment-layout__main delete-complete-main">
+              <div class="delete-complete-status-icon" aria-hidden="true"></div>
+              <h2 class="delete-complete-lead">
+                Your reservation is cancelled.
+              </h2>
+              <p class="delete-complete-copy">
+                Thank you for staying with us.<br />
+                We hope to welcome you back on another occasion.
+              </p>
 
-        <div class="confirm-actions delete-complete-actions">
-          <a href="index.html" class="reserve-complete-action-link">Main</a>
+              <div class="delete-complete-refund-box">
+                <h3 class="payment-section-head delete-complete-refund-head">
+                  <span class="payment-section-head__label">REFUND INFO</span>
+                  <span
+                    class="payment-section-head__rule"
+                    aria-hidden="true"
+                  ></span>
+                </h3>
+                <p
+                  class="delete-complete-refund-summary"
+                  id="delete-refund-summary-en"
+                >
+                  —
+                </p>
+                <p
+                  class="delete-complete-refund-detail"
+                  id="delete-refund-detail-en"
+                >
+                  —
+                </p>
+              </div>
+
+              <div class="delete-complete-main-actions">
+                <a
+                  href="index.html"
+                  class="btn reserve-btn confirm-pay-submit reserveinfo-submit-btn delete-complete-home-btn"
+                  >Main →</a
+                >
+              </div>
+            </div>
+
+            <aside
+              class="payment-layout__sidebar delete-complete-sidebar"
+              aria-label="Cancellation details"
+            >
+              <section class="delete-complete-panel">
+                <h3 class="payment-section-head" id="delete-cancel-info-en">
+                  <span class="payment-section-head__label"
+                    >CANCELLATION INFO</span
+                  >
+                  <span
+                    class="payment-section-head__rule"
+                    aria-hidden="true"
+                  ></span>
+                </h3>
+                <dl
+                  class="payment-kv delete-complete-kv"
+                  aria-labelledby="delete-cancel-info-en"
+                >
+                  <div class="payment-kv__row">
+                    <dt>BOOKING NO.</dt>
+                    <dd id="done-order-en">—</dd>
+                  </div>
+                  <div class="payment-kv__row">
+                    <dt>ROOM</dt>
+                    <dd id="done-room-en">—</dd>
+                  </div>
+                  <div class="payment-kv__row">
+                    <dt>CHECK-IN / CHECK-OUT</dt>
+                    <dd id="done-schedule-en">—</dd>
+                  </div>
+                  <div class="payment-kv__row">
+                    <dt>GUEST NAME</dt>
+                    <dd id="done-name-en">—</dd>
+                  </div>
+                  <div class="payment-kv__row">
+                    <dt>CONTACT</dt>
+                    <dd id="done-contact-en">—</dd>
+                  </div>
+                  <div class="payment-kv__row">
+                    <dt>PAYMENT AMOUNT</dt>
+                    <dd id="done-amount-en">—</dd>
+                  </div>
+                  <div class="payment-kv__row">
+                    <dt>PAYMENT METHOD</dt>
+                    <dd id="done-pay-method-en">—</dd>
+                  </div>
+                  <div class="payment-kv__row">
+                    <dt>BOOKED / CANCELLED</dt>
+                    <dd id="done-reserve-cancel-date-en">—</dd>
+                  </div>
+                  <div class="payment-kv__row">
+                    <dt>CANCELLATION REASON</dt>
+                    <dd>
+                      <span
+                        class="delete-complete-reason-pill"
+                        id="done-cancel-reason-en"
+                        >—</span
+                      >
+                    </dd>
+                  </div>
+                  <div class="payment-kv__row delete-complete-kv__row--refund">
+                    <dt>REFUND AMOUNT</dt>
+                    <dd id="done-refund-amount-en">—</dd>
+                  </div>
+                </dl>
+              </section>
+            </aside>
+          </div>
         </div>
         <div class="reserve-delete-modal-backdrop" hidden>
           <div class="reserve-delete-modal" role="dialog" aria-modal="true">

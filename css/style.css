@@ -6298,31 +6298,510 @@ main.content-section.confirm-page.reserveinfo-page {
   gap: 0.85rem;
 }
 
-.reserve-delete-page .confirm-layout-col--right {
-  position: static;
-  top: auto;
+.reserve-delete-page .payment-page-shell {
+  flex: 1 0 auto;
+  min-width: 0;
 }
 
-.reserve-delete-refund-box {
-  margin-top: 0.9rem;
-  padding: 0.9rem 1rem;
-  border: 1px solid rgba(58, 53, 49, 0.16);
-  border-radius: 8px;
+.reserve-delete-layout.payment-layout {
+  gap: 0;
 }
 
-.reserve-delete-refund-label {
+@media (min-width: 900px) {
+  .reserve-delete-layout.payment-layout .payment-layout__main {
+    padding-right: clamp(1.25rem, 4vw, 2.75rem);
+  }
+
+  .reserve-delete-layout.payment-layout .payment-layout__sidebar {
+    padding-left: clamp(1.25rem, 4vw, 2.75rem);
+    border-left: 1px solid var(--stone-200);
+    position: static;
+    top: auto;
+  }
+}
+
+@media (max-width: 899px) {
+  .reserve-delete-page .payment-layout__main {
+    order: 0;
+  }
+
+  .reserve-delete-page .payment-layout__sidebar {
+    order: 1;
+    border-top: 1px solid var(--stone-200);
+    padding-top: var(--space-32);
+    margin-top: var(--space-16);
+  }
+}
+
+.reserve-delete-main {
+  min-width: 0;
+}
+
+.reserve-delete-panel {
+  margin-bottom: clamp(1.75rem, 4vw, 2.5rem);
+}
+
+.reserve-delete-panel:last-child {
+  margin-bottom: 0;
+}
+
+.reserve-delete-policy-dynamic {
+  margin: 0 0 var(--space-16);
+  font-size: var(--font-size-feature-body-sm);
+  line-height: var(--line-height-body);
+  color: var(--stone-400);
+}
+
+.lang-kr .reserve-delete-policy-dynamic {
+  font-family: var(--font-family-body-kr);
+}
+
+.lang-en .reserve-delete-policy-dynamic {
+  font-family: var(--font-family-body-en);
+}
+
+.reserve-delete-refund-info-box {
+  padding: var(--space-24);
+  margin-bottom: clamp(1.75rem, 4vw, 2.5rem);
+  background: var(--stone-100);
+  border: 1px solid var(--stone-200);
+  box-sizing: border-box;
+}
+
+.reserve-delete-refund-info-box .payment-section-head {
+  margin-bottom: 0.75rem;
+}
+
+.reserve-delete-refund-info-amount {
+  margin: 0 0 var(--space-12);
+  font-size: clamp(1.2rem, 2.8vw, 1.55rem);
+  font-weight: 500;
+  line-height: var(--line-height-heading);
+  color: var(--stone-800);
+}
+
+.lang-kr .reserve-delete-refund-info-amount {
+  font-family: var(--font-family-body-kr);
+}
+
+.lang-en .reserve-delete-refund-info-amount {
+  font-family: var(--font-family-body-en);
+}
+
+.reserve-delete-refund-info-note {
   margin: 0;
-  font-size: 0.9rem;
-  color: var(--grafford-mud2);
+  font-size: var(--font-size-feature-body-sm);
+  line-height: var(--line-height-body);
+  color: var(--stone-400);
 }
 
-.reserve-delete-refund-amount {
-  margin: 0.35rem 0 0;
-  font-size: 1.25rem;
-  font-weight: 600;
-  color: var(--grafford-dark-brown);
+.lang-kr .reserve-delete-refund-info-note {
+  font-family: var(--font-family-body-kr);
 }
 
+.lang-en .reserve-delete-refund-info-note {
+  font-family: var(--font-family-body-en);
+}
+
+.reserve-delete-section-label-kr {
+  text-transform: none;
+  letter-spacing: 0.12em;
+  font-size: 0.72rem;
+}
+
+.reserve-delete-reason-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-12);
+}
+
+@media (max-width: 560px) {
+  .reserve-delete-reason-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.reserve-delete-reason-card {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-12);
+  margin: 0;
+  min-height: 3.35rem;
+  padding: var(--space-12) var(--space-16);
+  border: 1px solid var(--stone-200);
+  background: var(--stone-50);
+  cursor: pointer;
+  box-sizing: border-box;
+  transition:
+    border-color 0.2s ease,
+    background-color 0.2s ease;
+}
+
+.reserve-delete-reason-card:hover {
+  border-color: var(--stone-400);
+}
+
+.reserve-delete-reason-card:has(.reserve-delete-reason-card__input:checked) {
+  border-color: var(--gold-500);
+  background: color-mix(in srgb, var(--gold-500) 10%, var(--stone-50));
+}
+
+.reserve-delete-reason-card__input {
+  -webkit-appearance: none;
+  appearance: none;
+  margin: 0.2rem 0 0;
+  flex-shrink: 0;
+  width: 1.125rem;
+  height: 1.125rem;
+  border: 1px solid var(--stone-400);
+  border-radius: 2px;
+  background: #fff;
+  cursor: pointer;
+  position: relative;
+  box-sizing: border-box;
+  transition:
+    border-color 0.15s ease,
+    background-color 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.reserve-delete-reason-card__input:hover {
+  border-color: var(--stone-800);
+}
+
+.reserve-delete-reason-card__input:focus-visible {
+  outline: none;
+  box-shadow:
+    0 0 0 2px var(--stone-50),
+    0 0 0 4px var(--gold-500);
+}
+
+.reserve-delete-reason-card__input:checked {
+  border-color: var(--stone-800);
+  background-color: var(--stone-800);
+}
+
+/* 네모 안 체크 (┐ 모양 두 선) */
+.reserve-delete-reason-card__input:checked::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  top: 45%;
+  width: 0.22rem;
+  height: 0.42rem;
+  margin-left: -0.05rem;
+  border: 2px solid var(--stone-50);
+  border-top: 0;
+  border-left: 0;
+  transform: translate(-50%, -50%) rotate(45deg);
+  box-sizing: border-box;
+}
+
+.reserve-delete-reason-card__text {
+  font-size: var(--font-size-feature-body-sm);
+  line-height: var(--line-height-body);
+  color: var(--stone-800);
+}
+
+.lang-kr .reserve-delete-reason-card__text {
+  font-family: var(--font-family-body-kr);
+}
+
+.lang-en .reserve-delete-reason-card__text {
+  font-family: var(--font-family-body-en);
+}
+
+.reserve-delete-other-textarea-wrap {
+  margin-top: var(--space-16);
+}
+
+.reserve-delete-textarea-label {
+  display: block;
+  margin-bottom: var(--space-8);
+  font-size: 0.78rem;
+  color: var(--stone-400);
+}
+
+.lang-kr .reserve-delete-textarea-label {
+  font-family: var(--font-family-body-kr);
+}
+
+.lang-en .reserve-delete-textarea-label {
+  font-family: var(--font-family-body-en);
+}
+
+.reserve-delete-textarea {
+  width: 100%;
+  min-height: 5.5rem;
+  padding: var(--space-12);
+  box-sizing: border-box;
+  border: 1px solid var(--stone-200);
+  border-radius: var(--radius-soft);
+  background: var(--stone-50);
+  color: var(--stone-800);
+  font-size: var(--font-size-feature-body-sm);
+  line-height: var(--line-height-body);
+  resize: vertical;
+}
+
+.reserve-delete-textarea:focus,
+.reserve-delete-textarea:focus-visible {
+  outline: none;
+  border-color: var(--gold-500);
+}
+
+.lang-kr .reserve-delete-textarea {
+  font-family: var(--font-family-body-kr);
+}
+
+.lang-en .reserve-delete-textarea {
+  font-family: var(--font-family-body-en);
+}
+
+.reserve-delete-sidebar-inner {
+  background: var(--stone-50);
+  box-sizing: border-box;
+}
+
+.reserve-delete-card {
+  margin-bottom: var(--space-16);
+  padding: var(--space-24);
+  background: #fff;
+  border: 1px solid var(--stone-200);
+  box-sizing: border-box;
+}
+
+.reserve-delete-card:last-of-type {
+  margin-bottom: var(--space-20);
+}
+
+.reserve-delete-card .payment-section-head {
+  margin-bottom: 1rem;
+}
+
+.reserve-delete-card-kv {
+  margin: 0;
+}
+
+.reserve-delete-card-kv__row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: var(--space-16);
+  padding: 0.5rem 0;
+  border-bottom: 1px solid color-mix(in srgb, var(--stone-800) 8%, transparent);
+}
+
+.reserve-delete-card-kv__row:first-of-type {
+  padding-top: 0;
+}
+
+.reserve-delete-card-kv__row:last-of-type {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.reserve-delete-card-kv__row dt {
+  margin: 0;
+  flex-shrink: 0;
+  font-size: 0.72rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--stone-400);
+}
+
+.lang-kr .reserve-delete-card-kv__row dt {
+  text-transform: none;
+  letter-spacing: 0.02em;
+  font-size: 0.78rem;
+}
+
+.reserve-delete-card-kv__row dd {
+  margin: 0;
+  text-align: right;
+  font-size: var(--font-size-feature-body-sm);
+  font-weight: 500;
+  color: var(--stone-800);
+  word-break: break-word;
+}
+
+.lang-kr .reserve-delete-card-kv__row dd {
+  font-family: var(--font-family-body-kr);
+}
+
+.lang-en .reserve-delete-card-kv__row dd {
+  font-family: var(--font-family-body-en);
+}
+
+.reserve-delete-notice {
+  margin: 0 0 var(--space-20);
+  padding: var(--space-16) var(--space-16) var(--space-16) var(--space-20);
+  background: var(--stone-100);
+  border-left: 3px solid var(--gold-500);
+  font-size: 0.82rem;
+  line-height: var(--line-height-body);
+  color: var(--stone-800);
+}
+
+.lang-kr .reserve-delete-notice {
+  font-family: var(--font-family-body-kr);
+  color: var(--stone-600);
+  padding: var(--space-8);
+}
+
+.lang-en .reserve-delete-notice {
+  font-family: var(--font-family-body-en);
+  color: var(--stone-600);
+  padding: var(--space-8);
+}
+
+.reserve-delete-submit-btn.confirm-pay-submit.btn.reserve-btn {
+  width: 100%;
+  margin: 0;
+  margin-top: var(--space-16);
+  padding: 0.9rem 1.25rem;
+  font-size: var(--font-size-feature-body-md);
+  border-radius: var(--btn-primary-radius);
+  box-sizing: border-box;
+}
+
+/* 비활성: .confirm-pay-submit.btn.reserve-btn(요소+2클래스)보다 높은 특이도로 덮어씀 */
+button.reserve-delete-submit-btn.confirm-pay-submit.btn.reserve-btn:disabled,
+button.reserve-delete-submit-btn.confirm-pay-submit.btn.reserve-btn:disabled:hover,
+button.reserve-delete-submit-btn.confirm-pay-submit.btn.reserve-btn:disabled:focus-visible {
+  background-color: var(--stone-200);
+  background-image: none;
+  color: var(--stone-400);
+  cursor: not-allowed;
+  border: none;
+  position: relative;
+  animation: none;
+  transform: none;
+}
+
+button.reserve-delete-submit-btn.confirm-pay-submit.btn.reserve-btn:disabled::after {
+  display: none;
+}
+
+button.reserve-delete-submit-btn.confirm-pay-submit.btn.reserve-btn:not(
+    :disabled
+  ) {
+  background-color: var(--stone-800);
+  background-image: none;
+  color: var(--stone-50);
+  border: none;
+  position: relative;
+  isolation: isolate;
+}
+
+button.reserve-delete-submit-btn.confirm-pay-submit.btn.reserve-btn:not(
+    :disabled
+  )::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 2px;
+  background: var(--gold-500);
+  transform: scaleX(0);
+  transform-origin: left center;
+  transition: transform 0.42s cubic-bezier(0.22, 1, 0.36, 1);
+  z-index: 1;
+  pointer-events: none;
+}
+
+button.reserve-delete-submit-btn.confirm-pay-submit.btn.reserve-btn:not(
+    :disabled
+  ):hover::after,
+button.reserve-delete-submit-btn.confirm-pay-submit.btn.reserve-btn:not(
+    :disabled
+  ):focus-visible::after {
+  transform: scaleX(1);
+}
+
+button.reserve-delete-submit-btn.confirm-pay-submit.btn.reserve-btn:not(
+    :disabled
+  ):hover,
+button.reserve-delete-submit-btn.confirm-pay-submit.btn.reserve-btn:not(
+    :disabled
+  ):focus-visible {
+  animation: none;
+  background-color: var(--stone-900);
+  color: var(--stone-50);
+}
+
+button.reserve-delete-submit-btn.confirm-pay-submit.btn.reserve-btn:not(
+    :disabled
+  ):active {
+  animation: none;
+  background-color: var(--stone-900);
+  color: var(--stone-50);
+}
+
+.lang-kr button.reserve-delete-submit-btn.confirm-pay-submit.btn.reserve-btn {
+  font-family: var(--font-family-body-kr);
+}
+
+.lang-en button.reserve-delete-submit-btn.confirm-pay-submit.btn.reserve-btn {
+  font-family: var(--font-family-body-en);
+}
+
+.reserve-delete-back-link {
+  display: block;
+  width: 100%;
+  margin-top: var(--space-12);
+  padding: 0.88rem 1rem;
+  box-sizing: border-box;
+  text-align: center;
+  font-size: var(--font-size-feature-body-md);
+  font-weight: 500;
+  color: var(--stone-800);
+  background: var(--stone-50);
+  border: 1px solid var(--stone-200);
+  text-decoration: none;
+  transition:
+    border-color 0.2s ease,
+    background-color 0.2s ease,
+    color 0.2s ease;
+}
+
+.reserve-delete-back-link:hover,
+.reserve-delete-back-link:focus-visible {
+  border-color: var(--stone-400);
+  background: var(--stone-100);
+  color: var(--stone-800);
+}
+
+.lang-kr .reserve-delete-back-link {
+  font-family: var(--font-family-body-kr);
+}
+
+.lang-en .reserve-delete-back-link {
+  font-family: var(--font-family-body-en);
+}
+
+.reserve-delete-side-footnote {
+  margin: var(--space-20) 0 0;
+  font-size: 0.72rem;
+  line-height: 1.5;
+  color: var(--stone-400);
+}
+
+.lang-kr .reserve-delete-side-footnote {
+  font-family: var(--font-family-body-kr);
+  margin-top: var(--space-12);
+  text-align: center;
+}
+
+.lang-en .reserve-delete-side-footnote {
+  font-family: var(--font-family-body-en);
+  margin-top: var(--space-12);
+  text-align: center;
+}
+
+/* reserve-delete-dl — reserve-check / reserve-complete 등 다른 화면에서 공용 */
 .reserve-delete-dl {
   margin: 0;
   display: grid;
@@ -6371,7 +6850,7 @@ main.content-section.confirm-page.reserveinfo-page {
 .reserve-delete-modal-title {
   margin: 0;
   text-align: center;
-  color: var(--grafford-dark-brown);
+  color: var(--stone-800);
 }
 
 .reserve-delete-modal-actions {
@@ -6392,40 +6871,6 @@ main.content-section.confirm-page.reserveinfo-page {
   line-height: 1.45;
   text-align: center;
   color: var(--grafford-mud2);
-}
-
-.reserve-delete-reason-row {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  flex-wrap: wrap;
-  margin-bottom: 0.8rem;
-}
-
-.reserve-delete-reason-row .confirm-check {
-  margin-bottom: 0;
-}
-
-.reserve-delete-other-row {
-  display: flex;
-  align-items: center;
-  gap: 0.9rem;
-  margin: 0 0.7rem 0.85rem;
-  padding-left: 0.15rem;
-}
-
-.reserve-delete-other-row .confirm-check {
-  margin-bottom: 0;
-  white-space: nowrap;
-}
-
-.reserve-delete-other-label {
-  margin-bottom: 0;
-  flex: 1;
-}
-
-.reserve-delete-other-label input {
-  width: 100%;
 }
 
 /* 무통장 입금 예약 완료 (reserve-complete.html) */
@@ -6941,53 +7386,200 @@ main.content-section.confirm-page.reserveinfo-page {
   color: var(--grafford-mud);
 }
 
-.delete-complete-page {
-  max-width: 100%;
-  margin-left: auto;
-  margin-right: auto;
+/* delete-complete: payment와 동일 shell·grid 비율 (design.md 팔레트) */
+.delete-complete-page .payment-page-shell {
+  flex: 1 0 auto;
+  min-width: 0;
 }
 
-.delete-complete-mark {
-  width: 3.1rem;
-  height: 3.1rem;
-  margin: 0 auto 0.85rem;
+.delete-complete-band .reserve-check-page-band__right {
+  max-width: min(100%, 22rem);
+}
+
+.delete-complete-band-meta-line {
+  margin: 0;
+  font-family: var(--font-family-body-en);
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--stone-800);
+  line-height: 1.35;
+  font-variant-numeric: tabular-nums;
+}
+
+.delete-complete-band-meta-line--room {
+  margin-top: 0.4rem;
+}
+
+.delete-complete-layout.payment-layout {
+  gap: 0;
+}
+
+@media (min-width: 900px) {
+  .delete-complete-layout.payment-layout .payment-layout__main {
+    padding-right: clamp(1.25rem, 4vw, 2.75rem);
+  }
+
+  .delete-complete-layout.payment-layout .payment-layout__sidebar {
+    padding-left: clamp(1.25rem, 4vw, 2.75rem);
+    border-left: 1px solid var(--stone-200);
+  }
+}
+
+@media (max-width: 899px) {
+  .delete-complete-page .payment-layout__sidebar {
+    order: 1;
+    border-top: 1px solid var(--stone-200);
+    padding-top: var(--space-32);
+    margin-top: var(--space-8);
+  }
+
+  .delete-complete-page .payment-layout__main {
+    order: 0;
+  }
+}
+
+.delete-complete-main {
+  min-width: 0;
+}
+
+.delete-complete-status-icon {
+  width: 3rem;
+  height: 3rem;
+  margin: 0 0 var(--space-24);
+  box-sizing: border-box;
+  border: 1px solid var(--stone-200);
   display: flex;
   align-items: center;
   justify-content: center;
+  color: var(--stone-800);
+  font-size: 1.15rem;
+  line-height: 1;
+  background: var(--stone-50);
 }
 
-.delete-complete-mark img {
-  width: 100%;
-  height: 100%;
-  object-fit: contain;
-  display: block;
+.delete-complete-status-icon::before {
+  content: "✓";
+  font-weight: 400;
 }
 
-.delete-complete-title {
-  margin-bottom: 0.55rem;
+.delete-complete-lead {
+  margin: 0 0 var(--space-12);
+  font-size: clamp(1.35rem, 3.2vw, 1.85rem);
+  font-weight: 500;
+  line-height: var(--line-height-heading);
+  color: var(--stone-800);
 }
 
-.delete-complete-subtitle {
-  color: var(--grafford-mud2);
+.lang-kr .delete-complete-lead {
+  font-family: var(--font-family-body-kr);
+}
+
+.lang-en .delete-complete-lead {
+  font-family: var(--font-family-body-en);
+}
+
+.delete-complete-copy {
+  margin: 0 0 clamp(1.75rem, 4vw, 2.5rem);
+  font-size: 0.95rem;
+  font-weight: 400;
+  line-height: var(--line-height-body);
+  color: var(--stone-400);
+  max-width: 36rem;
+}
+
+.lang-kr .delete-complete-copy {
+  font-family: var(--font-family-body-kr);
+}
+
+.lang-en .delete-complete-copy {
+  font-family: var(--font-family-body-en);
+}
+
+.delete-complete-refund-box {
+  padding: var(--space-24);
+  margin-bottom: clamp(1.75rem, 4vw, 2.25rem);
+  background: var(--stone-100);
+  border: 1px solid var(--stone-200);
+  box-sizing: border-box;
+}
+
+.delete-complete-refund-head.payment-section-head {
+  margin-bottom: 0.85rem;
+}
+
+.delete-complete-refund-summary {
+  margin: 0 0 var(--space-12);
+  font-size: clamp(1.15rem, 2.6vw, 1.45rem);
+  font-weight: 500;
+  line-height: var(--line-height-heading);
+  color: var(--stone-800);
+}
+
+.lang-kr .delete-complete-refund-summary {
+  font-family: var(--font-family-body-kr);
+}
+
+.lang-en .delete-complete-refund-summary {
+  font-family: var(--font-family-body-en);
+}
+
+.delete-complete-refund-detail {
+  margin: 0;
+  font-size: var(--font-size-feature-body-sm);
+  line-height: var(--line-height-body);
+  color: var(--stone-400);
+}
+
+.lang-kr .delete-complete-refund-detail {
+  font-family: var(--font-family-body-kr);
+}
+
+.lang-en .delete-complete-refund-detail {
+  font-family: var(--font-family-body-en);
+}
+
+.delete-complete-main-actions {
+  display: flex;
+  justify-content: flex-start;
+  align-items: flex-start;
+}
+
+.delete-complete-home-btn.reserveinfo-submit-btn.confirm-pay-submit {
+  width: auto;
+  min-width: 11.5rem;
+  padding-left: 1.85rem;
+  padding-right: 1.85rem;
+  text-decoration: none;
+  box-sizing: border-box;
   text-align: center;
-  margin-bottom: 1.4rem;
 }
 
-.delete-complete-info {
-  margin-top: 0.35rem;
-  align-items: center;
-  justify-content: center;
-  width: min(100%, 560px);
-  margin-left: auto;
-  margin-right: auto;
+.delete-complete-panel {
+  min-width: 0;
 }
 
-.delete-complete-actions {
-  margin-top: 1.1rem;
-  margin-bottom: 2rem;
-  display: flex;
-  justify-content: center;
-  align-items: center;
+.lang-kr .delete-complete-kv .payment-kv__row dt {
+  text-transform: none;
+  letter-spacing: 0.02em;
+  font-size: 0.78rem;
+  font-weight: 500;
+  color: var(--stone-400);
+}
+
+.delete-complete-reason-pill {
+  display: inline-block;
+  padding: 0.2rem 0.55rem;
+  border: 1px solid var(--stone-200);
+  background: var(--stone-50);
+  font-size: 0.82em;
+  font-weight: 500;
+  color: var(--stone-800);
+}
+
+.delete-complete-kv__row--refund dd {
+  font-weight: 600;
 }
 
 .reserve-complete-order-box {

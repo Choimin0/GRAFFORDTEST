@@ -96,139 +96,298 @@
       </div>
     </nav>
     <div class="lang-kr">
-      <main class="content-section confirm-page reserve-delete-page">
-        <div class="confirm-topbar">
-          <a
-            href="reserveinfo.html"
-            class="confirm-back-inline"
-            aria-label="예약조회로 돌아가기"
-            >&lt;</a
+      <main
+        class="content-section confirm-page payment-page reserve-delete-page"
+      >
+        <div class="payment-page-shell">
+          <header
+            class="reserve-check-page-band payment-page-shell__band delete-complete-band"
+            aria-label="예약 취소 헤더"
           >
-          <h1 class="confirm-title">예약 취소</h1>
-        </div>
-        <p class="confirm-summary">
-          예약 취소 전 환불 규정과 예상 환불 금액을 확인해 주세요.
-        </p>
-
-        <div class="confirm-layout-grid">
-          <div class="confirm-layout-col">
-            <section
-              class="confirm-section"
-              aria-labelledby="refund-policy-title"
-            >
-              <h2 class="confirm-section-title" id="refund-policy-title">
-                환불 규정
-              </h2>
-              <p class="confirm-guide-content">
-                입실일까지 남은 날짜에 따라 환불 수수료가 차등 적용됩니다. 예상
-                환불 금액은 결제 금액에서 환불 수수료를 차감한 금액입니다.
+            <div class="reserve-check-page-band__left">
+              <p class="reserve-check-page-band__eyebrow">
+                RESERVATION — CANCELLATION
               </p>
-              <p class="confirm-guide-content" id="refund-rule-summary"></p>
-              <div class="reserve-delete-refund-box">
-                <p class="reserve-delete-refund-label">예상 환불 금액</p>
-                <p class="reserve-delete-refund-amount" id="refund-amount">—</p>
-              </div>
-            </section>
-          </div>
+              <h1 class="reserve-check-page-band__title">예약 취소</h1>
+            </div>
+            <div class="reserve-check-page-band__right">
+              <p
+                class="delete-complete-band-meta-line"
+                id="resdel-band-booking-kr"
+              >
+                BOOKING NO. —
+              </p>
+              <p
+                class="delete-complete-band-meta-line delete-complete-band-meta-line--room"
+                id="resdel-band-ground-kr"
+              >
+                GROUND —
+              </p>
+            </div>
+          </header>
 
-          <div class="confirm-layout-col confirm-layout-col--right">
-            <section
-              class="confirm-section"
-              aria-labelledby="cancel-booking-title"
-            >
-              <h2 class="confirm-section-title" id="cancel-booking-title">
-                예약 정보 확인
-              </h2>
-              <dl class="reserve-delete-dl">
-                <dt>예약번호</dt>
-                <dd id="cancel-order">
-                  <span id="cancel-order-text">—</span>
+          <div class="payment-layout reserve-delete-layout">
+            <div class="payment-layout__main reserve-delete-main">
+              <section
+                class="reserve-delete-panel"
+                aria-labelledby="resdel-refund-policy-kr"
+              >
+                <h2 class="payment-section-head" id="resdel-refund-policy-kr">
+                  <span class="payment-section-head__label">REFUND POLICY</span>
                   <span
-                    id="cancel-bank-status"
-                    class="reserve-complete-bank-status"
-                    hidden
+                    class="payment-section-head__rule"
+                    aria-hidden="true"
+                  ></span>
+                </h2>
+                <p class="payment-policy-lead">
+                  결제 완료 시 아래 환불 규정에 동의한 것으로 간주됩니다. 취소
+                  전 반드시 확인해 주세요.
+                </p>
+                <p
+                  class="reserve-delete-policy-dynamic"
+                  id="refund-rule-summary"
+                ></p>
+                <table class="payment-refund-table" aria-label="환불 규정">
+                  <thead>
+                    <tr>
+                      <th scope="col">취소 시점</th>
+                      <th scope="col">환불율</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>입실일로부터 15일 전</td>
+                      <td>100%</td>
+                    </tr>
+                    <tr>
+                      <td>입실일로부터 12일 전</td>
+                      <td>80%</td>
+                    </tr>
+                    <tr>
+                      <td>입실일로부터 9일 전</td>
+                      <td>70%</td>
+                    </tr>
+                    <tr>
+                      <td>입실일로부터 7일 전</td>
+                      <td>60%</td>
+                    </tr>
+                    <tr>
+                      <td>입실일로부터 5일 전</td>
+                      <td>50%</td>
+                    </tr>
+                    <tr class="payment-refund-table__row--danger">
+                      <td>입실일로부터 5일 이내</td>
+                      <td>환불 불가</td>
+                    </tr>
+                  </tbody>
+                </table>
+                <div class="payment-callout payment-callout--green">
+                  <strong class="payment-callout__strong">특약</strong>
+                  — 천재 지변 또는 기상 악화로 인한 비행기·배 결항 시, 관련 서류
+                  제출 시 100% 환불됩니다.
+                </div>
+              </section>
+
+              <div class="reserve-delete-refund-info-box">
+                <h2 class="payment-section-head">
+                  <span class="payment-section-head__label">REFUND INFO</span>
+                  <span
+                    class="payment-section-head__rule"
+                    aria-hidden="true"
+                  ></span>
+                </h2>
+                <p
+                  class="reserve-delete-refund-info-amount"
+                  id="refund-amount-display-kr"
+                >
+                  —
+                </p>
+                <p
+                  class="reserve-delete-refund-info-note"
+                  id="refund-amount-note-kr"
+                ></p>
+              </div>
+
+              <section
+                class="reserve-delete-panel"
+                aria-labelledby="resdel-reason-kr"
+              >
+                <h2 class="payment-section-head" id="resdel-reason-kr">
+                  <span
+                    class="payment-section-head__label reserve-delete-section-label-kr"
+                    >취소 사유</span
                   >
-                    [
-                    <span id="cancel-bank-status-pending">예약대기</span>
-                    /
-                    <span id="cancel-bank-status-confirmed">예약확정</span>
-                    ]
-                  </span>
-                </dd>
-                <dt>객실</dt>
-                <dd id="cancel-room">—</dd>
-                <dt>일정</dt>
-                <dd id="cancel-schedule">—</dd>
-                <dt>결제 금액</dt>
-                <dd id="cancel-amount">—</dd>
-              </dl>
-            </section>
-
-            <section
-              class="confirm-section"
-              aria-labelledby="cancel-user-title"
-            >
-              <h2 class="confirm-section-title" id="cancel-user-title">
-                예약자 정보 확인
-              </h2>
-              <dl class="reserve-delete-dl">
-                <dt>성함</dt>
-                <dd id="cancel-name">—</dd>
-                <dt>연락처</dt>
-                <dd id="cancel-contact">—</dd>
-                <dt>이메일</dt>
-                <dd id="cancel-email">—</dd>
-              </dl>
-            </section>
-
-            <section
-              class="confirm-section"
-              aria-labelledby="cancel-reason-title"
-            >
-              <h2 class="confirm-section-title" id="cancel-reason-title">
-                취소 사유
-              </h2>
-              <div class="confirm-agree-list reserve-delete-reason-row">
-                <label class="confirm-check">
-                  <input type="radio" name="cancelReason" value="mind-change" />
-                  단순 변심
-                </label>
-                <label class="confirm-check">
-                  <input
-                    type="radio"
-                    name="cancelReason"
-                    value="schedule-change"
-                  />
-                  일정 변경
-                </label>
-                <label class="confirm-check">
-                  <input type="radio" name="cancelReason" value="other-hotel" />
-                  타숙소 예약
-                </label>
-              </div>
-              <div class="reserve-delete-other-row">
-                <label class="confirm-check">
-                  <input type="radio" name="cancelReason" value="other" />
-                  기타
-                </label>
-                <label class="confirm-label reserve-delete-other-label">
-                  <input
-                    type="text"
+                  <span
+                    class="payment-section-head__rule"
+                    aria-hidden="true"
+                  ></span>
+                </h2>
+                <div class="reserve-delete-reason-grid">
+                  <label class="reserve-delete-reason-card">
+                    <input
+                      type="radio"
+                      name="cancelReason"
+                      value="mind-change"
+                      class="reserve-delete-reason-card__input"
+                    />
+                    <span class="reserve-delete-reason-card__text"
+                      >단순 변심</span
+                    >
+                  </label>
+                  <label class="reserve-delete-reason-card">
+                    <input
+                      type="radio"
+                      name="cancelReason"
+                      value="schedule-change"
+                      class="reserve-delete-reason-card__input"
+                    />
+                    <span class="reserve-delete-reason-card__text"
+                      >일정 변경</span
+                    >
+                  </label>
+                  <label class="reserve-delete-reason-card">
+                    <input
+                      type="radio"
+                      name="cancelReason"
+                      value="other-hotel"
+                      class="reserve-delete-reason-card__input"
+                    />
+                    <span class="reserve-delete-reason-card__text"
+                      >타 숙소 예약</span
+                    >
+                  </label>
+                  <label class="reserve-delete-reason-card">
+                    <input
+                      type="radio"
+                      name="cancelReason"
+                      value="other"
+                      class="reserve-delete-reason-card__input"
+                    />
+                    <span class="reserve-delete-reason-card__text">기타</span>
+                  </label>
+                </div>
+                <div
+                  class="reserve-delete-other-textarea-wrap"
+                  id="cancel-other-wrap-kr"
+                  hidden
+                >
+                  <label
+                    class="reserve-delete-textarea-label"
+                    for="cancel-reason-other"
+                    >기타 사유를 입력해 주세요.</label
+                  >
+                  <textarea
                     id="cancel-reason-other"
-                    placeholder="기타 사유를 입력해 주세요."
-                  />
-                </label>
-              </div>
-              <div class="confirm-actions">
+                    name="cancelReasonOther"
+                    class="reserve-delete-textarea"
+                    rows="4"
+                    placeholder="상세 사유를 입력해 주세요."
+                  ></textarea>
+                </div>
+              </section>
+            </div>
+
+            <aside
+              class="payment-layout__sidebar reserve-delete-sidebar"
+              aria-label="예약·게스트 요약"
+            >
+              <div class="reserve-delete-sidebar-inner">
+                <div class="reserve-delete-card">
+                  <h2 class="payment-section-head" id="resdel-res-info-kr">
+                    <span class="payment-section-head__label"
+                      >RESERVATION INFO</span
+                    >
+                    <span
+                      class="payment-section-head__rule"
+                      aria-hidden="true"
+                    ></span>
+                  </h2>
+                  <dl
+                    class="reserve-delete-card-kv"
+                    aria-labelledby="resdel-res-info-kr"
+                  >
+                    <div class="reserve-delete-card-kv__row">
+                      <dt>예약번호</dt>
+                      <dd id="cancel-order">
+                        <span id="cancel-order-text">—</span>
+                        <span
+                          id="cancel-bank-status"
+                          class="reserve-complete-bank-status"
+                          hidden
+                        >
+                          [
+                          <span id="cancel-bank-status-pending">예약대기</span>
+                          /
+                          <span id="cancel-bank-status-confirmed"
+                            >예약확정</span
+                          >
+                          ]
+                        </span>
+                      </dd>
+                    </div>
+                    <div class="reserve-delete-card-kv__row">
+                      <dt>객실</dt>
+                      <dd id="cancel-room">—</dd>
+                    </div>
+                    <div class="reserve-delete-card-kv__row">
+                      <dt>체크인 / 아웃</dt>
+                      <dd id="cancel-schedule">—</dd>
+                    </div>
+                    <div class="reserve-delete-card-kv__row">
+                      <dt>결제 금액</dt>
+                      <dd id="cancel-amount">—</dd>
+                    </div>
+                  </dl>
+                </div>
+
+                <div class="reserve-delete-card">
+                  <h2 class="payment-section-head" id="resdel-guest-kr">
+                    <span class="payment-section-head__label">GUEST INFO</span>
+                    <span
+                      class="payment-section-head__rule"
+                      aria-hidden="true"
+                    ></span>
+                  </h2>
+                  <dl
+                    class="reserve-delete-card-kv"
+                    aria-labelledby="resdel-guest-kr"
+                  >
+                    <div class="reserve-delete-card-kv__row">
+                      <dt>성함</dt>
+                      <dd id="cancel-name">—</dd>
+                    </div>
+                    <div class="reserve-delete-card-kv__row">
+                      <dt>연락처</dt>
+                      <dd id="cancel-contact">—</dd>
+                    </div>
+                    <div class="reserve-delete-card-kv__row">
+                      <dt>이메일</dt>
+                      <dd id="cancel-email">—</dd>
+                    </div>
+                  </dl>
+                </div>
+
+                <div class="reserve-delete-notice" role="note">
+                  취소 사유를 선택하면 예약 취소 버튼이 활성화됩니다.
+                </div>
+
                 <button
                   type="button"
-                  class="btn reserve-btn confirm-pay-submit"
+                  class="btn reserve-btn confirm-pay-submit reserve-delete-submit-btn"
                   id="cancel-submit-btn"
+                  disabled
                 >
-                  예약 취소
+                  예약 취소 →
                 </button>
+                <a href="reserveinfo.html" class="reserve-delete-back-link"
+                  >← 돌아가기</a
+                >
+                <p class="reserve-delete-side-footnote">
+                  취소가 완료되면 예약 데이터는 시스템 정책에 따라 처리되며,
+                  환불은 결제 수단·은행 사정에 따라 지연될 수 있습니다.
+                </p>
               </div>
-            </section>
+            </aside>
           </div>
         </div>
 
@@ -274,6 +433,12 @@
       </main>
 
       <script>
+        var resyncReserveDeleteSubmitFns = [];
+        document.addEventListener("grafford:languagechange", function () {
+          resyncReserveDeleteSubmitFns.forEach(function (fn) {
+            fn();
+          });
+        });
         document.addEventListener("DOMContentLoaded", function () {
           var ROOM_LABEL = {
             G1: "G1",
@@ -325,11 +490,14 @@
             return base + "/api/payment-cancel";
           }
 
-          var pageLoadingOverlay = document.getElementById("page-loading-overlay");
+          var pageLoadingOverlay = document.getElementById(
+            "page-loading-overlay",
+          );
           var pageLoadingText = document.getElementById("page-loading-text");
           function showPageLoading(isEn, msg) {
             if (pageLoadingText) {
-              pageLoadingText.textContent = msg || (isEn ? "Loading..." : "로딩 중입니다...");
+              pageLoadingText.textContent =
+                msg || (isEn ? "Loading..." : "로딩 중입니다...");
             }
             if (pageLoadingOverlay) {
               pageLoadingOverlay.hidden = false;
@@ -389,7 +557,9 @@
           );
 
           var cancelOrderTextEl = document.getElementById("cancel-order-text");
-          var cancelOrderTextEnEl = document.getElementById("cancel-order-text-en");
+          var cancelOrderTextEnEl = document.getElementById(
+            "cancel-order-text-en",
+          );
           if (cancelOrderTextEl) {
             cancelOrderTextEl.textContent = orderNo;
           }
@@ -398,8 +568,9 @@
           }
           var cancelBankStatusEl =
             document.getElementById("cancel-bank-status");
-          var cancelBankStatusEnEl =
-            document.getElementById("cancel-bank-status-en");
+          var cancelBankStatusEnEl = document.getElementById(
+            "cancel-bank-status-en",
+          );
           var cancelPendingEl = document.getElementById(
             "cancel-bank-status-pending",
           );
@@ -416,8 +587,10 @@
             if (cancelBankStatusEl) cancelBankStatusEl.hidden = false;
             if (cancelBankStatusEnEl) cancelBankStatusEnEl.hidden = false;
             if (bankConfirmed) {
-              if (cancelPendingEl) cancelPendingEl.classList.remove("is-active");
-              if (cancelConfirmedEl) cancelConfirmedEl.classList.add("is-active");
+              if (cancelPendingEl)
+                cancelPendingEl.classList.remove("is-active");
+              if (cancelConfirmedEl)
+                cancelConfirmedEl.classList.add("is-active");
               if (cancelPendingEnEl)
                 cancelPendingEnEl.classList.remove("is-active");
               if (cancelConfirmedEnEl)
@@ -426,7 +599,8 @@
               if (cancelPendingEl) cancelPendingEl.classList.add("is-active");
               if (cancelConfirmedEl)
                 cancelConfirmedEl.classList.remove("is-active");
-              if (cancelPendingEnEl) cancelPendingEnEl.classList.add("is-active");
+              if (cancelPendingEnEl)
+                cancelPendingEnEl.classList.add("is-active");
               if (cancelConfirmedEnEl)
                 cancelConfirmedEnEl.classList.remove("is-active");
             }
@@ -459,6 +633,11 @@
           setText("cancel-contact-en", contact);
           setText("cancel-email-en", email || "—");
 
+          setText("resdel-band-booking-kr", "BOOKING NO. " + orderNo);
+          setText("resdel-band-ground-kr", "GROUND " + roomText);
+          setText("resdel-band-booking-en", "BOOKING NO. " + orderNo);
+          setText("resdel-band-ground-en", "GROUND " + roomText);
+
           document.getElementById("refund-rule-summary").textContent =
             "입실일로부터 남은 날짜 " +
             remainDate +
@@ -468,13 +647,36 @@
           document.getElementById("refund-rule-summary-en").textContent =
             "Based on the remaining days until the check-in date (" +
             remainDate +
-            " days) , the refund fee of " +
+            " days), the refund fee of " +
             refundCharge +
             "% will be applied.";
-          setText("refund-amount", "예상 환불 금액: " + refundTextKr);
-          setText("refund-amount-en", "Estimated Refund Amount: " + refundTextEn);
+          setText("refund-amount-display-kr", refundTextKr);
+          setText("refund-amount-display-en", refundTextEn);
+          var noteKr;
+          var noteEn;
+          if (refundAmount <= 0) {
+            noteKr =
+              "현재 일정 기준으로 환불 금액이 없습니다. 위의 환불 규정을 참고해 주세요.";
+            noteEn =
+              "Based on the policy above, no refund applies to this cancellation.";
+          } else if (payMethod === "bank") {
+            noteKr =
+              "예상 환불 금액이며, 무통장 입금 건은 확인 후 수동 처리될 수 있습니다.";
+            noteEn =
+              "Estimated refund; bank transfers may be processed manually after verification.";
+          } else {
+            noteKr =
+              "예상 환불 금액이며, 카드사에 따라 영업일 기준 3~5일 내 처리될 수 있습니다.";
+            noteEn =
+              "Estimated refund; card refunds typically finalize within 3–5 business days.";
+          }
+          setText("refund-amount-note-kr", noteKr);
+          setText("refund-amount-note-en", noteEn);
 
           function bindCancelFlow(config) {
+            var langRoot = document.querySelector(
+              config.isEn ? ".lang-en" : ".lang-kr",
+            );
             var modal = document.getElementById(config.modalId);
             var openBtn = document.getElementById(config.openBtnId);
             var yesBtn = document.getElementById(config.yesBtnId);
@@ -487,31 +689,81 @@
               ? modal.querySelector(".reserve-delete-modal-note")
               : null;
             var reasonOtherInput = document.getElementById(config.otherInputId);
-            var reasonInputs = document.querySelectorAll(
-              'input[name="' + config.reasonName + '"]',
-            );
+            var reasonInputs = langRoot
+              ? langRoot.querySelectorAll(
+                  'input[name="' + config.reasonName + '"]',
+                )
+              : document.querySelectorAll(
+                  'input[name="' + config.reasonName + '"]',
+                );
             var missingMode = false;
+
+            function syncCancelSubmitEnabled() {
+              if (missingMode) {
+                return;
+              }
+              var btn = document.getElementById(config.openBtnId);
+              if (!btn) {
+                return;
+              }
+              var selected = langRoot
+                ? langRoot.querySelector(
+                    'input[name="' + config.reasonName + '"]:checked',
+                  )
+                : document.querySelector(
+                    'input[name="' + config.reasonName + '"]:checked',
+                  );
+              var ok = false;
+              if (selected) {
+                if (selected.value === "other") {
+                  ok = !!(
+                    reasonOtherInput &&
+                    String(reasonOtherInput.value || "").trim()
+                  );
+                } else {
+                  ok = true;
+                }
+              }
+              btn.disabled = !ok;
+              btn.setAttribute("aria-disabled", ok ? "false" : "true");
+            }
 
             if (!modal || !openBtn || !yesBtn) {
               return;
             }
 
             function syncOtherReasonState() {
-              if (!reasonOtherInput) return;
-              var selected = document.querySelector(
-                'input[name="' + config.reasonName + '"]:checked',
-              );
+              var selected = langRoot
+                ? langRoot.querySelector(
+                    'input[name="' + config.reasonName + '"]:checked',
+                  )
+                : document.querySelector(
+                    'input[name="' + config.reasonName + '"]:checked',
+                  );
               var isOther = !!(selected && selected.value === "other");
-              reasonOtherInput.disabled = !isOther;
-              if (!isOther) {
+              if (config.otherWrapId) {
+                var wrap = document.getElementById(config.otherWrapId);
+                if (wrap) {
+                  wrap.hidden = !isOther;
+                }
+              }
+              if (!isOther && reasonOtherInput) {
                 reasonOtherInput.value = "";
               }
+              syncCancelSubmitEnabled();
             }
 
             reasonInputs.forEach(function (el) {
               el.addEventListener("change", syncOtherReasonState);
             });
+            if (reasonOtherInput) {
+              reasonOtherInput.addEventListener(
+                "input",
+                syncCancelSubmitEnabled,
+              );
+            }
             syncOtherReasonState();
+            resyncReserveDeleteSubmitFns.push(syncOtherReasonState);
 
             function applyMissingReservationMode() {
               if (!modalTitleEl) return;
@@ -549,8 +801,13 @@
             window.addEventListener("pageshow", syncDeletedStateOnEntry);
 
             openBtn.addEventListener("click", function () {
+              if (openBtn.disabled) {
+                return;
+              }
               // 모달 오픈 시 예상 환불 금액을 note 영역에 동적 표시
-              var noteEl = modal ? modal.querySelector(".reserve-delete-modal-note") : null;
+              var noteEl = modal
+                ? modal.querySelector(".reserve-delete-modal-note")
+                : null;
               if (noteEl) {
                 if (payMethod === "bank") {
                   // 은행이체: PG 자동 환불 없음 → 관리자 수동 환불 안내
@@ -563,30 +820,45 @@
                       ? refundAmount.toLocaleString("en-US") + " KRW"
                       : refundAmount.toLocaleString("ko-KR") + "원";
                     noteEl.innerHTML = config.isEn
-                      ? "* Estimated Refund: <strong>" + bankRefundStr + "</strong><br>Bank transfer refunds require manual processing. Please contact us."
-                      : "* 예상 환불금: <strong>" + bankRefundStr + "</strong><br>무통장입금 환불은 관리자가 직접 처리합니다. 고객센터로 문의해 주세요.";
+                      ? "* Estimated Refund: <strong>" +
+                        bankRefundStr +
+                        "</strong><br>Bank transfer refunds require manual processing. Please contact us."
+                      : "* 예상 환불금: <strong>" +
+                        bankRefundStr +
+                        "</strong><br>무통장입금 환불은 관리자가 직접 처리합니다. 고객센터로 문의해 주세요.";
                   }
                 } else if (refundAmount <= 0) {
                   // 카드/네이버페이 — 환불 없음 (취소 수수료 100%)
                   noteEl.innerHTML = config.isEn
                     ? "* No Refund<br>Based on the cancellation policy, no refund will be issued."
                     : "* 환불 없음<br>취소 정책에 따라 환불되는 금액이 없습니다.";
-                } else if (Number.isFinite(paidAmount) && refundAmount < paidAmount) {
+                } else if (
+                  Number.isFinite(paidAmount) &&
+                  refundAmount < paidAmount
+                ) {
                   // 카드/네이버페이 — 부분 환불
                   var partialRefundStr = config.isEn
                     ? refundAmount.toLocaleString("en-US") + " KRW"
                     : refundAmount.toLocaleString("ko-KR") + "원";
                   noteEl.innerHTML = config.isEn
-                    ? "* Estimated Refund: <strong>" + partialRefundStr + "</strong><br>Refunds will be processed within 3~5 business days."
-                    : "* 예상 환불금: <strong>" + partialRefundStr + "</strong><br>카드사에 따라 영업일 기준 3~5일 소요될 수 있습니다.";
+                    ? "* Estimated Refund: <strong>" +
+                      partialRefundStr +
+                      "</strong><br>Refunds will be processed within 3~5 business days."
+                    : "* 예상 환불금: <strong>" +
+                      partialRefundStr +
+                      "</strong><br>카드사에 따라 영업일 기준 3~5일 소요될 수 있습니다.";
                 } else {
                   // 카드/네이버페이 — 전액 환불
                   var fullRefundStr = config.isEn
                     ? refundAmount.toLocaleString("en-US") + " KRW"
                     : refundAmount.toLocaleString("ko-KR") + "원";
                   noteEl.innerHTML = config.isEn
-                    ? "* Full Refund: <strong>" + fullRefundStr + "</strong><br>Refunds will be processed within 3~5 business days."
-                    : "* 전액 환불: <strong>" + fullRefundStr + "</strong><br>카드사에 따라 영업일 기준 3~5일 소요될 수 있습니다.";
+                    ? "* Full Refund: <strong>" +
+                      fullRefundStr +
+                      "</strong><br>Refunds will be processed within 3~5 business days."
+                    : "* 전액 환불: <strong>" +
+                      fullRefundStr +
+                      "</strong><br>카드사에 따라 영업일 기준 3~5일 소요될 수 있습니다.";
                 }
               }
               modal.hidden = false;
@@ -603,9 +875,13 @@
                 window.location.href = "index.html";
                 return;
               }
-              var selectedReasonEl = document.querySelector(
-                'input[name="' + config.reasonName + '"]:checked',
-              );
+              var selectedReasonEl = langRoot
+                ? langRoot.querySelector(
+                    'input[name="' + config.reasonName + '"]:checked',
+                  )
+                : document.querySelector(
+                    'input[name="' + config.reasonName + '"]:checked',
+                  );
               var selectedReasonCode = selectedReasonEl
                 ? selectedReasonEl.value
                 : "";
@@ -660,7 +936,9 @@
                         ? "Failed to process reservation cancellation. (" +
                           result.status +
                           ")"
-                        : "예약 취소 처리에 실패했습니다. (" + result.status + ")");
+                        : "예약 취소 처리에 실패했습니다. (" +
+                          result.status +
+                          ")");
                     throw new Error(msg);
                   }
                   sessionStorage.setItem(
@@ -716,26 +994,30 @@
             });
           }
 
-          bindCancelFlow({
-            isEn: false,
-            reasonName: "cancelReason",
-            otherInputId: "cancel-reason-other",
-            modalId: "cancel-modal",
-            openBtnId: "cancel-submit-btn",
-            yesBtnId: "cancel-modal-yes",
-            noBtnId: "cancel-modal-no",
-            modalTitleId: "cancel-modal-title",
-          });
-          bindCancelFlow({
-            isEn: true,
-            reasonName: "cancelReasonEn",
-            otherInputId: "cancel-reason-other-en",
-            modalId: "cancel-modal-en",
-            openBtnId: "cancel-submit-btn-en",
-            yesBtnId: "cancel-modal-yes-en",
-            noBtnId: "cancel-modal-no-en",
-            modalTitleId: "cancel-modal-title-en",
-          });
+          setTimeout(function () {
+            bindCancelFlow({
+              isEn: false,
+              reasonName: "cancelReason",
+              otherInputId: "cancel-reason-other",
+              otherWrapId: "cancel-other-wrap-kr",
+              modalId: "cancel-modal",
+              openBtnId: "cancel-submit-btn",
+              yesBtnId: "cancel-modal-yes",
+              noBtnId: "cancel-modal-no",
+              modalTitleId: "cancel-modal-title",
+            });
+            bindCancelFlow({
+              isEn: true,
+              reasonName: "cancelReasonEn",
+              otherInputId: "cancel-reason-other-en",
+              otherWrapId: "cancel-other-wrap-en",
+              modalId: "cancel-modal-en",
+              openBtnId: "cancel-submit-btn-en",
+              yesBtnId: "cancel-modal-yes-en",
+              noBtnId: "cancel-modal-no-en",
+              modalTitleId: "cancel-modal-title-en",
+            });
+          }, 0);
         });
       </script>
       <script defer src="js/grafford-page-fade.js"></script>
@@ -761,133 +1043,301 @@
       </script>
     </div>
     <div class="lang-en">
-      <main class="content-section confirm-page reserve-delete-page">
-        <div class="confirm-topbar">
-          <a
-            href="reserveinfo.html"
-            class="confirm-back-inline"
-            aria-label="예약조회로 돌아가기"
-          ></a>
-          <h1 class="confirm-title">Cancel Reservation</h1>
-        </div>
-        <p class="confirm-summary">
-          Before canceling your reservation, please review the cancellation
-          policy and refund amount.
-        </p>
-
-        <div class="confirm-layout-grid">
-          <div class="confirm-layout-col">
-            <section class="confirm-section">
-              <h2 class="confirm-section-title">Cancellation Policy</h2>
-              <p class="confirm-guide-content">
-                Refund fees will be differentially applied depending on the
-                remaining days until the check-in date. The estimated refund
-                amount is the amount of the payment minus the refund fee.
+      <main
+        class="content-section confirm-page payment-page reserve-delete-page"
+      >
+        <div class="payment-page-shell">
+          <header
+            class="reserve-check-page-band payment-page-shell__band delete-complete-band"
+            aria-label="Cancel reservation header"
+          >
+            <div class="reserve-check-page-band__left">
+              <p class="reserve-check-page-band__eyebrow">
+                RESERVATION — CANCELLATION
               </p>
-              <p class="confirm-guide-content" id="refund-rule-summary-en"></p>
-              <div class="reserve-delete-refund-box">
-                <p class="reserve-delete-refund-label">
-                  Estimated Refund Amount
+              <h1 class="reserve-check-page-band__title">Cancel Reservation</h1>
+            </div>
+            <div class="reserve-check-page-band__right">
+              <p
+                class="delete-complete-band-meta-line"
+                id="resdel-band-booking-en"
+              >
+                BOOKING NO. —
+              </p>
+              <p
+                class="delete-complete-band-meta-line delete-complete-band-meta-line--room"
+                id="resdel-band-ground-en"
+              >
+                GROUND —
+              </p>
+            </div>
+          </header>
+
+          <div class="payment-layout reserve-delete-layout">
+            <div class="payment-layout__main reserve-delete-main">
+              <section
+                class="reserve-delete-panel"
+                aria-labelledby="resdel-refund-policy-en"
+              >
+                <h2 class="payment-section-head" id="resdel-refund-policy-en">
+                  <span class="payment-section-head__label">REFUND POLICY</span>
+                  <span
+                    class="payment-section-head__rule"
+                    aria-hidden="true"
+                  ></span>
+                </h2>
+                <p class="payment-policy-lead">
+                  By completing payment, you agree to the cancellation and
+                  refund terms below. Please review before you cancel a stay.
                 </p>
                 <p
-                  class="reserve-delete-refund-amount"
-                  id="refund-amount-en"
+                  class="reserve-delete-policy-dynamic"
+                  id="refund-rule-summary-en"
+                ></p>
+                <table class="payment-refund-table" aria-label="Refund policy">
+                  <thead>
+                    <tr>
+                      <th scope="col">Timing</th>
+                      <th scope="col">Refund</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>15+ days before check-in</td>
+                      <td>100%</td>
+                    </tr>
+                    <tr>
+                      <td>12 days before</td>
+                      <td>80%</td>
+                    </tr>
+                    <tr>
+                      <td>9 days before</td>
+                      <td>70%</td>
+                    </tr>
+                    <tr>
+                      <td>7 days before</td>
+                      <td>60%</td>
+                    </tr>
+                    <tr>
+                      <td>5 days before</td>
+                      <td>50%</td>
+                    </tr>
+                    <tr class="payment-refund-table__row--danger">
+                      <td>Within 5 days of check-in</td>
+                      <td>Non-refundable</td>
+                    </tr>
+                  </tbody>
+                </table>
+                <div class="payment-callout payment-callout--green">
+                  <strong class="payment-callout__strong">Special terms</strong>
+                  — For flight or ferry cancellations due to force majeure or
+                  severe weather, submit supporting documents for a 100% refund.
+                </div>
+              </section>
+
+              <div class="reserve-delete-refund-info-box">
+                <h2 class="payment-section-head">
+                  <span class="payment-section-head__label">REFUND INFO</span>
+                  <span
+                    class="payment-section-head__rule"
+                    aria-hidden="true"
+                  ></span>
+                </h2>
+                <p
+                  class="reserve-delete-refund-info-amount"
+                  id="refund-amount-display-en"
+                >
+                  —
+                </p>
+                <p
+                  class="reserve-delete-refund-info-note"
+                  id="refund-amount-note-en"
                 ></p>
               </div>
-            </section>
-          </div>
 
-          <div class="confirm-layout-col confirm-layout-col--right">
-            <section class="confirm-section">
-              <h2 class="confirm-section-title">Reservation Information</h2>
-              <dl class="reserve-delete-dl">
-                <dt>Reservation Number</dt>
-                <dd id="cancel-order-no-en">
-                  <span id="cancel-order-text-en">—</span>
-                  <span
-                    id="cancel-bank-status-en"
-                    class="reserve-complete-bank-status"
-                    hidden
+              <section
+                class="reserve-delete-panel"
+                aria-labelledby="resdel-reason-en"
+              >
+                <h2 class="payment-section-head" id="resdel-reason-en">
+                  <span class="payment-section-head__label"
+                    >CANCELLATION REASON</span
                   >
-                    [
-                    <span id="cancel-bank-status-pending-en">Pending</span>
-                    /
-                    <span id="cancel-bank-status-confirmed-en">Confirmed</span>
-                    ]
-                  </span>
-                </dd>
-                <dt>Room</dt>
-                <dd id="cancel-room-en">—</dd>
-                <dt>Schedule</dt>
-                <dd id="cancel-schedule-en">—</dd>
-                <dt>Payment Amount</dt>
-                <dd id="cancel-amount-en">—</dd>
-              </dl>
-            </section>
-
-            <section class="confirm-section">
-              <h2 class="confirm-section-title">Guest Information</h2>
-              <dl class="reserve-delete-dl">
-                <dt>Name</dt>
-                <dd id="cancel-name-en">—</dd>
-                <dt>Contact</dt>
-                <dd id="cancel-contact-en">—</dd>
-                <dt>Email</dt>
-                <dd id="cancel-email-en">—</dd>
-              </dl>
-            </section>
-
-            <section class="confirm-section">
-              <h2 class="confirm-section-title">Cancel Reason</h2>
-              <div class="confirm-agree-list reserve-delete-reason-row">
-                <label class="confirm-check">
-                  <input
-                    type="radio"
-                    name="cancelReasonEn"
-                    value="mind-change"
-                  />
-                  Mind Change
-                </label>
-                <label class="confirm-check">
-                  <input
-                    type="radio"
-                    name="cancelReasonEn"
-                    value="schedule-change"
-                  />
-                  Schedule Changed
-                </label>
-                <label class="confirm-check">
-                  <input
-                    type="radio"
-                    name="cancelReasonEn"
-                    value="other-hotel"
-                  />
-                  Other Hotel Reservation
-                </label>
-              </div>
-              <div class="reserve-delete-other-row">
-                <label class="confirm-check">
-                  <input type="radio" name="cancelReasonEn" value="other" />
-                  Other
-                </label>
-                <label class="confirm-label reserve-delete-other-label">
-                  <input
-                    type="text"
+                  <span
+                    class="payment-section-head__rule"
+                    aria-hidden="true"
+                  ></span>
+                </h2>
+                <div class="reserve-delete-reason-grid">
+                  <label class="reserve-delete-reason-card">
+                    <input
+                      type="radio"
+                      name="cancelReasonEn"
+                      value="mind-change"
+                      class="reserve-delete-reason-card__input"
+                    />
+                    <span class="reserve-delete-reason-card__text"
+                      >Change of mind</span
+                    >
+                  </label>
+                  <label class="reserve-delete-reason-card">
+                    <input
+                      type="radio"
+                      name="cancelReasonEn"
+                      value="schedule-change"
+                      class="reserve-delete-reason-card__input"
+                    />
+                    <span class="reserve-delete-reason-card__text"
+                      >Schedule change</span
+                    >
+                  </label>
+                  <label class="reserve-delete-reason-card">
+                    <input
+                      type="radio"
+                      name="cancelReasonEn"
+                      value="other-hotel"
+                      class="reserve-delete-reason-card__input"
+                    />
+                    <span class="reserve-delete-reason-card__text"
+                      >Another stay booked</span
+                    >
+                  </label>
+                  <label class="reserve-delete-reason-card">
+                    <input
+                      type="radio"
+                      name="cancelReasonEn"
+                      value="other"
+                      class="reserve-delete-reason-card__input"
+                    />
+                    <span class="reserve-delete-reason-card__text">Other</span>
+                  </label>
+                </div>
+                <div
+                  class="reserve-delete-other-textarea-wrap"
+                  id="cancel-other-wrap-en"
+                  hidden
+                >
+                  <label
+                    class="reserve-delete-textarea-label"
+                    for="cancel-reason-other-en"
+                    >Please describe your reason.</label
+                  >
+                  <textarea
                     id="cancel-reason-other-en"
-                    placeholder="Enter other reason."
-                  />
-                </label>
-              </div>
-              <div class="confirm-actions">
+                    name="cancelReasonOtherEn"
+                    class="reserve-delete-textarea"
+                    rows="4"
+                    placeholder="Enter details."
+                  ></textarea>
+                </div>
+              </section>
+            </div>
+
+            <aside
+              class="payment-layout__sidebar reserve-delete-sidebar"
+              aria-label="Reservation and guest summary"
+            >
+              <div class="reserve-delete-sidebar-inner">
+                <div class="reserve-delete-card">
+                  <h2 class="payment-section-head" id="resdel-res-info-en">
+                    <span class="payment-section-head__label"
+                      >RESERVATION INFO</span
+                    >
+                    <span
+                      class="payment-section-head__rule"
+                      aria-hidden="true"
+                    ></span>
+                  </h2>
+                  <dl
+                    class="reserve-delete-card-kv"
+                    aria-labelledby="resdel-res-info-en"
+                  >
+                    <div class="reserve-delete-card-kv__row">
+                      <dt>BOOKING NO.</dt>
+                      <dd id="cancel-order-no-en">
+                        <span id="cancel-order-text-en">—</span>
+                        <span
+                          id="cancel-bank-status-en"
+                          class="reserve-complete-bank-status"
+                          hidden
+                        >
+                          [
+                          <span id="cancel-bank-status-pending-en"
+                            >Pending</span
+                          >
+                          /
+                          <span id="cancel-bank-status-confirmed-en"
+                            >Confirmed</span
+                          >
+                          ]
+                        </span>
+                      </dd>
+                    </div>
+                    <div class="reserve-delete-card-kv__row">
+                      <dt>ROOM</dt>
+                      <dd id="cancel-room-en">—</dd>
+                    </div>
+                    <div class="reserve-delete-card-kv__row">
+                      <dt>CHECK-IN / OUT</dt>
+                      <dd id="cancel-schedule-en">—</dd>
+                    </div>
+                    <div class="reserve-delete-card-kv__row">
+                      <dt>PAYMENT AMOUNT</dt>
+                      <dd id="cancel-amount-en">—</dd>
+                    </div>
+                  </dl>
+                </div>
+
+                <div class="reserve-delete-card">
+                  <h2 class="payment-section-head" id="resdel-guest-en">
+                    <span class="payment-section-head__label">GUEST INFO</span>
+                    <span
+                      class="payment-section-head__rule"
+                      aria-hidden="true"
+                    ></span>
+                  </h2>
+                  <dl
+                    class="reserve-delete-card-kv"
+                    aria-labelledby="resdel-guest-en"
+                  >
+                    <div class="reserve-delete-card-kv__row">
+                      <dt>NAME</dt>
+                      <dd id="cancel-name-en">—</dd>
+                    </div>
+                    <div class="reserve-delete-card-kv__row">
+                      <dt>CONTACT</dt>
+                      <dd id="cancel-contact-en">—</dd>
+                    </div>
+                    <div class="reserve-delete-card-kv__row">
+                      <dt>EMAIL</dt>
+                      <dd id="cancel-email-en">—</dd>
+                    </div>
+                  </dl>
+                </div>
+
+                <div class="reserve-delete-notice" role="note">
+                  Select a cancellation reason to enable the button. If you
+                  choose “Other”, please enter a short explanation.
+                </div>
+
                 <button
                   type="button"
-                  class="btn reserve-btn confirm-pay-submit"
+                  class="btn reserve-btn confirm-pay-submit reserve-delete-submit-btn"
                   id="cancel-submit-btn-en"
+                  disabled
                 >
-                  Cancel Reservation
+                  Cancel reservation →
                 </button>
+                <a href="reserveinfo.html" class="reserve-delete-back-link"
+                  >← Back</a
+                >
+                <p class="reserve-delete-side-footnote">
+                  After cancellation, booking data is handled per our retention
+                  policy. Refunds may take extra time depending on your bank or
+                  card issuer.
+                </p>
               </div>
-            </section>
+            </aside>
           </div>
         </div>
 
