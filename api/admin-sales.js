@@ -354,16 +354,52 @@ async function getMonthlySalesData(pool, month) {
   };
 }
 
-async function getAnnualSalesData(pool) {
+async function getAnnualSalesData(pool, year) {
+  var selectedYear = parseInt(year, 10);
+  if (!Number.isFinite(selectedYear) || selectedYear < 1900 || selectedYear > 9999) {
+    selectedYear = new Date().getUTCFullYear();
+  }
   const monthlyQuery = `
+    WITH year_bounds AS (
+      SELECT
+        MAKE_DATE($1::int, 1, 1) AS year_start,
+        MAKE_DATE($1::int + 1, 1, 1) AS next_year_start
+    ),
+    months AS (
+      SELECT generate_series(1, 12)::int AS month
+    ),
+    confirmed AS (
+      SELECT
+        EXTRACT(MONTH FROM check_in_date)::int AS month,
+        COUNT(*)::int AS reservation_count,
+        COALESCE(SUM(total_amount), 0)::bigint AS revenue
+      FROM ${BOOKING_TABLE}, year_bounds
+      WHERE status IN ('confirm', 'completed')
+        AND check_in_date >= year_start
+        AND check_in_date < next_year_start
+      GROUP BY month
+    ),
+    cancelled AS (
+      SELECT
+        EXTRACT(MONTH FROM COALESCE(cancelled_at, created_at))::int AS month,
+        COUNT(*)::int AS cancel_count,
+        COALESCE(SUM(total_amount), 0)::bigint AS cancel_revenue
+      FROM ${BOOKING_TABLE}, year_bounds
+      WHERE status = 'cancelled'
+        AND COALESCE(cancelled_at, created_at) >= year_start
+        AND COALESCE(cancelled_at, created_at) < next_year_start
+      GROUP BY month
+    )
     SELECT
-      EXTRACT(MONTH FROM check_in_date)::int AS month,
-      COALESCE(SUM(total_amount), 0)::bigint AS revenue
-    FROM ${BOOKING_TABLE}
-    WHERE status IN ('confirm', 'completed')
-      AND EXTRACT(YEAR FROM check_in_date) = EXTRACT(YEAR FROM CURRENT_DATE)
-    GROUP BY month
-    ORDER BY month
+      months.month,
+      COALESCE(confirmed.reservation_count, 0)::int AS reservation_count,
+      COALESCE(confirmed.revenue, 0)::bigint AS revenue,
+      COALESCE(cancelled.cancel_count, 0)::int AS cancel_count,
+      COALESCE(cancelled.cancel_revenue, 0)::bigint AS cancel_revenue
+    FROM months
+    LEFT JOIN confirmed ON confirmed.month = months.month
+    LEFT JOIN cancelled ON cancelled.month = months.month
+    ORDER BY months.month
   `;
 
   const annualQuery = `
@@ -378,18 +414,61 @@ async function getAnnualSalesData(pool) {
   `;
 
   const [monthlyResult, annualResult] = await Promise.all([
-    pool.query(monthlyQuery),
+    pool.query(monthlyQuery, [selectedYear]),
     pool.query(annualQuery),
   ]);
 
   // 12개월 배열 (1월~12월), 없으면 0
   var monthlyRevenue = Array(12).fill(0);
+  var monthlyStats = Array(12)
+    .fill(null)
+    .map(function (_, index) {
+      return {
+        month: index + 1,
+        reservationCount: 0,
+        cancelCount: 0,
+        cancelRate: 0,
+        revenue: 0,
+        cancelRevenue: 0,
+      };
+    });
   (monthlyResult.rows || []).forEach(function (row) {
     var m = Number(row.month);
     if (m >= 1 && m <= 12) {
-      monthlyRevenue[m - 1] = Number(row.revenue) || 0;
+      var reservationCount = Number(row.reservation_count) || 0;
+      var cancelCount = Number(row.cancel_count) || 0;
+      var revenue = Number(row.revenue) || 0;
+      monthlyRevenue[m - 1] = revenue;
+      monthlyStats[m - 1] = {
+        month: m,
+        reservationCount: reservationCount,
+        cancelCount: cancelCount,
+        cancelRate:
+          reservationCount + cancelCount > 0
+            ? Math.round((cancelCount / (reservationCount + cancelCount)) * 100)
+            : 0,
+        revenue: revenue,
+        cancelRevenue: Number(row.cancel_revenue) || 0,
+      };
     }
   });
+
+  var annualTotal = monthlyStats.reduce(function (sum, row) {
+    return sum + (Number(row.revenue) || 0);
+  }, 0);
+  var reservationCountTotal = monthlyStats.reduce(function (sum, row) {
+    return sum + (Number(row.reservationCount) || 0);
+  }, 0);
+  var cancelCountTotal = monthlyStats.reduce(function (sum, row) {
+    return sum + (Number(row.cancelCount) || 0);
+  }, 0);
+  var monthlyAverage = Math.round(annualTotal / 12);
+  var bestMonth = monthlyStats.reduce(
+    function (best, row) {
+      return Number(row.revenue) > Number(best.revenue) ? row : best;
+    },
+    { month: 0, revenue: 0 },
+  );
 
   var annualRevenue = (annualResult.rows || []).map(function (row) {
     return { year: Number(row.year), revenue: Number(row.revenue) || 0 };
@@ -400,7 +479,17 @@ async function getAnnualSalesData(pool) {
     annualRevenue = [{ year: 2026, revenue: 0 }];
   }
 
-  return { monthlyRevenue: monthlyRevenue, annualRevenue: annualRevenue };
+  return {
+    year: selectedYear,
+    monthlyRevenue: monthlyRevenue,
+    monthlyStats: monthlyStats,
+    annualTotal: annualTotal,
+    reservationCount: reservationCountTotal,
+    cancelCount: cancelCountTotal,
+    monthlyAverage: monthlyAverage,
+    bestMonth: { month: bestMonth.month || 0, revenue: bestMonth.revenue || 0 },
+    annualRevenue: annualRevenue,
+  };
 }
 
 export default async function handler(req, res) {
@@ -455,7 +544,7 @@ export default async function handler(req, res) {
 
   if (type === "annual") {
     try {
-      var data = await getAnnualSalesData(pool);
+      var data = await getAnnualSalesData(pool, body.year);
       json(res, 200, { ok: true, ...data });
     } catch (e) {
       json(res, 500, {

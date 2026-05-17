@@ -627,7 +627,7 @@
               매출 현황
             </h1>
           </div>
-          <div class="admin-sales-month-nav" aria-label="매출 현황 월 선택">
+          <div class="admin-sales-month-nav" aria-label="매출 현황 기간 선택">
             <button
               type="button"
               id="admin-sales-prev-month"
@@ -855,6 +855,7 @@
         var activeSalesTab = "monthly";
         var activeRoomManageTab = "rate";
         var selectedSalesMonth = getCurrentMonthKeyKst();
+        var selectedSalesYear = Number(selectedSalesMonth.slice(0, 4)) || 2026;
         var currentPage = 1;
         var PAGE_SIZE = 20;
         var sortKey = "";
@@ -1043,9 +1044,22 @@
           return parts[0] + "년 " + Number(parts[1]) + "월";
         }
 
+        function normalizeYearValue(value) {
+          var year = parseInt(value, 10);
+          if (!isFinite(year) || year < 1900 || year > 9999) {
+            return Number(getCurrentMonthKeyKst().slice(0, 4)) || 2026;
+          }
+          return year;
+        }
+
         function updateSalesMonthLabel() {
           if (salesMonthLabelEl) {
-            salesMonthLabelEl.textContent = formatMonthLabel(selectedSalesMonth);
+            if (activeSalesTab === "annual") {
+              salesMonthLabelEl.textContent =
+                normalizeYearValue(selectedSalesYear) + "년";
+            } else {
+              salesMonthLabelEl.textContent = formatMonthLabel(selectedSalesMonth);
+            }
           }
         }
 
@@ -1652,6 +1666,9 @@
           if (type === "monthly") {
             payload.month = normalizeMonthKey(selectedSalesMonth);
           }
+          if (type === "annual") {
+            payload.year = normalizeYearValue(selectedSalesYear);
+          }
           return fetch(adminSalesApiUrl(), {
             method: "POST",
             headers: { "Content-Type": "application/json" },
@@ -1701,7 +1718,10 @@
               });
           }
           if (tab === "annual") {
-            if (salesAnnualPanel) salesAnnualPanel.innerHTML = "";
+            if (salesAnnualPanel) {
+              salesAnnualPanel.innerHTML =
+                "<p class='admin-sales-pending'>연별 매출 데이터를 불러오는 중입니다.</p>";
+            }
             loadSalesData("annual")
               .then(function (data) {
                 renderSalesAnnual(data);
@@ -2304,67 +2324,221 @@
           if (!salesAnnualPanel) return;
           salesAnnualPanel.innerHTML = "";
 
+          var year = normalizeYearValue((data && data.year) || selectedSalesYear);
+          selectedSalesYear = year;
+          updateSalesMonthLabel();
+
+          var monthlyStats = (data && data.monthlyStats) || [];
           var monthlyRevenue =
             (data && data.monthlyRevenue) || Array(12).fill(0);
-          var annualRevenue = (data && data.annualRevenue) || [
-            { year: 2026, revenue: 0 },
-          ];
+          if (!monthlyStats.length) {
+            monthlyStats = monthlyRevenue.map(function (revenue, index) {
+              return {
+                month: index + 1,
+                reservationCount: 0,
+                cancelCount: 0,
+                cancelRate: 0,
+                revenue: Number(revenue) || 0,
+              };
+            });
+          }
+          var annualTotal = Number((data && data.annualTotal) || 0);
+          if (!annualTotal) {
+            annualTotal = monthlyStats.reduce(function (sum, row) {
+              return sum + (Number(row.revenue) || 0);
+            }, 0);
+          }
+          var reservationCount = Number((data && data.reservationCount) || 0);
+          var cancelCount = Number((data && data.cancelCount) || 0);
+          var monthlyAverage =
+            Number((data && data.monthlyAverage) || 0) ||
+            Math.round(annualTotal / 12);
+          var bestMonth = (data && data.bestMonth) || null;
+          if (!bestMonth) {
+            bestMonth = monthlyStats.reduce(
+              function (best, row) {
+                return Number(row.revenue) > Number(best.revenue) ? row : best;
+              },
+              { month: 0, revenue: 0 },
+            );
+          }
+          var nowKey = getCurrentMonthKeyKst();
+          var nowParts = nowKey.split("-");
+          var currentYear = Number(nowParts[0]);
+          var currentMonth = Number(nowParts[1]);
 
-          var currentMonth = new Date().getMonth(); // 0-indexed
+          function formatAnnualManWon(value) {
+            var amount = Number(value || 0);
+            if (Math.abs(amount) >= 10000) {
+              return Math.round(amount / 10000).toLocaleString("ko-KR") + "만원";
+            }
+            return amount.toLocaleString("ko-KR") + "원";
+          }
 
-          // 이달의 매출 차트
-          var monthBlock = document.createElement("div");
-          monthBlock.className = "admin-sales-annual-block";
-          var monthTitle = document.createElement("h3");
-          monthTitle.className = "admin-sales-chart-title";
-          monthTitle.textContent = "올해의 매출";
-          monthBlock.appendChild(monthTitle);
-          var monthChartWrap = document.createElement("div");
-          monthChartWrap.className = "admin-sales-linechart-wrap";
-          drawLineChart(monthChartWrap, {
-            xLabels: [
-              "1월",
-              "2월",
-              "3월",
-              "4월",
-              "5월",
-              "6월",
-              "7월",
-              "8월",
-              "9월",
-              "10월",
-              "11월",
-              "12월",
-            ],
-            yValues: monthlyRevenue,
-            baseUnit: 100000,
-            color: "#8b7e6a",
-            currentIdx: currentMonth,
+          function makeCardTitle(eyebrow, title) {
+            var head = document.createElement("div");
+            head.className = "admin-sales-card-head";
+            var eye = document.createElement("p");
+            eye.className = "admin-dashboard-eyebrow";
+            eye.textContent = eyebrow;
+            var titleEl = document.createElement("h3");
+            titleEl.className = "admin-sales-chart-title";
+            titleEl.textContent = title;
+            head.appendChild(eye);
+            head.appendChild(titleEl);
+            return head;
+          }
+
+          function animateNumber(el, target, opts) {
+            var options = opts || {};
+            var start = performance.now();
+            var duration = 1000;
+            var end = Number(target || 0);
+            function render(now) {
+              var progress = Math.min(1, (now - start) / duration);
+              var eased = 1 - Math.pow(1 - progress, 3);
+              var value = Math.round(end * eased);
+              if (options.type === "money") {
+                el.textContent = formatAnnualManWon(value);
+              } else if (options.suffix) {
+                el.textContent = value.toLocaleString("ko-KR") + options.suffix;
+              } else {
+                el.textContent = value.toLocaleString("ko-KR");
+              }
+              if (progress < 1) {
+                requestAnimationFrame(render);
+              }
+            }
+            requestAnimationFrame(render);
+          }
+
+          function setRatio(el, value, maxValue) {
+            var ratio = maxValue > 0 ? (Number(value || 0) / maxValue) * 100 : 0;
+            var ratioText = Math.max(0, Math.min(100, ratio)) + "%";
+            el.style.setProperty("--bar-ratio", "0%");
+            if (el.parentElement) {
+              el.parentElement.style.setProperty("--bar-ratio", ratioText);
+            }
+            requestAnimationFrame(function () {
+              el.style.setProperty("--bar-ratio", ratioText);
+            });
+          }
+
+          var statsRow = document.createElement("div");
+          statsRow.className = "admin-sales-stats-row admin-sales-annual-stats";
+          [
+            { label: "연간 총 매출", value: annualTotal, type: "money", sub: formatKRW(annualTotal) },
+            { label: "총 예약 건수", value: reservationCount, suffix: "건", sub: "확정·완료 예약" },
+            { label: "월평균 매출", value: monthlyAverage, type: "money", sub: formatKRW(monthlyAverage) },
+            { label: "총 취소 건수", value: cancelCount, suffix: "건", sub: "선택 연도 기준" },
+            {
+              label: "최고 매출 월",
+              value: Number(bestMonth.month) || 0,
+              suffix: "월",
+              sub: formatKRW(bestMonth.revenue || 0),
+            },
+          ].forEach(function (item, index) {
+            var card = document.createElement("div");
+            card.className = "admin-sales-stat-card is-accent-" + ((index % 5) + 1);
+            var label = document.createElement("span");
+            label.className = "admin-sales-stat-label";
+            label.textContent = item.label;
+            var num = document.createElement("strong");
+            num.className = "admin-sales-stat-num";
+            num.textContent = item.type === "money" ? "0원" : "0";
+            var sub = document.createElement("span");
+            sub.className = "admin-sales-stat-sub";
+            sub.textContent = item.sub || "";
+            card.appendChild(label);
+            card.appendChild(num);
+            card.appendChild(sub);
+            statsRow.appendChild(card);
+            animateNumber(num, item.value, item);
           });
-          monthBlock.appendChild(monthChartWrap);
-          salesAnnualPanel.appendChild(monthBlock);
+          salesAnnualPanel.appendChild(statsRow);
 
-          // 연도별 매출 차트
-          var yearBlock = document.createElement("div");
-          yearBlock.className = "admin-sales-annual-block";
-          var yearTitle = document.createElement("h3");
-          yearTitle.className = "admin-sales-chart-title";
-          yearTitle.textContent = "연도별 매출";
-          yearBlock.appendChild(yearTitle);
-          var yearChartWrap = document.createElement("div");
-          yearChartWrap.className = "admin-sales-linechart-wrap";
-          drawLineChart(yearChartWrap, {
-            xLabels: annualRevenue.map(function (d) {
-              return String(d.year) + "년";
-            }),
-            yValues: annualRevenue.map(function (d) {
-              return d.revenue;
-            }),
-            baseUnit: 2000000,
-            color: "#6f675c",
+          var overview = document.createElement("section");
+          overview.className = "admin-sales-chart-wrap admin-sales-annual-overview";
+          overview.appendChild(makeCardTitle("ANNUAL OVERVIEW", "월별 매출"));
+          var bars = document.createElement("div");
+          bars.className = "admin-sales-annual-bars";
+          var maxRevenue = Math.max.apply(null, monthlyRevenue.concat([0]));
+          monthlyRevenue.forEach(function (revenue, index) {
+            var row = document.createElement("div");
+            row.className = "admin-sales-bar-row admin-sales-annual-bar-row";
+            if (year === currentYear && index + 1 === currentMonth) {
+              row.className += " is-current";
+            }
+            var label = document.createElement("span");
+            label.className = "admin-sales-bar-label";
+            label.textContent = index + 1 + "월";
+            var track = document.createElement("div");
+            track.className = "admin-sales-bar-track";
+            var fill = document.createElement("span");
+            fill.className = "admin-sales-bar-fill";
+            var value = document.createElement("span");
+            value.className = "admin-sales-bar-value";
+            value.textContent = formatKRW(revenue);
+            setRatio(fill, revenue, maxRevenue);
+            track.appendChild(fill);
+            track.appendChild(value);
+            row.appendChild(label);
+            row.appendChild(track);
+            bars.appendChild(row);
           });
-          yearBlock.appendChild(yearChartWrap);
-          salesAnnualPanel.appendChild(yearBlock);
+          overview.appendChild(bars);
+          salesAnnualPanel.appendChild(overview);
+
+          var tableCard = document.createElement("section");
+          tableCard.className = "admin-sales-chart-wrap admin-sales-annual-table-card";
+          tableCard.appendChild(
+            makeCardTitle("BOOKINGS BY CANCELLATIONS", "월별 예약 · 취소 현황"),
+          );
+          var tableWrap = document.createElement("div");
+          tableWrap.className = "admin-sales-annual-table-wrap";
+          var table = document.createElement("table");
+          table.className = "admin-sales-annual-table";
+          table.innerHTML =
+            "<thead><tr>" +
+            "<th>월</th><th>예약</th><th>취소</th><th>취소율</th><th>매출</th><th>점유율</th>" +
+            "</tr></thead>";
+          var tbody = document.createElement("tbody");
+          var maxTableRevenue = Math.max.apply(
+            null,
+            monthlyStats.map(function (row) {
+              return Number(row.revenue) || 0;
+            }).concat([0]),
+          );
+          monthlyStats.forEach(function (row) {
+            var month = Number(row.month) || 0;
+            var revenue = Number(row.revenue) || 0;
+            var ratio = maxTableRevenue > 0 ? Math.round((revenue / maxTableRevenue) * 100) : 0;
+            var tr = document.createElement("tr");
+            if (year === currentYear && month === currentMonth) {
+              tr.className = "is-current";
+            }
+            tr.innerHTML =
+              "<td>" +
+              month +
+              "월</td><td>" +
+              (Number(row.reservationCount) || 0).toLocaleString("ko-KR") +
+              "건</td><td>" +
+              (Number(row.cancelCount) || 0).toLocaleString("ko-KR") +
+              "건</td><td>" +
+              (Number(row.cancelRate) || 0).toLocaleString("ko-KR") +
+              "%</td><td>" +
+              formatKRW(revenue) +
+              "</td><td><span class='admin-sales-table-ratio'><i style='--bar-ratio:" +
+              ratio +
+              "%'></i></span><b>" +
+              ratio +
+              "%</b></td>";
+            tbody.appendChild(tr);
+          });
+          table.appendChild(tbody);
+          tableWrap.appendChild(table);
+          tableCard.appendChild(tableWrap);
+          salesAnnualPanel.appendChild(tableCard);
         }
 
         function setActiveCategory(category) {
@@ -3781,22 +3955,40 @@
 
         if (salesPrevMonthBtn) {
           salesPrevMonthBtn.addEventListener("click", function () {
-            selectedSalesMonth = shiftMonthKey(selectedSalesMonth, -1);
-            if (!salesSection.hidden && activeSalesTab === "monthly") {
-              setActiveSalesTab("monthly");
+            if (activeSalesTab === "annual") {
+              selectedSalesYear = normalizeYearValue(selectedSalesYear) - 1;
+              if (!salesSection.hidden) {
+                setActiveSalesTab("annual");
+              } else {
+                updateSalesMonthLabel();
+              }
             } else {
-              updateSalesMonthLabel();
+              selectedSalesMonth = shiftMonthKey(selectedSalesMonth, -1);
+              if (!salesSection.hidden && activeSalesTab === "monthly") {
+                setActiveSalesTab("monthly");
+              } else {
+                updateSalesMonthLabel();
+              }
             }
           });
         }
 
         if (salesNextMonthBtn) {
           salesNextMonthBtn.addEventListener("click", function () {
-            selectedSalesMonth = shiftMonthKey(selectedSalesMonth, 1);
-            if (!salesSection.hidden && activeSalesTab === "monthly") {
-              setActiveSalesTab("monthly");
+            if (activeSalesTab === "annual") {
+              selectedSalesYear = normalizeYearValue(selectedSalesYear) + 1;
+              if (!salesSection.hidden) {
+                setActiveSalesTab("annual");
+              } else {
+                updateSalesMonthLabel();
+              }
             } else {
-              updateSalesMonthLabel();
+              selectedSalesMonth = shiftMonthKey(selectedSalesMonth, 1);
+              if (!salesSection.hidden && activeSalesTab === "monthly") {
+                setActiveSalesTab("monthly");
+              } else {
+                updateSalesMonthLabel();
+              }
             }
           });
         }

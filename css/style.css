@@ -11978,6 +11978,89 @@ main.content-section.confirm-page.admin-page {
   height: auto;
   display: block;
 }
+.admin-sales-annual-stats {
+  margin-bottom: var(--space-24);
+}
+.admin-sales-annual-overview {
+  margin-bottom: var(--space-24);
+}
+.admin-sales-annual-bars {
+  display: grid;
+  gap: var(--space-12);
+}
+.admin-sales-annual-bar-row {
+  grid-template-columns: 2.5rem minmax(0, 1fr);
+}
+.admin-sales-annual-bar-row .admin-sales-bar-track {
+  height: 0.58rem;
+}
+.admin-sales-annual-bar-row .admin-sales-bar-fill {
+  background: color-mix(in srgb, var(--gold-500) 72%, var(--stone-400));
+  transition: width 1s cubic-bezier(0.76, 0, 0.24, 1);
+}
+.admin-sales-annual-bar-row.is-current .admin-sales-bar-fill {
+  background: var(--gold-500);
+}
+.admin-sales-annual-bar-row.is-current .admin-sales-bar-label {
+  color: var(--gold-500);
+  font-weight: 500;
+}
+.admin-sales-annual-table-card {
+  margin-bottom: 0;
+}
+.admin-sales-annual-table-wrap {
+  width: 100%;
+  overflow-x: auto;
+}
+.admin-sales-annual-table {
+  width: 100%;
+  min-width: 720px;
+  border-collapse: collapse;
+  color: var(--stone-800);
+  font-size: 0.74rem;
+}
+.admin-sales-annual-table th,
+.admin-sales-annual-table td {
+  padding: 0.72rem 0.8rem;
+  border-bottom: 1px solid var(--stone-200);
+  text-align: center;
+  white-space: nowrap;
+}
+.admin-sales-annual-table th {
+  color: var(--stone-400);
+  font-size: 0.64rem;
+  font-weight: 400;
+  letter-spacing: 0.18em;
+}
+.admin-sales-annual-table td:nth-child(1),
+.admin-sales-annual-table td:nth-child(5) {
+  font-family: var(--font-family-body-en);
+}
+.admin-sales-annual-table tr.is-current {
+  background: color-mix(in srgb, var(--gold-500) 9%, var(--stone-50));
+}
+.admin-sales-table-ratio {
+  position: relative;
+  display: inline-block;
+  width: min(6rem, 58%);
+  height: 0.32rem;
+  margin-right: var(--space-8);
+  vertical-align: middle;
+  background: var(--stone-100);
+  overflow: hidden;
+}
+.admin-sales-table-ratio i {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: var(--bar-ratio, 0%);
+  max-width: 100%;
+  background: var(--gold-500);
+}
+.admin-sales-annual-table b {
+  color: var(--stone-800);
+  font-family: var(--font-family-body-en);
+  font-weight: 400;
+}
 @media (max-width: 700px) {
   .admin-sales-stats-row {
     grid-template-columns: 1fr;
