@@ -136,7 +136,7 @@ function parseBusinessFooterLines(selectedLines, language, naverMapAddr) {
       if (m) {
         infoRows.push({ label: "대표", value: m[1].trim(), mapHref: null });
         infoRows.push({
-          label: "대표자명",
+          label: "대표자",
           value: ownerNameKr,
           mapHref: null,
         });
@@ -253,16 +253,26 @@ function ensureSiteLegalModal() {
     '<div class="site-legal-modal__backdrop" aria-hidden="true"></div>' +
     '<div class="site-legal-modal__dialog" role="dialog" aria-modal="true" aria-labelledby="site-legal-modal-title">' +
     '<div class="site-legal-modal__header">' +
+    '<div class="site-legal-modal__header-copy">' +
+    '<p class="site-legal-modal__eyebrow"></p>' +
     '<h2 id="site-legal-modal-title" class="site-legal-modal__title"></h2>' +
+    "</div>" +
     '<button type="button" class="site-legal-modal__close" aria-label="닫기">X</button>' +
     "</div>" +
     '<div class="site-legal-modal__body"></div>' +
+    '<div class="site-legal-modal__footer">' +
+    '<p class="site-legal-modal__notice"></p>' +
+    '<button type="button" class="btn reserve-btn confirm-pay-submit reserveinfo-submit-btn site-legal-modal__confirm"></button>' +
+    "</div>" +
     "</div>";
   document.body.appendChild(wrap);
 
   var titleEl = wrap.querySelector("#site-legal-modal-title");
+  var eyebrowEl = wrap.querySelector(".site-legal-modal__eyebrow");
   var bodyEl = wrap.querySelector(".site-legal-modal__body");
   var closeBtn = wrap.querySelector(".site-legal-modal__close");
+  var noticeEl = wrap.querySelector(".site-legal-modal__notice");
+  var confirmBtn = wrap.querySelector(".site-legal-modal__confirm");
 
   function currentLang() {
     return resolveFooterLanguage() === "en" ? "en" : "kr";
@@ -280,6 +290,38 @@ function ensureSiteLegalModal() {
     }
   }
 
+  function decorateLegalBody() {
+    if (!bodyEl) {
+      return;
+    }
+    var headings = bodyEl.querySelectorAll("h3");
+    for (var i = 0; i < headings.length; i++) {
+      var heading = headings[i];
+      var title = heading.textContent.trim();
+      var sectionNo = String(i + 1);
+      if (sectionNo.length < 2) {
+        sectionNo = "0" + sectionNo;
+      }
+      heading.textContent = "";
+
+      var kicker = document.createElement("span");
+      kicker.className = "site-legal-modal__section-kicker";
+      kicker.textContent = "ART. " + sectionNo;
+
+      var rule = document.createElement("span");
+      rule.className = "site-legal-modal__section-rule";
+      rule.setAttribute("aria-hidden", "true");
+
+      var titleEl = document.createElement("span");
+      titleEl.className = "site-legal-modal__section-title";
+      titleEl.textContent = title;
+
+      heading.appendChild(kicker);
+      heading.appendChild(rule);
+      heading.appendChild(titleEl);
+    }
+  }
+
   function openModal(kind) {
     var lang = currentLang();
     var pack = SITE_LEGAL_MODAL_CONTENT[lang] || SITE_LEGAL_MODAL_CONTENT.kr;
@@ -290,12 +332,26 @@ function ensureSiteLegalModal() {
     if (titleEl) {
       titleEl.textContent = entry.title;
     }
+    if (eyebrowEl) {
+      eyebrowEl.textContent =
+        kind === "privacy" ? "PRIVACY POLICY" : "TERMS OF SERVICE";
+    }
     if (bodyEl) {
       bodyEl.innerHTML = entry.bodyHtml;
+      decorateLegalBody();
       bodyEl.scrollTop = 0;
     }
     if (closeBtn) {
       closeBtn.setAttribute("aria-label", lang === "en" ? "Close" : "닫기");
+    }
+    if (noticeEl) {
+      noticeEl.textContent =
+        lang === "en"
+          ? "By completing a reservation, you are deemed to have agreed to this notice."
+          : "예약 완료 시 본 안내에 동의한 것으로 간주됩니다.";
+    }
+    if (confirmBtn) {
+      confirmBtn.textContent = lang === "en" ? "I Understand" : "확인했습니다";
     }
     wrap.removeAttribute("hidden");
     wrap.setAttribute("aria-hidden", "false");
@@ -327,6 +383,11 @@ function ensureSiteLegalModal() {
 
   if (closeBtn) {
     closeBtn.addEventListener("click", function () {
+      closeModal();
+    });
+  }
+  if (confirmBtn) {
+    confirmBtn.addEventListener("click", function () {
       closeModal();
     });
   }
