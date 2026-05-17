@@ -86,6 +86,32 @@ function resolveChannel(paymentMethod) {
   return "GRAFFORD";
 }
 
+function normalizeMonthKey(value) {
+  var raw = String(value || "").trim();
+  var match = raw.match(/^(\d{4})-(\d{1,2})$/);
+  if (!match) {
+    var now = new Date();
+    return (
+      now.getUTCFullYear() +
+      "-" +
+      String(now.getUTCMonth() + 1).padStart(2, "0")
+    );
+  }
+  var month = Math.min(12, Math.max(1, Number(match[2]) || 1));
+  return match[1] + "-" + String(month).padStart(2, "0");
+}
+
+function resolvePaymentLabel(paymentMethod) {
+  var raw = String(paymentMethod || "").trim().toLowerCase();
+  if (raw === "card" || raw === "신용카드") return "신용카드";
+  if (raw === "naver" || raw === "네이버페이") return "네이버페이";
+  if (raw === "bank" || raw === "무통장입금") return "계좌이체";
+  if (raw === "kakao" || raw === "kakaopay" || raw === "카카오페이") {
+    return "카카오페이";
+  }
+  return "기타";
+}
+
 const CHANNEL_COLORS = {
   GRAFFORD: "#7EB8D4",
   야놀자: "#E07B7B",
@@ -94,7 +120,9 @@ const CHANNEL_COLORS = {
   기타: "#A48FCF",
 };
 
-async function getMonthlySalesData(pool) {
+async function getMonthlySalesData(pool, month) {
+  var monthKey = normalizeMonthKey(month);
+  var monthStart = monthKey + "-01";
   const statsQuery = `
     SELECT
       COUNT(*)::int                          AS reservation_count,
@@ -103,22 +131,26 @@ async function getMonthlySalesData(pool) {
       room_type
     FROM ${BOOKING_TABLE}
     WHERE status IN ('confirm', 'completed')
-      AND DATE_TRUNC('month', check_in_date) = DATE_TRUNC('month', CURRENT_DATE)
+      AND check_in_date >= $1::date
+      AND check_in_date < ($1::date + INTERVAL '1 month')::date
     GROUP BY payment_method, room_type
   `;
 
   const cancelQuery = `
-    SELECT COUNT(*)::int AS cancel_count
+    SELECT
+      COUNT(*)::int AS cancel_count,
+      COALESCE(SUM(total_amount), 0)::bigint AS cancel_revenue
     FROM ${BOOKING_TABLE}
     WHERE status = 'cancelled'
-      AND DATE_TRUNC('month', COALESCE(cancelled_at, created_at)) = DATE_TRUNC('month', CURRENT_DATE)
+      AND COALESCE(cancelled_at, created_at) >= $1::date
+      AND COALESCE(cancelled_at, created_at) < ($1::date + INTERVAL '1 month')
   `;
 
   const occupancyQuery = `
     WITH month_bounds AS (
       SELECT
-        DATE_TRUNC('month', CURRENT_DATE)::date AS month_start,
-        (DATE_TRUNC('month', CURRENT_DATE) + INTERVAL '1 month')::date AS next_month_start
+        $1::date AS month_start,
+        ($1::date + INTERVAL '1 month')::date AS next_month_start
     ),
     all_res AS (
       SELECT check_in_date, check_out_date
@@ -148,15 +180,59 @@ async function getMonthlySalesData(pool) {
     ORDER BY day
   `;
 
-  const [statsResult, cancelResult, occupancyResult] = await Promise.all([
-    pool.query(statsQuery),
-    pool.query(cancelQuery),
-    pool.query(occupancyQuery),
-  ]);
+  const dailyRevenueQuery = `
+    WITH month_bounds AS (
+      SELECT
+        $1::date AS month_start,
+        ($1::date + INTERVAL '1 month')::date AS next_month_start
+    ),
+    days AS (
+      SELECT generate_series(
+        (SELECT month_start FROM month_bounds),
+        (SELECT next_month_start FROM month_bounds) - INTERVAL '1 day',
+        INTERVAL '1 day'
+      )::date AS day
+    ),
+    sales AS (
+      SELECT check_in_date::date AS day, SUM(total_amount)::bigint AS revenue
+      FROM ${BOOKING_TABLE}, month_bounds
+      WHERE status IN ('confirm', 'completed')
+        AND check_in_date >= month_start
+        AND check_in_date < next_month_start
+      GROUP BY check_in_date::date
+    ),
+    daily_sales AS (
+      SELECT
+        days.day,
+        (((days.day - (SELECT month_start FROM month_bounds)) / 7) + 1)::int AS week_no,
+        COALESCE(sales.revenue, 0)::bigint AS revenue
+      FROM days
+      LEFT JOIN sales ON sales.day = days.day
+    )
+    SELECT
+      week_no,
+      MIN(day) AS week_start,
+      SUM(revenue)::bigint AS revenue
+    FROM daily_sales
+    GROUP BY week_no
+    ORDER BY week_no
+  `;
+
+  const [statsResult, cancelResult, occupancyResult, dailyRevenueResult] =
+    await Promise.all([
+      pool.query(statsQuery, [monthStart]),
+      pool.query(cancelQuery, [monthStart]),
+      pool.query(occupancyQuery, [monthStart]),
+      pool.query(dailyRevenueQuery, [monthStart]),
+    ]);
 
   var cancelCount =
     cancelResult.rows && cancelResult.rows[0]
       ? Number(cancelResult.rows[0].cancel_count) || 0
+      : 0;
+  var cancelRevenue =
+    cancelResult.rows && cancelResult.rows[0]
+      ? Number(cancelResult.rows[0].cancel_revenue) || 0
       : 0;
 
   var reservationCount = 0;
@@ -165,6 +241,9 @@ async function getMonthlySalesData(pool) {
   // 채널별 / 객실별 집계
   var channelMap = {};
   var roomMap = {};
+  var roomCountMap = {};
+  var paymentMap = {};
+  var paymentCountMap = {};
 
   (statsResult.rows || []).forEach(function (row) {
     var cnt = Number(row.reservation_count) || 0;
@@ -178,7 +257,12 @@ async function getMonthlySalesData(pool) {
     var room = String(row.room_type || "").toUpperCase();
     if (room) {
       roomMap[room] = (roomMap[room] || 0) + rev;
+      roomCountMap[room] = (roomCountMap[room] || 0) + cnt;
     }
+
+    var payment = String(row.payment_method || "").trim().toLowerCase() || "unknown";
+    paymentMap[payment] = (paymentMap[payment] || 0) + rev;
+    paymentCountMap[payment] = (paymentCountMap[payment] || 0) + cnt;
   });
 
   var channelRevenue = Object.keys(channelMap).map(function (ch) {
@@ -191,13 +275,36 @@ async function getMonthlySalesData(pool) {
 
   // G1~G4 순서 보장
   var roomRevenue = ["G1", "G2", "G3", "G4"]
-    .filter(function (r) { return roomMap[r] != null; })
     .map(function (r) {
       return {
         label: r,
         value: roomMap[r] || 0,
         color: ROOM_COLORS[r] || "#c8c8c8",
       };
+    });
+
+  var roomStats = ["G1", "G2", "G3", "G4"].map(function (r) {
+    var revenue = roomMap[r] || 0;
+    return {
+      label: r,
+      reservationCount: roomCountMap[r] || 0,
+      revenue: revenue,
+      revenueRate:
+        totalRevenue > 0 ? Math.round((revenue / totalRevenue) * 100) : 0,
+    };
+  });
+
+  var paymentRevenue = Object.keys(paymentMap)
+    .map(function (method) {
+      return {
+        method: method,
+        label: resolvePaymentLabel(method),
+        count: paymentCountMap[method] || 0,
+        revenue: paymentMap[method] || 0,
+      };
+    })
+    .sort(function (a, b) {
+      return b.revenue - a.revenue;
     });
 
   var occupancyByDay = (occupancyResult.rows || []).map(function (row) {
@@ -210,12 +317,39 @@ async function getMonthlySalesData(pool) {
     };
   });
 
+  var occupiedRoomNights = occupancyByDay.reduce(function (sum, row) {
+    return sum + (Number(row.count) || 0);
+  }, 0);
+  var maxRoomNights = occupancyByDay.length * 4;
+
+  var dailyRevenue = (dailyRevenueResult.rows || []).map(function (row) {
+    return {
+      label: String(row.week_no || "") + "주",
+      date:
+        row.week_start instanceof Date
+          ? row.week_start.toISOString().slice(0, 10)
+          : String(row.week_start || "").slice(0, 10),
+      revenue: Number(row.revenue) || 0,
+    };
+  });
+
   return {
+    month: monthKey,
     reservationCount: reservationCount,
     totalRevenue: totalRevenue,
     cancelCount: cancelCount,
+    cancelRevenue: cancelRevenue,
+    cancellationRate:
+      reservationCount + cancelCount > 0
+        ? Math.round((cancelCount / (reservationCount + cancelCount)) * 100)
+        : 0,
+    occupiedRoomNights: occupiedRoomNights,
+    maxRoomNights: maxRoomNights,
     channelRevenue: channelRevenue,
     roomRevenue: roomRevenue,
+    roomStats: roomStats,
+    paymentRevenue: paymentRevenue,
+    dailyRevenue: dailyRevenue,
     occupancyByDay: occupancyByDay,
   };
 }
@@ -308,7 +442,7 @@ export default async function handler(req, res) {
 
   if (type === "monthly") {
     try {
-      var data = await getMonthlySalesData(pool);
+      var data = await getMonthlySalesData(pool, body.month);
       json(res, 200, { ok: true, ...data });
     } catch (e) {
       json(res, 500, {

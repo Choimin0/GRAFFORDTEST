@@ -615,11 +615,40 @@
       </div>
 
       <section
-        class="confirm-section"
+        class="confirm-section admin-sales-section"
         id="admin-sales-section"
         aria-labelledby="admin-sales-title"
         hidden
       >
+        <div class="admin-dashboard-band admin-sales-band">
+          <div>
+            <p class="admin-dashboard-eyebrow">REVENUE</p>
+            <h1 class="admin-dashboard-title" id="admin-sales-title">
+              매출 현황
+            </h1>
+          </div>
+          <div class="admin-sales-month-nav" aria-label="매출 현황 월 선택">
+            <button
+              type="button"
+              id="admin-sales-prev-month"
+              class="admin-page-btn"
+              aria-label="이전 달"
+            >
+              &lt;
+            </button>
+            <strong id="admin-sales-month-label" class="admin-calendar-label"
+              >—</strong
+            >
+            <button
+              type="button"
+              id="admin-sales-next-month"
+              class="admin-page-btn"
+              aria-label="다음 달"
+            >
+              &gt;
+            </button>
+          </div>
+        </div>
         <div
           class="admin-res-tabs"
           id="admin-sales-tabs"
@@ -701,6 +730,15 @@
         var salesTabBtns = salesTabsEl
           ? salesTabsEl.querySelectorAll(".admin-res-tab-btn")
           : [];
+        var salesPrevMonthBtn = document.getElementById(
+          "admin-sales-prev-month",
+        );
+        var salesNextMonthBtn = document.getElementById(
+          "admin-sales-next-month",
+        );
+        var salesMonthLabelEl = document.getElementById(
+          "admin-sales-month-label",
+        );
         var tableSection = bankSection;
         var tableBody = document.getElementById("admin-table-body");
         var roomManageBody = document.getElementById("admin-room-manage-body");
@@ -816,6 +854,7 @@
         var activeResTab = "current";
         var activeSalesTab = "monthly";
         var activeRoomManageTab = "rate";
+        var selectedSalesMonth = getCurrentMonthKeyKst();
         var currentPage = 1;
         var PAGE_SIZE = 20;
         var sortKey = "";
@@ -972,6 +1011,42 @@
             "-" +
             String(map.day || "01")
           );
+        }
+
+        function getCurrentMonthKeyKst() {
+          return getTodayYmdKst().slice(0, 7);
+        }
+
+        function normalizeMonthKey(value) {
+          var match = String(value || "").match(/^(\d{4})-(\d{2})/);
+          if (!match) {
+            return getCurrentMonthKeyKst();
+          }
+          var month = Math.min(12, Math.max(1, Number(match[2]) || 1));
+          return match[1] + "-" + String(month).padStart(2, "0");
+        }
+
+        function shiftMonthKey(value, delta) {
+          var key = normalizeMonthKey(value);
+          var parts = key.split("-");
+          var date = new Date(Number(parts[0]), Number(parts[1]) - 1 + delta, 1);
+          return (
+            date.getFullYear() +
+            "-" +
+            String(date.getMonth() + 1).padStart(2, "0")
+          );
+        }
+
+        function formatMonthLabel(value) {
+          var key = normalizeMonthKey(value);
+          var parts = key.split("-");
+          return parts[0] + "년 " + Number(parts[1]) + "월";
+        }
+
+        function updateSalesMonthLabel() {
+          if (salesMonthLabelEl) {
+            salesMonthLabelEl.textContent = formatMonthLabel(selectedSalesMonth);
+          }
         }
 
         function renderAdminTopbarDate() {
@@ -1569,14 +1644,18 @@
         function loadSalesData(tab) {
           var type = tab === "annual" ? "annual" : "monthly";
           var auth = getAuthPayload();
+          var payload = {
+            type: type,
+            adminId: auth.adminId,
+            adminPw: auth.adminPw,
+          };
+          if (type === "monthly") {
+            payload.month = normalizeMonthKey(selectedSalesMonth);
+          }
           return fetch(adminSalesApiUrl(), {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              type: type,
-              adminId: auth.adminId,
-              adminPw: auth.adminPw,
-            }),
+            body: JSON.stringify(payload),
           })
             .then(function (r) {
               return r.json().then(function (data) {
@@ -1605,7 +1684,12 @@
           if (salesAnnualPanel) {
             salesAnnualPanel.hidden = tab !== "annual";
           }
+          updateSalesMonthLabel();
           if (tab === "monthly") {
+            if (salesMonthlyPanel) {
+              salesMonthlyPanel.innerHTML =
+                "<p class='admin-sales-pending'>매출 데이터를 불러오는 중입니다.</p>";
+            }
             loadSalesData("monthly")
               .then(function (data) {
                 renderSalesMonthly(data);
@@ -1719,129 +1803,285 @@
           var reservationCount = (data && data.reservationCount) || 0;
           var totalRevenue = (data && data.totalRevenue) || 0;
           var cancelCount = (data && data.cancelCount) || 0;
-          var channelData = (data && data.channelRevenue) || [
-            { label: "GRAFFORD", value: totalRevenue, color: "#7EB8D4" },
-          ];
-          var roomData = (data && data.roomRevenue) || [];
+          var cancelRevenue = (data && data.cancelRevenue) || 0;
+          var paymentData = (data && data.paymentRevenue) || [];
+          var roomStats = (data && data.roomStats) || [];
+          var dailyRevenue = (data && data.dailyRevenue) || [];
           var occupancyByDay = (data && data.occupancyByDay) || [];
+          var cancellationRate = Number((data && data.cancellationRate) || 0);
+          var averageRevenue =
+            reservationCount > 0 ? Math.round(totalRevenue / reservationCount) : 0;
+          var occupiedRoomNights = Number((data && data.occupiedRoomNights) || 0);
+          var maxRoomNights = Number((data && data.maxRoomNights) || 0);
+          var occupancyRate =
+            maxRoomNights > 0
+              ? Math.round((occupiedRoomNights / maxRoomNights) * 100)
+              : 0;
+          var monthKey = normalizeMonthKey((data && data.month) || selectedSalesMonth);
+          selectedSalesMonth = monthKey;
+          updateSalesMonthLabel();
 
-          var CHANNEL_COLORS = {
-            GRAFFORD: "#7EB8D4",
-            야놀자: "#E07B7B",
-            에어비앤비: "#F0A87C",
-            "Booking.com": "#88C9A0",
-            기타: "#A48FCF",
-          };
-          var ROOM_COLORS = {
-            G1: "#d3c7b1",
-            G2: "#8b7e6a",
-            G3: "#6f675c",
-            G4: "#5a5247",
-          };
+          function formatManWon(value) {
+            var amount = Number(value || 0);
+            if (Math.abs(amount) >= 10000) {
+              return (
+                (amount / 10000).toLocaleString("ko-KR", {
+                  maximumFractionDigits: 1,
+                }) + "만원"
+              );
+            }
+            return amount.toLocaleString("ko-KR") + "원";
+          }
 
-          channelData = channelData.map(function (d) {
-            return {
-              label: d.label,
-              value: d.value,
-              color: d.color || CHANNEL_COLORS[d.label] || "#c8c8c8",
-            };
-          });
-          roomData = roomData.map(function (d) {
-            return {
-              label: d.label,
-              value: d.value,
-              color: d.color || ROOM_COLORS[d.label] || "#c8c8c8",
-            };
-          });
+          function makeCardTitle(eyebrow, title) {
+            var head = document.createElement("div");
+            head.className = "admin-sales-card-head";
+            var eye = document.createElement("p");
+            eye.className = "admin-dashboard-eyebrow";
+            eye.textContent = eyebrow;
+            var titleEl = document.createElement("h3");
+            titleEl.className = "admin-sales-chart-title";
+            titleEl.textContent = title;
+            head.appendChild(eye);
+            head.appendChild(titleEl);
+            return head;
+          }
 
-          // ── 상단 통계 3개 ──
-          var statsRow = document.createElement("div");
-          statsRow.className = "admin-sales-stats-row";
-
-          [
-            { value: reservationCount + "건", label: "예약건수" },
-            {
-              value: Number(totalRevenue).toLocaleString("ko-KR") + "원",
-              label: "매출금",
-            },
-            { value: cancelCount + "건", label: "취소건수" },
-          ].forEach(function (item) {
+          function makeMetric(item, index) {
             var card = document.createElement("div");
             card.className = "admin-sales-stat-card";
+            if (index != null) {
+              card.className += " is-accent-" + ((index % 5) + 1);
+            }
+            var label = document.createElement("span");
+            label.className = "admin-sales-stat-label";
+            label.textContent = item.label;
             var num = document.createElement("strong");
             num.className = "admin-sales-stat-num";
             num.textContent = item.value;
-            var lbl = document.createElement("span");
-            lbl.className = "admin-sales-stat-label";
-            lbl.textContent = item.label;
+            var sub = document.createElement("span");
+            sub.className = "admin-sales-stat-sub";
+            sub.textContent = item.sub || "";
+            card.appendChild(label);
             card.appendChild(num);
-            card.appendChild(lbl);
-            statsRow.appendChild(card);
+            card.appendChild(sub);
+            return card;
+          }
+
+          var statsRow = document.createElement("div");
+          statsRow.className = "admin-sales-stats-row";
+          [
+            {
+              label: "월 매출",
+              value: formatManWon(totalRevenue),
+              sub: "총 매출 " + formatKRW(totalRevenue),
+            },
+            {
+              label: "예약 건수",
+              value: reservationCount + "건",
+              sub: "선택 월 기준",
+            },
+            {
+              label: "객실 점유율",
+              value: occupancyRate + "%",
+              sub: occupiedRoomNights + " / " + maxRoomNights + " room nights",
+            },
+            {
+              label: "취소 건수",
+              value: cancelCount + "건",
+              sub: "취소율 " + cancellationRate + "%",
+            },
+            {
+              label: "평균 객단가",
+              value: formatManWon(averageRevenue),
+              sub: "예약 1건 평균",
+            },
+          ].forEach(function (item, index) {
+            statsRow.appendChild(makeMetric(item, index));
           });
           salesMonthlyPanel.appendChild(statsRow);
 
-          // ── 도넛 차트 2개 ──
-          var chartsRow = document.createElement("div");
-          chartsRow.className = "admin-sales-charts-row";
+          function setRatio(el, value, maxValue) {
+            var ratio = maxValue > 0 ? (Number(value || 0) / maxValue) * 100 : 0;
+            var ratioText = Math.max(0, Math.min(100, ratio)) + "%";
+            el.style.setProperty("--bar-ratio", ratioText);
+            if (el.parentElement) {
+              el.parentElement.style.setProperty("--bar-ratio", ratioText);
+            }
+          }
 
-          function makeChart(title, segments) {
-            var wrap = document.createElement("div");
-            wrap.className = "admin-sales-chart-wrap";
-
-            var titleEl = document.createElement("h3");
-            titleEl.className = "admin-sales-chart-title";
-            titleEl.textContent = title;
-            wrap.appendChild(titleEl);
-
-            var donutWrap = document.createElement("div");
-            donutWrap.className = "admin-sales-donut-wrap";
-            drawDonutChart(donutWrap, segments);
-            wrap.appendChild(donutWrap);
-
-            var legend = document.createElement("ul");
-            legend.className = "admin-sales-legend";
-            segments.forEach(function (seg) {
-              var li = document.createElement("li");
-              li.className = "admin-sales-legend-item";
-              var dot = document.createElement("span");
-              dot.className = "admin-sales-legend-dot";
-              dot.style.background = seg.color;
-              var text = document.createElement("span");
-              text.className = "admin-sales-legend-text";
-              text.textContent =
-                seg.label +
-                "  " +
-                Number(seg.value).toLocaleString("ko-KR") +
-                "원";
-              li.appendChild(dot);
-              li.appendChild(text);
-              legend.appendChild(li);
+          function makeDailyTrendCard() {
+            var card = document.createElement("section");
+            card.className = "admin-sales-chart-wrap admin-sales-card--wide";
+            card.appendChild(makeCardTitle("DAILY TREND", "주간 매출 흐름"));
+            var list = document.createElement("div");
+            list.className = "admin-sales-daily-bars";
+            var maxValue = Math.max.apply(
+              null,
+              (dailyRevenue || []).map(function (row) {
+                return Number(row.revenue) || 0;
+              }).concat([0]),
+            );
+            (dailyRevenue || []).forEach(function (row) {
+              var revenue = Number(row.revenue) || 0;
+              var item = document.createElement("div");
+              item.className = "admin-sales-bar-row";
+              var day = document.createElement("span");
+              day.className = "admin-sales-bar-label";
+              day.textContent =
+                row.label || String(row.date || "").slice(8, 10) + "일";
+              var track = document.createElement("div");
+              track.className = "admin-sales-bar-track";
+              var fill = document.createElement("span");
+              fill.className = "admin-sales-bar-fill";
+              setRatio(fill, revenue, maxValue);
+              var value = document.createElement("span");
+              value.className = "admin-sales-bar-value";
+              value.textContent = revenue ? formatKRW(revenue) : "";
+              track.appendChild(fill);
+              track.appendChild(value);
+              item.appendChild(day);
+              item.appendChild(track);
+              list.appendChild(item);
             });
-            wrap.appendChild(legend);
-            return wrap;
+            if (!dailyRevenue.length) {
+              list.innerHTML =
+                "<p class='admin-sales-empty'>선택한 월의 매출 데이터가 없습니다.</p>";
+            }
+            card.appendChild(list);
+            return card;
           }
 
           function makeHeatmapCard(title) {
-            var wrap = document.createElement("div");
-            wrap.className = "admin-sales-chart-wrap";
-
-            var titleEl = document.createElement("h3");
-            titleEl.className = "admin-sales-chart-title";
-            titleEl.textContent = title;
-            wrap.appendChild(titleEl);
-
+            var wrap = document.createElement("section");
+            wrap.className = "admin-sales-chart-wrap admin-sales-card--wide";
+            wrap.appendChild(makeCardTitle("MONTHLY HEATMAP", title));
             var heatmapWrap = document.createElement("div");
             heatmapWrap.className = "admin-sales-heatmap-wrap";
             drawMonthlyOccupancyHeatmap(heatmapWrap, occupancyByDay);
             wrap.appendChild(heatmapWrap);
-
             return wrap;
           }
 
-          chartsRow.appendChild(makeChart("판매채널별 매출금", channelData));
-          chartsRow.appendChild(makeChart("객실별 매출금", roomData));
-          chartsRow.appendChild(makeHeatmapCard("월간 예약 히트맵"));
-          salesMonthlyPanel.appendChild(chartsRow);
+          function makeRoomRevenueCard() {
+            var card = document.createElement("section");
+            card.className = "admin-sales-chart-wrap admin-sales-card--side";
+            card.appendChild(makeCardTitle("BY ROOM", "객실별 매출 현황"));
+            var maxRevenue = Math.max.apply(
+              null,
+              (roomStats || []).map(function (row) {
+                return Number(row.revenue) || 0;
+              }).concat([0]),
+            );
+            var table = document.createElement("div");
+            table.className = "admin-sales-room-list";
+            (roomStats || []).forEach(function (row) {
+              var revenue = Number(row.revenue) || 0;
+              var item = document.createElement("div");
+              item.className = "admin-sales-room-row";
+              var room = document.createElement("span");
+              room.className = "admin-sales-room-name";
+              room.textContent = row.label || row.room || "—";
+              var count = document.createElement("span");
+              count.textContent = (Number(row.reservationCount) || 0) + "건";
+              var bar = document.createElement("span");
+              bar.className = "admin-sales-mini-track";
+              var fill = document.createElement("span");
+              fill.className = "admin-sales-mini-fill";
+              setRatio(fill, revenue, maxRevenue);
+              bar.appendChild(fill);
+              var rate = document.createElement("span");
+              rate.textContent = (Number(row.revenueRate) || 0) + "%";
+              var amount = document.createElement("strong");
+              amount.textContent = formatManWon(revenue);
+              item.appendChild(room);
+              item.appendChild(count);
+              item.appendChild(bar);
+              item.appendChild(rate);
+              item.appendChild(amount);
+              table.appendChild(item);
+            });
+            card.appendChild(table);
+            return card;
+          }
+
+          function makePaymentCard() {
+            var card = document.createElement("section");
+            card.className = "admin-sales-chart-wrap admin-sales-mini-card";
+            card.appendChild(makeCardTitle("PAYMENT", "결제수단"));
+            var maxValue = Math.max.apply(
+              null,
+              (paymentData || []).map(function (row) {
+                return Number(row.revenue) || 0;
+              }).concat([0]),
+            );
+            var list = document.createElement("div");
+            list.className = "admin-sales-payment-list";
+            (paymentData || []).forEach(function (row) {
+              var revenue = Number(row.revenue) || 0;
+              var item = document.createElement("div");
+              item.className = "admin-sales-payment-row";
+              var top = document.createElement("div");
+              top.className = "admin-sales-payment-top";
+              var label = document.createElement("span");
+              label.textContent = row.label || formatPaymentMethodLabel(row.method);
+              var amount = document.createElement("strong");
+              amount.textContent = formatKRW(revenue);
+              top.appendChild(label);
+              top.appendChild(amount);
+              var track = document.createElement("span");
+              track.className = "admin-sales-mini-track";
+              var fill = document.createElement("span");
+              fill.className = "admin-sales-mini-fill";
+              setRatio(fill, revenue, maxValue);
+              track.appendChild(fill);
+              item.appendChild(top);
+              item.appendChild(track);
+              list.appendChild(item);
+            });
+            if (!paymentData.length) {
+              list.innerHTML =
+                "<p class='admin-sales-empty'>결제 데이터가 없습니다.</p>";
+            }
+            card.appendChild(list);
+            return card;
+          }
+
+          function makeCancelCard() {
+            var card = document.createElement("section");
+            card.className = "admin-sales-chart-wrap admin-sales-mini-card";
+            card.appendChild(makeCardTitle("CANCELLATION", "취소 분석"));
+            var body = document.createElement("div");
+            body.className = "admin-sales-cancel-body";
+            body.innerHTML =
+              "<div><span>취소 건수</span><strong>" +
+              cancelCount +
+              "건</strong></div>" +
+              "<div><span>취소율</span><strong>" +
+              cancellationRate +
+              "%</strong></div>" +
+              "<p><span>취소 매출</span><strong>" +
+              formatKRW(cancelRevenue) +
+              "</strong></p>";
+            card.appendChild(body);
+            return card;
+          }
+
+          var firstGrid = document.createElement("div");
+          firstGrid.className = "admin-sales-grid";
+          firstGrid.appendChild(makeDailyTrendCard());
+          firstGrid.appendChild(makeRoomRevenueCard());
+          salesMonthlyPanel.appendChild(firstGrid);
+
+          var secondGrid = document.createElement("div");
+          secondGrid.className = "admin-sales-grid admin-sales-grid--lower";
+          var sideStack = document.createElement("div");
+          sideStack.className = "admin-sales-side-stack";
+          sideStack.appendChild(makePaymentCard());
+          sideStack.appendChild(makeCancelCard());
+          secondGrid.appendChild(makeHeatmapCard("월별 예약 밀도"));
+          secondGrid.appendChild(sideStack);
+          salesMonthlyPanel.appendChild(secondGrid);
         }
 
         function drawMonthlyOccupancyHeatmap(containerEl, occupancyByDay) {
@@ -1861,11 +2101,11 @@
           }
 
           var HEAT_COLORS = [
-            "#e8e1d5", // 0
-            "#d3c7b1", // 1
-            "#b8aa94", // 2
-            "#8e8172", // 3
-            "#433d34", // 4
+            "var(--stone-50)",
+            "color-mix(in srgb, var(--gold-500) 12%, var(--stone-50))",
+            "color-mix(in srgb, var(--gold-500) 24%, var(--stone-50))",
+            "color-mix(in srgb, var(--gold-500) 42%, var(--stone-50))",
+            "color-mix(in srgb, var(--gold-500) 64%, var(--stone-50))",
           ];
 
           var maxCount = 0;
@@ -2286,17 +2526,53 @@
           renderTodayStatusPanels();
           setActiveCategory("status");
           renderSalesMonthly({
+            month: "2026-05",
             reservationCount: 12,
             totalRevenue: 8640000,
             cancelCount: 2,
-            channelRevenue: [
-              { label: "GRAFFORD", value: 8640000, color: "#7EB8D4" },
+            cancelRevenue: 750000,
+            cancellationRate: 14,
+            occupiedRoomNights: 37,
+            maxRoomNights: 124,
+            dailyRevenue: [
+              { label: "1주", date: "2026-05-01", revenue: 0 },
+              { label: "2주", date: "2026-05-08", revenue: 2272500 },
+              { label: "3주", date: "2026-05-15", revenue: 500000 },
+              { label: "4주", date: "2026-05-22", revenue: 990000 },
+              { label: "5주", date: "2026-05-29", revenue: 0 },
+            ],
+            paymentRevenue: [
+              { method: "card", label: "신용카드", count: 6, revenue: 2750000 },
+              { method: "bank", label: "계좌이체", count: 5, revenue: 750000 },
+              { method: "kakaopay", label: "카카오페이", count: 1, revenue: 335000 },
+            ],
+            roomStats: [
+              { label: "G1", reservationCount: 8, revenue: 750000, revenueRate: 26 },
+              { label: "G2", reservationCount: 6, revenue: 487500, revenueRate: 19 },
+              { label: "G3", reservationCount: 14, revenue: 2282500, revenueRate: 45 },
+              { label: "G4", reservationCount: 4, revenue: 315000, revenueRate: 13 },
             ],
             roomRevenue: [
-              { label: "G1", value: 2160000, color: "#7EB8D4" },
-              { label: "G2", value: 1920000, color: "#F0A87C" },
-              { label: "G3", value: 2880000, color: "#88C9A0" },
-              { label: "G4", value: 1680000, color: "#E07B7B" },
+              { label: "G1", value: 2160000 },
+              { label: "G2", value: 1920000 },
+              { label: "G3", value: 2880000 },
+              { label: "G4", value: 1680000 },
+            ],
+            occupancyByDay: [
+              { date: "2026-05-01", count: 1 },
+              { date: "2026-05-02", count: 2 },
+              { date: "2026-05-03", count: 0 },
+              { date: "2026-05-04", count: 2 },
+              { date: "2026-05-05", count: 1 },
+              { date: "2026-05-06", count: 2 },
+              { date: "2026-05-07", count: 2 },
+              { date: "2026-05-08", count: 3 },
+              { date: "2026-05-09", count: 3 },
+              { date: "2026-05-10", count: 4 },
+              { date: "2026-05-11", count: 4 },
+              { date: "2026-05-12", count: 4 },
+              { date: "2026-05-13", count: 3 },
+              { date: "2026-05-14", count: 1 },
             ],
           });
           renderSalesAnnual({
@@ -3502,6 +3778,28 @@
             setActiveSalesTab(btn.getAttribute("data-sales-tab"));
           });
         });
+
+        if (salesPrevMonthBtn) {
+          salesPrevMonthBtn.addEventListener("click", function () {
+            selectedSalesMonth = shiftMonthKey(selectedSalesMonth, -1);
+            if (!salesSection.hidden && activeSalesTab === "monthly") {
+              setActiveSalesTab("monthly");
+            } else {
+              updateSalesMonthLabel();
+            }
+          });
+        }
+
+        if (salesNextMonthBtn) {
+          salesNextMonthBtn.addEventListener("click", function () {
+            selectedSalesMonth = shiftMonthKey(selectedSalesMonth, 1);
+            if (!salesSection.hidden && activeSalesTab === "monthly") {
+              setActiveSalesTab("monthly");
+            } else {
+              updateSalesMonthLabel();
+            }
+          });
+        }
 
         roomManageTabBtns.forEach(function (btn) {
           btn.addEventListener("click", function () {
