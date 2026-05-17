@@ -108,6 +108,7 @@ function naverMapSearchUrl(query) {
 function parseBusinessFooterLines(selectedLines, language, naverMapAddr) {
   var infoRows = [];
   var copyrightLine = null;
+  var ownerNameKr = "서동옥";
 
   for (var i = 0; i < selectedLines.length; i++) {
     var raw = selectedLines[i];
@@ -134,6 +135,11 @@ function parseBusinessFooterLines(selectedLines, language, naverMapAddr) {
       m = /^대표\s*:\s*(.+)$/.exec(trimmed);
       if (m) {
         infoRows.push({ label: "대표", value: m[1].trim(), mapHref: null });
+        infoRows.push({
+          label: "대표자명",
+          value: ownerNameKr,
+          mapHref: null,
+        });
         continue;
       }
       m = /^주소\s*:\s*(.+)$/.exec(trimmed);
