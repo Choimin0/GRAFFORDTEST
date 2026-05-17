@@ -9,40 +9,58 @@
   </head>
   <body>
     <main class="content-section confirm-page admin-page">
+      <header class="admin-app-topbar" id="admin-app-topbar" hidden>
+        <div class="admin-app-topbar__brand">
+          <span class="admin-app-topbar__logo">GRAFFORD</span>
+          <span class="admin-app-topbar__section">ADMIN</span>
+        </div>
+        <div class="admin-app-topbar__meta">
+          <time id="admin-today-date" datetime=""></time>
+          <button type="button" class="admin-logout-btn" id="admin-logout-btn">
+            로그아웃
+          </button>
+        </div>
+      </header>
       <nav
         id="admin-category-nav"
         class="admin-category-nav"
         aria-label="관리자 카테고리"
         hidden
       >
-        <button
-          type="button"
-          class="admin-category-btn is-active"
-          data-admin-category="status"
-        >
-          예약 현황
-        </button>
-        <button
-          type="button"
-          class="admin-category-btn"
-          data-admin-category="bank"
-        >
-          예약 목록
-        </button>
-        <button
-          type="button"
-          class="admin-category-btn"
-          data-admin-category="room-manage"
-        >
-          객실 관리
-        </button>
-        <button
-          type="button"
-          class="admin-category-btn"
-          data-admin-category="sales"
-        >
-          매출 현황
-        </button>
+        <a href="index.html" class="admin-sidebar-logo" aria-label="메인으로 이동">
+          GRAFFORD
+        </a>
+        <p class="admin-sidebar-label">ADMIN MENU</p>
+        <div class="admin-category-list">
+          <button
+            type="button"
+            class="admin-category-btn is-active"
+            data-admin-category="status"
+          >
+            예약 현황
+          </button>
+          <button
+            type="button"
+            class="admin-category-btn"
+            data-admin-category="bank"
+          >
+            예약 목록
+          </button>
+          <button
+            type="button"
+            class="admin-category-btn"
+            data-admin-category="room-manage"
+          >
+            객실 관리
+          </button>
+          <button
+            type="button"
+            class="admin-category-btn"
+            data-admin-category="sales"
+          >
+            매출 현황
+          </button>
+        </div>
       </nav>
       <section
         class="confirm-section admin-login-section"
@@ -133,119 +151,159 @@
       </section>
 
       <section
-        class="confirm-section"
+        class="confirm-section admin-dashboard-section"
         id="admin-status-section"
         aria-labelledby="admin-status-title"
         hidden
       >
-        <div class="admin-status-top-grid">
-          <section
-            class="admin-status-card"
-            aria-labelledby="admin-today-checkin-title"
-          >
-            <div class="admin-status-card-head">
-              <h3
-                id="admin-today-checkin-title"
-                class="admin-status-card-title"
-              >
-                체크인 리스트
-              </h3>
-              <div class="admin-inline-date-nav">
-                <button
-                  type="button"
-                  id="admin-checkin-prev-date"
-                  class="admin-page-btn"
-                  aria-label="이전 날짜"
-                >
-                  <
-                </button>
-                <strong
-                  id="admin-checkin-date-label"
-                  class="admin-inline-date-label"
-                ></strong>
-                <button
-                  type="button"
-                  id="admin-checkin-next-date"
-                  class="admin-page-btn"
-                  aria-label="다음 날짜"
-                >
+        <div class="admin-dashboard-band">
+          <div>
+            <p class="admin-dashboard-eyebrow">RESERVATIONS</p>
+            <h1 class="admin-dashboard-title" id="admin-status-title">
+              예약 현황
+            </h1>
+          </div>
+          <dl class="admin-dashboard-metrics" aria-label="오늘 예약 요약">
+            <div class="admin-dashboard-metric">
+              <dt>객실 점유</dt>
+              <dd id="admin-metric-occupancy">0 / 4</dd>
+            </div>
+            <div class="admin-dashboard-metric">
+              <dt>오늘 체크인</dt>
+              <dd id="admin-metric-checkin">0</dd>
+            </div>
+            <div class="admin-dashboard-metric">
+              <dt>오늘 체크아웃</dt>
+              <dd id="admin-metric-checkout">0</dd>
+            </div>
+          </dl>
+        </div>
+
+        <div class="admin-dashboard-layout">
+          <div class="admin-dashboard-main">
+            <section
+              class="admin-status-card admin-status-card--checkin"
+              aria-labelledby="admin-today-checkin-title"
+            >
+              <div class="admin-status-card-head">
+                <div class="admin-section-heading">
+                  <p class="admin-dashboard-eyebrow" id="admin-today-checkin-title">
+                    CHECK-IN TODAY
+                  </p>
+                  <span class="admin-section-heading__rule"></span>
+                </div>
+                <div class="admin-inline-date-nav">
+                  <button
+                    type="button"
+                    id="admin-checkin-prev-date"
+                    class="admin-page-btn"
+                    aria-label="이전 날짜"
                   >
-                </button>
+                    &lt;
+                  </button>
+                  <strong
+                    id="admin-checkin-date-label"
+                    class="admin-inline-date-label"
+                  ></strong>
+                  <button
+                    type="button"
+                    id="admin-checkin-next-date"
+                    class="admin-page-btn"
+                    aria-label="다음 날짜"
+                  >
+                    &gt;
+                  </button>
+                </div>
               </div>
-            </div>
-            <div id="admin-today-checkin-list" class="admin-status-list"></div>
-          </section>
-          <section
-            class="admin-status-card"
-            aria-labelledby="admin-room-status-title"
-          >
-            <div class="admin-status-card-head">
-              <h3 id="admin-room-status-title" class="admin-status-card-title">
-                객실 현황
-              </h3>
-              <div class="admin-inline-date-nav">
-                <button
-                  type="button"
-                  id="admin-room-week-prev"
-                  class="admin-page-btn"
-                  aria-label="이전 주"
-                >
-                  &lt;
-                </button>
-                <strong
-                  id="admin-room-week-label"
-                  class="admin-inline-date-label"
-                ></strong>
-                <button
-                  type="button"
-                  id="admin-room-week-next"
-                  class="admin-page-btn"
-                  aria-label="다음 주"
-                >
-                  &gt;
-                </button>
+              <div id="admin-today-checkin-list" class="admin-status-list"></div>
+            </section>
+
+            <section
+              class="admin-status-card admin-status-card--week"
+              aria-labelledby="admin-room-status-title"
+            >
+              <div class="admin-status-card-head">
+                <div class="admin-section-heading">
+                  <p class="admin-dashboard-eyebrow" id="admin-room-status-title">
+                    WEEKLY CHECK-IN
+                  </p>
+                  <span class="admin-section-heading__rule"></span>
+                </div>
+                <div class="admin-inline-date-nav">
+                  <button
+                    type="button"
+                    id="admin-room-week-prev"
+                    class="admin-page-btn"
+                    aria-label="이전 주"
+                  >
+                    &lt;
+                  </button>
+                  <strong
+                    id="admin-room-week-label"
+                    class="admin-inline-date-label"
+                  ></strong>
+                  <button
+                    type="button"
+                    id="admin-room-week-next"
+                    class="admin-page-btn"
+                    aria-label="다음 주"
+                  >
+                    &gt;
+                  </button>
+                </div>
               </div>
-            </div>
-            <div id="admin-room-status-list" class="admin-status-list"></div>
-          </section>
-        </div>
-        <div class="admin-table-head">
-          <div class="admin-calendar-nav">
-            <button
-              type="button"
-              id="admin-calendar-prev"
-              class="admin-page-btn"
+              <div id="admin-room-status-list" class="admin-status-list"></div>
+            </section>
+
+            <section
+              class="admin-status-card admin-status-card--calendar"
+              aria-label="월간 객실 현황"
             >
-              <
-            </button>
-            <strong id="admin-calendar-label" class="admin-calendar-label"
-              >—</strong
-            >
-            <button
-              type="button"
-              id="admin-calendar-next"
-              class="admin-page-btn"
-            >
-              >
-            </button>
+              <div class="admin-status-card-head">
+                <div class="admin-calendar-nav">
+                  <button
+                    type="button"
+                    id="admin-calendar-prev"
+                    class="admin-page-btn"
+                    aria-label="이전 달"
+                  >
+                    &lt;
+                  </button>
+                  <strong id="admin-calendar-label" class="admin-calendar-label"
+                    >—</strong
+                  >
+                  <button
+                    type="button"
+                    id="admin-calendar-next"
+                    class="admin-page-btn"
+                    aria-label="다음 달"
+                  >
+                    &gt;
+                  </button>
+                </div>
+              </div>
+              <div class="admin-calendar-wrap">
+                <div class="admin-calendar-weekdays">
+                  <span>일</span><span>월</span><span>화</span><span>수</span
+                  ><span>목</span><span>금</span><span>토</span>
+                </div>
+                <div id="admin-calendar-grid" class="admin-calendar-grid"></div>
+              </div>
+            </section>
           </div>
-        </div>
-        <div class="admin-calendar-wrap">
-          <div class="admin-calendar-weekdays">
-            <span>일</span><span>월</span><span>화</span><span>수</span
-            ><span>목</span><span>금</span><span>토</span>
-          </div>
-          <div id="admin-calendar-grid" class="admin-calendar-grid"></div>
 
           <section
             id="admin-calendar-detail"
-            class="admin-calendar-detail"
-            hidden
+            class="admin-calendar-detail admin-dashboard-aside"
+            aria-live="polite"
           >
-            <h3
+            <p class="admin-dashboard-eyebrow">SELECTED DATE</p>
+            <h2
               id="admin-calendar-detail-title"
               class="admin-calendar-detail-title"
-            ></h3>
+            >
+              —
+            </h2>
             <div
               id="admin-calendar-detail-list"
               class="admin-calendar-detail-list"
@@ -255,11 +313,33 @@
       </section>
 
       <section
-        class="confirm-section"
+        class="confirm-section admin-reservation-section"
         id="admin-bank-section"
         aria-labelledby="admin-bank-title"
         hidden
       >
+        <div class="admin-dashboard-band admin-reservation-band">
+          <div>
+            <p class="admin-dashboard-eyebrow">RESERVATION LIST</p>
+            <h1 class="admin-dashboard-title" id="admin-bank-title">
+              예약 목록
+            </h1>
+          </div>
+          <dl class="admin-dashboard-metrics" aria-label="예약 목록 요약">
+            <div class="admin-dashboard-metric">
+              <dt>다가올 예약</dt>
+              <dd id="admin-bank-metric-current">0</dd>
+            </div>
+            <div class="admin-dashboard-metric">
+              <dt>지난 예약</dt>
+              <dd id="admin-bank-metric-past">0</dd>
+            </div>
+            <div class="admin-dashboard-metric">
+              <dt>취소된 예약</dt>
+              <dd id="admin-bank-metric-deleted">0</dd>
+            </div>
+          </dl>
+        </div>
         <div
           class="admin-res-tabs"
           id="admin-res-tabs"
@@ -270,27 +350,18 @@
             class="admin-res-tab-btn is-active"
             data-res-tab="current"
           >
-            현재 예약
+            다가올 예약 <span id="admin-res-count-current">0</span>
           </button>
           <button type="button" class="admin-res-tab-btn" data-res-tab="past">
-            지난 예약
+            지난 예약 <span id="admin-res-count-past">0</span>
           </button>
           <button
             type="button"
             class="admin-res-tab-btn"
             data-res-tab="deleted"
           >
-            취소된 예약
+            취소된 예약 <span id="admin-res-count-deleted">0</span>
           </button>
-        </div>
-        <div class="admin-table-head">
-          <label class="admin-sort-control" for="admin-sort-select">
-            정렬 기준
-            <select id="admin-sort-select">
-              <option value="checkin">입실일</option>
-              <option value="reservationDate">예약일</option>
-            </select>
-          </label>
         </div>
 
         <form
@@ -314,6 +385,14 @@
               placeholder="연락처로 검색"
             />
           </label>
+          <label class="confirm-label">
+            예약번호
+            <input
+              id="admin-search-reservation"
+              type="text"
+              placeholder="예약번호로 검색"
+            />
+          </label>
           <button type="submit" class="btn reserve-btn admin-search-btn">
             검색
           </button>
@@ -326,26 +405,101 @@
           </button>
         </form>
         <div class="admin-table-wrap">
-          <table class="admin-table">
+          <table class="admin-table admin-reservation-table">
             <thead>
               <tr>
                 <th>예약번호</th>
-                <th>예약자</th>
+                <th>
+                  <button type="button" class="admin-sortable-head" data-admin-sort="room">
+                    객실 <span class="admin-sort-icons" aria-hidden="true"></span>
+                  </button>
+                </th>
                 <th>연락처</th>
-                <th>객실</th>
-                <th>체크인/체크아웃</th>
-                <th>총 금액</th>
+                <th>
+                  <button type="button" class="admin-sortable-head" data-admin-sort="guest">
+                    예약자 <span class="admin-sort-icons" aria-hidden="true"></span>
+                  </button>
+                </th>
+                <th>
+                  <button type="button" class="admin-sortable-head" data-admin-sort="checkin">
+                    체크인 <span class="admin-sort-icons" aria-hidden="true"></span>
+                  </button>
+                </th>
+                <th>
+                  <button type="button" class="admin-sortable-head" data-admin-sort="checkout">
+                    체크아웃 <span class="admin-sort-icons" aria-hidden="true"></span>
+                  </button>
+                </th>
+                <th>
+                  <button type="button" class="admin-sortable-head" data-admin-sort="nights">
+                    박수 <span class="admin-sort-icons" aria-hidden="true"></span>
+                  </button>
+                </th>
+                <th>
+                  <button type="button" class="admin-sortable-head" data-admin-sort="amount">
+                    금액 <span class="admin-sort-icons" aria-hidden="true"></span>
+                  </button>
+                </th>
+                <th>
+                  <button type="button" class="admin-sortable-head" data-admin-sort="payment">
+                    결제 <span class="admin-sort-icons" aria-hidden="true"></span>
+                  </button>
+                </th>
+                <th>요청</th>
               </tr>
             </thead>
             <tbody id="admin-table-body"></tbody>
           </table>
         </div>
-        <div
-          id="admin-pagination"
-          class="admin-pagination"
-          aria-label="목록 페이지"
-        ></div>
+        <div class="admin-pagination-row">
+          <p id="admin-pagination-summary" class="admin-pagination-summary">
+            0 / 0
+          </p>
+          <div
+            id="admin-pagination"
+            class="admin-pagination"
+            aria-label="목록 페이지"
+          ></div>
+        </div>
       </section>
+
+      <div
+        id="admin-request-modal"
+        class="admin-request-modal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="admin-request-modal-title"
+        hidden
+      >
+        <div class="admin-request-modal__panel">
+          <div class="admin-request-modal__head">
+            <p class="admin-dashboard-eyebrow">GUEST REQUEST</p>
+            <h2 id="admin-request-modal-title">요청사항</h2>
+            <p id="admin-request-modal-meta"></p>
+          </div>
+          <label class="admin-request-modal__label">
+            요청사항 내용
+            <textarea id="admin-request-text" rows="7"></textarea>
+          </label>
+          <p id="admin-request-message" class="admin-request-message" hidden></p>
+          <div class="admin-request-modal__actions">
+            <button
+              type="button"
+              class="btn reserve-btn admin-request-cancel-btn"
+              id="admin-request-cancel"
+            >
+              취소
+            </button>
+            <button
+              type="button"
+              class="btn reserve-btn confirm-pay-submit reserveinfo-submit-btn admin-request-save-btn"
+              id="admin-request-save"
+            >
+              저장
+            </button>
+          </div>
+        </div>
+      </div>
 
       <section
         class="confirm-section"
@@ -353,6 +507,14 @@
         aria-labelledby="admin-room-manage-title"
         hidden
       >
+        <div class="admin-dashboard-band admin-room-manage-band">
+          <div>
+            <p class="admin-dashboard-eyebrow">ROOM MANAGEMENT</p>
+            <h1 class="admin-dashboard-title" id="admin-room-manage-title">
+              객실 관리
+            </h1>
+          </div>
+        </div>
         <div
           class="admin-res-tabs"
           id="admin-room-manage-tabs"
@@ -381,29 +543,16 @@
           </button>
         </div>
         <div id="admin-room-manage-rate-panel" class="admin-sales-panel">
-          <div class="admin-table-wrap">
-            <table class="admin-table admin-room-manage-table">
-              <thead>
-                <tr>
-                  <th>객실 이름</th>
-                  <th>평일 기본 요금</th>
-                  <th></th>
-                </tr>
-              </thead>
-              <tbody id="admin-room-rate-body"></tbody>
-            </table>
-          </div>
-          <div class="admin-table-wrap" style="margin-top: 24px">
-            <table class="admin-table admin-room-manage-table">
-              <thead>
-                <tr>
-                  <th>요금 정책</th>
-                  <th>금액</th>
-                  <th></th>
-                </tr>
-              </thead>
-              <tbody id="admin-room-charge-body"></tbody>
-            </table>
+          <div class="admin-room-rate-layout">
+            <section class="admin-room-rate-main" aria-labelledby="admin-room-rate-title">
+              <div class="admin-room-rate-head">
+                <p class="admin-dashboard-eyebrow">BASE RATE</p>
+                <h2 id="admin-room-rate-title">객실별 기본 요금</h2>
+                <p>평일 기본 요금만 직접 수정할 수 있습니다.</p>
+              </div>
+              <div id="admin-room-rate-body" class="admin-room-rate-list"></div>
+            </section>
+            <aside class="admin-room-policy-list" id="admin-room-charge-body"></aside>
           </div>
         </div>
         <div
@@ -432,6 +581,38 @@
           <p class="admin-sales-pending">준비 중입니다.</p>
         </div>
       </section>
+
+      <div
+        id="admin-policy-confirm-modal"
+        class="admin-request-modal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="admin-policy-confirm-title"
+        hidden
+      >
+        <div class="admin-request-modal__panel admin-policy-confirm-panel">
+          <div class="admin-request-modal__head">
+            <p class="admin-dashboard-eyebrow">RATE POLICY</p>
+            <h2 id="admin-policy-confirm-title">변경 사항을 저장하시겠습니까?</h2>
+          </div>
+          <div class="admin-request-modal__actions">
+            <button
+              type="button"
+              class="btn reserve-btn admin-request-cancel-btn"
+              id="admin-policy-confirm-cancel"
+            >
+              취소
+            </button>
+            <button
+              type="button"
+              class="btn reserve-btn confirm-pay-submit reserveinfo-submit-btn admin-request-save-btn"
+              id="admin-policy-confirm-save"
+            >
+              저장
+            </button>
+          </div>
+        </div>
+      </div>
 
       <section
         class="confirm-section"
@@ -500,6 +681,9 @@
         var loginForm = document.getElementById("admin-login-form");
         var loginSection = document.getElementById("admin-login-section");
         var loginTitleEl = document.getElementById("admin-login-title");
+        var appTopbar = document.getElementById("admin-app-topbar");
+        var todayDateEl = document.getElementById("admin-today-date");
+        var logoutBtn = document.getElementById("admin-logout-btn");
         var idInput = document.getElementById("admin-id");
         var pwInput = document.getElementById("admin-pw");
         var msgEl = document.getElementById("admin-message");
@@ -523,17 +707,51 @@
         var roomRateBody = document.getElementById("admin-room-rate-body");
         var roomChargeBody = document.getElementById("admin-room-charge-body");
         var sortSelect = document.getElementById("admin-sort-select");
+        var sortableHeadBtns = document.querySelectorAll(".admin-sortable-head");
         var resTabs = document.getElementById("admin-res-tabs");
         var resTabBtns = resTabs
           ? resTabs.querySelectorAll(".admin-res-tab-btn")
           : [];
+        var requestModal = document.getElementById("admin-request-modal");
+        var requestTextInput = document.getElementById("admin-request-text");
+        var requestModalMeta = document.getElementById("admin-request-modal-meta");
+        var requestModalMessage = document.getElementById(
+          "admin-request-message",
+        );
+        var requestSaveBtn = document.getElementById("admin-request-save");
+        var requestCancelBtn = document.getElementById("admin-request-cancel");
+        var policyConfirmModal = document.getElementById(
+          "admin-policy-confirm-modal",
+        );
+        var policyConfirmSaveBtn = document.getElementById(
+          "admin-policy-confirm-save",
+        );
+        var policyConfirmCancelBtn = document.getElementById(
+          "admin-policy-confirm-cancel",
+        );
         var searchForm = document.getElementById("admin-search-form");
         var searchNameInput = document.getElementById("admin-search-name");
         var searchContactInput = document.getElementById(
           "admin-search-contact",
         );
+        var searchReservationInput = document.getElementById(
+          "admin-search-reservation",
+        );
         var searchResetBtn = document.getElementById("admin-search-reset");
         var paginationEl = document.getElementById("admin-pagination");
+        var paginationSummaryEl = document.getElementById(
+          "admin-pagination-summary",
+        );
+        var resTabCountEls = {
+          current: document.getElementById("admin-res-count-current"),
+          past: document.getElementById("admin-res-count-past"),
+          deleted: document.getElementById("admin-res-count-deleted"),
+        };
+        var bankMetricEls = {
+          current: document.getElementById("admin-bank-metric-current"),
+          past: document.getElementById("admin-bank-metric-past"),
+          deleted: document.getElementById("admin-bank-metric-deleted"),
+        };
         var calendarPrevBtn = document.getElementById("admin-calendar-prev");
         var calendarNextBtn = document.getElementById("admin-calendar-next");
         var calendarLabel = document.getElementById("admin-calendar-label");
@@ -560,6 +778,11 @@
         var checkinDateLabelEl = document.getElementById(
           "admin-checkin-date-label",
         );
+        var metricOccupancyEl = document.getElementById(
+          "admin-metric-occupancy",
+        );
+        var metricCheckinEl = document.getElementById("admin-metric-checkin");
+        var metricCheckoutEl = document.getElementById("admin-metric-checkout");
         var roomWeekPrevBtn = document.getElementById("admin-room-week-prev");
         var roomWeekNextBtn = document.getElementById("admin-room-week-next");
         var roomWeekLabelEl = document.getElementById("admin-room-week-label");
@@ -570,9 +793,24 @@
         var roomRateRows = [];
         var roomChargeRows = [];
         var CHARGE_LABELS = {
-          "weekend-charge": { label: "주말 요금", unit: "원/박" },
-          "consecutive-sale": { label: "연박 할인", unit: "원/박" },
-          promotion: { label: "프로모션 할인", unit: "%" },
+          "weekend-charge": {
+            eyebrow: "WEEKEND",
+            label: "주말 추가요금",
+            desc: "토요일 · 휴일 전날 1박 기준 추가 금액입니다.",
+            unit: "원/박",
+          },
+          "consecutive-sale": {
+            eyebrow: "MULTI-NIGHT",
+            label: "연박 할인",
+            desc: "2박 이상 예약 시 두 번째 박부터 적용되는 할인입니다.",
+            unit: "원/박",
+          },
+          promotion: {
+            eyebrow: "PROMOTION",
+            label: "프로모션 할인",
+            desc: "전체 평일 객실료 기준으로 적용되는 할인율입니다.",
+            unit: "%",
+          },
         };
         var roomStatusByRoom = { G1: "", G2: "", G3: "", G4: "" };
         var activeResTab = "current";
@@ -580,7 +818,12 @@
         var activeRoomManageTab = "rate";
         var currentPage = 1;
         var PAGE_SIZE = 20;
-        var sortKey = "checkin";
+        var sortKey = "";
+        var sortDirection = "";
+        var reservationTabCounts = { current: 0, past: 0, deleted: 0 };
+        var activeRequestReservationNumber = "";
+        var pendingPolicyToggle = null;
+        var pendingRateSave = null;
         var activeCategory = "bank";
         var roomManageTabsEl = document.getElementById(
           "admin-room-manage-tabs",
@@ -600,6 +843,7 @@
         var calendarViewDate = new Date();
         calendarViewDate.setDate(1);
         var selectedCheckinDate = getTodayYmdKst();
+        var selectedCalendarDate = getTodayYmdKst();
         var roomStatusWeekStart = getTodayYmdKst();
         var query = new URLSearchParams(window.location.search || "");
         var isLocalhost =
@@ -612,6 +856,9 @@
           if (categoryNav) {
             categoryNav.hidden = true;
           }
+          if (appTopbar) {
+            appTopbar.hidden = true;
+          }
           statusSection.hidden = true;
           bankSection.hidden = true;
           roomManageSection.hidden = true;
@@ -623,6 +870,23 @@
           if (loginTitleEl) {
             loginTitleEl.hidden = false;
           }
+        }
+
+        function setLoggedInView() {
+          if (loginSection) {
+            loginSection.hidden = true;
+          }
+          loginForm.hidden = true;
+          if (loginTitleEl) {
+            loginTitleEl.hidden = true;
+          }
+          if (categoryNav) {
+            categoryNav.hidden = false;
+          }
+          if (appTopbar) {
+            appTopbar.hidden = false;
+          }
+          renderAdminTopbarDate();
         }
 
         function dateKey(ymd) {
@@ -710,6 +974,15 @@
           );
         }
 
+        function renderAdminTopbarDate() {
+          if (!todayDateEl) {
+            return;
+          }
+          var today = getTodayYmdKst();
+          todayDateEl.dateTime = today;
+          todayDateEl.textContent = today.replace(/-/g, ".");
+        }
+
         function compareYmd(a, b) {
           if (a === b) return 0;
           return a < b ? -1 : 1;
@@ -759,24 +1032,97 @@
           return { display: full.slice(0, MAX_LEN) + "...", tooltip: full };
         }
 
+        function getAdminRooms() {
+          return ["G1", "G2", "G3", "G4"];
+        }
+
+        function getReservationRows() {
+          return (latestCalendarRows || []).filter(function (row) {
+            return row && row.checkIn && row.checkOut;
+          });
+        }
+
+        function getRoomRows(room) {
+          var roomName = String(room || "").toUpperCase();
+          return getReservationRows().filter(function (row) {
+            return String(row.roomType || "").toUpperCase() === roomName;
+          });
+        }
+
+        function getRoomStatusForDate(room, ymd) {
+          var rows = getRoomRows(room);
+          var checkinRow = null;
+          var stayRow = null;
+          var checkoutRow = null;
+          rows.forEach(function (row) {
+            var ci = dateKey(row.checkIn);
+            var co = dateKey(row.checkOut);
+            if (ci === ymd && co > ymd && !checkinRow) {
+              checkinRow = row;
+            } else if (ci < ymd && ymd < co && !stayRow) {
+              stayRow = row;
+            } else if (co === ymd && ci < ymd && !checkoutRow) {
+              checkoutRow = row;
+            }
+          });
+          if (checkinRow) {
+            return { state: "checkin", label: "체크인", row: checkinRow };
+          }
+          if (stayRow) {
+            return { state: "stay", label: "재실", row: stayRow };
+          }
+          if (checkoutRow) {
+            return { state: "checkout", label: "체크아웃", row: checkoutRow };
+          }
+          return { state: "vacant", label: "공실", row: null };
+        }
+
+        function isRoomOccupiedOnDate(room, ymd) {
+          var status = getRoomStatusForDate(room, ymd);
+          return status.state === "checkin" || status.state === "stay";
+        }
+
+        function renderStatusMetrics() {
+          var today = getTodayYmdKst();
+          var rooms = getAdminRooms();
+          var rows = getReservationRows();
+          var occupiedCount = rooms.filter(function (room) {
+            return isRoomOccupiedOnDate(room, today);
+          }).length;
+          var checkinCount = rows.filter(function (row) {
+            return dateKey(row.checkIn) === today;
+          }).length;
+          var checkoutCount = rows.filter(function (row) {
+            return dateKey(row.checkOut) === today;
+          }).length;
+          if (metricOccupancyEl) {
+            metricOccupancyEl.textContent = occupiedCount + " / " + rooms.length;
+          }
+          if (metricCheckinEl) {
+            metricCheckinEl.textContent = String(checkinCount);
+          }
+          if (metricCheckoutEl) {
+            metricCheckoutEl.textContent = String(checkoutCount);
+          }
+        }
+
         function renderTodayStatusPanels() {
           if (!todayCheckinListEl || !roomStatusListEl) {
             return;
           }
+          renderStatusMetrics();
           var today = getTodayYmdKst();
           var selectedDate = selectedCheckinDate || today;
           if (checkinDateLabelEl) {
             checkinDateLabelEl.textContent = formatDateLabel(selectedDate);
           }
-          var rows = (latestCalendarRows || []).filter(function (row) {
-            return row && row.checkIn && row.checkOut;
-          });
+          var rows = getReservationRows();
 
           var todayCheckins = rows.filter(function (row) {
             return dateKey(row.checkIn) === selectedDate;
           });
           todayCheckinListEl.innerHTML = "";
-          var rooms = ["G1", "G2", "G3", "G4"];
+          var rooms = getAdminRooms();
           var tableWrap = document.createElement("div");
           tableWrap.className = "admin-checkin-table-wrap";
           var table = document.createElement("table");
@@ -900,17 +1246,15 @@
           }
           var today = getTodayYmdKst();
           var weekStart = roomStatusWeekStart || today;
-          var rooms = ["G1", "G2", "G3", "G4"];
-          var rows = (latestCalendarRows || []).filter(function (row) {
-            return row && row.checkIn && row.checkOut;
-          });
+          var rooms = getAdminRooms();
+          var rows = getReservationRows();
 
           var ROOM_WEEK_PALETTE = [
-            "#d3c7b1",
-            "#8b7e6a",
-            "#6f675c",
-            "#5a5247",
-            "#3a3531",
+            "var(--gold-500)",
+            "color-mix(in srgb, var(--gold-500) 72%, var(--stone-50))",
+            "color-mix(in srgb, var(--gold-500) 54%, var(--stone-50))",
+            "color-mix(in srgb, var(--gold-500) 42%, var(--stone-50))",
+            "color-mix(in srgb, var(--stone-800) 36%, var(--stone-50))",
           ];
           var weekDates = [];
           for (var wi = 0; wi < 7; wi++) {
@@ -946,8 +1290,8 @@
           }
           function getWeekResColor(row) {
             return row
-              ? weekColorMap[getWeekResKey(row)] || "#c8c8c8"
-              : "#c8c8c8";
+              ? weekColorMap[getWeekResKey(row)] || "var(--stone-200)"
+              : "var(--stone-200)";
           }
           function formatWeekTooltip(row) {
             return (
@@ -1079,53 +1423,58 @@
           });
         }
 
+        function formatReservationSchedule(row) {
+          if (!row) {
+            return "—";
+          }
+          return (row.checkIn || "—") + " ~ " + (row.checkOut || "—");
+        }
+
         function renderCalendarDetail(ymd) {
           if (!calendarDetail || !calendarDetailTitle || !calendarDetailList) {
             return;
           }
-          var rows = findReservationsByDate(ymd);
-          if (!rows.length) {
-            calendarDetail.hidden = true;
-            calendarDetailTitle.textContent = "";
-            calendarDetailList.innerHTML = "";
-            return;
-          }
+          selectedCalendarDate = ymd || getTodayYmdKst();
           calendarDetail.hidden = false;
           calendarDetailTitle.textContent =
-            formatDateLabel(ymd) + " 예약 (" + rows.length + "건)";
+            formatDateLabel(selectedCalendarDate);
           calendarDetailList.innerHTML = "";
-          rows.forEach(function (row) {
+          getAdminRooms().forEach(function (room) {
+            var status = getRoomStatusForDate(room, selectedCalendarDate);
+            var row = status.row;
             var card = document.createElement("article");
             card.className =
-              "admin-calendar-detail-item" + (row.isPast ? " is-past" : "");
+              "admin-calendar-detail-item is-" + status.state;
+            var statusClass =
+              "admin-room-state-badge admin-room-state-badge--" + status.state;
             card.innerHTML =
-              "<p><strong>예약번호 | </strong> " +
-              (row.reservationNumber || "—") +
-              "</p>" +
-              "<p><strong>예약자 | </strong> " +
-              (row.guestName || "—") +
-              "</p>" +
-              "<p><strong>연락처 | </strong> " +
-              (row.contact || "—") +
-              "</p>" +
-              "<p><strong>객실 | </strong> " +
-              (row.roomType || "—") +
-              "</p>" +
-              "<p><strong>일정 | </strong> " +
-              (row.checkIn || "—") +
-              " ~ " +
-              (row.checkOut || "—") +
-              "</p>" +
-              "<p><strong>예약금 | </strong> " +
-              formatKRW(row.totalAmount || 0) +
-              "(" +
-              formatPaymentMethodLabel(row.paymentMethod) +
-              ")" +
-              "</p>" +
-              "<p><strong>예약 경로 | </strong> 자사 홈페이지</p>" +
-              "<p><strong>구분 | </strong> " +
-              (row.isPast ? "지난 예약" : "예정된 예약") +
-              "</p>";
+              "<div class='admin-calendar-detail-item__head'>" +
+              "<strong>" +
+              room +
+              "</strong>" +
+              "<span class='" +
+              statusClass +
+              "'>" +
+              status.label +
+              "</span>" +
+              "</div>";
+            if (row) {
+              card.innerHTML +=
+                "<dl class='admin-calendar-detail-kv'>" +
+                "<div><dt>예약번호</dt><dd>" +
+                (row.reservationNumber || "—") +
+                "</dd></div>" +
+                "<div><dt>예약자명</dt><dd>" +
+                (row.guestName || "—") +
+                "</dd></div>" +
+                "<div><dt>투숙 일정</dt><dd>" +
+                formatReservationSchedule(row) +
+                "</dd></div>" +
+                "<div><dt>총 금액</dt><dd>" +
+                formatKRW(row.totalAmount || 0) +
+                "</dd></div>" +
+                "</dl>";
+            }
             calendarDetailList.appendChild(card);
           });
         }
@@ -1167,32 +1516,46 @@
             if ((pastCounts[key] || 0) > 0) {
               cell.className += " has-past";
             }
+            if (key === selectedCalendarDate) {
+              cell.className += " is-selected";
+            }
             var dayEl = document.createElement("span");
             dayEl.className = "admin-calendar-day";
             dayEl.textContent = String(day);
+            var roomGrid = document.createElement("div");
+            roomGrid.className = "admin-calendar-room-grid";
+            getAdminRooms().forEach(function (room) {
+              var dot = document.createElement("span");
+              dot.className =
+                "admin-calendar-room-dot" +
+                (isRoomOccupiedOnDate(room, key) ? " is-occupied" : "");
+              dot.textContent = room;
+              roomGrid.appendChild(dot);
+            });
             var cntEl = document.createElement("strong");
             cntEl.className = "admin-calendar-count";
-            cntEl.textContent = cnt > 0 ? String(cnt) : "—";
+            cntEl.textContent = cnt > 0 ? cnt + "건" : "0건";
             cell.appendChild(dayEl);
+            cell.appendChild(roomGrid);
             cell.appendChild(cntEl);
-            if (cnt > 0) {
-              cell.setAttribute("role", "button");
-              cell.setAttribute("tabindex", "0");
-              (function (dateValue) {
-                function openDetail() {
-                  renderCalendarDetail(dateValue);
+            cell.setAttribute("role", "button");
+            cell.setAttribute("tabindex", "0");
+            (function (dateValue) {
+              function openDetail() {
+                renderCalendarDetail(dateValue);
+                renderStatusCalendar();
+              }
+              cell.addEventListener("click", openDetail);
+              cell.addEventListener("keydown", function (ev) {
+                if (ev.key === "Enter" || ev.key === " ") {
+                  ev.preventDefault();
+                  openDetail();
                 }
-                cell.addEventListener("click", openDetail);
-                cell.addEventListener("keydown", function (ev) {
-                  if (ev.key === "Enter" || ev.key === " ") {
-                    ev.preventDefault();
-                    openDetail();
-                  }
-                });
-              })(key);
-            }
+              });
+            })(key);
             calendarGrid.appendChild(cell);
           }
+          renderCalendarDetail(selectedCalendarDate || getTodayYmdKst());
         }
 
         function adminSalesApiUrl() {
@@ -1795,6 +2158,19 @@
                 { roomName: "G3", weekdayBaseRate: 300000 },
                 { roomName: "G4", weekdayBaseRate: 350000 },
               ];
+              roomChargeRows = [
+                {
+                  roomName: "weekend-charge",
+                  weekdayBaseRate: 20000,
+                  isEnabled: true,
+                },
+                {
+                  roomName: "consecutive-sale",
+                  weekdayBaseRate: 20000,
+                  isEnabled: false,
+                },
+                { roomName: "promotion", weekdayBaseRate: 5, isEnabled: false },
+              ];
               renderRoomRateTable();
               roomStatusManageRows = [
                 { roomName: "G1", statusText: "정상 운영 중" },
@@ -1814,16 +2190,7 @@
         }
 
         function enableLayoutPreviewMode() {
-          if (loginSection) {
-            loginSection.hidden = true;
-          }
-          loginForm.hidden = true;
-          if (loginTitleEl) {
-            loginTitleEl.hidden = true;
-          }
-          if (categoryNav) {
-            categoryNav.hidden = false;
-          }
+          setLoggedInView();
           latestRows = [
             {
               reservationNumber: "20260501-AAAAAA",
@@ -2024,6 +2391,148 @@
           return Math.max(0, baseTotal - discount);
         }
 
+        function getReservationStatusLabel(row) {
+          if (activeResTab === "deleted" || (row && row.deletedAt)) {
+            return "취소완료";
+          }
+          if (activeResTab === "past" || (row && row.isPast)) {
+            return "이용완료";
+          }
+          if (row && row.bankConfirmed === false) {
+            return "입금대기";
+          }
+          return "예약확정";
+        }
+
+        function getPaymentClass(method) {
+          var raw = String(method || "")
+            .trim()
+            .toLowerCase();
+          if (raw === "card" || raw === "신용카드") return "is-card";
+          if (raw === "naver" || raw === "네이버페이") return "is-naver";
+          if (raw === "bank" || raw === "무통장입금") return "is-bank";
+          return "is-unknown";
+        }
+
+        function setRequestMessage(text) {
+          if (!requestModalMessage) {
+            return;
+          }
+          requestModalMessage.hidden = !text;
+          requestModalMessage.textContent = text || "";
+        }
+
+        function findReservationByNumber(reservationNumber) {
+          var target = String(reservationNumber || "");
+          return (reservationListRows || []).filter(function (row) {
+            return String((row && row.reservationNumber) || "") === target;
+          })[0];
+        }
+
+        function updateReservationRequestLocal(reservationNumber, guestRequest) {
+          [reservationListRows, latestRows, latestCalendarRows].forEach(function (
+            list,
+          ) {
+            (list || []).forEach(function (row) {
+              if (
+                String((row && row.reservationNumber) || "") ===
+                String(reservationNumber || "")
+              ) {
+                row.guestRequest = guestRequest;
+              }
+            });
+          });
+        }
+
+        function openRequestModal(reservationNumber) {
+          if (!requestModal || !requestTextInput) {
+            return;
+          }
+          var row = findReservationByNumber(reservationNumber) || {};
+          activeRequestReservationNumber = String(reservationNumber || "");
+          requestTextInput.value = row.guestRequest || "";
+          if (requestModalMeta) {
+            requestModalMeta.textContent =
+              (row.reservationNumber || "—") +
+              " · " +
+              (row.guestName || "—") +
+              " · " +
+              (row.roomType || "—");
+          }
+          setRequestMessage("");
+          requestModal.hidden = false;
+          requestTextInput.focus();
+        }
+
+        function closeRequestModal() {
+          if (requestModal) {
+            requestModal.hidden = true;
+          }
+          activeRequestReservationNumber = "";
+          setRequestMessage("");
+        }
+
+        function saveRequestModal() {
+          if (!activeRequestReservationNumber || !requestTextInput) {
+            return;
+          }
+          var auth = getAuthPayload();
+          var nextRequest = requestTextInput.value || "";
+          if (requestSaveBtn) {
+            requestSaveBtn.disabled = true;
+          }
+          setRequestMessage("저장 중입니다.");
+          fetch(adminReservationsApiUrl(), {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              action: "save-request",
+              reservationNumber: activeRequestReservationNumber,
+              guestRequest: nextRequest,
+              adminId: auth.adminId,
+              adminPw: auth.adminPw,
+            }),
+          })
+            .then(function (r) {
+              return r.json().then(function (data) {
+                return { ok: r.ok, data: data || {} };
+              });
+            })
+            .then(function (result) {
+              if (!result.ok || !result.data.ok) {
+                throw new Error(result.data.error || "요청사항 저장 실패");
+              }
+              updateReservationRequestLocal(
+                result.data.reservationNumber || activeRequestReservationNumber,
+                result.data.guestRequest || "",
+              );
+              applyListView();
+              closeRequestModal();
+            })
+            .catch(function (err) {
+              setRequestMessage(
+                (err && err.message) || "요청사항 저장 중 오류가 발생했습니다.",
+              );
+            })
+            .finally(function () {
+              if (requestSaveBtn) {
+                requestSaveBtn.disabled = false;
+              }
+            });
+        }
+
+        function renderReservationTabCounts() {
+          ["current", "past", "deleted"].forEach(function (key) {
+            var count = reservationTabCounts[key] || 0;
+            if (resTabCountEls[key]) {
+              resTabCountEls[key].textContent = String(count);
+            }
+            if (bankMetricEls[key]) {
+              bankMetricEls[key].textContent = String(count);
+            }
+          });
+        }
+
         function getAuthPayload() {
           return {
             adminId: String(idInput.value || "").trim(),
@@ -2053,49 +2562,114 @@
             .toLowerCase();
         }
 
+        function normalizeContactDigits(value) {
+          return String(value || "").replace(/\D/g, "");
+        }
+
+        function formatAdminSearchContact(value) {
+          var digits = normalizeContactDigits(value).slice(0, 11);
+          if (digits.length === 11) {
+            return (
+              digits.slice(0, 3) +
+              "-" +
+              digits.slice(3, 7) +
+              "-" +
+              digits.slice(7)
+            );
+          }
+          return digits;
+        }
+
         function getFilteredRows(rows) {
           var nameQuery = normalizeSearchValue(
             searchNameInput && searchNameInput.value,
           );
           var contactQuery = normalizeSearchValue(
             searchContactInput && searchContactInput.value,
-          ).replace(/\s+/g, "");
-          if (!nameQuery && !contactQuery) {
+          ).replace(/\D/g, "");
+          var reservationQuery = normalizeSearchValue(
+            searchReservationInput && searchReservationInput.value,
+          );
+          if (!nameQuery && !contactQuery && !reservationQuery) {
             return (rows || []).slice();
           }
           return (rows || []).filter(function (row) {
             var rowName = normalizeSearchValue(row && row.guestName);
             var rowContact = normalizeSearchValue(row && row.contact).replace(
-              /\s+/g,
+              /\D/g,
               "",
+            );
+            var rowReservation = normalizeSearchValue(
+              row && row.reservationNumber,
             );
             var nameOk = !nameQuery || rowName.indexOf(nameQuery) >= 0;
             var contactOk =
               !contactQuery || rowContact.indexOf(contactQuery) >= 0;
-            return nameOk && contactOk;
+            var reservationOk =
+              !reservationQuery || rowReservation.indexOf(reservationQuery) >= 0;
+            return nameOk && contactOk && reservationOk;
           });
         }
 
         function sortRows(rows) {
           var copied = (rows || []).slice();
+          if (!sortKey || !sortDirection) {
+            return copied;
+          }
+          function getSortValue(row) {
+            if (sortKey === "room") return String((row && row.roomType) || "");
+            if (sortKey === "guest") return String((row && row.guestName) || "");
+            if (sortKey === "checkin") return asYmdNumber(row && row.checkIn);
+            if (sortKey === "checkout") return asYmdNumber(row && row.checkOut);
+            if (sortKey === "nights") return getStayPeriodNights(row);
+            if (sortKey === "amount") return getConsecutiveSaleTotal(row);
+            if (sortKey === "status") return getReservationStatusLabel(row);
+            if (sortKey === "payment") {
+              return formatPaymentMethodLabel(row && row.paymentMethod);
+            }
+            return reservationDateNumber(row);
+          }
           copied.sort(function (a, b) {
-            var aCheckin = asYmdNumber(a && a.checkIn);
-            var bCheckin = asYmdNumber(b && b.checkIn);
-            if (sortKey === "reservationDate") {
-              var aRes = reservationDateNumber(a);
-              var bRes = reservationDateNumber(b);
-              if (aRes !== bRes) {
-                return aRes - bRes;
-              }
-              return aCheckin - bCheckin;
+            var av = getSortValue(a);
+            var bv = getSortValue(b);
+            var result = 0;
+            if (typeof av === "number" && typeof bv === "number") {
+              result = av - bv;
+            } else {
+              result = String(av).localeCompare(String(bv), "ko-KR", {
+                numeric: true,
+              });
             }
-            // default: check-in 오름차순
-            if (aCheckin !== bCheckin) {
-              return aCheckin - bCheckin;
+            if (result === 0) {
+              result = asYmdNumber(a && a.checkIn) - asYmdNumber(b && b.checkIn);
             }
-            return reservationDateNumber(a) - reservationDateNumber(b);
+            return sortDirection === "desc" ? -result : result;
           });
           return copied;
+        }
+
+        function renderSortIndicators() {
+          sortableHeadBtns.forEach(function (btn) {
+            var key = btn.getAttribute("data-admin-sort");
+            var icon = btn.querySelector("span");
+            var isActive = key === sortKey && !!sortDirection;
+            btn.classList.toggle("is-sorted", isActive);
+            btn.classList.toggle("is-asc", isActive && sortDirection === "asc");
+            btn.classList.toggle("is-desc", isActive && sortDirection === "desc");
+            btn.setAttribute(
+              "aria-sort",
+              !isActive
+                ? "none"
+                : sortDirection === "asc"
+                  ? "ascending"
+                  : "descending",
+            );
+            if (icon) {
+              icon.innerHTML =
+                "<span class='admin-sort-icon-up'>▲</span>" +
+                "<span class='admin-sort-icon-down'>▼</span>";
+            }
+          });
         }
 
         function renderRows(rows) {
@@ -2106,7 +2680,7 @@
           if (!rows || !rows.length) {
             var emptyTr = document.createElement("tr");
             var emptyTd = document.createElement("td");
-            emptyTd.colSpan = 6;
+            emptyTd.colSpan = 10;
             emptyTd.textContent = "예약 내역이 없습니다.";
             emptyTr.appendChild(emptyTd);
             tableBody.appendChild(emptyTr);
@@ -2114,26 +2688,56 @@
           }
           rows.forEach(function (row) {
             var tr = document.createElement("tr");
+            var nights = getStayPeriodNights(row);
+            var paymentLabel = formatPaymentMethodLabel(row && row.paymentMethod);
+            var paymentClass =
+              "admin-reservation-payment " + getPaymentClass(row && row.paymentMethod);
+            var requestText = row && row.guestRequest ? row.guestRequest : "";
             tr.innerHTML =
-              "<td>" +
+              "<td class='admin-sort-hover-cell'>" +
               (row.reservationNumber || "—") +
               "</td>" +
-              "<td>" +
-              (row.guestName || "—") +
-              "</td>" +
-              "<td>" +
-              (row.contact || "—") +
-              "</td>" +
-              "<td>" +
+              "<td class='admin-sort-hover-cell'>" +
               (row.roomType || "—") +
               "</td>" +
-              "<td>" +
+              "<td class='admin-sort-hover-cell'>" +
+              (row.contact || "—") +
+              "</td>" +
+              "<td class='admin-sort-hover-cell'>" +
+              (row.guestName || "—") +
+              "</td>" +
+              "<td class='admin-sort-hover-cell'>" +
               (row.checkIn || "—") +
-              " ~ " +
+              "</td>" +
+              "<td class='admin-sort-hover-cell'>" +
               (row.checkOut || "—") +
               "</td>" +
-              "<td>" +
+              "<td class='admin-sort-hover-cell'>" +
+              (nights ? nights + "박" : "—") +
+              "</td>" +
+              "<td class='admin-sort-hover-cell'>" +
               formatKRW(getConsecutiveSaleTotal(row)) +
+              "</td>" +
+              "<td class='admin-sort-hover-cell'>" +
+              "<span class='" +
+              paymentClass +
+              "'>" +
+              paymentLabel +
+              "</span>" +
+              "</td>" +
+              "<td>" +
+              "<button type='button' class='admin-request-icon-btn" +
+              (requestText ? " has-request" : "") +
+              "' data-reservation-number='" +
+              (row.reservationNumber || "") +
+              "' aria-label='요청사항 보기'>" +
+              "<span class='col-request' aria-hidden='true'>" +
+              "<svg viewBox='0 0 16 16' fill='none' stroke='currentColor' stroke-width='1.4'>" +
+              "<path d='M3 2.75h10v7.5H8.25L5 13.1v-2.85H3z'/>" +
+              "<path d='M5 5.25h6M5 7.5h4'/>" +
+              "</svg>" +
+              "</span>" +
+              "</button>" +
               "</td>";
             tableBody.appendChild(tr);
           });
@@ -2145,8 +2749,8 @@
           }
           paginationEl.innerHTML = "";
           var totalPages = Math.max(1, Math.ceil(totalCount / PAGE_SIZE));
-          if (totalCount <= PAGE_SIZE) {
-            return;
+          if (paginationSummaryEl) {
+            paginationSummaryEl.textContent = currentPage + " / " + totalPages;
           }
 
           function makePageBtn(label, page, disabled, isActive) {
@@ -2165,18 +2769,20 @@
             paginationEl.appendChild(btn);
           }
 
-          makePageBtn("이전", Math.max(1, currentPage - 1), currentPage <= 1);
+          makePageBtn("‹", Math.max(1, currentPage - 1), currentPage <= 1);
           for (var i = 1; i <= totalPages; i += 1) {
             makePageBtn(String(i), i, false, i === currentPage);
           }
           makePageBtn(
-            "다음",
+            "›",
             Math.min(totalPages, currentPage + 1),
             currentPage >= totalPages,
           );
         }
 
         function applyListView(resetPage) {
+          renderSortIndicators();
+          renderReservationTabCounts();
           if (resetPage) {
             currentPage = 1;
           }
@@ -2302,15 +2908,87 @@
                   showMessage("프로모션 할인율은 0~100% 사이로 입력해 주세요.");
                   return;
                 }
-                btn.disabled = true;
-                saveRoomRateRow(roomName, val)
-                  .catch(function (err) {
-                    showMessage((err && err.message) || "저장 실패");
-                  })
-                  .finally(function () {
-                    btn.disabled = false;
-                  });
+                openRateSaveConfirm(roomName, val);
               });
+            });
+        }
+
+        function getChargeRow(name) {
+          return (roomChargeRows || []).filter(function (row) {
+            return row && row.roomName === name;
+          })[0];
+        }
+
+        function getWeekendChargeAmount() {
+          var row = getChargeRow("weekend-charge");
+          if (!row || row.isEnabled === false) {
+            return 0;
+          }
+          return Number(row.weekdayBaseRate || 0);
+        }
+
+        function openPolicyConfirm(roomName, nextEnabled) {
+          pendingRateSave = null;
+          pendingPolicyToggle = {
+            roomName: roomName,
+            isEnabled: nextEnabled === true,
+          };
+          setPolicyConfirmTitle("요금 정책을 변경하시겠습니까?");
+          if (policyConfirmModal) {
+            policyConfirmModal.hidden = false;
+          }
+        }
+
+        function openRateSaveConfirm(roomName, weekdayBaseRate) {
+          pendingPolicyToggle = null;
+          pendingRateSave = {
+            roomName: roomName,
+            weekdayBaseRate: weekdayBaseRate,
+          };
+          setPolicyConfirmTitle("변경 사항을 저장하시겠습니까?");
+          if (policyConfirmModal) {
+            policyConfirmModal.hidden = false;
+          }
+        }
+
+        function setPolicyConfirmTitle(text) {
+          var title = document.getElementById("admin-policy-confirm-title");
+          if (title) {
+            title.textContent = text || "";
+          }
+        }
+
+        function closePolicyConfirm() {
+          pendingPolicyToggle = null;
+          pendingRateSave = null;
+          if (policyConfirmModal) {
+            policyConfirmModal.hidden = true;
+          }
+        }
+
+        function savePolicyToggle() {
+          if (!pendingPolicyToggle && !pendingRateSave) {
+            return;
+          }
+          var nextToggle = pendingPolicyToggle;
+          var nextRate = pendingRateSave;
+          if (policyConfirmSaveBtn) {
+            policyConfirmSaveBtn.disabled = true;
+          }
+          var savePromise = nextToggle
+            ? saveRoomRateToggle(nextToggle.roomName, nextToggle.isEnabled)
+            : saveRoomRateRow(nextRate.roomName, nextRate.weekdayBaseRate);
+          savePromise
+            .then(function () {
+              closePolicyConfirm();
+            })
+            .catch(function (err) {
+              showMessage((err && err.message) || "저장 실패");
+            })
+            .finally(function () {
+              if (policyConfirmSaveBtn) {
+                policyConfirmSaveBtn.disabled = false;
+              }
             });
         }
 
@@ -2318,28 +2996,39 @@
           if (!roomRateBody) return;
           roomRateBody.innerHTML = "";
           if (!roomRateRows.length) {
-            var emptyTr = document.createElement("tr");
-            var emptyTd = document.createElement("td");
-            emptyTd.colSpan = 3;
-            emptyTd.textContent = "객실 요금 데이터가 없습니다.";
-            emptyTr.appendChild(emptyTd);
-            roomRateBody.appendChild(emptyTr);
+            roomRateBody.innerHTML =
+              "<p class='admin-sales-pending'>객실 요금 데이터가 없습니다.</p>";
           } else {
+            var weekendCharge = getWeekendChargeAmount();
             roomRateRows.forEach(function (row) {
-              var tr = document.createElement("tr");
-              tr.innerHTML =
-                "<td class='admin-room-name-cell'>" +
+              var weekdayRate = Number(row.weekdayBaseRate || 0);
+              var weekendRate = weekdayRate + weekendCharge;
+              var card = document.createElement("article");
+              card.className = "admin-room-rate-card";
+              card.innerHTML =
+                "<div class='admin-room-rate-card__room'>" +
+                "<span>" +
                 escapeHtml(row.roomName || "—") +
-                "</td>" +
-                "<td><input class='admin-room-status-input admin-room-rate-input' data-room-name='" +
+                "</span>" +
+                "</div>" +
+                "<label class='admin-room-rate-field'>" +
+                "<span>평일 기본 요금</span>" +
+                "<input class='admin-room-status-input admin-room-rate-input' data-room-name='" +
                 escapeHtml(row.roomName || "") +
                 "' type='number' min='0' step='1000' value='" +
-                String(Number(row.weekdayBaseRate || 0)) +
-                "' /></td>" +
-                "<td><button type='button' class='admin-confirm-btn admin-room-rate-save-btn' data-room-name='" +
+                String(weekdayRate) +
+                "' />" +
+                "</label>" +
+                "<div class='admin-room-rate-field is-readonly'>" +
+                "<span>주말 기본 요금</span>" +
+                "<strong>" +
+                formatKRW(weekendRate) +
+                "</strong>" +
+                "</div>" +
+                "<button type='button' class='btn reserve-btn confirm-pay-submit reserveinfo-submit-btn admin-room-rate-save-btn' data-room-name='" +
                 escapeHtml(row.roomName || "") +
-                "'>저장</button></td>";
-              roomRateBody.appendChild(tr);
+                "'>저장</button>";
+              roomRateBody.appendChild(card);
             });
             attachRateSaveBtns(roomRateBody);
           }
@@ -2347,28 +3036,50 @@
           if (!roomChargeBody) return;
           roomChargeBody.innerHTML = "";
           if (!roomChargeRows.length) {
-            var cEmptyTr = document.createElement("tr");
-            var cEmptyTd = document.createElement("td");
-            cEmptyTd.colSpan = 3;
-            cEmptyTd.textContent = "요금 정책 데이터가 없습니다.";
-            cEmptyTr.appendChild(cEmptyTd);
-            roomChargeBody.appendChild(cEmptyTr);
+            roomChargeBody.innerHTML =
+              "<p class='admin-sales-pending'>요금 정책 데이터가 없습니다.</p>";
           } else {
             roomChargeRows.forEach(function (row) {
               var meta = CHARGE_LABELS[row.roomName] || {
+                eyebrow: "POLICY",
                 label: row.roomName,
+                desc: "",
                 unit: "원",
               };
               var step = row.roomName === "promotion" ? "1" : "1000";
               var maxAttr = row.roomName === "promotion" ? " max='100'" : "";
-              var tr = document.createElement("tr");
-              tr.innerHTML =
-                "<td class='admin-room-name-cell'>" +
+              var isEnabled = row.isEnabled !== false;
+              var card = document.createElement("article");
+              card.className =
+                "admin-room-policy-card" + (isEnabled ? "" : " is-disabled");
+              card.innerHTML =
+                "<div class='admin-room-policy-card__head'>" +
+                "<div>" +
+                "<p class='admin-dashboard-eyebrow'>" +
+                escapeHtml(meta.eyebrow) +
+                "</p>" +
+                "<h3>" +
                 escapeHtml(meta.label) +
-                " <span style='color:#888;font-size:0.82em'>(" +
+                "</h3>" +
+                "</div>" +
+                "<button type='button' class='admin-policy-toggle" +
+                (isEnabled ? " is-on" : "") +
+                "' data-policy-name='" +
+                escapeHtml(row.roomName) +
+                "' data-next-enabled='" +
+                String(!isEnabled) +
+                "' aria-pressed='" +
+                String(isEnabled) +
+                "'><span>" +
+                (isEnabled ? "ON" : "OFF") +
+                "</span><i></i></button>" +
+                "</div>" +
+                "<div class='admin-room-policy-card__body'>" +
+                "<label class='admin-room-rate-field'>" +
+                "<span>적용 값 (" +
                 escapeHtml(meta.unit) +
-                ")</span></td>" +
-                "<td><input class='admin-room-status-input admin-room-rate-input' data-room-name='" +
+                ")</span>" +
+                "<input class='admin-room-status-input admin-room-rate-input' data-room-name='" +
                 escapeHtml(row.roomName) +
                 "' type='number' min='0' step='" +
                 step +
@@ -2376,13 +3087,28 @@
                 maxAttr +
                 " value='" +
                 String(Number(row.weekdayBaseRate || 0)) +
-                "' /></td>" +
-                "<td><button type='button' class='admin-confirm-btn admin-room-rate-save-btn' data-room-name='" +
+                "' />" +
+                "</label>" +
+                "<button type='button' class='btn reserve-btn confirm-pay-submit reserveinfo-submit-btn admin-room-rate-save-btn' data-room-name='" +
                 escapeHtml(row.roomName) +
-                "'>저장</button></td>";
-              roomChargeBody.appendChild(tr);
+                "'>저장</button>" +
+                "<p>" +
+                escapeHtml(meta.desc) +
+                "</p>" +
+                "</div>";
+              roomChargeBody.appendChild(card);
             });
             attachRateSaveBtns(roomChargeBody);
+            roomChargeBody
+              .querySelectorAll(".admin-policy-toggle")
+              .forEach(function (btn) {
+                btn.addEventListener("click", function () {
+                  openPolicyConfirm(
+                    btn.getAttribute("data-policy-name") || "",
+                    btn.getAttribute("data-next-enabled") === "true",
+                  );
+                });
+              });
           }
         }
 
@@ -2492,6 +3218,34 @@
             });
         }
 
+        function saveRoomRateToggle(roomName, isEnabled) {
+          var auth = getAuthPayload();
+          return fetch(adminRoomRateApiUrl(), {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              action: "toggle",
+              roomName: roomName,
+              isEnabled: isEnabled === true,
+              adminId: auth.adminId,
+              adminPw: auth.adminPw,
+            }),
+          })
+            .then(function (r) {
+              return r.json().then(function (data) {
+                return { ok: r.ok, data: data || {} };
+              });
+            })
+            .then(function (result) {
+              if (!result.ok || !result.data.ok) {
+                throw new Error(result.data.error || "저장 실패");
+              }
+              splitRateRows(result.data.rows || []);
+              renderRoomRateTable();
+              showMessage("저장되었습니다.");
+            });
+        }
+
         function setActiveRoomManageTab(tab) {
           activeRoomManageTab = tab || "rate";
           roomManageTabBtns.forEach(function (btn) {
@@ -2567,10 +3321,48 @@
               btn.getAttribute("data-res-tab") === tab,
             );
           });
+          sortKey = "";
+          sortDirection = "";
           loadReservationList(tab).catch(function (err) {
             showMessage(
               (err && err.message) || "목록 조회 중 오류가 발생했습니다.",
             );
+          });
+        }
+
+        function loadReservationTabCounts() {
+          var auth = getAuthPayload();
+          var collectionMap = {
+            current: "reservations",
+            past: "past-reservations",
+            deleted: "delete-reservations",
+          };
+          return Promise.all(
+            ["current", "past", "deleted"].map(function (tab) {
+              return fetch(adminReservationsApiUrl(), {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  action: "list",
+                  collection: collectionMap[tab],
+                  adminId: auth.adminId,
+                  adminPw: auth.adminPw,
+                }),
+              })
+                .then(function (r) {
+                  return r.json().then(function (data) {
+                    return { ok: r.ok, data: data || {} };
+                  });
+                })
+                .then(function (result) {
+                  if (!result.ok || !result.data.ok) {
+                    throw new Error(result.data.error || "목록 조회 실패");
+                  }
+                  reservationTabCounts[tab] = (result.data.rows || []).length;
+                });
+            }),
+          ).then(function () {
+            renderReservationTabCounts();
           });
         }
 
@@ -2602,11 +3394,15 @@
                 throw new Error(result.data.error || "목록 조회 실패");
               }
               reservationListRows = result.data.rows || [];
+              reservationTabCounts[tab] = reservationListRows.length;
               if (result.data.calendarRows) {
                 latestCalendarRows = result.data.calendarRows;
                 latestRows = latestCalendarRows;
               }
               applyListView(true);
+              loadReservationTabCounts().catch(function () {
+                renderReservationTabCounts();
+              });
               showMessage("");
             });
         }
@@ -2631,16 +3427,7 @@
               if (!result.ok || !result.data.ok) {
                 throw new Error(result.data.error || "목록 조회 실패");
               }
-              if (loginSection) {
-                loginSection.hidden = true;
-              }
-              loginForm.hidden = true;
-              if (loginTitleEl) {
-                loginTitleEl.hidden = true;
-              }
-              if (categoryNav) {
-                categoryNav.hidden = false;
-              }
+              setLoggedInView();
               latestRows = result.data.rows || [];
               latestCalendarRows = result.data.calendarRows || latestRows || [];
               return loadRoomStatusRows()
@@ -2672,12 +3459,31 @@
         if (sortSelect) {
           sortSelect.addEventListener("change", function () {
             sortKey = sortSelect.value || "checkin";
+            sortDirection = "asc";
             if (tableSection.hidden) {
               return;
             }
             applyListView(true);
           });
         }
+
+        sortableHeadBtns.forEach(function (btn) {
+          btn.addEventListener("click", function () {
+            var nextKey = btn.getAttribute("data-admin-sort") || "";
+            if (sortKey !== nextKey) {
+              sortKey = nextKey;
+              sortDirection = "asc";
+            } else if (sortDirection === "asc") {
+              sortDirection = "desc";
+            } else if (sortDirection === "desc") {
+              sortKey = "";
+              sortDirection = "";
+            } else {
+              sortDirection = "asc";
+            }
+            applyListView(true);
+          });
+        });
 
         resTabBtns.forEach(function (btn) {
           btn.addEventListener("click", function () {
@@ -2716,6 +3522,14 @@
           });
         }
 
+        if (searchContactInput) {
+          searchContactInput.addEventListener("input", function () {
+            searchContactInput.value = formatAdminSearchContact(
+              searchContactInput.value,
+            );
+          });
+        }
+
         if (searchResetBtn) {
           searchResetBtn.addEventListener("click", function () {
             if (searchNameInput) {
@@ -2724,11 +3538,69 @@
             if (searchContactInput) {
               searchContactInput.value = "";
             }
+            if (searchReservationInput) {
+              searchReservationInput.value = "";
+            }
             if (!tableSection.hidden) {
               applyListView(true);
             }
           });
         }
+
+        if (tableBody) {
+          tableBody.addEventListener("click", function (e) {
+            var btn = e.target.closest && e.target.closest(".admin-request-icon-btn");
+            if (!btn) {
+              return;
+            }
+            openRequestModal(btn.getAttribute("data-reservation-number") || "");
+          });
+        }
+
+        if (requestSaveBtn) {
+          requestSaveBtn.addEventListener("click", saveRequestModal);
+        }
+
+        if (requestCancelBtn) {
+          requestCancelBtn.addEventListener("click", closeRequestModal);
+        }
+
+        if (requestModal) {
+          requestModal.addEventListener("click", function (e) {
+            if (e.target === requestModal) {
+              closeRequestModal();
+            }
+          });
+        }
+
+        if (policyConfirmSaveBtn) {
+          policyConfirmSaveBtn.addEventListener("click", savePolicyToggle);
+        }
+
+        if (policyConfirmCancelBtn) {
+          policyConfirmCancelBtn.addEventListener("click", closePolicyConfirm);
+        }
+
+        if (policyConfirmModal) {
+          policyConfirmModal.addEventListener("click", function (e) {
+            if (e.target === policyConfirmModal) {
+              closePolicyConfirm();
+            }
+          });
+        }
+
+        document.addEventListener("keydown", function (e) {
+          if (e.key === "Escape" && requestModal && !requestModal.hidden) {
+            closeRequestModal();
+          }
+          if (
+            e.key === "Escape" &&
+            policyConfirmModal &&
+            !policyConfirmModal.hidden
+          ) {
+            closePolicyConfirm();
+          }
+        });
 
         if (calendarPrevBtn) {
           calendarPrevBtn.addEventListener("click", function () {
@@ -2800,6 +3672,25 @@
             setActiveCategory(btn.getAttribute("data-admin-category"));
           });
         });
+
+        if (logoutBtn) {
+          logoutBtn.addEventListener("click", function () {
+            if (idInput) {
+              idInput.value = "";
+            }
+            if (pwInput) {
+              pwInput.value = "";
+            }
+            latestRows = [];
+            latestCalendarRows = [];
+            reservationListRows = [];
+            selectedCheckinDate = getTodayYmdKst();
+            selectedCalendarDate = getTodayYmdKst();
+            roomStatusWeekStart = getTodayYmdKst();
+            setLoggedOutView();
+            showMessage("로그아웃되었습니다.");
+          });
+        }
 
         if (isLayoutPreviewMode) {
           enableLayoutPreviewMode();

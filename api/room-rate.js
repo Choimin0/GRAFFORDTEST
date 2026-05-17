@@ -48,13 +48,18 @@ async function ensureRoomRateTable(pool) {
     `CREATE TABLE IF NOT EXISTS ${TABLE_NAME} (
       room_name VARCHAR(16) PRIMARY KEY,
       weekday_base_rate BIGINT NOT NULL CHECK (weekday_base_rate >= 0),
+      is_enabled BOOLEAN NOT NULL DEFAULT TRUE,
       updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
     )`,
   );
   await pool.query(
-    `INSERT INTO ${TABLE_NAME} (room_name, weekday_base_rate)
-     VALUES ('G1', 250000), ('G2', 250000), ('G3', 300000), ('G4', 350000),
-            ('weekend-charge', 20000), ('consecutive-sale', 20000), ('promotion', 0)
+    `ALTER TABLE ${TABLE_NAME}
+     ADD COLUMN IF NOT EXISTS is_enabled BOOLEAN NOT NULL DEFAULT TRUE`,
+  );
+  await pool.query(
+    `INSERT INTO ${TABLE_NAME} (room_name, weekday_base_rate, is_enabled)
+     VALUES ('G1', 250000, TRUE), ('G2', 250000, TRUE), ('G3', 300000, TRUE), ('G4', 350000, TRUE),
+            ('weekend-charge', 20000, TRUE), ('consecutive-sale', 20000, TRUE), ('promotion', 0, TRUE)
      ON CONFLICT (room_name) DO NOTHING`,
   );
 }
@@ -86,7 +91,7 @@ export default async function handler(req, res) {
   try {
     await ensureRoomRateTable(pool);
     var sel = await pool.query(
-      `SELECT room_name, weekday_base_rate
+      `SELECT room_name, weekday_base_rate, is_enabled
        FROM ${TABLE_NAME}
        ORDER BY room_name ASC`,
     );
@@ -100,7 +105,7 @@ export default async function handler(req, res) {
     (sel.rows || []).forEach(function (row) {
       var n = Number(row.weekday_base_rate || 0);
       if (chargeKeyMap[row.room_name] !== undefined) {
-        charges[chargeKeyMap[row.room_name]] = n;
+        charges[chargeKeyMap[row.room_name]] = row.is_enabled === false ? 0 : n;
       } else {
         rates[row.room_name] = n;
       }

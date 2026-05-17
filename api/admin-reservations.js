@@ -286,6 +286,42 @@ export default async function handler(req, res) {
   }
   clearLoginFailures(clientIp);
 
+  var action = String(body.action || "list").trim().toLowerCase();
+  if (action === "save-request") {
+    var requestReservationNumber = String(body.reservationNumber || "")
+      .trim()
+      .replace(/^GRF-/i, "");
+    var guestRequest = String(body.guestRequest || "");
+    if (!requestReservationNumber) {
+      json(res, 400, { ok: false, error: "reservationNumber가 필요합니다." });
+      return;
+    }
+    try {
+      var requestUpd = await pool.query(
+        `UPDATE ${BOOKING_TABLE}
+         SET guest_request = $2
+         WHERE reservation_number = $1
+         RETURNING reservation_number, guest_request`,
+        [requestReservationNumber, guestRequest],
+      );
+      if (!requestUpd.rows || !requestUpd.rows.length) {
+        json(res, 404, { ok: false, error: "대상 예약을 찾을 수 없습니다." });
+        return;
+      }
+      json(res, 200, {
+        ok: true,
+        reservationNumber: requestUpd.rows[0].reservation_number,
+        guestRequest: requestUpd.rows[0].guest_request || "",
+      });
+    } catch (e) {
+      json(res, 500, {
+        ok: false,
+        error: String((e && e.message) || e || "request update failed"),
+      });
+    }
+    return;
+  }
+
   var collection = String(body.collection || "reservations")
     .trim()
     .toLowerCase();

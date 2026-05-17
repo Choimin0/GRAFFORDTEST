@@ -2843,7 +2843,7 @@ section ul li {
 .admin-page-reset-btn.btn.reserve-btn,
 .reserve-cta.btn.reserve-btn,
 .confirm-pay-submit.btn.reserve-btn {
-  background-color: var(--grafford-beige2);
+  background-color: var(--stone-700);
   background-image: linear-gradient(
     110deg,
     transparent 0%,
@@ -10262,6 +10262,923 @@ main.content-section.confirm-page.admin-page {
   margin: 0.2rem 0;
   font-size: 0.88rem;
 }
+
+/* 관리자 로그인 이후 대시보드 */
+.admin-page {
+  --admin-sidebar-width: 178px;
+  --admin-topbar-height: 48px;
+}
+.admin-app-topbar[hidden],
+.admin-category-nav[hidden] {
+  display: none !important;
+}
+.admin-app-topbar {
+  position: fixed;
+  inset: 0 0 auto;
+  z-index: 1200;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  height: var(--admin-topbar-height);
+  padding: 0 var(--space-32);
+  background: var(--stone-800);
+  color: var(--stone-50);
+  box-sizing: border-box;
+}
+.admin-app-topbar__brand,
+.admin-app-topbar__meta {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-24);
+}
+.admin-app-topbar__logo,
+.admin-sidebar-logo {
+  color: var(--stone-50);
+  font-family: var(--font-family-nav-en);
+  font-size: 0.72rem;
+  letter-spacing: 0.42em;
+  text-decoration: none;
+}
+.admin-app-topbar__section,
+.admin-app-topbar__meta,
+.admin-logout-btn {
+  color: var(--stone-400);
+  font-family: var(--font-family-body-en);
+  font-size: 0.62rem;
+  letter-spacing: 0.32em;
+}
+.admin-logout-btn {
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  padding: var(--space-8) 0;
+}
+.admin-logout-btn:hover,
+.admin-logout-btn:focus-visible {
+  color: var(--gold-500);
+}
+.admin-page > .admin-category-nav {
+  position: fixed;
+  top: var(--admin-topbar-height);
+  left: 0;
+  bottom: 0;
+  z-index: 1100;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0;
+  width: var(--admin-sidebar-width);
+  max-width: none;
+  margin: 0;
+  padding: var(--space-32) 0;
+  background: var(--stone-900);
+  border-right: 1px solid color-mix(in srgb, var(--stone-50) 8%, transparent);
+  box-sizing: border-box;
+}
+.admin-sidebar-logo {
+  padding: 0 var(--space-24) var(--space-24);
+}
+.admin-sidebar-label {
+  margin: 0;
+  padding: 0 var(--space-24) var(--space-12);
+  color: color-mix(in srgb, var(--gold-500) 72%, var(--stone-400));
+  font-family: var(--font-family-body-en);
+  font-size: 0.52rem;
+  letter-spacing: 0.36em;
+}
+.admin-category-list {
+  display: grid;
+  gap: 0;
+}
+.admin-category-btn {
+  position: relative;
+  width: 100%;
+  padding: var(--space-16) var(--space-24);
+  color: var(--stone-400);
+  font-size: 0.82rem;
+  text-align: left;
+  letter-spacing: 0.08em;
+}
+.admin-category-btn::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 50%;
+  width: 2px;
+  height: 0;
+  background: var(--gold-500);
+  transform: translateY(-50%);
+  transition: height 0.35s ease;
+}
+.admin-category-btn:hover,
+.admin-category-btn:focus-visible,
+.admin-category-btn.is-active {
+  color: var(--stone-50);
+  text-decoration: none;
+}
+.admin-category-btn.is-active::before {
+  height: 100%;
+}
+.admin-page > .confirm-section:not(.admin-login-section) {
+  width: calc(100vw - var(--admin-sidebar-width));
+  max-width: none;
+  min-height: 100svh;
+  margin: 0 0 0 var(--admin-sidebar-width);
+  padding: calc(var(--admin-topbar-height) + var(--space-32)) var(--space-24)
+    var(--space-48);
+  background: var(--stone-100);
+  box-sizing: border-box;
+}
+.admin-dashboard-section {
+  color: var(--stone-800);
+}
+.admin-dashboard-band {
+  display: flex;
+  align-items: stretch;
+  justify-content: space-between;
+  gap: var(--space-32);
+  margin-bottom: var(--space-24);
+  padding: var(--space-24) var(--space-32);
+  background: var(--stone-50);
+  border: 1px solid var(--stone-200);
+}
+.admin-dashboard-eyebrow {
+  margin: 0;
+  color: var(--gold-500);
+  font-family: var(--font-family-body-en);
+  font-size: 0.58rem;
+  letter-spacing: 0.44em;
+}
+.admin-dashboard-title {
+  margin: var(--space-8) 0 0;
+  color: var(--stone-800);
+  font-size: 1.3rem;
+  font-weight: 400;
+  letter-spacing: 0.08em;
+}
+.admin-dashboard-metrics {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(7rem, 1fr));
+  gap: var(--space-16);
+  margin: 0;
+}
+.admin-dashboard-metric {
+  min-width: 0;
+  padding-left: var(--space-24);
+  border-left: 1px solid var(--stone-200);
+}
+.admin-dashboard-metric dt {
+  color: var(--stone-400);
+  font-size: 0.7rem;
+  letter-spacing: 0.14em;
+}
+.admin-dashboard-metric dd {
+  margin: var(--space-8) 0 0;
+  color: var(--stone-800);
+  font-family: var(--font-family-body-en);
+  font-size: 1.35rem;
+  line-height: 1;
+  letter-spacing: 0.08em;
+}
+.admin-dashboard-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(260px, 300px);
+  gap: var(--space-24);
+  align-items: start;
+}
+.admin-dashboard-main {
+  display: grid;
+  gap: var(--space-24);
+  min-width: 0;
+}
+.admin-status-card {
+  border: 1px solid var(--stone-200);
+  background: var(--stone-50);
+  padding: var(--space-24);
+}
+.admin-status-card-head {
+  margin-bottom: var(--space-16);
+}
+.admin-section-heading {
+  display: flex;
+  align-items: center;
+  gap: var(--space-16);
+  min-width: 0;
+  flex: 1;
+}
+.admin-section-heading__rule {
+  flex: 1;
+  height: 1px;
+  background: linear-gradient(
+    to right,
+    var(--gold-500),
+    color-mix(in srgb, var(--stone-200) 72%, transparent)
+  );
+}
+.admin-inline-date-nav,
+.admin-calendar-nav {
+  gap: var(--space-8);
+}
+.admin-page-btn {
+  border: 1px solid var(--stone-200);
+  background: transparent;
+  color: var(--stone-800);
+  cursor: pointer;
+}
+.admin-page-btn:hover,
+.admin-page-btn:focus-visible,
+.admin-page-btn.is-active {
+  border-color: var(--gold-500);
+  color: var(--gold-500);
+}
+.admin-inline-date-label,
+.admin-calendar-label {
+  color: var(--stone-800);
+  font-family: var(--font-family-body-en);
+  font-size: 0.78rem;
+  letter-spacing: 0.12em;
+}
+.admin-checkin-table th,
+.admin-checkin-table td,
+.admin-room-week-table th,
+.admin-room-week-table td {
+  border-color: var(--stone-200);
+}
+.admin-checkin-table th,
+.admin-room-week-table thead th,
+.admin-room-week-table tbody th {
+  color: var(--stone-400);
+  font-weight: 400;
+}
+.admin-room-week-table td {
+  height: 3rem;
+  background: var(--stone-50);
+}
+.admin-room-week-cell {
+  background: var(--stone-50);
+}
+.admin-calendar-wrap {
+  margin-top: 0;
+}
+.admin-calendar-weekdays {
+  margin-bottom: 0;
+  border: 1px solid var(--stone-200);
+  border-bottom: 0;
+  background: var(--stone-50);
+}
+.admin-calendar-weekdays span {
+  padding: var(--space-8);
+  color: var(--stone-400);
+  font-size: 0.7rem;
+}
+.admin-calendar-grid {
+  gap: 0;
+  border-top: 1px solid var(--stone-200);
+  border-left: 1px solid var(--stone-200);
+}
+.admin-calendar-cell {
+  min-height: 7.25rem;
+  border: 0;
+  border-right: 1px solid var(--stone-200);
+  border-bottom: 1px solid var(--stone-200);
+  background: var(--stone-50);
+  padding: var(--space-12);
+  cursor: pointer;
+  transition:
+    background 0.25s ease,
+    border-color 0.25s ease;
+}
+.admin-calendar-cell.is-empty {
+  border-right: 1px solid var(--stone-200);
+  border-bottom: 1px solid var(--stone-200);
+  background: color-mix(in srgb, var(--stone-100) 58%, var(--stone-50));
+}
+.admin-calendar-cell.has-reservation,
+.admin-calendar-cell.has-past {
+  background: var(--stone-50);
+  border-color: var(--stone-200);
+}
+.admin-calendar-cell:hover,
+.admin-calendar-cell:focus-visible,
+.admin-calendar-cell.is-selected {
+  outline: none;
+  background: color-mix(in srgb, var(--gold-500) 8%, var(--stone-50));
+}
+.admin-calendar-cell.is-selected {
+  box-shadow: inset 0 0 0 1px var(--gold-500);
+}
+.admin-calendar-day {
+  color: var(--stone-800);
+  font-family: var(--font-family-body-en);
+  font-size: 0.82rem;
+}
+.admin-calendar-room-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 3px;
+  margin-top: auto;
+}
+.admin-calendar-room-dot {
+  display: block;
+  min-height: 1.1rem;
+  background: var(--stone-100);
+  color: var(--stone-400);
+  font-family: var(--font-family-body-en);
+  font-size: 0.48rem;
+  line-height: 1.1rem;
+  text-align: center;
+  letter-spacing: 0.08em;
+}
+.admin-calendar-room-dot.is-occupied {
+  background: var(--gold-500);
+  color: var(--stone-50);
+}
+.admin-calendar-count {
+  margin-top: var(--space-8);
+  color: var(--stone-400);
+  font-family: var(--font-family-body-kr);
+  font-size: 0.68rem;
+  font-weight: 400;
+}
+.admin-dashboard-aside {
+  position: sticky;
+  top: calc(var(--admin-topbar-height) + var(--space-24));
+  margin-top: 0;
+  padding: var(--space-24);
+  border: 1px solid var(--stone-200);
+  background: var(--stone-50);
+}
+.admin-calendar-detail-title {
+  margin: var(--space-8) 0 var(--space-24);
+  color: var(--stone-800);
+  font-family: var(--font-family-body-en);
+  font-size: 1.1rem;
+  font-weight: 400;
+  letter-spacing: 0.08em;
+}
+.admin-calendar-detail-list {
+  gap: var(--space-12);
+}
+.admin-calendar-detail-item {
+  max-width: none;
+  padding: var(--space-16);
+  border: 1px solid var(--stone-200);
+  background: var(--stone-50);
+}
+.admin-calendar-detail-item.is-vacant {
+  border-style: dashed;
+  background: color-mix(in srgb, var(--stone-100) 48%, var(--stone-50));
+}
+.admin-calendar-detail-item__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-12);
+  margin-bottom: var(--space-12);
+  color: var(--stone-800);
+  font-family: var(--font-family-body-en);
+  letter-spacing: 0.12em;
+}
+.admin-room-state-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 3.4rem;
+  padding: 0.18rem 0.4rem;
+  border: 1px solid transparent;
+  color: var(--stone-50);
+  font-size: 0.62rem;
+  letter-spacing: 0.08em;
+}
+.admin-room-state-badge--checkin {
+  background: var(--gold-500);
+  color: var(--stone-50);
+  font-weight: 400;
+}
+.admin-room-state-badge--stay {
+  background: color-mix(in srgb, var(--gold-500) 50%, transparent);
+  color: var(--stone-50);
+  font-weight: 400;
+}
+.admin-room-state-badge--checkout {
+  background: color-mix(in srgb, var(--stone-red) 80%, transparent);
+  font-weight: 400;
+}
+.admin-room-state-badge--vacant {
+  border-color: var(--stone-200);
+  background: transparent;
+  color: var(--stone-400);
+}
+.admin-calendar-detail-kv {
+  display: grid;
+  gap: var(--space-8);
+  margin: 0;
+}
+.admin-calendar-detail-kv div {
+  display: grid;
+  grid-template-columns: 4.5rem minmax(0, 1fr);
+  gap: var(--space-12);
+  align-items: baseline;
+}
+.admin-calendar-detail-kv dt {
+  color: var(--stone-400);
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+}
+.admin-calendar-detail-kv dd {
+  margin: 0;
+  color: var(--stone-800);
+  font-size: 0.74rem;
+  line-height: 1.5;
+  word-break: break-all;
+}
+.admin-reservation-section .admin-res-tabs {
+  display: flex;
+  gap: var(--space-24);
+  margin: 0 0 var(--space-24);
+  padding: 0 var(--space-24);
+  border-bottom: 1px solid var(--stone-200);
+  background: var(--stone-50);
+}
+.admin-reservation-section .admin-res-tab-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-8);
+  min-height: 3.2rem;
+  border: 0;
+  border-bottom: 1px solid transparent;
+  background: transparent;
+  color: var(--stone-400);
+  font-size: 0.8rem;
+  font-weight: 400;
+  letter-spacing: 0.12em;
+  cursor: pointer;
+}
+.admin-reservation-section .admin-res-tab-btn span {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.25rem;
+  height: 1.25rem;
+  background: var(--stone-100);
+  color: var(--stone-400);
+  font-family: var(--font-family-body-en);
+  font-size: 0.62rem;
+  letter-spacing: 0.04em;
+}
+.admin-reservation-section .admin-res-tab-btn:hover,
+.admin-reservation-section .admin-res-tab-btn:focus-visible,
+.admin-reservation-section .admin-res-tab-btn.is-active {
+  color: var(--stone-800);
+  font-weight: 500;
+  border-bottom-color: var(--gold-500);
+}
+.admin-reservation-section .admin-res-tab-btn.is-active span {
+  background: color-mix(in srgb, var(--gold-500) 12%, var(--stone-50));
+  color: var(--gold-500);
+}
+.admin-reservation-section .admin-search-row {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) auto auto;
+  gap: var(--space-16);
+  align-items: end;
+  margin: 0 0 var(--space-24);
+  padding: var(--space-24);
+  border-bottom: 1px solid var(--stone-200);
+  background: var(--stone-50);
+}
+.admin-reservation-section .admin-search-row .confirm-label {
+  margin: 0;
+  color: var(--stone-400);
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+}
+.admin-reservation-section .admin-search-row input {
+  width: 100%;
+  margin-top: var(--space-8);
+  padding: 0.45rem 0 0.5rem;
+  border-radius: 0;
+  border-bottom: 1px solid var(--stone-200);
+  color: var(--stone-800);
+  font-size: 0.7rem;
+}
+.admin-reservation-section .admin-search-row input::placeholder {
+  color: var(--stone-200);
+}
+.admin-reservation-section .admin-search-btn,
+.admin-reservation-section .admin-page-reset-btn {
+  min-width: 5.5rem;
+  height: 2.45rem;
+  margin: 0;
+  padding: 0 var(--space-16);
+  letter-spacing: 0.12em;
+}
+.admin-reservation-section .admin-table-wrap {
+  margin-top: 0;
+  background: var(--stone-50);
+}
+.admin-reservation-table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+.admin-reservation-table th,
+.admin-reservation-table td {
+  border-bottom: 1px solid var(--stone-200);
+  padding: 0.85rem 0.75rem;
+  color: var(--stone-800);
+  font-size: 0.78rem;
+  text-align: left;
+  vertical-align: middle;
+}
+.admin-reservation-table th {
+  color: var(--stone-400);
+  font-size: 0.62rem;
+  font-weight: 400;
+  letter-spacing: 0.18em;
+  white-space: nowrap;
+}
+.admin-reservation-table th:nth-child(1) {
+  width: 12%;
+  padding: 0.85rem 0.75rem 0.75rem;
+}
+.admin-reservation-table th:nth-child(2) {
+  width: 7%;
+  padding: 0.85rem 0.75rem 0.75rem;
+}
+.admin-reservation-table th:nth-child(7) {
+  width: 6%;
+  padding: 0.85rem 0.75rem 0.75rem;
+}
+.admin-reservation-table th:nth-child(9) {
+  width: 11%;
+  padding: 0.85rem 0.75rem 0.75rem;
+}
+.admin-reservation-table th:nth-child(10) {
+  width: 5%;
+  padding: 0.85rem 0.75rem 0.75rem;
+}
+.admin-sortable-head {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  letter-spacing: inherit;
+  cursor: pointer;
+  padding: 0;
+  transition: color 0.25s ease;
+}
+.admin-sort-icons {
+  display: inline-flex;
+  flex-direction: column;
+  width: 0.65rem;
+  color: var(--gold-500);
+  font-family: var(--font-family-body-en);
+  font-size: 0.48rem;
+  line-height: 1;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+}
+.admin-sort-icon-up,
+.admin-sort-icon-down {
+  display: block;
+  height: 0.42rem;
+}
+.admin-sortable-head:hover,
+.admin-sortable-head:focus-visible,
+.admin-sortable-head.is-sorted {
+  color: var(--gold-500);
+  outline: none;
+}
+.admin-sortable-head:hover .admin-sort-icons,
+.admin-sortable-head:focus-visible .admin-sort-icons,
+.admin-sortable-head.is-sorted .admin-sort-icons {
+  opacity: 1;
+}
+.admin-sortable-head.is-asc .admin-sort-icon-down,
+.admin-sortable-head.is-desc .admin-sort-icon-up {
+  color: color-mix(in srgb, var(--stone-400) 45%, var(--stone-50));
+}
+.admin-sort-hover-cell {
+  transition:
+    color 0.25s ease,
+    background 0.25s ease;
+}
+.admin-reservation-table tbody tr:hover .admin-sort-hover-cell {
+  background: color-mix(in srgb, var(--gold-500) 8%, var(--stone-50));
+  color: var(--gold-500);
+}
+.admin-reservation-payment {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.18rem 0.45rem;
+  font-size: 0.66rem;
+  letter-spacing: 0.08em;
+}
+.admin-reservation-payment.is-card {
+  background: color-mix(in srgb, var(--gold-500) 12%, var(--stone-50));
+  color: var(--gold-500);
+}
+.admin-reservation-payment.is-naver {
+  background: color-mix(in srgb, var(--stone-green) 14%, var(--stone-50));
+  color: var(--stone-green);
+}
+.admin-reservation-payment.is-bank {
+  background: color-mix(in srgb, var(--stone-800) 9%, var(--stone-50));
+  color: var(--stone-800);
+}
+.admin-reservation-payment.is-unknown {
+  background: var(--stone-100);
+  color: var(--stone-400);
+}
+.admin-request-icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.8rem;
+  height: 1.8rem;
+  border: 1px solid var(--stone-200);
+  background: var(--stone-50);
+  color: var(--stone-400);
+  cursor: pointer;
+  transition:
+    border-color 0.2s ease,
+    color 0.2s ease,
+    background 0.2s ease;
+}
+.admin-request-icon-btn:hover,
+.admin-request-icon-btn:focus-visible,
+.admin-request-icon-btn.has-request {
+  border-color: var(--gold-500);
+  background: color-mix(in srgb, var(--gold-500) 8%, var(--stone-50));
+  color: var(--gold-500);
+  outline: none;
+}
+.col-request {
+  display: inline-flex;
+  width: 1rem;
+  height: 1rem;
+}
+.col-request svg {
+  width: 100%;
+  height: 100%;
+}
+.admin-request-modal[hidden] {
+  display: none !important;
+}
+.admin-request-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 1600;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-24);
+  background: color-mix(in srgb, var(--stone-900) 46%, transparent);
+  box-sizing: border-box;
+}
+.admin-request-modal__panel {
+  width: min(100%, 460px);
+  border: 1px solid var(--stone-200);
+  background: var(--stone-50);
+  padding: var(--space-32);
+  box-sizing: border-box;
+}
+.admin-request-modal__head h2 {
+  margin: var(--space-8) 0 0;
+  color: var(--stone-800);
+  font-size: 1.25rem;
+  font-weight: 400;
+  letter-spacing: 0.08em;
+}
+.admin-request-modal__head p:last-child {
+  margin: var(--space-8) 0 var(--space-24);
+  color: var(--stone-400);
+  font-size: 0.76rem;
+  letter-spacing: 0.08em;
+}
+.admin-request-modal__label {
+  display: grid;
+  gap: var(--space-8);
+  color: var(--stone-400);
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+}
+.admin-request-modal__label textarea {
+  width: 100%;
+  resize: vertical;
+  min-height: 9rem;
+  border: 1px solid var(--stone-200);
+  background: transparent;
+  color: var(--stone-800);
+  padding: var(--space-12);
+  font-family: var(--font-family-body-kr);
+  font-size: 0.88rem;
+  line-height: 1.7;
+  box-sizing: border-box;
+}
+.admin-request-modal__label textarea:focus,
+.admin-request-modal__label textarea:focus-visible {
+  outline: none;
+  border-color: var(--gold-500);
+}
+.admin-request-message {
+  margin: var(--space-12) 0 0;
+  color: var(--stone-red);
+  font-size: 0.78rem;
+}
+.admin-request-modal__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-8);
+  margin-top: var(--space-24);
+}
+.admin-request-cancel-btn {
+  min-width: 5rem;
+  margin: 0;
+  padding: 0.65rem 1rem;
+}
+.admin-request-save-btn.reserveinfo-submit-btn.confirm-pay-submit.btn.reserve-btn {
+  width: auto;
+  min-width: 5rem;
+  margin: 0;
+  padding: 0.65rem 1.2rem;
+}
+.admin-request-cancel-btn.btn.reserve-btn {
+  border: 1px solid var(--stone-200);
+  background: transparent;
+  color: var(--stone-400);
+}
+.admin-request-save-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+.admin-reservation-status {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.18rem 0.45rem;
+  background: var(--stone-100);
+  color: var(--stone-400);
+  font-size: 0.66rem;
+  letter-spacing: 0.08em;
+}
+.admin-reservation-status.is-confirmed {
+  background: color-mix(in srgb, var(--gold-500) 10%, var(--stone-50));
+  color: var(--gold-500);
+}
+.admin-reservation-status.is-pending {
+  background: var(--stone-100);
+  color: var(--stone-800);
+}
+.admin-reservation-status.is-past {
+  background: var(--stone-100);
+  color: var(--stone-400);
+}
+.admin-reservation-status.is-deleted {
+  background: color-mix(in srgb, var(--stone-red) 9%, var(--stone-50));
+  color: var(--stone-red);
+}
+.admin-pagination-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 4rem;
+  padding: 0 var(--space-24);
+  background: var(--stone-50);
+}
+.admin-pagination-summary {
+  margin: 0;
+  color: var(--stone-400);
+  font-family: var(--font-family-body-en);
+  font-size: 0.68rem;
+  letter-spacing: 0.16em;
+}
+.admin-pagination {
+  display: inline-flex;
+  align-items: center;
+  gap: 0;
+}
+.admin-pagination .admin-page-btn {
+  min-width: 2rem;
+  height: 2rem;
+  border-color: var(--stone-200);
+}
+.admin-pagination .admin-page-btn.is-active {
+  background: var(--stone-800);
+  border-color: var(--stone-800);
+  color: var(--stone-50);
+}
+.admin-pagination .admin-page-btn:disabled {
+  color: var(--stone-200);
+  cursor: not-allowed;
+}
+@media (max-width: 980px) {
+  .admin-page {
+    --admin-sidebar-width: 148px;
+    --admin-topbar-height: 56px;
+  }
+  .admin-app-topbar {
+    padding: 0 var(--space-16);
+  }
+  .admin-app-topbar__section {
+    display: none;
+  }
+  .admin-page > .admin-category-nav {
+    position: fixed;
+    top: var(--admin-topbar-height);
+    left: 0;
+    bottom: 0;
+    width: var(--admin-sidebar-width);
+    max-width: none;
+    margin: 0;
+    flex-direction: column;
+    overflow-x: hidden;
+    overflow-y: auto;
+    padding: var(--space-24) 0;
+  }
+  .admin-sidebar-logo,
+  .admin-sidebar-label {
+    display: block;
+  }
+  .admin-category-list {
+    display: grid;
+    min-width: 0;
+  }
+  .admin-category-btn {
+    width: 100%;
+    padding: var(--space-16);
+    white-space: nowrap;
+  }
+  .admin-category-btn::before {
+    top: 50%;
+    bottom: auto;
+    width: 2px;
+    height: 0;
+    transform: translateY(-50%);
+    opacity: 1;
+  }
+  .admin-category-btn.is-active::before {
+    height: 100%;
+  }
+  .admin-page > .confirm-section:not(.admin-login-section) {
+    width: calc(100vw - var(--admin-sidebar-width));
+    margin-left: var(--admin-sidebar-width);
+    padding-top: calc(var(--admin-topbar-height) + var(--space-24));
+  }
+  .admin-dashboard-band,
+  .admin-dashboard-layout {
+    grid-template-columns: 1fr;
+  }
+  .admin-dashboard-band {
+    display: grid;
+  }
+  .admin-dashboard-metrics {
+    grid-template-columns: 1fr;
+  }
+  .admin-dashboard-metric {
+    padding-left: 0;
+    padding-top: var(--space-12);
+    border-left: 0;
+    border-top: 1px solid var(--stone-200);
+  }
+  .admin-dashboard-aside {
+    position: static;
+  }
+  .admin-reservation-section .admin-search-row {
+    grid-template-columns: 1fr;
+  }
+}
+@media (max-width: 700px) {
+  .admin-status-card-head {
+    align-items: stretch;
+    flex-direction: column;
+  }
+  .admin-inline-date-nav,
+  .admin-calendar-nav {
+    width: 100%;
+    justify-content: space-between;
+  }
+  .admin-calendar-cell {
+    min-height: 5.8rem;
+    padding: var(--space-8);
+  }
+  .admin-calendar-room-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .admin-reservation-section .admin-res-tabs {
+    overflow-x: auto;
+    padding: 0 var(--space-16);
+  }
+  .admin-pagination-row {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: var(--space-12);
+    padding: var(--space-16);
+  }
+}
 .admin-table-wrap {
   margin-top: 1rem;
   overflow-x: auto;
@@ -10374,7 +11291,7 @@ main.content-section.confirm-page.admin-page {
   border-bottom: 1px solid var(--color-border-default);
   padding: 0.6rem 0.5rem;
   text-align: left;
-  font-size: 0.93rem;
+  font-size: 0.73rem;
 }
 .admin-room-manage-table {
   min-width: 700px;
@@ -10424,6 +11341,222 @@ main.content-section.confirm-page.admin-page {
 .admin-confirm-btn:disabled {
   background-color: var(--color-disabled-bg);
   cursor: not-allowed;
+}
+
+/* Room management rate tab */
+#admin-room-manage-section .admin-res-tabs {
+  display: flex;
+  gap: var(--space-24);
+  margin: 0 0 var(--space-24);
+  padding: 0 var(--space-24);
+  border-bottom: 1px solid var(--stone-200);
+  background: var(--stone-50);
+}
+#admin-room-manage-section .admin-res-tab-btn {
+  min-height: 3.2rem;
+  border: 0;
+  border-bottom: 1px solid transparent;
+  background: transparent;
+  color: var(--stone-400);
+  font-size: 0.82rem;
+  font-weight: 400;
+  letter-spacing: 0.12em;
+  cursor: pointer;
+}
+#admin-room-manage-section .admin-res-tab-btn:hover,
+#admin-room-manage-section .admin-res-tab-btn:focus-visible,
+#admin-room-manage-section .admin-res-tab-btn.is-active {
+  color: var(--stone-800);
+  border-bottom-color: var(--gold-500);
+}
+.admin-room-rate-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(280px, 360px);
+  gap: var(--space-24);
+  align-items: start;
+}
+.admin-room-rate-main,
+.admin-room-policy-card {
+  border: 1px solid var(--stone-200);
+  background: var(--stone-50);
+}
+.admin-room-rate-head {
+  padding: var(--space-24);
+  border-bottom: 1px solid var(--stone-200);
+}
+.admin-room-rate-head h2,
+.admin-room-policy-card h3 {
+  margin: var(--space-8) 0 0;
+  color: var(--stone-800);
+  font-size: 1.05rem;
+  font-weight: 400;
+  letter-spacing: 0.08em;
+}
+.admin-room-rate-head p:last-child {
+  margin: var(--space-8) 0 0;
+  color: var(--stone-400);
+  font-size: 0.78rem;
+  letter-spacing: 0.06em;
+}
+.admin-room-rate-list {
+  display: grid;
+}
+.admin-room-rate-card {
+  display: grid;
+  grid-template-columns: 5rem minmax(0, 1fr) minmax(0, 1fr) auto;
+  gap: var(--space-24);
+  align-items: center;
+  padding: var(--space-24);
+  border-bottom: 1px solid var(--stone-200);
+}
+.admin-room-rate-card:last-child {
+  border-bottom: 0;
+}
+.admin-room-rate-card__room span {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2rem;
+  height: 1.45rem;
+  background: var(--stone-100);
+  color: var(--gold-500);
+  font-family: var(--font-family-body-en);
+  font-size: 0.68rem;
+  letter-spacing: 0.12em;
+}
+.admin-room-rate-field {
+  display: grid;
+  gap: var(--space-8);
+  min-width: 0;
+  color: var(--stone-400);
+  font-size: 0.68rem;
+  letter-spacing: 0.14em;
+}
+.admin-room-rate-field input.admin-room-status-input {
+  min-height: auto;
+  resize: none;
+  border: 0;
+  border-bottom: 1px solid var(--stone-200);
+  padding: 0.35rem 0;
+  color: var(--stone-800);
+  font-size: 0.92rem;
+  text-align: right;
+}
+.admin-room-rate-field input.admin-room-status-input:focus,
+.admin-room-rate-field input.admin-room-status-input:focus-visible {
+  outline: none;
+  border-bottom-color: var(--gold-500);
+}
+.admin-room-rate-field.is-readonly strong {
+  min-height: 1.85rem;
+  border-bottom: 1px solid var(--stone-200);
+  color: var(--stone-800);
+  font-size: 0.92rem;
+  font-weight: 400;
+  line-height: 1.85rem;
+  text-align: right;
+}
+.admin-room-rate-card .admin-room-rate-save-btn.reserveinfo-submit-btn.confirm-pay-submit.btn.reserve-btn,
+.admin-room-policy-card .admin-room-rate-save-btn.reserveinfo-submit-btn.confirm-pay-submit.btn.reserve-btn {
+  width: auto;
+  min-width: 4.5rem;
+  height: 2.3rem;
+  margin: 0;
+  padding: 0 1rem;
+}
+.admin-room-policy-list {
+  display: grid;
+  gap: var(--space-24);
+}
+.admin-room-policy-card {
+  padding: var(--space-24);
+}
+.admin-room-policy-card__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-16);
+  padding-bottom: var(--space-16);
+  border-bottom: 1px solid var(--stone-200);
+}
+.admin-policy-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-8);
+  border: 0;
+  background: transparent;
+  color: var(--stone-400);
+  font-family: var(--font-family-body-en);
+  font-size: 0.58rem;
+  letter-spacing: 0.22em;
+  cursor: pointer;
+}
+.admin-policy-toggle i {
+  position: relative;
+  display: inline-flex;
+  width: 2rem;
+  height: 1rem;
+  border: 1px solid var(--stone-200);
+  background: var(--stone-100);
+}
+.admin-policy-toggle i::before {
+  content: "";
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 0.7rem;
+  height: 0.7rem;
+  background: var(--stone-200);
+  transition:
+    transform 0.2s ease,
+    background 0.2s ease;
+}
+.admin-policy-toggle.is-on {
+  color: var(--gold-500);
+}
+.admin-policy-toggle.is-on i {
+  border-color: var(--gold-500);
+  background: color-mix(in srgb, var(--gold-500) 16%, var(--stone-50));
+}
+.admin-policy-toggle.is-on i::before {
+  background: var(--gold-500);
+  transform: translateX(1rem);
+}
+.admin-room-policy-card__body {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: var(--space-16);
+  align-items: end;
+  padding-top: var(--space-16);
+}
+.admin-room-policy-card__body p {
+  grid-column: 1 / -1;
+  margin: 0;
+  padding: var(--space-12);
+  background: var(--stone-100);
+  color: var(--stone-400);
+  font-size: 0.72rem;
+  line-height: 1.7;
+  letter-spacing: 0.06em;
+}
+.admin-room-policy-card.is-disabled .admin-room-policy-card__body {
+  opacity: 0.35;
+}
+.admin-policy-confirm-panel .admin-request-modal__head h2 {
+  margin-bottom: var(--space-24);
+}
+.admin-policy-confirm-panel {
+  width: min(100%, 307px);
+  padding: var(--space-24);
+}
+@media (max-width: 980px) {
+  .admin-room-rate-layout {
+    grid-template-columns: 1fr;
+  }
+  .admin-room-rate-card {
+    grid-template-columns: 1fr;
+    gap: var(--space-16);
+  }
 }
 .admin-pagination {
   margin-top: 0.95rem;
