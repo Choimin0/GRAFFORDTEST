@@ -11726,6 +11726,47 @@ main.content-section.confirm-page.admin-page {
   padding-bottom: var(--space-12);
   border-bottom: 1px solid var(--stone-200);
 }
+.admin-sales-card-head--with-legend {
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: end;
+}
+.admin-sales-card-head--with-legend .admin-dashboard-eyebrow,
+.admin-sales-card-head--with-legend .admin-sales-chart-title {
+  grid-column: 1;
+}
+.admin-sales-density-legend {
+  grid-column: 2;
+  grid-row: 1 / span 2;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.22rem;
+  color: var(--stone-400);
+  font-family: var(--font-family-body-en);
+  font-size: 0.62rem;
+  letter-spacing: 0.16em;
+  white-space: nowrap;
+}
+.admin-sales-density-legend i {
+  display: block;
+  width: 1rem;
+  height: 0.68rem;
+  border: 1px solid var(--stone-200);
+}
+.admin-sales-density-legend .is-level-0 {
+  background: var(--stone-50);
+}
+.admin-sales-density-legend .is-level-1 {
+  background: color-mix(in srgb, var(--gold-500) 12%, var(--stone-50));
+}
+.admin-sales-density-legend .is-level-2 {
+  background: color-mix(in srgb, var(--gold-500) 24%, var(--stone-50));
+}
+.admin-sales-density-legend .is-level-3 {
+  background: color-mix(in srgb, var(--gold-500) 42%, var(--stone-50));
+}
+.admin-sales-density-legend .is-level-4 {
+  background: color-mix(in srgb, var(--gold-500) 64%, var(--stone-50));
+}
 .admin-sales-chart-title {
   margin: 0;
   color: var(--stone-800);
@@ -11852,35 +11893,38 @@ main.content-section.confirm-page.admin-page {
 }
 .admin-sales-cancel-body {
   display: grid;
-  gap: var(--space-12);
+  gap: var(--space-24);
 }
-.admin-sales-cancel-body div {
+.admin-sales-cancel-metrics {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: var(--space-8);
+  gap: var(--space-24);
 }
-.admin-sales-cancel-body div span {
-  display: block;
-  padding: var(--space-16);
+.admin-sales-cancel-metrics article,
+.admin-sales-cancel-body p {
+  margin: 0;
+  border: 1px solid var(--stone-200);
   background: var(--stone-100);
+}
+.admin-sales-cancel-metrics article {
+  padding: var(--space-24);
+}
+.admin-sales-cancel-metrics article span {
+  display: block;
   color: var(--stone-400);
-  font-size: 0.68rem;
-  letter-spacing: 0.08em;
+  font-size: 0.72rem;
+  letter-spacing: 0.18em;
 }
-.admin-sales-cancel-body div strong {
+.admin-sales-cancel-metrics article strong {
   display: block;
-  padding: var(--space-16);
-  background: var(--stone-100);
+  margin-top: var(--space-16);
   color: var(--stone-800);
   font-family: var(--font-family-body-en);
-  font-size: 1.25rem;
+  font-size: 1.55rem;
   font-weight: 400;
 }
 .admin-sales-cancel-body p {
-  margin: 0;
-  padding: var(--space-16);
-  border-left: 2px solid var(--stone-red);
-  background: color-mix(in srgb, var(--stone-red) 8%, var(--stone-50));
+  padding: var(--space-24);
 }
 .admin-sales-cancel-body p span,
 .admin-sales-cancel-body p strong {
@@ -11888,13 +11932,14 @@ main.content-section.confirm-page.admin-page {
 }
 .admin-sales-cancel-body p span {
   color: var(--stone-400);
-  font-size: 0.68rem;
+  font-size: 0.72rem;
+  letter-spacing: 0.18em;
 }
 .admin-sales-cancel-body p strong {
-  margin-top: var(--space-8);
+  margin-top: var(--space-16);
   color: var(--stone-red);
   font-family: var(--font-family-body-en);
-  font-size: 1.05rem;
+  font-size: 1.65rem;
   font-weight: 400;
 }
 .admin-sales-empty {

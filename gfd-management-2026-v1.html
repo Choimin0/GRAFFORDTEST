@@ -739,6 +739,9 @@
         var salesMonthLabelEl = document.getElementById(
           "admin-sales-month-label",
         );
+        var siteBusinessFooterMount = document.getElementById(
+          "site-business-footer-mount",
+        );
         var tableSection = bankSection;
         var tableBody = document.getElementById("admin-table-body");
         var roomManageBody = document.getElementById("admin-room-manage-body");
@@ -910,6 +913,9 @@
           if (loginTitleEl) {
             loginTitleEl.hidden = false;
           }
+          if (siteBusinessFooterMount) {
+            siteBusinessFooterMount.hidden = false;
+          }
         }
 
         function setLoggedInView() {
@@ -925,6 +931,9 @@
           }
           if (appTopbar) {
             appTopbar.hidden = false;
+          }
+          if (siteBusinessFooterMount) {
+            siteBusinessFooterMount.hidden = true;
           }
           renderAdminTopbarDate();
         }
@@ -1853,6 +1862,29 @@
             return amount.toLocaleString("ko-KR") + "원";
           }
 
+          function animateMonthlyNumber(el, target, opts) {
+            var options = opts || {};
+            var start = performance.now();
+            var duration = 1000;
+            var end = Number(target || 0);
+            function render(now) {
+              var progress = Math.min(1, (now - start) / duration);
+              var eased = 1 - Math.pow(1 - progress, 3);
+              var value = Math.round(end * eased);
+              if (options.type === "money") {
+                el.textContent = formatManWon(value);
+              } else if (options.suffix) {
+                el.textContent = value.toLocaleString("ko-KR") + options.suffix;
+              } else {
+                el.textContent = value.toLocaleString("ko-KR");
+              }
+              if (progress < 1) {
+                requestAnimationFrame(render);
+              }
+            }
+            requestAnimationFrame(render);
+          }
+
           function makeCardTitle(eyebrow, title) {
             var head = document.createElement("div");
             head.className = "admin-sales-card-head";
@@ -1867,6 +1899,25 @@
             return head;
           }
 
+          function appendDensityLegend(head) {
+            if (!head) return;
+            head.className += " admin-sales-card-head--with-legend";
+            var legend = document.createElement("div");
+            legend.className = "admin-sales-density-legend";
+            var min = document.createElement("span");
+            min.textContent = "MIN";
+            var max = document.createElement("span");
+            max.textContent = "MAX";
+            legend.appendChild(min);
+            for (var i = 0; i < 5; i++) {
+              var swatch = document.createElement("i");
+              swatch.className = "is-level-" + i;
+              legend.appendChild(swatch);
+            }
+            legend.appendChild(max);
+            head.appendChild(legend);
+          }
+
           function makeMetric(item, index) {
             var card = document.createElement("div");
             card.className = "admin-sales-stat-card";
@@ -1878,13 +1929,14 @@
             label.textContent = item.label;
             var num = document.createElement("strong");
             num.className = "admin-sales-stat-num";
-            num.textContent = item.value;
+            num.textContent = item.type === "money" ? "0원" : "0";
             var sub = document.createElement("span");
             sub.className = "admin-sales-stat-sub";
             sub.textContent = item.sub || "";
             card.appendChild(label);
             card.appendChild(num);
             card.appendChild(sub);
+            animateMonthlyNumber(num, item.rawValue, item);
             return card;
           }
 
@@ -1893,27 +1945,32 @@
           [
             {
               label: "월 매출",
-              value: formatManWon(totalRevenue),
+              rawValue: totalRevenue,
+              type: "money",
               sub: "총 매출 " + formatKRW(totalRevenue),
             },
             {
               label: "예약 건수",
-              value: reservationCount + "건",
+              rawValue: reservationCount,
+              suffix: "건",
               sub: "선택 월 기준",
             },
             {
               label: "객실 점유율",
-              value: occupancyRate + "%",
+              rawValue: occupancyRate,
+              suffix: "%",
               sub: occupiedRoomNights + " / " + maxRoomNights + " room nights",
             },
             {
               label: "취소 건수",
-              value: cancelCount + "건",
+              rawValue: cancelCount,
+              suffix: "건",
               sub: "취소율 " + cancellationRate + "%",
             },
             {
               label: "평균 객단가",
-              value: formatManWon(averageRevenue),
+              rawValue: averageRevenue,
+              type: "money",
               sub: "예약 1건 평균",
             },
           ].forEach(function (item, index) {
@@ -1975,7 +2032,9 @@
           function makeHeatmapCard(title) {
             var wrap = document.createElement("section");
             wrap.className = "admin-sales-chart-wrap admin-sales-card--wide";
-            wrap.appendChild(makeCardTitle("MONTHLY HEATMAP", title));
+            var head = makeCardTitle("MONTHLY HEATMAP", title);
+            appendDensityLegend(head);
+            wrap.appendChild(head);
             var heatmapWrap = document.createElement("div");
             heatmapWrap.className = "admin-sales-heatmap-wrap";
             drawMonthlyOccupancyHeatmap(heatmapWrap, occupancyByDay);
@@ -2074,13 +2133,15 @@
             var body = document.createElement("div");
             body.className = "admin-sales-cancel-body";
             body.innerHTML =
-              "<div><span>취소 건수</span><strong>" +
+              "<div class='admin-sales-cancel-metrics'>" +
+              "<article><span>취소 건수</span><strong>" +
               cancelCount +
-              "건</strong></div>" +
-              "<div><span>취소율</span><strong>" +
+              "건</strong></article>" +
+              "<article><span>취소율</span><strong>" +
               cancellationRate +
-              "%</strong></div>" +
-              "<p><span>취소 매출</span><strong>" +
+              "%</strong></article>" +
+              "</div>" +
+              "<p><span>손실 추정액</span><strong>" +
               formatKRW(cancelRevenue) +
               "</strong></p>";
             card.appendChild(body);
