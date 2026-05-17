@@ -2000,8 +2000,47 @@
 
             function enhanceMobileReservationRoomLayout() {
               roomCopies.forEach(function (copy) {
+                enhanceRoomNoticeTable(copy);
                 enhanceMobileRoomSpec(copy);
                 enhanceMobileRoomAbout(copy);
+              });
+            }
+
+            function getNoticeLines(noticeTextEl) {
+              if (!noticeTextEl) {
+                return [];
+              }
+              return noticeTextEl.innerHTML
+                .split(/<br\s*\/?>/i)
+                .map(function (line) {
+                  return line
+                    .replace(/<[^>]*>/g, "")
+                    .replace(/^[▸◆◇•\-\s]+/, "")
+                    .trim();
+                })
+                .filter(Boolean);
+            }
+
+            function enhanceRoomNoticeTable(copy) {
+              var noticeTextEls = copy.querySelectorAll(".room-notice-panel__text");
+              noticeTextEls.forEach(function (noticeTextEl) {
+                if (noticeTextEl.classList.contains("is-table-enhanced")) {
+                  return;
+                }
+                var lines = getNoticeLines(noticeTextEl);
+                if (!lines.length) {
+                  return;
+                }
+                var list = document.createElement("ul");
+                list.className = "room-notice-table";
+                lines.forEach(function (line) {
+                  var item = document.createElement("li");
+                  item.textContent = line;
+                  list.appendChild(item);
+                });
+                noticeTextEl.textContent = "";
+                noticeTextEl.classList.add("is-table-enhanced");
+                noticeTextEl.appendChild(list);
               });
             }
 
@@ -2012,19 +2051,18 @@
                 return content;
               }
               var clonedGrid = sourceSection.querySelector(".room-spec-grid");
+              var clonedNoticeTable = sourceSection.querySelector(".room-notice-table");
               var clonedNotice = sourceSection.querySelector(".room-notice-panel__text");
               if (clonedGrid) {
                 content.appendChild(clonedGrid.cloneNode(true));
+              } else if (clonedNoticeTable) {
+                var mobileList = clonedNoticeTable.cloneNode(true);
+                mobileList.className = "reservation-mobile-notice-list";
+                content.appendChild(mobileList);
               } else if (clonedNotice) {
                 var list = document.createElement("ul");
                 list.className = "reservation-mobile-notice-list";
-                clonedNotice.innerHTML
-                  .split(/<br\s*\/?>/i)
-                  .map(function (line) {
-                    return line.replace(/<[^>]*>/g, "").replace(/^[▸◆◇•\-\s]+/, "").trim();
-                  })
-                  .filter(Boolean)
-                  .forEach(function (line) {
+                getNoticeLines(clonedNotice).forEach(function (line) {
                     var item = document.createElement("li");
                     item.textContent = line;
                     list.appendChild(item);
@@ -2442,14 +2480,9 @@
                 ) {
                   btn.classList.add("cal-soldout");
                   btn.textContent = "";
-                  var soldMark = document.createElement("span");
-                  soldMark.className = "cal-soldout-mark";
-                  soldMark.setAttribute("aria-hidden", "true");
-                  soldMark.textContent = "\u2013";
                   var soldDay = document.createElement("span");
                   soldDay.className = "cal-soldout-day";
                   soldDay.textContent = String(d);
-                  btn.appendChild(soldMark);
                   btn.appendChild(soldDay);
                 }
 

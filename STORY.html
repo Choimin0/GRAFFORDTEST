@@ -10,7 +10,7 @@
     <script src="js/mobile-nav.js" defer></script>
     <script src="js/site-language.js" defer></script>
   </head>
-  <body class="home-page page-hero-nav-sync">
+  <body class="home-page page-hero-nav-sync story-page">
     <div id="grafford-react-fade-root"></div>
     <nav class="site-nav top-right-nav nav-hero-sync-hidden">
       <a href="index.html" class="nav-logo" aria-label="홈으로 이동">
@@ -62,23 +62,27 @@
           <img src="images/story.jpeg" alt="" class="hero-slide is-active" />
           <div class="hero-overlay"></div>
         </div>
-        <header class="site-header hero-header">
-          <h1>STORY</h1>
+        <header class="site-header hero-header hero-header--story-copy">
+          <p class="story-hero-title">GRAFFORD · JEJU · STORY</p>
+          <h1 class="story-hero-main">STORY</h1>
+          <p class="story-hero-sub">
+            흔들림 없이 사람을 지지해 주는 땅,<br />
+            자연스럽게 이어지며 잠시 쉬어 갈 수 있는 여울길.
+          </p>
         </header>
         <button
           class="scroll-down-btn"
           id="scroll-down-btn"
           aria-label="다음 섹션으로 이동"
         >
-          <span></span>
+          <span class="story-scroll-line" aria-hidden="true"></span>
+          <span class="story-scroll-label">SCROLL</span>
         </button>
       </section>
 
       <main class="content-section fullpage-section" id="content">
         <section class="features features--story">
-          <article
-            class="feature feature-story-1 scroll-fade"
-          >
+          <article class="feature feature-story-1 scroll-fade">
             <div class="feature-media">
               <img
                 src="images/story.jpeg"
@@ -86,42 +90,62 @@
                 class="feature-image"
               />
             </div>
-            <div
-              class="feature-text"
-            >
-              <p
-                class="feature-body"
-              >
-                흔들림 없이 사람을 지지해 주는 땅, 자연스럽게 이어지며 잠시 쉬어
-                갈 수 있는 여울길.<br />
-                이 두 단어가 만난 그라포드는 땅의 묵직함과 여울의 부드러움을
-                동시에 품은 공간입니다.<br />
-                바쁜 일상 속에서 잠시 멈춰 쉴 수 있는 든든한 바탕. <br />
-                그라포드가 추구하는 가치입니다.
-              </p>
+            <div class="feature-text story-feature-copy">
+              <h2 class="story-feature-head payment-section-head">
+                <span class="payment-section-head__label">OUR ORIGIN</span>
+                <span
+                  class="payment-section-head__rule"
+                  aria-hidden="true"
+                ></span>
+              </h2>
+              <span class="story-feature-subrule" aria-hidden="true"></span>
+              <div class="story-feature-lines">
+                <p class="story-feature-title">
+                  땅과 여울이 만나는<br />
+                  그라포드의 시작
+                </p>
+                <p class="story-feature-main">
+                  흔들림 없이 사람을 지지해 주는 땅,<br />
+                  자연스럽게 이어지며 잠시 쉬어 갈 수 있는 여울길.<br />
+                  이 두 단어가 만난 그라포드는 땅의 묵직함과 여울의 부드러움을
+                  동시에 품은 공간입니다.
+                </p>
+                <p class="story-feature-sub">
+                  바쁜 일상 속에서 잠시 멈춰 쉴 수 있는 든든한 바탕.<br />
+                  그라포드가 추구하는 가치입니다.
+                </p>
+              </div>
             </div>
           </article>
-          <article
-            class="feature feature-story-2 scroll-fade"
-          >
-            <div
-              class="feature-text"
-            >
-              <p
-                class="feature-body"
-              >
-                GRAffORD는 로스터리 카페를 함께 하는 스테이입니다.<br />
-                우리가 추구하는 커피는 화려한 기술보다 불편함을 정제하는 과정에
-                집중합니다. <br />
-                혀끝을 찌르는 과한 산미, 입안에 남는 텁텁함, 마음을 조급하게
-                만드는 서두름.<br />
-                그라포드는 커피가 줄 수 있는 모든 불편한 감각들을 섬세하게
-                걸러내어, 오직 부드러운 몰입의 시간만을 드리기 위해 노력합니다.
-              </p>
+          <article class="feature feature-story-2 scroll-fade">
+            <div class="feature-text story-feature-copy">
+              <h2 class="story-feature-head payment-section-head">
+                <span class="payment-section-head__label">BRAND MOOD</span>
+                <span
+                  class="payment-section-head__rule"
+                  aria-hidden="true"
+                ></span>
+              </h2>
+              <span class="story-feature-subrule" aria-hidden="true"></span>
+              <div class="story-feature-lines">
+                <p class="story-feature-title">
+                  커피가 머무는<br />
+                  조용한 방식
+                </p>
+                <p class="story-feature-main">
+                  GRAffORD는 로스터리 카페를 함께 하는 스테이입니다.<br />
+                  우리가 추구하는 커피는 화려한 기술보다 불편함을 정제하는
+                  과정에 집중합니다.
+                </p>
+                <p class="story-feature-sub">
+                  혀끝을 찌르는 과한 산미, 입안에 남는 텁텁함, 마음을 조급하게
+                  만드는 서두름.<br />
+                  그라포드는 불편한 감각들을 섬세하게 걸러내어, 오직 부드러운
+                  몰입의 시간만을 드리기 위해 노력합니다.
+                </p>
+              </div>
             </div>
-            <div
-              class="feature-media feature-media--story-gallery"
-            >
+            <div class="feature-media feature-media--story-gallery">
               <div
                 class="room-image-slot room-image-slot--carousel"
                 id="story-cafe-gallery"
@@ -166,7 +190,6 @@
       <script>
         document.addEventListener("DOMContentLoaded", function () {
           const fadeTargets = document.querySelectorAll(".scroll-fade");
-          const scrollButton = document.getElementById("scroll-down-btn");
           const nextSection = document.getElementById("content");
 
           const observer = new IntersectionObserver(
@@ -185,14 +208,21 @@
             observer.observe(el);
           });
 
-          if (scrollButton && nextSection) {
-            scrollButton.addEventListener("click", function () {
-              nextSection.scrollIntoView({
+          document.querySelectorAll(".scroll-down-btn").forEach(function (btn) {
+            btn.addEventListener("click", function () {
+              var section = btn.closest(".lang-kr, .lang-en");
+              var target = section
+                ? section.querySelector(".content-section")
+                : nextSection;
+              if (!target) {
+                return;
+              }
+              target.scrollIntoView({
                 behavior: "smooth",
                 block: "start",
               });
             });
-          }
+          });
 
           var storyCafeImages = [
             "images/cafe01.jpg",
@@ -336,19 +366,23 @@
           <img src="images/story.jpeg" alt="" class="hero-slide is-active" />
           <div class="hero-overlay"></div>
         </div>
-        <header class="site-header hero-header">
-          <h1></h1>
+        <header class="site-header hero-header hero-header--story-copy">
+          <p class="story-hero-title">GRAFFORD · JEJU · STORY</p>
+          <h1 class="story-hero-main">STORY</h1>
+          <p class="story-hero-sub">
+            Ground that holds you steady,<br />
+            and a quiet ford where time can slow.
+          </p>
         </header>
         <button class="scroll-down-btn" aria-label="다음 섹션으로 이동">
-          <span></span>
+          <span class="story-scroll-line" aria-hidden="true"></span>
+          <span class="story-scroll-label">SCROLL</span>
         </button>
       </section>
 
       <main class="content-section fullpage-section">
         <section class="features features--story">
-          <article
-            class="feature feature-story-1 scroll-fade"
-          >
+          <article class="feature feature-story-1 scroll-fade">
             <div class="feature-media">
               <img
                 src="images/story.jpeg"
@@ -356,53 +390,62 @@
                 class="feature-image"
               />
             </div>
-            <div
-              class="feature-text"
-            >
-              <h3
-                class="feature-heading"
-              ></h3>
-              <p
-                class="feature-body"
-              >
-                "Ground," an unwavering support beneath our feet; and "Ford," a
-                naturally flowing crossing where one can pause briefly.<br />
-                These two words unite to form Grafford, a space that embraces
-                both the firm weight of the land and the gentle flow of a
-                ford.<br />
-                In the bustle of everyday life, Grafford is the reliable base
-                that lets you stop and take a moment’s rest.<br />
-                This is the value that Grafford pursues.
-              </p>
+            <div class="feature-text story-feature-copy">
+              <h2 class="story-feature-head payment-section-head">
+                <span class="payment-section-head__label">OUR ORIGIN</span>
+                <span
+                  class="payment-section-head__rule"
+                  aria-hidden="true"
+                ></span>
+              </h2>
+              <span class="story-feature-subrule" aria-hidden="true"></span>
+              <div class="story-feature-lines">
+                <p class="story-feature-title">
+                  Where ground<br />
+                  meets the ford
+                </p>
+                <p class="story-feature-main">
+                  "Ground," an unwavering support beneath our feet;<br />
+                  and "Ford," a naturally flowing crossing where one can pause
+                  briefly.<br />
+                  These two words unite to form Grafford.
+                </p>
+                <p class="story-feature-sub">
+                  A space that embraces both the firm weight of the land and the
+                  gentle flow of a ford.<br />
+                  This is the value that Grafford pursues.
+                </p>
+              </div>
             </div>
           </article>
-          <article
-            class="feature feature-story-2 scroll-fade"
-          >
-            <div
-              class="feature-text"
-            >
-              <h3
-                class="feature-heading"
-              ></h3>
-              <p
-                class="feature-body"
-              >
-                Grafford is a stay that operates its own coffee roastery. The
-                coffee, beverages, and desserts we pursue focus on the process
-                of refining discomfort rather than showcasing flashy
-                techniques.<br />
-                The sharp acidity that pricks the tongue, the lingering
-                bitterness in the mouth, and the haste that stirs a sense of
-                urgency—Grafford delicately filters out all the uneasy
-                sensations that food and drink can bring.<br />
-                In their place, we strive to offer you only a time of smooth,
-                quiet immersion.
-              </p>
+          <article class="feature feature-story-2 scroll-fade">
+            <div class="feature-text story-feature-copy">
+              <h2 class="story-feature-head payment-section-head">
+                <span class="payment-section-head__label">OUR ORIGIN</span>
+                <span
+                  class="payment-section-head__rule"
+                  aria-hidden="true"
+                ></span>
+              </h2>
+              <span class="story-feature-subrule" aria-hidden="true"></span>
+              <div class="story-feature-lines">
+                <p class="story-feature-title">
+                  A quiet way<br />
+                  for coffee to stay
+                </p>
+                <p class="story-feature-main">
+                  Grafford is a stay that operates its own coffee roastery.<br />
+                  Our coffee focuses on refining discomfort rather than
+                  showcasing flashy techniques.
+                </p>
+                <p class="story-feature-sub">
+                  We delicately filter out sharp acidity, lingering bitterness,
+                  and the haste that stirs urgency.<br />
+                  In their place, we offer a time of smooth, quiet immersion.
+                </p>
+              </div>
             </div>
-            <div
-              class="feature-media feature-media--story-gallery"
-            >
+            <div class="feature-media feature-media--story-gallery">
               <div
                 class="room-image-slot room-image-slot--carousel"
                 aria-label="로스터리 카페 사진"
