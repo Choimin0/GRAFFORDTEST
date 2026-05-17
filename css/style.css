@@ -14,7 +14,7 @@
   --stone-green: #4a522a;
 
   /* Semantic colors (components use these, not raw hex) */
-  --color-text-primary: var(--stone-800);
+  --color-text-primary: var(--stone-700);
   --color-text-muted: var(--stone-400);
   --color-text-on-dark: var(--stone-50);
   --color-text-on-accent: var(--stone-50);
@@ -1237,7 +1237,8 @@ main {
   margin-right: calc(50% - 50vw);
 }
 
-.story-page .hero-header--story-copy {
+:is(.story-page, .ground-page, .facilities-page, .reservation-page)
+  .hero-header--story-copy {
   position: absolute;
   left: clamp(var(--space-24), 4.5vw, var(--space-80));
   bottom: clamp(var(--space-48), 9vh, 7rem);
@@ -1286,7 +1287,8 @@ main {
   letter-spacing: 0.06em;
 }
 
-.story-page .scroll-down-btn {
+:is(.story-page, .ground-page, .facilities-page, .reservation-page)
+  .scroll-down-btn {
   left: auto;
   right: clamp(var(--space-24), 4.5vw, var(--space-80));
   bottom: clamp(var(--space-24), 4vh, var(--space-40));
@@ -1301,13 +1303,17 @@ main {
   animation: none;
 }
 
-.story-page .scroll-down-btn span {
+:is(.story-page, .ground-page, .facilities-page, .reservation-page)
+  .scroll-down-btn
+  span {
   margin: 0;
   border: 0;
   transform: none;
 }
 
-.story-page .scroll-down-btn .story-scroll-line {
+:is(.story-page, .ground-page, .facilities-page, .reservation-page)
+  .scroll-down-btn
+  .story-scroll-line {
   display: block;
   width: 1px;
   height: 40px;
@@ -1871,12 +1877,12 @@ main {
 
   .feature-index-about-title {
     margin: 0;
-    color: var(--stone-800);
+    color: var(--stone-700);
     font-family: var(--font-family-body-kr);
     font-size: clamp(1.75rem, 2.45vw, 2.75rem);
     font-weight: 400;
-    line-height: 1.42;
-    letter-spacing: 0.08em;
+    line-height: 1.45;
+    letter-spacing: 0.02em;
   }
 
   .feature-index-about-main.feature-body {
@@ -2325,6 +2331,70 @@ main {
   color: var(--color-text-primary);
 }
 
+.ground-section-label__pc {
+  display: none;
+}
+
+.ground-section-label__mobile {
+  display: inline;
+}
+
+@media (min-width: 768px) {
+  .ground-room-thumbs + .ground-mobile-section-head.payment-section-head,
+  .rooms-features > .ground-mobile-section-head.payment-section-head {
+    display: flex;
+    align-items: center;
+    gap: clamp(var(--space-16), 2vw, var(--space-24));
+    width: min(100% - (2 * var(--layout-margin-side-tablet)), 1440px);
+    margin: clamp(var(--space-48), 8vh, var(--space-80)) auto
+      clamp(var(--space-32), 5vh, var(--space-48));
+  }
+
+  .ground-room-thumbs
+    + .ground-mobile-section-head.payment-section-head::before,
+  .rooms-features > .ground-mobile-section-head.payment-section-head::before {
+    content: "";
+    flex: 1 1 0;
+    height: 1px;
+    min-width: 2rem;
+    background: var(--stone-200);
+  }
+
+  .ground-room-thumbs
+    + .ground-mobile-section-head.payment-section-head
+    .payment-section-head__label,
+  .rooms-features
+    > .ground-mobile-section-head.payment-section-head
+    .payment-section-head__label {
+    flex: 0 0 auto;
+    color: var(--gold-500);
+    font-family: var(--font-family-nav-en);
+    font-size: 0.58rem;
+    font-weight: 400;
+    letter-spacing: 0.42em;
+    line-height: 1.4;
+  }
+
+  .ground-section-label__pc {
+    display: inline;
+  }
+
+  .ground-section-label__mobile {
+    display: none;
+  }
+
+  .ground-room-thumbs
+    + .ground-mobile-section-head.payment-section-head
+    .payment-section-head__rule,
+  .rooms-features
+    > .ground-mobile-section-head.payment-section-head
+    .payment-section-head__rule {
+    flex: 1 1 0;
+    min-width: 2rem;
+    background: var(--stone-200);
+  }
+}
+
 .room-service-icons {
   display: flex;
   flex-wrap: wrap;
@@ -2409,7 +2479,7 @@ main {
 
 .room-intro-desc {
   margin: 0 0 0.85rem;
-  color: var(--stone-600);
+  color: var(--stone-700);
   font-weight: 400;
 }
 
@@ -2508,7 +2578,7 @@ main {
   .ground-room-thumbs ~ .content-section .feature-body.room-intro-layout {
     /*room meta grid*/
     --ground-room-stat-border: var(--stone-200);
-    --ground-room-stat-label-color: var(--stone-400);
+    --ground-room-stat-label-color: var(--stone-600);
     --ground-room-stat-label-font: var(--font-family-nav-en);
     --ground-room-stat-label-size: 0.62rem;
     --ground-room-stat-label-weight: 500;
@@ -2521,15 +2591,15 @@ main {
     --ground-room-stat-value-spacing: 0.04em;
     --ground-room-stat-value-line-height: 1.55;
     /*room intro desc (summary, detail)*/
-    --ground-room-intro-summary-color: var(--stone-700);
+    --ground-room-intro-summary-color: var(--stone-600);
     --ground-room-intro-summary-size: clamp(1.12rem, 2.5vw, 1.48rem);
     --ground-room-intro-summary-weight: 400;
-    --ground-room-intro-summary-spacing: 0.06em;
+    --ground-room-intro-summary-spacing: 0.04em;
     --ground-room-intro-summary-line-height: 1.65;
-    --ground-room-intro-detail-color: var(--stone-400);
+    --ground-room-intro-detail-color: var(--stone-500);
     --ground-room-intro-detail-size: clamp(0.94rem, 2vw, 1.08rem);
     --ground-room-intro-detail-weight: 400;
-    --ground-room-intro-detail-spacing: 0.06em;
+    --ground-room-intro-detail-spacing: 0.04em;
     --ground-room-intro-detail-line-height: 2;
     --ground-room-readmore-color: var(--gold-500);
     --ground-room-readmore-hover-color: var(--stone-600);
@@ -4639,7 +4709,7 @@ main.content-section:has(> .site-footer.site-business-footer) {
 
 .feature-text .room-meta-title,
 .feature-text .room-facility-name {
-  border-bottom-color: var(--grafford-mud);
+  border-bottom-color: var(--stone-200);
 }
 
 .reservation-pricing-bar {

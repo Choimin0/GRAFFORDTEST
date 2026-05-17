@@ -10,7 +10,7 @@
     <script src="js/mobile-nav.js" defer></script>
     <script src="js/site-language.js" defer></script>
   </head>
-  <body class="home-page page-hero-nav-sync">
+  <body class="home-page page-hero-nav-sync facilities-page">
     <div id="grafford-react-fade-root"></div>
     <nav class="site-nav top-right-nav nav-hero-sync-hidden">
       <a href="index.html" class="nav-logo" aria-label="홈으로 이동">
@@ -62,15 +62,21 @@
           <img src="images/space.jpeg" alt="" class="hero-slide is-active" />
           <div class="hero-overlay"></div>
         </div>
-        <header class="site-header hero-header">
-          <h1>FACILITIES</h1>
+        <header class="site-header hero-header hero-header--story-copy">
+          <p class="story-hero-title">GRAFFORD · JEJU · FACILITIES</p>
+          <h1 class="story-hero-main">FACILITIES</h1>
+          <p class="story-hero-sub">
+            머무는 시간에 깊이를 더하는 공간,<br />
+            그라포드의 시설을 소개합니다.
+          </p>
         </header>
         <button
           class="scroll-down-btn"
           id="scroll-down-btn"
           aria-label="다음 섹션으로 이동"
         >
-          <span></span>
+          <span class="story-scroll-line" aria-hidden="true"></span>
+          <span class="story-scroll-label">SCROLL</span>
         </button>
       </section>
 
@@ -178,7 +184,6 @@
       <script>
         document.addEventListener("DOMContentLoaded", function () {
           const fadeTargets = document.querySelectorAll(".scroll-fade");
-          const scrollButton = document.getElementById("scroll-down-btn");
           const nextSection = document.getElementById("content");
 
           const observer = new IntersectionObserver(
@@ -197,14 +202,21 @@
             observer.observe(el);
           });
 
-          if (scrollButton && nextSection) {
-            scrollButton.addEventListener("click", function () {
-              nextSection.scrollIntoView({
+          document.querySelectorAll(".scroll-down-btn").forEach(function (btn) {
+            btn.addEventListener("click", function () {
+              var section = btn.closest(".lang-kr, .lang-en");
+              var target = section
+                ? section.querySelector(".content-section")
+                : nextSection;
+              if (!target) {
+                return;
+              }
+              target.scrollIntoView({
                 behavior: "smooth",
                 block: "start",
               });
             });
-          }
+          });
         });
       </script>
       <script defer src="js/grafford-page-fade.js"></script>
@@ -235,11 +247,17 @@
           <img src="images/space.jpeg" alt="" class="hero-slide is-active" />
           <div class="hero-overlay"></div>
         </div>
-        <header class="site-header hero-header">
-          <h1>FACILITIES</h1>
+        <header class="site-header hero-header hero-header--story-copy">
+          <p class="story-hero-title">GRAFFORD · JEJU · FACILITIES</p>
+          <h1 class="story-hero-main">FACILITIES</h1>
+          <p class="story-hero-sub">
+            Spaces that add depth to your stay,<br />
+            designed for quiet recovery.
+          </p>
         </header>
         <button class="scroll-down-btn" aria-label="다음 섹션으로 이동">
-          <span></span>
+          <span class="story-scroll-line" aria-hidden="true"></span>
+          <span class="story-scroll-label">SCROLL</span>
         </button>
       </section>
 

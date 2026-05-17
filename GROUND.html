@@ -10,7 +10,7 @@
     <script src="js/mobile-nav.js" defer></script>
     <script src="js/site-language.js" defer></script>
   </head>
-  <body class="home-page page-hero-nav-sync">
+  <body class="home-page page-hero-nav-sync ground-page">
     <div id="grafford-react-fade-root"></div>
     <nav class="site-nav top-right-nav nav-hero-sync-hidden">
       <a href="index.html" class="nav-logo" aria-label="홈으로 이동">
@@ -62,15 +62,21 @@
           <img src="images/rooms.jpeg" alt="" class="hero-slide is-active" />
           <div class="hero-overlay"></div>
         </div>
-        <header class="site-header hero-header">
-          <h1>GROUND</h1>
+        <header class="site-header hero-header hero-header--story-copy">
+          <p class="story-hero-title">GRAFFORD · JEJU · GROUND</p>
+          <h1 class="story-hero-main">GROUND</h1>
+          <p class="story-hero-sub">
+            당신이 온전히 기댈 수 있는 대지,<br />
+            그라운드를 제공합니다.
+          </p>
         </header>
         <button
           class="scroll-down-btn"
           id="scroll-down-btn"
           aria-label="다음 섹션으로 이동"
         >
-          <span></span>
+          <span class="story-scroll-line" aria-hidden="true"></span>
+          <span class="story-scroll-label">SCROLL</span>
         </button>
       </section>
 
@@ -142,7 +148,10 @@
       </nav>
 
       <h2 class="payment-section-head ground-mobile-section-head">
-        <span class="payment-section-head__label">ROOM DETAILS</span>
+        <span class="payment-section-head__label ground-section-label">
+          <span class="ground-section-label__pc">GROUND 01</span>
+          <span class="ground-section-label__mobile">ROOM DETAILS</span>
+        </span>
         <span class="payment-section-head__rule" aria-hidden="true"></span>
       </h2>
 
@@ -630,7 +639,6 @@
       <script>
         document.addEventListener("DOMContentLoaded", function () {
           const fadeTargets = document.querySelectorAll(".scroll-fade");
-          const scrollButton = document.getElementById("scroll-down-btn");
           const nextSection = document.getElementById("rooms-bridge-copy");
 
           const observer = new IntersectionObserver(
@@ -649,14 +657,21 @@
             observer.observe(el);
           });
 
-          if (scrollButton && nextSection) {
-            scrollButton.addEventListener("click", function () {
-              nextSection.scrollIntoView({
+          document.querySelectorAll(".scroll-down-btn").forEach(function (btn) {
+            btn.addEventListener("click", function () {
+              var section = btn.closest(".lang-kr, .lang-en");
+              var target = section
+                ? section.querySelector(".room-bridge-copy")
+                : nextSection;
+              if (!target) {
+                return;
+              }
+              target.scrollIntoView({
                 behavior: "smooth",
                 block: "start",
               });
             });
-          }
+          });
 
           var roomCarouselImages = {
             G1: ["images/A00.jpg", "images/A01.jpg", "images/A02.jpg"],
@@ -1068,11 +1083,17 @@
           <img src="images/rooms.jpeg" alt="" class="hero-slide is-active" />
           <div class="hero-overlay"></div>
         </div>
-        <header class="site-header hero-header">
-          <h1>GROUND</h1>
+        <header class="site-header hero-header hero-header--story-copy">
+          <p class="story-hero-title">GRAFFORD · JEJU · GROUND</p>
+          <h1 class="story-hero-main">GROUND</h1>
+          <p class="story-hero-sub">
+            We provide the Ground,<br />
+            a steadfast earth where you can lean with trust.
+          </p>
         </header>
         <button class="scroll-down-btn" aria-label="다음 섹션으로 이동">
-          <span></span>
+          <span class="story-scroll-line" aria-hidden="true"></span>
+          <span class="story-scroll-label">SCROLL</span>
         </button>
       </section>
 
@@ -1143,7 +1164,10 @@
       </nav>
 
       <h2 class="payment-section-head ground-mobile-section-head">
-        <span class="payment-section-head__label">ROOM DETAILS</span>
+        <span class="payment-section-head__label ground-section-label">
+          <span class="ground-section-label__pc">GROUND 01</span>
+          <span class="ground-section-label__mobile">ROOM DETAILS</span>
+        </span>
         <span class="payment-section-head__rule" aria-hidden="true"></span>
       </h2>
 
