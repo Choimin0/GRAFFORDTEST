@@ -544,7 +544,7 @@
             </button>
             <button
               type="button"
-              class="btn reserve-btn confirm-pay-submit reserveinfo-submit-btn admin-request-save-btn"
+              class="btn reserve-btn confirm-pay-submit reserveinfo-submit-btn admin-save-btn admin-request-save-btn"
               id="admin-request-save"
             >
               저장
@@ -618,7 +618,10 @@
           class="admin-sales-panel"
           hidden
         >
-          <div id="admin-room-manage-body" class="admin-room-status-editor"></div>
+          <div
+            id="admin-room-manage-body"
+            class="admin-room-status-editor"
+          ></div>
         </div>
         <div
           id="admin-room-manage-block-panel"
@@ -654,7 +657,7 @@
             </button>
             <button
               type="button"
-              class="btn reserve-btn confirm-pay-submit reserveinfo-submit-btn admin-request-save-btn"
+              class="btn reserve-btn confirm-pay-submit reserveinfo-submit-btn admin-save-btn admin-request-save-btn"
               id="admin-policy-confirm-save"
             >
               저장
@@ -884,6 +887,8 @@
         var latestCalendarRows = [];
         var reservationListRows = [];
         var roomStatusManageRows = [];
+        var roomBlockRows = [];
+        var selectedBlockRooms = [];
         var roomRateRows = [];
         var roomChargeRows = [];
         var CHARGE_LABELS = {
@@ -921,6 +926,8 @@
         var pendingPolicyToggle = null;
         var pendingRateSave = null;
         var pendingRoomStatusSave = null;
+        var pendingRoomBlockSave = null;
+        var pendingRoomBlockRelease = null;
         var activeCategory = "bank";
         var roomManageTabsEl = document.getElementById(
           "admin-room-manage-tabs",
@@ -2878,8 +2885,16 @@
           ]);
           reservationListRows = latestRows.slice();
           setRoomStatusRows([
-            { roomName: "G1", statusType: "available", statusText: "정상 운영 중" },
-            { roomName: "G2", statusType: "available", statusText: "청소 완료" },
+            {
+              roomName: "G1",
+              statusType: "available",
+              statusText: "정상 운영 중",
+            },
+            {
+              roomName: "G2",
+              statusType: "available",
+              statusText: "청소 완료",
+            },
             { roomName: "G3", statusType: "repair", statusText: "보일러 수리" },
             { roomName: "G4", statusType: "repair", statusText: "" },
           ]);
@@ -3599,7 +3614,7 @@
               "</p>" +
               "</div>" +
               "<div class='admin-room-status-card__action'>" +
-              "<button type='button' class='admin-room-rate-save-btn reserveinfo-submit-btn confirm-pay-submit btn reserve-btn admin-room-save-btn' data-room-name='" +
+              "<button type='button' class='admin-save-btn admin-room-rate-save-btn reserveinfo-submit-btn confirm-pay-submit btn reserve-btn admin-room-save-btn' data-room-name='" +
               escapeHtml(roomName) +
               "'>저장</button>" +
               "</div>";
@@ -3631,6 +3646,17 @@
 
         function attachRateSaveBtns(tbody) {
           tbody
+            .querySelectorAll(".admin-room-rate-input[data-currency='krw']")
+            .forEach(function (input) {
+              input.addEventListener("focus", function () {
+                input.value = String(input.value || "").replace(/[^\d]/g, "");
+              });
+              input.addEventListener("blur", function () {
+                var amount = Number(String(input.value || "").replace(/[^\d]/g, ""));
+                input.value = formatKRW(Number.isFinite(amount) ? amount : 0);
+              });
+            });
+          tbody
             .querySelectorAll(".admin-room-rate-save-btn")
             .forEach(function (btn) {
               btn.addEventListener("click", function () {
@@ -3638,7 +3664,11 @@
                 var input = tbody.querySelector(
                   ".admin-room-rate-input[data-room-name='" + roomName + "']",
                 );
-                var val = input ? Number(input.value) : NaN;
+                var rawValue = input ? String(input.value || "") : "";
+                var val =
+                  input && input.getAttribute("data-currency") === "krw"
+                    ? Number(rawValue.replace(/[^\d]/g, ""))
+                    : Number(rawValue);
                 if (!Number.isFinite(val) || val < 0) {
                   showMessage("요금은 0 이상의 숫자로 입력해 주세요.");
                   return;
@@ -3669,11 +3699,14 @@
         function openPolicyConfirm(roomName, nextEnabled) {
           pendingRateSave = null;
           pendingRoomStatusSave = null;
+          pendingRoomBlockSave = null;
+          pendingRoomBlockRelease = null;
           pendingPolicyToggle = {
             roomName: roomName,
             isEnabled: nextEnabled === true,
           };
           setPolicyConfirmTitle("요금 정책을 변경하시겠습니까?");
+          setPolicyConfirmSaveLabel("저장");
           if (policyConfirmModal) {
             policyConfirmModal.hidden = false;
           }
@@ -3682,11 +3715,14 @@
         function openRateSaveConfirm(roomName, weekdayBaseRate) {
           pendingPolicyToggle = null;
           pendingRoomStatusSave = null;
+          pendingRoomBlockSave = null;
+          pendingRoomBlockRelease = null;
           pendingRateSave = {
             roomName: roomName,
             weekdayBaseRate: weekdayBaseRate,
           };
           setPolicyConfirmTitle("변경 사항을 저장하시겠습니까?");
+          setPolicyConfirmSaveLabel("저장");
           if (policyConfirmModal) {
             policyConfirmModal.hidden = false;
           }
@@ -3695,12 +3731,41 @@
         function openRoomStatusSaveConfirm(roomName, statusType, statusText) {
           pendingPolicyToggle = null;
           pendingRateSave = null;
+          pendingRoomBlockSave = null;
+          pendingRoomBlockRelease = null;
           pendingRoomStatusSave = {
             roomName: roomName,
             statusType: statusType === "repair" ? "repair" : "available",
             statusText: statusText,
           };
           setPolicyConfirmTitle("변경 사항을 저장하시겠습니까?");
+          setPolicyConfirmSaveLabel("저장");
+          if (policyConfirmModal) {
+            policyConfirmModal.hidden = false;
+          }
+        }
+
+        function openRoomBlockSaveConfirm(payload) {
+          pendingPolicyToggle = null;
+          pendingRateSave = null;
+          pendingRoomStatusSave = null;
+          pendingRoomBlockRelease = null;
+          pendingRoomBlockSave = payload;
+          setPolicyConfirmTitle("방막기를 적용하시겠습니까?");
+          setPolicyConfirmSaveLabel("저장");
+          if (policyConfirmModal) {
+            policyConfirmModal.hidden = false;
+          }
+        }
+
+        function openRoomBlockReleaseConfirm(blockId) {
+          pendingPolicyToggle = null;
+          pendingRateSave = null;
+          pendingRoomStatusSave = null;
+          pendingRoomBlockSave = null;
+          pendingRoomBlockRelease = { blockId: blockId };
+          setPolicyConfirmTitle("방막기를 해제하시겠습니까?");
+          setPolicyConfirmSaveLabel("해제");
           if (policyConfirmModal) {
             policyConfirmModal.hidden = false;
           }
@@ -3713,22 +3778,39 @@
           }
         }
 
+        function setPolicyConfirmSaveLabel(text) {
+          if (policyConfirmSaveBtn) {
+            policyConfirmSaveBtn.textContent = text || "저장";
+          }
+        }
+
         function closePolicyConfirm() {
           pendingPolicyToggle = null;
           pendingRateSave = null;
           pendingRoomStatusSave = null;
+          pendingRoomBlockSave = null;
+          pendingRoomBlockRelease = null;
+          setPolicyConfirmSaveLabel("저장");
           if (policyConfirmModal) {
             policyConfirmModal.hidden = true;
           }
         }
 
         function savePolicyToggle() {
-          if (!pendingPolicyToggle && !pendingRateSave && !pendingRoomStatusSave) {
+          if (
+            !pendingPolicyToggle &&
+            !pendingRateSave &&
+            !pendingRoomStatusSave &&
+            !pendingRoomBlockSave &&
+            !pendingRoomBlockRelease
+          ) {
             return;
           }
           var nextToggle = pendingPolicyToggle;
           var nextRate = pendingRateSave;
           var nextRoomStatus = pendingRoomStatusSave;
+          var nextBlockSave = pendingRoomBlockSave;
+          var nextBlockRelease = pendingRoomBlockRelease;
           if (policyConfirmSaveBtn) {
             policyConfirmSaveBtn.disabled = true;
           }
@@ -3736,11 +3818,15 @@
             ? saveRoomRateToggle(nextToggle.roomName, nextToggle.isEnabled)
             : nextRate
               ? saveRoomRateRow(nextRate.roomName, nextRate.weekdayBaseRate)
-              : saveRoomStatusManageRow(
-                  nextRoomStatus.roomName,
-                  nextRoomStatus.statusType,
-                  nextRoomStatus.statusText,
-                );
+              : nextRoomStatus
+                ? saveRoomStatusManageRow(
+                    nextRoomStatus.roomName,
+                    nextRoomStatus.statusType,
+                    nextRoomStatus.statusText,
+                  )
+                : nextBlockSave
+                  ? saveRoomBlockRows(nextBlockSave)
+                  : releaseRoomBlock(nextBlockRelease.blockId);
           savePromise
             .then(function () {
               closePolicyConfirm();
@@ -3778,8 +3864,8 @@
                 "<span>평일 기본 요금</span>" +
                 "<input class='admin-room-status-input admin-room-rate-input' data-room-name='" +
                 escapeHtml(row.roomName || "") +
-                "' type='number' min='0' step='1000' value='" +
-                String(weekdayRate) +
+                "' data-currency='krw' type='text' inputmode='numeric' value='" +
+                formatKRW(weekdayRate) +
                 "' />" +
                 "</label>" +
                 "<div class='admin-room-rate-field is-readonly'>" +
@@ -3788,7 +3874,7 @@
                 formatKRW(weekendRate) +
                 "</strong>" +
                 "</div>" +
-                "<button type='button' class='btn reserve-btn confirm-pay-submit reserveinfo-submit-btn admin-room-rate-save-btn' data-room-name='" +
+                "<button type='button' class='btn reserve-btn confirm-pay-submit reserveinfo-submit-btn admin-save-btn admin-room-rate-save-btn' data-room-name='" +
                 escapeHtml(row.roomName || "") +
                 "'>저장</button>";
               roomRateBody.appendChild(card);
@@ -3852,7 +3938,7 @@
                 String(Number(row.weekdayBaseRate || 0)) +
                 "' />" +
                 "</label>" +
-                "<button type='button' class='btn reserve-btn confirm-pay-submit reserveinfo-submit-btn admin-room-rate-save-btn' data-room-name='" +
+                "<button type='button' class='btn reserve-btn confirm-pay-submit reserveinfo-submit-btn admin-save-btn admin-room-rate-save-btn' data-room-name='" +
                 escapeHtml(row.roomName) +
                 "'>저장</button>" +
                 "<p>" +
@@ -3904,6 +3990,7 @@
                 throw new Error(result.data.error || "객실 상태 조회 실패");
               }
               var rows = result.data.rows || [];
+              roomBlockRows = result.data.blockRows || [];
               setRoomStatusRows(rows);
               return rows;
             });
@@ -3951,6 +4038,242 @@
               renderRoomRateTable();
               showMessage("");
             });
+        }
+
+        function renderRoomBlockPanel() {
+          if (!roomManageBlockPanel) {
+            return;
+          }
+          var today = getTodayYmdKst();
+          roomManageBlockPanel.innerHTML =
+            "<div class='admin-room-block-layout'>" +
+            "<section class='admin-room-block-card admin-room-block-form-card'>" +
+            "<div class='admin-room-rate-head'>" +
+            "<p class='admin-dashboard-eyebrow'>BLOCK DATES</p>" +
+            "<h2>방막기 설정</h2>" +
+            "</div>" +
+            "<div class='admin-room-block-form'>" +
+            "<fieldset class='admin-room-block-fieldset'>" +
+            "<legend>적용 객실 <span>*</span></legend>" +
+            "<div class='admin-room-block-room-grid'></div>" +
+            "<div class='admin-room-block-actions'><button type='button' data-block-room-all='select'>전체 선택</button><button type='button' data-block-room-all='clear'>전체 해제</button></div>" +
+            "</fieldset>" +
+            "<fieldset class='admin-room-block-fieldset'>" +
+            "<legend>막기 기간 <span>*</span></legend>" +
+            "<div class='admin-room-block-date-grid'>" +
+            "<label><span>시작일</span><input id='admin-block-start-date' type='date' min='" +
+            today +
+            "' /></label>" +
+            "<label><span>종료일</span><input id='admin-block-end-date' type='date' min='" +
+            today +
+            "' /></label>" +
+            "</div>" +
+            "</fieldset>" +
+            "<label class='admin-room-block-label'><span class='admin-room-block-label-title'>사유 <i>*</i></span><select id='admin-block-reason'><option value=''>사유를 선택하세요</option><option value='수리·점검'>수리·점검</option><option value='청소·정비'>청소·정비</option><option value='장기 미판매'>장기 미판매</option><option value='행사·촬영'>행사·촬영</option><option value='오너 직접 사용'>오너 직접 사용</option><option value='기타'>기타</option></select></label>" +
+            "<label class='admin-room-block-label'><span class='admin-room-block-label-title'>메모 (선택)</span><textarea id='admin-block-memo' rows='4'></textarea></label>" +
+            "<button type='button' id='admin-block-submit' class='btn reserve-btn confirm-pay-submit reserveinfo-submit-btn admin-save-btn' disabled>방막기 적용</button>" +
+            "</div>" +
+            "</section>" +
+            "<section class='admin-room-block-card admin-room-block-list-card'>" +
+            "<div class='admin-room-rate-head'>" +
+            "<div>" +
+            "<p class='admin-dashboard-eyebrow'>BLOCK LIST</p>" +
+            "<h2>설정된 방막기</h2>" +
+            "</div>" +
+            "<p class='admin-room-block-count'><span id='admin-block-count'>0</span>건</p>" +
+            "</div>" +
+            "<div id='admin-block-list' class='admin-room-block-list'></div>" +
+            "</section>" +
+            "</div>";
+
+          var roomGrid = roomManageBlockPanel.querySelector(
+            ".admin-room-block-room-grid",
+          );
+          getAdminRooms().forEach(function (room) {
+            var btn = document.createElement("button");
+            btn.type = "button";
+            btn.className = "admin-room-block-room-btn";
+            btn.dataset.room = room;
+            btn.textContent = room;
+            btn.addEventListener("click", function () {
+              var idx = selectedBlockRooms.indexOf(room);
+              if (idx >= 0) {
+                selectedBlockRooms.splice(idx, 1);
+              } else {
+                selectedBlockRooms.push(room);
+              }
+              renderBlockRoomButtons();
+              validateBlockForm();
+            });
+            roomGrid.appendChild(btn);
+          });
+
+          var startInput = roomManageBlockPanel.querySelector(
+            "#admin-block-start-date",
+          );
+          var endInput = roomManageBlockPanel.querySelector(
+            "#admin-block-end-date",
+          );
+          var reasonSelect = roomManageBlockPanel.querySelector(
+            "#admin-block-reason",
+          );
+          var memoInput =
+            roomManageBlockPanel.querySelector("#admin-block-memo");
+          var submitBtn = roomManageBlockPanel.querySelector(
+            "#admin-block-submit",
+          );
+          var listEl = roomManageBlockPanel.querySelector("#admin-block-list");
+          var countEl =
+            roomManageBlockPanel.querySelector("#admin-block-count");
+
+          function renderBlockRoomButtons() {
+            roomManageBlockPanel
+              .querySelectorAll(".admin-room-block-room-btn")
+              .forEach(function (btn) {
+                btn.classList.toggle(
+                  "is-selected",
+                  selectedBlockRooms.indexOf(btn.dataset.room) >= 0,
+                );
+              });
+          }
+
+          function validateBlockForm() {
+            var start = startInput ? startInput.value : "";
+            var end = endInput ? endInput.value : "";
+            var reason = reasonSelect ? reasonSelect.value : "";
+            var isValid =
+              selectedBlockRooms.length > 0 &&
+              start &&
+              end &&
+              start < end &&
+              reason;
+            if (submitBtn) {
+              submitBtn.disabled = !isValid;
+            }
+            if (endInput && start) {
+              endInput.min = start;
+            }
+          }
+
+          function groupBlockRows(rows) {
+            var map = {};
+            (rows || []).forEach(function (row) {
+              var id = String(row.id || "");
+              if (!id) return;
+              if (!map[id]) {
+                map[id] = {
+                  id: id,
+                  rooms: [],
+                  startDate: row.startDate,
+                  endDate: row.endDate,
+                  reason: row.reason,
+                  memo: row.memo,
+                };
+              }
+              map[id].rooms.push(row.roomName);
+            });
+            return Object.keys(map)
+              .map(function (id) {
+                map[id].rooms.sort();
+                return map[id];
+              })
+              .sort(function (a, b) {
+                return String(a.startDate).localeCompare(String(b.startDate));
+              });
+          }
+
+          function diffNights(start, end) {
+            var s = new Date(start);
+            var e = new Date(end);
+            if (isNaN(s.getTime()) || isNaN(e.getTime())) return 0;
+            return Math.max(0, Math.round((e - s) / 86400000));
+          }
+
+          var grouped = groupBlockRows(roomBlockRows);
+          if (countEl) {
+            countEl.textContent = String(grouped.length);
+          }
+          if (!grouped.length) {
+            listEl.innerHTML =
+              "<p class='admin-sales-pending'>설정된 방막기가 없습니다.</p>";
+          } else {
+            grouped.forEach(function (block) {
+              var item = document.createElement("article");
+              item.className = "admin-room-block-item";
+              item.innerHTML =
+                "<div class='admin-room-block-item__rooms'>" +
+                block.rooms
+                  .map(function (room) {
+                    return "<span>" + escapeHtml(room) + "</span>";
+                  })
+                  .join("") +
+                "</div>" +
+                "<div class='admin-room-block-item__body'>" +
+                "<strong>" +
+                escapeHtml(block.startDate) +
+                " ~ " +
+                escapeHtml(block.endDate) +
+                " (" +
+                diffNights(block.startDate, block.endDate) +
+                "박)</strong>" +
+                "<p>" +
+                escapeHtml(block.reason || "—") +
+                "</p>" +
+                (block.memo
+                  ? "<small>" + escapeHtml(block.memo) + "</small>"
+                  : "") +
+                "</div>" +
+                "<div class='admin-room-block-item__actions'><button type='button' data-block-release='" +
+                escapeHtml(block.id) +
+                "'>해제</button></div>";
+              listEl.appendChild(item);
+            });
+          }
+
+          roomManageBlockPanel
+            .querySelectorAll("[data-block-room-all]")
+            .forEach(function (btn) {
+              btn.addEventListener("click", function () {
+                selectedBlockRooms =
+                  btn.getAttribute("data-block-room-all") === "select"
+                    ? getAdminRooms().slice()
+                    : [];
+                renderBlockRoomButtons();
+                validateBlockForm();
+              });
+            });
+          [startInput, endInput, reasonSelect, memoInput].forEach(
+            function (el) {
+              if (el) {
+                el.addEventListener("input", validateBlockForm);
+                el.addEventListener("change", validateBlockForm);
+              }
+            },
+          );
+          if (submitBtn) {
+            submitBtn.addEventListener("click", function () {
+              validateBlockForm();
+              if (submitBtn.disabled) return;
+              openRoomBlockSaveConfirm({
+                rooms: selectedBlockRooms.slice(),
+                startDate: startInput.value,
+                endDate: endInput.value,
+                reason: reasonSelect.value,
+                memo: memoInput ? memoInput.value : "",
+              });
+            });
+          }
+          roomManageBlockPanel
+            .querySelectorAll("[data-block-release]")
+            .forEach(function (btn) {
+              btn.addEventListener("click", function () {
+                openRoomBlockReleaseConfirm(
+                  btn.getAttribute("data-block-release") || "",
+                );
+              });
+            });
+          renderBlockRoomButtons();
+          validateBlockForm();
         }
 
         function saveRoomRateRow(roomName, weekdayBaseRate) {
@@ -4043,6 +4366,41 @@
               );
             });
           }
+          if (activeRoomManageTab === "block") {
+            if (isLayoutPreviewMode) {
+              roomBlockRows = [
+                {
+                  id: "preview-block-1",
+                  roomName: "G1",
+                  startDate: "2026-05-19",
+                  endDate: "2026-05-21",
+                  reason: "수리·점검",
+                  memo: "욕실 배관 점검",
+                },
+                {
+                  id: "preview-block-2",
+                  roomName: "G4",
+                  startDate: "2026-07-01",
+                  endDate: "2026-12-31",
+                  reason: "장기 미판매",
+                  memo: "2026년 하반기 운영 계획",
+                },
+              ];
+              renderRoomBlockPanel();
+              return;
+            }
+            loadRoomStatusRows()
+              .then(function () {
+                renderRoomBlockPanel();
+                showMessage("");
+              })
+              .catch(function (err) {
+                showMessage(
+                  (err && err.message) ||
+                    "방막기 데이터를 조회 중 오류가 발생했습니다.",
+                );
+              });
+          }
         }
 
         function saveRoomStatusManageRow(roomName, statusType, statusText) {
@@ -4075,6 +4433,64 @@
                 renderTodayStatusPanels();
               }
               showMessage("저장되었습니다.");
+            });
+        }
+
+        function saveRoomBlockRows(payload) {
+          var auth = getAuthPayload();
+          return fetch(adminRoomStatusApiUrl(), {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              action: "block-save",
+              rooms: payload.rooms || [],
+              startDate: payload.startDate,
+              endDate: payload.endDate,
+              reason: payload.reason,
+              memo: payload.memo || "",
+              adminId: auth.adminId,
+              adminPw: auth.adminPw,
+            }),
+          })
+            .then(function (r) {
+              return r.json().then(function (data) {
+                return { ok: r.ok, data: data || {} };
+              });
+            })
+            .then(function (result) {
+              if (!result.ok || !result.data.ok) {
+                throw new Error(result.data.error || "방막기 적용 실패");
+              }
+              roomBlockRows = result.data.blockRows || [];
+              renderRoomBlockPanel();
+              showMessage("방막기가 적용되었습니다.");
+            });
+        }
+
+        function releaseRoomBlock(blockId) {
+          var auth = getAuthPayload();
+          return fetch(adminRoomStatusApiUrl(), {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              action: "block-release",
+              blockId: blockId,
+              adminId: auth.adminId,
+              adminPw: auth.adminPw,
+            }),
+          })
+            .then(function (r) {
+              return r.json().then(function (data) {
+                return { ok: r.ok, data: data || {} };
+              });
+            })
+            .then(function (result) {
+              if (!result.ok || !result.data.ok) {
+                throw new Error(result.data.error || "방막기 해제 실패");
+              }
+              roomBlockRows = result.data.blockRows || [];
+              renderRoomBlockPanel();
+              showMessage("방막기가 해제되었습니다.");
             });
         }
 

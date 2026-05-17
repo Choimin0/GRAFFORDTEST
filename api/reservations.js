@@ -18,6 +18,7 @@ const MAX_CANCEL_REASON = 1000;
 const MAX_EMAIL = 255;
 const DEFAULT_CANCEL_TOKEN_TTL_MS = 10 * 60 * 1000;
 const BOOKING_TABLE = "booking";
+const ROOM_STATUS_TABLE = '"room-status"';
 const ICAL_FETCH_TIMEOUT_MS = 8000;
 
 /** Neon/Vercel에서 오는 URL 이름이 달라도 사용 (TCP — Neon's HTTP 404 회피) */
@@ -366,19 +367,63 @@ function buildIcalCalendar(rows) {
     }
     var room = normalizeRoomType(row.room_type) || String(row.room_type || "");
     var number = String(row.reservation_number || "");
+    var isBlock = row.is_block === true || /^BLOCK-/.test(number);
     var uid = escapeIcsText(number + "-" + room + "@grafford.local");
     lines.push("BEGIN:VEVENT");
     lines.push("UID:" + uid);
     lines.push("DTSTAMP:" + now);
     lines.push("DTSTART;VALUE=DATE:" + ymdToIcsDate(ci));
     lines.push("DTEND;VALUE=DATE:" + ymdToIcsDate(co));
-    lines.push("SUMMARY:" + escapeIcsText("GRAFFORD " + room + " 예약"));
-    lines.push("DESCRIPTION:" + escapeIcsText("Reservation " + number));
+    lines.push(
+      "SUMMARY:" + escapeIcsText("GRAFFORD " + room + (isBlock ? " 방막기" : " 예약")),
+    );
+    lines.push(
+      "DESCRIPTION:" +
+        escapeIcsText(isBlock ? "Admin block " + number : "Reservation " + number),
+    );
     lines.push("END:VEVENT");
   });
 
   lines.push("END:VCALENDAR");
   return lines.join("\r\n") + "\r\n";
+}
+
+async function getRoomBlockRows(pool, roomFilter) {
+  try {
+    var params = [];
+    var where = "";
+    if (roomFilter) {
+      params.push(roomFilter);
+      where = "WHERE rs.room_name = $1";
+    }
+    var result = await pool.query(
+      `SELECT
+         rs.room_name,
+         item->>'id' AS block_id,
+         item->>'startDate' AS start_date,
+         item->>'endDate' AS end_date
+       FROM ${ROOM_STATUS_TABLE} rs,
+         jsonb_array_elements(COALESCE(rs.block_items, '[]'::jsonb)) AS item
+       ${where}
+       ORDER BY item->>'startDate'`,
+      params,
+    );
+    return (result.rows || []).filter(function (row) {
+      return row.start_date && row.end_date && row.start_date < row.end_date;
+    });
+  } catch (e) {
+    if (e && (e.code === "42P01" || e.code === "42703")) {
+      return [];
+    }
+    throw e;
+  }
+}
+
+async function hasRoomBlockOverlap(pool, roomName, checkIn, checkOut) {
+  var rows = await getRoomBlockRows(pool, roomName);
+  return rows.some(function (row) {
+    return String(row.start_date) < checkOut && String(row.end_date) > checkIn;
+  });
 }
 
 function todayYMDUtc() {
@@ -617,7 +662,17 @@ export default async function handler(req, res) {
              ORDER BY check_in_date`,
           );
         }
-        var ics = buildIcalCalendar(rowsForIcal.rows || []);
+        var blockRowsForIcal = await getRoomBlockRows(pool, roomFilter || "");
+        var blockEvents = blockRowsForIcal.map(function (row) {
+          return {
+            reservation_number: "BLOCK-" + row.block_id,
+            room_type: row.room_name,
+            check_in_date: row.start_date,
+            check_out_date: row.end_date,
+            is_block: true,
+          };
+        });
+        var ics = buildIcalCalendar((rowsForIcal.rows || []).concat(blockEvents));
         res.statusCode = 200;
         res.setHeader("Content-Type", "text/calendar; charset=utf-8");
         res.setHeader(
@@ -671,12 +726,26 @@ export default async function handler(req, res) {
         importedNights.forEach(function (n) {
           occupied[n] = true;
         });
+        var blockRows = await getRoomBlockRows(pool, roomForCal);
+        blockRows.forEach(function (row) {
+          expandOccupiedNights(String(row.start_date), String(row.end_date)).forEach(
+            function (n) {
+              occupied[n] = true;
+            },
+          );
+        });
         json(res, 200, {
           ok: true,
           room: roomForCal,
           occupiedNights: Object.keys(occupied).sort(),
           checkoutDays: Object.keys(checkouts).sort(),
           importedIcalNightsCount: importedNights.length,
+          blockedNightsCount: blockRows.reduce(function (sum, row) {
+            return (
+              sum +
+              expandOccupiedNights(String(row.start_date), String(row.end_date)).length
+            );
+          }, 0),
         });
       } catch (e) {
         console.error("reservations availability", e);
@@ -990,6 +1059,13 @@ export default async function handler(req, res) {
   try {
     await archivePastReservations(pool);
     await autoCancelUnpaidReservations(pool);
+    if (await hasRoomBlockOverlap(pool, roomType, checkIn, checkOut)) {
+      json(res, 409, {
+        ok: false,
+        error: "선택한 기간은 관리자 방막기로 예약할 수 없습니다.",
+      });
+      return;
+    }
     var result = await pool.query(insertSql, params);
     var row = result && result.rows && result.rows[0];
     if (!row) {
