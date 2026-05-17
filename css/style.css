@@ -11310,7 +11310,7 @@ main.content-section.confirm-page.admin-page {
   color: var(--grafford-mud2);
 }
 .admin-room-status-input {
-  width: 100%;
+  width: 70%;
   min-height: 72px;
   resize: vertical;
   border: 1px solid var(--color-border-default);
@@ -11322,6 +11322,133 @@ main.content-section.confirm-page.admin-page {
 }
 .admin-room-save-btn {
   min-width: 76px;
+}
+.admin-room-status-editor {
+  border: 1px solid var(--stone-200);
+  background: var(--stone-50);
+}
+.admin-room-status-card {
+  display: grid;
+  grid-template-columns: 8rem minmax(0, 1fr) auto;
+  align-items: stretch;
+  min-height: 7.2rem;
+  border-left: 2px solid var(--stone-400);
+  border-bottom: 1px solid var(--stone-200);
+}
+.admin-room-status-card:last-child {
+  border-bottom: 0;
+}
+.admin-room-status-card.is-available {
+  border-left-color: var(--stone-green);
+}
+.admin-room-status-card.is-repair {
+  border-left-color: var(--stone-red);
+}
+.admin-room-status-card.is-occupied {
+  border-left-color: var(--gold-500);
+}
+.admin-room-status-card__room {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-24) var(--space-16);
+  border-right: 1px solid var(--stone-200);
+}
+.admin-room-status-card__room span {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 3rem;
+  height: 2rem;
+  background: var(--stone-100);
+  color: var(--gold-500);
+  font-family: var(--font-family-body-en);
+  font-size: 0.9rem;
+  letter-spacing: 0.12em;
+}
+.admin-room-status-card__main {
+  display: grid;
+  gap: var(--space-16);
+  padding: var(--space-16);
+}
+.admin-room-status-select-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-12);
+}
+.admin-room-status-type-select {
+  min-width: 7rem;
+  border: 0;
+  border-bottom: 1px solid var(--stone-200);
+  border-radius: 0;
+  background: transparent;
+  color: var(--stone-800);
+  font-family: var(--font-family-body-kr);
+  font-size: 0.84rem;
+  padding: 0.35rem 1.5rem 0.35rem 0;
+}
+.admin-room-status-type-select:focus,
+.admin-room-status-type-select:focus-visible {
+  outline: none;
+  border-bottom-color: var(--gold-500);
+}
+.admin-room-status-type-select:disabled {
+  color: var(--stone-400);
+}
+.admin-room-status-badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 1.25rem;
+  padding: 0.14rem 0.5rem;
+  border: 1px solid var(--stone-200);
+  background: var(--stone-100);
+  color: var(--stone-400);
+  font-size: 0.62rem;
+  letter-spacing: 0.12em;
+}
+.admin-room-status-badge--available {
+  border-color: color-mix(in srgb, var(--stone-green) 26%, var(--stone-200));
+  background: color-mix(in srgb, var(--stone-green) 8%, var(--stone-50));
+  color: var(--stone-green);
+}
+.admin-room-status-badge--repair {
+  border-color: color-mix(in srgb, var(--stone-red) 28%, var(--stone-200));
+  background: color-mix(in srgb, var(--stone-red) 7%, var(--stone-50));
+  color: var(--stone-red);
+}
+.admin-room-status-badge--occupied {
+  border-color: color-mix(in srgb, var(--gold-500) 36%, var(--stone-200));
+  background: color-mix(in srgb, var(--gold-500) 10%, var(--stone-50));
+  color: var(--gold-500);
+}
+.admin-room-status-memo-input.admin-room-status-input {
+  min-height: 2.5rem;
+  resize: vertical;
+  border: 0;
+  border-bottom: 1px solid var(--stone-200);
+  padding: 0.35rem 0;
+  color: var(--stone-800);
+  font-size: 0.82rem;
+}
+.admin-room-status-memo-input.admin-room-status-input:focus,
+.admin-room-status-memo-input.admin-room-status-input:focus-visible {
+  outline: none;
+  border-bottom-color: var(--gold-500);
+}
+.admin-room-status-memo-input::placeholder {
+  color: var(--stone-200);
+}
+.admin-room-status-updated {
+  margin: 0;
+  color: var(--stone-400);
+  font-size: 0.66rem;
+  letter-spacing: 0.08em;
+}
+.admin-room-status-card__action {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-24);
 }
 .admin-status-pending {
   color: var(--color-status-neutral);
@@ -11456,8 +11583,10 @@ main.content-section.confirm-page.admin-page {
   line-height: 1.85rem;
   text-align: right;
 }
-.admin-room-rate-card .admin-room-rate-save-btn.reserveinfo-submit-btn.confirm-pay-submit.btn.reserve-btn,
-.admin-room-policy-card .admin-room-rate-save-btn.reserveinfo-submit-btn.confirm-pay-submit.btn.reserve-btn {
+.admin-room-rate-card
+  .admin-room-rate-save-btn.reserveinfo-submit-btn.confirm-pay-submit.btn.reserve-btn,
+.admin-room-policy-card
+  .admin-room-rate-save-btn.reserveinfo-submit-btn.confirm-pay-submit.btn.reserve-btn {
   width: auto;
   min-width: 4.5rem;
   height: 2.3rem;
@@ -11556,6 +11685,20 @@ main.content-section.confirm-page.admin-page {
   .admin-room-rate-card {
     grid-template-columns: 1fr;
     gap: var(--space-16);
+  }
+  .admin-room-status-card {
+    grid-template-columns: 1fr;
+  }
+  .admin-room-status-card__room,
+  .admin-room-status-card__action {
+    justify-content: flex-start;
+    border-right: 0;
+  }
+  .admin-room-status-card__room {
+    padding-bottom: 0;
+  }
+  .admin-room-status-card__action {
+    padding-top: 0;
   }
 }
 .admin-pagination {
@@ -11907,7 +12050,7 @@ main.content-section.confirm-page.admin-page {
   background: var(--stone-100);
 }
 .admin-sales-cancel-metrics article {
-  padding: var(--space-24);
+  padding: var(--space-16);
 }
 .admin-sales-cancel-metrics article span {
   display: block;
@@ -11924,7 +12067,7 @@ main.content-section.confirm-page.admin-page {
   font-weight: 400;
 }
 .admin-sales-cancel-body p {
-  padding: var(--space-24);
+  padding: var(--space-16);
 }
 .admin-sales-cancel-body p span,
 .admin-sales-cancel-body p strong {

@@ -139,12 +139,23 @@ async function ensureRoomStatusTable(pool) {
   await pool.query(
     `CREATE TABLE IF NOT EXISTS ${TABLE_NAME} (
       room_name VARCHAR(16) PRIMARY KEY,
-      status_text TEXT NOT NULL DEFAULT ''
+      status_text TEXT NOT NULL DEFAULT '',
+      status_type VARCHAR(20) NOT NULL DEFAULT 'available',
+      updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
     )`,
   );
   await pool.query(
-    `INSERT INTO ${TABLE_NAME} (room_name, status_text)
-     VALUES ('G1', ''), ('G2', ''), ('G3', ''), ('G4', '')
+    `ALTER TABLE ${TABLE_NAME}
+       ADD COLUMN IF NOT EXISTS status_type VARCHAR(20) NOT NULL DEFAULT 'available',
+       ADD COLUMN IF NOT EXISTS updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()`,
+  );
+  await pool.query(
+    `INSERT INTO ${TABLE_NAME} (room_name, status_text, status_type)
+     VALUES
+       ('G1', '', 'available'),
+       ('G2', '', 'available'),
+       ('G3', '', 'available'),
+       ('G4', '', 'available')
      ON CONFLICT (room_name) DO NOTHING`,
   );
 }
@@ -231,12 +242,18 @@ export default async function handler(req, res) {
       return;
     }
     var statusText = String(body.statusText || "");
+    var statusType =
+      String(body.statusType || "").trim().toLowerCase() === "repair"
+        ? "repair"
+        : "available";
     try {
       await pool.query(
         `UPDATE ${TABLE_NAME}
-         SET status_text = $2
+         SET status_text = $2,
+             status_type = $3,
+             updated_at = NOW()
          WHERE room_name = $1`,
-        [roomName, statusText],
+        [roomName, statusText, statusType],
       );
     } catch (e) {
       json(res, 500, {
@@ -249,7 +266,11 @@ export default async function handler(req, res) {
 
   try {
     var sel = await pool.query(
-      `SELECT room_name, status_text
+      `SELECT
+         room_name,
+         status_text,
+         status_type,
+         TO_CHAR(updated_at AT TIME ZONE 'Asia/Seoul', 'YYYY-MM-DD') AS updated_ymd
        FROM ${TABLE_NAME}
        ORDER BY room_name ASC`,
     );
@@ -259,6 +280,8 @@ export default async function handler(req, res) {
         return {
           roomName: row.room_name,
           statusText: row.status_text || "",
+          statusType: row.status_type === "repair" ? "repair" : "available",
+          updatedAt: row.updated_ymd || "",
         };
       }),
     });
