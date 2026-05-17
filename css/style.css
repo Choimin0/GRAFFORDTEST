@@ -757,11 +757,13 @@ main {
     object-fit: cover;
   }
 
-  /* PC: STORY 첫 feature와 동일 이미지 열 min-height + cover */
+  /* PC: STORY feature와 동일 — aspect-ratio 기준, min/max-height 미사용 */
   .features--index .feature-index-1 .feature-media,
-  .features--index .feature-index-2 .feature-media {
+  .features--index .feature-index-2 .feature-media,
+  .features--index .feature-index-4 .feature-media {
     align-self: stretch;
-    min-height: var(--feature-ref-media-min-h);
+    min-height: 0;
+    aspect-ratio: var(--feature-ref-media-ratio);
     padding: 0;
     box-sizing: border-box;
     display: flex;
@@ -769,28 +771,31 @@ main {
   }
 
   .features--index .feature-index-1 .feature-image,
-  .features--index .feature-index-2 .feature-image {
+  .features--index .feature-index-2 .feature-image,
+  .features--index .feature-index-4 .feature-image {
     flex: 1 1 auto;
     width: 100%;
     height: 100%;
-    min-height: var(--feature-ref-image-min-h);
-    max-height: var(--feature-viewport-max-block);
+    min-height: 0;
+    max-height: none;
     max-width: none;
     object-fit: cover;
   }
 
   .features--index .feature-index-3 .feature-media--index-gallery {
     align-self: stretch;
-    min-height: var(--feature-ref-media-min-h);
+    min-height: 0;
+    aspect-ratio: var(--feature-ref-media-ratio);
     display: flex;
     flex-direction: column;
+    padding: 0;
   }
 
   .features--index .feature-index-3 .room-image-slot {
     flex: 1 1 auto;
     display: flex;
     flex-direction: column;
-    min-height: var(--feature-ref-media-min-h);
+    min-height: 0;
     height: 100%;
   }
 
@@ -803,14 +808,14 @@ main {
 
   .features--index .feature-index-3 .gallery-main-wrap {
     flex: 1 1 auto;
-    min-height: var(--feature-ref-image-min-h);
+    min-height: 0;
   }
 
   .features--index .feature-index-3 .room-slot-main-img {
     width: 100% !important;
-    height: auto !important;
-    min-height: var(--feature-ref-image-min-h) !important;
-    max-height: var(--feature-viewport-max-block) !important;
+    height: 100% !important;
+    min-height: 0 !important;
+    max-height: none !important;
     object-fit: cover !important;
   }
 }
@@ -2361,7 +2366,11 @@ main {
     flex: 1 1 0;
     height: 1px;
     min-width: 2rem;
-    background: var(--stone-200);
+    background: linear-gradient(
+      90deg,
+      rgba(250, 249, 247, 0.12),
+      var(--gold-500)
+    );
   }
 
   .ground-room-thumbs
@@ -2395,7 +2404,11 @@ main {
     .payment-section-head__rule {
     flex: 1 1 0;
     min-width: 2rem;
-    background: var(--stone-200);
+    background: linear-gradient(
+      90deg,
+      var(--gold-500),
+      rgba(250, 249, 247, 0.12)
+    );
   }
 }
 
