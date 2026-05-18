@@ -46,11 +46,15 @@ function json(res, status, body) {
 async function ensureRoomRateTable(pool) {
   await pool.query(
     `CREATE TABLE IF NOT EXISTS ${TABLE_NAME} (
-      room_name VARCHAR(16) PRIMARY KEY,
+      room_name VARCHAR(32) PRIMARY KEY,
       weekday_base_rate BIGINT NOT NULL CHECK (weekday_base_rate >= 0),
       is_enabled BOOLEAN NOT NULL DEFAULT TRUE,
       updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
     )`,
+  );
+  await pool.query(
+    `ALTER TABLE ${TABLE_NAME}
+     ALTER COLUMN room_name TYPE VARCHAR(32)`,
   );
   await pool.query(
     `ALTER TABLE ${TABLE_NAME}
@@ -59,7 +63,8 @@ async function ensureRoomRateTable(pool) {
   await pool.query(
     `INSERT INTO ${TABLE_NAME} (room_name, weekday_base_rate, is_enabled)
      VALUES ('G1', 250000, TRUE), ('G2', 250000, TRUE), ('G3', 300000, TRUE), ('G4', 350000, TRUE),
-            ('weekend-charge', 20000, TRUE), ('consecutive-sale', 20000, TRUE), ('promotion', 0, TRUE)
+            ('weekend-charge', 20000, TRUE), ('consecutive-sale', 20000, TRUE),
+            ('promotion', 0, TRUE), ('extra-guest-charge', 30000, TRUE)
      ON CONFLICT (room_name) DO NOTHING`,
   );
 }
@@ -96,11 +101,17 @@ export default async function handler(req, res) {
        ORDER BY room_name ASC`,
     );
     var rates = {};
-    var charges = { weekendCharge: 20000, consecutiveSale: 20000, promotion: 0 };
+    var charges = {
+      weekendCharge: 20000,
+      consecutiveSale: 20000,
+      promotion: 0,
+      extraGuestCharge: 30000,
+    };
     var chargeKeyMap = {
       "weekend-charge": "weekendCharge",
       "consecutive-sale": "consecutiveSale",
       "promotion": "promotion",
+      "extra-guest-charge": "extraGuestCharge",
     };
     (sel.rows || []).forEach(function (row) {
       var n = Number(row.weekday_base_rate || 0);

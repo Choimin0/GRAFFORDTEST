@@ -135,7 +135,12 @@ function clearLoginFailures(ip) {
   adminLoginAttemptStore.delete(ip);
 }
 
-var SPECIAL_CHARGE_NAMES = ["weekend-charge", "consecutive-sale", "promotion"];
+var SPECIAL_CHARGE_NAMES = [
+  "weekend-charge",
+  "consecutive-sale",
+  "promotion",
+  "extra-guest-charge",
+];
 
 function normalizeRoomName(v) {
   var trimmed = String(v || "").trim();
@@ -148,11 +153,15 @@ function normalizeRoomName(v) {
 async function ensureRoomRateTable(pool) {
   await pool.query(
     `CREATE TABLE IF NOT EXISTS ${TABLE_NAME} (
-      room_name VARCHAR(16) PRIMARY KEY,
+      room_name VARCHAR(32) PRIMARY KEY,
       weekday_base_rate BIGINT NOT NULL CHECK (weekday_base_rate >= 0),
       is_enabled BOOLEAN NOT NULL DEFAULT TRUE,
       updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
     )`,
+  );
+  await pool.query(
+    `ALTER TABLE ${TABLE_NAME}
+     ALTER COLUMN room_name TYPE VARCHAR(32)`,
   );
   await pool.query(
     `ALTER TABLE ${TABLE_NAME}
@@ -161,7 +170,8 @@ async function ensureRoomRateTable(pool) {
   await pool.query(
     `INSERT INTO ${TABLE_NAME} (room_name, weekday_base_rate, is_enabled)
      VALUES ('G1', 250000, TRUE), ('G2', 250000, TRUE), ('G3', 300000, TRUE), ('G4', 350000, TRUE),
-            ('weekend-charge', 20000, TRUE), ('consecutive-sale', 20000, TRUE), ('promotion', 0, TRUE)
+            ('weekend-charge', 20000, TRUE), ('consecutive-sale', 20000, TRUE),
+            ('promotion', 0, TRUE), ('extra-guest-charge', 30000, TRUE)
      ON CONFLICT (room_name) DO NOTHING`,
   );
 }

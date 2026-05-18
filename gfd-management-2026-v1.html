@@ -910,6 +910,12 @@
             desc: "전체 평일 객실료 기준으로 적용되는 할인율입니다.",
             unit: "%",
           },
+          "extra-guest-charge": {
+            eyebrow: "EXTRA GUEST",
+            label: "인원 추가금",
+            desc: "기준 인원 외 추가 인원 1인당 1박 기준 추가 금액입니다.",
+            unit: "원/인·박",
+          },
         };
         var roomStatusByRoom = { G1: "", G2: "", G3: "", G4: "" };
         var activeResTab = "current";
@@ -2758,6 +2764,11 @@
                   isEnabled: false,
                 },
                 { roomName: "promotion", weekdayBaseRate: 5, isEnabled: false },
+                {
+                  roomName: "extra-guest-charge",
+                  weekdayBaseRate: 30000,
+                  isEnabled: true,
+                },
               ];
               renderRoomRateTable();
               roomStatusManageRows = [
@@ -4000,6 +4011,7 @@
           "weekend-charge",
           "consecutive-sale",
           "promotion",
+          "extra-guest-charge",
         ];
 
         function splitRateRows(rows) {

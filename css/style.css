@@ -5235,70 +5235,154 @@ main.content-section:has(> .site-footer.site-business-footer) {
 
 .reservation-extra-block {
   margin-bottom: 1rem;
-  padding: 0.85rem 0;
-  border-top: 1px solid rgba(58, 53, 49, 0.1);
+  padding: var(--space-24) 0 0;
+  border-top: 1px solid var(--stone-200);
 }
 
 .reservation-extra-row {
   display: flex;
   align-items: center;
-  justify-content: flex-end;
-  gap: 0.7rem;
+  justify-content: space-between;
+  gap: var(--space-16);
+  padding-bottom: var(--space-24);
+  border-bottom: 1px solid var(--stone-200);
+}
+
+.reservation-extra-copy {
+  display: grid;
+  gap: var(--space-8);
+  min-width: 0;
 }
 
 .reservation-extra-label {
   display: inline-flex;
-  justify-content: flex-end;
-  font-size: 0.9rem;
-  font-weight: 600;
-  color: var(--grafford-mud2);
+  justify-content: flex-start;
+  font-size: 1rem;
+  font-weight: 500;
+  color: var(--stone-800);
   margin: 0;
   white-space: nowrap;
-  text-align: right;
+  text-align: left;
 }
 
 .reservation-extra-stepper {
-  display: inline-flex;
+  display: grid;
+  grid-template-columns: repeat(3, 4rem);
   align-items: center;
-  gap: 0.4rem;
+  flex: 0 0 auto;
+  min-height: 3rem;
+  border: 1px solid var(--stone-200);
 }
 
 .reservation-extra-btn {
-  width: 2rem;
-  height: 2rem;
-  border-color: transparent;
+  width: 100%;
+  height: 100%;
+  border: 0;
   background: transparent;
-  color: var(--grafford-mud2);
-  font-size: 1.3rem;
+  color: var(--stone-600);
+  font-size: 1.15rem;
   line-height: 1;
   cursor: pointer;
   transition:
     background-color 0.2s ease,
-    border-color 0.2s ease,
     color 0.2s ease;
 }
 
 .reservation-extra-btn:disabled {
   background: transparent;
-  border-color: transparent;
-  color: var(--color-status-neutral);
+  color: var(--stone-300);
   cursor: not-allowed;
 }
 
 .reservation-extra-count {
-  min-width: 2.1rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  border-left: 1px solid var(--stone-200);
+  border-right: 1px solid var(--stone-200);
   text-align: center;
-  font-size: 1rem;
-  font-weight: 600;
-  color: var(--grafford-mud2);
+  font-family: var(--font-family-display);
+  font-size: 1.15rem;
+  font-weight: 500;
+  color: var(--stone-800);
 }
 
 .reservation-extra-hint {
-  margin: 0.45rem 0 0;
-  font-size: 0.82rem;
-  line-height: 1.5;
-  text-align: right;
-  color: var(--grafford-mud2);
+  margin: 0;
+  font-size: 0.86rem;
+  line-height: 1.45;
+  text-align: left;
+  color: var(--stone-400);
+}
+
+.reservation-extra-fee-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-16);
+  padding: var(--space-12) 0;
+}
+
+.reservation-extra-fee-copy {
+  display: grid;
+  gap: var(--space-12);
+  min-width: 0;
+}
+
+.reservation-extra-fee-label {
+  font-size: 0.95rem;
+  font-weight: 500;
+  color: var(--grafford-dark-brown);
+}
+
+.reservation-extra-fee-note {
+  margin: 0;
+  padding-left: var(--space-8);
+  border-left: 2px solid color-mix(in srgb, var(--gold-500) 34%, transparent);
+  color: var(--stone-400);
+  font-size: 0.86rem;
+  font-weight: 400;
+  line-height: 1.8;
+  letter-spacing: 0.02em;
+}
+
+.reservation-extra-fee-amount {
+  display: inline-block;
+  color: var(--grafford-dark-brown);
+  font-family: var(--font-family-display);
+  font-size: 1.15rem;
+  font-weight: 400;
+  letter-spacing: 0.01em;
+  transition:
+    opacity 0.24s ease,
+    transform 0.24s ease;
+  will-change: opacity, transform;
+}
+
+.reservation-extra-fee-amount.is-changing {
+  opacity: 0;
+  transform: translateY(-0.55rem);
+}
+
+.reservation-extra-fee-amount.is-entering {
+  opacity: 0;
+  transform: translateY(0.55rem);
+}
+
+@media (max-width: 560px) {
+  .reservation-extra-row {
+    align-items: flex-start;
+  }
+
+  .reservation-extra-stepper {
+    grid-template-columns: repeat(3, 3.2rem);
+    min-height: 3rem;
+  }
+
+  .reservation-extra-fee-row {
+    align-items: flex-start;
+  }
 }
 
 .reservation-price-summary {

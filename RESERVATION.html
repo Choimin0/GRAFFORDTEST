@@ -291,13 +291,6 @@
                       </p>
                     </div>
                   </section>
-                  <div class="room-plan-image-wrap">
-                    <img
-                      src="images/A-groundplan.png"
-                      alt="G1 객실 평면도"
-                      class="room-plan-image"
-                    />
-                  </div>
                 </div>
                 <div class="room-detail-intro room-copy" data-room="G2" hidden>
                   <section class="room-info-section">
@@ -418,13 +411,6 @@
                       </p>
                     </div>
                   </section>
-                  <div class="room-plan-image-wrap">
-                    <img
-                      src="images/B-groundplan.png"
-                      alt="G2 객실 평면도"
-                      class="room-plan-image"
-                    />
-                  </div>
                 </div>
                 <div class="room-detail-intro room-copy" data-room="G3" hidden>
                   <section class="room-info-section">
@@ -549,13 +535,6 @@
                       </p>
                     </div>
                   </section>
-                  <div class="room-plan-image-wrap">
-                    <img
-                      src="images/C-groundplan.png"
-                      alt="G3 객실 평면도"
-                      class="room-plan-image"
-                    />
-                  </div>
                 </div>
                 <div class="room-detail-intro room-copy" data-room="G4" hidden>
                   <section class="room-info-section">
@@ -686,13 +665,6 @@
                       </p>
                     </div>
                   </section>
-                  <div class="room-plan-image-wrap">
-                    <img
-                      src="images/D-groundplan.png"
-                      alt="G4 객실 평면도"
-                      class="room-plan-image"
-                    />
-                  </div>
                 </div>
               </div>
             </div>
@@ -770,7 +742,13 @@
 
               <div class="reservation-extra-block">
                 <div class="reservation-extra-row">
-                  <span class="reservation-extra-label">인원 추가</span>
+                  <div class="reservation-extra-copy">
+                    <span class="reservation-extra-label">인원 추가</span>
+                    <p
+                      class="reservation-extra-hint"
+                      id="extra-guests-hint"
+                    ></p>
+                  </div>
                   <div
                     class="reservation-extra-stepper"
                     aria-describedby="extra-guests-hint"
@@ -781,7 +759,7 @@
                       id="extra-guests-minus"
                       aria-label="추가 인원 감소"
                     >
-                      ＜
+                      -
                     </button>
                     <span
                       class="reservation-extra-count"
@@ -794,11 +772,23 @@
                       id="extra-guests-plus"
                       aria-label="추가 인원 증가"
                     >
-                      ＞
+                      +
                     </button>
                   </div>
                 </div>
-                <p class="reservation-extra-hint" id="extra-guests-hint"></p>
+                <div class="reservation-extra-fee-row">
+                  <div class="reservation-extra-fee-copy">
+                    <span class="reservation-extra-fee-label">추가 요금</span>
+                    <p class="reservation-extra-fee-note js-extra-fee-note">
+                      인원 추가 시 1박 당 1인 30,000원이 부과됩니다
+                    </p>
+                  </div>
+                  <span
+                    class="reservation-extra-fee-amount js-extra-fee-amount"
+                    data-value="0"
+                    >0원 / 1박</span
+                  >
+                </div>
               </div>
               <div
                 class="reservation-discount-cards"
@@ -1012,6 +1002,11 @@
             var extraGuestsHint = scope.querySelector(
               ".reservation-extra-hint",
             );
+            var extraGuestsFeeAmountEl = scope.querySelector(
+              ".js-extra-fee-amount",
+            );
+            var extraGuestsFeeNoteEl =
+              scope.querySelector(".js-extra-fee-note");
             var weekdayDisplay = scope.querySelector(
               "#reservation-weekday-display",
             );
@@ -1201,7 +1196,8 @@
               var hasAny =
                 rateMap["weekend-charge"] != null ||
                 rateMap["consecutive-sale"] != null ||
-                rateMap["promotion"] != null;
+                rateMap["promotion"] != null ||
+                rateMap["extra-guest-charge"] != null;
               if (!hasAny) {
                 return null;
               }
@@ -1209,6 +1205,7 @@
                 weekendCharge: Number(rateMap["weekend-charge"] || 0),
                 consecutiveSale: Number(rateMap["consecutive-sale"] || 0),
                 promotion: Number(rateMap["promotion"] || 0),
+                extraGuestCharge: Number(rateMap["extra-guest-charge"] || 0),
               };
             }
 
@@ -1393,6 +1390,14 @@
               return formatKRW(n);
             }
 
+            function formatExtraFeeAmount(n) {
+              var amount = Math.max(0, Math.round(Number(n) || 0));
+              if (isEnScope) {
+                return amount.toLocaleString("en-US") + " KRW / night";
+              }
+              return amount.toLocaleString("ko-KR") + "원 / 1박";
+            }
+
             function syncDateSummary() {
               if (calCheckinEl) {
                 calCheckinEl.textContent = formatReservationDateLine(checkIn);
@@ -1541,6 +1546,72 @@
               return P.MAX_EXTRA_GUESTS[currentRoom] || 0;
             }
 
+            var extraFeeTransitionTimer = null;
+
+            function getExtraGuestRate() {
+              if (!P) {
+                return 30000;
+              }
+              var rate = Number(P.EXTRA_PER_PERSON_PER_NIGHT);
+              return Number.isFinite(rate) && rate >= 0
+                ? Math.floor(rate)
+                : 30000;
+            }
+
+            function setExtraFeeAmount(nextAmount, animate) {
+              if (!extraGuestsFeeAmountEl) {
+                return;
+              }
+              var next = Math.max(0, Math.round(Number(nextAmount) || 0));
+              var from =
+                Number(extraGuestsFeeAmountEl.dataset.value || "0") || 0;
+              if (extraFeeTransitionTimer) {
+                window.clearTimeout(extraFeeTransitionTimer);
+                extraFeeTransitionTimer = null;
+              }
+              extraGuestsFeeAmountEl.classList.remove(
+                "is-changing",
+                "is-entering",
+              );
+              if (
+                !animate ||
+                from === next ||
+                (window.matchMedia &&
+                  window.matchMedia("(prefers-reduced-motion: reduce)").matches)
+              ) {
+                extraGuestsFeeAmountEl.dataset.value = String(next);
+                extraGuestsFeeAmountEl.textContent = formatExtraFeeAmount(next);
+                return;
+              }
+              extraGuestsFeeAmountEl.classList.add("is-changing");
+              extraFeeTransitionTimer = window.setTimeout(function () {
+                extraGuestsFeeAmountEl.dataset.value = String(next);
+                extraGuestsFeeAmountEl.textContent = formatExtraFeeAmount(next);
+                extraGuestsFeeAmountEl.classList.remove("is-changing");
+                extraGuestsFeeAmountEl.classList.add("is-entering");
+                window.requestAnimationFrame(function () {
+                  extraGuestsFeeAmountEl.classList.remove("is-entering");
+                  extraFeeTransitionTimer = window.setTimeout(function () {
+                    extraFeeTransitionTimer = null;
+                  }, 240);
+                });
+              }, 180);
+            }
+
+            function updateExtraFeeAmount(animate) {
+              var rate = getExtraGuestRate();
+              if (extraGuestsFeeNoteEl) {
+                extraGuestsFeeNoteEl.textContent = isEnScope
+                  ? "Extra guests are charged " +
+                    rate.toLocaleString("en-US") +
+                    " KRW per person per night."
+                  : "인원 추가 시 1박 당 1인 " +
+                    rate.toLocaleString("ko-KR") +
+                    "원이 부과됩니다.";
+              }
+              setExtraFeeAmount(getExtraGuests() * rate, animate);
+            }
+
             function renderExtraGuestsStepper() {
               var max = getMaxExtraGuests();
               var isUnavailable = max === 0;
@@ -1566,6 +1637,7 @@
                   cannotIncrease ? "true" : "false",
                 );
               }
+              updateExtraFeeAmount(true);
             }
 
             function setExtraGuests(nextValue) {
@@ -1602,11 +1674,13 @@
                 }
                 if (extraGuestsHint) {
                   if (currentRoom === "G3") {
-                    extraGuestsHint.textContent =
-                      "기준 인원 외 최대 2인 추가 가능합니다. (인원 추가 시 박당 30,000원/인)";
+                    extraGuestsHint.textContent = isEnScope
+                      ? "Up to 2 additional guests"
+                      : "최대 2인까지 추가 가능합니다";
                   } else {
-                    extraGuestsHint.textContent =
-                      "기준 인원 외 최대 4인 추가 가능합니다. (인원 추가 시 박당 30,000원/인)";
+                    extraGuestsHint.textContent = isEnScope
+                      ? "Up to 4 additional guests"
+                      : "최대 4인까지 추가 가능합니다";
                   }
                 }
               }
@@ -1629,6 +1703,7 @@
                 syncMobileStickyCta(false);
                 return;
               }
+              updateExtraFeeAmount(true);
               var ci = checkIn ? formatYMD(checkIn) : "";
               var co = checkOut ? formatYMD(checkOut) : "";
               if (!resPriceLeftEl || !resPriceAmountEl) {
@@ -2919,13 +2994,6 @@
                       </p>
                     </div>
                   </section>
-                  <div class="room-plan-image-wrap">
-                    <img
-                      src="images/A-groundplan.png"
-                      alt="G1 floor plan"
-                      class="room-plan-image"
-                    />
-                  </div>
                 </div>
                 <div class="room-detail-intro room-copy" data-room="G2" hidden>
                   <section class="room-info-section">
@@ -3051,13 +3119,6 @@
                       </p>
                     </div>
                   </section>
-                  <div class="room-plan-image-wrap">
-                    <img
-                      src="images/B-groundplan.png"
-                      alt="G2 floor plan"
-                      class="room-plan-image"
-                    />
-                  </div>
                 </div>
                 <div class="room-detail-intro room-copy" data-room="G3" hidden>
                   <section class="room-info-section">
@@ -3185,13 +3246,6 @@
                       </p>
                     </div>
                   </section>
-                  <div class="room-plan-image-wrap">
-                    <img
-                      src="images/C-groundplan.png"
-                      alt="G3 floor plan"
-                      class="room-plan-image"
-                    />
-                  </div>
                 </div>
                 <div class="room-detail-intro room-copy" data-room="G4" hidden>
                   <section class="room-info-section">
@@ -3326,13 +3380,6 @@
                       </p>
                     </div>
                   </section>
-                  <div class="room-plan-image-wrap">
-                    <img
-                      src="images/D-groundplan.png"
-                      alt="G4 floor plan"
-                      class="room-plan-image"
-                    />
-                  </div>
                 </div>
               </div>
             </div>
@@ -3407,7 +3454,10 @@
 
               <div class="reservation-extra-block">
                 <div class="reservation-extra-row">
-                  <span class="reservation-extra-label">Add Guests</span>
+                  <div class="reservation-extra-copy">
+                    <span class="reservation-extra-label">Add Guests</span>
+                    <p class="reservation-extra-hint"></p>
+                  </div>
                   <div
                     class="reservation-extra-stepper"
                     aria-describedby="extra-guests-hint"
@@ -3429,7 +3479,19 @@
                     </button>
                   </div>
                 </div>
-                <p class="reservation-extra-hint"></p>
+                <div class="reservation-extra-fee-row">
+                  <div class="reservation-extra-fee-copy">
+                    <span class="reservation-extra-fee-label">Extra Fee</span>
+                    <p class="reservation-extra-fee-note js-extra-fee-note">
+                      Extra guests are charged 30,000 KRW per person per night.
+                    </p>
+                  </div>
+                  <span
+                    class="reservation-extra-fee-amount js-extra-fee-amount"
+                    data-value="0"
+                    >0 KRW / night</span
+                  >
+                </div>
               </div>
               <div
                 class="reservation-discount-cards"

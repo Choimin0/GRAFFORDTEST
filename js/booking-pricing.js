@@ -60,6 +60,18 @@
         CONSECUTIVE_SALE_PER_NIGHT;
       root.GraffordBookingPricing.PROMOTION_PERCENT = PROMOTION_PERCENT;
     }
+    var eg = Number(
+      charges.extraGuestCharge !== undefined
+        ? charges.extraGuestCharge
+        : charges["extra-guest-charge"],
+    );
+    if (Number.isFinite(eg) && eg >= 0) {
+      EXTRA_PER_PERSON_PER_NIGHT = Math.floor(eg);
+    }
+    if (root && root.GraffordBookingPricing) {
+      root.GraffordBookingPricing.EXTRA_PER_PERSON_PER_NIGHT =
+        EXTRA_PER_PERSON_PER_NIGHT;
+    }
   }
 
   function parseYMD(str) {
