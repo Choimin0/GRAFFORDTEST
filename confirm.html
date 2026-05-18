@@ -536,7 +536,9 @@
                   <div class="confirm-total-box">
                     <div class="confirm-breakdown" id="confirm-breakdown"></div>
                     <p class="confirm-total-amount-wrap">
-                      <span class="confirm-total-label">합계</span>
+                      <span class="confirm-total-label"
+                        >합계<span>부가세 포함</span></span
+                      >
                       <strong
                         class="confirm-total-amount"
                         id="confirm-total-display"
@@ -901,128 +903,187 @@
             }
             var breakdownEl = scope.querySelector(".confirm-breakdown");
             var totalDisplayEl = scope.querySelector(".confirm-total-amount");
+            var totalWrapEl = scope.querySelector(".confirm-total-amount-wrap");
             if (!breakdownEl || !totalDisplayEl) {
               return;
             }
             breakdownEl.innerHTML = "";
-            function addBreakLine(text) {
-              var p = document.createElement("p");
-              p.className = "confirm-total-line";
-              p.textContent = text;
-              breakdownEl.appendChild(p);
-            }
+            scope
+              .querySelectorAll(".confirm-price-discount-note")
+              .forEach(function (note) {
+                note.remove();
+              });
             var isEn = language === "en";
 
+            function createTextEl(tagName, className, text) {
+              var el = document.createElement(tagName);
+              if (className) {
+                el.className = className;
+              }
+              el.textContent = text;
+              return el;
+            }
+
+            function formatNightBadge(nights) {
+              return isEn ? nights + "N" : nights + "박";
+            }
+
+            function formatGuestBadge(guests) {
+              return isEn ? guests + "P" : guests + "인";
+            }
+
+            function appendSection(title, modifier) {
+              var section = document.createElement("section");
+              section.className = "confirm-price-section";
+              if (modifier) {
+                section.className += " " + modifier;
+              }
+              section.appendChild(
+                createTextEl("h3", "confirm-price-section__title", title),
+              );
+              breakdownEl.appendChild(section);
+              return section;
+            }
+
+            function appendPriceRow(section, label, badge, amount, extraClass) {
+              var row = document.createElement("div");
+              row.className = "confirm-price-row";
+              if (extraClass) {
+                row.className += " " + extraClass;
+              }
+
+              var name = document.createElement("span");
+              name.className = "confirm-price-row__name";
+              name.appendChild(
+                createTextEl("span", "confirm-price-row__label", label),
+              );
+              if (badge) {
+                name.appendChild(
+                  createTextEl("span", "confirm-price-badge", badge),
+                );
+              }
+
+              row.appendChild(name);
+              row.appendChild(
+                createTextEl("strong", "confirm-price-row__amount", amount),
+              );
+              section.appendChild(row);
+            }
+
             if (quote.nights > 0 && P) {
+              var roomSection = appendSection(
+                isEn ? "Room Rate" : "객실 요금",
+                "confirm-price-section--room",
+              );
               if (
                 quote.weekdayNights !== undefined &&
                 quote.weekendNights !== undefined
               ) {
                 if (quote.weekdayNights > 0) {
-                  addBreakLine(
-                    roomRaw +
-                      (isEn ? " (weeknight) " : " (평일) ") +
-                      formatMoneyByLanguage(quote.baseNightly, language) +
-                      " × " +
-                      quote.weekdayNights +
-                      (isEn
-                        ? " night" + (quote.weekdayNights > 1 ? "s" : "")
-                        : "박") +
-                      " = " +
-                      formatMoneyByLanguage(quote.weekdaySubtotal, language),
+                  appendPriceRow(
+                    roomSection,
+                    roomRaw + (isEn ? " · Weekday" : " · 평일"),
+                    formatNightBadge(quote.weekdayNights),
+                    formatMoneyByLanguage(quote.weekdaySubtotal, language),
                   );
                 }
                 if (quote.weekendNights > 0) {
-                  addBreakLine(
-                    roomRaw +
-                      (isEn ? " (weekend) " : " (주말) ") +
-                      formatMoneyByLanguage(
-                        quote.weekendRatePerNight,
-                        language,
-                      ) +
-                      " × " +
-                      quote.weekendNights +
-                      (isEn
-                        ? " night" + (quote.weekendNights > 1 ? "s" : "")
-                        : "박") +
-                      " = " +
-                      formatMoneyByLanguage(quote.weekendSubtotal, language),
+                  appendPriceRow(
+                    roomSection,
+                    roomRaw + (isEn ? " · Weekend" : " · 주말"),
+                    formatNightBadge(quote.weekendNights),
+                    formatMoneyByLanguage(quote.weekendSubtotal, language),
                   );
                 }
               } else {
-                addBreakLine(
-                  ROOM_LABEL[roomRaw] +
-                    (isEn ? " (Weekday) " : " (평일) ") +
-                    formatMoneyByLanguage(quote.baseNightly, language) +
-                    " × " +
-                    quote.nights +
-                    (isEn ? " night" + (quote.nights > 1 ? "s" : "") : "박") +
-                    " = " +
-                    formatMoneyByLanguage(quote.baseTotal, language),
+                appendPriceRow(
+                  roomSection,
+                  ROOM_LABEL[roomRaw] + (isEn ? " · Weekday" : " · 평일"),
+                  formatNightBadge(quote.nights),
+                  formatMoneyByLanguage(quote.baseTotal, language),
                 );
                 if (quote.weekendSurcharge > 0) {
-                  addBreakLine(
-                    (isEn ? "Weekend surcharge " : "주말(금·토) 추가 ") +
-                      formatMoneyByLanguage(
-                        P.WEEKEND_SURCHARGE_PER_NIGHT,
-                        language,
-                      ) +
-                      " × " +
-                      quote.weekendNights +
-                      (isEn
-                        ? " night" + (quote.weekendNights > 1 ? "s" : "")
-                        : "박") +
-                      " = " +
-                      formatMoneyByLanguage(quote.weekendSurcharge, language),
+                  appendPriceRow(
+                    roomSection,
+                    isEn ? "Weekend surcharge" : "주말 추가",
+                    formatNightBadge(quote.weekendNights),
+                    formatMoneyByLanguage(quote.weekendSurcharge, language),
                   );
                 }
               }
+              appendPriceRow(
+                roomSection,
+                isEn ? "Room subtotal" : "객실 소계",
+                "",
+                formatMoneyByLanguage(quote.baseTotal, language),
+                "confirm-price-row--subtotal",
+              );
+
               if (quote.extraGuestTotal > 0) {
-                addBreakLine(
-                  (isEn ? "Extra guests " : "인원 추가 ") +
-                    formatMoneyByLanguage(
-                      P.EXTRA_PER_PERSON_PER_NIGHT,
-                      language,
-                    ) +
-                    " × " +
-                    quote.extraGuests +
-                    (isEn
-                      ? " guest" + (quote.extraGuests > 1 ? "s" : "")
-                      : "명") +
-                    " × " +
-                    quote.nights +
-                    (isEn ? " night" + (quote.nights > 1 ? "s" : "") : "박") +
-                    " = " +
-                    formatMoneyByLanguage(quote.extraGuestTotal, language),
+                var extraSection = appendSection(
+                  isEn ? "Additional Guest Fee" : "인원 추가 요금",
+                  "confirm-price-section--extra",
+                );
+                appendPriceRow(
+                  extraSection,
+                  isEn ? "Additional guest" : "추가 인원",
+                  formatGuestBadge(quote.extraGuests),
+                  formatMoneyByLanguage(quote.extraGuestTotal, language),
                 );
               }
-              if ((quote.consecutiveSale || 0) > 0) {
-                addBreakLine(
-                  (isEn ? "Consecutive stay discount: -" : "연박할인 : -") +
-                    formatMoneyByLanguage(quote.consecutiveSale, language),
+
+              var discountTotal =
+                (quote.consecutiveSale || 0) +
+                (quote.promotionDiscount || 0);
+              if (discountTotal > 0) {
+                var discountSection = appendSection(
+                  isEn ? "Discount" : "할인",
+                  "confirm-price-section--discount",
                 );
-              }
-              if ((quote.promotionDiscount || 0) > 0) {
-                addBreakLine(
-                  (isEn
-                    ? "Promotion (" +
-                      (quote.promotionPercent || 0) +
-                      "% off): -"
-                    : "프로모션 (" +
-                      (quote.promotionPercent || 0) +
-                      "% 할인) : -") +
-                    formatMoneyByLanguage(quote.promotionDiscount, language),
-                );
+                if ((quote.consecutiveSale || 0) > 0) {
+                  appendPriceRow(
+                    discountSection,
+                    isEn ? "Consecutive stay discount" : "연박 할인",
+                    formatNightBadge(Math.max(1, quote.nights - 1)),
+                    "-" +
+                      formatMoneyByLanguage(quote.consecutiveSale, language),
+                  );
+                }
+                if ((quote.promotionDiscount || 0) > 0) {
+                  appendPriceRow(
+                    discountSection,
+                    isEn ? "Promotion discount" : "프로모션 할인",
+                    (quote.promotionPercent || 0) + "%",
+                    "-" +
+                      formatMoneyByLanguage(quote.promotionDiscount, language),
+                  );
+                }
+                var notice = document.createElement("p");
+                notice.className = "confirm-price-discount-note";
+                notice.textContent = isEn
+                  ? "+ A total discount of " +
+                    formatMoneyByLanguage(discountTotal, language) +
+                    " has been applied."
+                  : "+ 총 " +
+                    formatMoneyByLanguage(discountTotal, language) +
+                    " 할인이 적용되었습니다.";
+                if (totalWrapEl) {
+                  totalWrapEl.insertAdjacentElement("afterend", notice);
+                }
               }
               totalDisplayEl.textContent = formatMoneyByLanguage(
                 quote.discountedGrandTotal || 0,
                 language,
               );
             } else {
-              addBreakLine(
-                isEn
-                  ? "Unable to calculate stay nights. Please check your check-in/check-out dates."
-                  : "투숙 일수를 계산할 수 없습니다. 체크인·체크아웃을 확인해 주세요.",
+              breakdownEl.appendChild(
+                createTextEl(
+                  "p",
+                  "confirm-total-line",
+                  isEn
+                    ? "Unable to calculate stay nights. Please check your check-in/check-out dates."
+                    : "투숙 일수를 계산할 수 없습니다. 체크인·체크아웃을 확인해 주세요.",
+                ),
               );
               totalDisplayEl.textContent = "—";
             }
@@ -2398,7 +2459,9 @@
                   <div class="confirm-total-box">
                     <div class="confirm-breakdown"></div>
                     <p class="confirm-total-amount-wrap">
-                      <span class="confirm-total-label">Total</span>
+                      <span class="confirm-total-label"
+                        >Total<span>VAT included</span></span
+                      >
                       <strong class="confirm-total-amount"></strong>
                     </p>
                   </div>
