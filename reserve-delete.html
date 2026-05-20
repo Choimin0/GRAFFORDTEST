@@ -589,6 +589,20 @@
             if (el) el.textContent = value;
           }
 
+          function applyPaidAmountFromLookup(row) {
+            if (!row || row.totalAmount == null) {
+              return;
+            }
+            var dbPaid =
+              parseInt(String(row.totalAmount).replace(/,/g, ""), 10) || 0;
+            if (dbPaid <= 0) {
+              return;
+            }
+            paidAmount = dbPaid;
+            setText("cancel-amount", formatKRW(paidAmount));
+            setText("cancel-amount-en", formatKRWEn(paidAmount));
+          }
+
           function applyRefundUi(bookingCreatedAtIsoStr) {
             var checkInYmd = normalizeCheckInYmdLocal(checkIn);
             var remainDate = checkInYmd
@@ -788,48 +802,44 @@
             }, 0);
           }
 
+          function finishRefundUiSetup(bookingCreatedAtIsoStr) {
+            applyRefundUi(bookingCreatedAtIsoStr || "");
+            wireCancelFlowsAfterRefund();
+          }
+
           var embeddedBookingIso =
             (saved && saved.bookingCreatedAtIso) || "";
-          if (embeddedBookingIso) {
-            applyRefundUi(embeddedBookingIso);
-            wireCancelFlowsAfterRefund();
-          } else {
-            var lookupOrder = String(orderNo || "").trim();
-            var lookupName = String(name || "").trim();
-            if (
-              lookupOrder &&
-              lookupOrder !== "—" &&
-              lookupName &&
-              lookupName !== "—"
-            ) {
-              fetch(reservationsLookupApiUrl(), {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                  guestName: lookupName,
-                  reservationNumber: lookupOrder,
-                }),
+          var lookupOrder = String(orderNo || "").trim();
+          var lookupName = String(name || "").trim();
+          if (
+            lookupOrder &&
+            lookupOrder !== "—" &&
+            lookupName &&
+            lookupName !== "—"
+          ) {
+            fetch(reservationsLookupApiUrl(), {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                guestName: lookupName,
+                reservationNumber: lookupOrder,
+              }),
+            })
+              .then(function (r) {
+                return r.json();
               })
-                .then(function (r) {
-                  return r.json();
-                })
-                .then(function (data) {
-                  var iso =
-                    data && data.ok && data.row && data.row.createdAtIso
-                      ? data.row.createdAtIso
-                      : "";
-                  applyRefundUi(iso);
-                })
-                .catch(function () {
-                  applyRefundUi("");
-                })
-                .finally(function () {
-                  wireCancelFlowsAfterRefund();
-                });
-            } else {
-              applyRefundUi("");
-              wireCancelFlowsAfterRefund();
-            }
+              .then(function (data) {
+                var row = data && data.ok && data.row ? data.row : null;
+                var iso =
+                  (row && row.createdAtIso) || embeddedBookingIso || "";
+                applyPaidAmountFromLookup(row);
+                finishRefundUiSetup(iso);
+              })
+              .catch(function () {
+                finishRefundUiSetup(embeddedBookingIso);
+              });
+          } else {
+            finishRefundUiSetup(embeddedBookingIso);
           }
 
           function bindCancelFlow(config) {
@@ -1101,6 +1111,18 @@
                           ")");
                     throw new Error(msg);
                   }
+                  var resultData = result.data || {};
+                  if (resultData.totalAmount != null) {
+                    var resolvedPaid =
+                      parseInt(String(resultData.totalAmount), 10) || 0;
+                    if (resolvedPaid > 0) {
+                      paidAmount = resolvedPaid;
+                    }
+                  }
+                  var finalRefundAmount =
+                    resultData.refundAmount != null
+                      ? parseInt(String(resultData.refundAmount), 10) || 0
+                      : refundAmount;
                   sessionStorage.setItem(
                     "graffordDeletedReservationOrderNo",
                     String(orderNo || ""),
@@ -1123,7 +1145,7 @@
                       cancelReason: selectedReason || "",
                       cancelReasonCode: selectedReasonCode || "",
                       cancelReasonDetail: selectedReasonDetail || "",
-                      refundAmount: String(refundAmount || 0),
+                      refundAmount: String(finalRefundAmount || 0),
                     }),
                   );
                   isNavigating = true;

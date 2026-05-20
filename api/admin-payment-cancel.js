@@ -10,6 +10,10 @@
  */
 import pg from "pg";
 import { decryptBookingPiiResponse } from "./lib/pii-crypto.js";
+import {
+  fetchPortonePayment,
+  resolvePaidAmountForBooking,
+} from "./lib/refund-amount.js";
 
 const { Pool } = pg;
 const BOOKING_TABLE = "booking";
@@ -197,42 +201,6 @@ function extractPgTxIdFromPayment(payment) {
   return null;
 }
 
-async function fetchPortonePayment(paymentId) {
-  var apiSecret = (process.env.PORTONE_API_SECRET || "").trim();
-  if (!apiSecret) {
-    return { ok: false, error: "PORTONE_API_SECRET 환경변수가 설정되지 않았습니다." };
-  }
-  try {
-    var portoneRes = await fetch(
-      "https://api.portone.io/payments/" + encodeURIComponent(paymentId),
-      { headers: { Authorization: "PortOne " + apiSecret } },
-    );
-    var resData = {};
-    try {
-      resData = await portoneRes.json();
-    } catch (_) {}
-    if (!portoneRes.ok) {
-      return {
-        ok: false,
-        error:
-          "PortOne 결제 조회 실패 (HTTP " +
-          portoneRes.status +
-          "): " +
-          (resData.message || resData.error || JSON.stringify(resData)),
-        detail: resData,
-      };
-    }
-    return { ok: true, data: resData };
-  } catch (e) {
-    return {
-      ok: false,
-      error:
-        "PortOne API 조회 중 네트워크 오류: " +
-        (e && e.message ? e.message : String(e)),
-    };
-  }
-}
-
 /**
  * PortOne v2 전액 취소. paymentId = 결제 시 merchant paymentId(예약번호).
  */
@@ -399,11 +367,15 @@ export default async function handler(req, res) {
     }
 
     var pgTid = row.pg_tid ? String(row.pg_tid).trim() : null;
-    var totalAmountRaw = row.total_amount != null ? Number(row.total_amount) : null;
-    var totalAmountNum = Number.isFinite(totalAmountRaw) ? totalAmountRaw : 0;
     var paymentMethodDb = String(row.payment_method || "").toLowerCase().trim();
     var isBankTransfer = isBankTransferMethod(paymentMethodDb);
-    var refundAmount = totalAmountNum;
+    var paidResolution = await resolvePaidAmountForBooking({
+      row: row,
+      reservationNumber: reservationNumber,
+      isBankTransfer: isBankTransfer,
+    });
+    var paidAmountNum = paidResolution.paidAmount;
+    var refundAmount = paidAmountNum;
 
     console.log(
       "[admin-payment-cancel] 예약번호:",
@@ -412,8 +384,12 @@ export default async function handler(req, res) {
       pgTid,
       "| payment_method:",
       paymentMethodDb,
-      "| totalAmount:",
-      totalAmountNum,
+      "| paidAmount:",
+      paidAmountNum,
+      "| paidAmountSource:",
+      paidResolution.source,
+      "| dbTotalAmount:",
+      row.total_amount,
       "| refundAmount(100%):",
       refundAmount,
     );
@@ -523,7 +499,8 @@ export default async function handler(req, res) {
       reservationNumber: reservationNumber,
       guestName: cancelledPii.guestName,
       refundAmount: refundAmount,
-      totalAmount: totalAmountNum,
+      totalAmount: paidAmountNum,
+      paidAmountSource: paidResolution.source,
       cancelReason: CANCEL_REASON_MANUAL,
       isBankTransfer: isBankTransfer,
     });

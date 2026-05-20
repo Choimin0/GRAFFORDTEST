@@ -16,6 +16,10 @@
 import pg from "pg";
 import crypto from "node:crypto";
 import { guestNamesMatch } from "./lib/pii-crypto.js";
+import {
+  computeRefundAmount,
+  resolvePaidAmountForBooking,
+} from "./lib/refund-amount.js";
 
 const { Pool } = pg;
 
@@ -492,8 +496,6 @@ export default async function handler(req, res) {
     }
 
     var pgTid = row.pg_tid ? String(row.pg_tid).trim() : null;
-    var totalAmountRaw = row.total_amount != null ? Number(row.total_amount) : null;
-    var totalAmountNum = Number.isFinite(totalAmountRaw) ? totalAmountRaw : 0;
     // payment_method: "bank" / "무통장입금" 이면 PG 취소 불필요; 그 외(card 등)는 PortOne 취소
     var paymentMethodDb = String(row.payment_method || "").toLowerCase().trim();
     var isBankTransfer =
@@ -501,23 +503,24 @@ export default async function handler(req, res) {
       paymentMethodDb === "무통장입금" ||
       paymentMethodDb === "bank_transfer";
 
+    var paidResolution = await resolvePaidAmountForBooking({
+      row: row,
+      reservationNumber: reservationNumber,
+      isBankTransfer: isBankTransfer,
+    });
+    var paidAmountNum = paidResolution.paidAmount;
     var feePercent = computeCancellationFeePercent(row);
-    var serverRefundAmount = Math.max(
-      0,
-      Math.round(totalAmountNum * ((100 - feePercent) / 100)),
-    );
-    // 클라이언트가 보낸 금액은 참고만 하고, DB 기준으로 재산출(조작 방지)
-    var safeRefundAmount = serverRefundAmount;
-    if (safeRefundAmount > totalAmountNum) {
-      safeRefundAmount = totalAmountNum;
-    }
+    // 클라이언트 refundAmount는 참고만 — 최종 결제액 기준으로 서버 재산출(조작 방지)
+    var safeRefundAmount = computeRefundAmount(paidAmountNum, feePercent);
 
     console.log(
       "[payment-cancel] 예약번호:", reservationNumber,
       "| pg_tid:", pgTid,
       "| payment_method(DB):", paymentMethodDb,
       "| isBankTransfer:", isBankTransfer,
-      "| totalAmount:", totalAmountNum,
+      "| paidAmount:", paidAmountNum,
+      "| paidAmountSource:", paidResolution.source,
+      "| dbTotalAmount:", row.total_amount,
       "| cancellationFeePercent:", feePercent,
       "| safeRefundAmount:", safeRefundAmount,
     );
@@ -533,7 +536,7 @@ export default async function handler(req, res) {
         reservationNumber, // PortOne paymentId = 결제 시 사용한 orderNo (= reservationNumber)
         portoneCancelReason,
         safeRefundAmount,
-        totalAmountNum,
+        paidAmountNum,
       );
       if (!portoneResult.ok) {
         // PortOne에 해당 결제가 없는 경우(404/payment not found)는 DB 취소만 진행
@@ -603,11 +606,12 @@ export default async function handler(req, res) {
       cancelledAt: formatDateTimeKst(new Date()),
       reservationNumber: reservationNumber,
       refundAmount: safeRefundAmount,    // 실제 환불 처리된 금액
-      totalAmount: totalAmountNum,       // 원래 결제 금액
+      totalAmount: paidAmountNum,        // 최종 결제 금액(환불 수수료 기준)
+      paidAmountSource: paidResolution.source,
       isPartialRefund:
         pgCancelled &&
         safeRefundAmount > 0 &&
-        safeRefundAmount < totalAmountNum,
+        safeRefundAmount < paidAmountNum,
     });
   } catch (e) {
     try { client.release(); } catch (_) {}

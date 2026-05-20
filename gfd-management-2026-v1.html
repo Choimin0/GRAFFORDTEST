@@ -3147,14 +3147,8 @@
           return nights > 0 ? nights : 0;
         }
 
-        function getConsecutiveSaleTotal(row) {
-          var baseTotal = Number((row && row.totalAmount) || 0);
-          var nights = getStayPeriodNights(row);
-          if (nights < 2) {
-            return baseTotal;
-          }
-          var discount = (nights - 1) * 20000;
-          return Math.max(0, baseTotal - discount);
+        function getReservationPaidTotal(row) {
+          return Number((row && row.totalAmount) || 0);
         }
 
         function getReservationStatusLabel(row) {
@@ -3257,7 +3251,7 @@
         }
 
         function buildAmountCellHtml(row) {
-          var totalText = formatKRW(getConsecutiveSaleTotal(row));
+          var totalText = formatKRW(getReservationPaidTotal(row));
           if (activeResTab !== "deleted") {
             return totalText;
           }
@@ -3359,7 +3353,7 @@
               " · " +
               (row.guestName || "—") +
               " · " +
-              formatKRW(getConsecutiveSaleTotal(row));
+              formatKRW(getReservationPaidTotal(row));
           }
           setManualCancelMessage("");
           manualCancelModal.hidden = false;
@@ -3569,7 +3563,7 @@
             if (sortKey === "checkin") return asYmdNumber(row && row.checkIn);
             if (sortKey === "checkout") return asYmdNumber(row && row.checkOut);
             if (sortKey === "nights") return getStayPeriodNights(row);
-            if (sortKey === "amount") return getConsecutiveSaleTotal(row);
+            if (sortKey === "amount") return getReservationPaidTotal(row);
             if (sortKey === "status") return getReservationStatusLabel(row);
             if (sortKey === "payment") {
               return formatPaymentMethodLabel(row && row.paymentMethod);
