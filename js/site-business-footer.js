@@ -92,10 +92,68 @@ function buildFooterLegalButtonsHtml(language) {
     '<button type="button" class="site-business-footer__legal-btn" data-site-legal-open="terms">' +
     termsLabel +
     "</button>" +
-    '<button type="button" class="site-business-footer__legal-btn" data-site-legal-open="privacy">' +
+    '<button type="button" class="site-business-footer__legal-btn site-business-footer__legal-btn--privacy" data-site-legal-open="privacy">' +
     privacyLabel +
     "</button>"
   );
+}
+
+function businessRegNoDigits(value) {
+  return String(value).replace(/\D/g, "");
+}
+
+function ftcBizCommPopUrl(regNo) {
+  var digits = businessRegNoDigits(regNo);
+  if (!digits) {
+    return null;
+  }
+  return "https://www.ftc.go.kr/bizCommPop.do?wrkr_no=" + digits;
+}
+
+function findTelcoSalesReportRowIndex(infoRows) {
+  for (var k = infoRows.length - 1; k >= 0; k--) {
+    if (infoRows[k].labelKey === "telcoSalesReport") {
+      return k;
+    }
+  }
+  return -1;
+}
+
+function findBusinessInfoRowIndex(infoRows) {
+  for (var j = infoRows.length - 1; j >= 0; j--) {
+    if (infoRows[j].label === "사업자" || infoRows[j].label === "Business no.") {
+      return j;
+    }
+  }
+  return -1;
+}
+
+function upsertTelcoSalesReportRow(infoRows, value, label) {
+  var resolvedLabel = label || "통신판매업신고번호";
+  var existingIdx = findTelcoSalesReportRowIndex(infoRows);
+  if (existingIdx >= 0) {
+    infoRows[existingIdx].value = value;
+    infoRows[existingIdx].label = resolvedLabel;
+    var businessIdx = findBusinessInfoRowIndex(infoRows);
+    if (businessIdx >= 0 && existingIdx !== businessIdx + 1) {
+      var row = infoRows.splice(existingIdx, 1)[0];
+      infoRows.splice(businessIdx + 1, 0, row);
+    }
+    return;
+  }
+
+  var insertAt = infoRows.length;
+  var businessRowIdx = findBusinessInfoRowIndex(infoRows);
+  if (businessRowIdx >= 0) {
+    insertAt = businessRowIdx + 1;
+  }
+
+  infoRows.splice(insertAt, 0, {
+    labelKey: "telcoSalesReport",
+    label: resolvedLabel,
+    value: value,
+    mapHref: null,
+  });
 }
 
 function naverMapSearchUrl(query) {
@@ -152,11 +210,25 @@ function parseBusinessFooterLines(selectedLines, language, naverMapAddr) {
         });
         continue;
       }
-      m = /^사업자등록번호\s*:\s*(.+)$/.exec(trimmed);
+      m = /^통신판매업신고번호\s*:\s*(.*)$/.exec(trimmed);
       if (m) {
-        infoRows.push({ label: "사업자", value: m[1].trim(), mapHref: null });
+        upsertTelcoSalesReportRow(infoRows, m[1].trim());
         continue;
       }
+      m = /^사업자등록번호\s*:\s*(.+)$/.exec(trimmed);
+      if (m) {
+        var regNoKr = m[1].trim();
+        infoRows.push({
+          label: "사업자",
+          value: regNoKr,
+          mapHref: null,
+          ftcHref: ftcBizCommPopUrl(regNoKr),
+          ftcBtnLabel: "사업자등록번호",
+        });
+        upsertTelcoSalesReportRow(infoRows, "", "통신판매업신고번호");
+        continue;
+      }
+
       m = /^전화\s*:\s*(.+)$/.exec(trimmed);
       if (m) {
         infoRows.push({ label: "전화", value: m[1].trim(), mapHref: null });
@@ -189,15 +261,35 @@ function parseBusinessFooterLines(selectedLines, language, naverMapAddr) {
       continue;
     }
     m =
+      /^(Mail-order business report(?:\s+no\.?)?|E-commerce registration(?:\s+no\.?)?)\s*:\s*(.*)$/i.exec(
+        trimmed,
+      );
+    if (m) {
+      upsertTelcoSalesReportRow(
+        infoRows,
+        m[2].trim(),
+        "Mail-order business report no.",
+      );
+      continue;
+    }
+    m =
       /^(Business registration(?:\s+number)?|Business no\.)\s*:\s*(.+)$/i.exec(
         trimmed,
       );
     if (m) {
+      var regNoEn = m[2].trim();
       infoRows.push({
         label: "Business no.",
-        value: m[2].trim(),
+        value: regNoEn,
         mapHref: null,
+        ftcHref: ftcBizCommPopUrl(regNoEn),
+        ftcBtnLabel: "Business registration",
       });
+      upsertTelcoSalesReportRow(
+        infoRows,
+        "",
+        "Mail-order business report no.",
+      );
       continue;
     }
     m = /^(Phone|Tel)\s*:\s*(.+)$/i.exec(trimmed);
@@ -231,8 +323,19 @@ function buildFooterInfoGridHtml(rows, escapeHtmlFn) {
           escapeHtmlFn(r.value) +
           "</a>",
       );
-    } else {
+    } else if (r.value) {
       parts.push(escapeHtmlFn(r.value));
+    } else if (r.labelKey === "telcoSalesReport") {
+      parts.push('<span class="site-business-footer__info-placeholder"></span>');
+    }
+    if (r.ftcHref && r.ftcBtnLabel) {
+      parts.push(
+        ' <a class="site-business-footer__biz-reg-btn" href="' +
+          escapeHtmlFn(r.ftcHref) +
+          '" target="_blank" rel="noopener noreferrer">' +
+          escapeHtmlFn(r.ftcBtnLabel) +
+          "</a>",
+      );
     }
     parts.push("</dd>");
   }

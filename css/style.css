@@ -3755,6 +3755,38 @@ main.content-section:has(> .site-footer.site-business-footer) {
   border-radius: var(--radius-soft);
 }
 
+.site-business-footer__biz-reg-btn {
+  display: inline-block;
+  margin-left: 0.35em;
+  padding: 0.1em 0.45em;
+  border: 1px solid color-mix(in srgb, var(--stone-400) 55%, transparent);
+  border-radius: var(--radius-soft);
+  color: var(--stone-400);
+  font-size: 0.625rem;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  line-height: 1.4;
+  text-decoration: none;
+  white-space: nowrap;
+  vertical-align: baseline;
+  transition:
+    color 0.2s ease,
+    border-color 0.2s ease,
+    background-color 0.2s ease;
+}
+
+.site-business-footer__biz-reg-btn:hover,
+.site-business-footer__biz-reg-btn:focus-visible {
+  color: var(--stone-50);
+  border-color: var(--stone-50);
+  background-color: color-mix(in srgb, var(--stone-50) 8%, transparent);
+}
+
+.site-business-footer__biz-reg-btn:focus-visible {
+  outline: 2px solid var(--stone-400);
+  outline-offset: 2px;
+}
+
 .site-business-footer__col--logo {
   display: flex;
   justify-content: flex-end;
@@ -3832,6 +3864,10 @@ main.content-section:has(> .site-footer.site-business-footer) {
   outline: 2px solid var(--stone-400);
   outline-offset: 4px;
   border-radius: var(--radius-soft);
+}
+
+.site-business-footer__legal-btn--privacy {
+  font-weight: 700;
 }
 
 .site-business-footer__gold-line {
