@@ -121,7 +121,10 @@ function findTelcoSalesReportRowIndex(infoRows) {
 
 function findBusinessInfoRowIndex(infoRows) {
   for (var j = infoRows.length - 1; j >= 0; j--) {
-    if (infoRows[j].label === "사업자" || infoRows[j].label === "Business no.") {
+    if (
+      infoRows[j].label === "사업자" ||
+      infoRows[j].label === "Business no."
+    ) {
       return j;
     }
   }
@@ -223,7 +226,6 @@ function parseBusinessFooterLines(selectedLines, language, naverMapAddr) {
           value: regNoKr,
           mapHref: null,
           ftcHref: ftcBizCommPopUrl(regNoKr),
-          ftcBtnLabel: "사업자등록번호",
         });
         upsertTelcoSalesReportRow(infoRows, "", "통신판매업신고번호");
         continue;
@@ -283,13 +285,8 @@ function parseBusinessFooterLines(selectedLines, language, naverMapAddr) {
         value: regNoEn,
         mapHref: null,
         ftcHref: ftcBizCommPopUrl(regNoEn),
-        ftcBtnLabel: "Business registration",
       });
-      upsertTelcoSalesReportRow(
-        infoRows,
-        "",
-        "Mail-order business report no.",
-      );
+      upsertTelcoSalesReportRow(infoRows, "", "Mail-order business report no.");
       continue;
     }
     m = /^(Phone|Tel)\s*:\s*(.+)$/i.exec(trimmed);
@@ -324,17 +321,20 @@ function buildFooterInfoGridHtml(rows, escapeHtmlFn) {
           "</a>",
       );
     } else if (r.value) {
-      parts.push(escapeHtmlFn(r.value));
+      if (r.ftcHref) {
+        parts.push(
+          '<a class="site-business-footer__biz-reg-no" href="' +
+            escapeHtmlFn(r.ftcHref) +
+            '" target="_blank" rel="noopener noreferrer">' +
+            escapeHtmlFn(r.value) +
+            "</a>",
+        );
+      } else {
+        parts.push(escapeHtmlFn(r.value));
+      }
     } else if (r.labelKey === "telcoSalesReport") {
-      parts.push('<span class="site-business-footer__info-placeholder"></span>');
-    }
-    if (r.ftcHref && r.ftcBtnLabel) {
       parts.push(
-        ' <a class="site-business-footer__biz-reg-btn" href="' +
-          escapeHtmlFn(r.ftcHref) +
-          '" target="_blank" rel="noopener noreferrer">' +
-          escapeHtmlFn(r.ftcBtnLabel) +
-          "</a>",
+        '<span class="site-business-footer__info-placeholder"></span>',
       );
     }
     parts.push("</dd>");

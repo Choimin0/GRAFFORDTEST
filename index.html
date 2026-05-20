@@ -197,73 +197,80 @@
             </div>
           </article>
           <article class="feature feature-index-3 scroll-fade">
-            <div class="feature-media feature-media--index-gallery">
-              <div
-                class="room-image-slot room-image-slot--carousel"
-                id="index-all-rooms-gallery"
-                aria-label="전체 객실 사진"
-              >
-                <div class="room-slot-gallery">
-                  <div class="gallery-main-wrap">
-                    <button
-                      type="button"
-                      class="gallery-nav gallery-prev room-slot-nav-prev"
-                      aria-label="이전 사진"
-                    >
-                      &#10094;
-                    </button>
-                    <img
-                      class="room-slot-main-img"
-                      src="images/A00.jpg"
-                      alt="객실 사진"
-                    />
-                    <button
-                      type="button"
-                      class="gallery-nav gallery-next room-slot-nav-next"
-                      aria-label="다음 사진"
-                    >
-                      &#10095;
-                    </button>
+            <div class="feature-index-3__layout">
+              <header class="feature-index-3__intro">
+                <div
+                  class="feature-index-3__head-row feature-index-space-head payment-section-head"
+                >
+                  <span class="payment-section-head__label">SPACE</span>
+                  <div
+                    class="feature-index-about-progress feature-index-about-progress--third"
+                    aria-label="Index feature 3 of 4"
+                  >
+                    <span aria-hidden="true"></span>
+                    <span aria-hidden="true"></span>
+                    <span class="is-active" aria-hidden="true"></span>
+                    <span aria-hidden="true"></span>
                   </div>
-                  <div class="gallery-thumbs room-slot-thumbs"></div>
                 </div>
-              </div>
-            </div>
-            <div class="feature-text">
-              <h2 class="feature-index-space-head payment-section-head">
-                <span class="payment-section-head__label">SPACE</span>
+                <div class="feature-index-space-copy feature-index-3__copy-row">
+                  <p class="feature-index-space-title">
+                    오롯이 자신에게 집중하는<br />
+                    환경을 만드는 것.
+                  </p>
+                  <p class="feature-body feature-index-space-sub">
+                    그것이 그라포드가 생각하는<br />
+                    공간의 본질입니다.
+                  </p>
+                </div>
                 <span
-                  class="payment-section-head__rule"
+                  class="feature-index-3__divider"
                   aria-hidden="true"
                 ></span>
-              </h2>
-              <div class="feature-index-space-copy">
-                <p class="feature-index-space-title">
-                  오롯이 자신에게 집중하는<br />
+              </header>
+              <div class="feature-media feature-media--index-space">
+                <div class="feature-index-3-space-grid" aria-label="공간 사진">
+                  <img
+                    class="feature-index-3-space-grid__img"
+                    alt=""
+                    data-space-slot="0"
+                  />
+                  <img
+                    class="feature-index-3-space-grid__img"
+                    alt=""
+                    data-space-slot="1"
+                  />
+                  <img
+                    class="feature-index-3-space-grid__img"
+                    alt=""
+                    data-space-slot="2"
+                  />
+                  <img
+                    class="feature-index-3-space-grid__img"
+                    alt=""
+                    data-space-slot="3"
+                  />
+                  <img
+                    class="feature-index-3-space-grid__img"
+                    alt=""
+                    data-space-slot="4"
+                  />
+                  <img
+                    class="feature-index-3-space-grid__img"
+                    alt=""
+                    data-space-slot="5"
+                  />
+                </div>
+              </div>
+              <div class="feature-text feature-index-3__mobile-text">
+                <p class="feature-body index-feature-3-mobile-copy">
+                  오롯이 자신에게 집중할 수 있는<br />
                   환경을 만드는 것.
-                </p>
-
-                <p class="feature-body feature-index-space-main">
+                  <br /><br />
                   그것이 그라포드가 생각하는<br />
                   공간의 본질입니다.
                 </p>
               </div>
-              <div
-                class="feature-index-about-progress feature-index-about-progress--third"
-                aria-label="Index feature 3 of 4"
-              >
-                <span aria-hidden="true"></span>
-                <span aria-hidden="true"></span>
-                <span class="is-active" aria-hidden="true"></span>
-                <span aria-hidden="true"></span>
-              </div>
-              <p class="feature-body index-feature-3-mobile-copy">
-                오롯이 자신에게 집중할 수 있는<br />
-                환경을 만드는 것.
-                <br /><br />
-                그것이 그라포드가 생각하는<br />
-                공간의 본질입니다.
-              </p>
             </div>
           </article>
           <article class="feature feature-index-4 scroll-fade">
@@ -321,6 +328,15 @@
                     >→</span
                   >
                 </a>
+                <div
+                  class="feature-index-about-progress feature-index-about-progress--fourth"
+                  aria-label="Index feature 4 of 4"
+                >
+                  <span aria-hidden="true"></span>
+                  <span aria-hidden="true"></span>
+                  <span aria-hidden="true"></span>
+                  <span class="is-active" aria-hidden="true"></span>
+                </div>
               </div>
             </div>
             <div class="feature-media index-location-map" aria-hidden="true">
@@ -471,125 +487,42 @@
             }, 5000);
           }
 
-          var indexAllRoomImages = [
-            "images/A00.jpg",
+          /* PC: [0] 좌 메인, [1–4] 중앙 2×2, [5] 우 메인 / 모바일: 순서대로 2×3 */
+          var indexFeature3SpaceImages = [
+            "images/space02.jpg",
             "images/A01.jpg",
-            "images/A02.jpg",
-            "images/B00.jpg",
-            "images/B01.jpg",
-            "images/B02.jpg",
-            "images/C00.jpg",
-            "images/C01.jpg",
-            "images/C02.jpg",
+            "images/reservation.jpeg",
+            "images/rooms.jpeg",
+            "images/GROUND.png",
             "images/D00.jpg",
-            "images/D01.jpg",
-            "images/D02.jpg",
-            "images/D03.jpg",
           ];
 
-          function startIndexAllRoomsGallery(slot) {
-            var imgs = indexAllRoomImages;
-            var imgEl = slot.querySelector(".room-slot-main-img");
-            var thumbsEl = slot.querySelector(".room-slot-thumbs");
-            var btnPrev = slot.querySelector(".room-slot-nav-prev");
-            var btnNext = slot.querySelector(".room-slot-nav-next");
-            if (!imgs.length || !imgEl || !thumbsEl) {
+          function initIndexFeature3SpaceGrid(layoutRoot, images, altPrefix) {
+            if (!layoutRoot || !images || !images.length) {
               return;
             }
-            var index = 0;
-            var fadeMs = 650;
-            var intervalMs = 5000;
-            var autoTimer = null;
-            var label = "객실";
-
-            function renderThumbs() {
-              thumbsEl.innerHTML = "";
-              imgs.forEach(function (_, i) {
-                var b = document.createElement("button");
-                b.type = "button";
-                b.className =
-                  "gallery-thumb" + (i === index ? " is-active" : "");
-                b.setAttribute("aria-label", label + " 사진 " + (i + 1));
-                b.addEventListener("click", function () {
-                  if (i === index) {
-                    return;
-                  }
-                  goToIndex(i);
-                  resetAutoTimer();
-                });
-                thumbsEl.appendChild(b);
-              });
-            }
-
-            function goToIndex(newIndex) {
-              newIndex = ((newIndex % imgs.length) + imgs.length) % imgs.length;
-              if (newIndex === index) {
-                return;
-              }
-              index = newIndex;
-              thumbsEl.classList.add("is-switching");
-              renderThumbs();
-              imgEl.classList.add("is-switching");
-              window.setTimeout(function () {
-                imgEl.src = imgs[index];
-                imgEl.alt = label + " 사진 " + (index + 1);
-                var onLoad = function () {
-                  imgEl.removeEventListener("load", onLoad);
-                  window.requestAnimationFrame(function () {
-                    imgEl.classList.remove("is-switching");
-                    thumbsEl.classList.remove("is-switching");
-                  });
-                };
-                imgEl.addEventListener("load", onLoad);
-                if (imgEl.complete) {
-                  window.requestAnimationFrame(function () {
-                    imgEl.classList.remove("is-switching");
-                    thumbsEl.classList.remove("is-switching");
-                  });
+            layoutRoot
+              .querySelectorAll(".feature-index-3-space-grid__img")
+              .forEach(function (img) {
+                var slot = Number(img.getAttribute("data-space-slot"));
+                var src = images[slot];
+                if (src) {
+                  img.src = src;
+                  img.alt = altPrefix + " " + (slot + 1);
                 }
-              }, fadeMs);
-            }
-
-            function goNext() {
-              goToIndex(index + 1);
-            }
-
-            function resetAutoTimer() {
-              if (autoTimer) {
-                window.clearInterval(autoTimer);
-              }
-              autoTimer = window.setInterval(goNext, intervalMs);
-            }
-
-            renderThumbs();
-            if (btnPrev) {
-              btnPrev.addEventListener("click", function () {
-                goToIndex(index - 1);
-                resetAutoTimer();
               });
-            }
-            if (btnNext) {
-              btnNext.addEventListener("click", function () {
-                goToIndex(index + 1);
-                resetAutoTimer();
-              });
-            }
-
-            window.setTimeout(function () {
-              resetAutoTimer();
-            }, 400);
           }
 
-          var indexGallerySlots = document.querySelectorAll(
-            ".room-image-slot--carousel",
-          );
-          indexGallerySlots.forEach(function (slot) {
-            if (slot.dataset.galleryInitialized === "true") {
-              return;
-            }
-            slot.dataset.galleryInitialized = "true";
-            startIndexAllRoomsGallery(slot);
-          });
+          document
+            .querySelectorAll(".feature-index-3__layout")
+            .forEach(function (layout) {
+              var isEn = !!layout.closest(".lang-en");
+              initIndexFeature3SpaceGrid(
+                layout,
+                indexFeature3SpaceImages,
+                isEn ? "Space photo" : "공간 사진",
+              );
+            });
         });
       </script>
       <script defer src="js/grafford-page-fade.js"></script>
@@ -812,72 +745,83 @@
             </div>
           </article>
           <article class="feature feature-index-3 scroll-fade">
-            <div class="feature-media feature-media--index-gallery">
-              <div
-                class="room-image-slot room-image-slot--carousel"
-                id="index-all-rooms-gallery-en"
-                aria-label="전체 객실 사진"
-              >
-                <div class="room-slot-gallery">
-                  <div class="gallery-main-wrap">
-                    <button
-                      type="button"
-                      class="gallery-nav gallery-prev room-slot-nav-prev"
-                      aria-label="이전 사진"
-                    >
-                      <
-                    </button>
-                    <img
-                      class="room-slot-main-img"
-                      src="images/A00.jpg"
-                      alt="객실 사진"
-                    />
-                    <button
-                      type="button"
-                      class="gallery-nav gallery-next room-slot-nav-next"
-                      aria-label="다음 사진"
-                    >
-                      >
-                    </button>
+            <div class="feature-index-3__layout">
+              <header class="feature-index-3__intro">
+                <div
+                  class="feature-index-3__head-row feature-index-space-head payment-section-head"
+                >
+                  <span class="payment-section-head__label">SPACE</span>
+                  <div
+                    class="feature-index-about-progress feature-index-about-progress--third"
+                    aria-label="Index feature 3 of 4"
+                  >
+                    <span aria-hidden="true"></span>
+                    <span aria-hidden="true"></span>
+                    <span class="is-active" aria-hidden="true"></span>
+                    <span aria-hidden="true"></span>
                   </div>
-                  <div class="gallery-thumbs room-slot-thumbs"></div>
                 </div>
-              </div>
-            </div>
-            <div class="feature-text">
-              <h2 class="feature-index-space-head payment-section-head">
-                <span class="payment-section-head__label">SPACE</span>
+                <div class="feature-index-space-copy feature-index-3__copy-row">
+                  <p class="feature-index-space-title">
+                    To create an environment<br />
+                    where one can focus entirely on oneself.
+                  </p>
+                  <p class="feature-body feature-index-space-sub">
+                    That is the essence of space<br />
+                    as envisioned by Grafford.
+                  </p>
+                </div>
                 <span
-                  class="payment-section-head__rule"
+                  class="feature-index-3__divider"
                   aria-hidden="true"
                 ></span>
-              </h2>
-              <div class="feature-index-space-copy">
-                <p class="feature-index-space-title">
+              </header>
+              <div class="feature-media feature-media--index-space">
+                <div
+                  class="feature-index-3-space-grid"
+                  aria-label="Space photos"
+                >
+                  <img
+                    class="feature-index-3-space-grid__img"
+                    alt=""
+                    data-space-slot="0"
+                  />
+                  <img
+                    class="feature-index-3-space-grid__img"
+                    alt=""
+                    data-space-slot="1"
+                  />
+                  <img
+                    class="feature-index-3-space-grid__img"
+                    alt=""
+                    data-space-slot="2"
+                  />
+                  <img
+                    class="feature-index-3-space-grid__img"
+                    alt=""
+                    data-space-slot="3"
+                  />
+                  <img
+                    class="feature-index-3-space-grid__img"
+                    alt=""
+                    data-space-slot="4"
+                  />
+                  <img
+                    class="feature-index-3-space-grid__img"
+                    alt=""
+                    data-space-slot="5"
+                  />
+                </div>
+              </div>
+              <div class="feature-text feature-index-3__mobile-text">
+                <p class="feature-body index-feature-3-mobile-copy">
                   To create an environment<br />
                   where one can focus entirely on oneself.
-                </p>
-                <p class="feature-body feature-index-space-main">
+                  <br /><br />
                   That is the essence of space<br />
                   as envisioned by Grafford.
                 </p>
               </div>
-              <div
-                class="feature-index-about-progress feature-index-about-progress--third"
-                aria-label="Index feature 3 of 4"
-              >
-                <span aria-hidden="true"></span>
-                <span aria-hidden="true"></span>
-                <span class="is-active" aria-hidden="true"></span>
-                <span aria-hidden="true"></span>
-              </div>
-              <p class="feature-body index-feature-3-mobile-copy">
-                To create an environment<br />
-                where one can focus entirely on oneself.
-                <br /><br />
-                That is the essence of space<br />
-                as envisioned by Grafford.
-              </p>
             </div>
           </article>
           <article class="feature feature-index-4 scroll-fade">
@@ -935,6 +879,15 @@
                     >→</span
                   >
                 </a>
+                <div
+                  class="feature-index-about-progress feature-index-about-progress--fourth"
+                  aria-label="Index feature 4 of 4"
+                >
+                  <span aria-hidden="true"></span>
+                  <span aria-hidden="true"></span>
+                  <span aria-hidden="true"></span>
+                  <span class="is-active" aria-hidden="true"></span>
+                </div>
               </div>
             </div>
             <div class="feature-media index-location-map" aria-hidden="true">

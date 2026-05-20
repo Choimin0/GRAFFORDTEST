@@ -354,6 +354,99 @@
                   </label>
                 </section>
 
+                <section class="confirm-section" aria-labelledby="sec-cancel">
+                  <h2 class="payment-section-head" id="sec-cancel">
+                    <span class="payment-section-head__label"
+                      >CANCELLATION POLICY</span
+                    >
+                    <span
+                      class="payment-section-head__rule"
+                      aria-hidden="true"
+                    ></span>
+                  </h2>
+                  <div class="confirm-policy-block">
+                    <p class="payment-policy-lead">
+                      결제 전 아래의 취소 및 환불 규정을 반드시 확인해 주세요.
+                    </p>
+                    <table class="payment-refund-table" aria-label="환불 규정">
+                      <thead>
+                        <tr>
+                          <th scope="col">취소 시점</th>
+                          <th scope="col">환불율</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <td>입실일로부터 15일 전</td>
+                          <td>100%</td>
+                        </tr>
+                        <tr>
+                          <td>입실일로부터 12일 전</td>
+                          <td>80%</td>
+                        </tr>
+                        <tr>
+                          <td>입실일로부터 9일 전</td>
+                          <td>70%</td>
+                        </tr>
+                        <tr>
+                          <td>입실일로부터 7일 전</td>
+                          <td>60%</td>
+                        </tr>
+                        <tr>
+                          <td>입실일로부터 5일 전</td>
+                          <td>50%</td>
+                        </tr>
+                        <tr class="payment-refund-table__row--danger">
+                          <td>입실일로부터 5일 이내</td>
+                          <td>환불 불가</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                    <div class="payment-callout payment-callout--green">
+                      <strong class="payment-callout__strong">특약</strong>
+                      — 천재 지변 또는 기상 악화로 인한 비행기·배 결항 시, 관련
+                      서류 제출 시 100% 환불됩니다.
+                    </div>
+
+                    <div class="payment-callout payment-callout--green">
+                      <strong class="payment-callout__strong"
+                        >24시간 내 무료 취소</strong
+                      >
+                      — 공정거래위원회 소비자분쟁해결기준에 의거하여, 예약을
+                      완료한 시점으로부터 24시간 이내에 취소할 경우 위약금 없이
+                      전액 환급됩니다.
+                      <p class="payment-callout__note">
+                        단, 사용 예정일(체크인 당일) 혹은 사용 예정일 전날
+                        예약한 경우에는 예약 후 24시간 이내이더라도 사용 예정일
+                        0시 이후 취소 시에는 자체 날짜별 환불 규정(위약금)이
+                        적용됩니다.
+                      </p>
+                    </div>
+                  </div>
+
+                  <label
+                    class="payment-method-option payment-method-option--no-icon confirm-consent-option confirm-consent-option--refund"
+                    for="agree-refund"
+                  >
+                    <input
+                      type="checkbox"
+                      name="agreeRefund"
+                      id="agree-refund"
+                      class="visually-hidden"
+                      value="1"
+                    />
+                    <span class="payment-method-option__text">
+                      <span class="payment-method-option__title"
+                        >취소 및 환불 규정 동의</span
+                      >
+                    </span>
+                    <span
+                      class="payment-method-option__check"
+                      aria-hidden="true"
+                    ></span>
+                  </label>
+                </section>
+
                 <section class="confirm-section" aria-labelledby="sec-agree">
                   <h2 class="payment-section-head" id="sec-agree">
                     <span class="payment-section-head__label"
@@ -545,7 +638,7 @@
                       id="guest-request-kr"
                       class="confirm-textarea"
                       rows="1"
-                      placeholder="입실 시간, 특별한 요청 사항 등을 자유롭게 남겨주세요."
+                      placeholder="요청 사항을 자유롭게 남겨주세요."
                     ></textarea>
                   </label>
                 </section>
@@ -1129,6 +1222,7 @@
           var agreeAll = document.getElementById("agree-all");
           var agreePrivacy = document.getElementById("agree-privacy");
           var agreePurchase = document.getElementById("agree-purchase");
+          var agreeRefund = document.getElementById("agree-refund");
           var agreePrivacyToggle = document.getElementById(
             "agree-privacy-toggle",
           );
@@ -1137,6 +1231,9 @@
           );
           var agreeSection = document
             .getElementById("sec-agree")
+            .closest("section");
+          var cancelSection = document
+            .getElementById("sec-cancel")
             .closest("section");
           var guideSection = document
             .getElementById("sec-guide")
@@ -1357,6 +1454,16 @@
             input.classList.toggle("confirm-input-error", !!hasError);
           }
 
+          function isValidConfirmEmail(input) {
+            if (!input) {
+              return false;
+            }
+            var val = input.value.trim();
+            return (
+              !!val && /^[^\s@]{1,64}@[^\s@]{1,255}\.[^\s@]{1,63}$/.test(val)
+            );
+          }
+
           function bookingApiUrl() {
             if (typeof window !== "undefined" && window.__GRAFFORD_API_BASE__) {
               return (
@@ -1375,6 +1482,10 @@
               agreeSection,
               !(agreePrivacy.checked && agreePurchase.checked),
             );
+            markSectionError(
+              cancelSection,
+              !(agreeRefund && agreeRefund.checked),
+            );
             markSectionError(guideSection, !agreeAll.checked);
           }
 
@@ -1385,6 +1496,7 @@
             var hasAgreeError = !(
               agreePrivacy.checked && agreePurchase.checked
             );
+            var hasRefundError = !(agreeRefund && agreeRefund.checked);
             var hasGuideError = !agreeAll.checked;
             var hasNameError = !guestNameInput.value.trim();
             var normalizedContact = contactInput
@@ -1396,31 +1508,43 @@
             var hasContactError = !/^\d{3}-\d{4}-\d{4}$/.test(
               normalizedContact,
             );
+            var hasEmailError = !isValidConfirmEmail(emailInput);
 
             var payInput = confirmForm.querySelector(
               'input[name="paymentMethod"]',
             );
 
             markSectionError(agreeSection, hasAgreeError);
+            markSectionError(cancelSection, hasRefundError);
             markSectionError(guideSection, hasGuideError);
             markInputError(guestNameInput, hasNameError);
             markInputError(contactInput, hasContactError);
+            markInputError(emailInput, hasEmailError);
 
             if (
               hasAgreeError ||
+              hasRefundError ||
               hasGuideError ||
               hasNameError ||
-              hasContactError
+              hasContactError ||
+              hasEmailError
             ) {
-              if (hasAgreeError && agreeSection) {
-                agreeSection.scrollIntoView({
+              if (hasGuideError && guideSection) {
+                guideSection.scrollIntoView({
                   behavior: "smooth",
                   block: "center",
                 });
                 return;
               }
-              if (hasGuideError && guideSection) {
-                guideSection.scrollIntoView({
+              if (hasRefundError && cancelSection) {
+                cancelSection.scrollIntoView({
+                  behavior: "smooth",
+                  block: "center",
+                });
+                return;
+              }
+              if (hasAgreeError && agreeSection) {
+                agreeSection.scrollIntoView({
                   behavior: "smooth",
                   block: "center",
                 });
@@ -1442,13 +1566,23 @@
                 });
                 return;
               }
+              if (hasEmailError && emailInput) {
+                emailInput.focus();
+                emailInput.scrollIntoView({
+                  behavior: "smooth",
+                  block: "center",
+                });
+                return;
+              }
               return;
             }
 
             markSectionError(agreeSection, false);
+            markSectionError(cancelSection, false);
             markSectionError(guideSection, false);
             markInputError(guestNameInput, false);
             markInputError(contactInput, false);
+            markInputError(emailInput, false);
             var nights = parseInt(
               document.getElementById("f-nights").value,
               10,
@@ -1475,14 +1609,6 @@
               return;
             }
             var emailVal = emailInput ? emailInput.value.trim() : "";
-            if (
-              !emailVal ||
-              !/^[^\s@]{1,64}@[^\s@]{1,255}\.[^\s@]{1,63}$/.test(emailVal)
-            ) {
-              window.alert("올바른 이메일 주소를 입력해 주세요.");
-              if (emailInput) emailInput.focus();
-              return;
-            }
             var orderNumber = R.generateOrderNumber();
             var room = document.getElementById("f-room").value;
             var checkIn = document.getElementById("f-checkin").value;
@@ -1613,7 +1739,7 @@
             }
           });
 
-          [guestNameInput, contactInput].forEach(function (el) {
+          [guestNameInput, contactInput, emailInput].forEach(function (el) {
             if (!el) {
               return;
             }
@@ -1626,15 +1752,18 @@
                 contactInput,
                 !/^\d{3}-\d{4}-\d{4}$/.test(contactInput.value.trim()),
               );
+              markInputError(emailInput, !isValidConfirmEmail(emailInput));
             });
           });
 
-          [agreeAll, agreePrivacy, agreePurchase].forEach(function (el) {
-            if (!el) {
-              return;
-            }
-            el.addEventListener("change", refreshConsentErrors);
-          });
+          [agreeAll, agreePrivacy, agreePurchase, agreeRefund].forEach(
+            function (el) {
+              if (!el) {
+                return;
+              }
+              el.addEventListener("change", refreshConsentErrors);
+            },
+          );
 
           if (agreePrivacyToggle && agreePrivacyDetail) {
             var detailFadeMs = 220;
@@ -1671,6 +1800,7 @@
             var agreeAllEn = document.getElementById("agree-all-en");
             var agreePrivacyEn = document.getElementById("agree-privacy-en");
             var agreePurchaseEn = document.getElementById("agree-purchase-en");
+            var agreeRefundEn = document.getElementById("agree-refund-en");
             var agreePrivacyToggleEn = document.getElementById(
               "agree-privacy-toggle-en",
             );
@@ -1678,6 +1808,7 @@
               "agree-privacy-detail-en",
             );
             var agreeSectionEn = document.getElementById("sec-agree-en");
+            var cancelSectionEn = document.getElementById("sec-cancel-en");
             var guideSectionEn = document.getElementById("sec-guide-en");
             var guestNameInputEn = document.getElementById("f-name-en");
             var emailInputEn = document.getElementById("f-email-en");
@@ -1699,6 +1830,10 @@
                 ),
               );
               markSectionError(
+                cancelSectionEn,
+                !(agreeRefundEn && agreeRefundEn.checked),
+              );
+              markSectionError(
                 guideSectionEn,
                 !(agreeAllEn && agreeAllEn.checked),
               );
@@ -1715,6 +1850,7 @@
                 agreePurchaseEn &&
                 agreePurchaseEn.checked
               );
+              var hasRefundError = !(agreeRefundEn && agreeRefundEn.checked);
               var hasGuideError = !(agreeAllEn && agreeAllEn.checked);
               var hasNameError = !(
                 guestNameInputEn && guestNameInputEn.value.trim()
@@ -1728,31 +1864,43 @@
               var hasContactError = !/^\d{3}-\d{4}-\d{4}$/.test(
                 normalizedContactEn,
               );
+              var hasEmailError = !isValidConfirmEmail(emailInputEn);
 
               var payInputEn = confirmFormEn.querySelector(
                 'input[name="paymentMethod"]',
               );
 
               markSectionError(agreeSectionEn, hasAgreeError);
+              markSectionError(cancelSectionEn, hasRefundError);
               markSectionError(guideSectionEn, hasGuideError);
               markInputError(guestNameInputEn, hasNameError);
               markInputError(contactInputEn, hasContactError);
+              markInputError(emailInputEn, hasEmailError);
 
               if (
                 hasAgreeError ||
+                hasRefundError ||
                 hasGuideError ||
                 hasNameError ||
-                hasContactError
+                hasContactError ||
+                hasEmailError
               ) {
-                if (hasAgreeError && agreeSectionEn) {
-                  agreeSectionEn.scrollIntoView({
+                if (hasGuideError && guideSectionEn) {
+                  guideSectionEn.scrollIntoView({
                     behavior: "smooth",
                     block: "center",
                   });
                   return;
                 }
-                if (hasGuideError && guideSectionEn) {
-                  guideSectionEn.scrollIntoView({
+                if (hasRefundError && cancelSectionEn) {
+                  cancelSectionEn.scrollIntoView({
+                    behavior: "smooth",
+                    block: "center",
+                  });
+                  return;
+                }
+                if (hasAgreeError && agreeSectionEn) {
+                  agreeSectionEn.scrollIntoView({
                     behavior: "smooth",
                     block: "center",
                   });
@@ -1774,13 +1922,23 @@
                   });
                   return;
                 }
+                if (hasEmailError && emailInputEn) {
+                  emailInputEn.focus();
+                  emailInputEn.scrollIntoView({
+                    behavior: "smooth",
+                    block: "center",
+                  });
+                  return;
+                }
                 return;
               }
 
               markSectionError(agreeSectionEn, false);
+              markSectionError(cancelSectionEn, false);
               markSectionError(guideSectionEn, false);
               markInputError(guestNameInputEn, false);
               markInputError(contactInputEn, false);
+              markInputError(emailInputEn, false);
 
               var nightsEn = parseInt(
                 document.getElementById("f-nights-en").value,
@@ -1808,16 +1966,6 @@
                 return;
               }
               var emailValEn = emailInputEn ? emailInputEn.value.trim() : "";
-              if (
-                !emailValEn ||
-                !/^[^\s@]{1,64}@[^\s@]{1,255}\.[^\s@]{1,63}$/.test(emailValEn)
-              ) {
-                window.alert("Please enter a valid email address.");
-                if (emailInputEn) {
-                  emailInputEn.focus();
-                }
-                return;
-              }
 
               var orderNumberEn = R.generateOrderNumber();
               var roomEn = document.getElementById("f-room-en").value;
@@ -1877,38 +2025,47 @@
               window.location.href = "payment.html";
             });
 
-            [guestNameInputEn, contactInputEn].forEach(function (el) {
-              if (!el) {
-                return;
-              }
-              el.addEventListener("input", function () {
-                if (!hasTriedSubmitEn) {
-                  return;
-                }
-                markInputError(
-                  guestNameInputEn,
-                  !(guestNameInputEn && guestNameInputEn.value.trim()),
-                );
-                markInputError(
-                  contactInputEn,
-                  !(
-                    contactInputEn &&
-                    /^\d{3}-\d{4}-\d{4}$/.test(
-                      formatPhoneKRMobile(contactInputEn.value),
-                    )
-                  ),
-                );
-              });
-            });
-
-            [agreeAllEn, agreePrivacyEn, agreePurchaseEn].forEach(
+            [guestNameInputEn, contactInputEn, emailInputEn].forEach(
               function (el) {
                 if (!el) {
                   return;
                 }
-                el.addEventListener("change", refreshConsentErrorsEn);
+                el.addEventListener("input", function () {
+                  if (!hasTriedSubmitEn) {
+                    return;
+                  }
+                  markInputError(
+                    guestNameInputEn,
+                    !(guestNameInputEn && guestNameInputEn.value.trim()),
+                  );
+                  markInputError(
+                    contactInputEn,
+                    !(
+                      contactInputEn &&
+                      /^\d{3}-\d{4}-\d{4}$/.test(
+                        formatPhoneKRMobile(contactInputEn.value),
+                      )
+                    ),
+                  );
+                  markInputError(
+                    emailInputEn,
+                    !isValidConfirmEmail(emailInputEn),
+                  );
+                });
               },
             );
+
+            [
+              agreeAllEn,
+              agreePrivacyEn,
+              agreePurchaseEn,
+              agreeRefundEn,
+            ].forEach(function (el) {
+              if (!el) {
+                return;
+              }
+              el.addEventListener("change", refreshConsentErrorsEn);
+            });
 
             if (agreePrivacyToggleEn && agreePrivacyDetailEn) {
               var detailFadeMsEn = 220;
@@ -2288,6 +2445,112 @@
                     <span class="payment-method-option__text">
                       <span class="payment-method-option__title"
                         >Agree all</span
+                      >
+                    </span>
+                    <span
+                      class="payment-method-option__check"
+                      aria-hidden="true"
+                    ></span>
+                  </label>
+                </section>
+
+                <section
+                  class="confirm-section"
+                  id="sec-cancel-en"
+                  aria-labelledby="sec-cancel-en-title"
+                >
+                  <h2 class="payment-section-head" id="sec-cancel-en-title">
+                    <span class="payment-section-head__label"
+                      >Cancellation policy</span
+                    >
+                    <span
+                      class="payment-section-head__rule"
+                      aria-hidden="true"
+                    ></span>
+                  </h2>
+                  <div class="confirm-policy-block">
+                    <p class="payment-policy-lead">
+                      By completing payment, you agree to the cancellation and
+                      refund terms below. Please review before you cancel a
+                      stay.
+                    </p>
+                    <table
+                      class="payment-refund-table"
+                      aria-label="Refund policy"
+                    >
+                      <thead>
+                        <tr>
+                          <th scope="col">Timing</th>
+                          <th scope="col">Refund</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <td>15+ days before check-in</td>
+                          <td>100%</td>
+                        </tr>
+                        <tr>
+                          <td>12 days before</td>
+                          <td>80%</td>
+                        </tr>
+                        <tr>
+                          <td>9 days before</td>
+                          <td>70%</td>
+                        </tr>
+                        <tr>
+                          <td>7 days before</td>
+                          <td>60%</td>
+                        </tr>
+                        <tr>
+                          <td>5 days before</td>
+                          <td>50%</td>
+                        </tr>
+                        <tr class="payment-refund-table__row--danger">
+                          <td>Within 5 days of check-in</td>
+                          <td>Non-refundable</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                    <div class="payment-callout payment-callout--green">
+                      <strong class="payment-callout__strong"
+                        >Special terms</strong
+                      >
+                      — For flight or ferry cancellations due to force majeure
+                      or severe weather, submit supporting documents for a 100%
+                      refund.
+                    </div>
+                    <div class="payment-callout payment-callout--green">
+                      <strong class="payment-callout__strong"
+                        >Free cancellation within 24 hours</strong
+                      >
+                      — Per the Fair Trade Commission’s consumer dispute
+                      resolution standards, cancellations made within 24 hours
+                      of completing your reservation are eligible for a full
+                      refund with no penalty.
+                      <p class="payment-callout__note">
+                        However, if you book on your check-in date or the day
+                        before your scheduled stay, cancellations after midnight
+                        on the check-in date are subject to our date-based
+                        refund policy (penalties apply), even when made within
+                        24 hours of booking.
+                      </p>
+                    </div>
+                  </div>
+
+                  <label
+                    class="payment-method-option payment-method-option--no-icon confirm-consent-option confirm-consent-option--refund"
+                    for="agree-refund-en"
+                  >
+                    <input
+                      type="checkbox"
+                      name="agreeRefund"
+                      id="agree-refund-en"
+                      class="visually-hidden"
+                      value="1"
+                    />
+                    <span class="payment-method-option__text">
+                      <span class="payment-method-option__title"
+                        >Cancellation &amp; refund policy agreement</span
                       >
                     </span>
                     <span
