@@ -73,6 +73,89 @@ function formatDateTimeKst(v) {
   }).format(d);
 }
 
+var FREE_CANCEL_WINDOW_MS = 24 * 60 * 60 * 1000;
+
+function formatYmdKst(d) {
+  return new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Asia/Seoul",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(d);
+}
+
+function ymdAddDays(ymd, deltaDays) {
+  var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(ymd || ""));
+  if (!m) return null;
+  var d = new Date(
+    Date.UTC(Number(m[1]), Number(m[2]) - 1, Number(m[3]) + deltaDays),
+  );
+  var y = d.getUTCFullYear();
+  var mo = String(d.getUTCMonth() + 1).padStart(2, "0");
+  var da = String(d.getUTCDate()).padStart(2, "0");
+  return y + "-" + mo + "-" + da;
+}
+
+/** check_in_date (DATE / string / Date) → YYYY-MM-DD */
+function normalizeCheckInYmd(v) {
+  if (v == null || v === "") return null;
+  if (typeof v === "string") {
+    var s = v.trim();
+    var mm = /^(\d{4}-\d{2}-\d{2})/.exec(s);
+    if (mm) return mm[1];
+  }
+  var d = new Date(v);
+  if (isNaN(d.getTime())) return null;
+  return d.toISOString().slice(0, 10);
+}
+
+function remainDaysUntilCheckInKst(checkInYmd) {
+  if (!checkInYmd) return 0;
+  var todayYmd = formatYmdKst(new Date());
+  var a = Date.UTC(
+    Number(todayYmd.slice(0, 4)),
+    Number(todayYmd.slice(5, 7)) - 1,
+    Number(todayYmd.slice(8, 10)),
+  );
+  var b = Date.UTC(
+    Number(checkInYmd.slice(0, 4)),
+    Number(checkInYmd.slice(5, 7)) - 1,
+    Number(checkInYmd.slice(8, 10)),
+  );
+  return Math.floor((b - a) / 86400000);
+}
+
+function policyCancellationFeePercent(remainDays) {
+  if (remainDays > 15) return 0;
+  if (remainDays >= 12) return 20;
+  if (remainDays >= 9) return 30;
+  if (remainDays >= 7) return 40;
+  if (remainDays >= 5) return 50;
+  return 100;
+}
+
+/**
+ * 취소 시 부과되는 위약금 비율(%). 0이면 전액 환불.
+ * — 예약 완료(created_at) 후 24시간 이내 + 체크인 당일·전날 예약이 아니면 0%.
+ * — 체크인 당일 또는 전날에 예약한 경우에는 24시간 이내라도 날짜별 규정만 적용.
+ */
+function computeCancellationFeePercent(row) {
+  var checkInYmd = normalizeCheckInYmd(row.check_in_date);
+  if (!checkInYmd) return 100;
+  var remain = remainDaysUntilCheckInKst(checkInYmd);
+  var policyPct = policyCancellationFeePercent(remain);
+  var created = row.created_at ? new Date(row.created_at) : null;
+  if (!created || isNaN(created.getTime())) return policyPct;
+  var bookingYmdKst = formatYmdKst(created);
+  var dayBefore = ymdAddDays(checkInYmd, -1);
+  var isLastMinuteBooking =
+    bookingYmdKst === checkInYmd ||
+    (dayBefore != null && bookingYmdKst === dayBefore);
+  var within24h = Date.now() - created.getTime() <= FREE_CANCEL_WINDOW_MS;
+  if (!isLastMinuteBooking && within24h) return 0;
+  return policyPct;
+}
+
 function normalizeLookupName(s) {
   return String(s || "")
     .trim()
@@ -286,7 +369,6 @@ export default async function handler(req, res) {
   var cancelReason = String(body.cancelReason || "")
     .trim()
     .slice(0, MAX_CANCEL_REASON);
-  var refundAmount = body.refundAmount != null ? Number(body.refundAmount) : null;
 
   if (!reservationNumber) {
     json(res, 400, { ok: false, error: "reservationNumber가 필요합니다." });
@@ -354,7 +436,8 @@ export default async function handler(req, res) {
     }
 
     var pgTid = row.pg_tid ? String(row.pg_tid).trim() : null;
-    var totalAmount = row.total_amount != null ? Number(row.total_amount) : null;
+    var totalAmountRaw = row.total_amount != null ? Number(row.total_amount) : null;
+    var totalAmountNum = Number.isFinite(totalAmountRaw) ? totalAmountRaw : 0;
     // payment_method: "bank" / "무통장입금" 이면 PG 취소 불필요; 그 외(card 등)는 PortOne 취소
     var paymentMethodDb = String(row.payment_method || "").toLowerCase().trim();
     var isBankTransfer =
@@ -362,17 +445,15 @@ export default async function handler(req, res) {
       paymentMethodDb === "무통장입금" ||
       paymentMethodDb === "bank_transfer";
 
-    // refundAmount 유효성 체크: totalAmount 초과 불가
-    var safeRefundAmount = refundAmount;
-    if (
-      Number.isFinite(safeRefundAmount) &&
-      Number.isFinite(totalAmount) &&
-      safeRefundAmount > totalAmount
-    ) {
-      safeRefundAmount = totalAmount;
-    }
-    if (!Number.isFinite(safeRefundAmount) || safeRefundAmount < 0) {
-      safeRefundAmount = totalAmount;
+    var feePercent = computeCancellationFeePercent(row);
+    var serverRefundAmount = Math.max(
+      0,
+      Math.round(totalAmountNum * ((100 - feePercent) / 100)),
+    );
+    // 클라이언트가 보낸 금액은 참고만 하고, DB 기준으로 재산출(조작 방지)
+    var safeRefundAmount = serverRefundAmount;
+    if (safeRefundAmount > totalAmountNum) {
+      safeRefundAmount = totalAmountNum;
     }
 
     console.log(
@@ -380,7 +461,8 @@ export default async function handler(req, res) {
       "| pg_tid:", pgTid,
       "| payment_method(DB):", paymentMethodDb,
       "| isBankTransfer:", isBankTransfer,
-      "| totalAmount:", totalAmount,
+      "| totalAmount:", totalAmountNum,
+      "| cancellationFeePercent:", feePercent,
       "| safeRefundAmount:", safeRefundAmount,
     );
 
@@ -395,7 +477,7 @@ export default async function handler(req, res) {
         reservationNumber, // PortOne paymentId = 결제 시 사용한 orderNo (= reservationNumber)
         cancelReason || "고객 요청 취소",
         safeRefundAmount,
-        totalAmount,
+        totalAmountNum,
       );
       if (!portoneResult.ok) {
         // PortOne에 해당 결제가 없는 경우(404/payment not found)는 DB 취소만 진행
@@ -463,8 +545,11 @@ export default async function handler(req, res) {
       cancelledAt: formatDateTimeKst(new Date()),
       reservationNumber: reservationNumber,
       refundAmount: safeRefundAmount,    // 실제 환불 처리된 금액
-      totalAmount: totalAmount,          // 원래 결제 금액
-      isPartialRefund: pgCancelled && Number.isFinite(safeRefundAmount) && Number.isFinite(totalAmount) && safeRefundAmount > 0 && safeRefundAmount < totalAmount,
+      totalAmount: totalAmountNum,       // 원래 결제 금액
+      isPartialRefund:
+        pgCancelled &&
+        safeRefundAmount > 0 &&
+        safeRefundAmount < totalAmountNum,
     });
   } catch (e) {
     try { client.release(); } catch (_) {}

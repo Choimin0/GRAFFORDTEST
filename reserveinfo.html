@@ -264,6 +264,7 @@
               payMethod: data.payMethod || "",
               bankConfirmed: data.bankConfirmed === true,
               cancelToken: data.cancelToken || "",
+              bookingCreatedAtIso: data.bookingCreatedAtIso || "",
             }),
           );
           window.location.href = "reserve-check.html";
@@ -381,6 +382,7 @@
                     payMethod: row.paymentMethod || "",
                     bankConfirmed: row.bankConfirmed === true,
                     cancelToken: result.data.cancelToken || "",
+                    bookingCreatedAtIso: row.createdAtIso || "",
                   });
                   return;
                 }

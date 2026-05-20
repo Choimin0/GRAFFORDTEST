@@ -490,6 +490,14 @@
             return base + "/api/payment-cancel";
           }
 
+          function reservationsLookupApiUrl() {
+            var base = "";
+            if (typeof window !== "undefined" && window.__GRAFFORD_API_BASE__) {
+              base = String(window.__GRAFFORD_API_BASE__).replace(/\/$/, "");
+            }
+            return base + "/api/reservations-lookup";
+          }
+
           var pageLoadingOverlay = document.getElementById(
             "page-loading-overlay",
           );
@@ -509,52 +517,174 @@
             }
           }
 
-          function parseYMD(s) {
-            if (!/^\d{4}-\d{2}-\d{2}$/.test(s || "")) {
-              return null;
-            }
-            var p = s.split("-");
-            return new Date(Number(p[0]), Number(p[1]) - 1, Number(p[2]));
-          }
-
           // 결제·환불 기준 금액: reservations.total_amount (세션 payload의 amount / totalAmount)
-          // booking-pricing 재계산은 사용하지 않음(현재 room-rate와 무관하게 실제 청구액 표시)
           var paidAmount =
             parseInt((saved && saved.amount) || "0", 10) ||
             parseInt((saved && saved.totalAmount) || "0", 10) ||
             0;
 
-          var today = new Date();
-          var todayDate = new Date(
-            today.getFullYear(),
-            today.getMonth(),
-            today.getDate(),
-          );
-          var checkInDate = parseYMD(checkIn);
-          var remainDate = 0;
-          if (checkInDate) {
-            remainDate = Math.floor((checkInDate - todayDate) / 86400000);
+          var FREE_CANCEL_WINDOW_MS = 24 * 60 * 60 * 1000;
+
+          function formatYmdKst(d) {
+            return new Intl.DateTimeFormat("en-CA", {
+              timeZone: "Asia/Seoul",
+              year: "numeric",
+              month: "2-digit",
+              day: "2-digit",
+            }).format(d);
           }
 
-          var refundCharge = 100;
-          if (remainDate > 15) {
-            refundCharge = 0;
-          } else if (remainDate >= 12) {
-            refundCharge = 20;
-          } else if (remainDate >= 9) {
-            refundCharge = 30;
-          } else if (remainDate >= 7) {
-            refundCharge = 40;
-          } else if (remainDate >= 5) {
-            refundCharge = 50;
-          } else {
-            refundCharge = 100;
+          function ymdAddDays(ymd, deltaDays) {
+            var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(ymd || ""));
+            if (!m) return null;
+            var d = new Date(
+              Date.UTC(
+                Number(m[1]),
+                Number(m[2]) - 1,
+                Number(m[3]) + deltaDays,
+              ),
+            );
+            var y = d.getUTCFullYear();
+            var mo = String(d.getUTCMonth() + 1).padStart(2, "0");
+            var da = String(d.getUTCDate()).padStart(2, "0");
+            return y + "-" + mo + "-" + da;
           }
 
-          var refundAmount = Math.max(
-            0,
-            Math.round(paidAmount * ((100 - refundCharge) / 100)),
-          );
+          function normalizeCheckInYmdLocal(s) {
+            var t = String(s || "").trim();
+            if (!/^\d{4}-\d{2}-\d{2}$/.test(t)) return null;
+            return t.slice(0, 10);
+          }
+
+          function remainDaysUntilCheckInKst(checkInYmd) {
+            if (!checkInYmd) return 0;
+            var todayYmd = formatYmdKst(new Date());
+            var a = Date.UTC(
+              Number(todayYmd.slice(0, 4)),
+              Number(todayYmd.slice(5, 7)) - 1,
+              Number(todayYmd.slice(8, 10)),
+            );
+            var b = Date.UTC(
+              Number(checkInYmd.slice(0, 4)),
+              Number(checkInYmd.slice(5, 7)) - 1,
+              Number(checkInYmd.slice(8, 10)),
+            );
+            return Math.floor((b - a) / 86400000);
+          }
+
+          function policyCancellationFeePercent(remainDays) {
+            if (remainDays > 15) return 0;
+            if (remainDays >= 12) return 20;
+            if (remainDays >= 9) return 30;
+            if (remainDays >= 7) return 40;
+            if (remainDays >= 5) return 50;
+            return 100;
+          }
+
+          var refundAmount = 0;
+          var refundCharge = 0;
+
+          function setText(id, value) {
+            var el = document.getElementById(id);
+            if (el) el.textContent = value;
+          }
+
+          function applyRefundUi(bookingCreatedAtIsoStr) {
+            var checkInYmd = normalizeCheckInYmdLocal(checkIn);
+            var remainDate = checkInYmd
+              ? remainDaysUntilCheckInKst(checkInYmd)
+              : 0;
+            var policyCharge = policyCancellationFeePercent(remainDate);
+            var bookingTime = bookingCreatedAtIsoStr
+              ? new Date(bookingCreatedAtIsoStr)
+              : null;
+            var within24h =
+              bookingTime &&
+              !isNaN(bookingTime.getTime()) &&
+              Date.now() - bookingTime.getTime() <= FREE_CANCEL_WINDOW_MS;
+            var bookingYmdKst =
+              bookingTime && !isNaN(bookingTime.getTime())
+                ? formatYmdKst(bookingTime)
+                : "";
+            var dayBefore = checkInYmd ? ymdAddDays(checkInYmd, -1) : null;
+            var isLastMinuteBooking =
+              !!checkInYmd &&
+              (bookingYmdKst === checkInYmd ||
+                (dayBefore != null && bookingYmdKst === dayBefore));
+            var freeByGrace = !!within24h && !isLastMinuteBooking;
+            refundCharge = freeByGrace ? 0 : policyCharge;
+            refundAmount = Math.max(
+              0,
+              Math.round(paidAmount * ((100 - refundCharge) / 100)),
+            );
+
+            var refundTextKr = formatKRW(refundAmount);
+            var refundTextEn = formatKRWEn(refundAmount);
+
+            var summaryKr;
+            var summaryEn;
+            if (freeByGrace && policyCharge > 0) {
+              summaryKr =
+                "예약 완료 시점 기준 24시간 이내 취소로, 위약금 없이 전액 환불이 적용됩니다.";
+              summaryEn =
+                "A full refund applies with no penalty because you are cancelling within 24 hours of completing your reservation.";
+            } else if (refundCharge === 0) {
+              summaryKr =
+                "입실일까지 남은 날짜 " +
+                remainDate +
+                "일 기준, 환불 수수료 0%가 적용됩니다.";
+              summaryEn =
+                "Based on " +
+                remainDate +
+                " day(s) before check-in, a 0% cancellation fee applies.";
+            } else {
+              summaryKr =
+                "입실일까지 남은 날짜 " +
+                remainDate +
+                "일 기준, 환불 수수료 " +
+                refundCharge +
+                "%가 적용됩니다.";
+              summaryEn =
+                "Based on " +
+                remainDate +
+                " day(s) until check-in, a cancellation fee of " +
+                refundCharge +
+                "% applies.";
+              if (isLastMinuteBooking && within24h) {
+                summaryKr +=
+                  " (체크인 당일·전날 예약은 예약 완료 후 24시간 이내라도 날짜별 규정이 적용됩니다.)";
+                summaryEn +=
+                  " (Bookings made on the check-in date or the day before follow the date-based policy even within 24 hours.)";
+              }
+            }
+
+            var rsk = document.getElementById("refund-rule-summary");
+            var rse = document.getElementById("refund-rule-summary-en");
+            if (rsk) rsk.textContent = summaryKr;
+            if (rse) rse.textContent = summaryEn;
+            setText("refund-amount-display-kr", refundTextKr);
+            setText("refund-amount-display-en", refundTextEn);
+            var noteKr;
+            var noteEn;
+            if (refundAmount <= 0) {
+              noteKr =
+                "현재 일정 기준으로 환불 금액이 없습니다. 위의 환불 규정을 참고해 주세요.";
+              noteEn =
+                "Based on the policy above, no refund applies to this cancellation.";
+            } else if (payMethod === "bank") {
+              noteKr =
+                "예상 환불 금액이며, 무통장 입금 건은 확인 후 수동 처리될 수 있습니다.";
+              noteEn =
+                "Estimated refund; bank transfers may be processed manually after verification.";
+            } else {
+              noteKr =
+                "예상 환불 금액이며, 카드사에 따라 영업일 기준 3~5일 내 처리될 수 있습니다.";
+              noteEn =
+                "Estimated refund; card refunds typically finalize within 3–5 business days.";
+            }
+            setText("refund-amount-note-kr", noteKr);
+            setText("refund-amount-note-en", noteEn);
+          }
 
           var cancelOrderTextEl = document.getElementById("cancel-order-text");
           var cancelOrderTextEnEl = document.getElementById(
@@ -609,13 +739,6 @@
           var scheduleText = (checkIn || "—") + " ~ " + (checkOut || "—");
           var amountTextKr = formatKRW(paidAmount);
           var amountTextEn = formatKRWEn(paidAmount);
-          var refundTextKr = formatKRW(refundAmount);
-          var refundTextEn = formatKRWEn(refundAmount);
-
-          function setText(id, value) {
-            var el = document.getElementById(id);
-            if (el) el.textContent = value;
-          }
 
           // Korean
           setText("cancel-room", roomText);
@@ -638,40 +761,76 @@
           setText("resdel-band-booking-en", "BOOKING NO. " + orderNo);
           setText("resdel-band-ground-en", "GROUND " + roomText);
 
-          document.getElementById("refund-rule-summary").textContent =
-            "입실일로부터 남은 날짜 " +
-            remainDate +
-            "일 기준, 환불 수수료 " +
-            refundCharge +
-            "%가 적용됩니다.";
-          document.getElementById("refund-rule-summary-en").textContent =
-            "Based on the remaining days until the check-in date (" +
-            remainDate +
-            " days), the refund fee of " +
-            refundCharge +
-            "% will be applied.";
-          setText("refund-amount-display-kr", refundTextKr);
-          setText("refund-amount-display-en", refundTextEn);
-          var noteKr;
-          var noteEn;
-          if (refundAmount <= 0) {
-            noteKr =
-              "현재 일정 기준으로 환불 금액이 없습니다. 위의 환불 규정을 참고해 주세요.";
-            noteEn =
-              "Based on the policy above, no refund applies to this cancellation.";
-          } else if (payMethod === "bank") {
-            noteKr =
-              "예상 환불 금액이며, 무통장 입금 건은 확인 후 수동 처리될 수 있습니다.";
-            noteEn =
-              "Estimated refund; bank transfers may be processed manually after verification.";
-          } else {
-            noteKr =
-              "예상 환불 금액이며, 카드사에 따라 영업일 기준 3~5일 내 처리될 수 있습니다.";
-            noteEn =
-              "Estimated refund; card refunds typically finalize within 3–5 business days.";
+          function wireCancelFlowsAfterRefund() {
+            setTimeout(function () {
+              bindCancelFlow({
+                isEn: false,
+                reasonName: "cancelReason",
+                otherInputId: "cancel-reason-other",
+                otherWrapId: "cancel-other-wrap-kr",
+                modalId: "cancel-modal",
+                openBtnId: "cancel-submit-btn",
+                yesBtnId: "cancel-modal-yes",
+                noBtnId: "cancel-modal-no",
+                modalTitleId: "cancel-modal-title",
+              });
+              bindCancelFlow({
+                isEn: true,
+                reasonName: "cancelReasonEn",
+                otherInputId: "cancel-reason-other-en",
+                otherWrapId: "cancel-other-wrap-en",
+                modalId: "cancel-modal-en",
+                openBtnId: "cancel-submit-btn-en",
+                yesBtnId: "cancel-modal-yes-en",
+                noBtnId: "cancel-modal-no-en",
+                modalTitleId: "cancel-modal-title-en",
+              });
+            }, 0);
           }
-          setText("refund-amount-note-kr", noteKr);
-          setText("refund-amount-note-en", noteEn);
+
+          var embeddedBookingIso =
+            (saved && saved.bookingCreatedAtIso) || "";
+          if (embeddedBookingIso) {
+            applyRefundUi(embeddedBookingIso);
+            wireCancelFlowsAfterRefund();
+          } else {
+            var lookupOrder = String(orderNo || "").trim();
+            var lookupName = String(name || "").trim();
+            if (
+              lookupOrder &&
+              lookupOrder !== "—" &&
+              lookupName &&
+              lookupName !== "—"
+            ) {
+              fetch(reservationsLookupApiUrl(), {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  guestName: lookupName,
+                  reservationNumber: lookupOrder,
+                }),
+              })
+                .then(function (r) {
+                  return r.json();
+                })
+                .then(function (data) {
+                  var iso =
+                    data && data.ok && data.row && data.row.createdAtIso
+                      ? data.row.createdAtIso
+                      : "";
+                  applyRefundUi(iso);
+                })
+                .catch(function () {
+                  applyRefundUi("");
+                })
+                .finally(function () {
+                  wireCancelFlowsAfterRefund();
+                });
+            } else {
+              applyRefundUi("");
+              wireCancelFlowsAfterRefund();
+            }
+          }
 
           function bindCancelFlow(config) {
             var langRoot = document.querySelector(
@@ -994,30 +1153,6 @@
             });
           }
 
-          setTimeout(function () {
-            bindCancelFlow({
-              isEn: false,
-              reasonName: "cancelReason",
-              otherInputId: "cancel-reason-other",
-              otherWrapId: "cancel-other-wrap-kr",
-              modalId: "cancel-modal",
-              openBtnId: "cancel-submit-btn",
-              yesBtnId: "cancel-modal-yes",
-              noBtnId: "cancel-modal-no",
-              modalTitleId: "cancel-modal-title",
-            });
-            bindCancelFlow({
-              isEn: true,
-              reasonName: "cancelReasonEn",
-              otherInputId: "cancel-reason-other-en",
-              otherWrapId: "cancel-other-wrap-en",
-              modalId: "cancel-modal-en",
-              openBtnId: "cancel-submit-btn-en",
-              yesBtnId: "cancel-modal-yes-en",
-              noBtnId: "cancel-modal-no-en",
-              modalTitleId: "cancel-modal-title-en",
-            });
-          }, 0);
         });
       </script>
       <script defer src="js/grafford-page-fade.js"></script>

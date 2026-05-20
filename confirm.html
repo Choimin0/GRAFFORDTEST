@@ -416,9 +416,8 @@
                       완료한 시점으로부터 24시간 이내에 취소할 경우 위약금 없이
                       전액 환급됩니다.
                       <p class="payment-callout__note">
-                        단, 사용 예정일(체크인 당일) 혹은 사용 예정일 전날
-                        예약한 경우에는 예약 후 24시간 이내이더라도 사용 예정일
-                        0시 이후 취소 시에는 날짜별 환불 규정(위약금)이
+                        단, 체크인 당일 또는 체크인 전날에 예약한 경우에는 예약
+                        완료 후 24시간 이내에 취소하더라도 날짜별 환불 규정(위약금)이
                         적용됩니다.
                       </p>
                     </div>
@@ -1696,6 +1695,8 @@
                       payMethod: payInput.value,
                       cancelToken:
                         (result.data && result.data.cancelToken) || "",
+                      bookingCreatedAtIso:
+                        (result.data && result.data.createdAtIso) || "",
                       bankConfirmed: !!(
                         result.data && result.data.bankConfirmed === true
                       ),
@@ -2529,10 +2530,9 @@
                       refund with no penalty.
                       <p class="payment-callout__note">
                         However, if you book on your check-in date or the day
-                        before your scheduled stay, cancellations after midnight
-                        on the check-in date are subject to our date-based
-                        refund policy (penalties apply), even when made within
-                        24 hours of booking.
+                        before check-in, the date-based cancellation policy
+                        (penalties) applies even if you cancel within 24 hours of
+                        completing your reservation.
                       </p>
                     </div>
                   </div>

@@ -1194,6 +1194,8 @@
               fetchedCancelToken =
                 (saveData && saveData.cancelToken) || fetchedCancelToken;
             }
+            var bookingCreatedAtIso =
+              (saveData && saveData.createdAtIso) || "";
             sessionStorage.removeItem("graffordInPaymentFlow");
 
             sessionStorage.setItem(
@@ -1212,6 +1214,7 @@
                 totalAmount: String(finalAmount),
                 payMethod: payMethod,
                 cancelToken: fetchedCancelToken,
+                bookingCreatedAtIso: bookingCreatedAtIso,
                 bankConfirmed: false,
               }),
             );
@@ -2409,6 +2412,8 @@
               fetchedCancelToken2 =
                 (saveData2 && saveData2.cancelToken) || fetchedCancelToken2;
             }
+            var bookingCreatedAtIso2 =
+              (saveData2 && saveData2.createdAtIso) || "";
             sessionStorage.removeItem("graffordInPaymentFlow");
 
             sessionStorage.setItem(
@@ -2427,6 +2432,7 @@
                 totalAmount: String(finalAmount),
                 payMethod: payMethod,
                 cancelToken: fetchedCancelToken2,
+                bookingCreatedAtIso: bookingCreatedAtIso2,
                 bankConfirmed: false,
               }),
             );

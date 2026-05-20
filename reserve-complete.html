@@ -396,6 +396,8 @@
           var payMethod = (saved && saved.payMethod) || "";
           var bankConfirmed = saved && saved.bankConfirmed === true;
           var cancelToken = (saved && saved.cancelToken) || "";
+          var bookingCreatedAtIso =
+            (saved && saved.bookingCreatedAtIso) || "";
           var orderTextEl = document.getElementById("complete-order-no-text");
           if (orderTextEl) {
             orderTextEl.textContent = orderNo || "번호를 확인할 수 없습니다.";
@@ -652,6 +654,7 @@
             bankConfirmed: bankConfirmed === true,
             request: guestRequest || "",
             cancelToken: cancelToken || "",
+            bookingCreatedAtIso: bookingCreatedAtIso || "",
           };
           var cancelPayloadStr = JSON.stringify(cancelPayload);
           var cancelLink = document.getElementById("complete-link-cancel");

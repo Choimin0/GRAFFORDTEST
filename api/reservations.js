@@ -822,6 +822,9 @@ export default async function handler(req, res) {
           paymentMethod: dbRow.payment_method || null,
           bankConfirmed: dbRow.bank_confirmed === true,
           createdAt: formatDateTimeKst(dbRow.created_at),
+          createdAtIso: dbRow.created_at
+            ? new Date(dbRow.created_at).toISOString()
+            : null,
         },
       });
     } catch (e) {
@@ -1077,11 +1080,39 @@ export default async function handler(req, res) {
       id: row.id,
       reservationNumber: row.reservation_number,
       createdAt: formatDateTimeKst(row.created_at),
+      createdAtIso: new Date(row.created_at).toISOString(),
       cancelToken: issueCancelToken(reservationNumber, guestName),
       bankConfirmed: paymentMethod === "bank" ? false : true,
     });
   } catch (e) {
     if (e && e.code === "23505") {
+      try {
+        var dupSel = await pool.query(
+          `SELECT created_at, guest_name, bank_confirmed, payment_method
+           FROM ${BOOKING_TABLE}
+           WHERE reservation_number = $1
+           LIMIT 1`,
+          [reservationNumber],
+        );
+        if (dupSel.rows && dupSel.rows.length) {
+          var dupRow = dupSel.rows[0];
+          if (
+            normalizeLookupName(dupRow.guest_name) ===
+            normalizeLookupName(guestName)
+          ) {
+            json(res, 409, {
+              ok: true,
+              duplicate: true,
+              createdAtIso: new Date(dupRow.created_at).toISOString(),
+              cancelToken: issueCancelToken(reservationNumber, guestName),
+              bankConfirmed: dupRow.bank_confirmed === true,
+            });
+            return;
+          }
+        }
+      } catch (dupErr) {
+        console.error("[reservations POST] duplicate follow-up query", dupErr);
+      }
       json(res, 409, { ok: false, error: "Duplicate reservation number" });
       return;
     }

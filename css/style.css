@@ -389,7 +389,7 @@ html {
   gap: 0.38rem;
   margin-right: 0.4rem;
   font-family: var(--font-family-nav-en);
-  letter-spacing: var(--letter-spacing-nav);
+  letter-spacing: 0;
   font-weight: 600;
   margin-bottom: 0.18rem;
 }

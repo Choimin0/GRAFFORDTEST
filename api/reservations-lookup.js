@@ -291,6 +291,9 @@ export default async function handler(req, res) {
           paymentMethod: row.payment_method || null,
           bankConfirmed: row.bank_confirmed === true,
           createdAt: formatDateTimeKst(row.created_at),
+          createdAtIso: row.created_at
+            ? new Date(row.created_at).toISOString()
+            : null,
         },
         cancelToken: issueCancelToken(row.reservation_number, row.guest_name),
       });
@@ -318,6 +321,9 @@ export default async function handler(req, res) {
         paymentMethod: row.payment_method || null,
         bankConfirmed: row.bank_confirmed === true,
         createdAt: formatDateTimeKst(row.created_at),
+        createdAtIso: row.created_at
+          ? new Date(row.created_at).toISOString()
+          : null,
         cancelReason: row.cancel_reason || "",
       },
     });
