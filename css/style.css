@@ -7284,6 +7284,7 @@ main.content-section.confirm-page.payment-page > #payment-error-area-en {
   text-transform: uppercase;
 }
 
+.payment-refund-table th:last-child,
 .payment-refund-table td:last-child {
   text-align: right;
   white-space: nowrap;
