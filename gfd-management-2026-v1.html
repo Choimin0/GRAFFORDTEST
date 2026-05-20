@@ -473,13 +473,17 @@
                     <span class="admin-sort-icons" aria-hidden="true"></span>
                   </button>
                 </th>
-                <th>
+                <th class="admin-res-col-amount">
                   <button
                     type="button"
                     class="admin-sortable-head"
                     data-admin-sort="amount"
                   >
-                    <span id="admin-res-amount-label">금액</span>
+                    <span
+                      id="admin-res-amount-label"
+                      class="admin-res-amount-label"
+                      >금액</span
+                    >
                     <span class="admin-sort-icons" aria-hidden="true"></span>
                   </button>
                 </th>
@@ -3595,7 +3599,7 @@
         function renderSortIndicators() {
           sortableHeadBtns.forEach(function (btn) {
             var key = btn.getAttribute("data-admin-sort");
-            var icon = btn.querySelector("span");
+            var icon = btn.querySelector(".admin-sort-icons");
             var isActive = key === sortKey && !!sortDirection;
             btn.classList.toggle("is-sorted", isActive);
             btn.classList.toggle("is-asc", isActive && sortDirection === "asc");
@@ -3648,7 +3652,7 @@
               cancelCell =
                 "<td class='admin-res-col-cancel'><button type='button' class='admin-reservation-cancel-badge' data-reservation-number='" +
                 escapeHtml(row.reservationNumber || "") +
-                "' aria-label='관리자 직접 취소'>취소</button></td>";
+                "' aria-label='관리자 취소'>취소</button></td>";
             } else if (activeResTab === "deleted") {
               cancelCell =
                 "<td class='admin-res-col-cancel admin-sort-hover-cell'>" +

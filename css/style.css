@@ -11997,6 +11997,16 @@ main.content-section.confirm-page.admin-page {
   width: 6%;
   padding: 0.85rem 0.75rem 0.75rem;
 }
+.admin-reservation-table th.admin-res-col-amount,
+.admin-reservation-table td.admin-res-col-amount {
+  min-width: 5.5rem;
+}
+.admin-res-amount-label {
+  flex-shrink: 0;
+}
+.admin-sortable-head .admin-res-amount-label {
+  letter-spacing: 0.12em;
+}
 .admin-reservation-table th.admin-res-col-payment,
 .admin-reservation-table td.admin-res-col-payment {
   text-align: center;
