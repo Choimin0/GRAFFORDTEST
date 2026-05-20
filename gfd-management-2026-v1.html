@@ -479,7 +479,7 @@
                     class="admin-sortable-head"
                     data-admin-sort="amount"
                   >
-                    금액
+                    <span id="admin-res-amount-label">금액</span>
                     <span class="admin-sort-icons" aria-hidden="true"></span>
                   </button>
                 </th>
@@ -493,7 +493,9 @@
                     <span class="admin-sort-icons" aria-hidden="true"></span>
                   </button>
                 </th>
-                <th class="admin-res-col-cancel">취소</th>
+                <th class="admin-res-col-cancel" id="admin-res-cancel-head">
+                  취소
+                </th>
                 <th class="admin-res-col-request">요청</th>
               </tr>
             </thead>
@@ -847,6 +849,8 @@
         );
         var tableSection = bankSection;
         var tableBody = document.getElementById("admin-table-body");
+        var resCancelHead = document.getElementById("admin-res-cancel-head");
+        var resAmountLabel = document.getElementById("admin-res-amount-label");
         var roomManageBody = document.getElementById("admin-room-manage-body");
         var roomRateBody = document.getElementById("admin-room-rate-body");
         var roomChargeBody = document.getElementById("admin-room-charge-body");
@@ -889,7 +893,9 @@
         var manualCancelCloseBtn = document.getElementById(
           "admin-manual-cancel-close",
         );
-        var manualCancelNoBtn = document.getElementById("admin-manual-cancel-no");
+        var manualCancelNoBtn = document.getElementById(
+          "admin-manual-cancel-no",
+        );
         var manualCancelYesBtn = document.getElementById(
           "admin-manual-cancel-yes",
         );
@@ -3170,6 +3176,104 @@
           return "is-unknown";
         }
 
+        var cancelReasonCodeMeta = {
+          "mind-change": { label: "단순 변심", variant: "mind-change" },
+          "schedule-change": { label: "일정 변경", variant: "schedule-change" },
+          "other-hotel": { label: "타 숙소 예약", variant: "other-hotel" },
+          other: { label: "기타", variant: "other" },
+          "not paid": { label: "입금 기한 초과", variant: "not-paid" },
+          manual: { label: "관리자 직접 취소", variant: "manual" },
+        };
+
+        function getCancelReasonDisplay(row) {
+          var code = String((row && row.cancelReason) || "")
+            .trim()
+            .toLowerCase();
+          var otherDetail = String(
+            (row && (row.otherReason || row["other-reason"])) || "",
+          ).trim();
+          var known = cancelReasonCodeMeta[code];
+          if (known) {
+            return {
+              label: known.label,
+              variant: known.variant,
+              tooltip: code === "other" ? otherDetail : "",
+            };
+          }
+          if (code) {
+            return {
+              label: "기타",
+              variant: "other",
+              tooltip: String((row && row.cancelReason) || "").trim(),
+            };
+          }
+          return { label: "—", variant: "unknown", tooltip: "" };
+        }
+
+        function buildCancelReasonBadgeHtml(row) {
+          var meta = getCancelReasonDisplay(row);
+          if (meta.label === "—") {
+            return "—";
+          }
+          var attrs =
+            'class="admin-cancel-reason-badge admin-cancel-reason-badge--' +
+            escapeHtml(meta.variant) +
+            '"';
+          if (meta.tooltip) {
+            attrs +=
+              ' data-tooltip="' +
+              escapeHtml(meta.tooltip) +
+              '" title="' +
+              escapeHtml(meta.tooltip) +
+              '"';
+          }
+          return (
+            "<span " +
+            attrs +
+            '><span class="admin-cancel-reason-badge__text">' +
+            escapeHtml(meta.label) +
+            "</span></span>"
+          );
+        }
+
+        function updateReservationCancelHead() {
+          if (!resCancelHead) {
+            return;
+          }
+          resCancelHead.textContent =
+            activeResTab === "deleted" ? "취소 사유" : "취소";
+        }
+
+        function updateReservationAmountHead() {
+          if (!resAmountLabel) {
+            return;
+          }
+          resAmountLabel.textContent =
+            activeResTab === "deleted" ? "금액(환불금)" : "금액";
+        }
+
+        function buildAmountCellHtml(row) {
+          var totalText = formatKRW(getConsecutiveSaleTotal(row));
+          if (activeResTab !== "deleted") {
+            return totalText;
+          }
+          var refundRaw = row && row.refundAmount;
+          var refundText = "—";
+          if (
+            refundRaw != null &&
+            refundRaw !== "" &&
+            isFinite(Number(refundRaw))
+          ) {
+            refundText = formatKRW(Number(refundRaw));
+          }
+          return (
+            totalText +
+            ' <span class="admin-res-refund-amount">(' +
+            escapeHtml(refundText) +
+            ")</span>"
+          );
+        }
+
         function setRequestMessage(text) {
           if (!requestModalMessage) {
             return;
@@ -3299,8 +3403,7 @@
             })
             .catch(function (err) {
               setManualCancelMessage(
-                (err && err.message) ||
-                  "취소 처리 중 오류가 발생했습니다.",
+                (err && err.message) || "취소 처리 중 오류가 발생했습니다.",
               );
             })
             .finally(function () {
@@ -3540,12 +3643,21 @@
               "admin-reservation-payment " +
               getPaymentClass(row && row.paymentMethod);
             var requestText = row && row.guestRequest ? row.guestRequest : "";
-            var cancelCell =
-              activeResTab === "current"
-                ? "<td class='admin-res-col-cancel'><button type='button' class='admin-reservation-cancel-badge' data-reservation-number='" +
-                  (row.reservationNumber || "") +
-                  "' aria-label='관리자 직접 취소'>취소</button></td>"
-                : "<td class='admin-res-col-cancel admin-sort-hover-cell'>—</td>";
+            var cancelCell;
+            if (activeResTab === "current") {
+              cancelCell =
+                "<td class='admin-res-col-cancel'><button type='button' class='admin-reservation-cancel-badge' data-reservation-number='" +
+                escapeHtml(row.reservationNumber || "") +
+                "' aria-label='관리자 직접 취소'>취소</button></td>";
+            } else if (activeResTab === "deleted") {
+              cancelCell =
+                "<td class='admin-res-col-cancel admin-sort-hover-cell'>" +
+                buildCancelReasonBadgeHtml(row) +
+                "</td>";
+            } else {
+              cancelCell =
+                "<td class='admin-res-col-cancel admin-sort-hover-cell'>—</td>";
+            }
             tr.innerHTML =
               "<td class='admin-sort-hover-cell'>" +
               (row.reservationNumber || "—") +
@@ -3568,8 +3680,8 @@
               "<td class='admin-sort-hover-cell'>" +
               (nights ? nights + "박" : "—") +
               "</td>" +
-              "<td class='admin-sort-hover-cell'>" +
-              formatKRW(getConsecutiveSaleTotal(row)) +
+              "<td class='admin-sort-hover-cell admin-res-col-amount'>" +
+              buildAmountCellHtml(row) +
               "</td>" +
               "<td class='admin-res-col-payment admin-sort-hover-cell'>" +
               "<span class='" +
@@ -4678,6 +4790,8 @@
               btn.getAttribute("data-res-tab") === tab,
             );
           });
+          updateReservationCancelHead();
+          updateReservationAmountHead();
           sortKey = "";
           sortDirection = "";
           loadReservationList(tab).catch(function (err) {
@@ -4973,7 +5087,10 @@
         }
 
         if (manualCancelCloseBtn) {
-          manualCancelCloseBtn.addEventListener("click", closeManualCancelModal);
+          manualCancelCloseBtn.addEventListener(
+            "click",
+            closeManualCancelModal,
+          );
         }
 
         if (manualCancelNoBtn) {

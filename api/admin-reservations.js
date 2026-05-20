@@ -219,7 +219,10 @@ function mapRow(row, isDeleted) {
   };
   if (isDeleted) {
     base.cancelReason = row.cancel_reason || "";
+    base.otherReason = row.other_reason || "";
     base.cancelledAt = formatDateTimeKst(row.cancelled_at);
+    base.refundAmount =
+      row.refund_amount != null ? Number(row.refund_amount) : null;
   }
   return base;
 }
@@ -351,7 +354,9 @@ export default async function handler(req, res) {
       ? "ORDER BY cancelled_at DESC, created_at DESC"
       : "ORDER BY check_in_date ASC, created_at DESC";
 
-    var extraCols = isDeleted ? ", cancel_reason, cancelled_at" : "";
+    var extraCols = isDeleted
+      ? ", cancel_reason, other_reason, cancelled_at, refund_amount"
+      : "";
 
     var sel = await pool.query(
       `SELECT

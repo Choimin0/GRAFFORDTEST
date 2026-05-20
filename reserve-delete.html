@@ -1050,7 +1050,6 @@
                 selectedReasonDetail = String(
                   (reasonOtherInput && reasonOtherInput.value) || "",
                 ).trim();
-                selectedReason = selectedReasonDetail || "other";
               }
 
               yesBtn.disabled = true;
@@ -1074,6 +1073,8 @@
                   guestName: name,
                   cancelToken: cancelToken,
                   cancelReason: selectedReason,
+                  "other-reason":
+                    selectedReasonCode === "other" ? selectedReasonDetail : "",
                   refundAmount: refundAmount,
                 }),
               })

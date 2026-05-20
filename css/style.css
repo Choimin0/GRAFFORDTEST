@@ -12124,6 +12124,79 @@ main.content-section.confirm-page.admin-page {
   outline: 2px solid color-mix(in srgb, var(--stone-red) 35%, transparent);
   outline-offset: 2px;
 }
+.admin-cancel-reason-badge {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 1.42rem;
+  min-width: 4.6rem;
+  padding: 0.18rem 0.45rem;
+  font-size: 0.66rem;
+  letter-spacing: 0.06em;
+  line-height: 1;
+  white-space: nowrap;
+  box-sizing: border-box;
+  border: 1px solid var(--stone-200);
+  background: var(--stone-100);
+  color: var(--stone-600);
+}
+.admin-cancel-reason-badge--mind-change {
+  border-color: color-mix(in srgb, var(--stone-400) 30%, var(--stone-200));
+  background: color-mix(in srgb, var(--stone-400) 10%, var(--stone-50));
+  color: var(--stone-600);
+}
+.admin-cancel-reason-badge--schedule-change {
+  border-color: color-mix(in srgb, var(--gold-500) 32%, var(--stone-200));
+  background: color-mix(in srgb, var(--gold-500) 10%, var(--stone-50));
+  color: var(--gold-500);
+}
+.admin-cancel-reason-badge--other-hotel {
+  border-color: color-mix(in srgb, var(--stone-green) 28%, var(--stone-200));
+  background: color-mix(in srgb, var(--stone-green) 8%, var(--stone-50));
+  color: var(--stone-green);
+}
+.admin-cancel-reason-badge--other {
+  border-color: color-mix(in srgb, var(--stone-800) 18%, var(--stone-200));
+  background: color-mix(in srgb, var(--stone-800) 7%, var(--stone-50));
+  color: var(--stone-800);
+  cursor: help;
+}
+.admin-cancel-reason-badge--not-paid,
+.admin-cancel-reason-badge--manual {
+  border-color: color-mix(in srgb, var(--stone-red) 28%, var(--stone-200));
+  background: color-mix(in srgb, var(--stone-red) 8%, var(--stone-50));
+  color: var(--stone-red);
+}
+.admin-res-refund-amount {
+  display: inline-block;
+  margin-left: 0.2rem;
+  font-size: 0.62rem;
+  letter-spacing: 0.02em;
+  color: var(--stone-400);
+  white-space: nowrap;
+}
+.admin-cancel-reason-badge--other[data-tooltip]:hover::after,
+.admin-cancel-reason-badge--other[data-tooltip]:focus-visible::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + 0.35rem);
+  transform: translateX(-50%);
+  z-index: 20;
+  max-width: 16rem;
+  padding: 0.35rem 0.55rem;
+  border-radius: 4px;
+  background: var(--color-tooltip-bg);
+  color: var(--color-tooltip-fg);
+  font-size: 0.72rem;
+  letter-spacing: 0.02em;
+  line-height: 1.35;
+  white-space: normal;
+  text-align: left;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.22);
+  pointer-events: none;
+}
 .admin-request-icon-btn {
   display: inline-flex;
   align-items: center;

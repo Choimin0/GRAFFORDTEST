@@ -859,9 +859,25 @@ export default async function handler(req, res) {
       deleteBody.reservationNumber || deleteBody.orderNo || "",
     );
     var delGuestName = normalizeLookupName(deleteBody.guestName || "");
-    var cancelReason = String(deleteBody.cancelReason || "")
+    var cancelReasonRaw = String(deleteBody.cancelReason || "")
       .trim()
       .slice(0, MAX_CANCEL_REASON);
+    var otherReasonRaw = String(
+      deleteBody.otherReason ||
+        deleteBody["other-reason"] ||
+        deleteBody.other_reason ||
+        "",
+    )
+      .trim()
+      .slice(0, MAX_CANCEL_REASON);
+    var cancelReason =
+      cancelReasonRaw.toLowerCase() === "other"
+        ? "other"
+        : cancelReasonRaw;
+    var otherReason =
+      cancelReasonRaw.toLowerCase() === "other"
+        ? otherReasonRaw || null
+        : null;
     var cancelToken = String(deleteBody.cancelToken || "").trim();
     if (!delReservationNumber) {
       json(res, 400, {
@@ -899,12 +915,13 @@ export default async function handler(req, res) {
         `UPDATE ${BOOKING_TABLE}
          SET status        = 'cancelled',
              cancel_reason = $3,
+             other_reason  = $4,
              cancelled_at  = NOW()
          WHERE reservation_number = $1
            AND guest_name = $2
            AND status IN ('confirm', 'completed')
          RETURNING reservation_number`,
-        [delReservationNumber, delGuestName, cancelReason || null],
+        [delReservationNumber, delGuestName, cancelReason || null, otherReason],
       );
       if (!upd.rows || !upd.rows.length) {
         json(res, 404, { ok: false, error: "삭제할 예약을 찾을 수 없습니다." });

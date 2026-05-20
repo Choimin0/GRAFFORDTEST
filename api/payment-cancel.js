@@ -21,6 +21,60 @@ const { Pool } = pg;
 const BOOKING_TABLE = "booking";
 const DEFAULT_CANCEL_TOKEN_TTL_MS = 10 * 60 * 1000;
 const MAX_CANCEL_REASON = 1000;
+const KNOWN_CANCEL_REASON_CODES = new Set([
+  "mind-change",
+  "schedule-change",
+  "other-hotel",
+  "other",
+  "not paid",
+  "manual",
+]);
+
+function cancelReasonLabelForPg(code, otherReason) {
+  var c = String(code || "")
+    .trim()
+    .toLowerCase();
+  if (c === "mind-change") return "단순 변심";
+  if (c === "schedule-change") return "일정 변경";
+  if (c === "other-hotel") return "타 숙소 예약";
+  if (c === "other") {
+    return String(otherReason || "").trim() || "기타";
+  }
+  if (c === "not paid") return "입금 기한 초과";
+  if (c === "manual") return "관리자 직접 취소";
+  return String(code || "").trim() || "고객 요청 취소";
+}
+
+function parseCancelReasonFields(body) {
+  var cancelReason = String(body.cancelReason || "")
+    .trim()
+    .slice(0, MAX_CANCEL_REASON);
+  var otherReason = String(
+    body.otherReason || body["other-reason"] || body.other_reason || "",
+  )
+    .trim()
+    .slice(0, MAX_CANCEL_REASON);
+  var code = cancelReason.toLowerCase();
+  if (code === "other") {
+    return {
+      cancelReason: "other",
+      otherReason: otherReason || null,
+      portoneReason: cancelReasonLabelForPg("other", otherReason),
+    };
+  }
+  if (KNOWN_CANCEL_REASON_CODES.has(code)) {
+    return {
+      cancelReason: cancelReason,
+      otherReason: null,
+      portoneReason: cancelReasonLabelForPg(cancelReason, ""),
+    };
+  }
+  return {
+    cancelReason: cancelReason || null,
+    otherReason: null,
+    portoneReason: cancelReason || "고객 요청 취소",
+  };
+}
 
 function getDatabaseUrl() {
   return String(
@@ -366,9 +420,10 @@ export default async function handler(req, res) {
   var reservationNumber = normalizeLookupOrder(body.reservationNumber || body.orderNo || "");
   var guestName = normalizeLookupName(body.guestName || body.name || "");
   var cancelToken = String(body.cancelToken || "").trim();
-  var cancelReason = String(body.cancelReason || "")
-    .trim()
-    .slice(0, MAX_CANCEL_REASON);
+  var cancelFields = parseCancelReasonFields(body);
+  var cancelReason = cancelFields.cancelReason;
+  var otherReason = cancelFields.otherReason;
+  var portoneCancelReason = cancelFields.portoneReason;
 
   if (!reservationNumber) {
     json(res, 400, { ok: false, error: "reservationNumber가 필요합니다." });
@@ -475,7 +530,7 @@ export default async function handler(req, res) {
     if (!isBankTransfer && safeRefundAmount > 0) {
       var portoneResult = await requestPortoneCancellation(
         reservationNumber, // PortOne paymentId = 결제 시 사용한 orderNo (= reservationNumber)
-        cancelReason || "고객 요청 취소",
+        portoneCancelReason,
         safeRefundAmount,
         totalAmountNum,
       );
@@ -515,9 +570,10 @@ export default async function handler(req, res) {
         `UPDATE ${BOOKING_TABLE}
          SET status        = 'cancelled',
              cancel_reason = $3,
+             other_reason  = $4,
              cancelled_at  = NOW(),
              refunded_count = 1,
-             refund_amount  = $4
+             refund_amount  = $5
          WHERE reservation_number = $1
            AND guest_name = $2
            AND status IN ('confirm', 'completed')
@@ -526,6 +582,7 @@ export default async function handler(req, res) {
           reservationNumber,
           row.guest_name,
           cancelReason || null,
+          otherReason,
           safeRefundAmount,
         ],
       );
