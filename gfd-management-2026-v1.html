@@ -483,7 +483,7 @@
                     <span class="admin-sort-icons" aria-hidden="true"></span>
                   </button>
                 </th>
-                <th>
+                <th class="admin-res-col-payment">
                   <button
                     type="button"
                     class="admin-sortable-head"
@@ -493,7 +493,8 @@
                     <span class="admin-sort-icons" aria-hidden="true"></span>
                   </button>
                 </th>
-                <th>요청</th>
+                <th class="admin-res-col-cancel">취소</th>
+                <th class="admin-res-col-request">요청</th>
               </tr>
             </thead>
             <tbody id="admin-table-body"></tbody>
@@ -631,6 +632,56 @@
           <p class="admin-sales-pending">준비 중입니다.</p>
         </div>
       </section>
+
+      <div
+        id="admin-manual-cancel-modal"
+        class="admin-request-modal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="admin-manual-cancel-title"
+        hidden
+      >
+        <div class="admin-request-modal__panel admin-manual-cancel-panel">
+          <div class="admin-manual-cancel-modal__head">
+            <p class="admin-dashboard-eyebrow">RESERVATION CANCEL</p>
+            <div class="admin-manual-cancel-modal__head-row">
+              <h2 id="admin-manual-cancel-title">
+                관리자 직접 취소를 진행하시겠습니까?
+              </h2>
+              <button
+                type="button"
+                class="admin-manual-cancel-modal__close"
+                id="admin-manual-cancel-close"
+                aria-label="닫기"
+              >
+                ×
+              </button>
+            </div>
+            <p id="admin-manual-cancel-meta"></p>
+          </div>
+          <p
+            id="admin-manual-cancel-message"
+            class="admin-request-message"
+            hidden
+          ></p>
+          <div class="admin-request-modal__actions">
+            <button
+              type="button"
+              class="btn reserve-btn admin-manual-cancel-confirm-btn"
+              id="admin-manual-cancel-yes"
+            >
+              취소합니다
+            </button>
+            <button
+              type="button"
+              class="btn reserve-btn confirm-pay-submit reserveinfo-submit-btn admin-save-btn admin-manual-cancel-dismiss-btn"
+              id="admin-manual-cancel-no"
+            >
+              아니오
+            </button>
+          </div>
+        </div>
+      </div>
 
       <div
         id="admin-policy-confirm-modal"
@@ -826,6 +877,23 @@
         var policyConfirmCancelBtn = document.getElementById(
           "admin-policy-confirm-cancel",
         );
+        var manualCancelModal = document.getElementById(
+          "admin-manual-cancel-modal",
+        );
+        var manualCancelMeta = document.getElementById(
+          "admin-manual-cancel-meta",
+        );
+        var manualCancelMessage = document.getElementById(
+          "admin-manual-cancel-message",
+        );
+        var manualCancelCloseBtn = document.getElementById(
+          "admin-manual-cancel-close",
+        );
+        var manualCancelNoBtn = document.getElementById("admin-manual-cancel-no");
+        var manualCancelYesBtn = document.getElementById(
+          "admin-manual-cancel-yes",
+        );
+        var activeManualCancelReservationNumber = "";
         var searchForm = document.getElementById("admin-search-form");
         var searchNameInput = document.getElementById("admin-search-name");
         var searchContactInput = document.getElementById(
@@ -3163,6 +3231,85 @@
           setRequestMessage("");
         }
 
+        function setManualCancelMessage(text) {
+          if (!manualCancelMessage) {
+            return;
+          }
+          manualCancelMessage.hidden = !text;
+          manualCancelMessage.textContent = text || "";
+        }
+
+        function openManualCancelModal(reservationNumber) {
+          if (!manualCancelModal) {
+            return;
+          }
+          var row = findReservationByNumber(reservationNumber) || {};
+          activeManualCancelReservationNumber = String(reservationNumber || "");
+          if (manualCancelMeta) {
+            manualCancelMeta.textContent =
+              (row.reservationNumber || "—") +
+              " · " +
+              (row.guestName || "—") +
+              " · " +
+              formatKRW(getConsecutiveSaleTotal(row));
+          }
+          setManualCancelMessage("");
+          manualCancelModal.hidden = false;
+        }
+
+        function closeManualCancelModal() {
+          if (manualCancelModal) {
+            manualCancelModal.hidden = true;
+          }
+          activeManualCancelReservationNumber = "";
+          setManualCancelMessage("");
+        }
+
+        function confirmManualCancel() {
+          if (!activeManualCancelReservationNumber) {
+            return;
+          }
+          var auth = getAuthPayload();
+          if (manualCancelYesBtn) {
+            manualCancelYesBtn.disabled = true;
+          }
+          setManualCancelMessage("100% 환불 및 취소 처리 중입니다.");
+          fetch(adminPaymentCancelApiUrl(), {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              reservationNumber: activeManualCancelReservationNumber,
+              adminId: auth.adminId,
+              adminPw: auth.adminPw,
+            }),
+          })
+            .then(function (r) {
+              return r.json().then(function (data) {
+                return { ok: r.ok, data: data || {} };
+              });
+            })
+            .then(function (result) {
+              if (!result.ok || !result.data.ok) {
+                throw new Error(
+                  result.data.error || "관리자 취소(환불) 처리에 실패했습니다.",
+                );
+              }
+              closeManualCancelModal();
+              return loadReservationList("current");
+            })
+            .catch(function (err) {
+              setManualCancelMessage(
+                (err && err.message) ||
+                  "취소 처리 중 오류가 발생했습니다.",
+              );
+            })
+            .finally(function () {
+              if (manualCancelYesBtn) {
+                manualCancelYesBtn.disabled = false;
+              }
+            });
+        }
+
         function saveRequestModal() {
           if (!activeRequestReservationNumber || !requestTextInput) {
             return;
@@ -3377,7 +3524,7 @@
           if (!rows || !rows.length) {
             var emptyTr = document.createElement("tr");
             var emptyTd = document.createElement("td");
-            emptyTd.colSpan = 10;
+            emptyTd.colSpan = 11;
             emptyTd.textContent = "예약 내역이 없습니다.";
             emptyTr.appendChild(emptyTd);
             tableBody.appendChild(emptyTr);
@@ -3393,6 +3540,12 @@
               "admin-reservation-payment " +
               getPaymentClass(row && row.paymentMethod);
             var requestText = row && row.guestRequest ? row.guestRequest : "";
+            var cancelCell =
+              activeResTab === "current"
+                ? "<td class='admin-res-col-cancel'><button type='button' class='admin-reservation-cancel-badge' data-reservation-number='" +
+                  (row.reservationNumber || "") +
+                  "' aria-label='관리자 직접 취소'>취소</button></td>"
+                : "<td class='admin-res-col-cancel admin-sort-hover-cell'>—</td>";
             tr.innerHTML =
               "<td class='admin-sort-hover-cell'>" +
               (row.reservationNumber || "—") +
@@ -3418,14 +3571,15 @@
               "<td class='admin-sort-hover-cell'>" +
               formatKRW(getConsecutiveSaleTotal(row)) +
               "</td>" +
-              "<td class='admin-sort-hover-cell'>" +
+              "<td class='admin-res-col-payment admin-sort-hover-cell'>" +
               "<span class='" +
               paymentClass +
               "'>" +
               paymentLabel +
               "</span>" +
               "</td>" +
-              "<td>" +
+              cancelCell +
+              "<td class='admin-res-col-request'>" +
               "<button type='button' class='admin-request-icon-btn" +
               (requestText ? " has-request" : "") +
               "' data-reservation-number='" +
@@ -3507,6 +3661,14 @@
             base = String(window.__GRAFFORD_API_BASE__).replace(/\/$/, "");
           }
           return base + "/api/admin-reservations";
+        }
+
+        function adminPaymentCancelApiUrl() {
+          var base = "";
+          if (typeof window !== "undefined" && window.__GRAFFORD_API_BASE__) {
+            base = String(window.__GRAFFORD_API_BASE__).replace(/\/$/, "");
+          }
+          return base + "/api/admin-payment-cancel";
         }
 
         function adminRoomStatusApiUrl() {
@@ -4784,6 +4946,15 @@
 
         if (tableBody) {
           tableBody.addEventListener("click", function (e) {
+            var cancelBtn =
+              e.target.closest &&
+              e.target.closest(".admin-reservation-cancel-badge");
+            if (cancelBtn) {
+              openManualCancelModal(
+                cancelBtn.getAttribute("data-reservation-number") || "",
+              );
+              return;
+            }
             var btn =
               e.target.closest && e.target.closest(".admin-request-icon-btn");
             if (!btn) {
@@ -4799,6 +4970,26 @@
 
         if (requestCancelBtn) {
           requestCancelBtn.addEventListener("click", closeRequestModal);
+        }
+
+        if (manualCancelCloseBtn) {
+          manualCancelCloseBtn.addEventListener("click", closeManualCancelModal);
+        }
+
+        if (manualCancelNoBtn) {
+          manualCancelNoBtn.addEventListener("click", closeManualCancelModal);
+        }
+
+        if (manualCancelYesBtn) {
+          manualCancelYesBtn.addEventListener("click", confirmManualCancel);
+        }
+
+        if (manualCancelModal) {
+          manualCancelModal.addEventListener("click", function (e) {
+            if (e.target === manualCancelModal) {
+              closeManualCancelModal();
+            }
+          });
         }
 
         if (requestModal) {
@@ -4828,6 +5019,13 @@
         document.addEventListener("keydown", function (e) {
           if (e.key === "Escape" && requestModal && !requestModal.hidden) {
             closeRequestModal();
+          }
+          if (
+            e.key === "Escape" &&
+            manualCancelModal &&
+            !manualCancelModal.hidden
+          ) {
+            closeManualCancelModal();
           }
           if (
             e.key === "Escape" &&

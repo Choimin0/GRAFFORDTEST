@@ -11997,13 +11997,27 @@ main.content-section.confirm-page.admin-page {
   width: 6%;
   padding: 0.85rem 0.75rem 0.75rem;
 }
-.admin-reservation-table th:nth-child(9) {
-  width: 11%;
-  padding: 0.85rem 0.75rem 0.75rem;
+.admin-reservation-table th.admin-res-col-payment,
+.admin-reservation-table td.admin-res-col-payment {
+  text-align: center;
 }
-.admin-reservation-table th:nth-child(10) {
-  width: 5%;
-  padding: 0.85rem 0.75rem 0.75rem;
+.admin-reservation-table th.admin-res-col-cancel,
+.admin-reservation-table td.admin-res-col-cancel {
+  width: 7.5%;
+  text-align: center;
+  padding-left: 0.5rem;
+  padding-right: 0.75rem;
+}
+.admin-reservation-table th.admin-res-col-request,
+.admin-reservation-table td.admin-res-col-request {
+  width: 6.5%;
+  text-align: center;
+  padding-left: 0.75rem;
+  padding-right: 0.85rem;
+}
+.admin-reservation-table th.admin-res-col-payment .admin-sortable-head {
+  justify-content: center;
+  width: 100%;
 }
 .admin-sortable-head {
   display: inline-flex;
@@ -12058,12 +12072,21 @@ main.content-section.confirm-page.admin-page {
   background: color-mix(in srgb, var(--gold-500) 8%, var(--stone-50));
   color: var(--gold-500);
 }
-.admin-reservation-payment {
+.admin-reservation-payment,
+.admin-reservation-cancel-badge {
   display: inline-flex;
   align-items: center;
+  justify-content: center;
+  min-height: 1.42rem;
   padding: 0.18rem 0.45rem;
   font-size: 0.66rem;
   letter-spacing: 0.08em;
+  line-height: 1;
+  white-space: nowrap;
+  box-sizing: border-box;
+}
+.admin-reservation-payment {
+  min-width: 4.6rem;
 }
 .admin-reservation-payment.is-card {
   background: color-mix(in srgb, var(--gold-500) 12%, var(--stone-50));
@@ -12080,6 +12103,26 @@ main.content-section.confirm-page.admin-page {
 .admin-reservation-payment.is-unknown {
   background: var(--stone-100);
   color: var(--stone-400);
+}
+.admin-reservation-cancel-badge {
+  min-width: 4.6rem;
+  border: 0;
+  background: color-mix(in srgb, var(--stone-red) 12%, var(--stone-50));
+  color: var(--stone-red);
+  cursor: pointer;
+  transition:
+    background 0.3s ease,
+    color 0.3s ease;
+}
+.admin-reservation-cancel-badge:hover,
+.admin-reservation-cancel-badge:focus-visible {
+  background: color-mix(in srgb, var(--stone-red) 18%, var(--stone-50));
+  color: var(--stone-red);
+  outline: none;
+}
+.admin-reservation-cancel-badge:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--stone-red) 35%, transparent);
+  outline-offset: 2px;
 }
 .admin-request-icon-btn {
   display: inline-flex;
@@ -12870,6 +12913,95 @@ main.content-section.confirm-page.admin-page {
 }
 .admin-policy-confirm-panel .admin-request-modal__head h2 {
   margin-bottom: var(--space-24);
+}
+.admin-manual-cancel-panel .admin-manual-cancel-modal__head {
+  margin-bottom: var(--space-8);
+}
+.admin-manual-cancel-modal__head-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-16);
+}
+.admin-manual-cancel-modal__head-row h2 {
+  flex: 1 1 auto;
+  margin: var(--space-8) 0 0;
+  color: var(--stone-800);
+  font-size: 1.05rem;
+  font-weight: 400;
+  line-height: 1.55;
+  letter-spacing: 0.06em;
+}
+.admin-manual-cancel-modal__close {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 2.3rem;
+  min-height: 2.3rem;
+  margin: 0;
+  padding: var(--space-8);
+  border: none;
+  background: transparent;
+  color: var(--stone-400);
+  font-size: 1.7rem;
+  font-weight: 300;
+  line-height: 1;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+.admin-manual-cancel-modal__close:hover,
+.admin-manual-cancel-modal__close:focus-visible {
+  color: var(--gold-500);
+  outline: none;
+}
+.admin-manual-cancel-modal__close:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--gold-500) 45%, transparent);
+  outline-offset: 2px;
+}
+.admin-manual-cancel-panel #admin-manual-cancel-meta {
+  margin: var(--space-8) 0 0;
+  color: var(--stone-400);
+  font-size: 0.76rem;
+  letter-spacing: 0.08em;
+}
+.admin-manual-cancel-confirm-btn.btn.reserve-btn {
+  min-width: 6.5rem;
+  margin: 0;
+  padding: 0.65rem 1.1rem;
+  border: 1px solid color-mix(in srgb, var(--stone-red) 35%, var(--stone-200));
+  background: color-mix(in srgb, var(--stone-red) 9%, var(--stone-50));
+  background-image: none;
+  color: var(--stone-red);
+  font-size: 0.8rem;
+  letter-spacing: 0.1em;
+  cursor: pointer;
+  transition:
+    background 0.35s ease,
+    border-color 0.35s ease,
+    color 0.35s ease;
+}
+.admin-manual-cancel-confirm-btn.btn.reserve-btn:hover,
+.admin-manual-cancel-confirm-btn.btn.reserve-btn:focus-visible {
+  border-color: var(--stone-red);
+  background: color-mix(in srgb, var(--stone-red) 14%, var(--stone-50));
+  background-image: none;
+  color: var(--stone-red);
+  animation: none;
+  outline: none;
+}
+.admin-manual-cancel-confirm-btn.btn.reserve-btn:disabled {
+  border-color: var(--stone-200);
+  background: var(--stone-100);
+  color: var(--stone-400);
+  cursor: not-allowed;
+}
+.admin-request-modal__actions
+  .admin-manual-cancel-dismiss-btn.reserveinfo-submit-btn.confirm-pay-submit.btn.reserve-btn {
+  min-width: 5rem;
+  height: auto;
+  padding: 0.65rem 1.2rem;
+  font-size: 0.8rem;
 }
 .admin-policy-confirm-panel {
   width: min(100%, 307px);
