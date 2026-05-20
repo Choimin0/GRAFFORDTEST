@@ -62,7 +62,9 @@
       >
         <header class="reserve-check-page-band" aria-label="예약 확인 헤더">
           <div class="reserve-check-page-band__left">
-            <p class="reserve-check-page-band__eyebrow">RESERVATION CONFIRMED</p>
+            <p class="reserve-check-page-band__eyebrow">
+              RESERVATION CONFIRMED
+            </p>
             <h1 class="reserve-check-page-band__title">예약 확인</h1>
             <p class="reserve-check-page-band__subtitle">
               대지가 내어주는 그라운드가 당신을 기다립니다
@@ -206,7 +208,9 @@
             class="reserve-check-stay-guide"
             aria-labelledby="reserve-check-stay-guide-heading"
           >
-            <div class="reserve-check-section-head reserve-check-section-head--wide">
+            <div
+              class="reserve-check-section-head reserve-check-section-head--wide"
+            >
               <h2
                 class="reserve-check-section-kicker"
                 id="reserve-check-stay-guide-heading"
@@ -219,24 +223,20 @@
               ></span>
             </div>
             <div class="reserve-check-guide-grid">
-              <article
-                class="reserve-check-guide-card"
-                tabindex="0"
-              >
+              <article class="reserve-check-guide-card" tabindex="0">
                 <p class="reserve-check-guide-card__index" aria-hidden="true">
                   01
                 </p>
-                <h3 class="reserve-check-guide-card__title">입실 전 유의사항</h3>
+                <h3 class="reserve-check-guide-card__title">
+                  입실 전 유의사항
+                </h3>
                 <div class="reserve-check-guide-card__body">
                   <p>입실 당일 오전에 체크인 안내 메시지가 발송됩니다.</p>
                   <p>기준 인원을 초과한 입실은 불가하며,</p>
                   <p>추가 인원은 사전 신청 내역 기준으로만 인정됩니다.</p>
                 </div>
               </article>
-              <article
-                class="reserve-check-guide-card"
-                tabindex="0"
-              >
+              <article class="reserve-check-guide-card" tabindex="0">
                 <p class="reserve-check-guide-card__index" aria-hidden="true">
                   02
                 </p>
@@ -254,19 +254,14 @@
                   </p>
                 </div>
               </article>
-              <article
-                class="reserve-check-guide-card"
-                tabindex="0"
-              >
+              <article class="reserve-check-guide-card" tabindex="0">
                 <p class="reserve-check-guide-card__index" aria-hidden="true">
                   03
                 </p>
                 <h3 class="reserve-check-guide-card__title">주차 안내</h3>
                 <div class="reserve-check-guide-card__body">
                   <p>객실 당 1대 주차 가능합니다.</p>
-                  <p>
-                    추가 차량이 있으신 경우 사전에 문의해 주시기 바랍니다.
-                  </p>
+                  <p>추가 차량이 있으신 경우 사전에 문의해 주시기 바랍니다.</p>
                 </div>
               </article>
             </div>
@@ -437,9 +432,7 @@
                 weekday: "short",
               }) +
               (stayNights > 0
-                ? " · " +
-                  stayNights +
-                  (stayNights === 1 ? " night" : " nights")
+                ? " · " + stayNights + (stayNights === 1 ? " night" : " nights")
                 : "")
             : "—";
           var amountTextKr =
@@ -562,7 +555,8 @@
             renderGallery(false);
           }
           function stepGallery(delta) {
-            galleryIndex = (galleryIndex + delta + images.length) % images.length;
+            galleryIndex =
+              (galleryIndex + delta + images.length) % images.length;
             renderGallery(true);
           }
           if (prevBtn) {
@@ -636,6 +630,7 @@
               "대표 : GRAFFORD",
               "주소 : 제주특별자치도 서귀포시 토산중앙로 22",
               "사업자등록번호 : 587-23-00957",
+              "통신판매업신고번호 : 2026-제주표선-029",
               "전화 : 010-6830-1105",
               "이메일 : tilkoas35@naver.com",
               " ",
@@ -651,8 +646,12 @@
       >
         <header class="reserve-check-page-band" aria-label="Reservation header">
           <div class="reserve-check-page-band__left">
-            <p class="reserve-check-page-band__eyebrow">RESERVATION CONFIRMED</p>
-            <h1 class="reserve-check-page-band__title">Reservation confirmed</h1>
+            <p class="reserve-check-page-band__eyebrow">
+              RESERVATION CONFIRMED
+            </p>
+            <h1 class="reserve-check-page-band__title">
+              Reservation confirmed
+            </h1>
             <p class="reserve-check-page-band__subtitle">
               The ground that the earth gives you is waiting for you
             </p>
@@ -787,7 +786,9 @@
             class="reserve-check-stay-guide"
             aria-labelledby="reserve-check-stay-guide-heading-en"
           >
-            <div class="reserve-check-section-head reserve-check-section-head--wide">
+            <div
+              class="reserve-check-section-head reserve-check-section-head--wide"
+            >
               <h2
                 class="reserve-check-section-kicker"
                 id="reserve-check-stay-guide-heading-en"
@@ -804,7 +805,9 @@
                 <p class="reserve-check-guide-card__index" aria-hidden="true">
                   01
                 </p>
-                <h3 class="reserve-check-guide-card__title">Pre-arrival notes</h3>
+                <h3 class="reserve-check-guide-card__title">
+                  Pre-arrival notes
+                </h3>
                 <div class="reserve-check-guide-card__body">
                   <p>
                     Your check-in guide will be sent on the morning of your
@@ -829,8 +832,8 @@
                 <div class="reserve-check-guide-card__body">
                   <p>
                     On the day of check-in, your door lock will be set using the
-                    last 4 digits of the phone number provided at booking (<strong
-                      class="reserve-complete-pin"
+                    last 4 digits of the phone number provided at booking
+                    (<strong class="reserve-complete-pin"
                       ><span id="reserve-check-pin-en">----</span></strong
                     >).
                   </p>

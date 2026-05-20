@@ -3663,7 +3663,9 @@
                 input.value = String(input.value || "").replace(/[^\d]/g, "");
               });
               input.addEventListener("blur", function () {
-                var amount = Number(String(input.value || "").replace(/[^\d]/g, ""));
+                var amount = Number(
+                  String(input.value || "").replace(/[^\d]/g, ""),
+                );
                 input.value = formatKRW(Number.isFinite(amount) ? amount : 0);
               });
             });
