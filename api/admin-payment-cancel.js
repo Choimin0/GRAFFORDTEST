@@ -9,6 +9,7 @@
  * Body: { reservationNumber, adminId, adminPw }
  */
 import pg from "pg";
+import { decryptBookingPiiResponse } from "./lib/pii-crypto.js";
 
 const { Pool } = pg;
 const BOOKING_TABLE = "booking";
@@ -513,13 +514,14 @@ export default async function handler(req, res) {
 
     client.release();
 
+    var cancelledPii = decryptBookingPiiResponse(updResult.rows[0]);
     json(res, 200, {
       ok: true,
       pgCancelled: pgCancelled,
       pgTid: pgTid,
       cancelledAt: formatDateTimeKst(new Date()),
       reservationNumber: reservationNumber,
-      guestName: updResult.rows[0].guest_name,
+      guestName: cancelledPii.guestName,
       refundAmount: refundAmount,
       totalAmount: totalAmountNum,
       cancelReason: CANCEL_REASON_MANUAL,

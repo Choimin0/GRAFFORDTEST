@@ -1,5 +1,9 @@
 import pg from "pg";
 import crypto from "node:crypto";
+import {
+  decryptBookingPiiResponse,
+  guestNamesMatch,
+} from "./lib/pii-crypto.js";
 
 const { Pool } = pg;
 const LEGACY_TO_ROOM = { A: "G1", B: "G2", C: "G3", D: "G4" };
@@ -263,11 +267,12 @@ export default async function handler(req, res) {
     }
 
     var row = sel.rows[0];
-    if (normalizeLookupName(row.guest_name) !== normName) {
+    if (!guestNamesMatch(row.guest_name, normName, normalizeLookupName)) {
       json(res, 404, { ok: false, error: "Not found" });
       return;
     }
 
+    var pii = decryptBookingPiiResponse(row);
     var isCancelled = row.status === "cancelled";
 
     if (!isCancelled) {
@@ -278,8 +283,8 @@ export default async function handler(req, res) {
         row: {
           id: row.id,
           reservationNumber: row.reservation_number,
-          guestName: row.guest_name,
-          contact: row.contact,
+          guestName: pii.guestName,
+          contact: pii.contact,
           roomType: normalizeRoomType(row.room_type) || row.room_type,
           checkIn: toYMD(row.check_in_date),
           checkOut: toYMD(row.check_out_date),
@@ -295,7 +300,7 @@ export default async function handler(req, res) {
             ? new Date(row.created_at).toISOString()
             : null,
         },
-        cancelToken: issueCancelToken(row.reservation_number, row.guest_name),
+        cancelToken: issueCancelToken(row.reservation_number, pii.guestName),
       });
       return;
     }
@@ -308,8 +313,8 @@ export default async function handler(req, res) {
       deleteReason: String(row.cancel_reason || "").toLowerCase(),
       row: {
         reservationNumber: row.reservation_number,
-        guestName: row.guest_name,
-        contact: row.contact,
+        guestName: pii.guestName,
+        contact: pii.contact,
         roomType: normalizeRoomType(row.room_type) || row.room_type,
         checkIn: toYMD(row.check_in_date),
         checkOut: toYMD(row.check_out_date),

@@ -15,6 +15,7 @@
  */
 import pg from "pg";
 import crypto from "node:crypto";
+import { guestNamesMatch } from "./lib/pii-crypto.js";
 
 const { Pool } = pg;
 
@@ -473,7 +474,7 @@ export default async function handler(req, res) {
     }
 
     var row = sel.rows[0];
-    if (normalizeLookupName(row.guest_name) !== guestName) {
+    if (!guestNamesMatch(row.guest_name, guestName, normalizeLookupName)) {
       client.release();
       json(res, 404, { ok: false, error: "예약을 찾을 수 없습니다." });
       return;

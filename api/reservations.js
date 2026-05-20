@@ -1,6 +1,11 @@
 import { parse as parseUrl } from "node:url";
 import pg from "pg";
 import crypto from "node:crypto";
+import {
+  decryptBookingPiiResponse,
+  encryptBookingPii,
+  guestNamesMatch,
+} from "./lib/pii-crypto.js";
 
 const { Pool } = pg;
 
@@ -798,19 +803,20 @@ export default async function handler(req, res) {
         return;
       }
       var dbRow = sel.rows[0];
-      if (normalizeLookupName(dbRow.guest_name) !== normName) {
+      if (!guestNamesMatch(dbRow.guest_name, normName, normalizeLookupName)) {
         json(res, 404, { ok: false, error: "Not found" });
         return;
       }
+      var pii = decryptBookingPiiResponse(dbRow);
       json(res, 200, {
         ok: true,
         source: "database",
         row: {
           id: dbRow.id,
           reservationNumber: dbRow.reservation_number,
-          guestName: dbRow.guest_name,
-          contact: dbRow.contact,
-          email: dbRow.email || "",
+          guestName: pii.guestName,
+          contact: pii.contact,
+          email: pii.email,
           roomType: normalizeRoomType(dbRow.room_type) || dbRow.room_type,
           checkIn: toYMD(dbRow.check_in_date),
           checkOut: toYMD(dbRow.check_out_date),
@@ -911,6 +917,24 @@ export default async function handler(req, res) {
     }
 
     try {
+      var delSel = await pool.query(
+        `SELECT guest_name FROM ${BOOKING_TABLE}
+         WHERE reservation_number = $1
+           AND status IN ('confirm', 'completed')
+         LIMIT 1`,
+        [delReservationNumber],
+      );
+      if (!delSel.rows || !delSel.rows.length) {
+        json(res, 404, { ok: false, error: "삭제할 예약을 찾을 수 없습니다." });
+        return;
+      }
+      var delStoredName = delSel.rows[0].guest_name;
+      if (
+        !guestNamesMatch(delStoredName, delGuestName, normalizeLookupName)
+      ) {
+        json(res, 404, { ok: false, error: "삭제할 예약을 찾을 수 없습니다." });
+        return;
+      }
       var upd = await pool.query(
         `UPDATE ${BOOKING_TABLE}
          SET status        = 'cancelled',
@@ -921,7 +945,12 @@ export default async function handler(req, res) {
            AND guest_name = $2
            AND status IN ('confirm', 'completed')
          RETURNING reservation_number`,
-        [delReservationNumber, delGuestName, cancelReason || null, otherReason],
+        [
+          delReservationNumber,
+          delStoredName,
+          cancelReason || null,
+          otherReason,
+        ],
       );
       if (!upd.rows || !upd.rows.length) {
         json(res, 404, { ok: false, error: "삭제할 예약을 찾을 수 없습니다." });
@@ -1033,6 +1062,12 @@ export default async function handler(req, res) {
   // 체크인일이 이미 지났으면 'completed', 아니면 'confirm'
   var insertStatus = checkIn < todayYMDUtc() ? "completed" : "confirm";
 
+  var encPii = encryptBookingPii({
+    guestName: guestName,
+    contact: contact,
+    email: email || null,
+  });
+
   var insertSql = `
     INSERT INTO ${BOOKING_TABLE} (
       reservation_number,
@@ -1060,9 +1095,9 @@ export default async function handler(req, res) {
   var params = [
     reservationNumber,
     insertStatus,
-    guestName,
-    contact,
-    email || null,
+    encPii.guest_name,
+    encPii.contact,
+    encPii.email || null,
     roomType,
     checkIn,
     checkOut,
@@ -1114,8 +1149,7 @@ export default async function handler(req, res) {
         if (dupSel.rows && dupSel.rows.length) {
           var dupRow = dupSel.rows[0];
           if (
-            normalizeLookupName(dupRow.guest_name) ===
-            normalizeLookupName(guestName)
+            guestNamesMatch(dupRow.guest_name, guestName, normalizeLookupName)
           ) {
             json(res, 409, {
               ok: true,

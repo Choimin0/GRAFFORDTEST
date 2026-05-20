@@ -1,4 +1,5 @@
 import pg from "pg";
+import { decryptBookingPiiResponse } from "./lib/pii-crypto.js";
 
 const { Pool } = pg;
 const BOOKING_TABLE = "booking";
@@ -203,10 +204,11 @@ async function autoCancelUnpaidReservations(pool) {
 }
 
 function mapRow(row, isDeleted) {
+  var pii = decryptBookingPiiResponse(row);
   var base = {
     reservationNumber: row.reservation_number,
-    guestName: row.guest_name,
-    contact: row.contact,
+    guestName: pii.guestName,
+    contact: pii.contact,
     roomType: row.room_type,
     checkIn: toYMD(row.check_in_date),
     checkOut: toYMD(row.check_out_date),
@@ -398,10 +400,11 @@ export default async function handler(req, res) {
         ORDER BY check_in_date ASC, created_at DESC`,
       );
       result.calendarRows = (calSel.rows || []).map(function (row) {
+        var calPii = decryptBookingPiiResponse(row);
         return {
           reservationNumber: row.reservation_number,
-          guestName: row.guest_name,
-          contact: row.contact,
+          guestName: calPii.guestName,
+          contact: calPii.contact,
           roomType: row.room_type,
           checkIn: toYMD(row.check_in_date),
           checkOut: toYMD(row.check_out_date),
