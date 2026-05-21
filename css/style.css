@@ -1021,6 +1021,83 @@ main {
   aspect-ratio: 4 / 3;
   object-fit: cover;
   background: var(--stone-200);
+  cursor: pointer;
+  transition: transform 0.35s ease;
+}
+
+.features--index .feature-index-3-space-grid__img:hover {
+  position: relative;
+  z-index: 1;
+  transform: scale(1.05);
+}
+
+.index-feature-3-lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 1300;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: clamp(1rem, 4vw, 2.5rem);
+  box-sizing: border-box;
+}
+
+.index-feature-3-lightbox[hidden] {
+  display: none !important;
+}
+
+.index-feature-3-lightbox__backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(15, 13, 11, 0.88);
+}
+
+.index-feature-3-lightbox__panel {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  max-width: min(92vw, 1100px);
+  max-height: min(90vh, 900px);
+}
+
+.index-feature-3-lightbox__img {
+  display: block;
+  max-width: 100%;
+  max-height: min(90vh, 900px);
+  width: auto;
+  height: auto;
+  object-fit: contain;
+  border-radius: var(--radius-soft);
+  box-shadow: 0 24px 64px rgba(15, 13, 11, 0.35);
+}
+
+.index-feature-3-lightbox__close {
+  position: absolute;
+  top: 0.75rem;
+  right: 0.75rem;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: var(--stone-50);
+  font-size: 1.75rem;
+  line-height: 1;
+  cursor: pointer;
+  transition:
+    background 0.2s ease,
+    transform 0.2s ease;
+}
+
+.index-feature-3-lightbox__close:hover {
+  background: color-mix(in srgb, var(--stone-400) 42%, transparent);
+  transform: scale(1.05);
 }
 
 .feature-index-3-space-grid__img:not([src]),
@@ -1064,6 +1141,12 @@ main {
     .feature-index-3.is-visible
     .feature-media.feature-media--index-space {
     opacity: 1;
+    transform: none;
+    transition: none;
+  }
+
+  .features--index .feature-index-3-space-grid__img,
+  .features--index .feature-index-3-space-grid__img:hover {
     transform: none;
     transition: none;
   }
