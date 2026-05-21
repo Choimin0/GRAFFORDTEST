@@ -94,16 +94,9 @@
 
   function b64urlDecode(str) {
     var s = String(str || "").replace(/-/g, "+").replace(/_/g, "/");
-    while (s.length % 4) {
-      s += "=";
-    }
-    return decodeURIComponent(
-      Array.prototype.map
-        .call(atob(s), function (c) {
-          return "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2);
-        })
-        .join(""),
-    );
+    var padLen = (4 - (s.length % 4)) % 4;
+    s += "====".slice(0, padLen);
+    return atob(s);
   }
 
   function decodeTokenPayload(token) {
@@ -203,16 +196,27 @@
     });
   }
 
+  function clearCheckoutTokenState() {
+    writeStoredToken("");
+    writeDraftTokenMeta(null);
+    writeSessionExp(0);
+    writeStoredHoldId("");
+  }
+
   async function prepareCheckoutSession(room, checkIn, checkOut, options) {
     options = options || {};
     if (options.reset) {
       await releaseBookingHold();
-      clearCheckoutSession();
+      clearCheckoutTokenState();
     }
-    return ensureBookingToken(room, checkIn, checkOut, {
+    var token = await ensureBookingToken(room, checkIn, checkOut, {
       forceNew: !!options.reset,
       reservationNumber: options.reservationNumber || "",
     });
+    if (root.GraffordCheckoutGuard) {
+      root.GraffordCheckoutGuard.markCheckoutActive();
+    }
+    return token;
   }
 
   async function bindBookingToken(payload) {
@@ -279,10 +283,7 @@
   }
 
   function clearCheckoutSession() {
-    writeStoredToken("");
-    writeDraftTokenMeta(null);
-    writeSessionExp(0);
-    writeStoredHoldId("");
+    clearCheckoutTokenState();
     try {
       sessionStorage.removeItem("graffordInPaymentFlow");
       sessionStorage.removeItem("graffordPaymentData");
@@ -417,12 +418,7 @@
     hasIssuedCheckoutSession: hasIssuedCheckoutSession,
     formatRemaining: formatRemaining,
     mountTtlTimer: mountTtlTimer,
-    clearStoredToken: function () {
-      writeStoredToken("");
-      writeDraftTokenMeta(null);
-      writeSessionExp(0);
-      writeStoredHoldId("");
-    },
+    clearStoredToken: clearCheckoutTokenState,
     clearCheckoutSession: clearCheckoutSession,
     abandonCheckoutSession: abandonCheckoutSession,
     prepareCheckoutSession: prepareCheckoutSession,

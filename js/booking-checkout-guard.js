@@ -68,17 +68,17 @@
       });
     }
 
+    startTtlTimer();
+
     var sessionReady = options.sessionReady;
     if (sessionReady && typeof sessionReady.then === "function") {
       sessionReady
         .then(function () {
-          startTtlTimer();
+          markCheckoutActive();
         })
         .catch(function (err) {
           console.warn("[checkout-guard] session init failed:", err);
         });
-    } else {
-      startTtlTimer();
     }
 
     function confirmLeaveAndGo(url) {
