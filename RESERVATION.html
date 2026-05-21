@@ -37,7 +37,12 @@
         <a href="FACILITIES.html">FACILITIES</a>
         <a href="RESERVATION.html">RESERVATION</a>
       </aside>
-      <div class="desktop-nav-links" aria-label="데스크톱 메뉴">
+      <div class="desktop-nav-center" aria-label="데스크톱 메뉴">
+        <a href="STORY.html">STORY</a>
+        <a href="GROUND.html">GROUND</a>
+        <a href="FACILITIES.html">FACILITIES</a>
+      </div>
+      <div class="desktop-nav-right" aria-label="데스크톱 유틸 메뉴">
         <div
           class="lang-switch"
           data-language-switch
@@ -51,10 +56,7 @@
             EN
           </button>
         </div>
-        <a href="STORY.html">STORY</a>
-        <a href="GROUND.html">GROUND</a>
-        <a href="FACILITIES.html">FACILITIES</a>
-        <a href="RESERVATION.html">RESERVATION</a>
+        <a href="RESERVATION.html" class="nav-reservation-btn">RESERVATION</a>
       </div>
     </nav>
     <div class="lang-kr">
@@ -733,10 +735,6 @@
                     —
                   </p>
                   <p class="reservation-date-box__dow js-cal-checkout-dow"></p>
-                  <p
-                    class="reservation-date-box__nights js-cal-stay-nights"
-                    hidden
-                  ></p>
                 </div>
               </div>
 
@@ -983,7 +981,6 @@
             var calCheckinDowEl = scope.querySelector(".js-cal-checkin-dow");
             var calCheckoutEl = scope.querySelector(".js-cal-checkout-date");
             var calCheckoutDowEl = scope.querySelector(".js-cal-checkout-dow");
-            var calStayNightsEl = scope.querySelector(".js-cal-stay-nights");
             var availabilityEl = scope.querySelector("#availability-note");
             var P = window.GraffordBookingPricing;
             var roomRatesLoaded = false;
@@ -1416,20 +1413,6 @@
                 calCheckoutDowEl.textContent = checkOut
                   ? formatDowLine(checkOut)
                   : "";
-              }
-              if (calStayNightsEl && P && typeof P.countNights === "function") {
-                var ci = checkIn ? formatYMD(checkIn) : "";
-                var co = checkOut ? formatYMD(checkOut) : "";
-                var n = ci && co ? P.countNights(ci, co) : 0;
-                if (n > 0) {
-                  calStayNightsEl.hidden = false;
-                  calStayNightsEl.textContent = isEnScope
-                    ? n + (n === 1 ? " night" : " nights")
-                    : n + "박";
-                } else {
-                  calStayNightsEl.hidden = true;
-                  calStayNightsEl.textContent = "";
-                }
               }
             }
 
@@ -3446,10 +3429,6 @@
                     —
                   </p>
                   <p class="reservation-date-box__dow js-cal-checkout-dow"></p>
-                  <p
-                    class="reservation-date-box__nights js-cal-stay-nights"
-                    hidden
-                  ></p>
                 </div>
               </div>
 

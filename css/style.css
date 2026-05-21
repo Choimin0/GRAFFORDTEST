@@ -144,7 +144,7 @@
   /* 페이지 진입 전체 오버레이 페이드 (Framer/React 없이 동작) */
   --page-overlay-fade: 1s;
   /* 상단 고정 내비(.top-right-nav)와 동일 기준 — feature 상하 여백·높이 예산에 사용 */
-  --site-nav-height: calc(0.2rem + (2 * (0.55rem + 1.5rem + 0.55rem)));
+  --site-nav-height: 4.25rem;
   /* 한 화면 안에 이미지 열이 들어가도록 상한 (고정 내비 + .features padding-block 2배 + 섹션 패딩 여유) */
   --feature-image-area-max: min(
     30svh,
@@ -366,10 +366,137 @@ html {
   display: block;
 }
 
-/* PC: 내비 로고를 수직 중앙 대비 약 2px 위로 */
+/* PC: 3단 내비 (로고 · 중앙 링크 · 언어+예약) */
 @media (min-width: 769px) {
-  .site-nav .nav-logo {
-    transform: translateY(calc(-50% - 2px));
+  .top-right-nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0;
+    padding: 1rem 3rem 1rem 1.5rem;
+    min-height: 4.25rem;
+    background-color: var(--stone-50);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    opacity: 1;
+  }
+
+  .top-right-nav .nav-logo {
+    position: static;
+    flex-shrink: 0;
+    margin: 0;
+    transform: none;
+  }
+
+  .top-right-nav .nav-logo img {
+    height: 28px;
+  }
+
+  .desktop-nav-center {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    gap: clamp(2rem, 4vw, 3.5rem);
+    pointer-events: auto;
+  }
+
+  .desktop-nav-right {
+    flex-shrink: 0;
+    margin-left: auto;
+    gap: 1.35rem;
+  }
+
+  .top-right-nav .desktop-nav-center a {
+    color: var(--stone-800);
+    font-weight: 600;
+    padding-bottom: 0;
+  }
+
+  .top-right-nav .desktop-nav-center a::after {
+    display: none;
+  }
+
+  .top-right-nav .desktop-nav-center a:hover,
+  .top-right-nav .desktop-nav-center a:focus-visible {
+    color: var(--stone-700);
+  }
+
+  .top-right-nav .lang-switch {
+    margin-right: 0;
+    margin-bottom: 0;
+    gap: 0.38rem;
+    font-size: 0.78rem;
+  }
+
+  .top-right-nav .lang-switch__btn,
+  .top-right-nav .lang-switch__divider {
+    color: var(--stone-400);
+    font-weight: 500;
+    font-size: inherit;
+  }
+
+  .top-right-nav .lang-switch__btn.is-active {
+    color: var(--stone-500);
+    font-weight: 600;
+  }
+
+  .top-right-nav .nav-reservation-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 2.65rem;
+    padding: 0.55rem 1.45rem;
+    background-color: var(--stone-800);
+    color: var(--stone-50);
+    font-weight: 600;
+    letter-spacing: var(--letter-spacing-nav);
+    transition: background-color 0.3s ease;
+  }
+
+  .top-right-nav .nav-reservation-btn::after {
+    display: none;
+  }
+
+  .top-right-nav .nav-reservation-btn:hover,
+  .top-right-nav .nav-reservation-btn:focus-visible {
+    color: var(--stone-50);
+    background-color: color-mix(in srgb, var(--gold-500) 50%, transparent);
+  }
+
+  .top-right-nav.nav-in-content-section {
+    background-color: var(--stone-50);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+
+  .top-right-nav.nav-in-content-section .desktop-nav-center a {
+    color: var(--stone-800);
+  }
+
+  .top-right-nav.nav-in-content-section .desktop-nav-center a:hover,
+  .top-right-nav.nav-in-content-section .desktop-nav-center a:focus-visible {
+    color: color-mix(in srgb, var(--gold-500) 50%, transparent);
+  }
+
+  .top-right-nav.nav-in-content-section .lang-switch__btn,
+  .top-right-nav.nav-in-content-section .lang-switch__divider {
+    color: var(--stone-400);
+  }
+
+  .top-right-nav.nav-in-content-section .lang-switch__btn.is-active {
+    color: var(--stone-500);
+  }
+
+  .top-right-nav.nav-in-content-section .nav-reservation-btn {
+    background-color: var(--stone-800);
+    color: var(--stone-50);
+  }
+
+  .top-right-nav.nav-in-content-section .nav-reservation-btn:hover,
+  .top-right-nav.nav-in-content-section .nav-reservation-btn:focus-visible {
+    color: var(--stone-50);
+    background-color: color-mix(in srgb, var(--gold-500) 30%, transparent);
   }
 }
 
@@ -377,10 +504,18 @@ html {
   display: none;
 }
 
-.desktop-nav-links {
+.desktop-nav-center,
+.desktop-nav-right {
   display: inline-flex;
   align-items: center;
-  gap: 0.75rem 1rem;
+}
+
+.desktop-nav-center {
+  gap: 2.25rem;
+}
+
+.desktop-nav-right {
+  gap: 1.15rem;
 }
 
 .lang-switch {
@@ -492,7 +627,6 @@ body[data-site-language="en"] .lang-en .hero-slide:first-child {
   gap: 0.75rem 1rem;
   /* 약 2배 높이: 기존 세로 패딩 0.55rem 기준 상하 2배 + 최소 높이로 한 줄 바의 약 2배 */
   padding: 1.1rem 3rem;
-  padding-left: clamp(9.75rem, 36vw, 15rem);
   min-height: calc(2 * (0.55rem + 1.5rem + 0.55rem));
   background-color: var(--color-nav-glass);
   backdrop-filter: blur(3px);
@@ -510,9 +644,12 @@ body[data-site-language="en"] .lang-en .hero-slide:first-child {
     -webkit-backdrop-filter 0.3s ease;
 }
 
-.top-right-nav .desktop-nav-links a,
+.top-right-nav .desktop-nav-center a,
+.top-right-nav .nav-reservation-btn,
 .top-right-nav .mobile-menu-btn {
-  transition: color 0.3s ease;
+  transition:
+    color 0.3s ease,
+    background-color 0.3s ease;
 }
 
 .top-right-nav.nav-hero-hidden {
@@ -544,8 +681,13 @@ body[data-site-language="en"] .lang-en .hero-slide:first-child {
   -webkit-backdrop-filter: blur(8px);
 }
 
-.top-right-nav.nav-in-content-section .desktop-nav-links a,
+.top-right-nav.nav-in-content-section .desktop-nav-center a,
 .top-right-nav.nav-in-content-section .mobile-menu-btn {
+  color: var(--stone-50);
+}
+
+.top-right-nav.nav-in-content-section .nav-reservation-btn {
+  background-color: var(--stone-800);
   color: var(--stone-50);
 }
 
@@ -748,8 +890,8 @@ main {
 }
 
 @media (min-width: 768px) {
-  .features .feature-media,
-  .features .gallery-main-wrap {
+  .features:not(.rooms-features) .feature-media,
+  .features:not(.rooms-features) .gallery-main-wrap {
     aspect-ratio: var(--feature-ref-media-ratio);
   }
 
@@ -2732,7 +2874,7 @@ main {
 }
 
 .rooms-features .room-feature .reserve-btn {
-  margin-top: auto;
+  margin-top: 0.75rem;
   align-self: flex-start;
 }
 
@@ -3274,7 +3416,7 @@ main {
 }
 
 @media (min-width: 768px) {
-  .room-image-slot {
+  .features:not(.rooms-features) .room-image-slot {
     display: flex;
     flex-direction: column;
     min-height: 0;
@@ -3294,7 +3436,7 @@ main {
     overflow: hidden;
   }
 
-  .room-image-slot .room-slot-main-img {
+  .features:not(.rooms-features) .room-image-slot .room-slot-main-img {
     max-height: var(--feature-viewport-max-block);
   }
 }
@@ -3303,12 +3445,39 @@ main {
   opacity: 0;
 }
 
+.room-image-slot--carousel .gallery-image-overlay {
+  position: absolute;
+  inset: 0;
+  top: auto;
+  z-index: 1;
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-end;
+  padding: clamp(0.75rem, 2.2vw, 1.35rem);
+  pointer-events: none;
+  background: linear-gradient(
+    to top,
+    rgba(15, 13, 11, 0.58) 0%,
+    rgba(15, 13, 11, 0.12) 52%,
+    transparent 100%
+  );
+}
+
+.room-image-slot--carousel .gallery-photo-index {
+  flex-shrink: 0;
+  font-family: var(--font-family-nav-en);
+  font-size: 0.8125rem;
+  letter-spacing: 0.06em;
+  color: rgba(250, 249, 247, 0.92);
+  align-self: flex-end;
+}
+
 .room-image-slot .gallery-thumbs {
   margin-top: 0;
   scrollbar-width: none;
 }
 
-/* ROOMS: PC — STORY .feature-story-1 과 동일 60/40·이미지 열 높이 */
+/* ROOMS: PC — 이미지가 feature 전체 높이를 cover */
 @media (min-width: 768px) {
   .rooms-features .room-feature {
     align-items: stretch;
@@ -3316,12 +3485,25 @@ main {
     min-height: unset !important;
   }
 
+  .rooms-features .feature-text--room {
+    height: auto;
+  }
+
+  .rooms-features .feature-text--room > br {
+    display: none;
+  }
+
+  .rooms-features .room-feature .reserve-btn {
+    margin-top: 0.75rem;
+  }
+
   .rooms-features .room-image-slot {
     align-self: stretch;
-    min-height: var(--feature-ref-media-min-h);
     display: flex;
     flex-direction: column;
-    height: 100%;
+    min-height: 0;
+    padding: 0;
+    overflow: hidden;
   }
 
   .rooms-features .room-slot-gallery {
@@ -3329,18 +3511,27 @@ main {
     display: flex;
     flex-direction: column;
     min-height: 0;
+    height: 100%;
   }
 
   .rooms-features .gallery-main-wrap {
+    position: relative;
     flex: 1 1 auto;
-    min-height: var(--feature-ref-image-min-h);
+    min-height: 0;
+    height: 100%;
+    aspect-ratio: unset;
+    overflow: hidden;
   }
 
   .rooms-features .room-slot-main-img {
+    position: absolute;
+    inset: 0;
     width: 100% !important;
-    height: auto !important;
-    min-height: var(--feature-ref-image-min-h) !important;
-    max-height: var(--feature-viewport-max-block) !important;
+    height: 100% !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    object-fit: cover !important;
+    object-position: center;
   }
 }
 
@@ -4275,7 +4466,8 @@ main.content-section:has(> .site-footer.site-business-footer) {
     min-height: 0;
   }
 
-  .desktop-nav-links {
+  .desktop-nav-center,
+  .desktop-nav-right {
     display: none;
   }
 
@@ -5411,10 +5603,9 @@ main.content-section:has(> .site-footer.site-business-footer) {
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
-  width: 42px;
-  height: 42px;
+  width: 32px;
+  height: 32px;
   border: none;
-  border-radius: 999px;
   background: transparent;
   color: var(--color-text-on-dark);
   font-size: 1.1rem;
@@ -5425,7 +5616,7 @@ main.content-section:has(> .site-footer.site-business-footer) {
 
 .gallery-nav:hover,
 .gallery-nav:focus-visible {
-  background: rgba(0, 0, 0, 0.65);
+  background: color-mix(in srgb, var(--stone-400) 45%, transparent);
 }
 
 .gallery-prev {
@@ -8587,7 +8778,6 @@ main.content-section.confirm-page.payment-page > #payment-error-area-en {
 
 .confirm-total-box {
   background: transparent;
-  width: 100%;
   margin: 0 0.7rem 0.85rem;
 }
 
@@ -8617,7 +8807,7 @@ main.content-section.confirm-page.payment-page > #payment-error-area-en {
   color: var(--stone-400);
   font-size: 0.82rem;
   font-weight: 400;
-  letter-spacing: 0.2em;
+  letter-spacing: 0.1em;
 }
 
 .confirm-price-row {
@@ -10431,14 +10621,14 @@ button.reserve-delete-submit-btn.confirm-pay-submit.btn.reserve-btn:not(
 }
 
 .reserve-complete-gallery .gallery-nav {
-  background: rgba(0, 0, 0, 0.48);
+  background: transparent;
   color: var(--color-text-on-dark);
   z-index: 4;
 }
 
 .reserve-complete-gallery .gallery-nav:hover,
 .reserve-complete-gallery .gallery-nav:focus-visible {
-  background: rgba(0, 0, 0, 0.7);
+  background: color-mix(in srgb, var(--stone-400) 45%, transparent);
 }
 
 .reserve-complete-dl {

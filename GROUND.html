@@ -36,7 +36,12 @@
         <a href="FACILITIES.html">FACILITIES</a>
         <a href="RESERVATION.html">RESERVATION</a>
       </aside>
-      <div class="desktop-nav-links" aria-label="데스크톱 메뉴">
+      <div class="desktop-nav-center" aria-label="데스크톱 메뉴">
+        <a href="STORY.html">STORY</a>
+        <a href="GROUND.html">GROUND</a>
+        <a href="FACILITIES.html">FACILITIES</a>
+      </div>
+      <div class="desktop-nav-right" aria-label="데스크톱 유틸 메뉴">
         <div
           class="lang-switch"
           data-language-switch
@@ -50,10 +55,7 @@
             EN
           </button>
         </div>
-        <a href="STORY.html">STORY</a>
-        <a href="GROUND.html">GROUND</a>
-        <a href="FACILITIES.html">FACILITIES</a>
-        <a href="RESERVATION.html">RESERVATION</a>
+        <a href="RESERVATION.html" class="nav-reservation-btn">RESERVATION</a>
       </div>
     </nav>
     <div class="lang-kr">
@@ -687,8 +689,23 @@
             var thumbsEl = slot.querySelector(".room-slot-thumbs");
             var btnPrev = slot.querySelector(".room-slot-nav-prev");
             var btnNext = slot.querySelector(".room-slot-nav-next");
+            var mainWrap = slot.querySelector(".gallery-main-wrap");
+            var photoIndexEl = slot.querySelector(".gallery-photo-index");
             if (!imgs || !imgs.length || !imgEl || !thumbsEl) {
               return;
+            }
+            if (mainWrap && !photoIndexEl) {
+              var overlay = document.createElement("div");
+              overlay.className = "gallery-image-overlay";
+              overlay.setAttribute("aria-hidden", "true");
+              photoIndexEl = document.createElement("div");
+              photoIndexEl.className = "gallery-photo-index";
+              overlay.appendChild(photoIndexEl);
+              if (btnNext) {
+                mainWrap.insertBefore(overlay, btnNext);
+              } else {
+                mainWrap.appendChild(overlay);
+              }
             }
             var index = 0;
             var fadeMs = 650; //객실 이미지 페이드 시간
@@ -696,8 +713,15 @@
             var autoTimer = null;
             var label = "Room " + room;
 
+            function updatePhotoIndex() {
+              if (photoIndexEl) {
+                photoIndexEl.textContent = index + 1 + " / " + imgs.length;
+              }
+            }
+
             function renderThumbs() {
               thumbsEl.innerHTML = "";
+              updatePhotoIndex();
               imgs.forEach(function (_, i) {
                 var b = document.createElement("button");
                 b.type = "button";
