@@ -3,6 +3,7 @@
     "해당 날짜에 예약이 불가합니다. 예약을 다시 확인해주세요";
   var EXPIRED_MSG = "유효 시간이 만료되었습니다";
   var SESSION_EXP_KEY = "graffordBookingSessionExp";
+  var HOLD_ID_KEY = "graffordBookingHoldId";
 
   function apiBase() {
     if (typeof root !== "undefined" && root.__GRAFFORD_API_BASE__) {
@@ -29,6 +30,24 @@
         sessionStorage.setItem("graffordBookingToken", token);
       } else {
         sessionStorage.removeItem("graffordBookingToken");
+      }
+    } catch (_e) {}
+  }
+
+  function readStoredHoldId() {
+    try {
+      return String(sessionStorage.getItem(HOLD_ID_KEY) || "").trim();
+    } catch (_e) {
+      return "";
+    }
+  }
+
+  function writeStoredHoldId(holdId) {
+    try {
+      if (holdId) {
+        sessionStorage.setItem(HOLD_ID_KEY, String(holdId));
+      } else {
+        sessionStorage.removeItem(HOLD_ID_KEY);
       }
     } catch (_e) {}
   }
@@ -105,6 +124,11 @@
     return Number.isFinite(exp) && exp > 0 ? exp : 0;
   }
 
+  function getHoldIdFromToken(token) {
+    var payload = decodeTokenPayload(token);
+    return payload && payload.nonce ? String(payload.nonce) : "";
+  }
+
   function tokenMatchesDraft(tokenMeta, room, checkIn, checkOut) {
     if (!tokenMeta) {
       return false;
@@ -127,13 +151,15 @@
     return { ok: res.ok && data.ok, status: res.status, data: data };
   }
 
-  async function issueBookingToken(room, checkIn, checkOut, reservationNumber) {
+  async function issueBookingToken(room, checkIn, checkOut, reservationNumber, options) {
+    options = options || {};
     var result = await postBookingTokenAction({
       action: "issue",
       room: room,
       checkIn: checkIn,
       checkOut: checkOut,
       reservationNumber: reservationNumber || "",
+      replaceOverlapping: !!options.replaceOverlapping,
     });
     if (!result.ok || !result.data.bookingToken) {
       throw new Error(
@@ -142,7 +168,12 @@
     }
     writeStoredToken(result.data.bookingToken);
     writeDraftTokenMeta({ room: room, checkIn: checkIn, checkOut: checkOut });
-    writeSessionExp(result.data.expiresAt || getTokenExpiresAt(result.data.bookingToken));
+    writeSessionExp(
+      result.data.expiresAt || getTokenExpiresAt(result.data.bookingToken),
+    );
+    writeStoredHoldId(
+      result.data.holdId || getHoldIdFromToken(result.data.bookingToken),
+    );
     return result.data.bookingToken;
   }
 
@@ -158,12 +189,30 @@
       tokenMatchesDraft(meta, room, checkIn, checkOut) &&
       getTokenExpiresAt(existing) > Date.now()
     ) {
+      writeStoredHoldId(
+        readStoredHoldId() || getHoldIdFromToken(existing),
+      );
+      writeSessionExp(readSessionExp() || getTokenExpiresAt(existing));
       return existing;
     }
-    if (forceNew && existing) {
-      await releaseBookingHold(existing);
+    if (forceNew) {
+      await releaseBookingHold(existing || readStoredToken());
     }
-    return issueBookingToken(room, checkIn, checkOut, reservationNumber);
+    return issueBookingToken(room, checkIn, checkOut, reservationNumber, {
+      replaceOverlapping: forceNew,
+    });
+  }
+
+  async function prepareCheckoutSession(room, checkIn, checkOut, options) {
+    options = options || {};
+    if (options.reset) {
+      await releaseBookingHold();
+      clearCheckoutSession();
+    }
+    return ensureBookingToken(room, checkIn, checkOut, {
+      forceNew: !!options.reset,
+      reservationNumber: options.reservationNumber || "",
+    });
   }
 
   async function bindBookingToken(payload) {
@@ -189,15 +238,18 @@
 
   async function releaseBookingHold(token) {
     var bookingToken = token || readStoredToken();
-    if (!bookingToken) {
+    var holdId = readStoredHoldId() || getHoldIdFromToken(bookingToken);
+    if (!bookingToken && !holdId) {
       return;
     }
     try {
       await postBookingTokenAction({
         action: "release",
-        bookingToken: bookingToken,
+        bookingToken: bookingToken || "",
+        holdId: holdId || "",
       });
     } catch (_e) {}
+    writeStoredHoldId("");
   }
 
   async function validateBookingToken(payload) {
@@ -230,6 +282,7 @@
     writeStoredToken("");
     writeDraftTokenMeta(null);
     writeSessionExp(0);
+    writeStoredHoldId("");
     try {
       sessionStorage.removeItem("graffordInPaymentFlow");
       sessionStorage.removeItem("graffordPaymentData");
@@ -285,11 +338,23 @@
 
   function getRemainingMs() {
     var token = readStoredToken();
+    if (!token) {
+      return null;
+    }
     var exp = readSessionExp() || getTokenExpiresAt(token);
     if (!exp) {
-      return 0;
+      return null;
     }
     return Math.max(0, exp - Date.now());
+  }
+
+  function hasIssuedCheckoutSession() {
+    var token = readStoredToken();
+    if (!token) {
+      return false;
+    }
+    var exp = readSessionExp() || getTokenExpiresAt(token);
+    return !!(exp && exp > Date.now());
   }
 
   function formatRemaining(ms) {
@@ -304,20 +369,26 @@
     var ids = Array.isArray(elementIds) ? elementIds : [elementIds];
     var timerId = null;
     var expiredHandled = false;
+    var pendingLabel = options.pendingLabel || "--:--";
 
     function render() {
       var remaining = getRemainingMs();
-      var text = formatRemaining(remaining);
+      var pending = remaining == null;
+      var text = pending ? pendingLabel : formatRemaining(remaining);
       ids.forEach(function (id) {
         var el = root.document.getElementById(id);
         if (!el) {
           return;
         }
         el.textContent = text;
-        el.classList.toggle("is-warning", remaining > 0 && remaining <= 120000);
-        el.classList.toggle("is-expired", remaining <= 0);
+        el.classList.toggle(
+          "is-warning",
+          !pending && remaining > 0 && remaining <= 120000,
+        );
+        el.classList.toggle("is-expired", !pending && remaining <= 0);
+        el.classList.toggle("is-pending", pending);
       });
-      if (remaining <= 0 && !expiredHandled) {
+      if (!pending && remaining <= 0 && !expiredHandled && readStoredToken()) {
         expiredHandled = true;
         if (typeof options.onExpired === "function") {
           options.onExpired();
@@ -343,15 +414,18 @@
     writeStoredToken: writeStoredToken,
     getTokenExpiresAt: getTokenExpiresAt,
     getRemainingMs: getRemainingMs,
+    hasIssuedCheckoutSession: hasIssuedCheckoutSession,
     formatRemaining: formatRemaining,
     mountTtlTimer: mountTtlTimer,
     clearStoredToken: function () {
       writeStoredToken("");
       writeDraftTokenMeta(null);
       writeSessionExp(0);
+      writeStoredHoldId("");
     },
     clearCheckoutSession: clearCheckoutSession,
     abandonCheckoutSession: abandonCheckoutSession,
+    prepareCheckoutSession: prepareCheckoutSession,
     ensureBookingToken: ensureBookingToken,
     bindBookingToken: bindBookingToken,
     releaseBookingHold: releaseBookingHold,

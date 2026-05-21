@@ -10341,13 +10341,18 @@ button.reserve-delete-submit-btn.confirm-pay-submit.btn.reserve-btn:not(
 .reserve-check-page-band__right {
   flex: 0 0 auto;
   display: flex;
-  align-items: flex-end;
+  align-items: flex-start;
   justify-content: flex-end;
   gap: clamp(0.85rem, 2vw, 1.35rem);
   text-align: right;
 }
 
-.booking-session-timer {
+.booking-session-timer,
+.reserve-check-page-band__right-col {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: flex-start;
   flex: 0 0 auto;
   text-align: right;
 }
@@ -10363,19 +10368,23 @@ button.reserve-delete-submit-btn.confirm-pay-submit.btn.reserve-btn:not(
 .booking-session-timer__value {
   margin: 0;
   min-width: 3.5rem;
+  min-height: 1.35rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
   font-size: 1.05rem;
   font-weight: 600;
   color: var(--stone-800);
   font-variant-numeric: tabular-nums;
-  line-height: 1.2;
+  line-height: 1;
 }
 
 .booking-session-timer__value.is-warning {
-  color: #b45309;
+  color: var(--stone-red);
 }
 
 .booking-session-timer__value.is-expired {
-  color: #b91c1c;
+  color: var(--stone-red);
 }
 
 .reserve-check-page-band__right .payment-page-step-indicator {

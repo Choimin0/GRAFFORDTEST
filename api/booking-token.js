@@ -7,6 +7,7 @@ import {
 import {
   bindBookingHoldReservation,
   releaseBookingHold,
+  releaseOpenHoldsForStay,
   upsertBookingHold,
 } from "./lib/booking-hold.js";
 import {
@@ -141,6 +142,9 @@ export default async function handler(req, res) {
       return;
     }
     try {
+      if (body.replaceOverlapping === true || body.replaceOverlapping === "true") {
+        await releaseOpenHoldsForStay(pool, room, checkIn, checkOut, issued.holdId);
+      }
       await upsertBookingHold(pool, {
         holdId: issued.holdId,
         roomType: room,
@@ -204,18 +208,18 @@ export default async function handler(req, res) {
   }
 
   if (action === "release") {
-    if (!bookingToken) {
+    var releaseHoldId =
+      getHoldIdFromToken(bookingToken) ||
+      String(body.holdId || "").trim();
+    if (!releaseHoldId) {
       json(res, 400, {
         ok: false,
-        error: "bookingToken is required",
+        error: "bookingToken or holdId is required",
       });
       return;
     }
-    var releaseHoldId = getHoldIdFromToken(bookingToken);
-    if (releaseHoldId) {
-      await releaseBookingHold(pool, releaseHoldId);
-    }
-    json(res, 200, { ok: true, released: true });
+    await releaseBookingHold(pool, releaseHoldId);
+    json(res, 200, { ok: true, released: true, holdId: releaseHoldId });
     return;
   }
 

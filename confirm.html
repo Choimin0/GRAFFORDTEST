@@ -85,7 +85,7 @@
                   15:00
                 </p>
               </div>
-              <div>
+              <div class="reserve-check-page-band__right-col">
               <p class="reserve-check-page-band__label">STEP_2</p>
               <div
                 class="payment-page-step-indicator"
@@ -1268,16 +1268,10 @@
           var cameFromReservation = /RESERVATION\.html$/i.test(referrer);
           var cameFromPayment = /payment\.html$/i.test(referrer);
 
-          // reservation -> confirm 최초 진입에서는 이전 결제 세션 데이터를 정리
+          // reservation -> confirm 최초 진입 시 결제 세션만 정리 (홀드/토큰은 prepareCheckoutSession에서 처리)
           if (cameFromReservation && !cameFromPayment) {
             sessionStorage.removeItem("graffordInPaymentFlow");
             sessionStorage.removeItem("graffordPaymentData");
-            if (window.GraffordBookingToken) {
-              window.GraffordBookingToken.releaseBookingHold()
-                .finally(function () {
-                  window.GraffordBookingToken.clearCheckoutSession();
-                });
-            }
           }
 
           var inPaymentFlow =
@@ -1312,35 +1306,22 @@
             if (leaveOverlayEn) leaveOverlayEn.classList.remove("is-visible");
           }
 
+          var checkoutSessionReady = Promise.resolve(null);
           if (window.GraffordBookingToken && checkIn && checkOut && roomRaw) {
-            var tokenPromise;
-            if (cameFromReservation && !cameFromPayment) {
-              tokenPromise = window.GraffordBookingToken.ensureBookingToken(
+            checkoutSessionReady =
+              window.GraffordBookingToken.prepareCheckoutSession(
                 roomRaw,
                 checkIn,
                 checkOut,
-                { forceNew: true },
+                { reset: cameFromReservation && !cameFromPayment },
               );
-            } else if (window.GraffordBookingToken.readStoredToken()) {
-              tokenPromise = Promise.resolve(
-                window.GraffordBookingToken.readStoredToken(),
-              );
-            } else {
-              tokenPromise = window.GraffordBookingToken.ensureBookingToken(
-                roomRaw,
-                checkIn,
-                checkOut,
-              );
-            }
-            tokenPromise.catch(function (err) {
-              console.warn("[booking-token] issue failed:", err);
-            });
           }
 
           if (window.GraffordCheckoutGuard) {
             window.GraffordCheckoutGuard.init({
               page: "confirm",
               inPaymentFlow: inPaymentFlow,
+              sessionReady: checkoutSessionReady,
               ttlElementIds: ["booking-ttl-kr", "booking-ttl-en"],
               showLeaveOverlay: showLeaveOverlay,
               hideLeaveOverlay: hideLeaveOverlay,
@@ -1353,6 +1334,10 @@
               },
             });
           }
+
+          checkoutSessionReady.catch(function (err) {
+            console.warn("[booking-token] session prepare failed:", err);
+          });
 
           if (leaveOverlayKr) {
             leaveOverlayKr.addEventListener("click", function (e) {
@@ -2194,7 +2179,7 @@
                   15:00
                 </p>
               </div>
-              <div>
+              <div class="reserve-check-page-band__right-col">
               <p class="reserve-check-page-band__label">STEP_2</p>
               <div
                 class="payment-page-step-indicator"

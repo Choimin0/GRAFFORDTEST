@@ -102,6 +102,32 @@ export async function bindBookingHoldReservation(pool, holdId, reservationNumber
   return (result.rowCount || 0) > 0;
 }
 
+export async function releaseOpenHoldsForStay(
+  pool,
+  roomName,
+  checkIn,
+  checkOut,
+  excludeHoldId,
+) {
+  await cleanupExpiredBookingHolds(pool);
+  var params = [roomName, checkIn, checkOut];
+  var excludeSql = "";
+  if (excludeHoldId) {
+    params.push(String(excludeHoldId).trim());
+    excludeSql = " AND hold_id <> $" + params.length;
+  }
+  await pool.query(
+    `DELETE FROM ${BOOKING_HOLD_TABLE}
+     WHERE room_type = $1
+       AND check_in_date = $2::date
+       AND check_out_date = $3::date
+       AND reservation_number IS NULL
+       AND expires_at > NOW()
+       ${excludeSql}`,
+    params,
+  );
+}
+
 export async function releaseBookingHold(pool, holdId) {
   if (!holdId) {
     return false;

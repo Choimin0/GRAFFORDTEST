@@ -133,7 +133,7 @@
                   15:00
                 </p>
               </div>
-              <div>
+              <div class="reserve-check-page-band__right-col">
               <p class="reserve-check-page-band__label">STEP_3</p>
               <div
                 class="payment-page-step-indicator"
@@ -1016,9 +1016,8 @@
               );
               return;
             }
-            if (
-              window.GraffordBookingToken.getRemainingMs() <= 0
-            ) {
+            var checkoutRemaining = window.GraffordBookingToken.getRemainingMs();
+            if (checkoutRemaining != null && checkoutRemaining <= 0) {
               resetPaymentGuard();
               window.GraffordBookingToken.showExpiredModal();
               return;
@@ -1366,7 +1365,7 @@
                   15:00
                 </p>
               </div>
-              <div>
+              <div class="reserve-check-page-band__right-col">
               <p class="reserve-check-page-band__label">STEP</p>
               <div
                 class="payment-page-step-indicator"
@@ -2277,9 +2276,8 @@
               );
               return;
             }
-            if (
-              window.GraffordBookingToken.getRemainingMs() <= 0
-            ) {
+            var checkoutRemaining = window.GraffordBookingToken.getRemainingMs();
+            if (checkoutRemaining != null && checkoutRemaining <= 0) {
               resetPaymentGuard();
               window.GraffordBookingToken.showExpiredModal({
                 redirectTo: "RESERVATION.html",
@@ -2761,10 +2759,33 @@
           });
         }
 
+        var paymentSessionReady = Promise.resolve(null);
+        if (window.GraffordBookingToken) {
+          paymentSessionReady = Promise.resolve().then(function () {
+            var token = window.GraffordBookingToken.readStoredToken();
+            if (!token) {
+              try {
+                var saved = JSON.parse(
+                  sessionStorage.getItem("graffordPaymentData") || "null",
+                );
+                token = saved && saved.bookingToken ? saved.bookingToken : "";
+                if (token) {
+                  window.GraffordBookingToken.writeStoredToken(token);
+                }
+              } catch (_e) {}
+            }
+            if (!token || !window.GraffordBookingToken.hasIssuedCheckoutSession()) {
+              throw new Error("checkout session missing");
+            }
+            return token;
+          });
+        }
+
         if (window.GraffordCheckoutGuard) {
           window.GraffordCheckoutGuard.init({
             page: "payment",
             guardPopstate: false,
+            sessionReady: paymentSessionReady,
             ttlElementIds: ["booking-ttl-pay-kr", "booking-ttl-pay-en"],
             showLeaveOverlay: showLeaveOverlay,
             hideLeaveOverlay: hideLeaveOverlay,
@@ -2777,6 +2798,10 @@
             },
           });
         }
+
+        paymentSessionReady.catch(function (err) {
+          console.warn("[checkout-guard] payment session init failed:", err);
+        });
       });
     </script>
     <script defer src="js/grafford-page-fade.js"></script>

@@ -57,10 +57,28 @@
 
     markCheckoutActive();
 
-    if (root.GraffordBookingToken && ttlElementIds.length) {
-      root.GraffordBookingToken.mountTtlTimer(ttlElementIds, {
+    var timerStop = null;
+    function startTtlTimer() {
+      if (timerStop || !root.GraffordBookingToken || !ttlElementIds.length) {
+        return;
+      }
+      timerStop = root.GraffordBookingToken.mountTtlTimer(ttlElementIds, {
         onExpired: onExpired,
+        pendingLabel: options.pendingLabel || "--:--",
       });
+    }
+
+    var sessionReady = options.sessionReady;
+    if (sessionReady && typeof sessionReady.then === "function") {
+      sessionReady
+        .then(function () {
+          startTtlTimer();
+        })
+        .catch(function (err) {
+          console.warn("[checkout-guard] session init failed:", err);
+        });
+    } else {
+      startTtlTimer();
     }
 
     function confirmLeaveAndGo(url) {
