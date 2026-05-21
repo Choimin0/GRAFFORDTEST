@@ -51,6 +51,46 @@
     } catch (_e) {}
   }
 
+  function isPageReload() {
+    try {
+      var entries = performance.getEntriesByType("navigation");
+      if (entries && entries[0] && entries[0].type === "reload") {
+        return true;
+      }
+    } catch (_e) {}
+    try {
+      return !!(performance.navigation && performance.navigation.type === 1);
+    } catch (_e2) {
+      return false;
+    }
+  }
+
+  function hasActiveCheckoutSession() {
+    if (isCheckoutActive()) {
+      return true;
+    }
+    if (root.GraffordBookingToken && root.GraffordBookingToken.hasIssuedCheckoutSession) {
+      return root.GraffordBookingToken.hasIssuedCheckoutSession();
+    }
+    return false;
+  }
+
+  function abandonCheckoutOnReload(redirectTo) {
+    var target = redirectTo || "RESERVATION.html";
+    if (!isPageReload() || isCheckoutNavigationAllowed() || !hasActiveCheckoutSession()) {
+      return false;
+    }
+    if (root.GraffordBookingToken) {
+      root.GraffordBookingToken.abandonCheckoutSession(target);
+    } else {
+      try {
+        sessionStorage.removeItem(CHECKOUT_ACTIVE_KEY);
+      } catch (_e) {}
+      root.location.replace(target);
+    }
+    return true;
+  }
+
   function init(options) {
     options = options || {};
     var page = options.page || "confirm";
@@ -83,6 +123,17 @@
     allowCheckoutNavigationFn = function () {
       leaveConfirmed = true;
     };
+
+    if (abandonCheckoutOnReload(options.redirectTo)) {
+      return {
+        confirmLeaveAndGo: function () {},
+        shouldGuardNavigation: function () {
+          return false;
+        },
+        allowCheckoutNavigation: allowCheckoutNavigation,
+        abortedOnReload: true,
+      };
+    }
 
     markCheckoutActive();
     clearCheckoutNavigationAllowance();
@@ -206,9 +257,12 @@
         showLeaveOverlay();
       });
 
+    }
+
+    if (guardEnabled) {
       root.addEventListener("beforeunload", function (e) {
         if (
-          !isCheckoutActive() ||
+          !hasActiveCheckoutSession() ||
           leaveConfirmed ||
           isCheckoutNavigationAllowed()
         ) {
@@ -216,6 +270,23 @@
         }
         e.preventDefault();
         e.returnValue = "";
+      });
+
+      root.addEventListener("pagehide", function () {
+        if (
+          !hasActiveCheckoutSession() ||
+          leaveConfirmed ||
+          isCheckoutNavigationAllowed()
+        ) {
+          return;
+        }
+        if (
+          root.GraffordBookingToken &&
+          typeof root.GraffordBookingToken.releaseBookingHoldKeepalive ===
+            "function"
+        ) {
+          root.GraffordBookingToken.releaseBookingHoldKeepalive();
+        }
       });
     }
 
@@ -229,6 +300,8 @@
   root.GraffordCheckoutGuard = {
     init: init,
     isCheckoutPath: isCheckoutPath,
+    isPageReload: isPageReload,
+    abandonCheckoutOnReload: abandonCheckoutOnReload,
     markCheckoutActive: markCheckoutActive,
     isCheckoutActive: isCheckoutActive,
     allowCheckoutNavigation: allowCheckoutNavigation,

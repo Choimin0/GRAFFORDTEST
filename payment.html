@@ -522,8 +522,8 @@
       </div>
 
       <script src="js/booking-pricing.js?v=4"></script>
-      <script src="js/booking-token-client.js?v=2"></script>
-      <script src="js/booking-checkout-guard.js?v=3"></script>
+      <script src="js/booking-token-client.js?v=3"></script>
+      <script src="js/booking-checkout-guard.js?v=4"></script>
       <script>
         document.addEventListener("DOMContentLoaded", function () {
           var P = window.GraffordBookingPricing;
@@ -1753,8 +1753,8 @@
       </div>
 
       <script src="js/booking-pricing.js?v=4"></script>
-      <script src="js/booking-token-client.js?v=2"></script>
-      <script src="js/booking-checkout-guard.js?v=3"></script>
+      <script src="js/booking-token-client.js?v=3"></script>
+      <script src="js/booking-checkout-guard.js?v=4"></script>
       <script>
         document.addEventListener("DOMContentLoaded", function () {
           var P = window.GraffordBookingPricing;
@@ -2757,6 +2757,13 @@
           leaveOverlay.addEventListener("click", function (e) {
             if (e.target === leaveOverlay) hideLeaveOverlay();
           });
+        }
+
+        if (
+          window.GraffordCheckoutGuard &&
+          window.GraffordCheckoutGuard.abandonCheckoutOnReload()
+        ) {
+          return;
         }
 
         var paymentSessionReady = Promise.resolve(null);

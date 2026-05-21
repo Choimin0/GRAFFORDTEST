@@ -256,6 +256,26 @@
     writeStoredHoldId("");
   }
 
+  function releaseBookingHoldKeepalive(token) {
+    var bookingToken = token || readStoredToken();
+    var holdId = readStoredHoldId() || getHoldIdFromToken(bookingToken);
+    if (!bookingToken && !holdId) {
+      return;
+    }
+    try {
+      root.fetch(bookingTokenApiUrl(), {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "release",
+          bookingToken: bookingToken || "",
+          holdId: holdId || "",
+        }),
+        keepalive: true,
+      });
+    } catch (_e) {}
+  }
+
   async function validateBookingToken(payload) {
     var bookingToken = payload.bookingToken || readStoredToken() || "";
     var res = await fetch(bookingTokenApiUrl(), {
@@ -425,6 +445,7 @@
     ensureBookingToken: ensureBookingToken,
     bindBookingToken: bindBookingToken,
     releaseBookingHold: releaseBookingHold,
+    releaseBookingHoldKeepalive: releaseBookingHoldKeepalive,
     validateBookingToken: validateBookingToken,
     showUnavailableModal: showUnavailableModal,
     showExpiredModal: showExpiredModal,
