@@ -408,7 +408,7 @@ html {
   }
 
   .top-right-nav .desktop-nav-center a {
-    color: var(--stone-800);
+    color: var(--stone-50);
     font-weight: 600;
     padding-bottom: 0;
   }
@@ -7610,6 +7610,15 @@ main.content-section.confirm-page.payment-page > #payment-error-area-en {
   text-align: center;
 }
 
+.payment-side-card--payrow:has(.payment-side-payrow__change[hidden]) {
+  grid-template-columns: auto minmax(0, 1fr);
+}
+
+.payment-side-card--payrow:has(.payment-side-payrow__change[hidden])
+  .payment-side-payrow__v {
+  text-align: right;
+}
+
 .payment-side-payrow__change {
   font-size: 0.72rem;
   color: var(--stone-500);
@@ -8302,6 +8311,69 @@ main.content-section.confirm-page.payment-page > #payment-error-area-en {
 #payment-retry-btn.payment-retry-spacing,
 #payment-retry-btn-en.payment-retry-spacing {
   margin-top: var(--space-12);
+}
+
+/* payment.html — 결제 알림/오류 모달 (design.md §10) */
+.payment-alert-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 10001;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem;
+  box-sizing: border-box;
+}
+
+.payment-alert-modal[hidden] {
+  display: none !important;
+}
+
+.payment-alert-modal__backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(15, 13, 11, 0.72);
+  backdrop-filter: blur(3px);
+}
+
+.payment-alert-modal__panel {
+  position: relative;
+  width: min(400px, 100%);
+  max-height: min(80vh, 480px);
+  overflow-y: auto;
+  background: var(--stone-50);
+  border: 1px solid var(--stone-200);
+  border-radius: 4px;
+  padding: 2rem 1.75rem 1.5rem;
+  text-align: center;
+  box-sizing: border-box;
+  opacity: 0;
+  transform: translateY(8px);
+  transition:
+    opacity 0.4s cubic-bezier(0.76, 0, 0.24, 1),
+    transform 0.4s cubic-bezier(0.76, 0, 0.24, 1);
+}
+
+.payment-alert-modal.is-visible .payment-alert-modal__panel {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.payment-alert-modal__message {
+  margin: 0 0 1.5rem;
+  font-size: 14px;
+  line-height: 1.85;
+  letter-spacing: 0.04em;
+  color: var(--stone-800);
+  white-space: pre-wrap;
+  word-break: keep-all;
+  overflow-wrap: break-word;
+}
+
+.payment-alert-modal__confirm {
+  width: 100%;
+  max-width: 12rem;
+  margin: 0 auto;
 }
 
 .payment-actions {
