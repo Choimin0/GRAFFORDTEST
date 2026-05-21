@@ -16,6 +16,33 @@
   </head>
   <body class="home-page">
     <div id="grafford-react-fade-root"></div>
+    <div
+      id="index-feature-3-lightbox"
+      class="index-feature-3-lightbox"
+      hidden
+      aria-hidden="true"
+    >
+      <div
+        class="index-feature-3-lightbox__backdrop"
+        aria-hidden="true"
+      ></div>
+      <div
+        class="index-feature-3-lightbox__panel"
+        role="dialog"
+        aria-modal="true"
+        aria-label="공간 사진 상세 보기"
+        tabindex="-1"
+      >
+        <button
+          type="button"
+          class="index-feature-3-lightbox__close"
+          aria-label="닫기"
+        >
+          &times;
+        </button>
+        <img class="index-feature-3-lightbox__img" alt="" />
+      </div>
+    </div>
     <nav class="site-nav top-right-nav nav-hero-hidden">
       <a href="index.html" class="nav-logo" aria-label="홈으로 이동">
         <img src="images/LOGO.png" alt="GRAFFORD LOGO" />
@@ -521,6 +548,13 @@
               return;
             }
 
+            var fadeRoot = document.getElementById("grafford-react-fade-root");
+            if (fadeRoot) {
+              fadeRoot.insertAdjacentElement("afterend", lightbox);
+            } else if (lightbox.parentElement !== document.body) {
+              document.body.appendChild(lightbox);
+            }
+
             var lightboxImg = lightbox.querySelector(
               ".index-feature-3-lightbox__img",
             );
@@ -535,14 +569,32 @@
             );
             var lastFocused = null;
 
+            function lockPageScroll() {
+              document.documentElement.classList.add(
+                "index-feature-3-lightbox-open",
+              );
+              document.body.classList.add("index-feature-3-lightbox-open");
+            }
+
+            function unlockPageScroll() {
+              document.documentElement.classList.remove(
+                "index-feature-3-lightbox-open",
+              );
+              document.body.classList.remove("index-feature-3-lightbox-open");
+            }
+
             function closeLightbox() {
               lightbox.hidden = true;
               lightbox.setAttribute("aria-hidden", "true");
               lightboxImg.removeAttribute("src");
               lightboxImg.alt = "";
-              document.body.style.overflow = "";
+              unlockPageScroll();
               if (lastFocused && typeof lastFocused.focus === "function") {
-                lastFocused.focus();
+                try {
+                  lastFocused.focus({ preventScroll: true });
+                } catch (error) {
+                  lastFocused.focus();
+                }
               }
             }
 
@@ -560,8 +612,12 @@
               closeBtn.setAttribute("aria-label", isEn ? "Close" : "닫기");
               lightbox.hidden = false;
               lightbox.setAttribute("aria-hidden", "false");
-              document.body.style.overflow = "hidden";
-              closeBtn.focus();
+              lockPageScroll();
+              try {
+                dialog.focus({ preventScroll: true });
+              } catch (error) {
+                dialog.focus();
+              }
             }
 
             closeBtn.addEventListener("click", closeLightbox);
@@ -576,7 +632,8 @@
             document
               .querySelectorAll(".feature-index-3-space-grid__img")
               .forEach(function (img) {
-                img.addEventListener("click", function () {
+                img.addEventListener("click", function (event) {
+                  event.preventDefault();
                   var isEn = !!img.closest(".lang-en");
                   openLightbox(img.currentSrc || img.src, img.alt, isEn);
                 });
@@ -1007,33 +1064,6 @@
           hidden
         ></footer>
       </main>
-    </div>
-
-    <div
-      id="index-feature-3-lightbox"
-      class="index-feature-3-lightbox"
-      hidden
-      aria-hidden="true"
-    >
-      <div
-        class="index-feature-3-lightbox__backdrop"
-        aria-hidden="true"
-      ></div>
-      <div
-        class="index-feature-3-lightbox__panel"
-        role="dialog"
-        aria-modal="true"
-        aria-label="공간 사진 상세 보기"
-      >
-        <button
-          type="button"
-          class="index-feature-3-lightbox__close"
-          aria-label="닫기"
-        >
-          &times;
-        </button>
-        <img class="index-feature-3-lightbox__img" alt="" />
-      </div>
     </div>
   </body>
 </html>
