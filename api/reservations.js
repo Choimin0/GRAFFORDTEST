@@ -6,6 +6,16 @@ import {
   encryptBookingPii,
   guestNamesMatch,
 } from "./lib/pii-crypto.js";
+import {
+  getActiveHoldOccupiedNights,
+  cleanupExpiredBookingHolds,
+  releaseBookingHold,
+} from "./lib/booking-hold.js";
+import {
+  verifyBookingToken,
+  getHoldIdFromToken,
+} from "./lib/booking-token.js";
+import { checkRoomAvailability } from "./lib/room-availability.js";
 
 const { Pool } = pg;
 
@@ -704,6 +714,7 @@ export default async function handler(req, res) {
         return;
       }
       try {
+        await cleanupExpiredBookingHolds(pool);
         var roomForCalLegacy = ROOM_TO_LEGACY[roomForCal] || "";
         var calRows = await pool.query(
           `SELECT check_in_date, check_out_date
@@ -739,6 +750,10 @@ export default async function handler(req, res) {
             },
           );
         });
+        var holdNights = await getActiveHoldOccupiedNights(pool, roomForCal);
+        holdNights.forEach(function (n) {
+          occupied[n] = true;
+        });
         json(res, 200, {
           ok: true,
           room: roomForCal,
@@ -751,6 +766,7 @@ export default async function handler(req, res) {
               expandOccupiedNights(String(row.start_date), String(row.end_date)).length
             );
           }, 0),
+          heldNightsCount: holdNights.length,
         });
       } catch (e) {
         console.error("reservations availability", e);
@@ -1000,6 +1016,30 @@ export default async function handler(req, res) {
     .toLowerCase();
   var guestCount = Number(body.guestCount);
   var pgTid = body.pgTid ? String(body.pgTid).trim().slice(0, 255) : null;
+  var bookingToken = String(body.bookingToken || "").trim();
+
+  if (!bookingToken) {
+    json(res, 400, {
+      ok: false,
+      error: "bookingToken is required",
+      code: "booking_token_required",
+    });
+    return;
+  }
+  var bookingTokenVerify = verifyBookingToken(bookingToken, {
+    room: roomType,
+    checkIn: checkIn,
+    checkOut: checkOut,
+    reservationNumber: reservationNumber,
+  });
+  if (!bookingTokenVerify.ok) {
+    json(res, 401, {
+      ok: false,
+      error: "유효하지 않은 예약 토큰입니다.",
+      code: bookingTokenVerify.error || "invalid_booking_token",
+    });
+    return;
+  }
 
   if (!reservationNumber || reservationNumber.length > MAX_RESV) {
     console.error("[reservations POST] Invalid reservationNumber:", JSON.stringify(reservationNumber));
@@ -1114,10 +1154,24 @@ export default async function handler(req, res) {
   try {
     await archivePastReservations(pool);
     await autoCancelUnpaidReservations(pool);
-    if (await hasRoomBlockOverlap(pool, roomType, checkIn, checkOut)) {
+    var availability = await checkRoomAvailability(
+      pool,
+      roomType,
+      checkIn,
+      checkOut,
+      reservationNumber,
+      getHoldIdFromToken(bookingToken),
+    );
+    if (!availability.available) {
+      var unavailableMsg =
+        availability.reason === "blocked"
+          ? "선택한 기간은 관리자 방막기로 예약할 수 없습니다."
+          : "해당 날짜에 예약이 불가합니다. 예약을 다시 확인해주세요";
       json(res, 409, {
         ok: false,
-        error: "선택한 기간은 관리자 방막기로 예약할 수 없습니다.",
+        error: unavailableMsg,
+        unavailable: true,
+        reason: availability.reason || "occupied",
       });
       return;
     }
@@ -1126,6 +1180,10 @@ export default async function handler(req, res) {
     if (!row) {
       json(res, 500, { ok: false, error: "Insert did not return a row" });
       return;
+    }
+    var insertedHoldId = getHoldIdFromToken(bookingToken);
+    if (insertedHoldId) {
+      await releaseBookingHold(pool, insertedHoldId);
     }
     json(res, 201, {
       ok: true,

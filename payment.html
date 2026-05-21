@@ -123,6 +123,17 @@
               </p>
             </div>
             <div class="reserve-check-page-band__right">
+              <div class="booking-session-timer" aria-live="polite">
+                <p class="booking-session-timer__label">TIME LEFT</p>
+                <p
+                  class="booking-session-timer__value"
+                  id="booking-ttl-pay-kr"
+                  aria-label="예약 유효 시간"
+                >
+                  15:00
+                </p>
+              </div>
+              <div>
               <p class="reserve-check-page-band__label">STEP_3</p>
               <div
                 class="payment-page-step-indicator"
@@ -141,6 +152,7 @@
                   class="payment-page-step-indicator__dot payment-page-step-indicator__dot--current"
                   aria-hidden="true"
                 ></span>
+              </div>
               </div>
             </div>
           </header>
@@ -510,6 +522,8 @@
       </div>
 
       <script src="js/booking-pricing.js?v=4"></script>
+      <script src="js/booking-token-client.js"></script>
+      <script src="js/booking-checkout-guard.js"></script>
       <script>
         document.addEventListener("DOMContentLoaded", function () {
           var P = window.GraffordBookingPricing;
@@ -590,6 +604,65 @@
           var reservationPreSaved =
             String(saved.reservationPreSaved || "") === "1";
           var preSavedCancelToken = String(saved.cancelToken || "");
+          var bookingToken = String(saved.bookingToken || "").trim();
+          if (!bookingToken && window.GraffordBookingToken) {
+            bookingToken = window.GraffordBookingToken.readStoredToken();
+          }
+          var paymentInProgress = false;
+          var paymentSettledKey = "graffordPaymentSettled:" + orderNo;
+
+          function resetPaymentGuard() {
+            paymentInProgress = false;
+            try {
+              sessionStorage.removeItem("graffordPaymentProcessing:" + orderNo);
+            } catch (_e) {}
+            if (submitBtn) submitBtn.disabled = false;
+          }
+
+          function markPaymentProcessing() {
+            paymentInProgress = true;
+            try {
+              sessionStorage.setItem(
+                "graffordPaymentProcessing:" + orderNo,
+                "1",
+              );
+            } catch (_e) {}
+            if (submitBtn) submitBtn.disabled = true;
+          }
+
+          try {
+            if (sessionStorage.getItem(paymentSettledKey) === "1") {
+              window.location.replace("reserve-complete.html");
+              return;
+            }
+            if (sessionStorage.getItem("graffordPaymentProcessing:" + orderNo) === "1") {
+              paymentInProgress = true;
+              if (submitBtn) submitBtn.disabled = true;
+            }
+          } catch (_ss) {}
+
+          async function resumeIfAlreadyBooked() {
+            if (!window.GraffordBookingToken || !bookingToken) {
+              return;
+            }
+            try {
+              var validation = await window.GraffordBookingToken.validateBookingToken(
+                {
+                  bookingToken: bookingToken,
+                  room: room,
+                  checkIn: checkIn,
+                  checkOut: checkOut,
+                  reservationNumber: orderNo,
+                },
+              );
+              if (validation.alreadyBooked) {
+                sessionStorage.setItem(paymentSettledKey, "1");
+                window.location.replace("reserve-complete.html");
+              }
+            } catch (_e) {}
+          }
+
+          resumeIfAlreadyBooked();
 
           function reservationsApiUrl() {
             if (typeof window !== "undefined" && window.__GRAFFORD_API_BASE__) {
@@ -916,7 +989,7 @@
           function showError(msg) {
             hidePageLoading();
             if (processingMsg) processingMsg.hidden = true;
-            if (submitBtn) submitBtn.disabled = false;
+            resetPaymentGuard();
             if (window.GraffordPaymentModal) {
               window.GraffordPaymentModal.open({
                 message: msg || "결제 중 오류가 발생했습니다.",
@@ -926,8 +999,74 @@
           }
 
           async function startPayment() {
-            if (submitBtn) submitBtn.disabled = true;
+            if (paymentInProgress) {
+              return;
+            }
+            markPaymentProcessing();
             if (processingMsg) processingMsg.hidden = false;
+
+            if (!window.GraffordBookingToken) {
+              showError(
+                "예약 토큰 모듈을 불러올 수 없습니다. 페이지를 새로고침 후 다시 시도해 주세요.",
+              );
+              return;
+            }
+            if (!bookingToken) {
+              showError(
+                "예약 토큰이 없습니다. 예약 확인 페이지부터 다시 진행해 주세요.",
+              );
+              return;
+            }
+            if (
+              window.GraffordBookingToken.getRemainingMs() <= 0
+            ) {
+              resetPaymentGuard();
+              window.GraffordBookingToken.showExpiredModal();
+              return;
+            }
+
+            try {
+              showPageLoading("예약 가능 여부를 확인하는 중입니다...");
+              var validation =
+                await window.GraffordBookingToken.validateBookingToken({
+                  bookingToken: bookingToken,
+                  room: room,
+                  checkIn: checkIn,
+                  checkOut: checkOut,
+                  reservationNumber: orderNo,
+                });
+              hidePageLoading();
+              if (validation.expired) {
+                resetPaymentGuard();
+                window.GraffordBookingToken.showExpiredModal();
+                return;
+              }
+              if (validation.unavailable) {
+                resetPaymentGuard();
+                window.GraffordBookingToken.showUnavailableModal();
+                return;
+              }
+              if (validation.alreadyBooked) {
+                sessionStorage.setItem(paymentSettledKey, "1");
+                window.location.replace("reserve-complete.html");
+                return;
+              }
+              if (!validation.ok) {
+                showError(
+                  (validation.data && validation.data.error) ||
+                    "예약 가능 여부를 확인하지 못했습니다. 예약 확인 페이지부터 다시 진행해 주세요.",
+                );
+                return;
+              }
+            } catch (e) {
+              hidePageLoading();
+              showError(
+                "예약 가능 여부 확인 중 오류가 발생했습니다.\n(" +
+                  (e && e.message ? e.message : "네트워크 오류") +
+                  ")",
+              );
+              return;
+            }
 
             var config = null;
             try {
@@ -1092,6 +1231,7 @@
                     paymentMethod: payMethod,
                     guestCount: guestCount,
                     pgTid: verifiedPgTid,
+                    bookingToken: bookingToken,
                   }),
                 });
                 saveData = await saveRes.json();
@@ -1103,6 +1243,12 @@
                     (e && e.message ? e.message : String(e)) +
                     ")",
                 );
+                return;
+              }
+
+              if (saveData && saveData.unavailable) {
+                resetPaymentGuard();
+                window.GraffordBookingToken.showUnavailableModal();
                 return;
               }
 
@@ -1122,6 +1268,10 @@
             var bookingCreatedAtIso =
               (saveData && saveData.createdAtIso) || "";
             sessionStorage.removeItem("graffordInPaymentFlow");
+            sessionStorage.setItem(paymentSettledKey, "1");
+            if (window.GraffordBookingToken) {
+              window.GraffordBookingToken.clearCheckoutSession();
+            }
 
             sessionStorage.setItem(
               "graffordReserveCompleteData",
@@ -1208,6 +1358,17 @@
               </p>
             </div>
             <div class="reserve-check-page-band__right">
+              <div class="booking-session-timer" aria-live="polite">
+                <p class="booking-session-timer__label">TIME LEFT</p>
+                <p
+                  class="booking-session-timer__value"
+                  id="booking-ttl-pay-en"
+                  aria-label="Booking time remaining"
+                >
+                  15:00
+                </p>
+              </div>
+              <div>
               <p class="reserve-check-page-band__label">STEP</p>
               <div
                 class="payment-page-step-indicator"
@@ -1226,6 +1387,7 @@
                   class="payment-page-step-indicator__dot payment-page-step-indicator__dot--current"
                   aria-hidden="true"
                 ></span>
+              </div>
               </div>
             </div>
           </header>
@@ -1594,6 +1756,8 @@
       </div>
 
       <script src="js/booking-pricing.js?v=4"></script>
+      <script src="js/booking-token-client.js"></script>
+      <script src="js/booking-checkout-guard.js"></script>
       <script>
         document.addEventListener("DOMContentLoaded", function () {
           var P = window.GraffordBookingPricing;
@@ -1676,6 +1840,65 @@
           var reservationPreSaved =
             String(saved.reservationPreSaved || "") === "1";
           var preSavedCancelToken = String(saved.cancelToken || "");
+          var bookingToken = String(saved.bookingToken || "").trim();
+          if (!bookingToken && window.GraffordBookingToken) {
+            bookingToken = window.GraffordBookingToken.readStoredToken();
+          }
+          var paymentInProgress = false;
+          var paymentSettledKey = "graffordPaymentSettled:" + orderNo;
+
+          function resetPaymentGuard() {
+            paymentInProgress = false;
+            try {
+              sessionStorage.removeItem("graffordPaymentProcessing:" + orderNo);
+            } catch (_e) {}
+            if (submitBtn) submitBtn.disabled = false;
+          }
+
+          function markPaymentProcessing() {
+            paymentInProgress = true;
+            try {
+              sessionStorage.setItem(
+                "graffordPaymentProcessing:" + orderNo,
+                "1",
+              );
+            } catch (_e) {}
+            if (submitBtn) submitBtn.disabled = true;
+          }
+
+          try {
+            if (sessionStorage.getItem(paymentSettledKey) === "1") {
+              window.location.replace("reserve-complete.html");
+              return;
+            }
+            if (sessionStorage.getItem("graffordPaymentProcessing:" + orderNo) === "1") {
+              paymentInProgress = true;
+              if (submitBtn) submitBtn.disabled = true;
+            }
+          } catch (_ss) {}
+
+          async function resumeIfAlreadyBooked() {
+            if (!window.GraffordBookingToken || !bookingToken) {
+              return;
+            }
+            try {
+              var validation = await window.GraffordBookingToken.validateBookingToken(
+                {
+                  bookingToken: bookingToken,
+                  room: room,
+                  checkIn: checkIn,
+                  checkOut: checkOut,
+                  reservationNumber: orderNo,
+                },
+              );
+              if (validation.alreadyBooked) {
+                sessionStorage.setItem(paymentSettledKey, "1");
+                window.location.replace("reserve-complete.html");
+              }
+            } catch (_e) {}
+          }
+
+          resumeIfAlreadyBooked();
 
           function reservationsApiUrl() {
             if (typeof window !== "undefined" && window.__GRAFFORD_API_BASE__) {
@@ -2029,7 +2252,7 @@
           function showError(msg) {
             hidePageLoading();
             if (processingMsg) processingMsg.hidden = true;
-            if (submitBtn) submitBtn.disabled = false;
+            resetPaymentGuard();
             if (window.GraffordPaymentModal) {
               window.GraffordPaymentModal.open({
                 message: msg || "A payment error occurred.",
@@ -2039,8 +2262,78 @@
           }
 
           async function startPayment() {
-            if (submitBtn) submitBtn.disabled = true;
+            if (paymentInProgress) {
+              return;
+            }
+            markPaymentProcessing();
             if (processingMsg) processingMsg.hidden = false;
+
+            if (!window.GraffordBookingToken) {
+              showError(
+                "Booking token module could not be loaded. Please refresh and try again.",
+              );
+              return;
+            }
+            if (!bookingToken) {
+              showError(
+                "Booking token is missing. Please restart from the confirmation page.",
+              );
+              return;
+            }
+            if (
+              window.GraffordBookingToken.getRemainingMs() <= 0
+            ) {
+              resetPaymentGuard();
+              window.GraffordBookingToken.showExpiredModal({
+                redirectTo: "RESERVATION.html",
+              });
+              return;
+            }
+
+            try {
+              showPageLoading("Checking room availability...");
+              var validation =
+                await window.GraffordBookingToken.validateBookingToken({
+                  bookingToken: bookingToken,
+                  room: room,
+                  checkIn: checkIn,
+                  checkOut: checkOut,
+                  reservationNumber: orderNo,
+                });
+              hidePageLoading();
+              if (validation.expired) {
+                resetPaymentGuard();
+                window.GraffordBookingToken.showExpiredModal();
+                return;
+              }
+              if (validation.unavailable) {
+                resetPaymentGuard();
+                window.GraffordBookingToken.showUnavailableModal({
+                  redirectTo: "RESERVATION.html",
+                });
+                return;
+              }
+              if (validation.alreadyBooked) {
+                sessionStorage.setItem(paymentSettledKey, "1");
+                window.location.replace("reserve-complete.html");
+                return;
+              }
+              if (!validation.ok) {
+                showError(
+                  (validation.data && validation.data.error) ||
+                    "Unable to verify room availability. Please restart from the confirmation page.",
+                );
+                return;
+              }
+            } catch (e) {
+              hidePageLoading();
+              showError(
+                "An error occurred while checking availability.\n(" +
+                  (e && e.message ? e.message : "Network error") +
+                  ")",
+              );
+              return;
+            }
 
             var config = null;
             try {
@@ -2208,6 +2501,7 @@
                     paymentMethod: payMethod,
                     guestCount: guestCount,
                     pgTid: verifiedPgTid2,
+                    bookingToken: bookingToken,
                   }),
                 });
                 saveData2 = await saveRes2.json();
@@ -2219,6 +2513,14 @@
                     (e && e.message ? e.message : String(e)) +
                     ")",
                 );
+                return;
+              }
+
+              if (saveData2 && saveData2.unavailable) {
+                resetPaymentGuard();
+                window.GraffordBookingToken.showUnavailableModal({
+                  redirectTo: "RESERVATION.html",
+                });
                 return;
               }
 
@@ -2238,6 +2540,10 @@
             var bookingCreatedAtIso2 =
               (saveData2 && saveData2.createdAtIso) || "";
             sessionStorage.removeItem("graffordInPaymentFlow");
+            sessionStorage.setItem(paymentSettledKey, "1");
+            if (window.GraffordBookingToken) {
+              window.GraffordBookingToken.clearCheckoutSession();
+            }
 
             sessionStorage.setItem(
               "graffordReserveCompleteData",
@@ -2272,6 +2578,48 @@
 
         });
       </script>
+    </div>
+
+    <div
+      id="checkout-leave-overlay"
+      class="confirm-leave-overlay"
+      aria-modal="true"
+      role="dialog"
+      aria-labelledby="checkout-leave-heading"
+    >
+      <div class="confirm-leave-dialog">
+        <div class="confirm-leave-dialog__accent" aria-hidden="true"></div>
+        <div class="confirm-leave-dialog__inner">
+          <p class="confirm-leave-eyebrow">WARNING — 페이지 이탈</p>
+          <h2 id="checkout-leave-heading" class="confirm-leave-heading">
+            지금 나가시면<br />작성한 내용이 모두 사라집니다
+          </h2>
+          <span class="confirm-leave-rule" aria-hidden="true"></span>
+          <p class="confirm-leave-body">
+            입력하신 <strong>예약자 정보</strong>와<br />
+            작성 중이던 <strong>요청·동의 내용</strong>이 초기화됩니다.<br />
+            페이지를 유지하시겠습니까?
+          </p>
+        </div>
+        <div class="confirm-leave-actions">
+          <button
+            type="button"
+            id="checkout-leave-confirm"
+            class="btn reserve-btn confirm-leave-btn confirm-leave-btn--leave"
+          >
+            <span class="confirm-leave-btn__label">나가기</span>
+            <span class="confirm-leave-btn__hint">작성 내용 삭제</span>
+          </button>
+          <button
+            type="button"
+            id="checkout-leave-cancel"
+            class="btn reserve-btn confirm-leave-btn confirm-leave-btn--continue"
+          >
+            <span class="confirm-leave-btn__label">계속 작성하기 →</span>
+            <span class="confirm-leave-btn__hint">페이지 유지</span>
+          </button>
+        </div>
+      </div>
     </div>
 
     <div
@@ -2311,6 +2659,7 @@
         var confirmBtn = null;
         var backdrop = null;
         var closeTimer = null;
+        var confirmHandler = null;
 
         function closeModal() {
           if (!modal) return;
@@ -2323,6 +2672,7 @@
               modal.setAttribute("aria-hidden", "true");
             }
           }, 400);
+          confirmHandler = null;
         }
 
         function openModal(options) {
@@ -2338,6 +2688,8 @@
           if (confirmBtn) {
             confirmBtn.textContent = options.confirmLabel || "확인";
           }
+          confirmHandler =
+            typeof options.onConfirm === "function" ? options.onConfirm : null;
           modal.hidden = false;
           modal.setAttribute("aria-hidden", "false");
           document.body.style.overflow = "hidden";
@@ -2355,7 +2707,13 @@
           backdrop = modal.querySelector(".payment-alert-modal__backdrop");
 
           if (confirmBtn) {
-            confirmBtn.addEventListener("click", closeModal);
+            confirmBtn.addEventListener("click", function () {
+              var handler = confirmHandler;
+              closeModal();
+              if (typeof handler === "function") {
+                handler();
+              }
+            });
           }
           if (backdrop) {
             backdrop.addEventListener("click", closeModal);
@@ -2388,6 +2746,43 @@
         </p>
       </div>
     </div>
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        var leaveOverlay = document.getElementById("checkout-leave-overlay");
+        var leaveConfirmBtn = document.getElementById("checkout-leave-confirm");
+        var leaveCancelBtn = document.getElementById("checkout-leave-cancel");
+
+        function showLeaveOverlay() {
+          if (leaveOverlay) leaveOverlay.classList.add("is-visible");
+        }
+        function hideLeaveOverlay() {
+          if (leaveOverlay) leaveOverlay.classList.remove("is-visible");
+        }
+
+        if (leaveOverlay) {
+          leaveOverlay.addEventListener("click", function (e) {
+            if (e.target === leaveOverlay) hideLeaveOverlay();
+          });
+        }
+
+        if (window.GraffordCheckoutGuard) {
+          window.GraffordCheckoutGuard.init({
+            page: "payment",
+            guardPopstate: false,
+            ttlElementIds: ["booking-ttl-pay-kr", "booking-ttl-pay-en"],
+            showLeaveOverlay: showLeaveOverlay,
+            hideLeaveOverlay: hideLeaveOverlay,
+            leaveConfirmButtons: [leaveConfirmBtn],
+            leaveCancelButtons: [leaveCancelBtn],
+            onExpired: function () {
+              if (window.GraffordBookingToken) {
+                window.GraffordBookingToken.showExpiredModal();
+              }
+            },
+          });
+        }
+      });
+    </script>
     <script defer src="js/grafford-page-fade.js"></script>
   </body>
 </html>

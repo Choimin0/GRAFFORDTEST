@@ -10340,7 +10340,46 @@ button.reserve-delete-submit-btn.confirm-pay-submit.btn.reserve-btn:not(
 
 .reserve-check-page-band__right {
   flex: 0 0 auto;
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-end;
+  gap: clamp(0.85rem, 2vw, 1.35rem);
   text-align: right;
+}
+
+.booking-session-timer {
+  flex: 0 0 auto;
+  text-align: right;
+}
+
+.booking-session-timer__label {
+  margin: 0 0 0.35rem;
+  font-size: 0.68rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--stone-400);
+}
+
+.booking-session-timer__value {
+  margin: 0;
+  min-width: 3.5rem;
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--stone-800);
+  font-variant-numeric: tabular-nums;
+  line-height: 1.2;
+}
+
+.booking-session-timer__value.is-warning {
+  color: #b45309;
+}
+
+.booking-session-timer__value.is-expired {
+  color: #b91c1c;
+}
+
+.reserve-check-page-band__right .payment-page-step-indicator {
+  flex: 0 0 auto;
 }
 
 .reserve-check-page-band__label {
