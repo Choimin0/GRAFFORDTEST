@@ -7,6 +7,10 @@
     };
   }
 
+  function isMobileGuideCollapse() {
+    return window.matchMedia("(max-width: 767px)").matches;
+  }
+
   function initConfirmGuideCollapse(block) {
     var viewport = block.querySelector(".confirm-guide-collapse__viewport");
     var content = block.querySelector(".confirm-guide-collapse__content");
@@ -19,6 +23,14 @@
     var collapsedHeight = 0;
 
     function measure() {
+      if (!isMobileGuideCollapse()) {
+        block.classList.remove("is-collapsed");
+        block.classList.add("is-expanded");
+        viewport.style.maxHeight = "none";
+        applyState();
+        return;
+      }
+
       block.classList.remove("is-collapsed", "is-expanded");
       viewport.style.maxHeight = "none";
       fullHeight = content.scrollHeight;
@@ -49,6 +61,15 @@
     }
 
     function applyState() {
+      if (!isMobileGuideCollapse()) {
+        btn.hidden = true;
+        viewport.style.maxHeight = "none";
+        block.classList.remove("is-collapsed");
+        block.classList.add("is-expanded");
+        btn.setAttribute("aria-expanded", "true");
+        return;
+      }
+
       btn.hidden =
         fullHeight <= collapsedHeight + 2 ||
         block.classList.contains("is-expanded");

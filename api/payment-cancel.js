@@ -294,19 +294,27 @@ function verifyCancelToken(token, reservationNumber, guestName) {
 function readBody(req) {
   return new Promise(function (resolve, reject) {
     var chunks = [];
-    req.on("data", function (c) { chunks.push(c); });
+    req.on("data", function (c) {
+      chunks.push(c);
+    });
     req.on("end", function () {
       try {
         var raw = Buffer.concat(chunks).toString("utf8");
         resolve(raw ? JSON.parse(raw) : {});
-      } catch (e) { reject(e); }
+      } catch (e) {
+        reject(e);
+      }
     });
     req.on("error", reject);
   });
 }
 
 async function getJsonBody(req) {
-  if (req.body != null && typeof req.body === "object" && !Buffer.isBuffer(req.body)) {
+  if (
+    req.body != null &&
+    typeof req.body === "object" &&
+    !Buffer.isBuffer(req.body)
+  ) {
     return req.body;
   }
   return readBody(req);
@@ -319,10 +327,18 @@ async function getJsonBody(req) {
  * 같으면 전액 취소(amount 없이 호출).
  * refundAmount === 0 인 경우(100% 취소 수수료)는 호출하지 않아야 합니다 — 호출 전 확인 필요.
  */
-async function requestPortoneCancellation(paymentId, cancelReason, refundAmount, totalAmount) {
+async function requestPortoneCancellation(
+  paymentId,
+  cancelReason,
+  refundAmount,
+  totalAmount,
+) {
   var apiSecret = (process.env.PORTONE_API_SECRET || "").trim();
   if (!apiSecret) {
-    return { ok: false, error: "PORTONE_API_SECRET 환경변수가 설정되지 않았습니다." };
+    return {
+      ok: false,
+      error: "PORTONE_API_SECRET 환경변수가 설정되지 않았습니다.",
+    };
   }
 
   var isPartial =
@@ -342,14 +358,19 @@ async function requestPortoneCancellation(paymentId, cancelReason, refundAmount,
   // 전액 취소: amount 없이 호출 → PortOne이 전액 환불 처리
 
   var cancelUrl =
-    "https://api.portone.io/payments/" + encodeURIComponent(paymentId) + "/cancel";
+    "https://api.portone.io/payments/" +
+    encodeURIComponent(paymentId) +
+    "/cancel";
 
   console.log(
     "[payment-cancel] PortOne 취소 요청 →",
     cancelUrl,
-    "| paymentId:", paymentId,
-    "| 부분취소:", isPartial,
-    "| body:", JSON.stringify(cancelBody),
+    "| paymentId:",
+    paymentId,
+    "| 부분취소:",
+    isPartial,
+    "| body:",
+    JSON.stringify(cancelBody),
   );
 
   try {
@@ -363,11 +384,15 @@ async function requestPortoneCancellation(paymentId, cancelReason, refundAmount,
     });
 
     var resData = {};
-    try { resData = await portoneRes.json(); } catch (_) {}
+    try {
+      resData = await portoneRes.json();
+    } catch (_) {}
 
     console.log(
-      "[payment-cancel] PortOne 취소 응답 HTTP", portoneRes.status,
-      "| body:", JSON.stringify(resData),
+      "[payment-cancel] PortOne 취소 응답 HTTP",
+      portoneRes.status,
+      "| body:",
+      JSON.stringify(resData),
     );
 
     if (!portoneRes.ok) {
@@ -385,7 +410,9 @@ async function requestPortoneCancellation(paymentId, cancelReason, refundAmount,
   } catch (e) {
     return {
       ok: false,
-      error: "PortOne API 호출 중 네트워크 오류: " + (e && e.message ? e.message : String(e)),
+      error:
+        "PortOne API 호출 중 네트워크 오류: " +
+        (e && e.message ? e.message : String(e)),
     };
   }
 }
@@ -409,7 +436,8 @@ export default async function handler(req, res) {
   if (!pool) {
     json(res, 503, {
       ok: false,
-      error: "DB 연결 정보가 없습니다. .env.local 에 POSTGRES_URL 등을 설정하세요.",
+      error:
+        "DB 연결 정보가 없습니다. .env.local 에 POSTGRES_URL 등을 설정하세요.",
     });
     return;
   }
@@ -422,7 +450,9 @@ export default async function handler(req, res) {
     return;
   }
 
-  var reservationNumber = normalizeLookupOrder(body.reservationNumber || body.orderNo || "");
+  var reservationNumber = normalizeLookupOrder(
+    body.reservationNumber || body.orderNo || "",
+  );
   var guestName = normalizeLookupName(body.guestName || body.name || "");
   var cancelToken = String(body.cancelToken || "").trim();
   var cancelFields = parseCancelReasonFields(body);
@@ -444,7 +474,11 @@ export default async function handler(req, res) {
   }
 
   // cancelToken 검증
-  var tokenVerify = verifyCancelToken(cancelToken, reservationNumber, guestName);
+  var tokenVerify = verifyCancelToken(
+    cancelToken,
+    reservationNumber,
+    guestName,
+  );
   if (!tokenVerify.ok) {
     json(res, 401, { ok: false, error: tokenVerify.error });
     return;
@@ -485,7 +519,8 @@ export default async function handler(req, res) {
     }
 
     // refunded_count가 0이 아니면 이미 취소(환불) 처리된 예약
-    var refundedCount = row.refunded_count != null ? Number(row.refunded_count) : 0;
+    var refundedCount =
+      row.refunded_count != null ? Number(row.refunded_count) : 0;
     if (refundedCount !== 0) {
       client.release();
       json(res, 409, {
@@ -497,7 +532,9 @@ export default async function handler(req, res) {
 
     var pgTid = row.pg_tid ? String(row.pg_tid).trim() : null;
     // payment_method: "bank" / "무통장입금" 이면 PG 취소 불필요; 그 외(card 등)는 PortOne 취소
-    var paymentMethodDb = String(row.payment_method || "").toLowerCase().trim();
+    var paymentMethodDb = String(row.payment_method || "")
+      .toLowerCase()
+      .trim();
     var isBankTransfer =
       paymentMethodDb === "bank" ||
       paymentMethodDb === "무통장입금" ||
@@ -514,15 +551,24 @@ export default async function handler(req, res) {
     var safeRefundAmount = computeRefundAmount(paidAmountNum, feePercent);
 
     console.log(
-      "[payment-cancel] 예약번호:", reservationNumber,
-      "| pg_tid:", pgTid,
-      "| payment_method(DB):", paymentMethodDb,
-      "| isBankTransfer:", isBankTransfer,
-      "| paidAmount:", paidAmountNum,
-      "| paidAmountSource:", paidResolution.source,
-      "| dbTotalAmount:", row.total_amount,
-      "| cancellationFeePercent:", feePercent,
-      "| safeRefundAmount:", safeRefundAmount,
+      "[payment-cancel] 예약번호:",
+      reservationNumber,
+      "| pg_tid:",
+      pgTid,
+      "| payment_method(DB):",
+      paymentMethodDb,
+      "| isBankTransfer:",
+      isBankTransfer,
+      "| paidAmount:",
+      paidAmountNum,
+      "| paidAmountSource:",
+      paidResolution.source,
+      "| dbTotalAmount:",
+      row.total_amount,
+      "| cancellationFeePercent:",
+      feePercent,
+      "| safeRefundAmount:",
+      safeRefundAmount,
     );
 
     var pgCancelled = false;
@@ -549,7 +595,8 @@ export default async function handler(req, res) {
         if (isNotFound) {
           console.warn(
             "[payment-cancel] PortOne에서 결제건을 찾을 수 없음(PAYMENT_NOT_FOUND) → DB 취소만 진행.",
-            "reservationNumber:", reservationNumber,
+            "reservationNumber:",
+            reservationNumber,
           );
           pgCancelled = false;
           pgError = portoneResult.error;
@@ -558,7 +605,8 @@ export default async function handler(req, res) {
           json(res, 502, {
             ok: false,
             error:
-              "결제 취소에 실패했습니다. 고객센터로 문의해 주세요.\n" + portoneResult.error,
+              "결제 취소에 실패했습니다. 고객센터로 문의해 주세요.\n" +
+              portoneResult.error,
             pgError: portoneResult.error,
           });
           return;
@@ -605,20 +653,22 @@ export default async function handler(req, res) {
       pgTid: pgTid,
       cancelledAt: formatDateTimeKst(new Date()),
       reservationNumber: reservationNumber,
-      refundAmount: safeRefundAmount,    // 실제 환불 처리된 금액
-      totalAmount: paidAmountNum,        // 최종 결제 금액(환불 수수료 기준)
+      refundAmount: safeRefundAmount, // 실제 환불 처리된 금액
+      totalAmount: paidAmountNum, // 최종 결제 금액(환불 수수료 기준)
       paidAmountSource: paidResolution.source,
       isPartialRefund:
-        pgCancelled &&
-        safeRefundAmount > 0 &&
-        safeRefundAmount < paidAmountNum,
+        pgCancelled && safeRefundAmount > 0 && safeRefundAmount < paidAmountNum,
     });
   } catch (e) {
-    try { client.release(); } catch (_) {}
+    try {
+      client.release();
+    } catch (_) {}
     console.error("payment-cancel handler", e);
     json(res, 500, {
       ok: false,
-      error: "처리 중 서버 오류가 발생했습니다: " + (e && e.message ? e.message : String(e)),
+      error:
+        "처리 중 서버 오류가 발생했습니다: " +
+        (e && e.message ? e.message : String(e)),
     });
   }
 }

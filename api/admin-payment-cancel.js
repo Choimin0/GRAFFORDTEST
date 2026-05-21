@@ -80,7 +80,11 @@ function readBody(req) {
 }
 
 async function getJsonBody(req) {
-  if (req.body != null && typeof req.body === "object" && !Buffer.isBuffer(req.body)) {
+  if (
+    req.body != null &&
+    typeof req.body === "object" &&
+    !Buffer.isBuffer(req.body)
+  ) {
     return req.body;
   }
   return readBody(req);
@@ -117,7 +121,10 @@ function isAdminOk(body) {
   var envId = String(process.env.ADMIN_ID || "").trim();
   var envPw = String(process.env.ADMIN_PW || "").trim();
   if (!envId || !envPw) {
-    return { ok: false, error: "서버 ADMIN_ID/ADMIN_PW가 설정되지 않았습니다." };
+    return {
+      ok: false,
+      error: "서버 ADMIN_ID/ADMIN_PW가 설정되지 않았습니다.",
+    };
   }
   if (!inputId || !inputPw) {
     return { ok: false, error: "관리자 ID/PW를 입력해주세요." };
@@ -179,7 +186,9 @@ function clearLoginFailures(ip) {
 }
 
 function isBankTransferMethod(paymentMethodDb) {
-  var m = String(paymentMethodDb || "").toLowerCase().trim();
+  var m = String(paymentMethodDb || "")
+    .toLowerCase()
+    .trim();
   return m === "bank" || m === "무통장입금" || m === "bank_transfer";
 }
 
@@ -207,12 +216,17 @@ function extractPgTxIdFromPayment(payment) {
 async function requestPortoneFullCancellation(paymentId, cancelReason) {
   var apiSecret = (process.env.PORTONE_API_SECRET || "").trim();
   if (!apiSecret) {
-    return { ok: false, error: "PORTONE_API_SECRET 환경변수가 설정되지 않았습니다." };
+    return {
+      ok: false,
+      error: "PORTONE_API_SECRET 환경변수가 설정되지 않았습니다.",
+    };
   }
 
   var cancelBody = { reason: cancelReason || "관리자 직접 취소" };
   var cancelUrl =
-    "https://api.portone.io/payments/" + encodeURIComponent(paymentId) + "/cancel";
+    "https://api.portone.io/payments/" +
+    encodeURIComponent(paymentId) +
+    "/cancel";
 
   console.log(
     "[admin-payment-cancel] PortOne 전액 취소 →",
@@ -277,7 +291,8 @@ export default async function handler(req, res) {
   if (!pool) {
     json(res, 503, {
       ok: false,
-      error: "DB 연결 정보가 없습니다. .env.local 에 POSTGRES_URL 등을 설정하세요.",
+      error:
+        "DB 연결 정보가 없습니다. .env.local 에 POSTGRES_URL 등을 설정하세요.",
     });
     return;
   }
@@ -323,7 +338,9 @@ export default async function handler(req, res) {
   }
   clearLoginFailures(clientIp);
 
-  var reservationNumber = normalizeReservationNumber(body.reservationNumber || "");
+  var reservationNumber = normalizeReservationNumber(
+    body.reservationNumber || "",
+  );
   if (!reservationNumber) {
     json(res, 400, { ok: false, error: "reservationNumber가 필요합니다." });
     return;
@@ -356,7 +373,8 @@ export default async function handler(req, res) {
     }
 
     var row = sel.rows[0];
-    var refundedCount = row.refunded_count != null ? Number(row.refunded_count) : 0;
+    var refundedCount =
+      row.refunded_count != null ? Number(row.refunded_count) : 0;
     if (refundedCount !== 0) {
       client.release();
       json(res, 409, {
@@ -367,7 +385,9 @@ export default async function handler(req, res) {
     }
 
     var pgTid = row.pg_tid ? String(row.pg_tid).trim() : null;
-    var paymentMethodDb = String(row.payment_method || "").toLowerCase().trim();
+    var paymentMethodDb = String(row.payment_method || "")
+      .toLowerCase()
+      .trim();
     var isBankTransfer = isBankTransferMethod(paymentMethodDb);
     var paidResolution = await resolvePaidAmountForBooking({
       row: row,
@@ -455,7 +475,8 @@ export default async function handler(req, res) {
           client.release();
           json(res, 502, {
             ok: false,
-            error: "결제 취소(100% 환불)에 실패했습니다.\n" + portoneResult.error,
+            error:
+              "결제 취소(100% 환불)에 실패했습니다.\n" + portoneResult.error,
             pgError: portoneResult.error,
           });
           return;

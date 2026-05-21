@@ -559,6 +559,13 @@
                       ></span>
                     </div>
                     <div class="payment-side-mini">
+                      <span class="payment-side-mini__k">NIGHTS</span>
+                      <span
+                        class="payment-side-mini__v"
+                        id="booking-nights-kr"
+                      ></span>
+                    </div>
+                    <div class="payment-side-mini">
                       <span class="payment-side-mini__k">GUESTS</span>
                       <span
                         class="payment-side-mini__v"
@@ -938,20 +945,22 @@
             var coEl = scope.querySelector(
               isEn ? "#booking-check-out-en" : "#booking-check-out-kr",
             );
+            var nightsEl = scope.querySelector(
+              isEn ? "#booking-nights-en" : "#booking-nights-kr",
+            );
             var gEl = scope.querySelector(
               isEn ? "#booking-guests-en" : "#booking-guests-kr",
             );
-            if (!roomEl || !ciEl || !coEl || !gEl) {
+            if (!roomEl || !ciEl || !coEl || !nightsEl || !gEl) {
               return;
             }
             roomEl.textContent = ROOM_LABEL[roomRaw];
             if (checkIn && checkOut && quote.nights > 0) {
               ciEl.textContent = formatDisplayYMD(checkIn);
-              var nightsPart =
-                quote.nights +
-                (isEn ? " night" + (quote.nights > 1 ? "s" : "") : "박");
-              coEl.textContent =
-                formatDisplayYMD(checkOut) + " (" + nightsPart + ")";
+              coEl.textContent = formatDisplayYMD(checkOut);
+              nightsEl.textContent = isEn
+                ? quote.nights + " night" + (quote.nights > 1 ? "s" : "")
+                : quote.nights + "박";
               gEl.textContent = isEn
                 ? String(getDisplayGuestCount())
                 : getDisplayGuestCount() + "명";
@@ -961,6 +970,7 @@
                 : "일정이 없습니다. 예약 페이지에서 일정을 선택한 후 다시 들어와 주세요.";
               ciEl.textContent = emptyMsg;
               coEl.textContent = "—";
+              nightsEl.textContent = "—";
               gEl.textContent = "—";
             }
           }
@@ -2680,6 +2690,13 @@
                       <span
                         class="payment-side-mini__v"
                         id="booking-check-out-en"
+                      ></span>
+                    </div>
+                    <div class="payment-side-mini">
+                      <span class="payment-side-mini__k">Nights</span>
+                      <span
+                        class="payment-side-mini__v"
+                        id="booking-nights-en"
                       ></span>
                     </div>
                     <div class="payment-side-mini">

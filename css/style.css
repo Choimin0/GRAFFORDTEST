@@ -7773,32 +7773,25 @@ main.content-section.confirm-page.payment-page > #payment-error-area-en {
   .confirm-guide-collapse.is-expanded .confirm-guide-collapse__viewport::after {
     opacity: 0;
   }
+
+  .confirm-guide-expand-btn {
+    display: inline-flex;
+  }
 }
 
-.confirm-guide-collapse__viewport {
-  position: relative;
-  overflow: hidden;
-  transition: max-height 0.35s ease;
-}
+@media (min-width: 768px) {
+  .confirm-guide-expand-btn {
+    display: none !important;
+  }
 
-.confirm-guide-collapse.is-collapsed .confirm-guide-collapse__viewport::after {
-  content: "";
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  height: 2.5rem;
-  background: linear-gradient(
-    to bottom,
-    transparent,
-    var(--color-surface-page)
-  );
-  pointer-events: none;
-  transition: opacity 0.25s ease;
-}
+  .confirm-guide-collapse__viewport {
+    overflow: visible;
+    max-height: none !important;
+  }
 
-.confirm-guide-collapse.is-expanded .confirm-guide-collapse__viewport::after {
-  opacity: 0;
+  .confirm-guide-collapse .confirm-guide-collapse__viewport::after {
+    display: none;
+  }
 }
 
 .confirm-guide-expand-btn {
@@ -8668,6 +8661,22 @@ main.content-section.confirm-page.payment-page > #payment-error-area-en {
   white-space: nowrap;
 }
 
+/* 객실 소계, 인원 추가 요금, 할인 요금 뱃지 색상  */
+.confirm-price-section--room .confirm-price-badge {
+  background: color-mix(in srgb, var(--gold-500) 20%, var(--stone-100));
+  color: color-mix(in srgb, var(--gold-500) 88%, var(--stone-800));
+}
+
+.confirm-price-section--extra .confirm-price-badge {
+  background: color-mix(in srgb, var(--gold-500) 20%, var(--stone-100));
+  color: color-mix(in srgb, var(--gold-500) 88%, var(--stone-800));
+}
+
+.confirm-price-section--discount .confirm-price-badge {
+  background: color-mix(in srgb, var(--stone-green) 20%, var(--stone-100));
+  color: color-mix(in srgb, var(--stone-green) 88%, var(--stone-800));
+}
+
 .confirm-price-row__amount {
   flex-shrink: 0;
   color: var(--stone-700) !important;
@@ -8678,6 +8687,7 @@ main.content-section.confirm-page.payment-page > #payment-error-area-en {
 
 .confirm-price-row--subtotal {
   padding-top: 0.35rem;
+  border-top: 1px dashed color-mix(in srgb, var(--stone-800) 18%, transparent);
 }
 
 .confirm-price-row--subtotal .confirm-price-row__name,
