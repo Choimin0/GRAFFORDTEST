@@ -1,7 +1,9 @@
 (function (root) {
   var CHECKOUT_ACTIVE_KEY = "graffordCheckoutActive";
+  var ALLOW_NAV_KEY = "graffordCheckoutAllowNav";
   var ALLOWED_PATH_RE =
     /(?:^|\/)(?:confirm|payment)\.html(?:[?#].*)?$/i;
+  var allowCheckoutNavigationFn = null;
 
   function isCheckoutPath(url) {
     try {
@@ -24,6 +26,29 @@
     } catch (_e) {
       return false;
     }
+  }
+
+  function isCheckoutNavigationAllowed() {
+    try {
+      return sessionStorage.getItem(ALLOW_NAV_KEY) === "1";
+    } catch (_e) {
+      return false;
+    }
+  }
+
+  function allowCheckoutNavigation() {
+    if (allowCheckoutNavigationFn) {
+      allowCheckoutNavigationFn();
+    }
+    try {
+      sessionStorage.setItem(ALLOW_NAV_KEY, "1");
+    } catch (_e) {}
+  }
+
+  function clearCheckoutNavigationAllowance() {
+    try {
+      sessionStorage.removeItem(ALLOW_NAV_KEY);
+    } catch (_e) {}
   }
 
   function init(options) {
@@ -55,7 +80,12 @@
     var leaveConfirmed = false;
     var popstateReady = false;
 
+    allowCheckoutNavigationFn = function () {
+      leaveConfirmed = true;
+    };
+
     markCheckoutActive();
+    clearCheckoutNavigationAllowance();
 
     var timerStop = null;
     function startTtlTimer() {
@@ -177,7 +207,11 @@
       });
 
       root.addEventListener("beforeunload", function (e) {
-        if (!isCheckoutActive() || leaveConfirmed) {
+        if (
+          !isCheckoutActive() ||
+          leaveConfirmed ||
+          isCheckoutNavigationAllowed()
+        ) {
           return;
         }
         e.preventDefault();
@@ -188,6 +222,7 @@
     return {
       confirmLeaveAndGo: confirmLeaveAndGo,
       shouldGuardNavigation: shouldGuardNavigation,
+      allowCheckoutNavigation: allowCheckoutNavigation,
     };
   }
 
@@ -196,5 +231,7 @@
     isCheckoutPath: isCheckoutPath,
     markCheckoutActive: markCheckoutActive,
     isCheckoutActive: isCheckoutActive,
+    allowCheckoutNavigation: allowCheckoutNavigation,
+    clearCheckoutNavigationAllowance: clearCheckoutNavigationAllowance,
   };
 })(typeof window !== "undefined" ? window : this);

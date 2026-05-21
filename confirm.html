@@ -748,7 +748,7 @@
       <script src="js/booking-pricing.js?v=4"></script>
       <script src="js/booking-reservations.js"></script>
       <script src="js/booking-token-client.js?v=2"></script>
-      <script src="js/booking-checkout-guard.js?v=2"></script>
+      <script src="js/booking-checkout-guard.js?v=3"></script>
       <script>
         document.addEventListener("DOMContentLoaded", async function () {
           var P = window.GraffordBookingPricing;
@@ -1714,6 +1714,9 @@
                 bookingToken: bookingToken,
               }),
             );
+            if (window.GraffordCheckoutGuard) {
+              window.GraffordCheckoutGuard.allowCheckoutNavigation();
+            }
             window.location.href = "payment.html";
               })
               .catch(function (err) {
@@ -2042,6 +2045,9 @@
                       bookingToken: bookingToken,
                     }),
                   );
+                  if (window.GraffordCheckoutGuard) {
+                    window.GraffordCheckoutGuard.allowCheckoutNavigation();
+                  }
                   window.location.href = "payment.html";
                 })
                 .catch(function (err) {
