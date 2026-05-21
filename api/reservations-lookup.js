@@ -185,21 +185,6 @@ async function archivePastReservations(pool) {
   );
 }
 
-async function autoCancelUnpaidReservations(pool) {
-  var res = await pool.query(
-    `UPDATE ${BOOKING_TABLE}
-     SET status        = 'cancelled',
-         cancel_reason = 'not paid',
-         cancelled_at  = NOW()
-     WHERE status IN ('confirm', 'completed')
-       AND coalesce(lower(trim(payment_method)), 'bank') IN ('bank', '무통장입금')
-       AND bank_confirmed IS NOT TRUE
-       AND created_at <= NOW() - INTERVAL '12 hours'
-     RETURNING reservation_number`,
-  );
-  return { cancelled: (res.rows || []).length };
-}
-
 export default async function handler(req, res) {
   if (req.method === "OPTIONS") {
     res.statusCode = 204;
@@ -246,7 +231,6 @@ export default async function handler(req, res) {
 
   try {
     await archivePastReservations(pool);
-    await autoCancelUnpaidReservations(pool);
 
     // booking 테이블에서 status 기준으로 한 번에 조회
     var sel = await pool.query(

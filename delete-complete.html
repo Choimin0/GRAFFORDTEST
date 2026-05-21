@@ -371,9 +371,6 @@
             if (key === "naver") {
               return "네이버페이";
             }
-            if (key === "bank" || key === "무통장입금") {
-              return "무통장입금";
-            }
             return v || "—";
           }
 
@@ -386,9 +383,6 @@
             }
             if (key === "naver") {
               return "Naver Pay";
-            }
-            if (key === "bank" || key === "무통장입금") {
-              return "Bank Transfer";
             }
             return v || "—";
           }
@@ -439,8 +433,7 @@
 
           var refundAmount = Number(refundAmountRaw);
           if (!isFinite(refundAmount)) {
-            refundAmount =
-              paymentMethod.toLowerCase() === "bank" ? 0 : paidAmount;
+            refundAmount = paidAmount;
           }
 
           function formatRefundKRW(n) {
@@ -482,9 +475,6 @@
           }
           function refundDetailKr(n, key) {
             if (!Number.isFinite(n) || n <= 0) {
-              if (key === "bank" || key === "무통장입금") {
-                return "무통장 입금 건은 안내에 따라 별도 처리될 수 있습니다.";
-              }
               return "환불 대상 금액이 없습니다.";
             }
             return (
@@ -495,9 +485,6 @@
           }
           function refundDetailEn(n, key) {
             if (!Number.isFinite(n) || n <= 0) {
-              if (key === "bank" || key === "무통장입금") {
-                return "Bank transfers may be handled separately per our policy.";
-              }
               return "There is no refund amount for this cancellation.";
             }
             return (

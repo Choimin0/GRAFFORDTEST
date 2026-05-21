@@ -1,5 +1,5 @@
 /**
- * 테스트용 예약 저장소 (localStorage). 무통장입금 완료 시 기록, 예약조회에서 조회.
+ * 테스트용 예약 저장소 (localStorage). 예약 완료 시 기록, 예약조회에서 조회.
  */
 (function (root) {
   var STORAGE_KEY = "grafford_reservations_v1";

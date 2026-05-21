@@ -22,7 +22,7 @@ const { Pool } = pg;
 const ALLOWED_ROOMS = new Set(["G1", "G2", "G3", "G4"]);
 const LEGACY_TO_ROOM = { A: "G1", B: "G2", C: "G3", D: "G4" };
 const ROOM_TO_LEGACY = { G1: "A", G2: "B", G3: "C", G4: "D" };
-const ALLOWED_PAY = new Set(["card", "naver", "bank"]);
+const ALLOWED_PAY = new Set(["card", "naver"]);
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 const EMAIL_RE = /^[^\s@]{1,64}@[^\s@]{1,255}\.[^\s@]{1,63}$/;
 const MAX_NAME = 255;
@@ -455,20 +455,6 @@ async function archivePastReservations(pool) {
   );
 }
 
-async function autoCancelUnpaidReservations(pool) {
-  // 미입금 무통장(12시간 경과)을 'cancelled'로 상태 전환
-  await pool.query(
-    `UPDATE ${BOOKING_TABLE}
-     SET status        = 'cancelled',
-         cancel_reason = 'not paid',
-         cancelled_at  = NOW()
-     WHERE status IN ('confirm', 'completed')
-       AND coalesce(lower(trim(payment_method)), 'bank') IN ('bank', '무통장입금')
-       AND bank_confirmed IS NOT TRUE
-       AND created_at <= NOW() - INTERVAL '12 hours'`,
-  );
-}
-
 /** [check_in, check_out) 구간의 숙박일(밤) — check_out 아침 퇴실 전날 밤까지 */
 function expandOccupiedNights(ciYmd, coYmd) {
   var out = [];
@@ -627,7 +613,6 @@ export default async function handler(req, res) {
   if (req.method === "GET") {
     try {
       await archivePastReservations(pool);
-      await autoCancelUnpaidReservations(pool);
     } catch (e) {
       console.error("archive past reservations before GET", e);
       json(res, 500, {
@@ -859,7 +844,6 @@ export default async function handler(req, res) {
   if (req.method === "DELETE") {
     try {
       await archivePastReservations(pool);
-      await autoCancelUnpaidReservations(pool);
     } catch (e) {
       console.error("archive past reservations before DELETE", e);
       json(res, 500, {
@@ -1147,13 +1131,12 @@ export default async function handler(req, res) {
     ta,
     guestRequest,
     paymentMethod,
-    paymentMethod === "bank" ? false : true,
+    true,
     pgTid || null,
   ];
 
   try {
     await archivePastReservations(pool);
-    await autoCancelUnpaidReservations(pool);
     var availability = await checkRoomAvailability(
       pool,
       roomType,
@@ -1192,7 +1175,7 @@ export default async function handler(req, res) {
       createdAt: formatDateTimeKst(row.created_at),
       createdAtIso: new Date(row.created_at).toISOString(),
       cancelToken: issueCancelToken(reservationNumber, guestName),
-      bankConfirmed: paymentMethod === "bank" ? false : true,
+      bankConfirmed: true,
     });
   } catch (e) {
     if (e && e.code === "23505") {

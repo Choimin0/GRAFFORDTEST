@@ -1,6 +1,6 @@
 /**
  * 환불 기준 금액: 이용자가 실제 결제한 금액(최종 결제액).
- * PG(카드/네이버페이)는 PortOne 결제 조회값을 우선하고, 무통장은 DB total_amount를 사용합니다.
+ * PG(카드/네이버페이)는 PortOne 결제 조회값을 우선하고, 조회 실패 시 DB total_amount를 사용합니다.
  */
 
 export function extractPortonePaidAmount(payment) {

@@ -312,19 +312,6 @@
                       <dt>예약번호</dt>
                       <dd id="cancel-order">
                         <span id="cancel-order-text">—</span>
-                        <span
-                          id="cancel-bank-status"
-                          class="reserve-complete-bank-status"
-                          hidden
-                        >
-                          [
-                          <span id="cancel-bank-status-pending">예약대기</span>
-                          /
-                          <span id="cancel-bank-status-confirmed"
-                            >예약확정</span
-                          >
-                          ]
-                        </span>
                       </dd>
                     </div>
                     <div class="reserve-delete-card-kv__row">
@@ -466,7 +453,6 @@
           var extraGuests =
             parseInt((saved && saved.extraGuests) || "0", 10) || 0;
           var payMethod = (saved && saved.payMethod) || "";
-          var bankConfirmed = saved && saved.bankConfirmed === true;
           var cancelToken = (saved && saved.cancelToken) || "";
 
           function formatKRW(n) {
@@ -687,11 +673,6 @@
                 "현재 일정 기준으로 환불 금액이 없습니다. 위의 환불 규정을 참고해 주세요.";
               noteEn =
                 "Based on the policy above, no refund applies to this cancellation.";
-            } else if (payMethod === "bank") {
-              noteKr =
-                "예상 환불 금액이며, 무통장 입금 건은 확인 후 수동 처리될 수 있습니다.";
-              noteEn =
-                "Estimated refund; bank transfers may be processed manually after verification.";
             } else {
               noteKr =
                 "예상 환불 금액이며, 카드사에 따라 영업일 기준 3~5일 내 처리될 수 있습니다.";
@@ -711,45 +692,6 @@
           }
           if (cancelOrderTextEnEl) {
             cancelOrderTextEnEl.textContent = orderNo;
-          }
-          var cancelBankStatusEl =
-            document.getElementById("cancel-bank-status");
-          var cancelBankStatusEnEl = document.getElementById(
-            "cancel-bank-status-en",
-          );
-          var cancelPendingEl = document.getElementById(
-            "cancel-bank-status-pending",
-          );
-          var cancelPendingEnEl = document.getElementById(
-            "cancel-bank-status-pending-en",
-          );
-          var cancelConfirmedEl = document.getElementById(
-            "cancel-bank-status-confirmed",
-          );
-          var cancelConfirmedEnEl = document.getElementById(
-            "cancel-bank-status-confirmed-en",
-          );
-          if (payMethod === "bank") {
-            if (cancelBankStatusEl) cancelBankStatusEl.hidden = false;
-            if (cancelBankStatusEnEl) cancelBankStatusEnEl.hidden = false;
-            if (bankConfirmed) {
-              if (cancelPendingEl)
-                cancelPendingEl.classList.remove("is-active");
-              if (cancelConfirmedEl)
-                cancelConfirmedEl.classList.add("is-active");
-              if (cancelPendingEnEl)
-                cancelPendingEnEl.classList.remove("is-active");
-              if (cancelConfirmedEnEl)
-                cancelConfirmedEnEl.classList.add("is-active");
-            } else {
-              if (cancelPendingEl) cancelPendingEl.classList.add("is-active");
-              if (cancelConfirmedEl)
-                cancelConfirmedEl.classList.remove("is-active");
-              if (cancelPendingEnEl)
-                cancelPendingEnEl.classList.add("is-active");
-              if (cancelConfirmedEnEl)
-                cancelConfirmedEnEl.classList.remove("is-active");
-            }
           }
           var roomText = ROOM_LABEL[room] || room || "—";
           var scheduleText = (checkIn || "—") + " ~ " + (checkOut || "—");
@@ -980,25 +922,7 @@
                 ? modal.querySelector(".reserve-delete-modal-note")
                 : null;
               if (noteEl) {
-                if (payMethod === "bank") {
-                  // 은행이체: PG 자동 환불 없음 → 관리자 수동 환불 안내
-                  if (refundAmount <= 0) {
-                    noteEl.innerHTML = config.isEn
-                      ? "* No Refund<br>Based on the cancellation policy, no refund will be issued."
-                      : "* 환불 없음<br>취소 정책에 따라 환불되는 금액이 없습니다.";
-                  } else {
-                    var bankRefundStr = config.isEn
-                      ? refundAmount.toLocaleString("en-US") + " KRW"
-                      : refundAmount.toLocaleString("ko-KR") + "원";
-                    noteEl.innerHTML = config.isEn
-                      ? "* Estimated Refund: <strong>" +
-                        bankRefundStr +
-                        "</strong><br>Bank transfer refunds require manual processing. Please contact us."
-                      : "* 예상 환불금: <strong>" +
-                        bankRefundStr +
-                        "</strong><br>무통장입금 환불은 관리자가 직접 처리합니다. 고객센터로 문의해 주세요.";
-                  }
-                } else if (refundAmount <= 0) {
+                if (refundAmount <= 0) {
                   // 카드/네이버페이 — 환불 없음 (취소 수수료 100%)
                   noteEl.innerHTML = config.isEn
                     ? "* No Refund<br>Based on the cancellation policy, no refund will be issued."
@@ -1417,21 +1341,6 @@
                       <dt>BOOKING NO.</dt>
                       <dd id="cancel-order-no-en">
                         <span id="cancel-order-text-en">—</span>
-                        <span
-                          id="cancel-bank-status-en"
-                          class="reserve-complete-bank-status"
-                          hidden
-                        >
-                          [
-                          <span id="cancel-bank-status-pending-en"
-                            >Pending</span
-                          >
-                          /
-                          <span id="cancel-bank-status-confirmed-en"
-                            >Confirmed</span
-                          >
-                          ]
-                        </span>
                       </dd>
                     </div>
                     <div class="reserve-delete-card-kv__row">

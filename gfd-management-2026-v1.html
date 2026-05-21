@@ -46,7 +46,7 @@
           <button
             type="button"
             class="admin-category-btn"
-            data-admin-category="bank"
+            data-admin-category="list"
           >
             예약 목록
           </button>
@@ -1012,7 +1012,7 @@
         var pendingRoomStatusSave = null;
         var pendingRoomBlockSave = null;
         var pendingRoomBlockRelease = null;
-        var activeCategory = "bank";
+        var activeCategory = "status";
         var roomManageTabsEl = document.getElementById(
           "admin-room-manage-tabs",
         );
@@ -2808,14 +2808,14 @@
             );
           });
           statusSection.hidden = category !== "status";
-          bankSection.hidden = category !== "bank";
+          bankSection.hidden = category !== "list";
           roomManageSection.hidden = category !== "room-manage";
           salesSection.hidden = category !== "sales";
           if (category === "status") {
             renderStatusCalendar();
             renderTodayStatusPanels();
           }
-          if (category === "bank") {
+          if (category === "list") {
             loadReservationList(activeResTab).catch(function (err) {
               showMessage(
                 (err && err.message) || "목록 조회 중 오류가 발생했습니다.",
@@ -2899,8 +2899,7 @@
               guestCount: 2,
               guestRequest: "조용한 객실 요청",
               totalAmount: 560000,
-              paymentMethod: "bank",
-              bankConfirmed: false,
+              paymentMethod: "naver",
             },
             {
               reservationNumber: "20260502-BBBBBB",
@@ -2913,7 +2912,6 @@
               guestRequest: "",
               totalAmount: 990000,
               paymentMethod: "card",
-              bankConfirmed: true,
             },
             {
               reservationNumber: "20260508-DDDDDD",
@@ -2926,7 +2924,6 @@
               guestRequest: "",
               totalAmount: 480000,
               paymentMethod: "card",
-              bankConfirmed: true,
             },
             {
               reservationNumber: "20260510-EEEEEE",
@@ -2939,8 +2936,7 @@
               guestRequest:
                 "늦은 체크인 예정인데 아이도 데려오고 문구도 오버되고 이것저것",
               totalAmount: 720000,
-              paymentMethod: "bank",
-              bankConfirmed: false,
+              paymentMethod: "naver",
             },
             {
               reservationNumber: "20260511-FFFFFF",
@@ -2953,7 +2949,6 @@
               guestRequest: "",
               totalAmount: 640000,
               paymentMethod: "card",
-              bankConfirmed: true,
             },
           ];
           latestCalendarRows = latestRows.concat([
@@ -2968,7 +2963,6 @@
               guestRequest: "",
               totalAmount: 420000,
               paymentMethod: "card",
-              bankConfirmed: true,
               isPast: true,
             },
           ]);
@@ -3008,7 +3002,7 @@
             ],
             paymentRevenue: [
               { method: "card", label: "신용카드", count: 6, revenue: 2750000 },
-              { method: "bank", label: "계좌이체", count: 5, revenue: 750000 },
+              { method: "naver", label: "네이버페이", count: 5, revenue: 750000 },
               {
                 method: "kakaopay",
                 label: "카카오페이",
@@ -3076,14 +3070,6 @@
           );
         }
 
-        function adminApiUrl() {
-          var base = "";
-          if (typeof window !== "undefined" && window.__GRAFFORD_API_BASE__) {
-            base = String(window.__GRAFFORD_API_BASE__).replace(/\/$/, "");
-          }
-          return base + "/api/admin-bank-reservations";
-        }
-
         function showMessage(text) {
           if (!msgEl) {
             return;
@@ -3110,9 +3096,6 @@
           }
           if (raw === "naver" || raw === "네이버페이") {
             return "네이버페이";
-          }
-          if (raw === "bank" || raw === "무통장입금") {
-            return "무통장입금";
           }
           return "결제수단 미확인";
         }
@@ -3158,9 +3141,6 @@
           if (activeResTab === "past" || (row && row.isPast)) {
             return "이용완료";
           }
-          if (row && row.bankConfirmed === false) {
-            return "입금대기";
-          }
           return "예약확정";
         }
 
@@ -3170,7 +3150,6 @@
             .toLowerCase();
           if (raw === "card" || raw === "신용카드") return "is-card";
           if (raw === "naver" || raw === "네이버페이") return "is-naver";
-          if (raw === "bank" || raw === "무통장입금") return "is-bank";
           return "is-unknown";
         }
 
@@ -4878,11 +4857,12 @@
 
         function loadList() {
           var auth = getAuthPayload();
-          return fetch(adminApiUrl(), {
+          return fetch(adminReservationsApiUrl(), {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
               action: "list",
+              collection: "reservations",
               adminId: auth.adminId,
               adminPw: auth.adminPw,
             }),

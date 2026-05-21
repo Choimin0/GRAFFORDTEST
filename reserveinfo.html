@@ -264,7 +264,6 @@
               extraGuests: String(data.extraGuests || 0),
               totalAmount: String(resolveStoredTotalAmount(data)),
               payMethod: data.payMethod || "",
-              bankConfirmed: data.bankConfirmed === true,
               cancelToken: data.cancelToken || "",
               bookingCreatedAtIso: data.bookingCreatedAtIso || "",
             }),
@@ -344,10 +343,7 @@
                     var isNotPaidAuto = dr === "not paid";
                     var refundNum = null;
                     if (isNotPaidAuto) {
-                      refundNum =
-                        (row.paymentMethod || "").toLowerCase() === "bank"
-                          ? 0
-                          : Number(row.totalAmount || 0);
+                      refundNum = Number(row.totalAmount || 0);
                     }
                     goToDeleteComplete({
                       orderNo: row.reservationNumber,
@@ -382,7 +378,6 @@
                     extraGuests: row.extraGuests || 0,
                     totalAmount: row.totalAmount || 0,
                     payMethod: row.paymentMethod || "",
-                    bankConfirmed: row.bankConfirmed === true,
                     cancelToken: result.data.cancelToken || "",
                     bookingCreatedAtIso: row.createdAtIso || "",
                   });
@@ -414,7 +409,6 @@
                   extraGuests: found.extraGuests || 0,
                   totalAmount: found.totalAmount || 0,
                   payMethod: found.paymentMethod || "",
-                  bankConfirmed: found.bankConfirmed === true,
                   cancelToken: "",
                 });
               })
@@ -445,7 +439,6 @@
                   extraGuests: found.extraGuests || 0,
                   totalAmount: found.totalAmount || 0,
                   payMethod: found.paymentMethod || "",
-                  bankConfirmed: found.bankConfirmed === true,
                   cancelToken: "",
                 });
               });

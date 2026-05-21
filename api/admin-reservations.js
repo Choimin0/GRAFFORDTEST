@@ -190,19 +190,6 @@ async function archivePastReservations(pool) {
   );
 }
 
-async function autoCancelUnpaidReservations(pool) {
-  await pool.query(
-    `UPDATE ${BOOKING_TABLE}
-     SET status        = 'cancelled',
-         cancel_reason = 'not paid',
-         cancelled_at  = NOW()
-     WHERE status IN ('confirm', 'completed')
-       AND coalesce(lower(trim(payment_method)), 'bank') IN ('bank', '무통장입금')
-       AND bank_confirmed IS NOT TRUE
-       AND created_at <= NOW() - INTERVAL '12 hours'`,
-  );
-}
-
 function mapRow(row, isDeleted) {
   var pii = decryptBookingPiiResponse(row);
   var base = {
@@ -342,7 +329,6 @@ export default async function handler(req, res) {
 
   try {
     await archivePastReservations(pool);
-    await autoCancelUnpaidReservations(pool);
   } catch (e) {
     json(res, 500, {
       ok: false,

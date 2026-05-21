@@ -152,17 +152,6 @@
                   <dt>예약 번호</dt>
                   <dd id="complete-order-no">
                     <span id="check-order-no-text">—</span>
-                    <span
-                      id="check-bank-status"
-                      class="reserve-complete-bank-status"
-                      hidden
-                    >
-                      [
-                      <span id="check-bank-status-pending">예약대기</span>
-                      /
-                      <span id="check-bank-status-confirmed">예약확정</span>
-                      ]
-                    </span>
                   </dd>
                   <dt>체크인</dt>
                   <dd id="complete-checkin-line-kr">—</dd>
@@ -330,7 +319,6 @@
           var extraGuests = (saved && saved.extraGuests) || "0";
           var totalAmount = (saved && saved.totalAmount) || "0";
           var payMethod = (saved && saved.payMethod) || "";
-          var bankConfirmed = saved && saved.bankConfirmed === true;
           var cancelToken = (saved && saved.cancelToken) || "";
           var bookingCreatedAtIso =
             (saved && saved.bookingCreatedAtIso) || "";
@@ -347,24 +335,6 @@
           if (bandEn) {
             bandEn.textContent = orderNo || "—";
           }
-          var bankStatusEl = document.getElementById("check-bank-status");
-          var pendingStatusEl = document.getElementById(
-            "check-bank-status-pending",
-          );
-          var confirmedStatusEl = document.getElementById(
-            "check-bank-status-confirmed",
-          );
-          if (payMethod === "bank" && bankStatusEl) {
-            bankStatusEl.hidden = false;
-            if (bankConfirmed) {
-              pendingStatusEl.classList.remove("is-active");
-              confirmedStatusEl.classList.add("is-active");
-            } else {
-              pendingStatusEl.classList.add("is-active");
-              confirmedStatusEl.classList.remove("is-active");
-            }
-          }
-
           // 표시 금액 = reservations.total_amount (DB 저장값). 재계산 없음.
           var paidAmount =
             parseInt(String(totalAmount || "0").replace(/,/g, ""), 10) || 0;
@@ -596,7 +566,6 @@
             totalAmount: String(paidAmount || 0),
             extraGuests: String(extraGuests || "0"),
             payMethod: payMethod || "",
-            bankConfirmed: bankConfirmed === true,
             request: guestRequest || "",
             cancelToken: cancelToken || "",
             bookingCreatedAtIso: bookingCreatedAtIso || "",

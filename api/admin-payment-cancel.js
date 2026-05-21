@@ -1,9 +1,8 @@
 /**
  * POST /api/admin-payment-cancel
  *
- * 관리자 직접 취소(천재지변 등): 결제 수단에 따라 100% 환불 후 예약 취소.
- * - PG(카드/네이버페이): DB pg_tid 기준 결제 확인 후 PortOne 전액 취소
- * - 무통장입금: DB만 취소 처리(수동 환불)
+ * 관리자 직접 취소(천재지변 등): PG(카드/네이버페이) 100% 환불 후 예약 취소.
+ * - DB pg_tid 기준 결제 확인 후 PortOne 전액 취소
  * - cancel_reason = 'MANUAL'
  *
  * Body: { reservationNumber, adminId, adminPw }

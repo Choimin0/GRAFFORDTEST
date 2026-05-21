@@ -105,7 +105,6 @@ function resolvePaymentLabel(paymentMethod) {
   var raw = String(paymentMethod || "").trim().toLowerCase();
   if (raw === "card" || raw === "신용카드") return "신용카드";
   if (raw === "naver" || raw === "네이버페이") return "네이버페이";
-  if (raw === "bank" || raw === "무통장입금") return "계좌이체";
   if (raw === "kakao" || raw === "kakaopay" || raw === "카카오페이") {
     return "카카오페이";
   }
