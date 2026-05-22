@@ -71,6 +71,10 @@ function mapRow(row, isDeleted) {
     guestRequest: row.guest_request || "",
     paymentMethod: row.payment_method || "",
     createdAt: formatDateTimeKst(row.created_at),
+    checkinAlarmSentCount:
+      row.checkin_alarm_sent_count != null
+        ? Number(row.checkin_alarm_sent_count)
+        : 0,
   };
   if (isDeleted) {
     base.cancelReason = row.cancel_reason || "";
@@ -164,6 +168,7 @@ export async function handleAdminReservations(res, pool, body) {
         stay_nights,
         guest_request,
         payment_method,
+        checkin_alarm_sent_count,
         created_at
         ${extraCols}
       FROM ${BOOKING_TABLE}
@@ -185,6 +190,7 @@ export async function handleAdminReservations(res, pool, body) {
           reservation_number, guest_name, contact, room_type,
           check_in_date, check_out_date, guest_count, total_amount,
           stay_nights, guest_request, payment_method, bank_confirmed,
+          checkin_alarm_sent_count,
           created_at, (status = 'completed') AS is_past
         FROM ${BOOKING_TABLE}
         WHERE status IN ('confirm', 'completed')
@@ -207,6 +213,10 @@ export async function handleAdminReservations(res, pool, body) {
           bankConfirmed: row.bank_confirmed === true,
           createdAt: formatDateTimeKst(row.created_at),
           isPast: row.is_past === true,
+          checkinAlarmSentCount:
+            row.checkin_alarm_sent_count != null
+              ? Number(row.checkin_alarm_sent_count)
+              : 0,
         };
       });
     }

@@ -690,6 +690,40 @@
       </div>
 
       <div
+        id="admin-checkin-resend-modal"
+        class="admin-request-modal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="admin-checkin-resend-title"
+        hidden
+      >
+        <div class="admin-request-modal__panel admin-policy-confirm-panel">
+          <div class="admin-request-modal__head">
+            <p class="admin-dashboard-eyebrow">CHECK-IN ALIMTALK</p>
+            <h2 id="admin-checkin-resend-title">
+              이미 1회 전송된 알림톡입니다. 재전송하시겠습니까?
+            </h2>
+          </div>
+          <div class="admin-request-modal__actions">
+            <button
+              type="button"
+              class="btn reserve-btn confirm-pay-submit reserveinfo-submit-btn admin-save-btn admin-manual-cancel-dismiss-btn"
+              id="admin-checkin-resend-no"
+            >
+              아니오
+            </button>
+            <button
+              type="button"
+              class="btn reserve-btn admin-manual-cancel-confirm-btn"
+              id="admin-checkin-resend-yes"
+            >
+              전송
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div
         id="admin-policy-confirm-modal"
         class="admin-request-modal"
         role="dialog"
@@ -903,7 +937,21 @@
         var manualCancelYesBtn = document.getElementById(
           "admin-manual-cancel-yes",
         );
+        var checkinResendModal = document.getElementById(
+          "admin-checkin-resend-modal",
+        );
+        var checkinResendTitleEl = document.getElementById(
+          "admin-checkin-resend-title",
+        );
+        var checkinResendNoBtn = document.getElementById(
+          "admin-checkin-resend-no",
+        );
+        var checkinResendYesBtn = document.getElementById(
+          "admin-checkin-resend-yes",
+        );
         var activeManualCancelReservationNumber = "";
+        var activeCheckinResendReservationNumber = "";
+        var activeCheckinResendBtn = null;
         var searchForm = document.getElementById("admin-search-form");
         var searchNameInput = document.getElementById("admin-search-name");
         var searchContactInput = document.getElementById(
@@ -1427,6 +1475,9 @@
             sendBtn.dataset.room = room;
             sendBtn.dataset.reservationNumber =
               roomCheckin.reservationNumber || "";
+            sendBtn.dataset.checkinAlarmSentCount = String(
+              Number(roomCheckin.checkinAlarmSentCount) || 0,
+            );
             talkTd.appendChild(sendBtn);
             var requestText = roomCheckin.guestRequest || "—";
             var requestTd = appendCheckinCell(
@@ -3391,6 +3442,69 @@
             });
         }
 
+        function updateCheckinAlarmSentCountLocal(reservationNumber, count) {
+          [reservationListRows, latestRows, latestCalendarRows].forEach(
+            function (list) {
+              (list || []).forEach(function (row) {
+                if (
+                  String((row && row.reservationNumber) || "") ===
+                  String(reservationNumber || "")
+                ) {
+                  row.checkinAlarmSentCount = count;
+                }
+              });
+            },
+          );
+        }
+
+        function openCheckinResendModal(reservationNumber, sentCount, btn) {
+          if (!checkinResendModal) {
+            sendCheckinAlimtalk(reservationNumber, btn);
+            return;
+          }
+          activeCheckinResendReservationNumber = String(
+            reservationNumber || "",
+          );
+          activeCheckinResendBtn = btn || null;
+          if (checkinResendTitleEl) {
+            checkinResendTitleEl.textContent =
+              "이미 " +
+              String(sentCount) +
+              "회 전송된 알림톡입니다. 재전송하시겠습니까?";
+          }
+          checkinResendModal.hidden = false;
+        }
+
+        function closeCheckinResendModal() {
+          if (checkinResendModal) {
+            checkinResendModal.hidden = true;
+          }
+          activeCheckinResendReservationNumber = "";
+          activeCheckinResendBtn = null;
+        }
+
+        function confirmCheckinResend() {
+          if (!activeCheckinResendReservationNumber) {
+            return;
+          }
+          var reservationNumber = activeCheckinResendReservationNumber;
+          var btn = activeCheckinResendBtn;
+          closeCheckinResendModal();
+          sendCheckinAlimtalk(reservationNumber, btn);
+        }
+
+        function handleCheckinSendClick(btn) {
+          var reservationNumber =
+            btn.getAttribute("data-reservation-number") || "";
+          var sentCount =
+            Number(btn.getAttribute("data-checkin-alarm-sent-count") || 0) || 0;
+          if (sentCount >= 1) {
+            openCheckinResendModal(reservationNumber, sentCount, btn);
+            return;
+          }
+          sendCheckinAlimtalk(reservationNumber, btn);
+        }
+
         function sendCheckinAlimtalk(reservationNumber, btn) {
           var orderNo = String(reservationNumber || "").trim();
           if (!orderNo) {
@@ -3429,10 +3543,25 @@
                 }
                 return;
               }
-              showMessage("입실 안내 알림톡을 발송했습니다.");
+              var nextCount =
+                result.data.checkinAlarmSentCount != null
+                  ? Number(result.data.checkinAlarmSentCount)
+                  : (Number(
+                      btn && btn.getAttribute("data-checkin-alarm-sent-count"),
+                    ) || 0) + 1;
+              updateCheckinAlarmSentCountLocal(orderNo, nextCount);
+              showMessage(
+                "입실 안내 알림톡을 발송했습니다. (총 " +
+                  String(nextCount) +
+                  "회)",
+              );
               if (btn) {
-                btn.textContent = "완료";
-                btn.disabled = true;
+                btn.textContent = "전송";
+                btn.disabled = false;
+                btn.setAttribute(
+                  "data-checkin-alarm-sent-count",
+                  String(nextCount),
+                );
               }
             })
             .catch(function (err) {
@@ -5060,6 +5189,22 @@
           manualCancelYesBtn.addEventListener("click", confirmManualCancel);
         }
 
+        if (checkinResendNoBtn) {
+          checkinResendNoBtn.addEventListener("click", closeCheckinResendModal);
+        }
+
+        if (checkinResendYesBtn) {
+          checkinResendYesBtn.addEventListener("click", confirmCheckinResend);
+        }
+
+        if (checkinResendModal) {
+          checkinResendModal.addEventListener("click", function (e) {
+            if (e.target === checkinResendModal) {
+              closeCheckinResendModal();
+            }
+          });
+        }
+
         if (manualCancelModal) {
           manualCancelModal.addEventListener("click", function (e) {
             if (e.target === manualCancelModal) {
@@ -5102,6 +5247,13 @@
             !manualCancelModal.hidden
           ) {
             closeManualCancelModal();
+          }
+          if (
+            e.key === "Escape" &&
+            checkinResendModal &&
+            !checkinResendModal.hidden
+          ) {
+            closeCheckinResendModal();
           }
           if (
             e.key === "Escape" &&
@@ -5160,10 +5312,7 @@
             if (!btn || btn.disabled) {
               return;
             }
-            sendCheckinAlimtalk(
-              btn.getAttribute("data-reservation-number") || "",
-              btn,
-            );
+            handleCheckinSendClick(btn);
           });
         }
 

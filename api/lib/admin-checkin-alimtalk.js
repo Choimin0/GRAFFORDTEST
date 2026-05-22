@@ -90,5 +90,17 @@ export async function handleAdminCheckinAlimtalk(res, pool, body) {
     return;
   }
 
-  json(res, 200, { ok: true, sent: true });
+  var countUpd = await pool.query(
+    `UPDATE ${BOOKING_TABLE}
+     SET checkin_alarm_sent_count = COALESCE(checkin_alarm_sent_count, 0) + 1
+     WHERE reservation_number = $1
+     RETURNING checkin_alarm_sent_count`,
+    [reservationNumber],
+  );
+  var checkinAlarmSentCount =
+    countUpd.rows && countUpd.rows[0]
+      ? Number(countUpd.rows[0].checkin_alarm_sent_count) || 0
+      : 0;
+
+  json(res, 200, { ok: true, sent: true, checkinAlarmSentCount: checkinAlarmSentCount });
 }
