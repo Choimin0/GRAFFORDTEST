@@ -17,6 +17,7 @@ function getSolapiConfig() {
     from: normalizePhone(trimEnv("SOLAPI_FROM")),
     templateReserveComplete: trimEnv("SOLAPI_TEMPLATE_RESERVE_COMPLETE"),
     templateCancelComplete: trimEnv("SOLAPI_TEMPLATE_CANCEL_COMPLETE"),
+    templateCheckinAlarm: trimEnv("SOLAPI_TEMPLATE_CHECKIN_ALARM"),
     propertyAddress:
       trimEnv("SOLAPI_PROPERTY_ADDRESS") || DEFAULT_PROPERTY_ADDRESS,
   };
@@ -41,6 +42,12 @@ export function normalizePhone(raw) {
     digits = "0" + digits;
   }
   return digits;
+}
+
+/** 예약 연락처 뒷 4자리 (비대면 체크인 도어락 비밀번호) */
+export function contactLast4(raw) {
+  var digits = normalizePhone(raw);
+  return digits.length >= 4 ? digits.slice(-4) : "";
 }
 
 function normalizeRoomLabel(roomType) {
@@ -120,11 +127,13 @@ function validateConfig(config, templateId, type) {
     return "SOLAPI_FROM 환경변수가 필요합니다.";
   }
   if (!templateId) {
-    return (
-      (type === "cancel-complete"
+    var envName =
+      type === "cancel-complete"
         ? "SOLAPI_TEMPLATE_CANCEL_COMPLETE"
-        : "SOLAPI_TEMPLATE_RESERVE_COMPLETE") + " 환경변수가 필요합니다."
-    );
+        : type === "checkin-alarm"
+          ? "SOLAPI_TEMPLATE_CHECKIN_ALARM"
+          : "SOLAPI_TEMPLATE_RESERVE_COMPLETE";
+    return envName + " 환경변수가 필요합니다.";
   }
   return null;
 }
@@ -133,7 +142,7 @@ function validateConfig(config, templateId, type) {
  * 예약 완료 / 예약 취소 완료 카카오 알림톡 발송.
  * Solapi 콘솔에서 대체발송(SMS) 설정 시 disableSms를 지정하지 않으면 자동 적용됩니다.
  *
- * @param {"reserve-complete"|"cancel-complete"} type
+ * @param {"reserve-complete"|"cancel-complete"|"checkin-alarm"} type
  * @param {{
  *   guestName: string,
  *   contact: string,
@@ -148,7 +157,9 @@ export async function sendBookingAlimtalk(type, payload) {
   var templateId =
     type === "cancel-complete"
       ? config.templateCancelComplete
-      : config.templateReserveComplete;
+      : type === "checkin-alarm"
+        ? config.templateCheckinAlarm
+        : config.templateReserveComplete;
 
   var configError = validateConfig(config, templateId, type);
   if (configError) {
@@ -161,8 +172,11 @@ export async function sendBookingAlimtalk(type, payload) {
   }
 
   var variables = buildBaseVariables(payload || {});
-  if (type === "reserve-complete") {
+  if (type === "reserve-complete" || type === "checkin-alarm") {
     variables["#{숙소주소}"] = config.propertyAddress;
+  }
+  if (type === "checkin-alarm") {
+    variables["#{비밀번호}"] = contactLast4(to);
   }
 
   var messageService = getMessageService(config);

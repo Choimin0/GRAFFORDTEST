@@ -1863,7 +1863,7 @@ body.index-feature-3-lightbox-open {
 
 .story-hero-title {
   margin: 0 0 clamp(var(--space-16), 2.4vh, var(--space-24));
-  color: var(--gold-500);
+  color: color-mix(in srgb, var(--color-text-on-dark) 80%, transparent);
   font-family: var(--font-family-nav-en);
   font-size: clamp(0.55rem, 0.72vw, 0.7rem);
   font-weight: 800;
@@ -1884,7 +1884,7 @@ body.index-feature-3-lightbox-open {
 
 .story-hero-sub {
   margin: clamp(var(--space-24), 3.2vh, var(--space-32)) 0 0;
-  color: color-mix(in srgb, var(--color-text-on-dark) 72%, transparent);
+  color: color-mix(in srgb, var(--color-text-on-dark) 80%, transparent);
   font-family: var(--font-family-body-kr);
   font-size: clamp(0.86rem, 1vw, 1rem);
   font-weight: 400;

@@ -3391,6 +3391,62 @@
             });
         }
 
+        function sendCheckinAlimtalk(reservationNumber, btn) {
+          var orderNo = String(reservationNumber || "").trim();
+          if (!orderNo) {
+            showMessage("예약번호를 확인할 수 없습니다.");
+            return;
+          }
+          var auth = getAuthPayload();
+          if (btn) {
+            btn.disabled = true;
+            btn.textContent = "전송 중";
+          }
+          adminPost("checkin-alimtalk", {
+            reservationNumber: orderNo,
+            adminId: auth.adminId,
+            adminPw: auth.adminPw,
+          })
+            .then(function (r) {
+              return r.json().then(function (data) {
+                return { ok: r.ok, data: data || {} };
+              });
+            })
+            .then(function (result) {
+              if (!result.ok || !result.data.ok) {
+                throw new Error(
+                  result.data.error || "입실 안내 알림톡 발송에 실패했습니다.",
+                );
+              }
+              if (result.data.skipped) {
+                showMessage(
+                  result.data.reason ||
+                    "알림톡 발송 설정이 없어 건너뛰었습니다.",
+                );
+                if (btn) {
+                  btn.disabled = false;
+                  btn.textContent = "전송";
+                }
+                return;
+              }
+              showMessage("입실 안내 알림톡을 발송했습니다.");
+              if (btn) {
+                btn.textContent = "완료";
+                btn.disabled = true;
+              }
+            })
+            .catch(function (err) {
+              showMessage(
+                (err && err.message) ||
+                  "알림톡 발송 중 오류가 발생했습니다.",
+              );
+              if (btn) {
+                btn.disabled = false;
+                btn.textContent = "전송";
+              }
+            });
+        }
+
         function saveRequestModal() {
           if (!activeRequestReservationNumber || !requestTextInput) {
             return;
@@ -5095,6 +5151,19 @@
               1,
             );
             renderTodayStatusPanels();
+          });
+        }
+
+        if (todayCheckinListEl) {
+          todayCheckinListEl.addEventListener("click", function (e) {
+            var btn = e.target.closest(".admin-checkin-send-btn");
+            if (!btn || btn.disabled) {
+              return;
+            }
+            sendCheckinAlimtalk(
+              btn.getAttribute("data-reservation-number") || "",
+              btn,
+            );
           });
         }
 
