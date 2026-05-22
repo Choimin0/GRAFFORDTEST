@@ -9,6 +9,7 @@
     <script src="js/nav-hero.js" defer></script>
     <script src="js/mobile-nav.js" defer></script>
     <script src="js/site-language.js" defer></script>
+    <script src="js/alimtalk-notify.js" defer></script>
   </head>
   <body>
     <div id="grafford-react-fade-root"></div>
@@ -463,19 +464,17 @@
             if (!Number.isFinite(n) || n <= 0) {
               return "환불 없음";
             }
-            return Number(n).toLocaleString("ko-KR") + "원 전액 환불";
+            return Number(n).toLocaleString("ko-KR") + "원 환불";
           }
           function refundSummaryEn(n) {
             if (!Number.isFinite(n) || n <= 0) {
               return "No refund";
             }
-            return (
-              "Full refund of " + Number(n).toLocaleString("en-US") + " KRW"
-            );
+            return "Refund of " + Number(n).toLocaleString("en-US") + " KRW";
           }
           function refundDetailKr(n, key) {
             if (!Number.isFinite(n) || n <= 0) {
-              return "환불 대상 금액이 없습니다.";
+              return "환불 금액이 없습니다.";
             }
             return (
               "결제 수단에 따라 영업일 기준 3~5일 내 환불이 완료될 수 있습니다. (" +
@@ -488,7 +487,7 @@
               return "There is no refund amount for this cancellation.";
             }
             return (
-              "Refunds are typically processed within 3–5 business days depending on your payment provider (" +
+              "Refunds are typically processed within 3~5 business days depending on your payment provider (" +
               paymentLabelEn(paymentMethod) +
               ")."
             );
@@ -546,6 +545,25 @@
             ),
           );
           setText("done-refund-amount-en", formatRefundKRWEn(refundAmount));
+
+          var rawOrderNo = String((saved && saved.orderNo) || "").trim();
+          if (
+            window.GraffordAlimtalkNotify &&
+            rawOrderNo &&
+            name &&
+            name !== "—" &&
+            contact &&
+            contact !== "—"
+          ) {
+            window.GraffordAlimtalkNotify.sendCancelComplete({
+              orderNo: rawOrderNo,
+              guestName: name,
+              contact: contact,
+              room: room,
+              checkIn: checkIn,
+              checkOut: checkOut,
+            });
+          }
         });
       </script>
       <script defer src="js/grafford-page-fade.js"></script>

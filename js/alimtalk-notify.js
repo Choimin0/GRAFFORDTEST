@@ -26,19 +26,11 @@
   function requestAlimtalk(type, payload) {
     var orderNo = normalizeOrderNo(payload && payload.orderNo);
     if (!orderNo) {
-      console.log("[GRAFFORD alimtalk test] 클라이언트: orderNo 없음 — 요청 생략", {
-        type: type,
-        payload: payload,
-      });
       return Promise.resolve({ ok: false, skipped: true });
     }
     var key = storageKey(type, orderNo);
     try {
       if (global.sessionStorage.getItem(key) === "1") {
-        console.log("[GRAFFORD alimtalk test] 클라이언트: 이미 발송됨 — 중복 생략", {
-          type: type,
-          orderNo: orderNo,
-        });
         return Promise.resolve({ ok: true, skipped: true, duplicate: true });
       }
     } catch (_e) {}
@@ -53,10 +45,6 @@
       checkIn: payload.checkIn || "",
       checkOut: payload.checkOut || "",
     };
-    console.log("[GRAFFORD alimtalk test] 클라이언트: /api/alimtalk-notify 요청", {
-      url: apiUrl,
-      body: requestBody,
-    });
 
     return fetch(apiUrl, {
       method: "POST",
@@ -74,20 +62,6 @@
           });
       })
       .then(function (result) {
-        var logPayload = {
-          type: type,
-          orderNo: orderNo,
-          httpOk: result.ok,
-          data: result.data,
-        };
-        if (result.ok) {
-          console.log("[GRAFFORD alimtalk test] 클라이언트: /api/alimtalk-notify 응답", logPayload);
-        } else {
-          console.error(
-            "[GRAFFORD alimtalk test] 클라이언트: /api/alimtalk-notify 실패",
-            logPayload,
-          );
-        }
         if (
           result.ok &&
           result.data &&
@@ -100,7 +74,6 @@
         return result;
       })
       .catch(function (err) {
-        console.warn("[GRAFFORD alimtalk test] 클라이언트: 요청 실패", type, err);
         return { ok: false, error: err };
       });
   }

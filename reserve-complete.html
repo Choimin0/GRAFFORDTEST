@@ -616,14 +616,6 @@
           }
 
           if (window.GraffordAlimtalkNotify && orderNo && guestName && contact) {
-            console.log("[GRAFFORD alimtalk test] reserve-complete 페이지: 예약 완료 알림톡 요청", {
-              orderNo: orderNo,
-              guestName: guestName,
-              contact: contact,
-              room: room,
-              checkIn: checkIn,
-              checkOut: checkOut,
-            });
             window.GraffordAlimtalkNotify.sendReserveComplete({
               orderNo: orderNo,
               guestName: guestName,
@@ -632,16 +624,6 @@
               checkIn: checkIn,
               checkOut: checkOut,
             });
-          } else {
-            console.log(
-              "[GRAFFORD alimtalk test] reserve-complete: 알림톡 요청 생략",
-              {
-                hasModule: !!window.GraffordAlimtalkNotify,
-                orderNo: orderNo,
-                guestName: guestName,
-                contact: contact,
-              },
-            );
           }
         });
       </script>
