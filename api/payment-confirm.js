@@ -1,11 +1,54 @@
 /**
- * POST /api/payment-confirm
- * PortOne v2 결제 서버 사이드 검증 엔드포인트.
+ * GET  /api/payment-confirm — PortOne 결제 UI 설정 (구 payment-config)
+ * POST /api/payment-confirm — PortOne v2 결제 서버 사이드 검증
  *
- * Body: { paymentId: string, expectedAmount: number }
- * Response: { ok: true, paymentId, status } | { error: string }
+ * POST Body: { paymentId: string, expectedAmount: number }
  */
+function sendPaymentConfig(res) {
+  res.setHeader("Content-Type", "application/json");
+  res.setHeader("Cache-Control", "no-store");
+  res.setHeader("Access-Control-Allow-Origin", "*");
+
+  var storeId = process.env.STORE_ID || "";
+  var channelKey = process.env.CHANNEL_KEY || "";
+  var naverPayChannelKey = process.env.NAVER_PAY_CHANNEL_KEY || "";
+
+  if (!storeId || !channelKey) {
+    res.statusCode = 500;
+    res.end(
+      JSON.stringify({
+        error:
+          "STORE_ID 또는 CHANNEL_KEY 환경변수가 설정되지 않았습니다.",
+      }),
+    );
+    return;
+  }
+
+  res.statusCode = 200;
+  res.end(
+    JSON.stringify({
+      storeId: storeId,
+      channelKey: channelKey,
+      naverPayChannelKey: naverPayChannelKey,
+    }),
+  );
+}
+
 export default async function handler(req, res) {
+  if (req.method === "OPTIONS") {
+    res.statusCode = 204;
+    res.setHeader("Access-Control-Allow-Origin", "*");
+    res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+    res.setHeader("Access-Control-Allow-Headers", "Content-Type");
+    res.end();
+    return;
+  }
+
+  if (req.method === "GET") {
+    sendPaymentConfig(res);
+    return;
+  }
+
   res.setHeader("Content-Type", "application/json");
   res.setHeader("Cache-Control", "no-store");
 

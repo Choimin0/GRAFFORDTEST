@@ -156,6 +156,13 @@ export default async function handler(req, res) {
   var guestName = normalizeLookupName(body.guestName || body.name || "");
   var contact = String(body.contact || "").trim();
 
+  console.log("[GRAFFORD alimtalk test] /api/alimtalk-notify 요청 수신", {
+    type: type,
+    reservationNumber: reservationNumber,
+    guestName: guestName,
+    contact: contact,
+  });
+
   if (!reservationNumber || !guestName || !contact) {
     json(res, 400, {
       ok: false,
@@ -193,6 +200,15 @@ export default async function handler(req, res) {
     }
 
     var status = String(row.status || "").toLowerCase();
+    console.log("[GRAFFORD alimtalk test] DB 예약 검증", {
+      type: type,
+      reservationNumber: reservationNumber,
+      status: status,
+      roomType: row.room_type,
+      checkIn: rowDateToYMD(row.check_in_date),
+      checkOut: rowDateToYMD(row.check_out_date),
+    });
+
     if (type === "reserve-complete") {
       if (status !== "confirm" && status !== "completed") {
         json(res, 409, {
@@ -221,6 +237,11 @@ export default async function handler(req, res) {
     });
 
     if (sendResult.skipped) {
+      console.log("[GRAFFORD alimtalk test] /api/alimtalk-notify 응답: skipped", {
+        type: type,
+        reservationNumber: reservationNumber,
+        reason: sendResult.error || "skipped",
+      });
       json(res, 200, {
         ok: true,
         skipped: true,
@@ -229,6 +250,11 @@ export default async function handler(req, res) {
       return;
     }
     if (!sendResult.ok) {
+      console.log("[GRAFFORD alimtalk test] /api/alimtalk-notify 응답: failed", {
+        type: type,
+        reservationNumber: reservationNumber,
+        error: sendResult.error || "알림톡 발송에 실패했습니다.",
+      });
       json(res, 502, {
         ok: false,
         error: sendResult.error || "알림톡 발송에 실패했습니다.",
@@ -236,6 +262,10 @@ export default async function handler(req, res) {
       return;
     }
 
+    console.log("[GRAFFORD alimtalk test] /api/alimtalk-notify 응답: sent", {
+      type: type,
+      reservationNumber: reservationNumber,
+    });
     json(res, 200, { ok: true, sent: true });
   } catch (e) {
     try {

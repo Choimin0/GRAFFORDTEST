@@ -1806,12 +1806,21 @@
           renderCalendarDetail(selectedCalendarDate || getTodayYmdKst());
         }
 
-        function adminSalesApiUrl() {
+        function adminApiUrl() {
           var base = "";
           if (typeof window !== "undefined" && window.__GRAFFORD_API_BASE__) {
             base = String(window.__GRAFFORD_API_BASE__).replace(/\/$/, "");
           }
-          return base + "/api/admin-sales";
+          return base + "/api/admin";
+        }
+
+        function adminPost(resource, payload) {
+          var body = Object.assign({ resource: resource }, payload || {});
+          return fetch(adminApiUrl(), {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(body),
+          });
         }
 
         function loadSalesData(tab) {
@@ -1828,11 +1837,7 @@
           if (type === "annual") {
             payload.year = normalizeYearValue(selectedSalesYear);
           }
-          return fetch(adminSalesApiUrl(), {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(payload),
-          })
+          return adminPost("sales", payload)
             .then(function (r) {
               return r.json().then(function (data) {
                 return { ok: r.ok, data: data || {} };
@@ -3355,14 +3360,10 @@
             manualCancelYesBtn.disabled = true;
           }
           setManualCancelMessage("100% 환불 및 취소 처리 중입니다.");
-          fetch(adminPaymentCancelApiUrl(), {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              reservationNumber: activeManualCancelReservationNumber,
-              adminId: auth.adminId,
-              adminPw: auth.adminPw,
-            }),
+          adminPost("payment-cancel", {
+            reservationNumber: activeManualCancelReservationNumber,
+            adminId: auth.adminId,
+            adminPw: auth.adminPw,
           })
             .then(function (r) {
               return r.json().then(function (data) {
@@ -3400,16 +3401,12 @@
             requestSaveBtn.disabled = true;
           }
           setRequestMessage("저장 중입니다.");
-          fetch(adminReservationsApiUrl(), {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              action: "save-request",
-              reservationNumber: activeRequestReservationNumber,
-              guestRequest: nextRequest,
-              adminId: auth.adminId,
-              adminPw: auth.adminPw,
-            }),
+          adminPost("reservations", {
+            action: "save-request",
+            reservationNumber: activeRequestReservationNumber,
+            guestRequest: nextRequest,
+            adminId: auth.adminId,
+            adminPw: auth.adminPw,
           })
             .then(function (r) {
               return r.json().then(function (data) {
@@ -3742,38 +3739,6 @@
           var pageRows = filteredRows.slice(start, start + PAGE_SIZE);
           renderRows(pageRows);
           renderPagination(filteredRows.length);
-        }
-
-        function adminReservationsApiUrl() {
-          var base = "";
-          if (typeof window !== "undefined" && window.__GRAFFORD_API_BASE__) {
-            base = String(window.__GRAFFORD_API_BASE__).replace(/\/$/, "");
-          }
-          return base + "/api/admin-reservations";
-        }
-
-        function adminPaymentCancelApiUrl() {
-          var base = "";
-          if (typeof window !== "undefined" && window.__GRAFFORD_API_BASE__) {
-            base = String(window.__GRAFFORD_API_BASE__).replace(/\/$/, "");
-          }
-          return base + "/api/admin-payment-cancel";
-        }
-
-        function adminRoomStatusApiUrl() {
-          var base = "";
-          if (typeof window !== "undefined" && window.__GRAFFORD_API_BASE__) {
-            base = String(window.__GRAFFORD_API_BASE__).replace(/\/$/, "");
-          }
-          return base + "/api/admin-room-status";
-        }
-
-        function adminRoomRateApiUrl() {
-          var base = "";
-          if (typeof window !== "undefined" && window.__GRAFFORD_API_BASE__) {
-            base = String(window.__GRAFFORD_API_BASE__).replace(/\/$/, "");
-          }
-          return base + "/api/admin-room-rate";
         }
 
         function escapeHtml(text) {
@@ -4235,14 +4200,10 @@
 
         function loadRoomStatusRows() {
           var auth = getAuthPayload();
-          return fetch(adminRoomStatusApiUrl(), {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              action: "list",
-              adminId: auth.adminId,
-              adminPw: auth.adminPw,
-            }),
+          return adminPost("room-status", {
+            action: "list",
+            adminId: auth.adminId,
+            adminPw: auth.adminPw,
           })
             .then(function (r) {
               return r.json().then(function (data) {
@@ -4281,14 +4242,10 @@
 
         function loadRoomRateRows() {
           var auth = getAuthPayload();
-          return fetch(adminRoomRateApiUrl(), {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              action: "list",
-              adminId: auth.adminId,
-              adminPw: auth.adminPw,
-            }),
+          return adminPost("room-rate", {
+            action: "list",
+            adminId: auth.adminId,
+            adminPw: auth.adminPw,
           })
             .then(function (r) {
               return r.json().then(function (data) {
@@ -4543,16 +4500,12 @@
 
         function saveRoomRateRow(roomName, weekdayBaseRate) {
           var auth = getAuthPayload();
-          return fetch(adminRoomRateApiUrl(), {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              action: "save",
-              roomName: roomName,
-              weekdayBaseRate: Math.floor(weekdayBaseRate),
-              adminId: auth.adminId,
-              adminPw: auth.adminPw,
-            }),
+          return adminPost("room-rate", {
+            action: "save",
+            roomName: roomName,
+            weekdayBaseRate: Math.floor(weekdayBaseRate),
+            adminId: auth.adminId,
+            adminPw: auth.adminPw,
           })
             .then(function (r) {
               return r.json().then(function (data) {
@@ -4571,16 +4524,12 @@
 
         function saveRoomRateToggle(roomName, isEnabled) {
           var auth = getAuthPayload();
-          return fetch(adminRoomRateApiUrl(), {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              action: "toggle",
-              roomName: roomName,
-              isEnabled: isEnabled === true,
-              adminId: auth.adminId,
-              adminPw: auth.adminPw,
-            }),
+          return adminPost("room-rate", {
+            action: "toggle",
+            roomName: roomName,
+            isEnabled: isEnabled === true,
+            adminId: auth.adminId,
+            adminPw: auth.adminPw,
           })
             .then(function (r) {
               return r.json().then(function (data) {
@@ -4670,17 +4619,13 @@
 
         function saveRoomStatusManageRow(roomName, statusType, statusText) {
           var auth = getAuthPayload();
-          return fetch(adminRoomStatusApiUrl(), {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              action: "save",
-              roomName: roomName,
-              statusType: statusType === "repair" ? "repair" : "available",
-              statusText: statusText,
-              adminId: auth.adminId,
-              adminPw: auth.adminPw,
-            }),
+          return adminPost("room-status", {
+            action: "save",
+            roomName: roomName,
+            statusType: statusType === "repair" ? "repair" : "available",
+            statusText: statusText,
+            adminId: auth.adminId,
+            adminPw: auth.adminPw,
           })
             .then(function (r) {
               return r.json().then(function (data) {
@@ -4703,19 +4648,15 @@
 
         function saveRoomBlockRows(payload) {
           var auth = getAuthPayload();
-          return fetch(adminRoomStatusApiUrl(), {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              action: "block-save",
-              rooms: payload.rooms || [],
-              startDate: payload.startDate,
-              endDate: payload.endDate,
-              reason: payload.reason,
-              memo: payload.memo || "",
-              adminId: auth.adminId,
-              adminPw: auth.adminPw,
-            }),
+          return adminPost("room-status", {
+            action: "block-save",
+            rooms: payload.rooms || [],
+            startDate: payload.startDate,
+            endDate: payload.endDate,
+            reason: payload.reason,
+            memo: payload.memo || "",
+            adminId: auth.adminId,
+            adminPw: auth.adminPw,
           })
             .then(function (r) {
               return r.json().then(function (data) {
@@ -4734,15 +4675,11 @@
 
         function releaseRoomBlock(blockId) {
           var auth = getAuthPayload();
-          return fetch(adminRoomStatusApiUrl(), {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              action: "block-release",
-              blockId: blockId,
-              adminId: auth.adminId,
-              adminPw: auth.adminPw,
-            }),
+          return adminPost("room-status", {
+            action: "block-release",
+            blockId: blockId,
+            adminId: auth.adminId,
+            adminPw: auth.adminPw,
           })
             .then(function (r) {
               return r.json().then(function (data) {
@@ -4787,15 +4724,11 @@
           };
           return Promise.all(
             ["current", "past", "deleted"].map(function (tab) {
-              return fetch(adminReservationsApiUrl(), {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                  action: "list",
-                  collection: collectionMap[tab],
-                  adminId: auth.adminId,
-                  adminPw: auth.adminPw,
-                }),
+              return adminPost("reservations", {
+                action: "list",
+                collection: collectionMap[tab],
+                adminId: auth.adminId,
+                adminPw: auth.adminPw,
               })
                 .then(function (r) {
                   return r.json().then(function (data) {
@@ -4822,15 +4755,11 @@
             deleted: "delete-reservations",
           };
           var collection = collectionMap[tab] || "reservations";
-          return fetch(adminReservationsApiUrl(), {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              action: "list",
-              collection: collection,
-              adminId: auth.adminId,
-              adminPw: auth.adminPw,
-            }),
+          return adminPost("reservations", {
+            action: "list",
+            collection: collection,
+            adminId: auth.adminId,
+            adminPw: auth.adminPw,
           })
             .then(function (r) {
               return r.json().then(function (data) {
@@ -4857,15 +4786,11 @@
 
         function loadList() {
           var auth = getAuthPayload();
-          return fetch(adminReservationsApiUrl(), {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              action: "list",
-              collection: "reservations",
-              adminId: auth.adminId,
-              adminPw: auth.adminPw,
-            }),
+          return adminPost("reservations", {
+            action: "list",
+            collection: "reservations",
+            adminId: auth.adminId,
+            adminPw: auth.adminPw,
           })
             .then(function (r) {
               return r.json().then(function (data) {

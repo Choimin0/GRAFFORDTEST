@@ -122,22 +122,44 @@ function validateConfig(config, templateId, type) {
  * }} payload
  */
 export async function sendBookingAlimtalk(type, payload) {
+  console.log("[GRAFFORD alimtalk test] sendBookingAlimtalk 시작", {
+    type: type,
+    reservationNumber: payload && payload.reservationNumber,
+    guestName: payload && payload.guestName,
+    contact: payload && payload.contact,
+    roomType: payload && payload.roomType,
+    checkIn: payload && payload.checkIn,
+    checkOut: payload && payload.checkOut,
+  });
+
   var config = getSolapiConfig();
   var templateId =
     type === "cancel-complete"
       ? config.templateCancelComplete
       : config.templateReserveComplete;
+
+  console.log("[GRAFFORD alimtalk test] Solapi 설정 확인", {
+    type: type,
+    hasApiKey: !!config.apiKey,
+    hasApiSecret: !!config.apiSecret,
+    pfId: config.pfId || "(미설정)",
+    from: config.from || "(미설정)",
+    templateId: templateId || "(미설정)",
+    propertyAddress:
+      type === "reserve-complete" ? config.propertyAddress : "(취소 알림톡 제외)",
+  });
+
   var configError = validateConfig(config, templateId, type);
   if (configError) {
-    console.warn("[solapi-alimtalk] skipped:", configError, "| type:", type);
+    console.warn("[GRAFFORD alimtalk test] 발송 건너뜀:", configError, "| type:", type);
     return { ok: false, skipped: true, error: configError };
   }
 
   var to = normalizePhone(payload && payload.contact);
   if (!/^01\d{8,9}$/.test(to)) {
     console.warn(
-      "[solapi-alimtalk] skipped: invalid contact",
-      payload && payload.reservationNumber,
+      "[GRAFFORD alimtalk test] 발송 건너뜀: 유효하지 않은 연락처",
+      { reservationNumber: payload && payload.reservationNumber, contact: payload && payload.contact, normalized: to },
     );
     return { ok: false, skipped: true, error: "Invalid contact number" };
   }
@@ -146,6 +168,14 @@ export async function sendBookingAlimtalk(type, payload) {
   if (type === "reserve-complete") {
     variables["#{숙소주소}"] = config.propertyAddress;
   }
+
+  console.log("[GRAFFORD alimtalk test] Solapi API 호출 직전", {
+    type: type,
+    to: to,
+    from: config.from,
+    templateId: templateId,
+    variables: variables,
+  });
 
   var messageService = getMessageService(config);
   try {
@@ -158,24 +188,30 @@ export async function sendBookingAlimtalk(type, payload) {
         variables: variables,
       },
     });
-    console.log(
-      "[solapi-alimtalk] sent",
-      type,
-      payload && payload.reservationNumber,
-      "| success:",
-      result &&
+    console.log("[GRAFFORD alimtalk test] Solapi 발송 성공", {
+      type: type,
+      reservationNumber: payload && payload.reservationNumber,
+      registeredSuccess:
+        result &&
         result.groupInfo &&
         result.groupInfo.count &&
         result.groupInfo.count.registeredSuccess,
-    );
+      registeredFailed:
+        result &&
+        result.groupInfo &&
+        result.groupInfo.count &&
+        result.groupInfo.count.registeredFailed,
+      groupId: result && result.groupInfo && result.groupInfo.groupId,
+    });
     return { ok: true, result: result };
   } catch (err) {
-    console.error(
-      "[solapi-alimtalk] failed",
-      type,
-      payload && payload.reservationNumber,
-      err && err.message ? err.message : err,
-    );
+    console.error("[GRAFFORD alimtalk test] Solapi 발송 실패", {
+      type: type,
+      reservationNumber: payload && payload.reservationNumber,
+      message: err && err.message ? err.message : String(err),
+      tag: err && err._tag ? err._tag : undefined,
+      failedMessageList: err && err.failedMessageList ? err.failedMessageList : undefined,
+    });
     return {
       ok: false,
       error: err && err.message ? err.message : String(err),
@@ -185,7 +221,13 @@ export async function sendBookingAlimtalk(type, payload) {
 
 /** API 응답을 막지 않도록 백그라운드 발송 */
 export function queueBookingAlimtalk(type, payload) {
+  console.log("[GRAFFORD alimtalk test] queueBookingAlimtalk 등록", {
+    type: type,
+    reservationNumber: payload && payload.reservationNumber,
+    guestName: payload && payload.guestName,
+    contact: payload && payload.contact,
+  });
   sendBookingAlimtalk(type, payload).catch(function (err) {
-    console.error("[solapi-alimtalk] queue failed", type, err);
+    console.error("[GRAFFORD alimtalk test] queueBookingAlimtalk 실패", type, err);
   });
 }

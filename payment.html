@@ -1067,7 +1067,7 @@
 
             var config = null;
             try {
-              var cfgRes = await fetch("/api/payment-config");
+              var cfgRes = await fetch("/api/payment-confirm");
               if (!cfgRes.ok) throw new Error("설정 조회 실패");
               config = await cfgRes.json();
             } catch (e) {
@@ -2330,7 +2330,7 @@
 
             var config = null;
             try {
-              var cfgRes = await fetch("/api/payment-config");
+              var cfgRes = await fetch("/api/payment-confirm");
               if (!cfgRes.ok) throw new Error("Config fetch failed");
               config = await cfgRes.json();
             } catch (e) {
