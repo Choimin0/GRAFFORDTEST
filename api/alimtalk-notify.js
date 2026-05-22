@@ -171,17 +171,14 @@ export default async function handler(req, res) {
     return;
   }
 
-  var client;
   try {
-    client = await pool.connect();
-    var sel = await client.query(
+    var sel = await pool.query(
       `SELECT guest_name, contact, room_type, check_in_date, check_out_date, status
        FROM ${BOOKING_TABLE}
        WHERE reservation_number = $1
        LIMIT 1`,
       [reservationNumber],
     );
-    client.release();
 
     if (!sel.rows || !sel.rows.length) {
       json(res, 404, { ok: false, error: "예약을 찾을 수 없습니다." });
@@ -268,9 +265,6 @@ export default async function handler(req, res) {
     });
     json(res, 200, { ok: true, sent: true });
   } catch (e) {
-    try {
-      client.release();
-    } catch (_) {}
     console.error("alimtalk-notify handler", e);
     json(res, 500, {
       ok: false,

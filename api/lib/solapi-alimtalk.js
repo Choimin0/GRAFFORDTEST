@@ -87,6 +87,28 @@ function buildBaseVariables(payload) {
   };
 }
 
+function formatSolapiError(err) {
+  var msg = err && err.message ? err.message : String(err || "알림톡 발송 실패");
+  if (/허용되지 않은\s*IP|not allowed.*IP/i.test(msg)) {
+    return (
+      "Solapi IP 접근 제한입니다. Solapi 콘솔 > API 보안에서 IP 제한을 해제하거나 " +
+      "Vercel Static IP(프로젝트 Connectivity)를 Solapi 허용 목록에 등록해 주세요."
+    );
+  }
+  if (err && err.failedMessageList && err.failedMessageList.length) {
+    var parts = err.failedMessageList
+      .map(function (item) {
+        return (
+          (item && (item.statusMessage || item.reason || item.statusCode)) ||
+          ""
+        );
+      })
+      .filter(Boolean);
+    if (parts.length) return parts.join("; ");
+  }
+  return msg;
+}
+
 function validateConfig(config, templateId, type) {
   if (!config.apiKey || !config.apiSecret) {
     return "SOLAPI_API_KEY / SOLAPI_API_SECRET 환경변수가 필요합니다.";
@@ -188,33 +210,41 @@ export async function sendBookingAlimtalk(type, payload) {
         variables: variables,
       },
     });
+    var count =
+      result && result.groupInfo && result.groupInfo.count
+        ? result.groupInfo.count
+        : null;
+    var registeredSuccess = count ? count.registeredSuccess : 0;
+    var registeredFailed = count ? count.registeredFailed : 0;
     console.log("[GRAFFORD alimtalk test] Solapi 발송 성공", {
       type: type,
       reservationNumber: payload && payload.reservationNumber,
-      registeredSuccess:
-        result &&
-        result.groupInfo &&
-        result.groupInfo.count &&
-        result.groupInfo.count.registeredSuccess,
-      registeredFailed:
-        result &&
-        result.groupInfo &&
-        result.groupInfo.count &&
-        result.groupInfo.count.registeredFailed,
+      registeredSuccess: registeredSuccess,
+      registeredFailed: registeredFailed,
       groupId: result && result.groupInfo && result.groupInfo.groupId,
     });
+    if (registeredSuccess < 1) {
+      var failDetail =
+        result &&
+        result.failedMessageList &&
+        result.failedMessageList.length
+          ? formatSolapiError({ failedMessageList: result.failedMessageList })
+          : "Solapi 접수에 실패했습니다.";
+      return { ok: false, error: failDetail };
+    }
     return { ok: true, result: result };
   } catch (err) {
+    var errorText = formatSolapiError(err);
     console.error("[GRAFFORD alimtalk test] Solapi 발송 실패", {
       type: type,
       reservationNumber: payload && payload.reservationNumber,
-      message: err && err.message ? err.message : String(err),
+      message: errorText,
       tag: err && err._tag ? err._tag : undefined,
       failedMessageList: err && err.failedMessageList ? err.failedMessageList : undefined,
     });
     return {
       ok: false,
-      error: err && err.message ? err.message : String(err),
+      error: errorText,
     };
   }
 }

@@ -74,12 +74,20 @@
           });
       })
       .then(function (result) {
-        console.log("[GRAFFORD alimtalk test] 클라이언트: /api/alimtalk-notify 응답", {
+        var logPayload = {
           type: type,
           orderNo: orderNo,
           httpOk: result.ok,
           data: result.data,
-        });
+        };
+        if (result.ok) {
+          console.log("[GRAFFORD alimtalk test] 클라이언트: /api/alimtalk-notify 응답", logPayload);
+        } else {
+          console.error(
+            "[GRAFFORD alimtalk test] 클라이언트: /api/alimtalk-notify 실패",
+            logPayload,
+          );
+        }
         if (
           result.ok &&
           result.data &&
