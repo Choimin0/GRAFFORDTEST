@@ -13,6 +13,7 @@ import {
   fetchPortonePayment,
   resolvePaidAmountForBooking,
 } from "./lib/refund-amount.js";
+import { queueBookingAlimtalk } from "./lib/solapi-alimtalk.js";
 
 const { Pool } = pg;
 const BOOKING_TABLE = "booking";
@@ -112,6 +113,18 @@ function normalizeReservationNumber(s) {
     .toUpperCase();
   if (t.startsWith("GRF-")) t = t.slice(4);
   return t;
+}
+
+function normalizeCheckInYmd(v) {
+  if (v == null || v === "") return null;
+  if (typeof v === "string") {
+    var s = v.trim();
+    var mm = /^(\d{4}-\d{2}-\d{2})/.exec(s);
+    if (mm) return mm[1];
+  }
+  var d = new Date(v);
+  if (isNaN(d.getTime())) return null;
+  return d.toISOString().slice(0, 10);
 }
 
 function isAdminOk(body) {
@@ -511,6 +524,15 @@ export default async function handler(req, res) {
     client.release();
 
     var cancelledPii = decryptBookingPiiResponse(updResult.rows[0]);
+    queueBookingAlimtalk("cancel-complete", {
+      guestName: cancelledPii.guestName,
+      contact: cancelledPii.contact,
+      reservationNumber: reservationNumber,
+      roomType: row.room_type,
+      checkIn: normalizeCheckInYmd(row.check_in_date) || "",
+      checkOut: normalizeCheckInYmd(row.check_out_date) || "",
+    });
+
     json(res, 200, {
       ok: true,
       pgCancelled: pgCancelled,

@@ -20,6 +20,8 @@ import {
   computeRefundAmount,
   resolvePaidAmountForBooking,
 } from "./lib/refund-amount.js";
+import { decryptBookingPiiResponse } from "./lib/pii-crypto.js";
+import { queueBookingAlimtalk } from "./lib/solapi-alimtalk.js";
 
 const { Pool } = pg;
 
@@ -646,6 +648,16 @@ export default async function handler(req, res) {
     } finally {
       client.release();
     }
+
+    var cancelledPii = decryptBookingPiiResponse(row);
+    queueBookingAlimtalk("cancel-complete", {
+      guestName: cancelledPii.guestName,
+      contact: cancelledPii.contact,
+      reservationNumber: reservationNumber,
+      roomType: row.room_type,
+      checkIn: normalizeCheckInYmd(row.check_in_date) || "",
+      checkOut: normalizeCheckInYmd(row.check_out_date) || "",
+    });
 
     json(res, 200, {
       ok: true,

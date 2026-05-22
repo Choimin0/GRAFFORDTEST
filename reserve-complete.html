@@ -9,6 +9,7 @@
     <script src="js/nav-hero.js" defer></script>
     <script src="js/mobile-nav.js" defer></script>
     <script src="js/site-language.js" defer></script>
+    <script src="js/alimtalk-notify.js" defer></script>
   </head>
   <body class="reserve-check-page">
     <div id="grafford-react-fade-root"></div>
@@ -612,6 +613,17 @@
           if (cancelLinkEn) {
             sessionStorage.setItem("graffordCancelPayload", cancelPayloadStr);
             cancelLinkEn.href = "reserve-delete.html";
+          }
+
+          if (window.GraffordAlimtalkNotify && orderNo && guestName && contact) {
+            window.GraffordAlimtalkNotify.sendReserveComplete({
+              orderNo: orderNo,
+              guestName: guestName,
+              contact: contact,
+              room: room,
+              checkIn: checkIn,
+              checkOut: checkOut,
+            });
           }
         });
       </script>
