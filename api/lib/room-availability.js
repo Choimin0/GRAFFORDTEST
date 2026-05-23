@@ -1,4 +1,5 @@
 import { hasActiveHoldOverlap } from "./booking-hold.js";
+import { hasExternalBookingOverlap } from "./ical-sync.js";
 
 const ALLOWED_ROOMS = new Set(["G1", "G2", "G3", "G4"]);
 const LEGACY_TO_ROOM = { A: "G1", B: "G2", C: "G3", D: "G4" };
@@ -131,6 +132,9 @@ export async function checkRoomAvailability(
     )
   ) {
     return { available: false, reason: "occupied" };
+  }
+  if (await hasExternalBookingOverlap(pool, room, checkIn, checkOut)) {
+    return { available: false, reason: "external" };
   }
   if (
     await hasActiveHoldOverlap(pool, room, checkIn, checkOut, excludeHoldId)

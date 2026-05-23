@@ -16,6 +16,10 @@ import {
   getHoldIdFromToken,
 } from "./lib/booking-token.js";
 import { checkRoomAvailability } from "./lib/room-availability.js";
+import {
+  buildIcalCalendar,
+  getMergedOccupiedNightsForRoom,
+} from "./lib/ical-sync.js";
 
 const { Pool } = pg;
 
@@ -34,7 +38,6 @@ const MAX_EMAIL = 255;
 const DEFAULT_CANCEL_TOKEN_TTL_MS = 10 * 60 * 1000;
 const BOOKING_TABLE = "booking";
 const ROOM_STATUS_TABLE = '"room-status"';
-const ICAL_FETCH_TIMEOUT_MS = 8000;
 
 /** Neon/Vercel에서 오는 URL 이름이 달라도 사용 (TCP — Neon's HTTP 404 회피) */
 function getDatabaseUrl() {
@@ -190,217 +193,6 @@ function addOneDayYMD(ymd) {
   var m = String(dt.getMonth() + 1).padStart(2, "0");
   var day = String(dt.getDate()).padStart(2, "0");
   return y + "-" + m + "-" + day;
-}
-
-function escapeIcsText(v) {
-  return String(v == null ? "" : v)
-    .replace(/\\/g, "\\\\")
-    .replace(/\n/g, "\\n")
-    .replace(/,/g, "\\,")
-    .replace(/;/g, "\\;");
-}
-
-function ymdToIcsDate(ymd) {
-  return String(ymd || "").replace(/-/g, "");
-}
-
-function parseIcsDateToYmd(raw) {
-  var text = String(raw || "").trim();
-  if (!text) {
-    return "";
-  }
-  var m = text.match(/^(\d{4})(\d{2})(\d{2})/);
-  if (!m) {
-    return "";
-  }
-  return m[1] + "-" + m[2] + "-" + m[3];
-}
-
-function unfoldIcsLines(text) {
-  return String(text || "").replace(/\r\n[ \t]/g, "").split(/\r?\n/);
-}
-
-function collectIcsOccupiedNights(icsText) {
-  var lines = unfoldIcsLines(icsText);
-  var occupied = Object.create(null);
-  var inEvent = false;
-  var dtStart = "";
-  var dtEnd = "";
-
-  function flushEvent() {
-    if (!dtStart) {
-      dtStart = "";
-      dtEnd = "";
-      return;
-    }
-    var ci = parseIcsDateToYmd(dtStart);
-    var co = parseIcsDateToYmd(dtEnd);
-    if (ci && co && ci < co) {
-      expandOccupiedNights(ci, co).forEach(function (n) {
-        occupied[n] = true;
-      });
-    }
-    dtStart = "";
-    dtEnd = "";
-  }
-
-  lines.forEach(function (line) {
-    if (line === "BEGIN:VEVENT") {
-      inEvent = true;
-      dtStart = "";
-      dtEnd = "";
-      return;
-    }
-    if (line === "END:VEVENT") {
-      flushEvent();
-      inEvent = false;
-      return;
-    }
-    if (!inEvent) {
-      return;
-    }
-    if (line.startsWith("DTSTART")) {
-      var i1 = line.indexOf(":");
-      if (i1 >= 0) {
-        dtStart = line.slice(i1 + 1).trim();
-      }
-      return;
-    }
-    if (line.startsWith("DTEND")) {
-      var i2 = line.indexOf(":");
-      if (i2 >= 0) {
-        dtEnd = line.slice(i2 + 1).trim();
-      }
-    }
-  });
-
-  return Object.keys(occupied);
-}
-
-function parseRoomFromIcalImportEntry(raw) {
-  var t = String(raw || "").trim();
-  if (!t) {
-    return { room: "", url: "" };
-  }
-  var at = t.indexOf("@");
-  if (at > 0) {
-    var roomToken = normalizeRoomType(t.slice(0, at));
-    var urlToken = t.slice(at + 1).trim();
-    return { room: roomToken, url: urlToken };
-  }
-  return { room: "", url: t };
-}
-
-function getIcalImportUrls(room) {
-  var out = [];
-  var roomScoped = String(process.env["ICAL_IMPORT_URLS_" + room] || "").trim();
-  if (roomScoped) {
-    roomScoped
-      .split(",")
-      .map(function (s) {
-        return s.trim();
-      })
-      .filter(Boolean)
-      .forEach(function (u) {
-        out.push(u);
-      });
-  }
-
-  var common = String(process.env.ICAL_IMPORT_URLS || "").trim();
-  if (!common) {
-    return out;
-  }
-  common
-    .split(",")
-    .map(function (s) {
-      return s.trim();
-    })
-    .filter(Boolean)
-    .forEach(function (entry) {
-      var parsed = parseRoomFromIcalImportEntry(entry);
-      if (!parsed.url) {
-        return;
-      }
-      if (!parsed.room || parsed.room === room) {
-        out.push(parsed.url);
-      }
-    });
-  return out;
-}
-
-async function fetchIcalOccupiedNightsForRoom(room) {
-  var urls = getIcalImportUrls(room);
-  if (!urls.length) {
-    return [];
-  }
-  var occupied = Object.create(null);
-
-  for (var i = 0; i < urls.length; i++) {
-    var controller = new AbortController();
-    var timer = setTimeout(function () {
-      controller.abort();
-    }, ICAL_FETCH_TIMEOUT_MS);
-    try {
-      var r = await fetch(urls[i], {
-        method: "GET",
-        signal: controller.signal,
-        headers: { Accept: "text/calendar, text/plain;q=0.9, */*;q=0.8" },
-      });
-      if (!r.ok) {
-        continue;
-      }
-      var text = await r.text();
-      collectIcsOccupiedNights(text).forEach(function (d) {
-        occupied[d] = true;
-      });
-    } catch (_e) {
-      // 외부 iCal 실패는 본 예약 API를 깨지 않게 무시
-    } finally {
-      clearTimeout(timer);
-    }
-  }
-
-  return Object.keys(occupied).sort();
-}
-
-function buildIcalCalendar(rows) {
-  var now = new Date().toISOString().replace(/[-:]/g, "").replace(/\.\d{3}Z$/, "Z");
-  var lines = [
-    "BEGIN:VCALENDAR",
-    "VERSION:2.0",
-    "PRODID:-//GRAFFORD//Reservation Calendar//KO",
-    "CALSCALE:GREGORIAN",
-    "METHOD:PUBLISH",
-    "X-WR-CALNAME:GRAFFORD Reservations",
-  ];
-
-  (rows || []).forEach(function (row) {
-    var ci = rowDateToYMD(row.check_in_date);
-    var co = rowDateToYMD(row.check_out_date);
-    if (!ci || !co || ci >= co) {
-      return;
-    }
-    var room = normalizeRoomType(row.room_type) || String(row.room_type || "");
-    var number = String(row.reservation_number || "");
-    var isBlock = row.is_block === true || /^BLOCK-/.test(number);
-    var uid = escapeIcsText(number + "-" + room + "@grafford.local");
-    lines.push("BEGIN:VEVENT");
-    lines.push("UID:" + uid);
-    lines.push("DTSTAMP:" + now);
-    lines.push("DTSTART;VALUE=DATE:" + ymdToIcsDate(ci));
-    lines.push("DTEND;VALUE=DATE:" + ymdToIcsDate(co));
-    lines.push(
-      "SUMMARY:" + escapeIcsText("GRAFFORD " + room + (isBlock ? " 방막기" : " 예약")),
-    );
-    lines.push(
-      "DESCRIPTION:" +
-        escapeIcsText(isBlock ? "Admin block " + number : "Reservation " + number),
-    );
-    lines.push("END:VEVENT");
-  });
-
-  lines.push("END:VCALENDAR");
-  return lines.join("\r\n") + "\r\n";
 }
 
 async function getRoomBlockRows(pool, roomFilter) {
@@ -672,7 +464,7 @@ export default async function handler(req, res) {
             is_block: true,
           };
         });
-        var ics = buildIcalCalendar((rowsForIcal.rows || []).concat(blockEvents));
+        var ics = buildIcalCalendar((rowsForIcal.rows || []).concat(blockEvents), rowDateToYMD);
         res.statusCode = 200;
         res.setHeader("Content-Type", "text/calendar; charset=utf-8");
         res.setHeader(
@@ -723,7 +515,7 @@ export default async function handler(req, res) {
           });
           checkouts[co] = true;
         });
-        var importedNights = await fetchIcalOccupiedNightsForRoom(roomForCal);
+        var importedNights = await getMergedOccupiedNightsForRoom(pool, roomForCal);
         importedNights.forEach(function (n) {
           occupied[n] = true;
         });
