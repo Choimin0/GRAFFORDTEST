@@ -74,18 +74,21 @@
               </p>
               <h1 class="reserve-check-page-band__title">예약 완료</h1>
             </div>
-            <div class="reserve-check-page-band__right">
+            <div
+              class="reserve-check-page-band__right reserve-check-page-band__booking-block"
+            >
+              <p class="reserve-check-page-band__label">BOOKING NO</p>
               <p
-                class="delete-complete-band-meta-line"
-                id="complete-band-booking-kr"
+                class="reserve-check-page-band__booking-no"
+                id="complete-band-booking-no-kr"
               >
-                BOOKING NO. —
+                —
               </p>
               <p
-                class="delete-complete-band-meta-line delete-complete-band-meta-line--room"
-                id="complete-band-ground-kr"
+                class="reserve-check-page-band__band-room"
+                id="complete-band-room-kr"
               >
-                GROUND —
+                —
               </p>
             </div>
           </header>
@@ -410,16 +413,10 @@
           }
           var roomLabel = ROOM_LABEL[room] || room;
           var scheduleText = (checkIn || "—") + " ~ " + (checkOut || "—");
-          setText(
-            "complete-band-booking-kr",
-            "BOOKING NO. " + (orderNo || "—"),
-          );
-          setText(
-            "complete-band-booking-en",
-            "BOOKING NO. " + (orderNo || "—"),
-          );
-          setText("complete-band-ground-kr", "GROUND " + (roomLabel || "—"));
-          setText("complete-band-ground-en", "GROUND " + (roomLabel || "—"));
+          setText("complete-band-booking-no-kr", orderNo || "—");
+          setText("complete-band-booking-no-en", orderNo || "—");
+          setText("complete-band-room-kr", roomLabel || "—");
+          setText("complete-band-room-en", roomLabel || "—");
           setText(
             "complete-room-name",
             ROOM_LABEL[room] || room || "객실 정보 없음",
@@ -667,18 +664,21 @@
                 Reservation complete
               </h1>
             </div>
-            <div class="reserve-check-page-band__right">
+            <div
+              class="reserve-check-page-band__right reserve-check-page-band__booking-block"
+            >
+              <p class="reserve-check-page-band__label">BOOKING NO</p>
               <p
-                class="delete-complete-band-meta-line"
-                id="complete-band-booking-en"
+                class="reserve-check-page-band__booking-no"
+                id="complete-band-booking-no-en"
               >
-                BOOKING NO. —
+                —
               </p>
               <p
-                class="delete-complete-band-meta-line delete-complete-band-meta-line--room"
-                id="complete-band-ground-en"
+                class="reserve-check-page-band__band-room"
+                id="complete-band-room-en"
               >
-                GROUND —
+                —
               </p>
             </div>
           </header>

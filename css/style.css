@@ -437,7 +437,7 @@ html {
   }
 
   .top-right-nav .lang-switch__btn.is-active {
-    color: var(--stone-500);
+    color: var(--stone-50);
     font-weight: 600;
   }
 
@@ -1901,12 +1901,12 @@ body.index-feature-3-lightbox-open {
   .scroll-down-btn {
   left: auto;
   right: clamp(var(--space-24), 4.5vw, var(--space-80));
-  bottom: clamp(var(--space-24), 4vh, var(--space-40));
+  bottom: 2rem;
   transform: none;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 0.55rem;
+  gap: 0.65rem;
   min-width: 0;
   min-height: 0;
   padding: 0;
@@ -1925,25 +1925,29 @@ body.index-feature-3-lightbox-open {
   .scroll-down-btn
   .story-scroll-line {
   display: block;
-  width: 1px;
-  height: 40px;
+  width: 2px;
+  height: 3.5rem;
+  border-radius: 999px;
   background: linear-gradient(
     to bottom,
-    transparent,
-    color-mix(in srgb, var(--gold-500) 86%, transparent)
+    color-mix(in srgb, var(--gold-500) 42%, transparent),
+    var(--gold-500)
   );
-  animation: scrollPulse 2s ease-in-out infinite;
+  box-shadow: 0 0 8px color-mix(in srgb, var(--gold-500) 50%, transparent);
+  animation: storyScrollPulse 2s ease-in-out infinite;
 }
 
 .story-scroll-label {
   display: block;
   width: auto;
   height: auto;
-  color: color-mix(in srgb, var(--color-text-on-dark) 78%, transparent);
+  color: color-mix(in srgb, var(--color-text-on-dark) 92%, transparent);
   font-family: var(--font-family-nav-en);
-  font-size: 0.5rem;
-  letter-spacing: 0.52em;
+  font-size: 0.5625rem;
+  font-weight: 600;
+  letter-spacing: 0.44em;
   line-height: 1;
+  text-shadow: 0 1px 10px rgba(0, 0, 0, 0.35);
 }
 
 .features--story .feature-media {
@@ -7275,6 +7279,16 @@ main.content-section.confirm-page.payment-page > #payment-error-area-en {
   max-width: 100%;
   margin-left: 0;
   margin-right: 0;
+  padding-left: var(--checkout-content-inset-x);
+  padding-right: var(--checkout-content-inset-x);
+  box-sizing: border-box;
+}
+
+@media (min-width: 768px) {
+  .payment-page-shell .reserve-check-page-band.payment-page-shell__band {
+    padding-left: var(--checkout-content-inset-x-tablet);
+    padding-right: var(--checkout-content-inset-x-tablet);
+  }
 }
 
 /* confirm.html — payment와 동일한 상단 밴드·레이아웃 셸 */
@@ -8011,7 +8025,7 @@ main.content-section.confirm-page.payment-page > #payment-error-area-en {
 }
 
 .confirm-page .payment-section-head {
-  margin: 0 0.65rem 1.15rem;
+  margin: 0;
 }
 
 .confirm-page .confirm-guide-kv {
@@ -10368,21 +10382,26 @@ button.reserve-delete-submit-btn.confirm-pay-submit.btn.reserve-btn:not(
   color: var(--grafford-mud2);
 }
 
-/* 무통장 입금 예약 완료 (reserve-complete.html) */
-.reserve-complete-page .payment-page-shell > .reserve-check-content {
-  width: calc(100% - clamp(2rem, 8vw, 6rem));
-}
-
 .reserve-complete-page .confirm-layout-col--right {
   position: static;
   top: auto;
 }
 
 /* ── 예약 조회 / 확인 (reserve-check.html) ───────────────── */
-.reserve-check-page .confirm-page.reserve-check-main {
+.reserve-check-page .confirm-page.reserve-check-main,
+main.content-section.confirm-page.reserve-check-main {
   padding-top: calc(var(--site-nav-height) + var(--space-16));
   padding-bottom: var(--space-48);
+  padding-left: 0;
+  padding-right: 0;
+  margin-left: calc(50% - 50vw);
+  margin-right: calc(50% - 50vw);
+  width: 100vw;
+  max-width: 100%;
+  box-sizing: border-box;
   background: var(--stone-50);
+  box-shadow: none;
+  border-radius: 0;
 }
 
 .reserve-check-page-band {
@@ -10391,9 +10410,7 @@ button.reserve-delete-submit-btn.confirm-pay-submit.btn.reserve-btn:not(
   margin-left: calc(50% - 50vw);
   margin-right: calc(50% - 50vw);
   box-sizing: border-box;
-  padding: var(--space-32)
-    clamp(var(--layout-margin-side-mobile), 5vw, var(--space-48))
-    var(--space-24);
+  padding: var(--space-32) var(--checkout-content-inset-x) var(--space-24);
   display: flex;
   flex-wrap: wrap;
   align-items: flex-end;
@@ -10401,6 +10418,13 @@ button.reserve-delete-submit-btn.confirm-pay-submit.btn.reserve-btn:not(
   gap: var(--space-24);
   background: var(--stone-50);
   border-bottom: 1px solid var(--stone-200);
+}
+
+@media (min-width: 768px) {
+  .reserve-check-page-band {
+    padding-left: var(--checkout-content-inset-x-tablet);
+    padding-right: var(--checkout-content-inset-x-tablet);
+  }
 }
 
 .reserve-check-page-band__left {
@@ -10496,21 +10520,57 @@ button.reserve-delete-submit-btn.confirm-pay-submit.btn.reserve-btn:not(
   color: var(--stone-400);
 }
 
-.reserve-check-page-band__booking-no {
+.reserve-check-page-band__booking-block {
+  flex-direction: column;
+  align-items: flex-end;
+  justify-content: flex-end;
+  gap: 0.35rem;
+  text-align: right;
+}
+
+.reserve-check-page-band__booking-block .reserve-check-page-band__label {
   margin: 0;
-  font-size: 1.05rem;
+  width: 100%;
+  text-align: right;
+}
+
+.reserve-check-page-band__booking-no,
+.reserve-check-page-band__band-room {
+  margin: 0;
+  width: 100%;
+  font-family: var(--font-family-body-en);
+  font-size: 0.68rem;
   font-weight: 600;
-  color: var(--stone-800);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--stone-400);
+  line-height: 1.35;
   font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.reserve-check-page-band__booking-block .reserve-check-page-band__band-room {
+  margin-top: 0.05rem;
+}
+
+.delete-complete-band .reserve-check-page-band__right {
+  max-width: min(100%, 22rem);
 }
 
 .reserve-check-content {
-  max-width: var(--layout-content-max);
-  margin-left: auto;
-  margin-right: auto;
-  padding: var(--space-32)
-    clamp(var(--layout-margin-side-mobile), 4vw, var(--space-48)) 0;
+  width: 100%;
+  max-width: none;
+  margin-left: 0;
+  margin-right: 0;
+  padding: var(--space-32) var(--checkout-content-inset-x) 0;
   box-sizing: border-box;
+}
+
+@media (min-width: 768px) {
+  .reserve-check-content {
+    padding-left: var(--checkout-content-inset-x-tablet);
+    padding-right: var(--checkout-content-inset-x-tablet);
+  }
 }
 
 .reserve-check-top-grid {
@@ -10939,26 +10999,6 @@ button.reserve-delete-submit-btn.confirm-pay-submit.btn.reserve-btn:not(
   min-width: 0;
 }
 
-.delete-complete-band .reserve-check-page-band__right {
-  max-width: min(100%, 22rem);
-}
-
-.delete-complete-band-meta-line {
-  margin: 0;
-  font-family: var(--font-family-body-en);
-  font-size: 0.68rem;
-  font-weight: 600;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  color: var(--stone-400);
-  line-height: 1.35;
-  font-variant-numeric: tabular-nums;
-}
-
-.delete-complete-band-meta-line--room {
-  margin-top: 0.4rem;
-}
-
 .delete-complete-layout.payment-layout {
   gap: 0;
 }
@@ -11200,6 +11240,20 @@ button.reserve-delete-submit-btn.confirm-pay-submit.btn.reserve-btn:not(
   100% {
     opacity: 0.38;
     transform: scaleY(0.72);
+    transform-origin: top;
+  }
+  50% {
+    opacity: 1;
+    transform: scaleY(1);
+    transform-origin: top;
+  }
+}
+
+@keyframes storyScrollPulse {
+  0%,
+  100% {
+    opacity: 0.72;
+    transform: scaleY(0.88);
     transform-origin: top;
   }
   50% {

@@ -74,18 +74,18 @@
               </p>
               <h1 class="reserve-check-page-band__title">예약 취소 완료</h1>
             </div>
-            <div class="reserve-check-page-band__right">
+            <div
+              class="reserve-check-page-band__right reserve-check-page-band__booking-block"
+            >
+              <p class="reserve-check-page-band__label">BOOKING NO</p>
               <p
-                class="delete-complete-band-meta-line"
-                id="band-booking-line-kr"
+                class="reserve-check-page-band__booking-no"
+                id="band-booking-no-kr"
               >
-                BOOKING NO. —
+                —
               </p>
-              <p
-                class="delete-complete-band-meta-line delete-complete-band-meta-line--room"
-                id="band-ground-line-kr"
-              >
-                GROUND —
+              <p class="reserve-check-page-band__band-room" id="band-room-kr">
+                —
               </p>
             </div>
           </header>
@@ -493,10 +493,10 @@
             );
           }
 
-          setText("band-booking-line-kr", "BOOKING NO. " + orderNo);
-          setText("band-ground-line-kr", "GROUND " + roomLabel);
-          setText("band-booking-line-en", "BOOKING NO. " + orderNo);
-          setText("band-ground-line-en", "GROUND " + roomLabel);
+          setText("band-booking-no-kr", orderNo || "—");
+          setText("band-room-kr", roomLabel || "—");
+          setText("band-booking-no-en", orderNo || "—");
+          setText("band-room-en", roomLabel || "—");
           setText("delete-refund-summary-kr", refundSummaryKr(refundAmount));
           setText("delete-refund-summary-en", refundSummaryEn(refundAmount));
           setText(
@@ -606,18 +606,18 @@
                 Reservation Cancelled
               </h1>
             </div>
-            <div class="reserve-check-page-band__right">
+            <div
+              class="reserve-check-page-band__right reserve-check-page-band__booking-block"
+            >
+              <p class="reserve-check-page-band__label">BOOKING NO</p>
               <p
-                class="delete-complete-band-meta-line"
-                id="band-booking-line-en"
+                class="reserve-check-page-band__booking-no"
+                id="band-booking-no-en"
               >
-                BOOKING NO. —
+                —
               </p>
-              <p
-                class="delete-complete-band-meta-line delete-complete-band-meta-line--room"
-                id="band-ground-line-en"
-              >
-                GROUND —
+              <p class="reserve-check-page-band__band-room" id="band-room-en">
+                —
               </p>
             </div>
           </header>

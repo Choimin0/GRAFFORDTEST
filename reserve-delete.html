@@ -112,18 +112,21 @@
               </p>
               <h1 class="reserve-check-page-band__title">예약 취소</h1>
             </div>
-            <div class="reserve-check-page-band__right">
+            <div
+              class="reserve-check-page-band__right reserve-check-page-band__booking-block"
+            >
+              <p class="reserve-check-page-band__label">BOOKING NO</p>
               <p
-                class="delete-complete-band-meta-line"
-                id="resdel-band-booking-kr"
+                class="reserve-check-page-band__booking-no"
+                id="resdel-band-booking-no-kr"
               >
-                BOOKING NO. —
+                —
               </p>
               <p
-                class="delete-complete-band-meta-line delete-complete-band-meta-line--room"
-                id="resdel-band-ground-kr"
+                class="reserve-check-page-band__band-room"
+                id="resdel-band-room-kr"
               >
-                GROUND —
+                —
               </p>
             </div>
           </header>
@@ -714,10 +717,10 @@
           setText("cancel-contact-en", contact);
           setText("cancel-email-en", email || "—");
 
-          setText("resdel-band-booking-kr", "BOOKING NO. " + orderNo);
-          setText("resdel-band-ground-kr", "GROUND " + roomText);
-          setText("resdel-band-booking-en", "BOOKING NO. " + orderNo);
-          setText("resdel-band-ground-en", "GROUND " + roomText);
+          setText("resdel-band-booking-no-kr", orderNo || "—");
+          setText("resdel-band-room-kr", roomText || "—");
+          setText("resdel-band-booking-no-en", orderNo || "—");
+          setText("resdel-band-room-en", roomText || "—");
 
           function wireCancelFlowsAfterRefund() {
             setTimeout(function () {
@@ -1142,18 +1145,21 @@
               </p>
               <h1 class="reserve-check-page-band__title">Cancel Reservation</h1>
             </div>
-            <div class="reserve-check-page-band__right">
+            <div
+              class="reserve-check-page-band__right reserve-check-page-band__booking-block"
+            >
+              <p class="reserve-check-page-band__label">BOOKING NO</p>
               <p
-                class="delete-complete-band-meta-line"
-                id="resdel-band-booking-en"
+                class="reserve-check-page-band__booking-no"
+                id="resdel-band-booking-no-en"
               >
-                BOOKING NO. —
+                —
               </p>
               <p
-                class="delete-complete-band-meta-line delete-complete-band-meta-line--room"
-                id="resdel-band-ground-en"
+                class="reserve-check-page-band__band-room"
+                id="resdel-band-room-en"
               >
-                GROUND —
+                —
               </p>
             </div>
           </header>
