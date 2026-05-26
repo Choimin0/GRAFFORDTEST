@@ -10,6 +10,7 @@
     <script src="js/mobile-nav.js" defer></script>
     <script src="js/site-language.js" defer></script>
     <script src="js/alimtalk-notify.js" defer></script>
+    <script src="js/booking-pricing.js?v=5"></script>
   </head>
   <body class="reserve-check-page">
     <div id="grafford-react-fade-root"></div>
@@ -484,10 +485,16 @@
 
           var parsedGuestCount = parseInt(guestCount || "", 10);
           if (!parsedGuestCount || parsedGuestCount < 1) {
-            parsedGuestCount = Math.max(
-              1,
-              2 + (parseInt(extraGuests || "0", 10) || 0),
-            );
+            var P = window.GraffordBookingPricing;
+            parsedGuestCount = P
+              ? P.computeGuestCount(
+                  room,
+                  parseInt(extraGuests || "0", 10) || 0,
+                )
+              : Math.max(
+                  1,
+                  2 + (parseInt(extraGuests || "0", 10) || 0),
+                );
           }
           document.getElementById("complete-guest-count").textContent =
             String(parsedGuestCount) + "명";

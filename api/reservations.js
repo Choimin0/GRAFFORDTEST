@@ -21,6 +21,11 @@ import {
   buildIcalCalendar,
   getMergedOccupiedNightsForRoom,
 } from "./lib/ical-sync.js";
+import {
+  clampExtraGuests,
+  computeGuestCount,
+  getMaxExtraGuests,
+} from "./lib/room-guest-policy.js";
 
 const { Pool } = pg;
 
@@ -853,6 +858,20 @@ export default async function handler(req, res) {
     json(res, 400, { ok: false, error: "Invalid extraGuests" });
     return;
   }
+  var maxExtraForRoom = getMaxExtraGuests(roomType);
+  if (Math.floor(extraGuests) > maxExtraForRoom) {
+    console.error(
+      "[reservations POST] extraGuests exceeds room limit:",
+      extraGuests,
+      "room:",
+      roomType,
+      "max:",
+      maxExtraForRoom,
+    );
+    json(res, 400, { ok: false, error: "Invalid extraGuests for room" });
+    return;
+  }
+  extraGuests = clampExtraGuests(roomType, extraGuests);
   if (!Number.isFinite(totalAmount) || totalAmount < 0 || totalAmount > 1e12) {
     console.error("[reservations POST] Invalid totalAmount:", totalAmount, "raw:", body.totalAmount);
     json(res, 400, { ok: false, error: "Invalid totalAmount" });
@@ -869,7 +888,7 @@ export default async function handler(req, res) {
     return;
   }
   if (!Number.isFinite(guestCount) || guestCount < 1 || guestCount > 50) {
-    guestCount = Math.min(50, Math.max(1, 2 + (extraGuests | 0)));
+    guestCount = computeGuestCount(roomType, extraGuests);
   }
 
   var gc = Math.floor(guestCount);

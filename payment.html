@@ -520,7 +520,7 @@
         </div>
       </div>
 
-      <script src="js/booking-pricing.js?v=4"></script>
+      <script src="js/booking-pricing.js?v=5"></script>
       <script src="js/booking-token-client.js?v=3"></script>
       <script src="js/booking-checkout-guard.js?v=4"></script>
       <script>
@@ -590,7 +590,12 @@
           var contact = saved.contact || "";
           var email = saved.email || "";
           var guestRequest = saved.guestRequest || "";
-          var guestCount = parseInt(saved.guestCount || "2", 10) || 2;
+          var guestCount = parseInt(saved.guestCount || "", 10);
+          if (!guestCount || guestCount < 1) {
+            guestCount = P
+              ? P.computeGuestCount(room, extraGuests)
+              : 2 + extraGuests;
+          }
           /* 현재는 신용카드만 결제 가능 (네이버페이 추후 오픈) */
           var payMethod = "card";
           saved.payMethod = "card";
@@ -1750,7 +1755,7 @@
         </div>
       </div>
 
-      <script src="js/booking-pricing.js?v=4"></script>
+      <script src="js/booking-pricing.js?v=5"></script>
       <script src="js/booking-token-client.js?v=3"></script>
       <script src="js/booking-checkout-guard.js?v=4"></script>
       <script>
@@ -1822,7 +1827,12 @@
           var contact = saved.contact || "";
           var email = saved.email || "";
           var guestRequest = saved.guestRequest || "";
-          var guestCount = parseInt(saved.guestCount || "2", 10) || 2;
+          var guestCount = parseInt(saved.guestCount || "", 10);
+          if (!guestCount || guestCount < 1) {
+            guestCount = P
+              ? P.computeGuestCount(room, extraGuests)
+              : 2 + extraGuests;
+          }
           /* Card only for now; Naver Pay option deferred */
           var payMethod = "card";
           saved.payMethod = "card";

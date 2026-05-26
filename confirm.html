@@ -745,7 +745,7 @@
         ></footer>
       </main>
 
-      <script src="js/booking-pricing.js?v=4"></script>
+      <script src="js/booking-pricing.js?v=5"></script>
       <script src="js/booking-reservations.js"></script>
       <script src="js/booking-token-client.js?v=3"></script>
       <script src="js/booking-checkout-guard.js?v=4"></script>
@@ -903,11 +903,9 @@
           );
 
           function getDisplayGuestCount() {
-            var baseGuests = 2;
-            if ((roomRaw === "G3" || roomRaw === "G4") && extraGuests > 0) {
-              return baseGuests + extraGuests;
-            }
-            return baseGuests;
+            return P
+              ? P.computeGuestCount(roomRaw, extraGuests)
+              : 2 + extraGuests;
           }
 
           function formatKRW(n) {
@@ -1640,7 +1638,9 @@
             var totalAmount =
               parseInt(document.getElementById("f-total-amount").value, 10) ||
               0;
-            var guestCount = Math.min(50, Math.max(1, 2 + extraGuests));
+            var guestCount = P
+              ? P.computeGuestCount(room, extraGuests)
+              : Math.min(50, Math.max(1, 2 + extraGuests));
 
             if (paySubmitBtn) paySubmitBtn.disabled = true;
 
@@ -1986,7 +1986,9 @@
                   document.getElementById("f-total-amount-en").value,
                   10,
                 ) || 0;
-              var guestCountEn = Math.min(50, Math.max(1, 2 + extraGuestsEn));
+              var guestCountEn = P
+                ? P.computeGuestCount(roomEn, extraGuestsEn)
+                : Math.min(50, Math.max(1, 2 + extraGuestsEn));
 
               if (paySubmitBtnEn) paySubmitBtnEn.disabled = true;
 

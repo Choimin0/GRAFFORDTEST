@@ -13,8 +13,10 @@
   var WEEKEND_SURCHARGE_PER_NIGHT = 20000;   // 기본값 (DB에서 덮어씀)
   var CONSECUTIVE_SALE_PER_NIGHT = 20000;    // 기본값 (DB에서 덮어씀)
   var PROMOTION_PERCENT = 0;                  // 기본 프로모션 할인율 (%)
+  /** 객실별 기준 인원 */
+  var BASE_GUESTS = { G1: 2, G2: 2, G3: 3, G4: 4 };
   /** 추가 투숙 가능 인원 (기준 인원 외) */
-  var MAX_EXTRA_GUESTS = { G1: 0, G2: 0, G3: 2, G4: 4 };
+  var MAX_EXTRA_GUESTS = { G1: 0, G2: 0, G3: 0, G4: 1 };
 
   function setRoomWeekdayBase(nextMap) {
     if (!nextMap || typeof nextMap !== "object") {
@@ -111,8 +113,26 @@
     return day === 5 || day === 6;
   }
 
+  function getBaseGuests(room) {
+    room = String(room || "G1").toUpperCase();
+    return BASE_GUESTS.hasOwnProperty(room) ? BASE_GUESTS[room] : 2;
+  }
+
+  function getMaxGuests(room) {
+    return getBaseGuests(room) + clampExtra(room, getMaxExtraGuests(room));
+  }
+
+  function getMaxExtraGuests(room) {
+    room = String(room || "G1").toUpperCase();
+    return MAX_EXTRA_GUESTS.hasOwnProperty(room) ? MAX_EXTRA_GUESTS[room] : 0;
+  }
+
+  function computeGuestCount(room, extraGuests) {
+    return getBaseGuests(room) + clampExtra(room, extraGuests);
+  }
+
   function clampExtra(room, n) {
-    var max = MAX_EXTRA_GUESTS[room] !== undefined ? MAX_EXTRA_GUESTS[room] : 0;
+    var max = getMaxExtraGuests(room);
     n = Number(n);
     if (isNaN(n) || n < 0) {
       n = 0;
@@ -201,7 +221,12 @@
 
   root.GraffordBookingPricing = {
     ROOM_WEEKDAY_BASE: ROOM_WEEKDAY_BASE,
+    BASE_GUESTS: BASE_GUESTS,
     MAX_EXTRA_GUESTS: MAX_EXTRA_GUESTS,
+    getBaseGuests: getBaseGuests,
+    getMaxGuests: getMaxGuests,
+    getMaxExtraGuests: getMaxExtraGuests,
+    computeGuestCount: computeGuestCount,
     EXTRA_PER_PERSON_PER_NIGHT: EXTRA_PER_PERSON_PER_NIGHT,
     WEEKEND_SURCHARGE_PER_NIGHT: WEEKEND_SURCHARGE_PER_NIGHT,
     CONSECUTIVE_SALE_PER_NIGHT: CONSECUTIVE_SALE_PER_NIGHT,

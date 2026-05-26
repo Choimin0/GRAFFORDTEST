@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="css/style.css" />
     <script src="js/nav-hero.js" defer></script>
     <script src="js/mobile-nav.js" defer></script>
-    <script src="js/booking-pricing.js?v=3" defer></script>
+    <script src="js/booking-pricing.js?v=5" defer></script>
     <script src="js/site-language.js" defer></script>
   </head>
   <body class="home-page page-hero-nav-sync reservation-page">
@@ -458,7 +458,7 @@
                       </div>
                       <div class="room-spec-cell" role="listitem">
                         <span class="room-spec-label">투숙 인원</span>
-                        <p class="room-spec-value">기준 2인 · 최대 4인</p>
+                        <p class="room-spec-value">기준 3인 · 최대 3인</p>
                       </div>
                       <div class="room-spec-cell" role="listitem">
                         <span class="room-spec-label">구성</span>
@@ -586,7 +586,7 @@
                       </div>
                       <div class="room-spec-cell" role="listitem">
                         <span class="room-spec-label">투숙 인원</span>
-                        <p class="room-spec-value">기준 2인 · 최대 6인</p>
+                        <p class="room-spec-value">기준 4인 · 최대 5인</p>
                       </div>
                       <div class="room-spec-cell" role="listitem">
                         <span class="room-spec-label">구성</span>
@@ -1647,8 +1647,9 @@
                   extraGuestsBlock.hidden = true;
                 }
                 if (extraGuestsHint) {
-                  extraGuestsHint.textContent =
-                    "G1·G2는 기준 인원 외 추가가 불가합니다.";
+                  extraGuestsHint.textContent = isEnScope
+                    ? "Additional guests are not available for this room."
+                    : "해당 객실은 기준 인원 외 추가가 불가합니다.";
                 }
                 setExtraGuests(0);
               } else {
@@ -1656,15 +1657,12 @@
                   extraGuestsBlock.hidden = false;
                 }
                 if (extraGuestsHint) {
-                  if (currentRoom === "G3") {
-                    extraGuestsHint.textContent = isEnScope
-                      ? "Up to 2 additional guests"
-                      : "최대 2인까지 추가 가능합니다";
-                  } else {
-                    extraGuestsHint.textContent = isEnScope
-                      ? "Up to 4 additional guests"
-                      : "최대 4인까지 추가 가능합니다";
-                  }
+                  extraGuestsHint.textContent = isEnScope
+                    ? "Up to " +
+                      max +
+                      " additional guest" +
+                      (max > 1 ? "s" : "")
+                    : "최대 " + max + "인까지 추가 가능합니다";
                 }
               }
               renderExtraGuestsStepper();
@@ -3152,7 +3150,7 @@
                       </div>
                       <div class="room-spec-cell" role="listitem">
                         <span class="room-spec-label">Guests</span>
-                        <p class="room-spec-value">Standard 2 · Max 4</p>
+                        <p class="room-spec-value">Standard 3 · Max 3</p>
                       </div>
                       <div class="room-spec-cell" role="listitem">
                         <span class="room-spec-label">Layout</span>
@@ -3284,7 +3282,7 @@
                       </div>
                       <div class="room-spec-cell" role="listitem">
                         <span class="room-spec-label">Guests</span>
-                        <p class="room-spec-value">Standard 2 · Max 6</p>
+                        <p class="room-spec-value">Standard 4 · Max 5</p>
                       </div>
                       <div class="room-spec-cell" role="listitem">
                         <span class="room-spec-label">Layout</span>
