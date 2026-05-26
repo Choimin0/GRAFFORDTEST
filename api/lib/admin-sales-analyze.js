@@ -2,7 +2,13 @@ import { createSign } from "node:crypto";
 import { json } from "./admin-common.js";
 import { fetchAnalyzeContext } from "./bigquery-analyze-context.js";
 
-const AI_STUDIO_DEFAULT_MODEL = "gemini-1.5-flash-latest";
+/** v1 ListModels 기준 generateContent 지원 (1.5 계열은 v1에서 미제공) */
+const AI_STUDIO_DEFAULT_MODEL = "gemini-2.0-flash";
+const AI_STUDIO_FALLBACK_MODELS = [
+  "gemini-2.5-flash",
+  "gemini-2.5-flash-lite",
+];
+const AI_STUDIO_DEPRECATED_MODEL_PREFIX = /^gemini-1\.5-/i;
 const VERTEX_DEFAULT_MODEL = "gemini-1.5-flash";
 const MAX_QUESTION_LENGTH = 2000;
 const MAX_CONTEXT_CHARS = 120000;
@@ -48,15 +54,53 @@ export function detectGeminiProvider() {
   return "google-ai-studio";
 }
 
-function getAiStudioModel() {
-  var raw = trimEnv("GEMINI_MODEL");
-  if (!raw) {
-    return AI_STUDIO_DEFAULT_MODEL;
+function normalizeModelId(raw) {
+  var id = String(raw || "").trim();
+  if (id.startsWith("models/")) {
+    id = id.slice("models/".length);
   }
-  if (raw.startsWith("models/")) {
-    return raw.slice("models/".length);
+  return id;
+}
+
+function isAiStudioModelNotFoundError(message, status) {
+  var msg = String(message || "");
+  return (
+    status === 404 ||
+    /not found/i.test(msg) ||
+    /not supported for generateContent/i.test(msg)
+  );
+}
+
+/** Google AI Studio v1에서 시도할 모델 ID 목록 (중복 제거) */
+function getAiStudioModelsToTry() {
+  var ordered = [];
+  var seen = {};
+
+  function push(id) {
+    var normalized = normalizeModelId(id);
+    if (!normalized || seen[normalized]) {
+      return;
+    }
+    seen[normalized] = true;
+    ordered.push(normalized);
   }
-  return raw;
+
+  var configured = normalizeModelId(trimEnv("GEMINI_MODEL"));
+  if (configured && !AI_STUDIO_DEPRECATED_MODEL_PREFIX.test(configured)) {
+    push(configured);
+  } else if (configured) {
+    console.warn(
+      "[sales-analyze] GEMINI_MODEL=" +
+        configured +
+        " is not available on API v1; using " +
+        AI_STUDIO_DEFAULT_MODEL,
+    );
+  }
+
+  push(AI_STUDIO_DEFAULT_MODEL);
+  AI_STUDIO_FALLBACK_MODELS.forEach(push);
+
+  return ordered;
 }
 
 function getVertexModel() {
@@ -135,8 +179,12 @@ function parseGeminiResponse(data, response) {
   return text;
 }
 
-async function callGoogleAiStudio(apiKey, systemPrompt, question) {
-  var model = getAiStudioModel();
+async function callGoogleAiStudioWithModel(
+  apiKey,
+  systemPrompt,
+  question,
+  model,
+) {
   var url =
     "https://generativelanguage.googleapis.com/v1/models/" +
     encodeURIComponent(model) +
@@ -152,14 +200,57 @@ async function callGoogleAiStudio(apiKey, systemPrompt, question) {
   var data = await response.json().catch(function () {
     return {};
   });
-  var text = parseGeminiResponse(data, response);
 
-  return {
-    text: text,
-    model: model,
-    provider: "google-ai-studio",
-    endpoint: "generativelanguage.googleapis.com/v1",
-  };
+  try {
+    var text = parseGeminiResponse(data, response);
+    return {
+      text: text,
+      model: model,
+      provider: "google-ai-studio",
+      endpoint: "generativelanguage.googleapis.com/v1",
+    };
+  } catch (e) {
+    e.attemptedModel = model;
+    e.httpStatus = response.status;
+    throw e;
+  }
+}
+
+async function callGoogleAiStudio(apiKey, systemPrompt, question) {
+  var models = getAiStudioModelsToTry();
+  var lastError = null;
+
+  for (var i = 0; i < models.length; i++) {
+    var model = models[i];
+    try {
+      return await callGoogleAiStudioWithModel(
+        apiKey,
+        systemPrompt,
+        question,
+        model,
+      );
+    } catch (e) {
+      lastError = e;
+      if (
+        isAiStudioModelNotFoundError(e.message, e.httpStatus) &&
+        i < models.length - 1
+      ) {
+        console.warn(
+          "[sales-analyze] model not available on v1, retrying:",
+          model,
+          "→",
+          models[i + 1],
+        );
+        continue;
+      }
+      throw e;
+    }
+  }
+
+  throw (
+    lastError ||
+    new Error("사용 가능한 Gemini 모델을 찾지 못했습니다.")
+  );
 }
 
 function base64url(input) {
