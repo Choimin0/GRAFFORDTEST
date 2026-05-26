@@ -961,16 +961,21 @@ export default async function handler(req, res) {
     if (insertedHoldId) {
       await releaseBookingHold(pool, insertedHoldId);
     }
-    exportReservationToBigQuery({
-      reservationId: row.reservation_number,
-      room: roomType,
-      amount: ta,
-      createdAt: row.created_at,
-      checkIn: checkIn,
-      checkOut: checkOut,
-    }).catch(function (bqErr) {
+    try {
+      var bqResult = await exportReservationToBigQuery({
+        reservationId: row.reservation_number,
+        room: roomType,
+        amount: ta,
+        createdAt: row.created_at,
+        checkIn: checkIn,
+        checkOut: checkOut,
+      });
+      if (!bqResult.ok) {
+        console.error("[reservations POST] BigQuery export failed", bqResult);
+      }
+    } catch (bqErr) {
       console.error("[reservations POST] BigQuery export", bqErr);
-    });
+    }
     json(res, 201, {
       ok: true,
       id: row.id,

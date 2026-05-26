@@ -1,7 +1,11 @@
+import { writeFileSync, unlinkSync } from "node:fs";
+import { join } from "node:path";
+import { tmpdir } from "node:os";
+import { randomUUID } from "node:crypto";
 import { BigQuery } from "@google-cloud/bigquery";
 
-const DEFAULT_DATASET = "reservations";
-const DEFAULT_TABLE = "bookings";
+const DEFAULT_DATASET = "grafford_analyze";
+const DEFAULT_TABLE = "grafford_reserve";
 
 var bigQueryClientSingleton = null;
 
@@ -48,15 +52,24 @@ function normalizeRoom(roomType) {
     .toUpperCase();
 }
 
-function toIsoTimestamp(value) {
+function formatCreatedAtKst(value) {
   if (value == null || value === "") {
-    return null;
+    return "";
   }
   var d = new Date(value);
   if (isNaN(d.getTime())) {
-    return null;
+    return "";
   }
-  return d.toISOString();
+  return new Intl.DateTimeFormat("ko-KR", {
+    timeZone: "Asia/Seoul",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: false,
+  }).format(d);
 }
 
 function toDateString(value) {
@@ -75,18 +88,45 @@ function toDateString(value) {
   return text.slice(0, 10);
 }
 
+function buildRow(payload) {
+  var reservationId = String(payload?.reservationId || "").trim();
+  var room = normalizeRoom(payload.room);
+  var amount = String(Math.floor(Number(payload.amount) || 0));
+  var createdAt = formatCreatedAtKst(payload.createdAt);
+  var checkIn = toDateString(payload.checkIn);
+  var checkOut = toDateString(payload.checkOut);
+
+  if (!reservationId || !room || !checkIn || !checkOut || !createdAt) {
+    return null;
+  }
+
+  return {
+    reservation_id: reservationId,
+    room: room,
+    amount: amount,
+    created_at: createdAt,
+    check_in: checkIn,
+    check_out: checkOut,
+  };
+}
+
+function humanizeInsertError(e) {
+  var message = (e && e.message) || "BigQuery insert failed";
+  if (/bigquery\.jobs\.create/i.test(message)) {
+    return (
+      message +
+      " — 서비스 계정에 프로젝트 수준 BigQuery Job User(roles/bigquery.jobUser) 역할을 추가해 주세요."
+    );
+  }
+  if (/Streaming insert is not allowed/i.test(message)) {
+    return message + " — 스트리밍 대신 배치 적재(load job)를 사용합니다.";
+  }
+  return message;
+}
+
 /**
  * 예약 생성 시 BigQuery에 행을 삽입합니다.
- * GOOGLE_PROJECT_ID, GOOGLE_CLIENT_EMAIL, GOOGLE_PRIVATE_KEY가 없으면 건너뜁니다.
- *
- * @param {{
- *   reservationId: string,
- *   room: string,
- *   amount: number,
- *   createdAt: string | Date,
- *   checkIn: string,
- *   checkOut: string,
- * }} payload
+ * (무료 티어 호환) 스트리밍 insert 대신 load job으로 NDJSON 1건을 적재합니다.
  */
 export async function exportReservationToBigQuery(payload) {
   var config = getBigQueryConfig();
@@ -94,43 +134,48 @@ export async function exportReservationToBigQuery(payload) {
     return { ok: false, skipped: true, error: "BigQuery credentials not configured" };
   }
 
-  var reservationId = String(payload?.reservationId || "").trim();
-  if (!reservationId) {
-    return { ok: false, skipped: true, error: "Missing reservationId" };
-  }
-
-  var row = {
-    reservation_id: reservationId,
-    room: normalizeRoom(payload.room),
-    amount: Math.floor(Number(payload.amount) || 0),
-    created_at: toIsoTimestamp(payload.createdAt),
-    check_in: toDateString(payload.checkIn),
-    check_out: toDateString(payload.checkOut),
-  };
-
-  if (!row.room || !row.check_in || !row.check_out || !row.created_at) {
+  var row = buildRow(payload);
+  if (!row) {
     return { ok: false, skipped: true, error: "Invalid reservation payload for BigQuery" };
   }
 
+  var tmpPath = join(tmpdir(), "bq-" + randomUUID() + ".ndjson");
+
   try {
+    writeFileSync(tmpPath, JSON.stringify(row) + "\n", "utf8");
     var client = getBigQueryClient(config);
-    await client.dataset(config.dataset).table(config.table).insert([row]);
+    var table = client.dataset(config.dataset).table(config.table);
+    var loadResult = await table.load(tmpPath, {
+      sourceFormat: "NEWLINE_DELIMITED_JSON",
+      writeDisposition: "WRITE_APPEND",
+    });
+    var job = Array.isArray(loadResult) ? loadResult[0] : loadResult;
+    if (job && typeof job.promise === "function") {
+      await job.promise();
+      var metaResult = await job.getMetadata();
+      var metadata = Array.isArray(metaResult) ? metaResult[0] : metaResult;
+      if (metadata && metadata.status && metadata.status.errorResult) {
+        throw new Error(metadata.status.errorResult.message);
+      }
+    }
     return { ok: true };
   } catch (e) {
-    var insertErrors =
-      e && Array.isArray(e.errors)
-        ? e.errors
-        : e && e.response && Array.isArray(e.response.insertErrors)
-          ? e.response.insertErrors
-          : null;
-    console.error("[bigquery-export] insert failed", {
-      reservationId: reservationId,
+    console.error("[bigquery-export] load job failed", {
+      reservationId: row.reservation_id,
+      dataset: config.dataset,
+      table: config.table,
       message: e && e.message,
-      insertErrors: insertErrors,
+      errors: e && e.errors,
     });
     return {
       ok: false,
-      error: (e && e.message) || "BigQuery insert failed",
+      error: humanizeInsertError(e),
     };
+  } finally {
+    try {
+      unlinkSync(tmpPath);
+    } catch (_) {
+      /* ignore */
+    }
   }
 }
