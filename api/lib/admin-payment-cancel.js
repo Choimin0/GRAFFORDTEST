@@ -7,6 +7,7 @@ import {
   resolvePaidAmountForBooking,
 } from "./refund-amount.js";
 import { queueBookingAlimtalk } from "./solapi-alimtalk.js";
+import { exportCancellationToBigQuery } from "./bigquery-export.js";
 import { json } from "./admin-common.js";
 
 const BOOKING_TABLE = "booking";
@@ -310,6 +311,27 @@ export async function handleAdminPaymentCancel(res, pool, body) {
 
     client.release();
 
+    var cancelledAt = new Date();
+    try {
+      var bqResult = await exportCancellationToBigQuery({
+        reservationId: reservationNumber,
+        room: row.room_type,
+        amount: paidAmountNum,
+        refundAmount: refundAmount,
+        cancelReason: CANCEL_REASON_MANUAL,
+        otherReason: null,
+        createdAt: row.created_at,
+        checkIn: normalizeCheckInYmd(row.check_in_date),
+        checkOut: normalizeCheckInYmd(row.check_out_date),
+        cancelledAt: cancelledAt,
+      });
+      if (!bqResult.ok) {
+        console.error("[admin-payment-cancel] BigQuery export failed", bqResult);
+      }
+    } catch (bqErr) {
+      console.error("[admin-payment-cancel] BigQuery export", bqErr);
+    }
+
     var cancelledPii = decryptBookingPiiResponse(updResult.rows[0]);
     queueBookingAlimtalk("cancel-complete", {
       guestName: cancelledPii.guestName,
@@ -324,7 +346,7 @@ export async function handleAdminPaymentCancel(res, pool, body) {
       ok: true,
       pgCancelled: pgCancelled,
       pgTid: pgTid,
-      cancelledAt: formatDateTimeKst(new Date()),
+      cancelledAt: formatDateTimeKst(cancelledAt),
       reservationNumber: reservationNumber,
       guestName: cancelledPii.guestName,
       refundAmount: refundAmount,

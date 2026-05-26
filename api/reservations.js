@@ -16,7 +16,7 @@ import {
   getHoldIdFromToken,
 } from "./lib/booking-token.js";
 import { checkRoomAvailability } from "./lib/room-availability.js";
-import { exportReservationToBigQuery } from "./lib/bigquery-export.js";
+import { exportReservationToBigQuery, exportCancellationToBigQuery } from "./lib/bigquery-export.js";
 import {
   buildIcalCalendar,
   getMergedOccupiedNightsForRoom,
@@ -716,7 +716,8 @@ export default async function handler(req, res) {
 
     try {
       var delSel = await pool.query(
-        `SELECT guest_name FROM ${BOOKING_TABLE}
+        `SELECT guest_name, room_type, total_amount, created_at, check_in_date, check_out_date
+         FROM ${BOOKING_TABLE}
          WHERE reservation_number = $1
            AND status IN ('confirm', 'completed')
          LIMIT 1`,
@@ -754,11 +755,32 @@ export default async function handler(req, res) {
         json(res, 404, { ok: false, error: "삭제할 예약을 찾을 수 없습니다." });
         return;
       }
+      var delRow = delSel.rows[0];
+      var cancelledAt = new Date();
+      try {
+        var cancelBqResult = await exportCancellationToBigQuery({
+          reservationId: upd.rows[0].reservation_number,
+          room: delRow.room_type,
+          amount: delRow.total_amount,
+          refundAmount: 0,
+          cancelReason: cancelReason,
+          otherReason: otherReason,
+          createdAt: delRow.created_at,
+          checkIn: delRow.check_in_date,
+          checkOut: delRow.check_out_date,
+          cancelledAt: cancelledAt,
+        });
+        if (!cancelBqResult.ok) {
+          console.error("[reservations DELETE] BigQuery export failed", cancelBqResult);
+        }
+      } catch (bqErr) {
+        console.error("[reservations DELETE] BigQuery export", bqErr);
+      }
       json(res, 200, {
         ok: true,
         deleted: true,
         reservationNumber: upd.rows[0].reservation_number,
-        cancelledAt: formatDateTimeKst(new Date()),
+        cancelledAt: formatDateTimeKst(cancelledAt),
       });
     } catch (e) {
       console.error("reservations delete", e);

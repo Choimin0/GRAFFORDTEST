@@ -20,6 +20,7 @@ import {
   computeRefundAmount,
   resolvePaidAmountForBooking,
 } from "./lib/refund-amount.js";
+import { exportCancellationToBigQuery } from "./lib/bigquery-export.js";
 const { Pool } = pg;
 
 const BOOKING_TABLE = "booking";
@@ -646,11 +647,32 @@ export default async function handler(req, res) {
       client.release();
     }
 
+    var cancelledAt = new Date();
+    try {
+      var bqResult = await exportCancellationToBigQuery({
+        reservationId: reservationNumber,
+        room: row.room_type,
+        amount: paidAmountNum,
+        refundAmount: safeRefundAmount,
+        cancelReason: cancelReason,
+        otherReason: otherReason,
+        createdAt: row.created_at,
+        checkIn: normalizeCheckInYmd(row.check_in_date),
+        checkOut: normalizeCheckInYmd(row.check_out_date),
+        cancelledAt: cancelledAt,
+      });
+      if (!bqResult.ok) {
+        console.error("[payment-cancel] BigQuery export failed", bqResult);
+      }
+    } catch (bqErr) {
+      console.error("[payment-cancel] BigQuery export", bqErr);
+    }
+
     json(res, 200, {
       ok: true,
       pgCancelled: pgCancelled,
       pgTid: pgTid,
-      cancelledAt: formatDateTimeKst(new Date()),
+      cancelledAt: formatDateTimeKst(cancelledAt),
       reservationNumber: reservationNumber,
       refundAmount: safeRefundAmount, // 실제 환불 처리된 금액
       totalAmount: paidAmountNum, // 최종 결제 금액(환불 수수료 기준)
