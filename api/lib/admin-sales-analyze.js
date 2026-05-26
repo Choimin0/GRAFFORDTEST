@@ -1,7 +1,9 @@
+import { createSign } from "node:crypto";
 import { json } from "./admin-common.js";
 import { fetchAnalyzeContext } from "./bigquery-analyze-context.js";
 
-const DEFAULT_GEMINI_MODEL = "gemini-1.5-flash";
+const AI_STUDIO_DEFAULT_MODEL = "gemini-1.5-flash-latest";
+const VERTEX_DEFAULT_MODEL = "gemini-1.5-flash";
 const MAX_QUESTION_LENGTH = 2000;
 const MAX_CONTEXT_CHARS = 120000;
 
@@ -9,8 +11,67 @@ function trimEnv(name) {
   return String(process.env[name] || "").trim();
 }
 
-function getGeminiModel() {
-  return trimEnv("GEMINI_MODEL") || DEFAULT_GEMINI_MODEL;
+/**
+ * google-ai-studio | vertex-ai
+ * - GEMINI_API_KEY 있음 → Google AI Studio (현재 .env 구성)
+ * - GEMINI_PROVIDER=vertex-ai 또는 API 키 없이 GCP 서비스 계정만 → Vertex AI
+ */
+export function detectGeminiProvider() {
+  var explicit = trimEnv("GEMINI_PROVIDER").toLowerCase();
+  if (
+    explicit === "vertex" ||
+    explicit === "vertex-ai" ||
+    explicit === "vertex_ai"
+  ) {
+    return "vertex-ai";
+  }
+  if (
+    explicit === "ai-studio" ||
+    explicit === "google-ai-studio" ||
+    explicit === "studio"
+  ) {
+    return "google-ai-studio";
+  }
+
+  if (trimEnv("GEMINI_API_KEY")) {
+    return "google-ai-studio";
+  }
+
+  if (
+    trimEnv("GOOGLE_PROJECT_ID") &&
+    trimEnv("GOOGLE_CLIENT_EMAIL") &&
+    trimEnv("GOOGLE_PRIVATE_KEY")
+  ) {
+    return "vertex-ai";
+  }
+
+  return "google-ai-studio";
+}
+
+function getAiStudioModel() {
+  var raw = trimEnv("GEMINI_MODEL");
+  if (!raw) {
+    return AI_STUDIO_DEFAULT_MODEL;
+  }
+  if (raw.startsWith("models/")) {
+    return raw.slice("models/".length);
+  }
+  return raw;
+}
+
+function getVertexModel() {
+  var raw = trimEnv("GEMINI_MODEL") || VERTEX_DEFAULT_MODEL;
+  if (raw.includes("publishers/google/models/")) {
+    return raw.split("publishers/google/models/").pop();
+  }
+  if (raw.startsWith("models/")) {
+    return raw.slice("models/".length);
+  }
+  return raw;
+}
+
+function getVertexLocation() {
+  return trimEnv("GOOGLE_VERTEX_LOCATION") || trimEnv("GEMINI_VERTEX_LOCATION") || "us-central1";
 }
 
 function buildSystemPrompt(context) {
@@ -30,35 +91,24 @@ function buildSystemPrompt(context) {
   );
 }
 
-async function callGemini(apiKey, systemPrompt, question) {
-  var model = getGeminiModel();
-  var url =
-    "https://generativelanguage.googleapis.com/v1beta/models/" +
-    encodeURIComponent(model) +
-    ":generateContent?key=" +
-    encodeURIComponent(apiKey);
-
-  var response = await fetch(url, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      contents: [
-        {
-          role: "user",
-          parts: [{ text: systemPrompt + "\n\n=== 사용자 질문 ===\n" + question }],
-        },
-      ],
-      generationConfig: {
-        temperature: 0.35,
-        maxOutputTokens: 4096,
+function buildGenerateContentBody(systemPrompt, question) {
+  return {
+    contents: [
+      {
+        role: "user",
+        parts: [
+          { text: systemPrompt + "\n\n=== 사용자 질문 ===\n" + question },
+        ],
       },
-    }),
-  });
+    ],
+    generationConfig: {
+      temperature: 0.35,
+      maxOutputTokens: 4096,
+    },
+  };
+}
 
-  var data = await response.json().catch(function () {
-    return {};
-  });
-
+function parseGeminiResponse(data, response) {
   if (!response.ok) {
     var apiMsg =
       (data.error && data.error.message) ||
@@ -82,7 +132,144 @@ async function callGemini(apiKey, systemPrompt, question) {
     throw new Error("Gemini가 분석 결과를 반환하지 않았습니다.");
   }
 
-  return { text: text, model: model };
+  return text;
+}
+
+async function callGoogleAiStudio(apiKey, systemPrompt, question) {
+  var model = getAiStudioModel();
+  var url =
+    "https://generativelanguage.googleapis.com/v1/models/" +
+    encodeURIComponent(model) +
+    ":generateContent?key=" +
+    encodeURIComponent(apiKey);
+
+  var response = await fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(buildGenerateContentBody(systemPrompt, question)),
+  });
+
+  var data = await response.json().catch(function () {
+    return {};
+  });
+  var text = parseGeminiResponse(data, response);
+
+  return {
+    text: text,
+    model: model,
+    provider: "google-ai-studio",
+    endpoint: "generativelanguage.googleapis.com/v1",
+  };
+}
+
+function base64url(input) {
+  return Buffer.from(input)
+    .toString("base64")
+    .replace(/\+/g, "-")
+    .replace(/\//g, "_")
+    .replace(/=+$/g, "");
+}
+
+async function getVertexAccessToken(clientEmail, privateKey) {
+  var now = Math.floor(Date.now() / 1000);
+  var header = base64url(JSON.stringify({ alg: "RS256", typ: "JWT" }));
+  var claimSet = base64url(
+    JSON.stringify({
+      iss: clientEmail,
+      sub: clientEmail,
+      aud: "https://oauth2.googleapis.com/token",
+      iat: now,
+      exp: now + 3600,
+      scope: "https://www.googleapis.com/auth/cloud-platform",
+    }),
+  );
+  var unsigned = header + "." + claimSet;
+  var signer = createSign("RSA-SHA256");
+  signer.update(unsigned);
+  signer.end();
+  var signature = signer.sign(privateKey.replace(/\\n/g, "\n"));
+  var jwt = unsigned + "." + base64url(signature);
+
+  var tokenRes = await fetch("https://oauth2.googleapis.com/token", {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body:
+      "grant_type=urn%3Aietf%3Aparams%3Aoauth%3Agrant-type%3Ajwt-bearer&assertion=" +
+      encodeURIComponent(jwt),
+  });
+
+  var tokenData = await tokenRes.json().catch(function () {
+    return {};
+  });
+  if (!tokenRes.ok || !tokenData.access_token) {
+    throw new Error(
+      (tokenData.error_description || tokenData.error || "Vertex AI 인증 실패") +
+        "",
+    );
+  }
+  return tokenData.access_token;
+}
+
+async function callVertexAi(systemPrompt, question) {
+  var projectId = trimEnv("GOOGLE_PROJECT_ID");
+  var clientEmail = trimEnv("GOOGLE_CLIENT_EMAIL");
+  var privateKey = trimEnv("GOOGLE_PRIVATE_KEY");
+  if (!projectId || !clientEmail || !privateKey) {
+    throw new Error(
+      "Vertex AI에는 GOOGLE_PROJECT_ID, GOOGLE_CLIENT_EMAIL, GOOGLE_PRIVATE_KEY가 필요합니다.",
+    );
+  }
+
+  var location = getVertexLocation();
+  var model = getVertexModel();
+  var modelPath = "publishers/google/models/" + model;
+  var url =
+    "https://" +
+    location +
+    "-aiplatform.googleapis.com/v1/projects/" +
+    encodeURIComponent(projectId) +
+    "/locations/" +
+    encodeURIComponent(location) +
+    "/" +
+    modelPath +
+    ":generateContent";
+
+  var accessToken = await getVertexAccessToken(clientEmail, privateKey);
+
+  var response = await fetch(url, {
+    method: "POST",
+    headers: {
+      Authorization: "Bearer " + accessToken,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(buildGenerateContentBody(systemPrompt, question)),
+  });
+
+  var data = await response.json().catch(function () {
+    return {};
+  });
+  var text = parseGeminiResponse(data, response);
+
+  return {
+    text: text,
+    model: modelPath,
+    provider: "vertex-ai",
+    endpoint: location + "-aiplatform.googleapis.com/v1",
+  };
+}
+
+async function callGemini(systemPrompt, question) {
+  var provider = detectGeminiProvider();
+
+  if (provider === "vertex-ai") {
+    return callVertexAi(systemPrompt, question);
+  }
+
+  var apiKey = trimEnv("GEMINI_API_KEY");
+  if (!apiKey) {
+    throw new Error("GEMINI_API_KEY가 서버에 설정되지 않았습니다.");
+  }
+  return callGoogleAiStudio(apiKey, systemPrompt, question);
 }
 
 /**
@@ -103,8 +290,8 @@ export async function handleAdminSalesAnalyze(res, _pool, body) {
     return;
   }
 
-  var apiKey = trimEnv("GEMINI_API_KEY");
-  if (!apiKey) {
+  var provider = detectGeminiProvider();
+  if (provider === "google-ai-studio" && !trimEnv("GEMINI_API_KEY")) {
     json(res, 503, {
       ok: false,
       error: "GEMINI_API_KEY가 서버에 설정되지 않았습니다.",
@@ -128,13 +315,13 @@ export async function handleAdminSalesAnalyze(res, _pool, body) {
 
   var geminiResult;
   try {
-    geminiResult = await callGemini(
-      apiKey,
-      buildSystemPrompt(context),
-      question,
-    );
+    geminiResult = await callGemini(buildSystemPrompt(context), question);
+    console.info("[sales-analyze] provider=" + geminiResult.provider, {
+      model: geminiResult.model,
+      endpoint: geminiResult.endpoint,
+    });
   } catch (e) {
-    console.error("[sales-analyze] Gemini", e);
+    console.error("[sales-analyze] Gemini provider=" + provider, e);
     json(res, 500, {
       ok: false,
       error: (e && e.message) || "Gemini 분석 중 오류가 발생했습니다.",
@@ -146,6 +333,7 @@ export async function handleAdminSalesAnalyze(res, _pool, body) {
     ok: true,
     analysis: geminiResult.text,
     model: geminiResult.model,
+    provider: geminiResult.provider,
     contextGeneratedAt: context.generatedAt,
   });
 }
