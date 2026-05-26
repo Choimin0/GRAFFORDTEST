@@ -238,7 +238,7 @@ export default async function handler(req, res) {
         id, reservation_number, guest_name, contact, room_type,
         check_in_date, check_out_date, guest_count, stay_nights,
         extra_guests, total_amount, guest_request, payment_method,
-        bank_confirmed, created_at, status, cancel_reason
+        bank_confirmed, created_at, status, cancel_reason, booking_locale
       FROM ${BOOKING_TABLE}
       WHERE reservation_number = $1
       LIMIT 1`,
@@ -283,6 +283,7 @@ export default async function handler(req, res) {
           createdAtIso: row.created_at
             ? new Date(row.created_at).toISOString()
             : null,
+          bookingLocale: row.booking_locale || "kr",
         },
         cancelToken: issueCancelToken(row.reservation_number, pii.guestName),
       });
@@ -314,6 +315,7 @@ export default async function handler(req, res) {
           ? new Date(row.created_at).toISOString()
           : null,
         cancelReason: row.cancel_reason || "",
+        bookingLocale: row.booking_locale || "kr",
       },
     });
   } catch (e) {

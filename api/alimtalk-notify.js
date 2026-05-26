@@ -9,6 +9,11 @@ import {
   decryptBookingPiiResponse,
   guestNamesMatch,
 } from "./lib/pii-crypto.js";
+import { shouldSendAlimtalk } from "./lib/booking-locale.js";
+import {
+  contactsMatchIntl,
+  isInternationalStoredContact,
+} from "./lib/intl-phone.js";
 import {
   normalizePhone,
   sendBookingAlimtalk,
@@ -111,6 +116,12 @@ function rowDateToYMD(v) {
 }
 
 function contactsMatch(storedContact, providedContact) {
+  if (
+    isInternationalStoredContact(storedContact) ||
+    isInternationalStoredContact(providedContact)
+  ) {
+    return contactsMatchIntl(storedContact, providedContact);
+  }
   var a = normalizePhone(storedContact);
   var b = normalizePhone(providedContact);
   if (!a || !b) return false;
@@ -166,7 +177,7 @@ export default async function handler(req, res) {
 
   try {
     var sel = await pool.query(
-      `SELECT guest_name, contact, room_type, check_in_date, check_out_date, status
+      `SELECT guest_name, contact, room_type, check_in_date, check_out_date, status, booking_locale
        FROM ${BOOKING_TABLE}
        WHERE reservation_number = $1
        LIMIT 1`,
@@ -180,6 +191,14 @@ export default async function handler(req, res) {
 
     var row = sel.rows[0];
     var pii = decryptBookingPiiResponse(row);
+    if (!shouldSendAlimtalk(row.booking_locale, pii.contact)) {
+      json(res, 200, {
+        ok: true,
+        skipped: true,
+        reason: "english_booking",
+      });
+      return;
+    }
     if (!guestNamesMatch(row.guest_name, guestName, normalizeLookupName)) {
       json(res, 403, { ok: false, error: "예약자 정보가 일치하지 않습니다." });
       return;

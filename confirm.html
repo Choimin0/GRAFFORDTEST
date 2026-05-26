@@ -745,6 +745,7 @@
         ></footer>
       </main>
 
+      <script src="js/intl-phone.js"></script>
       <script src="js/booking-pricing.js?v=5"></script>
       <script src="js/booking-reservations.js"></script>
       <script src="js/booking-token-client.js?v=3"></script>
@@ -1389,6 +1390,7 @@
                 guestRequestInput.value = prevPayData.guestRequest;
               }
               var guestNameInputEn = document.getElementById("f-name-en");
+              var contactDialEn = document.getElementById("f-contact-dial-en");
               var contactInputEn = document.getElementById("f-contact-en");
               var emailInputEn = document.getElementById("f-email-en");
               var guestRequestInputEn =
@@ -1396,8 +1398,20 @@
               if (guestNameInputEn && prevPayData.guestName) {
                 guestNameInputEn.value = prevPayData.guestName;
               }
-              if (contactInputEn && prevPayData.contact) {
-                contactInputEn.value = prevPayData.contact;
+              if (
+                window.GraffordIntlPhone &&
+                prevPayData.contact &&
+                contactDialEn &&
+                contactInputEn
+              ) {
+                var parsedContact = window.GraffordIntlPhone.parseStored(
+                  prevPayData.contact,
+                );
+                window.GraffordIntlPhone.populateDialSelect(
+                  contactDialEn,
+                  parsedContact.dial,
+                );
+                contactInputEn.value = parsedContact.nationalDisplay || "";
               }
               if (emailInputEn && prevPayData.email) {
                 emailInputEn.value = prevPayData.email;
@@ -1435,18 +1449,14 @@
               contactInput.value = formatPhoneKRMobile(contactInput.value);
             });
           }
+          var contactDialEn = document.getElementById("f-contact-dial-en");
           var contactInputEn = document.getElementById("f-contact-en");
-          if (contactInputEn) {
-            contactInputEn.addEventListener("input", function () {
-              var cur = contactInputEn.value;
-              var next = formatPhoneKRMobile(cur);
-              if (cur !== next) {
-                contactInputEn.value = next;
-              }
-            });
-            contactInputEn.addEventListener("blur", function () {
-              contactInputEn.value = formatPhoneKRMobile(contactInputEn.value);
-            });
+          if (window.GraffordIntlPhone && contactDialEn) {
+            window.GraffordIntlPhone.populateDialSelect(contactDialEn, "1");
+            window.GraffordIntlPhone.bindNationalInput(
+              contactDialEn,
+              contactInputEn,
+            );
           }
 
           var confirmForm = document.getElementById("confirm-form");
@@ -1854,15 +1864,18 @@
               var hasNameError = !(
                 guestNameInputEn && guestNameInputEn.value.trim()
               );
-              var normalizedContactEn = contactInputEn
-                ? formatPhoneKRMobile(contactInputEn.value)
-                : "";
-              if (contactInputEn) {
-                contactInputEn.value = normalizedContactEn;
-              }
-              var hasContactError = !/^\d{3}-\d{4}-\d{4}$/.test(
-                normalizedContactEn,
-              );
+              var contactDialValueEn =
+                contactDialEn && contactDialEn.value
+                  ? contactDialEn.value
+                  : "1";
+              var normalizedContactEn =
+                window.GraffordIntlPhone && contactInputEn
+                  ? window.GraffordIntlPhone.buildStored(
+                      contactDialValueEn,
+                      contactInputEn.value,
+                    )
+                  : "";
+              var hasContactError = !normalizedContactEn;
               var hasEmailError = !isValidConfirmEmail(emailInputEn);
 
               var payInputEn = confirmFormEn.querySelector(
@@ -1964,9 +1977,9 @@
 
               var guestNameEn = guestNameInputEn.value.trim();
               var contactEn = normalizedContactEn;
-              if (!/^\d{3}-\d{4}-\d{4}$/.test(contactEn)) {
+              if (!contactEn) {
                 window.alert(
-                  "Please enter your phone number as 010-1234-5678 (11 digits).",
+                  "Please enter a valid phone number for the selected country.",
                 );
                 return;
               }
@@ -2045,6 +2058,7 @@
                       extraGuests: String(extraGuestsEn || 0),
                       guestName: guestNameEn,
                       contact: contactEn,
+                      bookingLocale: "en",
                       email: emailValEn,
                       guestRequest: guestRequestInputEn
                         ? guestRequestInputEn.value.trim()
@@ -2070,7 +2084,7 @@
                 });
             });
 
-            [guestNameInputEn, contactInputEn, emailInputEn].forEach(
+            [guestNameInputEn, contactInputEn, contactDialEn, emailInputEn].forEach(
               function (el) {
                 if (!el) {
                   return;
@@ -2083,15 +2097,18 @@
                     guestNameInputEn,
                     !(guestNameInputEn && guestNameInputEn.value.trim()),
                   );
-                  markInputError(
-                    contactInputEn,
-                    !(
-                      contactInputEn &&
-                      /^\d{3}-\d{4}-\d{4}$/.test(
-                        formatPhoneKRMobile(contactInputEn.value),
-                      )
-                    ),
-                  );
+                  var dialVal =
+                    contactDialEn && contactDialEn.value
+                      ? contactDialEn.value
+                      : "1";
+                  var builtContact =
+                    window.GraffordIntlPhone && contactInputEn
+                      ? window.GraffordIntlPhone.buildStored(
+                          dialVal,
+                          contactInputEn.value,
+                        )
+                      : "";
+                  markInputError(contactInputEn, !builtContact);
                   markInputError(
                     emailInputEn,
                     !isValidConfirmEmail(emailInputEn),
@@ -2776,20 +2793,30 @@
                       placeholder=""
                     />
                   </label>
-                  <label class="confirm-label"
+                  <label class="confirm-label confirm-label--contact-intl"
                     >Contact
-                    <input
-                      type="tel"
-                      name="contact"
-                      id="f-contact-en"
-                      required
-                      autocomplete="tel"
-                      inputmode="numeric"
-                      maxlength="13"
-                      placeholder=""
-                      title="11 digits (010-1234-5678 format)"
-                      pattern="[0-9]{3}-[0-9]{4}-[0-9]{4}"
-                    />
+                    <div
+                      class="confirm-contact-intl"
+                      role="group"
+                      aria-label="Phone number with country code"
+                    >
+                      <select
+                        id="f-contact-dial-en"
+                        class="confirm-contact-intl__dial"
+                        required
+                        aria-label="Country code"
+                      ></select>
+                      <input
+                        type="tel"
+                        name="contactNational"
+                        id="f-contact-en"
+                        required
+                        autocomplete="tel-national"
+                        inputmode="tel"
+                        placeholder="Phone number"
+                        title="Enter your phone number without the country code"
+                      />
+                    </div>
                   </label>
                   <label class="confirm-label"
                     >Email

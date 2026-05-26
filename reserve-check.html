@@ -316,6 +316,7 @@
           var checkOut = (saved && saved.checkOut) || "";
           var guestName = (saved && saved.guestName) || "";
           var contact = (saved && saved.contact) || "";
+          var bookingLocale = (saved && saved.bookingLocale) || "kr";
           var email = (saved && saved.email) || "";
           var guestRequest = (saved && saved.guestRequest) || "";
           var guestCount = (saved && saved.guestCount) || "";
@@ -437,6 +438,14 @@
             contactDigits.length >= 4 ? contactDigits.slice(-4) : "----";
           setText("reserve-check-pin-kr", contactLast4);
           setText("reserve-check-pin-en", contactLast4);
+
+          var checkinGuideEnNote = document.querySelector(
+            ".lang-en .reserve-check-guide-card:nth-child(2) .reserve-check-guide-card__body p:last-child",
+          );
+          if (checkinGuideEnNote && bookingLocale === "en") {
+            checkinGuideEnNote.textContent =
+              "Check-in details will be sent to the email address you provided on the day of arrival.";
+          }
 
           var parsedGuestCount = parseInt(guestCount || "", 10);
           if (!parsedGuestCount || parsedGuestCount < 1) {
@@ -578,6 +587,7 @@
             request: guestRequest || "",
             cancelToken: cancelToken || "",
             bookingCreatedAtIso: bookingCreatedAtIso || "",
+            bookingLocale: bookingLocale || "kr",
           };
           var cancelPayloadCheckStr = JSON.stringify(cancelPayloadCheck);
           var cancelLink = document.getElementById("complete-link-cancel");

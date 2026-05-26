@@ -278,6 +278,7 @@
           var checkOut = (saved && saved.checkOut) || "";
           var name = (saved && saved.name) || "—";
           var contact = (saved && saved.contact) || "—";
+          var bookingLocale = (saved && saved.bookingLocale) || "kr";
           // reservations.total_amount (세션: amount / totalAmount). 재계산 없음.
           var paidAmount =
             parseInt(
@@ -562,6 +563,7 @@
               room: room,
               checkIn: checkIn,
               checkOut: checkOut,
+              bookingLocale: bookingLocale,
             });
           }
         });

@@ -6,6 +6,7 @@ import {
   fetchPortonePayment,
   resolvePaidAmountForBooking,
 } from "./refund-amount.js";
+import { shouldSendAlimtalk } from "./booking-locale.js";
 import { queueBookingAlimtalk } from "./solapi-alimtalk.js";
 import { exportCancellationToBigQuery } from "./bigquery-export.js";
 import { json } from "./admin-common.js";
@@ -333,14 +334,16 @@ export async function handleAdminPaymentCancel(res, pool, body) {
     }
 
     var cancelledPii = decryptBookingPiiResponse(updResult.rows[0]);
-    queueBookingAlimtalk("cancel-complete", {
-      guestName: cancelledPii.guestName,
-      contact: cancelledPii.contact,
-      reservationNumber: reservationNumber,
-      roomType: row.room_type,
-      checkIn: normalizeCheckInYmd(row.check_in_date) || "",
-      checkOut: normalizeCheckInYmd(row.check_out_date) || "",
-    });
+    if (shouldSendAlimtalk(row.booking_locale, cancelledPii.contact)) {
+      queueBookingAlimtalk("cancel-complete", {
+        guestName: cancelledPii.guestName,
+        contact: cancelledPii.contact,
+        reservationNumber: reservationNumber,
+        roomType: row.room_type,
+        checkIn: normalizeCheckInYmd(row.check_in_date) || "",
+        checkOut: normalizeCheckInYmd(row.check_out_date) || "",
+      });
+    }
 
     json(res, 200, {
       ok: true,

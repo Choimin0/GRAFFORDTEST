@@ -266,6 +266,7 @@
               payMethod: data.payMethod || "",
               cancelToken: data.cancelToken || "",
               bookingCreatedAtIso: data.bookingCreatedAtIso || "",
+              bookingLocale: data.bookingLocale || "kr",
             }),
           );
           window.location.href = "reserve-check.html";
@@ -296,6 +297,7 @@
                 typeof data.refundAmount === "number"
                   ? String(data.refundAmount)
                   : "",
+              bookingLocale: data.bookingLocale || "kr",
             }),
           );
           window.location.href = "delete-complete.html";
@@ -362,6 +364,7 @@
                         result.data.deleteReason ||
                         (isNotPaidAuto ? "미입금 자동 취소" : ""),
                       refundAmount: refundNum,
+                      bookingLocale: row.bookingLocale || "kr",
                     });
                     return;
                   }
@@ -380,6 +383,7 @@
                     payMethod: row.paymentMethod || "",
                     cancelToken: result.data.cancelToken || "",
                     bookingCreatedAtIso: row.createdAtIso || "",
+                    bookingLocale: row.bookingLocale || "kr",
                   });
                   return;
                 }

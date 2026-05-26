@@ -23,10 +23,29 @@
     return base + "/api/alimtalk-notify";
   }
 
+  function shouldSkipAlimtalk(payload) {
+    if (!payload) {
+      return false;
+    }
+    if (payload.skipAlimtalk === true) {
+      return true;
+    }
+    if (String(payload.bookingLocale || "").toLowerCase() === "en") {
+      return true;
+    }
+    if (String(payload.contact || "").trim().indexOf("+") === 0) {
+      return true;
+    }
+    return false;
+  }
+
   function requestAlimtalk(type, payload) {
     var orderNo = normalizeOrderNo(payload && payload.orderNo);
     if (!orderNo) {
       return Promise.resolve({ ok: false, skipped: true });
+    }
+    if (shouldSkipAlimtalk(payload)) {
+      return Promise.resolve({ ok: true, skipped: true, reason: "english_booking" });
     }
     var key = storageKey(type, orderNo);
     try {

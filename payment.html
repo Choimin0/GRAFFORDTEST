@@ -590,6 +590,7 @@
           var contact = saved.contact || "";
           var email = saved.email || "";
           var guestRequest = saved.guestRequest || "";
+          var bookingLocale = saved.bookingLocale || "kr";
           var guestCount = parseInt(saved.guestCount || "", 10);
           if (!guestCount || guestCount < 1) {
             guestCount = P
@@ -1234,6 +1235,7 @@
                     guestCount: guestCount,
                     pgTid: verifiedPgTid,
                     bookingToken: bookingToken,
+                    bookingLocale: bookingLocale,
                   }),
                 });
                 saveData = await saveRes.json();
@@ -1292,6 +1294,7 @@
                 payMethod: payMethod,
                 cancelToken: fetchedCancelToken,
                 bookingCreatedAtIso: bookingCreatedAtIso,
+                bookingLocale: bookingLocale,
               }),
             );
 
@@ -1827,6 +1830,7 @@
           var contact = saved.contact || "";
           var email = saved.email || "";
           var guestRequest = saved.guestRequest || "";
+          var bookingLocale = saved.bookingLocale || "en";
           var guestCount = parseInt(saved.guestCount || "", 10);
           if (!guestCount || guestCount < 1) {
             guestCount = P
@@ -2505,6 +2509,7 @@
                     guestCount: guestCount,
                     pgTid: verifiedPgTid2,
                     bookingToken: bookingToken,
+                    bookingLocale: bookingLocale,
                   }),
                 });
                 saveData2 = await saveRes2.json();
@@ -2565,6 +2570,7 @@
                 payMethod: payMethod,
                 cancelToken: fetchedCancelToken2,
                 bookingCreatedAtIso: bookingCreatedAtIso2,
+                bookingLocale: bookingLocale,
               }),
             );
 

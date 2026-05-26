@@ -382,6 +382,7 @@
           var checkOut = (saved && saved.checkOut) || "";
           var guestName = (saved && saved.guestName) || "";
           var contact = (saved && saved.contact) || "";
+          var bookingLocale = (saved && saved.bookingLocale) || "kr";
           var email = (saved && saved.email) || "";
           var guestRequest = (saved && saved.guestRequest) || "";
           var guestCount = (saved && saved.guestCount) || "";
@@ -477,10 +478,24 @@
               "</strong>)로 설정될 예정입니다.<br />예약시 입력해주신 연락처를 통해 입실 당일 관련 안내 사항을 카카오톡 알림톡으로 발송해드리겠습니다.";
           }
           if (checkinGuideEnEl) {
-            checkinGuideEnEl.innerHTML =
-              'On your check-in day, the entry PIN will be set to the last 4 digits of the phone number you provided (<strong class="reserve-complete-pin">' +
-              contactLast4 +
-              "</strong>).<br />A KakaoTalk notification with check-in details will be sent to your registered contact number on the day of arrival.";
+            if (bookingLocale === "en") {
+              checkinGuideEnEl.innerHTML =
+                'On your check-in day, the entry PIN will be set to the last 4 digits of the phone number you provided (<strong class="reserve-complete-pin">' +
+                contactLast4 +
+                "</strong>).<br />Check-in details will be sent to the email address you provided on the day of arrival.";
+            } else {
+              checkinGuideEnEl.innerHTML =
+                'On your check-in day, the entry PIN will be set to the last 4 digits of the phone number you provided (<strong class="reserve-complete-pin">' +
+                contactLast4 +
+                "</strong>).<br />A KakaoTalk notification with check-in details will be sent to your registered contact number on the day of arrival.";
+            }
+          }
+          var checkinGuideEnCardNote = document.querySelector(
+            ".lang-en .reserve-check-guide-card:nth-child(2) .reserve-check-guide-card__body p:last-child",
+          );
+          if (checkinGuideEnCardNote && bookingLocale === "en") {
+            checkinGuideEnCardNote.textContent =
+              "Check-in details will be sent to the email address you provided on the day of arrival.";
           }
 
           var parsedGuestCount = parseInt(guestCount || "", 10);
@@ -606,6 +621,7 @@
             request: guestRequest || "",
             cancelToken: cancelToken || "",
             bookingCreatedAtIso: bookingCreatedAtIso || "",
+            bookingLocale: bookingLocale || "kr",
           };
           var cancelPayloadStr = JSON.stringify(cancelPayload);
           var cancelLink = document.getElementById("complete-link-cancel");
@@ -627,6 +643,7 @@
               room: room,
               checkIn: checkIn,
               checkOut: checkOut,
+              bookingLocale: bookingLocale,
             });
           }
         });

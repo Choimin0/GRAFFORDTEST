@@ -95,6 +95,8 @@
   --layout-grid-gutter-desktop: var(--space-24);
   --layout-safe-min: var(--space-32);
   --layout-feature-block-margin: clamp(var(--space-8), 8vh, var(--space-64));
+  /* STORY content feature 1↔2 간격 = 블록 margin 상·하 합 */
+  --layout-feature-stack-gap: calc(2 * var(--layout-feature-block-margin));
   --layout-feature-min-height-md: 36svh;
   --layout-facilities-image-height-sm: 13rem;
   --layout-facilities-image-height-md: min(32vh, 260px);
@@ -223,6 +225,7 @@
     --index-pc-feature-media-width: 58%;
     --index-pc-feature-media-min-h: calc(80svh - var(--site-nav-height));
     --index-pc-feature-media-max-h: calc(90svh - var(--site-nav-height));
+    --layout-feature-stack-gap: calc(2 * clamp(0.5rem, 3vh, 2rem));
   }
 }
 
@@ -2259,19 +2262,11 @@ body.index-feature-3-lightbox-open {
 .features {
   display: flex;
   flex-direction: column;
-  gap: 0;
+  gap: var(--layout-feature-stack-gap);
 }
 
 .content-section .features {
   padding-block: var(--site-nav-height);
-}
-
-/* PC: feature 카드 간 세로 간격 — 이전 clamp 대비 2배 */
-@media (min-width: 768px) {
-  main.content-section.fullpage-section .feature.scroll-fade {
-    margin-top: clamp(0.5rem, 3vh, 2rem) !important;
-    margin-bottom: clamp(0.5rem, 3vh, 2rem) !important;
-  }
 }
 
 /* 모바일: 모든 feature — 사진(또는 갤러리 슬롯) 위, 텍스트 아래 */
@@ -2298,10 +2293,10 @@ body.index-feature-3-lightbox-open {
   box-sizing: border-box;
 }
 
-.features--index .feature,
-.features--story .feature {
-  margin-top: var(--layout-feature-block-margin);
-  margin-bottom: var(--layout-feature-block-margin);
+.content-section .features > .feature,
+.content-section .features > .room-feature {
+  margin-top: 0;
+  margin-bottom: 0;
 }
 
 .feature-text {
@@ -2385,8 +2380,6 @@ body.index-feature-3-lightbox-open {
   flex-direction: column;
   gap: 0;
   width: 100%;
-  margin-top: var(--layout-feature-block-margin);
-  margin-bottom: var(--layout-feature-block-margin);
   margin-left: 0;
   margin-right: 0;
 }
@@ -2405,8 +2398,6 @@ body.index-feature-3-lightbox-open {
   display: flex;
   flex-direction: column;
   gap: 0;
-  margin-top: var(--layout-feature-block-margin);
-  margin-bottom: var(--layout-feature-block-margin);
 }
 
 @media (min-width: 768px) {
@@ -2449,8 +2440,6 @@ body.index-feature-3-lightbox-open {
       minmax(0, var(--index-pc-feature-media-width))
       minmax(0, 42%);
     min-height: calc(100svh - var(--site-nav-height));
-    margin-top: 0 !important;
-    margin-bottom: 0 !important;
     border: 0;
     background: var(--stone-50);
   }
@@ -2558,10 +2547,7 @@ body.index-feature-3-lightbox-open {
     position: relative;
     display: block;
     min-height: calc(100svh - var(--site-nav-height));
-    margin-top: 0 !important;
-    margin-bottom: 0 !important;
-    padding: clamp(var(--space-48), 8vh, var(--space-80)) 0
-      clamp(var(--space-64), 10vh, 7rem);
+    padding: 0;
     overflow: hidden;
     border: 0;
     background: var(--stone-50);
@@ -2677,10 +2663,7 @@ body.index-feature-3-lightbox-open {
   .features--index .feature-index-3 {
     display: block;
     min-height: auto;
-    margin-top: 0 !important;
-    margin-bottom: 0 !important;
-    padding: clamp(var(--space-48), 8vh, var(--space-80))
-      var(--layout-margin-side-tablet) clamp(var(--space-64), 10vh, 7rem);
+    padding: 0 var(--layout-margin-side-tablet);
     overflow: visible;
     border: 0;
     background: var(--stone-50);
@@ -2860,9 +2843,7 @@ body.index-feature-3-lightbox-open {
     justify-content: center;
     align-items: center;
     min-height: calc(100svh - var(--site-nav-height));
-    margin-top: 0 !important;
-    margin-bottom: 0 !important;
-    padding: clamp(var(--space-64), 12vh, 8rem) 0;
+    padding: 0;
     border: 0;
     background: var(--stone-50);
     box-shadow: none;
@@ -2968,10 +2949,6 @@ body.index-feature-3-lightbox-open {
   margin-left: calc(50% - 50vw);
   margin-right: calc(50% - 50vw);
   padding-top: 0 !important;
-}
-
-.rooms-features .room-feature:first-child {
-  margin-top: 0.75rem !important;
 }
 
 .rooms-features .room-feature .reserve-btn {
@@ -5246,11 +5223,6 @@ main.content-section:has(> .site-footer.site-business-footer) {
     margin: var(--space-32) var(--layout-margin-side-mobile) var(--space-16);
   }
 
-  .rooms-features
-    > .ground-mobile-section-head.payment-section-head
-    + .room-feature {
-    margin-top: 0 !important;
-  }
 }
 
 @media (min-width: 768px) {
@@ -8925,6 +8897,45 @@ main.content-section.confirm-page.payment-page > #payment-error-area-en {
   background-color: transparent;
 }
 
+.confirm-label--contact-intl .confirm-contact-intl {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 0.5rem 0.75rem;
+  width: 100%;
+  max-width: 100%;
+  margin-top: 0.35rem;
+}
+
+.confirm-contact-intl__dial {
+  flex: 0 1 auto;
+  min-width: 11rem;
+  max-width: 100%;
+  margin-top: 0;
+  padding: 0.5rem 0.35rem 0.5rem 0;
+  border: none;
+  border-bottom: 1px solid var(--grafford-mud2);
+  border-radius: 0;
+  background: transparent;
+  font-size: 0.92rem;
+  color: inherit;
+  box-sizing: border-box;
+}
+
+.confirm-label--contact-intl .confirm-contact-intl input {
+  flex: 1 1 10rem;
+  width: auto;
+  min-width: 8rem;
+  max-width: 100%;
+  margin-top: 0;
+}
+
+.confirm-contact-intl__dial:focus,
+.confirm-contact-intl__dial:focus-visible {
+  outline: none;
+  border-bottom: 2px solid var(--color-focus-ring);
+}
+
 .confirm-input-error {
   border: 1px solid rgba(196, 54, 54, 0.72) !important;
 }
@@ -11715,6 +11726,12 @@ main.content-section.confirm-page.admin-page {
   white-space: nowrap;
   cursor: default;
 }
+.admin-checkin-talk-email {
+  font-size: 0.85rem;
+  color: var(--stone-600);
+  white-space: nowrap;
+}
+
 .admin-checkin-send-btn {
   border: 1px solid transparent;
   background-color: var(--grafford-mud2);

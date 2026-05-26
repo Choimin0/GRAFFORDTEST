@@ -26,6 +26,8 @@ import {
   computeGuestCount,
   getMaxExtraGuests,
 } from "./lib/room-guest-policy.js";
+import { normalizeBookingLocale } from "./lib/booking-locale.js";
+import { isValidInternationalStoredContact } from "./lib/intl-phone.js";
 
 const { Pool } = pg;
 
@@ -821,6 +823,7 @@ export default async function handler(req, res) {
   var guestCount = Number(body.guestCount);
   var pgTid = body.pgTid ? String(body.pgTid).trim().slice(0, 255) : null;
   var bookingToken = String(body.bookingToken || "").trim();
+  var bookingLocale = normalizeBookingLocale(body.bookingLocale);
 
   if (!bookingToken) {
     json(res, 400, {
@@ -858,6 +861,17 @@ export default async function handler(req, res) {
   if (!contact || contact.length > MAX_CONTACT) {
     console.error("[reservations POST] Invalid contact:", JSON.stringify(contact));
     json(res, 400, { ok: false, error: "Invalid contact" });
+    return;
+  }
+  if (bookingLocale === "en" && !isValidInternationalStoredContact(contact)) {
+    console.error(
+      "[reservations POST] Invalid international contact:",
+      JSON.stringify(contact),
+    );
+    json(res, 400, {
+      ok: false,
+      error: "Invalid international contact format",
+    });
     return;
   }
   if (!ALLOWED_ROOMS.has(roomType)) {
@@ -943,9 +957,10 @@ export default async function handler(req, res) {
       guest_request,
       payment_method,
       bank_confirmed,
-      pg_tid
+      pg_tid,
+      booking_locale
     ) VALUES (
-      $1, $2, $3, $4, $5, $6, $7::date, $8::date, $9, $10, $11, $12, $13, $14, $15, $16
+      $1, $2, $3, $4, $5, $6, $7::date, $8::date, $9, $10, $11, $12, $13, $14, $15, $16, $17
     )
     RETURNING id, reservation_number, created_at
   `;
@@ -967,6 +982,7 @@ export default async function handler(req, res) {
     paymentMethod,
     true,
     pgTid || null,
+    bookingLocale,
   ];
 
   try {

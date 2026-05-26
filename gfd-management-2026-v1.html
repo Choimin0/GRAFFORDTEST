@@ -1611,17 +1611,25 @@
             appendCheckinCell(tr, roomCheckin.guestName || "—");
             appendCheckinCell(tr, formatGuestCount(roomCheckin));
             var talkTd = appendCheckinCell(tr, "");
-            var sendBtn = document.createElement("button");
-            sendBtn.type = "button";
-            sendBtn.className = "admin-checkin-send-btn";
-            sendBtn.textContent = "전송";
-            sendBtn.dataset.room = room;
-            sendBtn.dataset.reservationNumber =
-              roomCheckin.reservationNumber || "";
-            sendBtn.dataset.checkinAlarmSentCount = String(
-              Number(roomCheckin.checkinAlarmSentCount) || 0,
-            );
-            talkTd.appendChild(sendBtn);
+            var isEnglishBooking =
+              String(roomCheckin.bookingLocale || "").toLowerCase() === "en" ||
+              String(roomCheckin.contact || "").trim().indexOf("+") === 0;
+            if (isEnglishBooking) {
+              talkTd.textContent = "이메일";
+              talkTd.classList.add("admin-checkin-talk-email");
+            } else {
+              var sendBtn = document.createElement("button");
+              sendBtn.type = "button";
+              sendBtn.className = "admin-checkin-send-btn";
+              sendBtn.textContent = "전송";
+              sendBtn.dataset.room = room;
+              sendBtn.dataset.reservationNumber =
+                roomCheckin.reservationNumber || "";
+              sendBtn.dataset.checkinAlarmSentCount = String(
+                Number(roomCheckin.checkinAlarmSentCount) || 0,
+              );
+              talkTd.appendChild(sendBtn);
+            }
             var requestText = roomCheckin.guestRequest || "—";
             var requestTd = appendCheckinCell(
               tr,
@@ -3903,6 +3911,10 @@
         }
 
         function formatAdminSearchContact(value) {
+          var raw = String(value || "").trim();
+          if (raw.indexOf("+") === 0) {
+            return raw;
+          }
           var digits = normalizeContactDigits(value).slice(0, 11);
           if (digits.length === 11) {
             return (

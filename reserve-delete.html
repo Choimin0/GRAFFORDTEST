@@ -1075,6 +1075,9 @@
                       cancelReasonCode: selectedReasonCode || "",
                       cancelReasonDetail: selectedReasonDetail || "",
                       refundAmount: String(finalRefundAmount || 0),
+                      bookingLocale: String(
+                        (saved && saved.bookingLocale) || "kr",
+                      ),
                     }),
                   );
                   isNavigating = true;

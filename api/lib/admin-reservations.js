@@ -75,6 +75,7 @@ function mapRow(row, isDeleted) {
       row.checkin_alarm_sent_count != null
         ? Number(row.checkin_alarm_sent_count)
         : 0,
+    bookingLocale: row.booking_locale || "kr",
   };
   if (isDeleted) {
     base.cancelReason = row.cancel_reason || "";
@@ -169,6 +170,7 @@ export async function handleAdminReservations(res, pool, body) {
         guest_request,
         payment_method,
         checkin_alarm_sent_count,
+        booking_locale,
         created_at
         ${extraCols}
       FROM ${BOOKING_TABLE}
@@ -191,6 +193,7 @@ export async function handleAdminReservations(res, pool, body) {
           check_in_date, check_out_date, guest_count, total_amount,
           stay_nights, guest_request, payment_method, bank_confirmed,
           checkin_alarm_sent_count,
+          booking_locale,
           created_at, (status = 'completed') AS is_past
         FROM ${BOOKING_TABLE}
         WHERE status IN ('confirm', 'completed')
@@ -217,6 +220,7 @@ export async function handleAdminReservations(res, pool, body) {
             row.checkin_alarm_sent_count != null
               ? Number(row.checkin_alarm_sent_count)
               : 0,
+          bookingLocale: row.booking_locale || "kr",
         };
       });
     }

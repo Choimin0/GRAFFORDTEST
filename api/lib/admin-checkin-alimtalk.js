@@ -3,6 +3,7 @@
  */
 import { decryptBookingPiiResponse } from "./pii-crypto.js";
 import { json } from "./admin-common.js";
+import { shouldSendAlimtalk } from "./booking-locale.js";
 import { sendBookingAlimtalk } from "./solapi-alimtalk.js";
 
 const BOOKING_TABLE = "booking";
@@ -42,7 +43,7 @@ export async function handleAdminCheckinAlimtalk(res, pool, body) {
   }
 
   var sel = await pool.query(
-    `SELECT guest_name, contact, room_type, check_in_date, check_out_date, status
+    `SELECT guest_name, contact, room_type, check_in_date, check_out_date, status, booking_locale
      FROM ${BOOKING_TABLE}
      WHERE reservation_number = $1
      LIMIT 1`,
@@ -65,6 +66,15 @@ export async function handleAdminCheckinAlimtalk(res, pool, body) {
   }
 
   var pii = decryptBookingPiiResponse(row);
+  if (!shouldSendAlimtalk(row.booking_locale, pii.contact)) {
+    json(res, 409, {
+      ok: false,
+      error: "영문(국제) 예약은 알림톡 대신 이메일로 안내합니다.",
+      skipped: true,
+      reason: "english_booking",
+    });
+    return;
+  }
   var sendResult = await sendBookingAlimtalk("checkin-alarm", {
     guestName: pii.guestName,
     contact: pii.contact,
