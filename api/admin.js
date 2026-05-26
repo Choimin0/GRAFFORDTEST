@@ -2,7 +2,7 @@
  * POST /api/admin
  *
  * 관리자 API 단일 게이트웨이.
- * Body.resource: reservations | sales | payment-cancel | room-status | room-rate | checkin-alimtalk
+ * Body.resource: reservations | sales | sales-analyze | payment-cancel | room-status | room-rate | checkin-alimtalk
  */
 import {
   getPool,
@@ -12,6 +12,7 @@ import {
 } from "./lib/admin-common.js";
 import { handleAdminReservations } from "./lib/admin-reservations.js";
 import { handleAdminSales } from "./lib/admin-sales.js";
+import { handleAdminSalesAnalyze } from "./lib/admin-sales-analyze.js";
 import { handleAdminPaymentCancel } from "./lib/admin-payment-cancel.js";
 import { handleAdminRoomStatus } from "./lib/admin-room-status.js";
 import { handleAdminRoomRate } from "./lib/admin-room-rate.js";
@@ -20,6 +21,7 @@ import { handleAdminCheckinAlimtalk } from "./lib/admin-checkin-alimtalk.js";
 const RESOURCE_HANDLERS = {
   reservations: handleAdminReservations,
   sales: handleAdminSales,
+  "sales-analyze": handleAdminSalesAnalyze,
   "payment-cancel": handleAdminPaymentCancel,
   "room-status": handleAdminRoomStatus,
   "room-rate": handleAdminRoomRate,
@@ -67,7 +69,7 @@ export default async function handler(req, res) {
     json(res, 400, {
       ok: false,
       error:
-        "resource가 필요합니다. (reservations, sales, payment-cancel, room-status, room-rate, checkin-alimtalk)",
+        "resource가 필요합니다. (reservations, sales, sales-analyze, payment-cancel, room-status, room-rate, checkin-alimtalk)",
     });
     return;
   }
