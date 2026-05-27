@@ -1112,8 +1112,16 @@
               m: today.getMonth() + 1,
               d: today.getDate(),
             };
-            var minViewMonth = new Date(todayParts.y, todayParts.m - 1 - 6, 1);
-            var maxCheckInParts = addMonthsKeepingDayParts(todayParts, 6);
+            var bookingWindowMonths = 3;
+            var minViewMonth = new Date(
+              todayParts.y,
+              todayParts.m - 1 - bookingWindowMonths,
+              1,
+            );
+            var maxCheckInParts = addMonthsKeepingDayParts(
+              todayParts,
+              bookingWindowMonths,
+            );
             var maxCheckOutDate = addDays(
               new Date(
                 maxCheckInParts.y,

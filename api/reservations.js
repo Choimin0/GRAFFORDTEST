@@ -28,6 +28,7 @@ import {
 } from "./lib/room-guest-policy.js";
 import { normalizeBookingLocale } from "./lib/booking-locale.js";
 import { isValidInternationalStoredContact } from "./lib/intl-phone.js";
+import { validateBookingWindow } from "./lib/booking-window.js";
 
 const { Pool } = pg;
 
@@ -884,6 +885,21 @@ export default async function handler(req, res) {
     json(res, 400, { ok: false, error: "Invalid checkIn or checkOut" });
     return;
   }
+  var bookingWindowCheck = validateBookingWindow(checkIn, checkOut);
+  if (!bookingWindowCheck.ok) {
+    console.error(
+      "[reservations POST] Booking window rejected:",
+      bookingWindowCheck.code,
+      "checkIn=" + checkIn,
+      "checkOut=" + checkOut,
+    );
+    json(res, 400, {
+      ok: false,
+      error: bookingWindowCheck.error,
+      code: bookingWindowCheck.code,
+    });
+    return;
+  }
   if (!Number.isFinite(stayNights) || stayNights < 1 || stayNights > 365) {
     console.error("[reservations POST] Invalid stayNights:", stayNights, "raw:", body.stayNights);
     json(res, 400, { ok: false, error: "Invalid stayNights" });
@@ -999,11 +1015,19 @@ export default async function handler(req, res) {
       var unavailableMsg =
         availability.reason === "blocked"
           ? "선택한 기간은 관리자 방막기로 예약할 수 없습니다."
-          : "해당 날짜에 예약이 불가합니다. 예약을 다시 확인해주세요";
-      json(res, 409, {
+          : availability.error ||
+            "해당 날짜에 예약이 불가합니다. 예약을 다시 확인해주세요";
+      var unavailableStatus =
+        availability.reason === "check_in_too_early" ||
+        availability.reason === "check_in_too_late" ||
+        availability.reason === "check_out_too_late" ||
+        availability.reason === "booking_window"
+          ? 400
+          : 409;
+      json(res, unavailableStatus, {
         ok: false,
         error: unavailableMsg,
-        unavailable: true,
+        unavailable: unavailableStatus === 409,
         reason: availability.reason || "occupied",
       });
       return;

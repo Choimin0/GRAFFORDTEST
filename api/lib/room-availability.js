@@ -1,5 +1,6 @@
 import { hasActiveHoldOverlap } from "./booking-hold.js";
 import { hasExternalBookingOverlap } from "./ical-sync.js";
+import { validateBookingWindow } from "./booking-window.js";
 
 const ALLOWED_ROOMS = new Set(["G1", "G2", "G3", "G4"]);
 const LEGACY_TO_ROOM = { A: "G1", B: "G2", C: "G3", D: "G4" };
@@ -118,6 +119,14 @@ export async function checkRoomAvailability(
   }
   if (!DATE_RE.test(checkIn) || !DATE_RE.test(checkOut) || checkIn >= checkOut) {
     return { available: false, reason: "invalid_dates" };
+  }
+  var windowCheck = validateBookingWindow(checkIn, checkOut);
+  if (!windowCheck.ok) {
+    return {
+      available: false,
+      reason: windowCheck.code || "booking_window",
+      error: windowCheck.error,
+    };
   }
   if (await hasRoomBlockOverlap(pool, room, checkIn, checkOut)) {
     return { available: false, reason: "blocked" };

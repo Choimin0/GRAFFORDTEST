@@ -1,35 +1,186 @@
 /**
  * 영문 예약용 국제 연락처 입력·검증·저장 형식 (+국가번호 국내번호)
+ * 배열 순서를 변경하여 드롭박스 순서 변경 가능
  */
 (function (global) {
   var COUNTRIES = [
-    { dial: "1", label: "United States / Canada (+1)", min: 10, max: 10, format: formatUsCa },
+    {
+      dial: "1",
+      label: "United States / Canada (+1)",
+      min: 10,
+      max: 10,
+      format: formatUsCa,
+    },
     { dial: "81", label: "Japan (+81)", min: 9, max: 10, format: formatJp },
     { dial: "86", label: "China (+86)", min: 11, max: 11, format: formatCn },
-    { dial: "44", label: "United Kingdom (+44)", min: 10, max: 10, format: formatGrouped4 },
-    { dial: "61", label: "Australia (+61)", min: 9, max: 9, format: formatGrouped3 },
-    { dial: "49", label: "Germany (+49)", min: 10, max: 11, format: formatGrouped3 },
-    { dial: "33", label: "France (+33)", min: 9, max: 9, format: formatGrouped2 },
-    { dial: "39", label: "Italy (+39)", min: 9, max: 10, format: formatGrouped3 },
-    { dial: "34", label: "Spain (+34)", min: 9, max: 9, format: formatGrouped3 },
-    { dial: "31", label: "Netherlands (+31)", min: 9, max: 9, format: formatGrouped2 },
-    { dial: "41", label: "Switzerland (+41)", min: 9, max: 9, format: formatGrouped2 },
-    { dial: "65", label: "Singapore (+65)", min: 8, max: 8, format: formatGrouped4 },
-    { dial: "852", label: "Hong Kong (+852)", min: 8, max: 8, format: formatGrouped4 },
-    { dial: "886", label: "Taiwan (+886)", min: 9, max: 9, format: formatGrouped3 },
-    { dial: "82", label: "South Korea (+82)", min: 9, max: 10, format: formatKrIntl },
-    { dial: "66", label: "Thailand (+66)", min: 9, max: 9, format: formatGrouped3 },
-    { dial: "84", label: "Vietnam (+84)", min: 9, max: 10, format: formatGrouped3 },
-    { dial: "60", label: "Malaysia (+60)", min: 9, max: 10, format: formatGrouped3 },
-    { dial: "63", label: "Philippines (+63)", min: 10, max: 10, format: formatGrouped3 },
-    { dial: "62", label: "Indonesia (+62)", min: 9, max: 12, format: formatGrouped3 },
-    { dial: "91", label: "India (+91)", min: 10, max: 10, format: formatGrouped5 },
-    { dial: "7", label: "Russia (+7)", min: 10, max: 10, format: formatGrouped3 },
-    { dial: "971", label: "UAE (+971)", min: 9, max: 9, format: formatGrouped3 },
-    { dial: "966", label: "Saudi Arabia (+966)", min: 9, max: 9, format: formatGrouped3 },
-    { dial: "55", label: "Brazil (+55)", min: 10, max: 11, format: formatGrouped3 },
-    { dial: "52", label: "Mexico (+52)", min: 10, max: 10, format: formatGrouped3 },
-    { dial: "64", label: "New Zealand (+64)", min: 8, max: 10, format: formatGrouped3 },
+    {
+      dial: "44",
+      label: "United Kingdom (+44)",
+      min: 10,
+      max: 10,
+      format: formatGrouped4,
+    },
+    {
+      dial: "61",
+      label: "Australia (+61)",
+      min: 9,
+      max: 9,
+      format: formatGrouped3,
+    },
+    {
+      dial: "49",
+      label: "Germany (+49)",
+      min: 10,
+      max: 11,
+      format: formatGrouped3,
+    },
+    {
+      dial: "33",
+      label: "France (+33)",
+      min: 9,
+      max: 9,
+      format: formatGrouped2,
+    },
+    {
+      dial: "39",
+      label: "Italy (+39)",
+      min: 9,
+      max: 10,
+      format: formatGrouped3,
+    },
+    {
+      dial: "34",
+      label: "Spain (+34)",
+      min: 9,
+      max: 9,
+      format: formatGrouped3,
+    },
+    {
+      dial: "31",
+      label: "Netherlands (+31)",
+      min: 9,
+      max: 9,
+      format: formatGrouped2,
+    },
+    {
+      dial: "41",
+      label: "Switzerland (+41)",
+      min: 9,
+      max: 9,
+      format: formatGrouped2,
+    },
+    {
+      dial: "65",
+      label: "Singapore (+65)",
+      min: 8,
+      max: 8,
+      format: formatGrouped4,
+    },
+    {
+      dial: "852",
+      label: "Hong Kong (+852)",
+      min: 8,
+      max: 8,
+      format: formatGrouped4,
+    },
+    {
+      dial: "886",
+      label: "Taiwan (+886)",
+      min: 9,
+      max: 9,
+      format: formatGrouped3,
+    },
+    {
+      dial: "82",
+      label: "South Korea (+82)",
+      min: 9,
+      max: 10,
+      format: formatKrIntl,
+    },
+    {
+      dial: "66",
+      label: "Thailand (+66)",
+      min: 9,
+      max: 9,
+      format: formatGrouped3,
+    },
+    {
+      dial: "84",
+      label: "Vietnam (+84)",
+      min: 9,
+      max: 10,
+      format: formatGrouped3,
+    },
+    {
+      dial: "60",
+      label: "Malaysia (+60)",
+      min: 9,
+      max: 10,
+      format: formatGrouped3,
+    },
+    {
+      dial: "63",
+      label: "Philippines (+63)",
+      min: 10,
+      max: 10,
+      format: formatGrouped3,
+    },
+    {
+      dial: "62",
+      label: "Indonesia (+62)",
+      min: 9,
+      max: 12,
+      format: formatGrouped3,
+    },
+    {
+      dial: "91",
+      label: "India (+91)",
+      min: 10,
+      max: 10,
+      format: formatGrouped5,
+    },
+    {
+      dial: "7",
+      label: "Russia (+7)",
+      min: 10,
+      max: 10,
+      format: formatGrouped3,
+    },
+    {
+      dial: "971",
+      label: "UAE (+971)",
+      min: 9,
+      max: 9,
+      format: formatGrouped3,
+    },
+    {
+      dial: "966",
+      label: "Saudi Arabia (+966)",
+      min: 9,
+      max: 9,
+      format: formatGrouped3,
+    },
+    {
+      dial: "55",
+      label: "Brazil (+55)",
+      min: 10,
+      max: 11,
+      format: formatGrouped3,
+    },
+    {
+      dial: "52",
+      label: "Mexico (+52)",
+      min: 10,
+      max: 10,
+      format: formatGrouped3,
+    },
+    {
+      dial: "64",
+      label: "New Zealand (+64)",
+      min: 8,
+      max: 10,
+      format: formatGrouped3,
+    },
   ];
 
   function getCountryByDial(dial) {
@@ -239,7 +390,11 @@
     contactDigitsForMatch: contactDigitsForMatch,
     stripLeadingZero: stripLeadingZero,
     isInternationalStored: function (stored) {
-      return String(stored || "").trim().indexOf("+") === 0;
+      return (
+        String(stored || "")
+          .trim()
+          .indexOf("+") === 0
+      );
     },
   };
 })(typeof window !== "undefined" ? window : globalThis);

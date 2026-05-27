@@ -14,6 +14,7 @@ import {
   checkRoomAvailability,
   findConfirmedReservation,
 } from "./lib/room-availability.js";
+import { validateBookingWindow } from "./lib/booking-window.js";
 
 const { Pool } = pg;
 
@@ -125,6 +126,15 @@ export default async function handler(req, res) {
       json(res, 400, {
         ok: false,
         error: "room, checkIn, checkOut are required",
+      });
+      return;
+    }
+    var windowCheck = validateBookingWindow(checkIn, checkOut);
+    if (!windowCheck.ok) {
+      json(res, 400, {
+        ok: false,
+        error: windowCheck.error,
+        code: windowCheck.code,
       });
       return;
     }
@@ -272,13 +282,20 @@ export default async function handler(req, res) {
       holdId,
     );
     if (!availability.available) {
-      json(res, 409, {
+      var isWindowViolation =
+        availability.reason === "check_in_too_early" ||
+        availability.reason === "check_in_too_late" ||
+        availability.reason === "check_out_too_late" ||
+        availability.reason === "booking_window";
+      json(res, isWindowViolation ? 400 : 409, {
         ok: false,
         tokenValid: true,
         available: false,
-        unavailable: true,
+        unavailable: !isWindowViolation,
         reason: availability.reason || "occupied",
-        error: "해당 날짜에 예약이 불가합니다. 예약을 다시 확인해주세요",
+        error:
+          availability.error ||
+          "해당 날짜에 예약이 불가합니다. 예약을 다시 확인해주세요",
       });
       return;
     }
