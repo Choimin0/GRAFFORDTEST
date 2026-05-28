@@ -10802,6 +10802,13 @@ main.content-section.confirm-page.reserve-check-main {
   margin: 0;
   font-size: 0.88rem;
   color: var(--stone-400);
+  text-decoration: none;
+}
+
+.reserve-check-footer__contact-line:hover,
+.reserve-check-footer__contact-line:focus-visible {
+  color: var(--stone-600);
+  text-decoration: underline;
 }
 
 .reserve-check-footer__actions {
