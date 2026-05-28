@@ -138,6 +138,42 @@
           </section>
         </div>
 
+        <div
+          id="reserveinfo-notfound-overlay"
+          class="confirm-leave-overlay"
+          aria-modal="true"
+          role="dialog"
+          aria-labelledby="reserveinfo-notfound-heading"
+        >
+          <div class="confirm-leave-dialog">
+            <div class="confirm-leave-dialog__accent" aria-hidden="true"></div>
+            <div class="confirm-leave-dialog__inner">
+              <p class="confirm-leave-eyebrow">NOTICE — 예약 조회</p>
+              <h2
+                id="reserveinfo-notfound-heading"
+                class="confirm-leave-heading"
+              >
+                예약 정보를 찾을 수 없습니다
+              </h2>
+              <span class="confirm-leave-rule" aria-hidden="true"></span>
+              <p class="confirm-leave-body">
+                입력하신 <strong>성함</strong>과 <strong>예약번호</strong>를 다시
+                확인해 주세요.
+              </p>
+            </div>
+            <div class="confirm-leave-actions">
+              <button
+                type="button"
+                id="reserveinfo-notfound-close"
+                class="btn reserve-btn confirm-leave-btn confirm-leave-btn--continue"
+              >
+                <span class="confirm-leave-btn__label">확인</span>
+                <span class="confirm-leave-btn__hint">입력 화면으로 돌아가기</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
         <footer
           id="site-business-footer-mount"
           data-site-business-footer-mount
@@ -219,6 +255,42 @@
           </section>
         </div>
 
+        <div
+          id="reserveinfo-notfound-overlay-en"
+          class="confirm-leave-overlay"
+          aria-modal="true"
+          role="dialog"
+          aria-labelledby="reserveinfo-notfound-heading-en"
+        >
+          <div class="confirm-leave-dialog">
+            <div class="confirm-leave-dialog__accent" aria-hidden="true"></div>
+            <div class="confirm-leave-dialog__inner">
+              <p class="confirm-leave-eyebrow">NOTICE — Reservation lookup</p>
+              <h2
+                id="reserveinfo-notfound-heading-en"
+                class="confirm-leave-heading"
+              >
+                Reservation not found
+              </h2>
+              <span class="confirm-leave-rule" aria-hidden="true"></span>
+              <p class="confirm-leave-body">
+                Please check the <strong>name</strong> and
+                <strong>reservation number</strong> and try again.
+              </p>
+            </div>
+            <div class="confirm-leave-actions">
+              <button
+                type="button"
+                id="reserveinfo-notfound-close-en"
+                class="btn reserve-btn confirm-leave-btn confirm-leave-btn--continue"
+              >
+                <span class="confirm-leave-btn__label">OK</span>
+                <span class="confirm-leave-btn__hint">Return to the form</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
         <footer
           data-site-business-footer-mount
           class="site-footer site-business-footer"
@@ -231,6 +303,18 @@
       document.addEventListener("DOMContentLoaded", function () {
         var R = window.GraffordReservations;
         var forms = document.querySelectorAll(".reserveinfo-form");
+        var notFoundOverlayKr = document.getElementById(
+          "reserveinfo-notfound-overlay",
+        );
+        var notFoundOverlayEn = document.getElementById(
+          "reserveinfo-notfound-overlay-en",
+        );
+        var notFoundCloseBtnKr = document.getElementById(
+          "reserveinfo-notfound-close",
+        );
+        var notFoundCloseBtnEn = document.getElementById(
+          "reserveinfo-notfound-close-en",
+        );
 
         function lookupApiUrl() {
           var base = "";
@@ -276,6 +360,23 @@
           window.alert(msg);
         }
 
+        function activeNotFoundOverlay() {
+          var lang = document.body.getAttribute("data-site-language") || "kr";
+          return lang === "en" ? notFoundOverlayEn : notFoundOverlayKr;
+        }
+
+        function showNotFoundOverlay() {
+          var el = activeNotFoundOverlay();
+          if (el) {
+            el.classList.add("is-visible");
+          }
+        }
+
+        function hideNotFoundOverlay() {
+          if (notFoundOverlayKr) notFoundOverlayKr.classList.remove("is-visible");
+          if (notFoundOverlayEn) notFoundOverlayEn.classList.remove("is-visible");
+        }
+
         function goToDeleteComplete(data) {
           sessionStorage.setItem(
             "graffordDeleteCompleteData",
@@ -305,14 +406,46 @@
 
         function bindLookupSubmit(form) {
           if (!form) return;
+          var nameInput = form.querySelector('input[name="lookupName"]');
+          var orderInput = form.querySelector('input[name="lookupOrder"]');
+
+          function markInputError(input, hasError) {
+            if (!input) return;
+            input.classList.toggle("confirm-input-error", !!hasError);
+          }
+
+          function refreshLookupInputError() {
+            markInputError(nameInput, !nameInput || !nameInput.value.trim());
+            markInputError(orderInput, !orderInput || !orderInput.value.trim());
+          }
+
+          if (nameInput) {
+            nameInput.addEventListener("input", function () {
+              markInputError(nameInput, !nameInput.value.trim());
+            });
+          }
+          if (orderInput) {
+            orderInput.addEventListener("input", function () {
+              markInputError(orderInput, !orderInput.value.trim());
+            });
+          }
+
           form.addEventListener("submit", function (e) {
             e.preventDefault();
-            if (!form.checkValidity()) {
-              form.reportValidity();
+            refreshLookupInputError();
+            if (
+              !nameInput ||
+              !orderInput ||
+              !nameInput.value.trim() ||
+              !orderInput.value.trim()
+            ) {
+              if (!nameInput || !nameInput.value.trim()) {
+                nameInput && nameInput.focus();
+              } else if (!orderInput.value.trim()) {
+                orderInput.focus();
+              }
               return;
             }
-            var nameInput = form.querySelector('input[name="lookupName"]');
-            var orderInput = form.querySelector('input[name="lookupOrder"]');
             var name = nameInput ? nameInput.value : "";
             var order = orderInput ? orderInput.value : "";
 
@@ -395,9 +528,7 @@
                 }
                 var found = R.findByNameAndOrder(name, order);
                 if (!found) {
-                  showError(
-                    "일치하는 예약을 찾을 수 없습니다. 성함·예약번호를 다시 확인해 주세요.",
-                  );
+                  showNotFoundOverlay();
                   return;
                 }
                 goToReserveComplete({
@@ -425,9 +556,7 @@
                 }
                 var found = R.findByNameAndOrder(name, order);
                 if (!found) {
-                  showError(
-                    "서버에 연결할 수 없고, 이 기기 저장소에도 없습니다. vercel dev 가 켜져 있는지 확인해 주세요.",
-                  );
+                  showNotFoundOverlay();
                   return;
                 }
                 goToReserveComplete({
@@ -446,6 +575,23 @@
                   cancelToken: "",
                 });
               });
+          });
+        }
+
+        if (notFoundCloseBtnKr) {
+          notFoundCloseBtnKr.addEventListener("click", hideNotFoundOverlay);
+        }
+        if (notFoundCloseBtnEn) {
+          notFoundCloseBtnEn.addEventListener("click", hideNotFoundOverlay);
+        }
+        if (notFoundOverlayKr) {
+          notFoundOverlayKr.addEventListener("click", function (e) {
+            if (e.target === notFoundOverlayKr) hideNotFoundOverlay();
+          });
+        }
+        if (notFoundOverlayEn) {
+          notFoundOverlayEn.addEventListener("click", function (e) {
+            if (e.target === notFoundOverlayEn) hideNotFoundOverlay();
           });
         }
 
