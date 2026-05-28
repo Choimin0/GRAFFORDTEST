@@ -9884,6 +9884,10 @@ main.content-section.confirm-page.reserveinfo-page {
   color: var(--stone-400);
 }
 
+.reserve-delete-refund-emphasis {
+  font-weight: 600;
+}
+
 .lang-kr .reserve-delete-policy-dynamic {
   font-family: var(--font-family-body-kr);
 }
