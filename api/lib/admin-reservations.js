@@ -62,6 +62,7 @@ function mapRow(row, isDeleted) {
     reservationNumber: row.reservation_number,
     guestName: pii.guestName,
     contact: pii.contact,
+    email: pii.email || "",
     roomType: row.room_type,
     checkIn: toYMD(row.check_in_date),
     checkOut: toYMD(row.check_out_date),
@@ -161,6 +162,7 @@ export async function handleAdminReservations(res, pool, body) {
         reservation_number,
         guest_name,
         contact,
+        email,
         room_type,
         check_in_date,
         check_out_date,
@@ -189,7 +191,7 @@ export async function handleAdminReservations(res, pool, body) {
       // 달력용: confirm + completed 모두 포함
       var calSel = await pool.query(
         `SELECT
-          reservation_number, guest_name, contact, room_type,
+          reservation_number, guest_name, contact, email, room_type,
           check_in_date, check_out_date, guest_count, total_amount,
           stay_nights, guest_request, payment_method, bank_confirmed,
           checkin_alarm_sent_count,
@@ -205,6 +207,7 @@ export async function handleAdminReservations(res, pool, body) {
           reservationNumber: row.reservation_number,
           guestName: calPii.guestName,
           contact: calPii.contact,
+          email: calPii.email || "",
           roomType: row.room_type,
           checkIn: toYMD(row.check_in_date),
           checkOut: toYMD(row.check_out_date),

@@ -1615,8 +1615,19 @@
               String(roomCheckin.bookingLocale || "").toLowerCase() === "en" ||
               String(roomCheckin.contact || "").trim().indexOf("+") === 0;
             if (isEnglishBooking) {
-              talkTd.textContent = "이메일";
-              talkTd.classList.add("admin-checkin-talk-email");
+              var emailBtn = document.createElement("button");
+              emailBtn.type = "button";
+              emailBtn.className = "admin-checkin-email-btn";
+              emailBtn.textContent = "이메일";
+              var guestEmail = String(roomCheckin.email || "").trim();
+              emailBtn.dataset.email = guestEmail;
+              if (!guestEmail) {
+                emailBtn.disabled = true;
+                emailBtn.title = "등록된 이메일 없음";
+              } else {
+                emailBtn.title = guestEmail;
+              }
+              talkTd.appendChild(emailBtn);
             } else {
               var sendBtn = document.createElement("button");
               sendBtn.type = "button";
@@ -3738,6 +3749,48 @@
           sendCheckinAlimtalk(reservationNumber, btn);
         }
 
+        function copyTextToClipboard(text) {
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            return navigator.clipboard.writeText(text);
+          }
+          return new Promise(function (resolve, reject) {
+            var ta = document.createElement("textarea");
+            ta.value = text;
+            ta.setAttribute("readonly", "");
+            ta.style.position = "absolute";
+            ta.style.left = "-9999px";
+            document.body.appendChild(ta);
+            ta.select();
+            try {
+              var ok = document.execCommand("copy");
+              document.body.removeChild(ta);
+              if (ok) {
+                resolve();
+              } else {
+                reject(new Error("copy failed"));
+              }
+            } catch (e) {
+              document.body.removeChild(ta);
+              reject(e);
+            }
+          });
+        }
+
+        function handleCheckinEmailCopyClick(btn) {
+          var email = String(btn.dataset.email || "").trim();
+          if (!email) {
+            showMessage("등록된 이메일이 없습니다.");
+            return;
+          }
+          copyTextToClipboard(email)
+            .then(function () {
+              showMessage("이메일 주소를 복사했습니다.");
+            })
+            .catch(function () {
+              showMessage("복사에 실패했습니다: " + email);
+            });
+        }
+
         function handleCheckinSendClick(btn) {
           var reservationNumber =
             btn.getAttribute("data-reservation-number") || "";
@@ -5556,11 +5609,15 @@
 
         if (todayCheckinListEl) {
           todayCheckinListEl.addEventListener("click", function (e) {
-            var btn = e.target.closest(".admin-checkin-send-btn");
-            if (!btn || btn.disabled) {
+            var sendBtn = e.target.closest(".admin-checkin-send-btn");
+            if (sendBtn && !sendBtn.disabled) {
+              handleCheckinSendClick(sendBtn);
               return;
             }
-            handleCheckinSendClick(btn);
+            var emailBtn = e.target.closest(".admin-checkin-email-btn");
+            if (emailBtn && !emailBtn.disabled) {
+              handleCheckinEmailCopyClick(emailBtn);
+            }
           });
         }
 

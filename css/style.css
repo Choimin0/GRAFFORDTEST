@@ -11726,19 +11726,26 @@ main.content-section.confirm-page.admin-page {
   white-space: nowrap;
   cursor: default;
 }
-.admin-checkin-talk-email {
-  font-size: 0.85rem;
-  color: var(--stone-600);
-  white-space: nowrap;
-}
-
-.admin-checkin-send-btn {
+.admin-checkin-send-btn,
+.admin-checkin-email-btn {
   border: 1px solid transparent;
-  background-color: var(--grafford-mud2);
-  color: var(--color-text-on-dark);
   padding: 0.28rem 0.7rem;
   cursor: pointer;
   font-size: 0.82rem;
+  white-space: nowrap;
+}
+.admin-checkin-send-btn {
+  background-color: var(--grafford-mud2);
+  color: var(--color-text-on-dark);
+}
+.admin-checkin-email-btn {
+  background-color: var(--grafford-mud);
+  color: var(--color-text-on-dark);
+}
+.admin-checkin-send-btn:disabled,
+.admin-checkin-email-btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
 }
 #admin-room-status-list {
   display: block;
