@@ -431,7 +431,7 @@ html {
     margin-bottom: 0;
     gap: 0.38rem;
     font-size: 0.78rem;
-  cursor: pointer;
+    cursor: pointer;
     align-self: flex-end;
     padding-bottom: 0.55rem;
   }
@@ -450,10 +450,10 @@ html {
     padding-bottom: 0.1rem;
   }
 
-.top-right-nav .lang-switch__btn:not(.is-active),
-.top-right-nav .lang-switch__divider {
-  display: none;
-}
+  .top-right-nav .lang-switch__btn:not(.is-active),
+  .top-right-nav .lang-switch__divider {
+    display: none;
+  }
 
   .top-right-nav .nav-reservation-btn {
     display: inline-flex;
@@ -8032,7 +8032,7 @@ main.content-section.confirm-page.payment-page > #payment-error-area-en {
 }
 
 .confirm-page .confirm-policy-block {
-  margin: 0 0.65rem 0.85rem;
+  margin: 0;
 }
 
 .confirm-page .confirm-policy-block .payment-refund-table {
@@ -8101,6 +8101,27 @@ main.content-section.confirm-page.payment-page > #payment-error-area-en {
 
   .confirm-guide-collapse .confirm-guide-collapse__viewport::after {
     display: none;
+  }
+}
+
+/* Desktop alignment for section heads and content panels */
+@media (min-width: 900px) {
+  .confirm-page .confirm-guide-collapse,
+  .confirm-page .confirm-guide-kv {
+    margin-left: 0;
+    margin-right: 0;
+  }
+
+  .payment-page .payment-panel > .payment-kv,
+  .payment-page .payment-panel > .payment-policy-lead,
+  .payment-page .payment-panel > .payment-refund-table {
+    margin-left: 0;
+    margin-right: 0;
+  }
+
+  .confirm-page .payment-section-head,
+  .payment-page .payment-section-head {
+    margin-bottom: 1.35rem;
   }
 }
 
@@ -8181,7 +8202,7 @@ main.content-section.confirm-page.payment-page > #payment-error-area-en {
 }
 
 .confirm-booking-side {
-  margin: 0 0.65rem 0.85rem;
+  margin: 0;
   max-width: none;
   box-sizing: border-box;
 }
@@ -8855,7 +8876,7 @@ main.content-section.confirm-page.payment-page > #payment-error-area-en {
   font-weight: 400;
   color: var(--stone-500);
   line-height: 1.6;
-  margin: 0 0.7rem 0.85rem;
+  margin: 0 0 0.85rem;
 }
 
 .confirm-guide-list {
@@ -8886,7 +8907,7 @@ main.content-section.confirm-page.payment-page > #payment-error-area-en {
 
 .confirm-label {
   display: block;
-  margin: 0 0.7rem 0.85rem;
+  margin: 0 0 0.85rem;
   font-size: 0.9rem;
   font-weight: 400;
   color: var(--stone-700);
@@ -8999,7 +9020,7 @@ main.content-section.confirm-page.payment-page > #payment-error-area-en {
 
 .confirm-total-box {
   background: transparent;
-  margin: 0 0.7rem 0.85rem;
+  margin: 0 0 0.85rem;
 }
 
 .confirm-breakdown {
