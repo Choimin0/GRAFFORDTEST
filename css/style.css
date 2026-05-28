@@ -408,6 +408,7 @@ html {
     flex-shrink: 0;
     margin-left: auto;
     gap: 1.35rem;
+    align-items: flex-end;
   }
 
   .top-right-nav .desktop-nav-center a {
@@ -430,6 +431,9 @@ html {
     margin-bottom: 0;
     gap: 0.38rem;
     font-size: 0.78rem;
+  cursor: pointer;
+    align-self: flex-end;
+    padding-bottom: 0.55rem;
   }
 
   .top-right-nav .lang-switch__btn,
@@ -442,7 +446,14 @@ html {
   .top-right-nav .lang-switch__btn.is-active {
     color: var(--stone-50);
     font-weight: 600;
+    border-bottom: 1px solid currentColor;
+    padding-bottom: 0.1rem;
   }
+
+.top-right-nav .lang-switch__btn:not(.is-active),
+.top-right-nav .lang-switch__divider {
+  display: none;
+}
 
   .top-right-nav .nav-reservation-btn {
     display: inline-flex;
@@ -519,6 +530,10 @@ html {
 
 .desktop-nav-right {
   gap: 1.15rem;
+}
+
+.top-right-nav .desktop-nav-right {
+  align-items: flex-end;
 }
 
 .lang-switch {
@@ -696,7 +711,7 @@ body[data-site-language="en"] .lang-en .hero-slide:first-child {
 
 .top-right-nav.nav-in-content-section .lang-switch__divider,
 .top-right-nav.nav-in-content-section .lang-switch__btn:not(.is-active) {
-  color: var(--stone-400);
+  display: none;
 }
 
 .top-right-nav.nav-in-content-section .lang-switch__btn.is-active {

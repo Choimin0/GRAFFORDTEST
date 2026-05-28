@@ -2632,31 +2632,35 @@
 
     <div
       id="payment-alert-modal"
-      class="payment-alert-modal"
+      class="confirm-leave-overlay"
       hidden
       aria-hidden="true"
+      aria-modal="true"
+      role="dialog"
+      aria-labelledby="payment-alert-modal-heading"
     >
-      <div
-        class="payment-alert-modal__backdrop"
-        tabindex="-1"
-        aria-hidden="true"
-      ></div>
-      <div
-        class="payment-alert-modal__panel"
-        role="dialog"
-        aria-modal="true"
-        aria-labelledby="payment-alert-modal-msg"
-      >
-        <p id="payment-alert-modal-msg" class="payment-alert-modal__message">
-          결제 중 오류가 발생했습니다.
-        </p>
-        <button
-          type="button"
-          id="payment-alert-modal-confirm"
-          class="btn reserve-btn confirm-pay-submit reserveinfo-submit-btn payment-alert-modal__confirm"
-        >
-          확인
-        </button>
+      <div class="confirm-leave-dialog">
+        <div class="confirm-leave-dialog__accent" aria-hidden="true"></div>
+        <div class="confirm-leave-dialog__inner">
+          <p class="confirm-leave-eyebrow">WARNING — 결제 실패</p>
+          <h2 id="payment-alert-modal-heading" class="confirm-leave-heading">
+            결제가 완료되지 않았습니다
+          </h2>
+          <span class="confirm-leave-rule" aria-hidden="true"></span>
+          <p id="payment-alert-modal-msg" class="confirm-leave-body">
+            결제 중 오류가 발생했습니다.
+          </p>
+        </div>
+        <div class="confirm-leave-actions">
+          <button
+            type="button"
+            id="payment-alert-modal-confirm"
+            class="btn reserve-btn confirm-leave-btn confirm-leave-btn--continue"
+          >
+            <span class="confirm-leave-btn__label">확인</span>
+            <span class="confirm-leave-btn__hint">결제 화면으로 돌아가기</span>
+          </button>
+        </div>
       </div>
     </div>
 
@@ -2665,7 +2669,7 @@
         var modal = null;
         var msgEl = null;
         var confirmBtn = null;
-        var backdrop = null;
+        var confirmBtnLabel = null;
         var closeTimer = null;
         var confirmHandler = null;
 
@@ -2693,8 +2697,8 @@
             msgEl.textContent =
               options.message || "결제 중 오류가 발생했습니다.";
           }
-          if (confirmBtn) {
-            confirmBtn.textContent = options.confirmLabel || "확인";
+          if (confirmBtnLabel) {
+            confirmBtnLabel.textContent = options.confirmLabel || "확인";
           }
           confirmHandler =
             typeof options.onConfirm === "function" ? options.onConfirm : null;
@@ -2712,7 +2716,9 @@
           if (!modal) return;
           msgEl = document.getElementById("payment-alert-modal-msg");
           confirmBtn = document.getElementById("payment-alert-modal-confirm");
-          backdrop = modal.querySelector(".payment-alert-modal__backdrop");
+          confirmBtnLabel = confirmBtn
+            ? confirmBtn.querySelector(".confirm-leave-btn__label")
+            : null;
 
           if (confirmBtn) {
             confirmBtn.addEventListener("click", function () {
@@ -2723,9 +2729,9 @@
               }
             });
           }
-          if (backdrop) {
-            backdrop.addEventListener("click", closeModal);
-          }
+          modal.addEventListener("click", function (e) {
+            if (e.target === modal) closeModal();
+          });
           document.addEventListener("keydown", function (e) {
             if (
               e.key === "Escape" &&

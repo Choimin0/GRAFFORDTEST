@@ -76,12 +76,29 @@
   function updateSwitchState(lang) {
     var switchNodes = document.querySelectorAll("[data-language-switch]");
     switchNodes.forEach(function (container) {
+      var isMobileSwitch = container.classList.contains("mobile-lang-switch");
+      var nextLang = lang === "en" ? "kr" : "en";
       var buttons = container.querySelectorAll("[data-lang-option]");
       buttons.forEach(function (btn) {
         var isActive = btn.getAttribute("data-lang-option") === lang;
         btn.classList.toggle("is-active", isActive);
         btn.setAttribute("aria-pressed", isActive ? "true" : "false");
       });
+      if (isMobileSwitch) {
+        container.removeAttribute("role");
+        container.removeAttribute("tabindex");
+        container.removeAttribute("aria-pressed");
+        container.setAttribute("aria-label", "Language switch");
+        return;
+      }
+      container.setAttribute("role", "button");
+      container.setAttribute("tabindex", "0");
+      container.setAttribute("aria-pressed", "false");
+      container.setAttribute(
+        "aria-label",
+        nextLang === "en" ? "Switch language to EN" : "Switch language to KR",
+      );
+      container.setAttribute("title", nextLang === "en" ? "EN" : "KR");
     });
   }
 
@@ -160,18 +177,41 @@
   }
 
   function handleSwitchClick(event) {
-    var btn = event.target.closest("[data-lang-option]");
-    if (!btn) return;
-    var lang = normalizeLanguage(btn.getAttribute("data-lang-option"));
-    if (lang === currentLang) return;
-    saveLanguage(lang);
-    applyLanguage(lang);
+    var switchContainer = event.target.closest("[data-language-switch]");
+    if (!switchContainer) return;
+
+    var isMobileSwitch = switchContainer.classList.contains("mobile-lang-switch");
+    if (isMobileSwitch) {
+      var btn = event.target.closest("[data-lang-option]");
+      if (!btn) return;
+      var lang = normalizeLanguage(btn.getAttribute("data-lang-option"));
+      if (lang === currentLang) return;
+      saveLanguage(lang);
+      applyLanguage(lang);
+      return;
+    }
+
+    var toggledLang = currentLang === "en" ? "kr" : "en";
+    saveLanguage(toggledLang);
+    applyLanguage(toggledLang);
+  }
+
+  function handleDesktopSwitchKeydown(event) {
+    var switchContainer = event.target.closest("[data-language-switch]");
+    if (!switchContainer) return;
+    if (switchContainer.classList.contains("mobile-lang-switch")) return;
+    if (event.key !== "Enter" && event.key !== " ") return;
+    event.preventDefault();
+    var toggledLang = currentLang === "en" ? "kr" : "en";
+    saveLanguage(toggledLang);
+    applyLanguage(toggledLang);
   }
 
   function initLanguageSwitch() {
     ensureMobileLanguageSwitch();
     document.addEventListener("click", handleScrollDownClick);
     document.addEventListener("click", handleSwitchClick);
+    document.addEventListener("keydown", handleDesktopSwitchKeydown);
     applyLanguage(getSavedLanguage());
   }
 
