@@ -1927,17 +1927,31 @@ body.index-feature-3-lightbox-open {
 :is(.story-page, .ground-page, .facilities-page, .reservation-page)
   .scroll-down-btn
   .story-scroll-line {
+  position: relative;
   display: block;
-  width: 2px;
-  height: 3.5rem;
+  width: 1px;
+  height: 10rem;
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+:is(.story-page, .ground-page, .facilities-page, .reservation-page)
+  .scroll-down-btn
+  .story-scroll-line::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 100%;
+  height: 40%;
   border-radius: 999px;
   background: linear-gradient(
     to bottom,
-    color-mix(in srgb, var(--gold-500) 42%, transparent),
-    var(--gold-500)
+    color-mix(in srgb, var(--stone-50) 30%, transparent),
+    var(--stone-50)
   );
   box-shadow: 0 0 8px color-mix(in srgb, var(--gold-500) 50%, transparent);
-  animation: storyScrollPulse 2s ease-in-out infinite;
+  animation: storyScrollDown 2.5s ease-in-out infinite;
 }
 
 .story-scroll-label {
@@ -2217,7 +2231,6 @@ body.index-feature-3-lightbox-open {
 .scroll-down-btn span {
   display: block;
   width: 14px;
-  height: 14px;
   margin: 0 auto;
   border-right: 2px solid var(--color-text-on-dark);
   border-bottom: 2px solid var(--color-text-on-dark);
@@ -5222,7 +5235,6 @@ main.content-section:has(> .site-footer.site-business-footer) {
     width: calc(100% - (2 * var(--layout-margin-side-mobile)));
     margin: var(--space-32) var(--layout-margin-side-mobile) var(--space-16);
   }
-
 }
 
 @media (min-width: 768px) {
@@ -11260,17 +11272,21 @@ main.content-section.confirm-page.reserve-check-main {
   }
 }
 
-@keyframes storyScrollPulse {
-  0%,
-  100% {
-    opacity: 0.72;
-    transform: scaleY(0.88);
-    transform-origin: top;
+@keyframes storyScrollDown {
+  0% {
+    top: 0;
+    opacity: 0.85;
   }
-  50% {
+  10% {
     opacity: 1;
-    transform: scaleY(1);
-    transform-origin: top;
+  }
+  75% {
+    top: 58%;
+    opacity: 1;
+  }
+  100% {
+    top: 58%;
+    opacity: 0;
   }
 }
 
@@ -14518,14 +14534,19 @@ main.content-section.confirm-page.admin-page {
   letter-spacing: 0.06em;
   white-space: nowrap;
 }
-.admin-gemini-form .admin-gemini-submit.btn.reserve-btn.confirm-pay-submit:hover:not(:disabled),
-.admin-gemini-form .admin-gemini-submit.btn.reserve-btn.confirm-pay-submit:focus-visible:not(:disabled) {
+.admin-gemini-form
+  .admin-gemini-submit.btn.reserve-btn.confirm-pay-submit:hover:not(:disabled),
+.admin-gemini-form
+  .admin-gemini-submit.btn.reserve-btn.confirm-pay-submit:focus-visible:not(
+    :disabled
+  ) {
   background: #3a322a;
   background-image: none;
   color: var(--stone-50);
   animation: none;
 }
-.admin-gemini-form .admin-gemini-submit.btn.reserve-btn.confirm-pay-submit:disabled {
+.admin-gemini-form
+  .admin-gemini-submit.btn.reserve-btn.confirm-pay-submit:disabled {
   opacity: 0.55;
   cursor: not-allowed;
 }
