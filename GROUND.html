@@ -834,9 +834,17 @@
               more.classList.remove("is-collapsed");
             }
             button.setAttribute("aria-expanded", String(!isCollapsed));
-            button.textContent = isCollapsed
+            button.classList.toggle("is-collapsed", isCollapsed);
+            button.classList.toggle("is-expanded", !isCollapsed);
+            var label = button.querySelector(".room-intro-readmore__label");
+            var nextLabel = isCollapsed
               ? button.dataset.moreLabel
               : button.dataset.lessLabel;
+            if (label) {
+              label.textContent = nextLabel;
+            } else {
+              button.textContent = nextLabel;
+            }
           }
 
           function createRoomMetaItem(title, value) {
@@ -1037,9 +1045,25 @@
                   ? "READ MORE"
                   : "더 읽기";
                 readMoreButton.dataset.lessLabel = isEnglish ? "CLOSE" : "접기";
+                var readMoreRuleBefore = document.createElement("span");
+                readMoreRuleBefore.className = "room-intro-readmore__rule";
+                readMoreRuleBefore.setAttribute("aria-hidden", "true");
+                var readMoreLabel = document.createElement("span");
+                readMoreLabel.className = "room-intro-readmore__label";
+                readMoreLabel.textContent = readMoreButton.dataset.moreLabel;
+                var readMoreRuleAfter = document.createElement("span");
+                readMoreRuleAfter.className = "room-intro-readmore__rule";
+                readMoreRuleAfter.setAttribute("aria-hidden", "true");
+                readMoreButton.append(
+                  readMoreRuleBefore,
+                  readMoreLabel,
+                  readMoreRuleAfter,
+                );
                 readMoreButton.addEventListener("click", function () {
                   var more = desc.querySelector(".room-intro-desc__more");
-                  setIntroCollapsed(desc, !more.hidden);
+                  var isCollapsed =
+                    more.hidden || more.classList.contains("is-collapsed");
+                  setIntroCollapsed(desc, !isCollapsed);
                 });
                 desc.insertAdjacentElement("afterend", readMoreButton);
                 setIntroCollapsed(desc, true);
