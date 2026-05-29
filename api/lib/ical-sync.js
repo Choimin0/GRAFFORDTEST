@@ -14,6 +14,14 @@ const ICAL_CACHE_TTL_MS = Math.max(
 
 var occupiedNightsCache = new Map();
 
+/** Airbnb → GRAFFORD import 일시 중단 (코드 유지, env로만 제어) */
+export function isIcalImportDisabled() {
+  var v = String(process.env.ICAL_IMPORT_DISABLED || "")
+    .trim()
+    .toLowerCase();
+  return v === "1" || v === "true" || v === "yes" || v === "on";
+}
+
 export function normalizeRoomType(raw) {
   var room = String(raw || "")
     .trim()
@@ -285,6 +293,9 @@ async function fetchIcsText(url) {
 }
 
 export async function fetchExternalOccupiedNights(room, options) {
+  if (isIcalImportDisabled()) {
+    return { nights: [], ok: true, configured: false, cached: false, disabled: true };
+  }
   var opts = options || {};
   var useCache = opts.useCache !== false;
   if (useCache) {
@@ -394,6 +405,9 @@ export function buildIcalCalendar(rows, rowDateFn) {
 }
 
 export async function getExternalBookingCalendarRows(pool) {
+  if (isIcalImportDisabled()) {
+    return [];
+  }
   try {
     var result = await pool.query(
       `SELECT room_type, external_uid, source, check_in_date, check_out_date, summary
@@ -430,6 +444,9 @@ export async function getExternalBookingCalendarRows(pool) {
 }
 
 export async function getExternalBookingOccupiedNights(pool, room) {
+  if (isIcalImportDisabled()) {
+    return [];
+  }
   try {
     var result = await pool.query(
       `SELECT check_in_date, check_out_date
@@ -460,6 +477,9 @@ export async function getExternalBookingOccupiedNights(pool, room) {
 }
 
 export async function hasExternalBookingOverlap(pool, roomName, checkIn, checkOut) {
+  if (isIcalImportDisabled()) {
+    return false;
+  }
   var room = normalizeRoomType(roomName);
   if (!ALLOWED_ROOMS.has(room)) {
     return false;
@@ -530,6 +550,17 @@ function syntheticUidForEvent(ev, room, url, index) {
 }
 
 export async function syncExternalBookingsForTarget(pool, room, url) {
+  if (isIcalImportDisabled()) {
+    return {
+      room: room,
+      url: url,
+      ok: false,
+      disabled: true,
+      error: "ical_import_disabled",
+      upserted: 0,
+      deleted: 0,
+    };
+  }
   var fetched = await fetchIcalEventsForUrl(url);
   if (!fetched.ok) {
     return {
@@ -618,6 +649,13 @@ export async function syncExternalBookingsForRoom(pool, room) {
 }
 
 export async function syncAllExternalBookings(pool, roomFilter) {
+  if (isIcalImportDisabled()) {
+    return {
+      targetCount: 0,
+      results: [],
+      disabled: true,
+    };
+  }
   var targets = getAllIcalImportTargets();
   if (roomFilter) {
     var room = normalizeRoomType(roomFilter);

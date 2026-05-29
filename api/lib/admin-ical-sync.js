@@ -4,9 +4,24 @@ import {
   getExternalBookingCalendarRows,
   getAllIcalImportTargets,
   normalizeRoomType,
+  isIcalImportDisabled,
 } from "./ical-sync.js";
 
 export async function handleAdminIcalSync(res, pool, body) {
+  if (isIcalImportDisabled()) {
+    json(res, 200, {
+      ok: true,
+      mode: "admin",
+      disabled: true,
+      message: "에어비앤비 iCal import가 일시 중단되어 있습니다. (ICAL_IMPORT_DISABLED)",
+      targetCount: 0,
+      successCount: 0,
+      failedCount: 0,
+      results: [],
+      externalRows: [],
+    });
+    return;
+  }
   var roomFilter = normalizeRoomType(body.room || "");
   var targets = getAllIcalImportTargets();
   if (roomFilter) {

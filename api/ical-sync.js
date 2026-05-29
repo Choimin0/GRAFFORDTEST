@@ -3,6 +3,7 @@ import {
   syncAllExternalBookings,
   getAllIcalImportTargets,
   normalizeRoomType,
+  isIcalImportDisabled,
 } from "./lib/ical-sync.js";
 
 function isAuthorizedSync(req) {
@@ -65,6 +66,17 @@ export default async function handler(req, res) {
     targets = targets.filter(function (t) {
       return t.room === roomFilter;
     });
+  }
+
+  if (isIcalImportDisabled()) {
+    json(res, 200, {
+      ok: true,
+      disabled: true,
+      message: "iCal import is temporarily disabled (ICAL_IMPORT_DISABLED)",
+      targetCount: 0,
+      results: [],
+    });
+    return;
   }
 
   if (!targets.length) {
