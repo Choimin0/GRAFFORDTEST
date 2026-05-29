@@ -138,6 +138,24 @@ export async function releaseBookingHold(pool, holdId) {
   return true;
 }
 
+export async function getBookingHoldByReservationNumber(pool, reservationNumber) {
+  await cleanupExpiredBookingHolds(pool);
+  var norm = String(reservationNumber || "").trim();
+  if (!norm) {
+    return null;
+  }
+  var result = await pool.query(
+    `SELECT hold_id, room_type, check_in_date, check_out_date, reservation_number
+     FROM ${BOOKING_HOLD_TABLE}
+     WHERE reservation_number = $1
+       AND expires_at > NOW()
+     ORDER BY expires_at DESC
+     LIMIT 1`,
+    [norm],
+  );
+  return (result.rows && result.rows[0]) || null;
+}
+
 export async function hasActiveHoldOverlap(
   pool,
   roomName,

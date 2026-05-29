@@ -681,6 +681,16 @@
             return "/api/reservations";
           }
 
+          function portoneWebhookApiUrl() {
+            if (typeof window !== "undefined" && window.__GRAFFORD_API_BASE__) {
+              return (
+                String(window.__GRAFFORD_API_BASE__).replace(/\/$/, "") +
+                "/api/portone-webhook"
+              );
+            }
+            return window.location.origin + "/api/portone-webhook";
+          }
+
           function roomRateApiUrl() {
             var base = "";
             if (typeof window !== "undefined" && window.__GRAFFORD_API_BASE__) {
@@ -1133,6 +1143,8 @@
                 window.location.origin +
                 window.location.pathname.replace("payment.html", "") +
                 "payment.html",
+              confirmUrl: portoneWebhookApiUrl(),
+              noticeUrls: [portoneWebhookApiUrl()],
             };
 
             // 네이버페이: easyPay + naverpay 상품 정보
@@ -1180,6 +1192,8 @@
                 body: JSON.stringify({
                   paymentId: response.paymentId,
                   expectedAmount: finalAmount,
+                  paymentToken: response.paymentToken || null,
+                  txId: response.txId || null,
                 }),
               });
               var verifyData = await verifyRes.json();
@@ -1922,6 +1936,16 @@
             return "/api/reservations";
           }
 
+          function portoneWebhookApiUrl() {
+            if (typeof window !== "undefined" && window.__GRAFFORD_API_BASE__) {
+              return (
+                String(window.__GRAFFORD_API_BASE__).replace(/\/$/, "") +
+                "/api/portone-webhook"
+              );
+            }
+            return window.location.origin + "/api/portone-webhook";
+          }
+
           function roomRateApiUrl() {
             var base = "";
             if (typeof window !== "undefined" && window.__GRAFFORD_API_BASE__) {
@@ -2407,6 +2431,8 @@
                 window.location.origin +
                 window.location.pathname.replace("payment.html", "") +
                 "payment.html",
+              confirmUrl: portoneWebhookApiUrl(),
+              noticeUrls: [portoneWebhookApiUrl()],
             };
 
             // Naver Pay: easyPay + naverpay item info
@@ -2454,6 +2480,8 @@
                 body: JSON.stringify({
                   paymentId: response.paymentId,
                   expectedAmount: finalAmount,
+                  paymentToken: response.paymentToken || null,
+                  txId: response.txId || null,
                 }),
               });
               var verifyData = await verifyRes.json();

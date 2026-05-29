@@ -67,6 +67,14 @@ async function main() {
   );
   console.log("OK payment-confirm POST validation →", postNoId.status);
 
+  const portoneWebhook = await import("../api/portone-webhook.js");
+  const webhookBad = await invoke(portoneWebhook.default, "POST", { type: "test" });
+  assert(
+    webhookBad.status === 200 || webhookBad.status === 503,
+    "portone-webhook accepts POST",
+  );
+  console.log("OK portone-webhook POST →", webhookBad.status);
+
   const admin401 = await invoke(adminHandler, "POST", {
     resource: "reservations",
     action: "list",

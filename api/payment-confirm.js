@@ -1,9 +1,21 @@
 /**
  * GET  /api/payment-confirm — PortOne 결제 UI 설정 (구 payment-config)
- * POST /api/payment-confirm — PortOne v2 결제 서버 사이드 검증
+ * POST /api/payment-confirm — PortOne v2 결제 서버 사이드 검증 (+ 수동 승인)
  *
- * POST Body: { paymentId: string, expectedAmount: number }
+ * POST Body: {
+ *   paymentId: string,
+ *   expectedAmount: number,
+ *   paymentToken?: string,  // 수동 승인 채널
+ *   txId?: string
+ * }
  */
+import {
+  confirmPortonePayment,
+  extractPgTxIdFromPayment,
+  extractPortonePaidAmount,
+  fetchPortonePayment,
+} from "./lib/portone-client.js";
+
 function sendPaymentConfig(res) {
   res.setHeader("Content-Type", "application/json");
   res.setHeader("Cache-Control", "no-store");
@@ -51,6 +63,7 @@ export default async function handler(req, res) {
 
   res.setHeader("Content-Type", "application/json");
   res.setHeader("Cache-Control", "no-store");
+  res.setHeader("Access-Control-Allow-Origin", "*");
 
   if (req.method !== "POST") {
     res.statusCode = 405;
@@ -100,6 +113,9 @@ export default async function handler(req, res) {
   var paymentId = String(body.paymentId || "").trim();
   var expectedAmount =
     body.expectedAmount != null ? Number(body.expectedAmount) : null;
+  var paymentToken =
+    body.paymentToken != null ? String(body.paymentToken).trim() : "";
+  var txId = body.txId != null ? String(body.txId).trim() : "";
 
   if (!paymentId) {
     res.statusCode = 400;
@@ -108,33 +124,58 @@ export default async function handler(req, res) {
   }
 
   try {
-    var portoneRes = await fetch(
-      "https://api.portone.io/payments/" + encodeURIComponent(paymentId),
-      {
-        headers: {
-          Authorization: "PortOne " + apiSecret,
-        },
-      },
-    );
+    if (paymentToken) {
+      var confirmResult = await confirmPortonePayment({
+        paymentId: paymentId,
+        paymentToken: paymentToken,
+        txId: txId,
+      });
+      if (!confirmResult.ok && !confirmResult.skipped) {
+        console.error(
+          "[payment-confirm] manual confirm failed",
+          paymentId,
+          confirmResult.error,
+        );
+        res.statusCode = 400;
+        res.end(
+          JSON.stringify({
+            ok: false,
+            error:
+              confirmResult.error ||
+              "결제 승인(수동 승인)에 실패했습니다. 잠시 후 다시 시도해 주세요.",
+            detail: confirmResult.detail || null,
+          }),
+        );
+        return;
+      }
+      if (confirmResult.ok) {
+        console.log(
+          "[payment-confirm] manual confirm succeeded",
+          paymentId,
+          confirmResult.alreadyPaid ? "(already paid)" : "",
+        );
+      }
+    }
 
-    if (!portoneRes.ok) {
-      var errData = {};
-      try {
-        errData = await portoneRes.json();
-      } catch (_) {}
-      console.error("[payment-confirm] PortOne API error", portoneRes.status, errData);
+    var paymentLookup = await fetchPortonePayment(paymentId);
+    if (!paymentLookup.ok) {
+      console.error(
+        "[payment-confirm] PortOne API error",
+        paymentId,
+        paymentLookup.error,
+      );
       res.statusCode = 400;
       res.end(
         JSON.stringify({
           ok: false,
-          error: "PortOne API 조회 실패 (HTTP " + portoneRes.status + "): " + (errData.message || errData.error || JSON.stringify(errData)),
-          detail: errData,
+          error: paymentLookup.error,
+          detail: paymentLookup.detail || null,
         }),
       );
       return;
     }
 
-    var payment = await portoneRes.json();
+    var payment = paymentLookup.data;
 
     if (payment.status !== "PAID") {
       res.statusCode = 400;
@@ -148,20 +189,7 @@ export default async function handler(req, res) {
       return;
     }
 
-    // PortOne v2 응답의 amount 구조는 PG사에 따라 다를 수 있으므로 방어적으로 파싱합니다.
-    // { amount: { total: N } } 또는 { amount: N } 또는 { totalAmount: N } 형태 모두 대응.
-    var actualAmount = null;
-    if (payment.amount != null) {
-      if (typeof payment.amount === "object" && payment.amount.total != null) {
-        actualAmount = Number(payment.amount.total);
-      } else if (typeof payment.amount === "number") {
-        actualAmount = Number(payment.amount);
-      }
-    }
-    if (actualAmount == null && payment.totalAmount != null) {
-      actualAmount = Number(payment.totalAmount);
-    }
-
+    var actualAmount = extractPortonePaidAmount(payment);
     if (
       expectedAmount !== null &&
       actualAmount !== null &&
@@ -179,31 +207,19 @@ export default async function handler(req, res) {
       return;
     }
 
-    // PortOne v2: PG사 거래번호(TID)는 transactions[0].pgTxId 에 위치합니다.
-    // KG이니시스의 경우 transactions 배열의 첫 번째 항목에 있습니다.
-    var pgTid = null;
-    if (
-      payment.transactions &&
-      Array.isArray(payment.transactions) &&
-      payment.transactions.length > 0
-    ) {
-      var firstTx = payment.transactions[0];
-      // pgTxId 또는 txId 또는 id 필드 순서로 시도
-      pgTid =
-        (firstTx.pgTxId && String(firstTx.pgTxId)) ||
-        (firstTx.txId && String(firstTx.txId)) ||
-        null;
-    }
-    if (!pgTid && payment.pgTxId) {
-      pgTid = String(payment.pgTxId);
-    }
+    var pgTid = extractPgTxIdFromPayment(payment);
 
     console.log(
-      "[payment-confirm] paymentId:", paymentId,
-      "| status:", payment.status,
-      "| actualAmount:", actualAmount,
-      "| pgTid:", pgTid,
-      "| transactions count:", (payment.transactions && payment.transactions.length) || 0,
+      "[payment-confirm] paymentId:",
+      paymentId,
+      "| status:",
+      payment.status,
+      "| actualAmount:",
+      actualAmount,
+      "| pgTid:",
+      pgTid,
+      "| transactions count:",
+      (payment.transactions && payment.transactions.length) || 0,
     );
 
     res.statusCode = 200;
