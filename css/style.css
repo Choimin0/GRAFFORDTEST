@@ -1355,7 +1355,7 @@ body.index-feature-3-lightbox-open {
     justify-content: flex-start;
     min-height: auto;
     margin: 0;
-    padding: var(--space-40) var(--layout-margin-side-mobile) var(--space-64);
+    padding: 0 var(--layout-margin-side-mobile) var(--space-64);
     background: var(--stone-50);
     border: 0;
     border-top: 1px solid var(--stone-200);
@@ -1451,8 +1451,25 @@ body.index-feature-3-lightbox-open {
     order: 2;
     align-items: flex-start;
     justify-content: center;
-    padding: var(--space-40) var(--space-16);
+    padding: var(--space-40) var(--space-16) 0;
     text-align: left;
+  }
+
+  /* feature 3 ↔ reservation CTA: 모바일 2rem (DOM상 feature-4는 hidden) */
+  .features--index
+    .feature-index-3
+    + .feature-index-4
+    + .feature-index-reservation-cta {
+    margin-top: calc(3rem - var(--layout-feature-stack-gap));
+    padding-top: 0;
+  }
+
+  .features--index
+    .feature-index-3
+    + .feature-index-4
+    + .feature-index-reservation-cta
+    .feature-text {
+    margin-top: 0;
   }
 
   .features--index .feature-index-3 .feature-text::before {
@@ -2979,6 +2996,16 @@ body.index-feature-3-lightbox-open {
   padding-top: 0 !important;
 }
 
+@media (max-width: 767px) {
+  /* 100vw 풀블리드는 스크롤바 폭만큼 가로 넘침 → 모바일은 100% */
+  .rooms-features {
+    width: 100%;
+    max-width: 100%;
+    margin-left: 0;
+    margin-right: 0;
+  }
+}
+
 .rooms-features .room-feature .reserve-btn {
   margin-top: 0.75rem;
   align-self: flex-start;
@@ -2986,14 +3013,6 @@ body.index-feature-3-lightbox-open {
 
 .rooms-features .room-feature .feature-heading {
   color: var(--color-text-primary);
-}
-
-.ground-section-label__pc {
-  display: none;
-}
-
-.ground-section-label__mobile {
-  display: inline;
 }
 
 @media (min-width: 768px) {
@@ -3034,14 +3053,6 @@ body.index-feature-3-lightbox-open {
     font-weight: 400;
     letter-spacing: 0.42em;
     line-height: 1.4;
-  }
-
-  .ground-section-label__pc {
-    display: inline;
-  }
-
-  .ground-section-label__mobile {
-    display: none;
   }
 
   .ground-room-thumbs
@@ -5233,22 +5244,136 @@ main.content-section:has(> .site-footer.site-business-footer) {
 }
 
 @media (max-width: 767px) {
-  .ground-mobile-section-head.payment-section-head {
-    display: flex;
+  .ground-page {
+    overflow-x: clip;
+    /* 모바일 좌우 거터: layout-margin-side-mobile(16px)의 1/2 */
+    --ground-mobile-gutter: var(--space-16);
+    --ground-mobile-section-head-gap: var(--space-16);
+    --ground-mobile-section-inset-gap: var(--space-32);
+    --ground-mobile-section-band-gap: calc(
+      var(--ground-mobile-section-inset-gap) + var(--ground-mobile-section-head-gap)
+    );
+    --ground-mobile-room-surface: var(--color-surface-elevated);
+  }
+
+  .ground-page .lang-kr,
+  .ground-page .lang-en {
+    max-width: 100%;
+    overflow-x: clip;
+  }
+
+  .ground-page .hero-header--story-copy {
+    left: var(--ground-mobile-gutter);
+    right: var(--ground-mobile-gutter);
     width: auto;
-    max-width: var(--layout-content-max);
-    margin: var(--space-24) var(--layout-margin-side-mobile) var(--space-16);
+    max-width: none;
+  }
+
+  .ground-page .scroll-down-btn {
+    right: var(--ground-mobile-gutter);
+  }
+
+  .ground-page main.content-section {
+    width: 100%;
+    max-width: 100%;
+    padding-left: 0;
+    padding-right: 0;
+    overflow-x: clip;
+    background: var(--ground-mobile-room-surface);
+  }
+
+  .ground-page .site-footer.site-business-footer {
+    width: 100%;
+    max-width: 100%;
+    margin-left: 0;
+    margin-right: 0;
+  }
+
+  .ground-page .content-section .features .room-feature .feature-text--room,
+  .ground-page .content-section .features .room-feature .room-image-slot,
+  .ground-page .content-section .features .room-feature .room-meta-grid,
+  .ground-page .content-section .features .room-feature .room-facility-list {
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .ground-page .content-section .features .room-feature .feature-text {
+    width: calc(100% - (2 * var(--ground-mobile-gutter)));
+    margin-left: var(--ground-mobile-gutter);
+    margin-right: var(--ground-mobile-gutter);
     box-sizing: border-box;
   }
 
-  .ground-room-thumbs + .ground-mobile-section-head.payment-section-head {
-    margin-top: var(--space-16);
-    margin-bottom: 0;
+  .ground-page .content-section .features .room-feature .feature-text--room {
+    padding-left: 0;
+    padding-right: 0;
   }
 
-  .rooms-features > .ground-mobile-section-head.payment-section-head {
-    width: calc(100% - (2 * var(--layout-margin-side-mobile)));
-    margin: var(--space-32) var(--layout-margin-side-mobile) var(--space-16);
+  .ground-page .ground-mobile-section-head .payment-section-head__label {
+    white-space: normal;
+  }
+
+  .ground-page .ground-room-thumbs {
+    padding-left: var(--ground-mobile-gutter);
+    padding-right: var(--ground-mobile-gutter);
+  }
+
+  .ground-page .ground-mobile-section-head.payment-section-head {
+    display: flex;
+    width: auto;
+    max-width: var(--layout-content-max);
+    margin: var(--space-24) var(--ground-mobile-gutter)
+      var(--ground-mobile-section-head-gap);
+    box-sizing: border-box;
+  }
+
+  .ground-mobile-section-head.payment-section-head:has(+ .ground-room-thumbs) {
+    margin-bottom: var(--ground-mobile-section-head-gap);
+  }
+
+  .ground-room-thumbs {
+    padding-top: var(--ground-mobile-section-inset-gap);
+    padding-bottom: 0;
+  }
+
+  .ground-room-thumbs ~ .content-section .features.rooms-features {
+    padding-top: 0;
+    gap: 0;
+  }
+
+  .ground-page .ground-room-thumbs + .ground-mobile-section-head.payment-section-head,
+  .ground-page
+    .rooms-features
+    > .ground-mobile-section-head.payment-section-head {
+    width: 100%;
+    max-width: none;
+    margin-top: 0;
+    margin-bottom: 0;
+    margin-left: 0;
+    margin-right: 0;
+    padding: var(--ground-mobile-section-band-gap) var(--ground-mobile-gutter);
+    background-color: var(--ground-mobile-room-surface);
+    box-sizing: border-box;
+  }
+
+  .ground-page
+    .ground-room-thumbs
+    + .ground-mobile-section-head
+    + main.content-section {
+    padding-top: 0;
+  }
+
+  .ground-page
+    .rooms-features
+    > .room-feature:has(+ .ground-mobile-section-head) {
+    padding-bottom: 0;
+  }
+
+  .ground-page
+    .rooms-features
+    > .ground-mobile-section-head
+    + .room-feature {
+    padding-top: 0;
   }
 }
 
@@ -10618,6 +10743,39 @@ main.content-section.confirm-page.reserve-check-main {
 
 .delete-complete-band .reserve-check-page-band__right {
   max-width: min(100%, 22rem);
+}
+
+@media (max-width: 767px) {
+  main.reserve-check-main .reserve-check-page-band,
+  .delete-complete-page .reserve-check-page-band {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto auto;
+    align-items: start;
+    justify-items: stretch;
+    gap: var(--space-16);
+    flex-wrap: nowrap;
+  }
+
+  main.reserve-check-main .reserve-check-page-band__left,
+  .delete-complete-page .reserve-check-page-band__left {
+    flex: none;
+    min-width: 0;
+    width: 100%;
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  main.reserve-check-main .reserve-check-page-band__booking-block,
+  .delete-complete-page .reserve-check-page-band__booking-block {
+    grid-column: 1;
+    grid-row: 2;
+    justify-self: end;
+    align-self: end;
+    flex: none;
+    width: auto;
+    max-width: min(100%, 22rem);
+  }
 }
 
 .reserve-check-content {

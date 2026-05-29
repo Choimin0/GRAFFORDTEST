@@ -83,6 +83,12 @@
             >
               —
             </p>
+            <p
+              class="reserve-check-page-band__band-room"
+              id="reserve-check-band-room-kr"
+            >
+              —
+            </p>
           </div>
         </header>
 
@@ -336,11 +342,20 @@
           }
           var bandKr = document.getElementById("reserve-check-booking-no-kr");
           var bandEn = document.getElementById("reserve-check-booking-no-en");
+          var bandRoomKr = document.getElementById("reserve-check-band-room-kr");
+          var bandRoomEn = document.getElementById("reserve-check-band-room-en");
+          var bandRoomLabel = ROOM_LABEL[room] || room || "—";
           if (bandKr) {
             bandKr.textContent = orderNo || "—";
           }
           if (bandEn) {
             bandEn.textContent = orderNo || "—";
+          }
+          if (bandRoomKr) {
+            bandRoomKr.textContent = bandRoomLabel;
+          }
+          if (bandRoomEn) {
+            bandRoomEn.textContent = bandRoomLabel;
           }
           // 표시 금액 = reservations.total_amount (DB 저장값). 재계산 없음.
           var paidAmount =
@@ -653,6 +668,12 @@
             <p
               class="reserve-check-page-band__booking-no"
               id="reserve-check-booking-no-en"
+            >
+              —
+            </p>
+            <p
+              class="reserve-check-page-band__band-room"
+              id="reserve-check-band-room-en"
             >
               —
             </p>
