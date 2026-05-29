@@ -178,6 +178,17 @@
             </h1>
           </div>
           <dl class="admin-dashboard-metrics" aria-label="오늘 예약 요약">
+            <div class="admin-dashboard-metric admin-dashboard-metric--ical">
+              <button
+                type="button"
+                id="admin-ical-refresh-btn"
+                class="admin-ical-refresh-btn btn reserve-btn admin-refresh-btn"
+                aria-label="에어비앤비 달력 새로고침"
+                title="에어비앤비 iCal 동기화"
+              >
+                ↻
+              </button>
+            </div>
             <div class="admin-dashboard-metric">
               <dt>객실 점유</dt>
               <dd id="admin-metric-occupancy">0 / 4</dd>
@@ -1147,6 +1158,7 @@
         var metricOccupancyEl = document.getElementById(
           "admin-metric-occupancy",
         );
+        var icalRefreshBtn = document.getElementById("admin-ical-refresh-btn");
         var metricCheckinEl = document.getElementById("admin-metric-checkin");
         var metricCheckoutEl = document.getElementById("admin-metric-checkout");
         var roomWeekPrevBtn = document.getElementById("admin-room-week-prev");
@@ -1483,9 +1495,13 @@
 
         function getRoomRows(room) {
           var roomName = String(room || "").toUpperCase();
-          return getReservationRows().filter(function (row) {
-            return String(row.roomType || "").toUpperCase() === roomName;
-          });
+          return getReservationRows()
+            .filter(function (row) {
+              return String(row.roomType || "").toUpperCase() === roomName;
+            })
+            .sort(function (a, b) {
+              return (a.isExternal ? 1 : 0) - (b.isExternal ? 1 : 0);
+            });
         }
 
         function getRoomStatusForDate(room, ymd) {
@@ -1505,13 +1521,25 @@
             }
           });
           if (checkinRow) {
-            return { state: "checkin", label: "체크인", row: checkinRow };
+            return {
+              state: "checkin",
+              label: checkinRow.isExternal ? "에어비앤비" : "체크인",
+              row: checkinRow,
+            };
           }
           if (stayRow) {
-            return { state: "stay", label: "재실", row: stayRow };
+            return {
+              state: "stay",
+              label: stayRow.isExternal ? "에어비앤비" : "재실",
+              row: stayRow,
+            };
           }
           if (checkoutRow) {
-            return { state: "checkout", label: "체크아웃", row: checkoutRow };
+            return {
+              state: "checkout",
+              label: checkoutRow.isExternal ? "에어비앤비" : "체크아웃",
+              row: checkoutRow,
+            };
           }
           return { state: "vacant", label: "공실", row: null };
         }
@@ -1920,21 +1948,36 @@
               "</span>" +
               "</div>";
             if (row) {
-              card.innerHTML +=
-                "<dl class='admin-calendar-detail-kv'>" +
-                "<div><dt>예약번호</dt><dd>" +
-                (row.reservationNumber || "—") +
-                "</dd></div>" +
-                "<div><dt>예약자명</dt><dd>" +
-                (row.guestName || "—") +
-                "</dd></div>" +
-                "<div><dt>투숙 일정</dt><dd>" +
-                formatReservationSchedule(row) +
-                "</dd></div>" +
-                "<div><dt>총 금액</dt><dd>" +
-                formatKRW(row.totalAmount || 0) +
-                "</dd></div>" +
-                "</dl>";
+              if (row.isExternal) {
+                card.innerHTML +=
+                  "<dl class='admin-calendar-detail-kv'>" +
+                  "<div><dt>연동 채널</dt><dd>" +
+                  (row.guestName || "외부 예약") +
+                  "</dd></div>" +
+                  "<div><dt>일정</dt><dd>" +
+                  formatReservationSchedule(row) +
+                  "</dd></div>" +
+                  "<div><dt>메모</dt><dd>" +
+                  (row.guestRequest || "—") +
+                  "</dd></div>" +
+                  "</dl>";
+              } else {
+                card.innerHTML +=
+                  "<dl class='admin-calendar-detail-kv'>" +
+                  "<div><dt>예약번호</dt><dd>" +
+                  (row.reservationNumber || "—") +
+                  "</dd></div>" +
+                  "<div><dt>예약자명</dt><dd>" +
+                  (row.guestName || "—") +
+                  "</dd></div>" +
+                  "<div><dt>투숙 일정</dt><dd>" +
+                  formatReservationSchedule(row) +
+                  "</dd></div>" +
+                  "<div><dt>총 금액</dt><dd>" +
+                  formatKRW(row.totalAmount || 0) +
+                  "</dd></div>" +
+                  "</dl>";
+              }
             }
             calendarDetailList.appendChild(card);
           });
@@ -5270,6 +5313,53 @@
             });
         }
 
+        function syncAirbnbCalendar() {
+          var auth = getAuthPayload();
+          if (!auth.adminId || !auth.adminPw) {
+            showMessage("관리자 로그인이 필요합니다.");
+            return Promise.resolve();
+          }
+          if (icalRefreshBtn) {
+            icalRefreshBtn.disabled = true;
+            icalRefreshBtn.classList.add("is-loading");
+            icalRefreshBtn.setAttribute("aria-busy", "true");
+          }
+          showMessage("에어비앤비 달력을 동기화하는 중입니다.");
+          return adminPost("ical-sync", {
+            adminId: auth.adminId,
+            adminPw: auth.adminPw,
+          })
+            .then(function (r) {
+              return r.json().then(function (data) {
+                return { ok: r.ok, data: data || {} };
+              });
+            })
+            .then(function (result) {
+              if (!result.ok || !result.data.ok) {
+                throw new Error(
+                  result.data.error || "에어비앤비 달력 동기화에 실패했습니다.",
+                );
+              }
+              return loadList();
+            })
+            .then(function () {
+              showMessage("에어비앤비 달력 동기화가 완료되었습니다.");
+            })
+            .catch(function (err) {
+              showMessage(
+                (err && err.message) ||
+                  "에어비앤비 달력 동기화 중 오류가 발생했습니다.",
+              );
+            })
+            .finally(function () {
+              if (icalRefreshBtn) {
+                icalRefreshBtn.disabled = false;
+                icalRefreshBtn.classList.remove("is-loading");
+                icalRefreshBtn.removeAttribute("aria-busy");
+              }
+            });
+        }
+
         function loadList() {
           var auth = getAuthPayload();
           return adminPost("reservations", {
@@ -5584,6 +5674,12 @@
               1,
             );
             renderStatusCalendar();
+          });
+        }
+
+        if (icalRefreshBtn) {
+          icalRefreshBtn.addEventListener("click", function () {
+            syncAirbnbCalendar();
           });
         }
 

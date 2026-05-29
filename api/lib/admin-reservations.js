@@ -1,5 +1,6 @@
 import { decryptBookingPiiResponse } from "./pii-crypto.js";
 import { json } from "./admin-common.js";
+import { getExternalBookingCalendarRows } from "./ical-sync.js";
 
 const BOOKING_TABLE = "booking";
 
@@ -201,7 +202,7 @@ export async function handleAdminReservations(res, pool, body) {
         WHERE status IN ('confirm', 'completed')
         ORDER BY check_in_date ASC, created_at DESC`,
       );
-      result.calendarRows = (calSel.rows || []).map(function (row) {
+      var bookingCalendarRows = (calSel.rows || []).map(function (row) {
         var calPii = decryptBookingPiiResponse(row);
         return {
           reservationNumber: row.reservation_number,
@@ -226,6 +227,8 @@ export async function handleAdminReservations(res, pool, body) {
           bookingLocale: row.booking_locale || "kr",
         };
       });
+      var externalCalendarRows = await getExternalBookingCalendarRows(pool);
+      result.calendarRows = bookingCalendarRows.concat(externalCalendarRows);
     }
 
     json(res, 200, result);

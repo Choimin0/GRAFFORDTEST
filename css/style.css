@@ -3837,6 +3837,7 @@ section ul li {
 /* 관리/결제 등 통일 버튼: grafford-beige2 (GROUND 예약하기는 data-reserve-room 별도 스타일) */
 .admin-search-btn.btn.reserve-btn,
 .admin-refresh-btn.btn.reserve-btn,
+.admin-ical-refresh-btn.btn.reserve-btn,
 .admin-page-reset-btn.btn.reserve-btn,
 .reserve-cta.btn.reserve-btn,
 .confirm-pay-submit.btn.reserve-btn {
@@ -3859,6 +3860,8 @@ section ul li {
 .admin-search-btn.btn.reserve-btn:focus-visible,
 .admin-refresh-btn.btn.reserve-btn:hover,
 .admin-refresh-btn.btn.reserve-btn:focus-visible,
+.admin-ical-refresh-btn.btn.reserve-btn:hover,
+.admin-ical-refresh-btn.btn.reserve-btn:focus-visible,
 .admin-page-reset-btn.btn.reserve-btn:hover,
 .admin-page-reset-btn.btn.reserve-btn:focus-visible,
 .reserve-cta.btn.reserve-btn:hover,
@@ -12168,9 +12171,37 @@ main.content-section.confirm-page.admin-page {
 }
 .admin-dashboard-metrics {
   display: grid;
-  grid-template-columns: repeat(3, minmax(7rem, 1fr));
+  grid-template-columns: auto repeat(3, minmax(7rem, 1fr));
   gap: var(--space-16);
   margin: 0;
+  align-items: end;
+}
+.admin-dashboard-metric--ical {
+  border-left: none;
+  padding-left: 0;
+  display: flex;
+  align-items: flex-end;
+  padding-bottom: 0.15rem;
+}
+.admin-ical-refresh-btn {
+  min-width: 2.5rem;
+  width: 2.5rem;
+  height: 2.5rem;
+  padding: 0;
+  font-size: 1.15rem;
+  line-height: 1;
+  letter-spacing: 0;
+}
+.admin-ical-refresh-btn.is-loading {
+  animation: admin-ical-refresh-spin 0.85s linear infinite;
+}
+@keyframes admin-ical-refresh-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
 }
 .admin-dashboard-metric {
   min-width: 0;
@@ -13041,6 +13072,11 @@ main.content-section.confirm-page.admin-page {
     padding-top: var(--space-12);
     border-left: 0;
     border-top: 1px solid var(--stone-200);
+  }
+  .admin-dashboard-metric--ical {
+    border-top: 0;
+    padding-top: 0;
+    justify-content: flex-start;
   }
   .admin-dashboard-aside {
     position: static;

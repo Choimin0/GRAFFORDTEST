@@ -2,7 +2,7 @@
  * POST /api/admin
  *
  * 관리자 API 단일 게이트웨이.
- * Body.resource: reservations | sales | sales-analyze | payment-cancel | room-status | room-rate | checkin-alimtalk
+ * Body.resource: reservations | sales | sales-analyze | payment-cancel | room-status | room-rate | checkin-alimtalk | ical-sync
  */
 import {
   getPool,
@@ -17,6 +17,7 @@ import { handleAdminPaymentCancel } from "./lib/admin-payment-cancel.js";
 import { handleAdminRoomStatus } from "./lib/admin-room-status.js";
 import { handleAdminRoomRate } from "./lib/admin-room-rate.js";
 import { handleAdminCheckinAlimtalk } from "./lib/admin-checkin-alimtalk.js";
+import { handleAdminIcalSync } from "./lib/admin-ical-sync.js";
 
 const RESOURCE_HANDLERS = {
   reservations: handleAdminReservations,
@@ -26,6 +27,7 @@ const RESOURCE_HANDLERS = {
   "room-status": handleAdminRoomStatus,
   "room-rate": handleAdminRoomRate,
   "checkin-alimtalk": handleAdminCheckinAlimtalk,
+  "ical-sync": handleAdminIcalSync,
 };
 
 export default async function handler(req, res) {
@@ -69,7 +71,7 @@ export default async function handler(req, res) {
     json(res, 400, {
       ok: false,
       error:
-        "resource가 필요합니다. (reservations, sales, sales-analyze, payment-cancel, room-status, room-rate, checkin-alimtalk)",
+        "resource가 필요합니다. (reservations, sales, sales-analyze, payment-cancel, room-status, room-rate, checkin-alimtalk, ical-sync)",
     });
     return;
   }

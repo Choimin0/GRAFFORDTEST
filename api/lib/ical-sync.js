@@ -393,6 +393,42 @@ export function buildIcalCalendar(rows, rowDateFn) {
   return lines.join("\r\n") + "\r\n";
 }
 
+export async function getExternalBookingCalendarRows(pool) {
+  try {
+    var result = await pool.query(
+      `SELECT room_type, external_uid, source, check_in_date, check_out_date, summary
+       FROM ${EXTERNAL_BOOKING_TABLE}
+       WHERE check_out_date > CURRENT_DATE - INTERVAL '1 day'
+       ORDER BY check_in_date ASC, room_type ASC`,
+    );
+    return (result.rows || []).map(function (row) {
+      var source = String(row.source || "ical").trim().toLowerCase();
+      var uid = String(row.external_uid || "").trim();
+      return {
+        reservationNumber:
+          "EXT-" + (uid ? uid.slice(0, 24) : "unknown"),
+        guestName: source === "airbnb" ? "Airbnb" : "외부 예약",
+        contact: "",
+        email: "",
+        roomType: row.room_type,
+        checkIn: rowDateToYMD(row.check_in_date),
+        checkOut: rowDateToYMD(row.check_out_date),
+        guestCount: null,
+        totalAmount: 0,
+        guestRequest: row.summary || "",
+        paymentMethod: "",
+        isExternal: true,
+        externalSource: source,
+      };
+    });
+  } catch (e) {
+    if (e && (e.code === "42P01" || e.code === "42703")) {
+      return [];
+    }
+    throw e;
+  }
+}
+
 export async function getExternalBookingOccupiedNights(pool, room) {
   try {
     var result = await pool.query(
