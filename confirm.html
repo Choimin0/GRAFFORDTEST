@@ -86,25 +86,25 @@
                 </p>
               </div>
               <div class="reserve-check-page-band__right-col">
-              <p class="reserve-check-page-band__label">STEP_2</p>
-              <div
-                class="payment-page-step-indicator"
-                role="img"
-                aria-label="예약 진행 3단계 중 2단계, 결제 전 확인"
-              >
-                <span
-                  class="payment-page-step-indicator__dot"
-                  aria-hidden="true"
-                ></span>
-                <span
-                  class="payment-page-step-indicator__dot payment-page-step-indicator__dot--current"
-                  aria-hidden="true"
-                ></span>
-                <span
-                  class="payment-page-step-indicator__dot"
-                  aria-hidden="true"
-                ></span>
-              </div>
+                <p class="reserve-check-page-band__label">STEP_2</p>
+                <div
+                  class="payment-page-step-indicator"
+                  role="img"
+                  aria-label="예약 진행 3단계 중 2단계, 결제 전 확인"
+                >
+                  <span
+                    class="payment-page-step-indicator__dot"
+                    aria-hidden="true"
+                  ></span>
+                  <span
+                    class="payment-page-step-indicator__dot payment-page-step-indicator__dot--current"
+                    aria-hidden="true"
+                  ></span>
+                  <span
+                    class="payment-page-step-indicator__dot"
+                    aria-hidden="true"
+                  ></span>
+                </div>
               </div>
             </div>
           </header>
@@ -425,8 +425,8 @@
                       전액 환급됩니다.
                       <p class="payment-callout__note">
                         단, 체크인 당일 또는 체크인 전날에 예약한 경우에는 예약
-                        완료 후 24시간 이내에 취소하더라도 날짜별 환불 규정(위약금)이
-                        적용됩니다.
+                        완료 후 24시간 이내에 취소하더라도 날짜별 환불
+                        규정(위약금)이 적용됩니다.
                       </p>
                     </div>
                   </div>
@@ -1690,51 +1690,51 @@
                   return;
                 }
 
-            var payload = {
-              reservationNumber: orderNumber,
-              guestName: guestName,
-              contact: contact,
-              email: emailVal,
-              guestRequest: guestRequestInput
-                ? guestRequestInput.value.trim()
-                : "",
-              roomType: room,
-              checkIn: checkIn,
-              checkOut: checkOut,
-              stayNights: nights,
-              extraGuests: extraGuests,
-              totalAmount: totalAmount,
-              paymentMethod: payInput.value,
-              guestCount: guestCount,
-              bookingToken: bookingToken,
-            };
+                var payload = {
+                  reservationNumber: orderNumber,
+                  guestName: guestName,
+                  contact: contact,
+                  email: emailVal,
+                  guestRequest: guestRequestInput
+                    ? guestRequestInput.value.trim()
+                    : "",
+                  roomType: room,
+                  checkIn: checkIn,
+                  checkOut: checkOut,
+                  stayNights: nights,
+                  extraGuests: extraGuests,
+                  totalAmount: totalAmount,
+                  paymentMethod: payInput.value,
+                  guestCount: guestCount,
+                  bookingToken: bookingToken,
+                };
 
-            sessionStorage.setItem("graffordInPaymentFlow", "1");
-            sessionStorage.setItem(
-              "graffordPaymentData",
-              JSON.stringify({
-                orderNo: orderNumber,
-                totalAmount: String(totalAmount || 0),
-                room: room,
-                checkIn: checkIn,
-                checkOut: checkOut,
-                stayNights: String(nights),
-                extraGuests: String(extraGuests || 0),
-                guestName: guestName,
-                contact: contact,
-                email: emailVal,
-                guestRequest: guestRequestInput
-                  ? guestRequestInput.value.trim()
-                  : "",
-                guestCount: String(guestCount),
-                payMethod: payInput.value,
-                bookingToken: bookingToken,
-              }),
-            );
-            if (window.GraffordCheckoutGuard) {
-              window.GraffordCheckoutGuard.allowCheckoutNavigation();
-            }
-            window.location.href = "payment.html";
+                sessionStorage.setItem("graffordInPaymentFlow", "1");
+                sessionStorage.setItem(
+                  "graffordPaymentData",
+                  JSON.stringify({
+                    orderNo: orderNumber,
+                    totalAmount: String(totalAmount || 0),
+                    room: room,
+                    checkIn: checkIn,
+                    checkOut: checkOut,
+                    stayNights: String(nights),
+                    extraGuests: String(extraGuests || 0),
+                    guestName: guestName,
+                    contact: contact,
+                    email: emailVal,
+                    guestRequest: guestRequestInput
+                      ? guestRequestInput.value.trim()
+                      : "",
+                    guestCount: String(guestCount),
+                    payMethod: payInput.value,
+                    bookingToken: bookingToken,
+                  }),
+                );
+                if (window.GraffordCheckoutGuard) {
+                  window.GraffordCheckoutGuard.allowCheckoutNavigation();
+                }
+                window.location.href = "payment.html";
               })
               .catch(function (err) {
                 window.alert(
@@ -2084,38 +2084,41 @@
                 });
             });
 
-            [guestNameInputEn, contactInputEn, contactDialEn, emailInputEn].forEach(
-              function (el) {
-                if (!el) {
+            [
+              guestNameInputEn,
+              contactInputEn,
+              contactDialEn,
+              emailInputEn,
+            ].forEach(function (el) {
+              if (!el) {
+                return;
+              }
+              el.addEventListener("input", function () {
+                if (!hasTriedSubmitEn) {
                   return;
                 }
-                el.addEventListener("input", function () {
-                  if (!hasTriedSubmitEn) {
-                    return;
-                  }
-                  markInputError(
-                    guestNameInputEn,
-                    !(guestNameInputEn && guestNameInputEn.value.trim()),
-                  );
-                  var dialVal =
-                    contactDialEn && contactDialEn.value
-                      ? contactDialEn.value
-                      : "1";
-                  var builtContact =
-                    window.GraffordIntlPhone && contactInputEn
-                      ? window.GraffordIntlPhone.buildStored(
-                          dialVal,
-                          contactInputEn.value,
-                        )
-                      : "";
-                  markInputError(contactInputEn, !builtContact);
-                  markInputError(
-                    emailInputEn,
-                    !isValidConfirmEmail(emailInputEn),
-                  );
-                });
-              },
-            );
+                markInputError(
+                  guestNameInputEn,
+                  !(guestNameInputEn && guestNameInputEn.value.trim()),
+                );
+                var dialVal =
+                  contactDialEn && contactDialEn.value
+                    ? contactDialEn.value
+                    : "1";
+                var builtContact =
+                  window.GraffordIntlPhone && contactInputEn
+                    ? window.GraffordIntlPhone.buildStored(
+                        dialVal,
+                        contactInputEn.value,
+                      )
+                    : "";
+                markInputError(contactInputEn, !builtContact);
+                markInputError(
+                  emailInputEn,
+                  !isValidConfirmEmail(emailInputEn),
+                );
+              });
+            });
 
             [
               agreeAllEn,
@@ -2173,7 +2176,7 @@
             },
             lines: [
               "대표 : GRAFFORD",
-              "주소 : 제주특별자치도 서귀포시 토산중앙로 22",
+              "주소 : 제주특별자치도 서귀포시 표선면 토산중앙로 22",
               "사업자등록번호 : 587-23-00957",
               "통신판매업신고번호 : 2026-제주표선-029",
               "전화 : 010-6830-1105",
@@ -2212,25 +2215,25 @@
                 </p>
               </div>
               <div class="reserve-check-page-band__right-col">
-              <p class="reserve-check-page-band__label">STEP_2</p>
-              <div
-                class="payment-page-step-indicator"
-                role="img"
-                aria-label="Step 2 of 3: review before payment"
-              >
-                <span
-                  class="payment-page-step-indicator__dot"
-                  aria-hidden="true"
-                ></span>
-                <span
-                  class="payment-page-step-indicator__dot payment-page-step-indicator__dot--current"
-                  aria-hidden="true"
-                ></span>
-                <span
-                  class="payment-page-step-indicator__dot"
-                  aria-hidden="true"
-                ></span>
-              </div>
+                <p class="reserve-check-page-band__label">STEP_2</p>
+                <div
+                  class="payment-page-step-indicator"
+                  role="img"
+                  aria-label="Step 2 of 3: review before payment"
+                >
+                  <span
+                    class="payment-page-step-indicator__dot"
+                    aria-hidden="true"
+                  ></span>
+                  <span
+                    class="payment-page-step-indicator__dot payment-page-step-indicator__dot--current"
+                    aria-hidden="true"
+                  ></span>
+                  <span
+                    class="payment-page-step-indicator__dot"
+                    aria-hidden="true"
+                  ></span>
+                </div>
               </div>
             </div>
           </header>
@@ -2598,8 +2601,8 @@
                       <p class="payment-callout__note">
                         However, if you book on your check-in date or the day
                         before check-in, the date-based cancellation policy
-                        (penalties) applies even if you cancel within 24 hours of
-                        completing your reservation.
+                        (penalties) applies even if you cancel within 24 hours
+                        of completing your reservation.
                       </p>
                     </div>
                   </div>

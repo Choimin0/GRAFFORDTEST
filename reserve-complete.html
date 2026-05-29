@@ -394,8 +394,7 @@
           var totalAmount = (saved && saved.totalAmount) || "0";
           var payMethod = (saved && saved.payMethod) || "";
           var cancelToken = (saved && saved.cancelToken) || "";
-          var bookingCreatedAtIso =
-            (saved && saved.bookingCreatedAtIso) || "";
+          var bookingCreatedAtIso = (saved && saved.bookingCreatedAtIso) || "";
           var orderTextEl = document.getElementById("complete-order-no-text");
           if (orderTextEl) {
             orderTextEl.textContent = orderNo || "번호를 확인할 수 없습니다.";
@@ -506,14 +505,8 @@
           if (!parsedGuestCount || parsedGuestCount < 1) {
             var P = window.GraffordBookingPricing;
             parsedGuestCount = P
-              ? P.computeGuestCount(
-                  room,
-                  parseInt(extraGuests || "0", 10) || 0,
-                )
-              : Math.max(
-                  1,
-                  2 + (parseInt(extraGuests || "0", 10) || 0),
-                );
+              ? P.computeGuestCount(room, parseInt(extraGuests || "0", 10) || 0)
+              : Math.max(1, 2 + (parseInt(extraGuests || "0", 10) || 0));
           }
           document.getElementById("complete-guest-count").textContent =
             String(parsedGuestCount) + "명";
@@ -639,7 +632,12 @@
             cancelLinkEn.href = "reserve-delete.html";
           }
 
-          if (window.GraffordAlimtalkNotify && orderNo && guestName && contact) {
+          if (
+            window.GraffordAlimtalkNotify &&
+            orderNo &&
+            guestName &&
+            contact
+          ) {
             window.GraffordAlimtalkNotify.sendReserveComplete({
               orderNo: orderNo,
               guestName: guestName,
@@ -663,7 +661,7 @@
             },
             lines: [
               "대표 : GRAFFORD",
-              "주소 : 제주특별자치도 서귀포시 토산중앙로 22",
+              "주소 : 제주특별자치도 서귀포시 표선면 토산중앙로 22",
               "사업자등록번호 : 587-23-00957",
               "통신판매업신고번호 : 2026-제주표선-029",
               "전화 : 010-6830-1105",

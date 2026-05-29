@@ -134,25 +134,25 @@
                 </p>
               </div>
               <div class="reserve-check-page-band__right-col">
-              <p class="reserve-check-page-band__label">STEP_3</p>
-              <div
-                class="payment-page-step-indicator"
-                role="img"
-                aria-label="예약 진행 3단계 중 3단계, 결제"
-              >
-                <span
-                  class="payment-page-step-indicator__dot"
-                  aria-hidden="true"
-                ></span>
-                <span
-                  class="payment-page-step-indicator__dot"
-                  aria-hidden="true"
-                ></span>
-                <span
-                  class="payment-page-step-indicator__dot payment-page-step-indicator__dot--current"
-                  aria-hidden="true"
-                ></span>
-              </div>
+                <p class="reserve-check-page-band__label">STEP_3</p>
+                <div
+                  class="payment-page-step-indicator"
+                  role="img"
+                  aria-label="예약 진행 3단계 중 3단계, 결제"
+                >
+                  <span
+                    class="payment-page-step-indicator__dot"
+                    aria-hidden="true"
+                  ></span>
+                  <span
+                    class="payment-page-step-indicator__dot"
+                    aria-hidden="true"
+                  ></span>
+                  <span
+                    class="payment-page-step-indicator__dot payment-page-step-indicator__dot--current"
+                    aria-hidden="true"
+                  ></span>
+                </div>
               </div>
             </div>
           </header>
@@ -640,7 +640,10 @@
               window.location.replace("reserve-complete.html");
               return;
             }
-            if (sessionStorage.getItem("graffordPaymentProcessing:" + orderNo) === "1") {
+            if (
+              sessionStorage.getItem("graffordPaymentProcessing:" + orderNo) ===
+              "1"
+            ) {
               paymentInProgress = true;
               if (submitBtn) submitBtn.disabled = true;
             }
@@ -651,15 +654,14 @@
               return;
             }
             try {
-              var validation = await window.GraffordBookingToken.validateBookingToken(
-                {
+              var validation =
+                await window.GraffordBookingToken.validateBookingToken({
                   bookingToken: bookingToken,
                   room: room,
                   checkIn: checkIn,
                   checkOut: checkOut,
                   reservationNumber: orderNo,
-                },
-              );
+                });
               if (validation.alreadyBooked) {
                 sessionStorage.setItem(paymentSettledKey, "1");
                 window.location.replace("reserve-complete.html");
@@ -1021,7 +1023,8 @@
               );
               return;
             }
-            var checkoutRemaining = window.GraffordBookingToken.getRemainingMs();
+            var checkoutRemaining =
+              window.GraffordBookingToken.getRemainingMs();
             if (checkoutRemaining != null && checkoutRemaining <= 0) {
               resetPaymentGuard();
               window.GraffordBookingToken.showExpiredModal();
@@ -1269,8 +1272,7 @@
               fetchedCancelToken =
                 (saveData && saveData.cancelToken) || fetchedCancelToken;
             }
-            var bookingCreatedAtIso =
-              (saveData && saveData.createdAtIso) || "";
+            var bookingCreatedAtIso = (saveData && saveData.createdAtIso) || "";
             sessionStorage.removeItem("graffordInPaymentFlow");
             sessionStorage.setItem(paymentSettledKey, "1");
             if (window.GraffordBookingToken) {
@@ -1307,7 +1309,6 @@
               startPayment();
             });
           }
-
         });
       </script>
       <script defer src="js/grafford-page-fade.js"></script>
@@ -1321,7 +1322,7 @@
             },
             lines: [
               "대표 : GRAFFORD",
-              "주소 : 제주특별자치도 서귀포시 토산중앙로 22",
+              "주소 : 제주특별자치도 서귀포시 표선면 토산중앙로 22",
               "사업자등록번호 : 587-23-00957",
               "통신판매업신고번호 : 2026-제주표선-029",
               "전화 : 010-6830-1105",
@@ -1373,25 +1374,25 @@
                 </p>
               </div>
               <div class="reserve-check-page-band__right-col">
-              <p class="reserve-check-page-band__label">STEP</p>
-              <div
-                class="payment-page-step-indicator"
-                role="img"
-                aria-label="Step 3 of 3: payment"
-              >
-                <span
-                  class="payment-page-step-indicator__dot"
-                  aria-hidden="true"
-                ></span>
-                <span
-                  class="payment-page-step-indicator__dot"
-                  aria-hidden="true"
-                ></span>
-                <span
-                  class="payment-page-step-indicator__dot payment-page-step-indicator__dot--current"
-                  aria-hidden="true"
-                ></span>
-              </div>
+                <p class="reserve-check-page-band__label">STEP</p>
+                <div
+                  class="payment-page-step-indicator"
+                  role="img"
+                  aria-label="Step 3 of 3: payment"
+                >
+                  <span
+                    class="payment-page-step-indicator__dot"
+                    aria-hidden="true"
+                  ></span>
+                  <span
+                    class="payment-page-step-indicator__dot"
+                    aria-hidden="true"
+                  ></span>
+                  <span
+                    class="payment-page-step-indicator__dot payment-page-step-indicator__dot--current"
+                    aria-hidden="true"
+                  ></span>
+                </div>
               </div>
             </div>
           </header>
@@ -1880,7 +1881,10 @@
               window.location.replace("reserve-complete.html");
               return;
             }
-            if (sessionStorage.getItem("graffordPaymentProcessing:" + orderNo) === "1") {
+            if (
+              sessionStorage.getItem("graffordPaymentProcessing:" + orderNo) ===
+              "1"
+            ) {
               paymentInProgress = true;
               if (submitBtn) submitBtn.disabled = true;
             }
@@ -1891,15 +1895,14 @@
               return;
             }
             try {
-              var validation = await window.GraffordBookingToken.validateBookingToken(
-                {
+              var validation =
+                await window.GraffordBookingToken.validateBookingToken({
                   bookingToken: bookingToken,
                   room: room,
                   checkIn: checkIn,
                   checkOut: checkOut,
                   reservationNumber: orderNo,
-                },
-              );
+                });
               if (validation.alreadyBooked) {
                 sessionStorage.setItem(paymentSettledKey, "1");
                 window.location.replace("reserve-complete.html");
@@ -2288,7 +2291,8 @@
               );
               return;
             }
-            var checkoutRemaining = window.GraffordBookingToken.getRemainingMs();
+            var checkoutRemaining =
+              window.GraffordBookingToken.getRemainingMs();
             if (checkoutRemaining != null && checkoutRemaining <= 0) {
               resetPaymentGuard();
               window.GraffordBookingToken.showExpiredModal({
@@ -2583,7 +2587,6 @@
               startPayment();
             });
           }
-
         });
       </script>
     </div>
@@ -2801,7 +2804,10 @@
                 }
               } catch (_e) {}
             }
-            if (!token || !window.GraffordBookingToken.hasIssuedCheckoutSession()) {
+            if (
+              !token ||
+              !window.GraffordBookingToken.hasIssuedCheckoutSession()
+            ) {
               throw new Error("checkout session missing");
             }
             return token;

@@ -389,7 +389,14 @@
           </div>
         </div>
 
-        <div id="cancel-modal" class="confirm-leave-overlay" role="dialog" aria-modal="true" aria-labelledby="cancel-modal-title" hidden>
+        <div
+          id="cancel-modal"
+          class="confirm-leave-overlay"
+          role="dialog"
+          aria-modal="true"
+          aria-labelledby="cancel-modal-title"
+          hidden
+        >
           <div class="confirm-leave-dialog">
             <div class="confirm-leave-dialog__accent" aria-hidden="true"></div>
             <div class="confirm-leave-dialog__inner">
@@ -399,7 +406,10 @@
                 취소 후에는 복구가 불가능합니다.
               </h2>
               <span class="confirm-leave-rule" aria-hidden="true"></span>
-              <p class="confirm-leave-body reserve-delete-modal-note" id="cancel-modal-note">
+              <p
+                class="confirm-leave-body reserve-delete-modal-note"
+                id="cancel-modal-note"
+              >
                 * 환불 소요 기간 안내 <br />
                 카드사에 따라 영업일 기준 3~5일 소요될 수 있습니다.
               </p>
@@ -781,8 +791,7 @@
             wireCancelFlowsAfterRefund();
           }
 
-          var embeddedBookingIso =
-            (saved && saved.bookingCreatedAtIso) || "";
+          var embeddedBookingIso = (saved && saved.bookingCreatedAtIso) || "";
           var lookupOrder = String(orderNo || "").trim();
           var lookupName = String(name || "").trim();
           if (
@@ -804,8 +813,7 @@
               })
               .then(function (data) {
                 var row = data && data.ok && data.row ? data.row : null;
-                var iso =
-                  (row && row.createdAtIso) || embeddedBookingIso || "";
+                var iso = (row && row.createdAtIso) || embeddedBookingIso || "";
                 applyPaidAmountFromLookup(row);
                 finishRefundUiSetup(iso);
               })
@@ -1134,7 +1142,6 @@
                 });
             });
           }
-
         });
       </script>
       <script defer src="js/grafford-page-fade.js"></script>
@@ -1148,7 +1155,7 @@
             },
             lines: [
               "대표 : GRAFFORD",
-              "주소 : 제주특별자치도 서귀포시 토산중앙로 22",
+              "주소 : 제주특별자치도 서귀포시 표선면 토산중앙로 22",
               "사업자등록번호 : 587-23-00957",
               "통신판매업신고번호 : 2026-제주표선-029",
               "전화 : 010-6830-1105",
@@ -1464,7 +1471,10 @@
                 After cancellation, reservation cannot be restored.
               </h2>
               <span class="confirm-leave-rule" aria-hidden="true"></span>
-              <p class="confirm-leave-body reserve-delete-modal-note" id="cancel-modal-note-en">
+              <p
+                class="confirm-leave-body reserve-delete-modal-note"
+                id="cancel-modal-note-en"
+              >
                 * Refund Time Notification<br />
                 Refunds will be processed within 3~5 business days.
               </p>
@@ -1476,7 +1486,9 @@
                 id="cancel-modal-yes-en"
               >
                 <span class="confirm-leave-btn__label">Yes</span>
-                <span class="confirm-leave-btn__hint">Proceed cancellation</span>
+                <span class="confirm-leave-btn__hint"
+                  >Proceed cancellation</span
+                >
               </button>
               <button
                 type="button"
