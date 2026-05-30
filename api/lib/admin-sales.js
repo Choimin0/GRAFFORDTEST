@@ -37,9 +37,15 @@ function normalizeMonthKey(value) {
 function resolvePaymentLabel(paymentMethod) {
   var raw = String(paymentMethod || "").trim().toLowerCase();
   if (raw === "card" || raw === "신용카드") return "신용카드";
+  if (raw === "samsung" || raw === "samsungpay" || raw === "삼성페이") {
+    return "삼성페이";
+  }
   if (raw === "naver" || raw === "네이버페이") return "네이버페이";
   if (raw === "kakao" || raw === "kakaopay" || raw === "카카오페이") {
     return "카카오페이";
+  }
+  if (raw === "toss" || raw === "tosspay" || raw === "토스페이") {
+    return "토스페이";
   }
   return "기타";
 }

@@ -8097,6 +8097,45 @@ main.content-section.confirm-page.payment-page > #payment-error-area-en {
   color: #fff;
 }
 
+.payment-method-option__icon--samsung {
+  width: 2.5rem;
+  height: 1.65rem;
+  border-radius: 4px;
+  background: #1428a0;
+  color: #fff;
+}
+
+.payment-method-option__icon--kakao {
+  width: 2.5rem;
+  height: 1.65rem;
+  border-radius: 4px;
+  background: #fee500;
+  color: #191919;
+}
+
+.payment-method-option__icon--toss {
+  width: 2.5rem;
+  height: 1.65rem;
+  border-radius: 4px;
+  background: #0064ff;
+  color: #fff;
+}
+
+.payment-method-option__brand-mark {
+  font-family: var(--font-family-body-en);
+  font-weight: 700;
+  font-size: 0.95rem;
+  line-height: 1;
+}
+
+.payment-method-drawer__section-head--easy-pay {
+  padding-top: 0.35rem;
+}
+
+.payment-method-drawer__options--easy-pay {
+  padding-bottom: 0.25rem;
+}
+
 .payment-method-option__naver-n {
   font-family: var(--font-family-body-en);
   font-weight: 700;

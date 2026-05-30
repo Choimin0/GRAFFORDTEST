@@ -29,13 +29,16 @@ import {
 import { normalizeBookingLocale } from "./lib/booking-locale.js";
 import { isValidInternationalStoredContact } from "./lib/intl-phone.js";
 import { validateBookingWindow } from "./lib/booking-window.js";
+import {
+  ALLOWED_PAY,
+  normalizePaymentMethodId,
+} from "./lib/payment-methods.js";
 
 const { Pool } = pg;
 
 const ALLOWED_ROOMS = new Set(["G1", "G2", "G3", "G4"]);
 const LEGACY_TO_ROOM = { A: "G1", B: "G2", C: "G3", D: "G4" };
 const ROOM_TO_LEGACY = { G1: "A", G2: "B", G3: "C", G4: "D" };
-const ALLOWED_PAY = new Set(["card", "naver"]);
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 const EMAIL_RE = /^[^\s@]{1,64}@[^\s@]{1,255}\.[^\s@]{1,63}$/;
 const MAX_NAME = 255;
@@ -83,7 +86,7 @@ function humanDbError(e) {
   }
   var c = e.code;
   if (c === "42703") {
-    return "DB에 필요한 컬럼이 없습니다. db/migrations/015_create_booking_table.sql 을 실행하세요.";
+    return "DB에 필요한 컬럼이 없습니다. db/migrations/015_create_booking_table.sql 및 db/migrations/026_add_pg_pay_provider.sql 을 실행하세요.";
   }
   if (c === "42P01") {
     return "booking 테이블이 없습니다. db/migrations/015_create_booking_table.sql 을 실행하세요.";
@@ -818,9 +821,10 @@ export default async function handler(req, res) {
   var guestRequest = String(body.guestRequest || "")
     .trim()
     .slice(0, MAX_GUEST_REQUEST);
-  var paymentMethod = String(body.paymentMethod || "")
-    .trim()
-    .toLowerCase();
+  var paymentMethod = normalizePaymentMethodId(body.paymentMethod || "");
+  var pgPayProvider = body.pgPayProvider
+    ? String(body.pgPayProvider).trim().slice(0, 32)
+    : null;
   var guestCount = Number(body.guestCount);
   var pgTid = body.pgTid ? String(body.pgTid).trim().slice(0, 255) : null;
   var bookingToken = String(body.bookingToken || "").trim();
@@ -974,9 +978,10 @@ export default async function handler(req, res) {
       payment_method,
       bank_confirmed,
       pg_tid,
+      pg_pay_provider,
       booking_locale
     ) VALUES (
-      $1, $2, $3, $4, $5, $6, $7::date, $8::date, $9, $10, $11, $12, $13, $14, $15, $16, $17
+      $1, $2, $3, $4, $5, $6, $7::date, $8::date, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18
     )
     RETURNING id, reservation_number, created_at
   `;
@@ -998,6 +1003,7 @@ export default async function handler(req, res) {
     paymentMethod,
     true,
     pgTid || null,
+    pgPayProvider || null,
     bookingLocale,
   ];
 

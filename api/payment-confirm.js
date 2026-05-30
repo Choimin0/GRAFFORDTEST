@@ -15,6 +15,11 @@ import {
   extractPortonePaidAmount,
   fetchPortonePayment,
 } from "./lib/portone-client.js";
+import {
+  extractPaymentMethodFromPortonePayment,
+  resolveEnabledPaymentMethods,
+  resolveVerifiedPaymentMethod,
+} from "./lib/payment-methods.js";
 
 function sendPaymentConfig(res) {
   res.setHeader("Content-Type", "application/json");
@@ -42,6 +47,7 @@ function sendPaymentConfig(res) {
       storeId: storeId,
       channelKey: channelKey,
       naverPayChannelKey: naverPayChannelKey,
+      enabledMethods: resolveEnabledPaymentMethods(),
     }),
   );
 }
@@ -116,6 +122,10 @@ export default async function handler(req, res) {
   var paymentToken =
     body.paymentToken != null ? String(body.paymentToken).trim() : "";
   var txId = body.txId != null ? String(body.txId).trim() : "";
+  var requestedPaymentMethod =
+    body.requestedPaymentMethod != null
+      ? String(body.requestedPaymentMethod).trim()
+      : "";
 
   if (!paymentId) {
     res.statusCode = 400;
@@ -208,6 +218,11 @@ export default async function handler(req, res) {
     }
 
     var pgTid = extractPgTxIdFromPayment(payment);
+    var extractedMethod = extractPaymentMethodFromPortonePayment(payment);
+    var verifiedMethod = resolveVerifiedPaymentMethod(
+      extractedMethod,
+      requestedPaymentMethod,
+    );
 
     console.log(
       "[payment-confirm] paymentId:",
@@ -218,6 +233,10 @@ export default async function handler(req, res) {
       actualAmount,
       "| pgTid:",
       pgTid,
+      "| paymentMethod:",
+      verifiedMethod.methodId,
+      "| pgPayProvider:",
+      verifiedMethod.pgPayProvider || "(none)",
       "| transactions count:",
       (payment.transactions && payment.transactions.length) || 0,
     );
@@ -229,6 +248,8 @@ export default async function handler(req, res) {
         paymentId: payment.id,
         status: payment.status,
         pgTid: pgTid,
+        paymentMethod: verifiedMethod.methodId,
+        pgPayProvider: verifiedMethod.pgPayProvider,
       }),
     );
   } catch (e) {

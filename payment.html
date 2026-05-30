@@ -426,19 +426,21 @@
             <div
               class="payment-method-drawer__options"
               role="radiogroup"
-              aria-labelledby="payment-method-drawer-section-kr"
+              aria-labelledby="payment-method-drawer-section-kr-card"
+              data-payment-section="card"
             >
               <span
-                id="payment-method-drawer-section-kr"
+                id="payment-method-drawer-section-kr-card"
                 class="visually-hidden"
-                >결제 수단 선택</span
+                >신용카드 결제</span
               >
-              <label class="payment-method-option">
+              <label class="payment-method-option" data-payment-method="card">
                 <input
                   type="radio"
                   name="payment-drawer-method-kr"
                   value="card"
                   class="visually-hidden"
+                  checked
                 />
                 <span class="payment-method-option__icon" aria-hidden="true">
                   <svg
@@ -479,8 +481,65 @@
                   aria-hidden="true"
                 ></span>
               </label>
+            </div>
+            <div
+              class="payment-method-drawer__section-head payment-method-drawer__section-head--easy-pay"
+              data-payment-section-head="easy_pay"
+              hidden
+            >
+              <span class="payment-method-drawer__section-kicker"
+                >EASY PAY</span
+              >
+              <span
+                class="payment-method-drawer__section-rule"
+                aria-hidden="true"
+              ></span>
+            </div>
+            <div
+              class="payment-method-drawer__options payment-method-drawer__options--easy-pay"
+              role="radiogroup"
+              aria-labelledby="payment-method-drawer-section-kr-easy"
+              data-payment-section="easy_pay"
+              hidden
+            >
+              <span
+                id="payment-method-drawer-section-kr-easy"
+                class="visually-hidden"
+                >간편결제</span
+              >
               <label
-                class="payment-method-option payment-method-option--deferred"
+                class="payment-method-option payment-method-option--easy-pay"
+                data-payment-method="samsung"
+                data-payment-easy-pay
+                hidden
+              >
+                <input
+                  type="radio"
+                  name="payment-drawer-method-kr"
+                  value="samsung"
+                  class="visually-hidden"
+                />
+                <span
+                  class="payment-method-option__icon payment-method-option__icon--samsung"
+                  aria-hidden="true"
+                >
+                  <span class="payment-method-option__brand-mark">S</span>
+                </span>
+                <span class="payment-method-option__text">
+                  <span class="payment-method-option__title">삼성페이</span>
+                  <span class="payment-method-option__desc"
+                    >삼성페이 간편결제</span
+                  >
+                </span>
+                <span
+                  class="payment-method-option__check"
+                  aria-hidden="true"
+                ></span>
+              </label>
+              <label
+                class="payment-method-option payment-method-option--easy-pay"
+                data-payment-method="naver"
+                data-payment-easy-pay
                 hidden
               >
                 <input
@@ -506,6 +565,64 @@
                   aria-hidden="true"
                 ></span>
               </label>
+              <label
+                class="payment-method-option payment-method-option--easy-pay"
+                data-payment-method="kakao"
+                data-payment-easy-pay
+                hidden
+              >
+                <input
+                  type="radio"
+                  name="payment-drawer-method-kr"
+                  value="kakao"
+                  class="visually-hidden"
+                />
+                <span
+                  class="payment-method-option__icon payment-method-option__icon--kakao"
+                  aria-hidden="true"
+                >
+                  <span class="payment-method-option__brand-mark">K</span>
+                </span>
+                <span class="payment-method-option__text">
+                  <span class="payment-method-option__title">카카오페이</span>
+                  <span class="payment-method-option__desc"
+                    >카카오페이 간편결제</span
+                  >
+                </span>
+                <span
+                  class="payment-method-option__check"
+                  aria-hidden="true"
+                ></span>
+              </label>
+              <label
+                class="payment-method-option payment-method-option--easy-pay"
+                data-payment-method="toss"
+                data-payment-easy-pay
+                hidden
+              >
+                <input
+                  type="radio"
+                  name="payment-drawer-method-kr"
+                  value="toss"
+                  class="visually-hidden"
+                />
+                <span
+                  class="payment-method-option__icon payment-method-option__icon--toss"
+                  aria-hidden="true"
+                >
+                  <span class="payment-method-option__brand-mark">T</span>
+                </span>
+                <span class="payment-method-option__text">
+                  <span class="payment-method-option__title">토스페이</span>
+                  <span class="payment-method-option__desc"
+                    >토스페이 간편결제</span
+                  >
+                </span>
+                <span
+                  class="payment-method-option__check"
+                  aria-hidden="true"
+                ></span>
+              </label>
             </div>
             <div class="payment-method-drawer__footer">
               <button
@@ -523,6 +640,7 @@
       <script src="js/booking-pricing.js?v=5"></script>
       <script src="js/booking-token-client.js?v=3"></script>
       <script src="js/booking-checkout-guard.js?v=4"></script>
+      <script src="js/payment-methods.js?v=1"></script>
       <script>
         document.addEventListener("DOMContentLoaded", function () {
           var P = window.GraffordBookingPricing;
@@ -597,9 +715,13 @@
               ? P.computeGuestCount(room, extraGuests)
               : 2 + extraGuests;
           }
-          /* 현재는 신용카드만 결제 가능 (네이버페이 추후 오픈) */
-          var payMethod = "card";
-          saved.payMethod = "card";
+          /* 기본 신용카드. 간편결제는 PAYMENT_EASY_*_ENABLED=true 시 drawer에 노출 */
+          var GPM = window.GraffordPaymentMethods;
+          var paymentConfig = null;
+          var payMethod = GPM
+            ? GPM.normalizeMethodId(saved.payMethod || "card")
+            : "card";
+          saved.payMethod = payMethod;
           try {
             sessionStorage.setItem(
               "graffordPaymentData",
@@ -840,13 +962,12 @@
             el.innerHTML = rows.join("");
           }
 
-          var PAY_METHOD_LABELS = {
-            card: "신용카드",
-            naver: "네이버페이",
-          };
+          function paymentMethodLabel(methodId) {
+            return GPM ? GPM.getLabel(methodId, "kr") : methodId || "—";
+          }
 
           function effectiveDrawerMethod() {
-            return payMethod === "naver" ? "naver" : "card";
+            return GPM ? GPM.normalizeMethodId(payMethod) : "card";
           }
 
           function persistSaved() {
@@ -859,17 +980,11 @@
           }
 
           function refreshPaymentMethodUiKr() {
-            var pmLabel = PAY_METHOD_LABELS[payMethod] || payMethod || "—";
+            var pmLabel = paymentMethodLabel(payMethod);
             setText("pay-kr-payment-method", pmLabel);
             setText("pay-kr-side-method", pmLabel);
             if (submitBtn) {
-              //amtStr ; 결제 금액 원 단위 표시 제거
-              var amtStr = Number(finalAmount).toLocaleString("ko-KR");
-              if (payMethod === "naver") {
-                submitBtn.textContent = "결제하기 →"; // 네이버페이로 결제하기 →
-              } else {
-                submitBtn.textContent = "결제하기 →";
-              }
+              submitBtn.textContent = "결제하기 →";
             }
           }
 
@@ -932,7 +1047,7 @@
               'input[name="payment-drawer-method-kr"]:checked',
             );
             var v = checked ? checked.value : effectiveDrawerMethod();
-            payMethod = v === "naver" ? "naver" : "card";
+            payMethod = GPM ? GPM.normalizeMethodId(v) : "card";
             saved.payMethod = payMethod;
             persistSaved();
             refreshPaymentMethodUiKr();
@@ -962,6 +1077,16 @@
 
           async function bootstrapKr() {
             await hydrateRates();
+            try {
+              var cfgRes = await fetch("/api/payment-confirm");
+              if (cfgRes.ok) {
+                paymentConfig = await cfgRes.json();
+                if (GPM && drawerKr) {
+                  GPM.syncDrawerVisibility(drawerKr, paymentConfig, "kr");
+                }
+              }
+            } catch (_cfg) {}
+
             quote = P
               ? P.computeStay(room, checkIn, checkOut, extraGuests)
               : null;
@@ -1084,11 +1209,17 @@
               return;
             }
 
-            var config = null;
+            var config = paymentConfig;
             try {
-              var cfgRes = await fetch("/api/payment-confirm");
-              if (!cfgRes.ok) throw new Error("설정 조회 실패");
-              config = await cfgRes.json();
+              if (!config) {
+                var cfgRes = await fetch("/api/payment-confirm");
+                if (!cfgRes.ok) throw new Error("설정 조회 실패");
+                config = await cfgRes.json();
+                paymentConfig = config;
+                if (GPM && drawerKr) {
+                  GPM.syncDrawerVisibility(drawerKr, config, "kr");
+                }
+              }
             } catch (e) {
               showError(
                 "결제 설정을 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.\n(" +
@@ -1098,16 +1229,24 @@
               return;
             }
 
-            // 네이버페이 여부 판단
-            var isNaverPay = payMethod === "naver";
-            var activeChannelKey = isNaverPay
-              ? config.naverPayChannelKey
+            var checkoutMethod = GPM
+              ? GPM.validateMethodForCheckout(payMethod, config)
+              : { ok: true, methodId: "card" };
+            if (!checkoutMethod.ok) {
+              showError(checkoutMethod.errorKr || checkoutMethod.errorEn);
+              return;
+            }
+            payMethod = checkoutMethod.methodId;
+
+            var activeChannelKey = GPM
+              ? GPM.resolveActiveChannelKey(payMethod, config)
               : config.channelKey;
 
             if (!config.storeId || !activeChannelKey) {
               showError(
-                isNaverPay
-                  ? "네이버페이 채널 키가 설정되지 않았습니다.\n.env 파일에 NAVER_PAY_CHANNEL_KEY를 등록하고 서버를 재시작해 주세요."
+                GPM && GPM.isEasyPayMethodId(payMethod)
+                  ? paymentMethodLabel(payMethod) +
+                      " 채널이 아직 설정되지 않았습니다. 신용카드로 다시 시도해 주세요."
                   : "결제 설정이 올바르지 않습니다. 관리자에게 문의하세요.",
               );
               return;
@@ -1123,49 +1262,52 @@
               return;
             }
 
-            // PortOne v2 결제 요청 파라미터 구성
-            var portoneParams = {
-              storeId: config.storeId,
-              channelKey: activeChannelKey,
-              paymentId: orderNo,
-              orderName:
-                "GRAFFORD 숙박 예약 (" + (ROOM_LABELS[room] || room) + ")",
-              totalAmount: finalAmount,
-              currency: "KRW",
-              payMethod: isNaverPay ? "EASY_PAY" : "CARD",
-              customer: {
-                fullName: guestName || undefined,
-                phoneNumber: contact || undefined,
-                email: email || undefined,
-              },
-              locale: "KO_KR",
-              redirectUrl:
-                window.location.origin +
-                window.location.pathname.replace("payment.html", "") +
-                "payment.html",
-              confirmUrl: portoneWebhookApiUrl(),
-              noticeUrls: [portoneWebhookApiUrl()],
-            };
-
-            // 네이버페이: easyPay + naverpay 상품 정보
-            if (isNaverPay) {
-              portoneParams.easyPay = { easyPayProvider: "NAVERPAY" };
-              portoneParams.naverpay = {
-                useCfmYmdt: (checkOut || "").replace(/-/g, ""),
-                productItems: [
+            var orderName =
+              "GRAFFORD 숙박 예약 (" + (ROOM_LABELS[room] || room) + ")";
+            var portoneParams = GPM
+              ? GPM.buildPortoneParams(
+                  payMethod,
                   {
-                    categoryType: "PRODUCT",
-                    categoryId: "GENERAL",
-                    uid: orderNo,
-                    name:
-                      "GRAFFORD 숙박 예약 (" +
-                      (ROOM_LABELS[room] || room) +
-                      ")",
-                    count: 1,
+                    orderNo: orderNo,
+                    orderName: orderName,
+                    totalAmount: finalAmount,
+                    checkOut: checkOut,
+                    customer: {
+                      fullName: guestName || undefined,
+                      phoneNumber: contact || undefined,
+                      email: email || undefined,
+                    },
+                    locale: "KO_KR",
+                    redirectUrl:
+                      window.location.origin +
+                      window.location.pathname.replace("payment.html", "") +
+                      "payment.html",
+                    confirmUrl: portoneWebhookApiUrl(),
+                    noticeUrls: [portoneWebhookApiUrl()],
                   },
-                ],
-              };
-            }
+                  config,
+                )
+              : {
+                  storeId: config.storeId,
+                  channelKey: activeChannelKey,
+                  paymentId: orderNo,
+                  orderName: orderName,
+                  totalAmount: finalAmount,
+                  currency: "KRW",
+                  payMethod: "CARD",
+                  customer: {
+                    fullName: guestName || undefined,
+                    phoneNumber: contact || undefined,
+                    email: email || undefined,
+                  },
+                  locale: "KO_KR",
+                  redirectUrl:
+                    window.location.origin +
+                    window.location.pathname.replace("payment.html", "") +
+                    "payment.html",
+                  confirmUrl: portoneWebhookApiUrl(),
+                  noticeUrls: [portoneWebhookApiUrl()],
+                };
 
             var response;
             try {
@@ -1184,6 +1326,8 @@
             }
 
             var verifiedPgTid = null;
+            var verifiedPayMethod = payMethod;
+            var verifiedPgPayProvider = null;
             try {
               showPageLoading("결제 확인 중입니다...");
               var verifyRes = await fetch("/api/payment-confirm", {
@@ -1194,6 +1338,7 @@
                   expectedAmount: finalAmount,
                   paymentToken: response.paymentToken || null,
                   txId: response.txId || null,
+                  requestedPaymentMethod: payMethod,
                 }),
               });
               var verifyData = await verifyRes.json();
@@ -1214,6 +1359,14 @@
                 return;
               }
               verifiedPgTid = verifyData.pgTid || null;
+              if (GPM) {
+                var verified = GPM.resolveVerifiedMethod(verifyData, payMethod);
+                verifiedPayMethod = verified.methodId;
+                verifiedPgPayProvider = verified.pgPayProvider;
+              } else if (verifyData.paymentMethod) {
+                verifiedPayMethod = verifyData.paymentMethod;
+                verifiedPgPayProvider = verifyData.pgPayProvider || null;
+              }
             } catch (e) {
               showError(
                 "결제 검증 중 네트워크 오류가 발생했습니다. 결제가 정상적으로 이루어졌다면 고객센터로 문의해 주세요.\n(" +
@@ -1222,6 +1375,11 @@
               );
               return;
             }
+
+            payMethod = verifiedPayMethod;
+            saved.payMethod = payMethod;
+            persistSaved();
+            refreshPaymentMethodUiKr();
 
             if (processingMsg) {
               processingMsg.hidden = false;
@@ -1248,7 +1406,8 @@
                     stayNights: stayNights,
                     extraGuests: extraGuests,
                     totalAmount: finalAmount,
-                    paymentMethod: payMethod,
+                    paymentMethod: verifiedPayMethod,
+                    pgPayProvider: verifiedPgPayProvider,
                     guestCount: guestCount,
                     pgTid: verifiedPgTid,
                     bookingToken: bookingToken,
@@ -1679,19 +1838,21 @@
             <div
               class="payment-method-drawer__options"
               role="radiogroup"
-              aria-labelledby="payment-method-drawer-section-en"
+              aria-labelledby="payment-method-drawer-section-en-card"
+              data-payment-section="card"
             >
               <span
-                id="payment-method-drawer-section-en"
+                id="payment-method-drawer-section-en-card"
                 class="visually-hidden"
-                >Select payment method</span
+                >Credit card payment</span
               >
-              <label class="payment-method-option">
+              <label class="payment-method-option" data-payment-method="card">
                 <input
                   type="radio"
                   name="payment-drawer-method-en"
                   value="card"
                   class="visually-hidden"
+                  checked
                 />
                 <span class="payment-method-option__icon" aria-hidden="true">
                   <svg
@@ -1732,8 +1893,65 @@
                   aria-hidden="true"
                 ></span>
               </label>
+            </div>
+            <div
+              class="payment-method-drawer__section-head payment-method-drawer__section-head--easy-pay"
+              data-payment-section-head="easy_pay"
+              hidden
+            >
+              <span class="payment-method-drawer__section-kicker"
+                >EASY PAY</span
+              >
+              <span
+                class="payment-method-drawer__section-rule"
+                aria-hidden="true"
+              ></span>
+            </div>
+            <div
+              class="payment-method-drawer__options payment-method-drawer__options--easy-pay"
+              role="radiogroup"
+              aria-labelledby="payment-method-drawer-section-en-easy"
+              data-payment-section="easy_pay"
+              hidden
+            >
+              <span
+                id="payment-method-drawer-section-en-easy"
+                class="visually-hidden"
+                >Easy pay</span
+              >
               <label
-                class="payment-method-option payment-method-option--deferred"
+                class="payment-method-option payment-method-option--easy-pay"
+                data-payment-method="samsung"
+                data-payment-easy-pay
+                hidden
+              >
+                <input
+                  type="radio"
+                  name="payment-drawer-method-en"
+                  value="samsung"
+                  class="visually-hidden"
+                />
+                <span
+                  class="payment-method-option__icon payment-method-option__icon--samsung"
+                  aria-hidden="true"
+                >
+                  <span class="payment-method-option__brand-mark">S</span>
+                </span>
+                <span class="payment-method-option__text">
+                  <span class="payment-method-option__title">Samsung Pay</span>
+                  <span class="payment-method-option__desc"
+                    >Pay with Samsung Pay</span
+                  >
+                </span>
+                <span
+                  class="payment-method-option__check"
+                  aria-hidden="true"
+                ></span>
+              </label>
+              <label
+                class="payment-method-option payment-method-option--easy-pay"
+                data-payment-method="naver"
+                data-payment-easy-pay
                 hidden
               >
                 <input
@@ -1759,6 +1977,64 @@
                   aria-hidden="true"
                 ></span>
               </label>
+              <label
+                class="payment-method-option payment-method-option--easy-pay"
+                data-payment-method="kakao"
+                data-payment-easy-pay
+                hidden
+              >
+                <input
+                  type="radio"
+                  name="payment-drawer-method-en"
+                  value="kakao"
+                  class="visually-hidden"
+                />
+                <span
+                  class="payment-method-option__icon payment-method-option__icon--kakao"
+                  aria-hidden="true"
+                >
+                  <span class="payment-method-option__brand-mark">K</span>
+                </span>
+                <span class="payment-method-option__text">
+                  <span class="payment-method-option__title">Kakao Pay</span>
+                  <span class="payment-method-option__desc"
+                    >Pay with Kakao Pay</span
+                  >
+                </span>
+                <span
+                  class="payment-method-option__check"
+                  aria-hidden="true"
+                ></span>
+              </label>
+              <label
+                class="payment-method-option payment-method-option--easy-pay"
+                data-payment-method="toss"
+                data-payment-easy-pay
+                hidden
+              >
+                <input
+                  type="radio"
+                  name="payment-drawer-method-en"
+                  value="toss"
+                  class="visually-hidden"
+                />
+                <span
+                  class="payment-method-option__icon payment-method-option__icon--toss"
+                  aria-hidden="true"
+                >
+                  <span class="payment-method-option__brand-mark">T</span>
+                </span>
+                <span class="payment-method-option__text">
+                  <span class="payment-method-option__title">Toss Pay</span>
+                  <span class="payment-method-option__desc"
+                    >Pay with Toss Pay</span
+                  >
+                </span>
+                <span
+                  class="payment-method-option__check"
+                  aria-hidden="true"
+                ></span>
+              </label>
             </div>
             <div class="payment-method-drawer__footer">
               <button
@@ -1776,6 +2052,7 @@
       <script src="js/booking-pricing.js?v=5"></script>
       <script src="js/booking-token-client.js?v=3"></script>
       <script src="js/booking-checkout-guard.js?v=4"></script>
+      <script src="js/payment-methods.js?v=1"></script>
       <script>
         document.addEventListener("DOMContentLoaded", function () {
           var P = window.GraffordBookingPricing;
@@ -1852,9 +2129,13 @@
               ? P.computeGuestCount(room, extraGuests)
               : 2 + extraGuests;
           }
-          /* Card only for now; Naver Pay option deferred */
-          var payMethod = "card";
-          saved.payMethod = "card";
+          /* Card by default; easy pay appears when PAYMENT_EASY_*_ENABLED=true */
+          var GPM = window.GraffordPaymentMethods;
+          var paymentConfig = null;
+          var payMethod = GPM
+            ? GPM.normalizeMethodId(saved.payMethod || "card")
+            : "card";
+          saved.payMethod = payMethod;
           try {
             sessionStorage.setItem(
               "graffordPaymentData",
@@ -2118,13 +2399,12 @@
             el.innerHTML = rows.join("");
           }
 
-          var PAY_METHOD_LABELS_EN = {
-            card: "Credit Card",
-            naver: "Naver Pay",
-          };
+          function paymentMethodLabelEn(methodId) {
+            return GPM ? GPM.getLabel(methodId, "en") : methodId || "—";
+          }
 
           function effectiveDrawerMethodEn() {
-            return payMethod === "naver" ? "naver" : "card";
+            return GPM ? GPM.normalizeMethodId(payMethod) : "card";
           }
 
           function persistSavedEn() {
@@ -2137,16 +2417,11 @@
           }
 
           function refreshPaymentMethodUiEn() {
-            var pmLabel = PAY_METHOD_LABELS_EN[payMethod] || payMethod || "—";
+            var pmLabel = paymentMethodLabelEn(payMethod);
             setText("pay-en-payment-method", pmLabel);
             setText("pay-en-side-method", pmLabel);
             if (submitBtn) {
-              var amtStr = formatKrwEn(finalAmount);
-              if (payMethod === "naver") {
-                submitBtn.textContent = "Pay with Naver Pay →";
-              } else {
-                submitBtn.textContent = "Pay now →";
-              }
+              submitBtn.textContent = "Pay now →";
             }
           }
 
@@ -2206,7 +2481,7 @@
               'input[name="payment-drawer-method-en"]:checked',
             );
             var v = checked ? checked.value : effectiveDrawerMethodEn();
-            payMethod = v === "naver" ? "naver" : "card";
+            payMethod = GPM ? GPM.normalizeMethodId(v) : "card";
             saved.payMethod = payMethod;
             persistSavedEn();
             refreshPaymentMethodUiEn();
@@ -2236,6 +2511,16 @@
 
           async function bootstrapEn() {
             await hydrateRates();
+            try {
+              var cfgRes = await fetch("/api/payment-confirm");
+              if (cfgRes.ok) {
+                paymentConfig = await cfgRes.json();
+                if (GPM && drawerEn) {
+                  GPM.syncDrawerVisibility(drawerEn, paymentConfig, "en");
+                }
+              }
+            } catch (_cfg) {}
+
             quote = P
               ? P.computeStay(room, checkIn, checkOut, extraGuests)
               : null;
@@ -2370,11 +2655,17 @@
               return;
             }
 
-            var config = null;
+            var config = paymentConfig;
             try {
-              var cfgRes = await fetch("/api/payment-confirm");
-              if (!cfgRes.ok) throw new Error("Config fetch failed");
-              config = await cfgRes.json();
+              if (!config) {
+                var cfgRes = await fetch("/api/payment-confirm");
+                if (!cfgRes.ok) throw new Error("Config fetch failed");
+                config = await cfgRes.json();
+                paymentConfig = config;
+                if (GPM && drawerEn) {
+                  GPM.syncDrawerVisibility(drawerEn, config, "en");
+                }
+              }
             } catch (e) {
               showError(
                 "Failed to load payment configuration. Please try again.\n(" +
@@ -2384,16 +2675,24 @@
               return;
             }
 
-            // Naver Pay detection
-            var isNaverPay = payMethod === "naver";
-            var activeChannelKey = isNaverPay
-              ? config.naverPayChannelKey
+            var checkoutMethod = GPM
+              ? GPM.validateMethodForCheckout(payMethod, config)
+              : { ok: true, methodId: "card" };
+            if (!checkoutMethod.ok) {
+              showError(checkoutMethod.errorEn || checkoutMethod.errorKr);
+              return;
+            }
+            payMethod = checkoutMethod.methodId;
+
+            var activeChannelKey = GPM
+              ? GPM.resolveActiveChannelKey(payMethod, config)
               : config.channelKey;
 
             if (!config.storeId || !activeChannelKey) {
               showError(
-                isNaverPay
-                  ? "Naver Pay channel key is not configured. Please contact support."
+                GPM && GPM.isEasyPayMethodId(payMethod)
+                  ? paymentMethodLabelEn(payMethod) +
+                      " is not configured yet. Please pay with a credit card."
                   : "Payment configuration is invalid. Please contact support.",
               );
               return;
@@ -2409,51 +2708,54 @@
               return;
             }
 
-            // PortOne v2 request params
-            var portoneParams = {
-              storeId: config.storeId,
-              channelKey: activeChannelKey,
-              paymentId: orderNo,
-              orderName:
-                "GRAFFORD Stay Reservation (" +
-                (ROOM_LABELS[room] || room) +
-                ")",
-              totalAmount: finalAmount,
-              currency: "KRW",
-              payMethod: isNaverPay ? "EASY_PAY" : "CARD",
-              customer: {
-                fullName: guestName || undefined,
-                phoneNumber: contact || undefined,
-                email: email || undefined,
-              },
-              locale: isNaverPay ? "KO_KR" : "EN_US",
-              redirectUrl:
-                window.location.origin +
-                window.location.pathname.replace("payment.html", "") +
-                "payment.html",
-              confirmUrl: portoneWebhookApiUrl(),
-              noticeUrls: [portoneWebhookApiUrl()],
-            };
-
-            // Naver Pay: easyPay + naverpay item info
-            if (isNaverPay) {
-              portoneParams.easyPay = { easyPayProvider: "NAVERPAY" };
-              portoneParams.naverpay = {
-                useCfmYmdt: (checkOut || "").replace(/-/g, ""),
-                productItems: [
+            var orderNameEn =
+              "GRAFFORD Stay Reservation (" + (ROOM_LABELS[room] || room) + ")";
+            var portoneLocale =
+              GPM && GPM.isEasyPayMethodId(payMethod) ? "KO_KR" : "EN_US";
+            var portoneParams = GPM
+              ? GPM.buildPortoneParams(
+                  payMethod,
                   {
-                    categoryType: "PRODUCT",
-                    categoryId: "GENERAL",
-                    uid: orderNo,
-                    name:
-                      "GRAFFORD Stay Reservation (" +
-                      (ROOM_LABELS[room] || room) +
-                      ")",
-                    count: 1,
+                    orderNo: orderNo,
+                    orderName: orderNameEn,
+                    totalAmount: finalAmount,
+                    checkOut: checkOut,
+                    customer: {
+                      fullName: guestName || undefined,
+                      phoneNumber: contact || undefined,
+                      email: email || undefined,
+                    },
+                    locale: portoneLocale,
+                    redirectUrl:
+                      window.location.origin +
+                      window.location.pathname.replace("payment.html", "") +
+                      "payment.html",
+                    confirmUrl: portoneWebhookApiUrl(),
+                    noticeUrls: [portoneWebhookApiUrl()],
                   },
-                ],
-              };
-            }
+                  config,
+                )
+              : {
+                  storeId: config.storeId,
+                  channelKey: activeChannelKey,
+                  paymentId: orderNo,
+                  orderName: orderNameEn,
+                  totalAmount: finalAmount,
+                  currency: "KRW",
+                  payMethod: "CARD",
+                  customer: {
+                    fullName: guestName || undefined,
+                    phoneNumber: contact || undefined,
+                    email: email || undefined,
+                  },
+                  locale: "EN_US",
+                  redirectUrl:
+                    window.location.origin +
+                    window.location.pathname.replace("payment.html", "") +
+                    "payment.html",
+                  confirmUrl: portoneWebhookApiUrl(),
+                  noticeUrls: [portoneWebhookApiUrl()],
+                };
 
             var response;
             try {
@@ -2472,6 +2774,8 @@
             }
 
             var verifiedPgTid2 = null;
+            var verifiedPayMethod = payMethod;
+            var verifiedPgPayProvider = null;
             try {
               showPageLoading("Verifying payment...");
               var verifyRes = await fetch("/api/payment-confirm", {
@@ -2482,6 +2786,7 @@
                   expectedAmount: finalAmount,
                   paymentToken: response.paymentToken || null,
                   txId: response.txId || null,
+                  requestedPaymentMethod: payMethod,
                 }),
               });
               var verifyData = await verifyRes.json();
@@ -2503,6 +2808,14 @@
                 return;
               }
               verifiedPgTid2 = verifyData.pgTid || null;
+              if (GPM) {
+                var verifiedEn = GPM.resolveVerifiedMethod(verifyData, payMethod);
+                verifiedPayMethod = verifiedEn.methodId;
+                verifiedPgPayProvider = verifiedEn.pgPayProvider;
+              } else if (verifyData.paymentMethod) {
+                verifiedPayMethod = verifyData.paymentMethod;
+                verifiedPgPayProvider = verifyData.pgPayProvider || null;
+              }
             } catch (e) {
               showError(
                 "Network error during payment verification. If you believe your payment went through, please contact support.\n(" +
@@ -2511,6 +2824,11 @@
               );
               return;
             }
+
+            payMethod = verifiedPayMethod;
+            saved.payMethod = payMethod;
+            persistSavedEn();
+            refreshPaymentMethodUiEn();
 
             if (processingMsg) {
               processingMsg.hidden = false;
@@ -2537,7 +2855,8 @@
                     stayNights: stayNights,
                     extraGuests: extraGuests,
                     totalAmount: finalAmount,
-                    paymentMethod: payMethod,
+                    paymentMethod: verifiedPayMethod,
+                    pgPayProvider: verifiedPgPayProvider,
                     guestCount: guestCount,
                     pgTid: verifiedPgTid2,
                     bookingToken: bookingToken,
