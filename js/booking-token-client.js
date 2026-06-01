@@ -2,6 +2,7 @@
   var UNAVAILABLE_MSG =
     "해당 날짜에 예약이 불가합니다. 예약을 다시 확인해주세요";
   var EXPIRED_MSG = "유효 시간이 만료되었습니다";
+  var PAYMENT_EXPIRED_MSG = "결제 가능 시간이 만료되었습니다";
   var SESSION_EXP_KEY = "graffordBookingSessionExp";
   var HOLD_ID_KEY = "graffordBookingHoldId";
 
@@ -348,13 +349,46 @@
 
   function showExpiredModal(options) {
     options = options || {};
-    openModal(
-      options.message || EXPIRED_MSG,
-      function () {
-        abandonCheckoutSession(options.redirectTo || "RESERVATION.html");
+    var redirectTo = options.redirectTo || "RESERVATION.html";
+    if (options.releaseHoldOnOpen) {
+      releaseBookingHold();
+    }
+    var modalOptions = {
+      message: options.message || EXPIRED_MSG,
+      confirmLabel: options.confirmLabel || "확인",
+      heading: options.heading,
+      eyebrow: options.eyebrow,
+      confirmHint: options.confirmHint,
+      dismissible: options.dismissible,
+      onConfirm: function () {
+        if (options.releaseHoldOnOpen) {
+          clearCheckoutSession();
+          root.location.replace(redirectTo);
+          return;
+        }
+        abandonCheckoutSession(redirectTo);
       },
-      options.confirmLabel || "확인",
-    );
+    };
+    var modalApi = root.GraffordPaymentModal;
+    if (modalApi && typeof modalApi.open === "function") {
+      modalApi.open(modalOptions);
+      return;
+    }
+    root.alert(modalOptions.message);
+    modalOptions.onConfirm();
+  }
+
+  function showPaymentExpiredModal() {
+    showExpiredModal({
+      message: PAYMENT_EXPIRED_MSG,
+      heading: "",
+      eyebrow: "",
+      confirmLabel: "확인",
+      confirmHint: "",
+      dismissible: false,
+      redirectTo: "RESERVATION.html",
+      releaseHoldOnOpen: true,
+    });
   }
 
   function getRemainingMs() {
@@ -430,6 +464,7 @@
   root.GraffordBookingToken = {
     UNAVAILABLE_MSG: UNAVAILABLE_MSG,
     EXPIRED_MSG: EXPIRED_MSG,
+    PAYMENT_EXPIRED_MSG: PAYMENT_EXPIRED_MSG,
     bookingTokenApiUrl: bookingTokenApiUrl,
     readStoredToken: readStoredToken,
     writeStoredToken: writeStoredToken,
@@ -449,5 +484,6 @@
     validateBookingToken: validateBookingToken,
     showUnavailableModal: showUnavailableModal,
     showExpiredModal: showExpiredModal,
+    showPaymentExpiredModal: showPaymentExpiredModal,
   };
 })(typeof window !== "undefined" ? window : this);

@@ -10671,6 +10671,19 @@ main.content-section.confirm-page.reserve-check-main {
   border-radius: 0;
 }
 
+/* 모바일: 고정 내비 바로 아래 page band (추가 top 여백 제거, 내비 실측 높이와 맞춤) */
+@media (max-width: 767px) {
+  main.content-section.confirm-page:has(.reserve-check-page-band) {
+    padding-top: calc(0.7rem * 2 + 44px);
+  }
+}
+
+@media (max-width: 400px) {
+  main.content-section.confirm-page:has(.reserve-check-page-band) {
+    padding-top: calc(0.6rem * 2 + 40px);
+  }
+}
+
 .reserve-check-page-band {
   width: 100vw;
   max-width: 100vw;
@@ -10825,8 +10838,7 @@ main.content-section.confirm-page.reserve-check-main {
 }
 
 @media (max-width: 767px) {
-  main.reserve-check-main .reserve-check-page-band,
-  .delete-complete-page .reserve-check-page-band {
+  .reserve-check-page-band {
     display: grid;
     grid-template-columns: minmax(0, 1fr);
     grid-template-rows: auto auto;
@@ -10836,8 +10848,7 @@ main.content-section.confirm-page.reserve-check-main {
     flex-wrap: nowrap;
   }
 
-  main.reserve-check-main .reserve-check-page-band__left,
-  .delete-complete-page .reserve-check-page-band__left {
+  .reserve-check-page-band__left {
     flex: none;
     min-width: 0;
     width: 100%;
@@ -10845,8 +10856,7 @@ main.content-section.confirm-page.reserve-check-main {
     grid-row: 1;
   }
 
-  main.reserve-check-main .reserve-check-page-band__booking-block,
-  .delete-complete-page .reserve-check-page-band__booking-block {
+  .reserve-check-page-band__right {
     grid-column: 1;
     grid-row: 2;
     justify-self: end;
@@ -10854,6 +10864,8 @@ main.content-section.confirm-page.reserve-check-main {
     flex: none;
     width: auto;
     max-width: min(100%, 22rem);
+    align-items: flex-end;
+    justify-content: flex-end;
   }
 }
 

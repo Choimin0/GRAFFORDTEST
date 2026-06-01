@@ -1162,7 +1162,7 @@
               window.GraffordBookingToken.getRemainingMs();
             if (checkoutRemaining != null && checkoutRemaining <= 0) {
               resetPaymentGuard();
-              window.GraffordBookingToken.showExpiredModal();
+              window.GraffordBookingToken.showPaymentExpiredModal();
               return;
             }
 
@@ -1179,7 +1179,7 @@
               hidePageLoading();
               if (validation.expired) {
                 resetPaymentGuard();
-                window.GraffordBookingToken.showExpiredModal();
+                window.GraffordBookingToken.showPaymentExpiredModal();
                 return;
               }
               if (validation.unavailable) {
@@ -2604,9 +2604,7 @@
               window.GraffordBookingToken.getRemainingMs();
             if (checkoutRemaining != null && checkoutRemaining <= 0) {
               resetPaymentGuard();
-              window.GraffordBookingToken.showExpiredModal({
-                redirectTo: "RESERVATION.html",
-              });
+              window.GraffordBookingToken.showPaymentExpiredModal();
               return;
             }
 
@@ -2623,7 +2621,7 @@
               hidePageLoading();
               if (validation.expired) {
                 resetPaymentGuard();
-                window.GraffordBookingToken.showExpiredModal();
+                window.GraffordBookingToken.showPaymentExpiredModal();
                 return;
               }
               if (validation.unavailable) {
@@ -2992,7 +2990,9 @@
       <div class="confirm-leave-dialog">
         <div class="confirm-leave-dialog__accent" aria-hidden="true"></div>
         <div class="confirm-leave-dialog__inner">
-          <p class="confirm-leave-eyebrow">WARNING — 결제 실패</p>
+          <p class="confirm-leave-eyebrow" id="payment-alert-modal-eyebrow">
+            WARNING — 결제 실패
+          </p>
           <h2 id="payment-alert-modal-heading" class="confirm-leave-heading">
             결제가 완료되지 않았습니다
           </h2>
@@ -3008,7 +3008,9 @@
             class="btn reserve-btn confirm-leave-btn confirm-leave-btn--continue"
           >
             <span class="confirm-leave-btn__label">확인</span>
-            <span class="confirm-leave-btn__hint">결제 화면으로 돌아가기</span>
+            <span class="confirm-leave-btn__hint" id="payment-alert-modal-confirm-hint"
+              >결제 화면으로 돌아가기</span
+            >
           </button>
         </div>
       </div>
@@ -3018,12 +3020,19 @@
       (function () {
         var modal = null;
         var msgEl = null;
+        var headingEl = null;
+        var eyebrowEl = null;
         var confirmBtn = null;
         var confirmBtnLabel = null;
+        var confirmBtnHint = null;
         var closeTimer = null;
         var confirmHandler = null;
+        var dismissible = true;
 
         function closeModal() {
+          if (!dismissible) {
+            return;
+          }
           if (!modal) return;
           modal.classList.remove("is-visible");
           document.body.style.overflow = "";
@@ -3043,15 +3052,45 @@
           if (typeof options.beforeOpen === "function") {
             options.beforeOpen();
           }
+          if (headingEl) {
+            if (typeof options.heading === "string") {
+              headingEl.textContent = options.heading;
+              headingEl.hidden = !options.heading;
+            } else {
+              headingEl.textContent = "결제가 완료되지 않았습니다";
+              headingEl.hidden = false;
+            }
+          }
+          if (eyebrowEl) {
+            if (typeof options.eyebrow === "string") {
+              eyebrowEl.textContent = options.eyebrow;
+              eyebrowEl.hidden = !options.eyebrow;
+            } else {
+              eyebrowEl.textContent = "WARNING — 결제 실패";
+              eyebrowEl.hidden = false;
+            }
+          }
           if (msgEl) {
             msgEl.textContent =
               options.message || "결제 중 오류가 발생했습니다.";
+            msgEl.hidden = options.message === "";
           }
           if (confirmBtnLabel) {
             confirmBtnLabel.textContent = options.confirmLabel || "확인";
           }
+          if (confirmBtnHint) {
+            if (options.confirmHint === "") {
+              confirmBtnHint.hidden = true;
+            } else {
+              confirmBtnHint.hidden = false;
+              if (typeof options.confirmHint === "string") {
+                confirmBtnHint.textContent = options.confirmHint;
+              }
+            }
+          }
           confirmHandler =
             typeof options.onConfirm === "function" ? options.onConfirm : null;
+          dismissible = options.dismissible !== false;
           modal.hidden = false;
           modal.setAttribute("aria-hidden", "false");
           document.body.style.overflow = "hidden";
@@ -3065,10 +3104,15 @@
           modal = document.getElementById("payment-alert-modal");
           if (!modal) return;
           msgEl = document.getElementById("payment-alert-modal-msg");
+          headingEl = document.getElementById("payment-alert-modal-heading");
+          eyebrowEl = document.getElementById("payment-alert-modal-eyebrow");
           confirmBtn = document.getElementById("payment-alert-modal-confirm");
           confirmBtnLabel = confirmBtn
             ? confirmBtn.querySelector(".confirm-leave-btn__label")
             : null;
+          confirmBtnHint = document.getElementById(
+            "payment-alert-modal-confirm-hint",
+          );
 
           if (confirmBtn) {
             confirmBtn.addEventListener("click", function () {
@@ -3173,7 +3217,7 @@
             leaveCancelButtons: [leaveCancelBtn],
             onExpired: function () {
               if (window.GraffordBookingToken) {
-                window.GraffordBookingToken.showExpiredModal();
+                window.GraffordBookingToken.showPaymentExpiredModal();
               }
             },
           });

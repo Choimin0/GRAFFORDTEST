@@ -107,6 +107,12 @@ export default async function handler(req, res) {
       promotion: 0,
       extraGuestCharge: 30000,
     };
+    var chargeEnabled = {
+      weekendCharge: true,
+      consecutiveSale: true,
+      promotion: true,
+      extraGuestCharge: true,
+    };
     var chargeKeyMap = {
       "weekend-charge": "weekendCharge",
       "consecutive-sale": "consecutiveSale",
@@ -116,12 +122,20 @@ export default async function handler(req, res) {
     (sel.rows || []).forEach(function (row) {
       var n = Number(row.weekday_base_rate || 0);
       if (chargeKeyMap[row.room_name] !== undefined) {
-        charges[chargeKeyMap[row.room_name]] = row.is_enabled === false ? 0 : n;
+        var key = chargeKeyMap[row.room_name];
+        var enabled = row.is_enabled !== false;
+        chargeEnabled[key] = enabled;
+        charges[key] = enabled ? n : 0;
       } else {
         rates[row.room_name] = n;
       }
     });
-    json(res, 200, { ok: true, rates: rates, charges: charges });
+    json(res, 200, {
+      ok: true,
+      rates: rates,
+      charges: charges,
+      chargeEnabled: chargeEnabled,
+    });
   } catch (e) {
     json(res, 500, {
       ok: false,

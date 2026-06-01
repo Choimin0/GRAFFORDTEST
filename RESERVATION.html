@@ -793,7 +793,7 @@
                 aria-label="할인 적용 안내"
               >
                 <article
-                  class="reservation-discount-card reservation-discount-card--promo reservation-discount-card--on"
+                  class="reservation-discount-card reservation-discount-card--promo reservation-discount-card--on js-res-promo-card"
                 >
                   <div
                     class="reservation-discount-card__icon"
@@ -1010,6 +1010,8 @@
             var resPriceAmountEl = scope.querySelector(".js-res-price-amount");
             var inquiryBtn = scope.querySelector(".reservation-inquiry-btn");
             var promoRateEl = scope.querySelector(".js-res-promo-rate");
+            var promoCardEl = scope.querySelector(".js-res-promo-card");
+            var promotionEnabled = true;
             var consecutiveCardEl = scope.querySelector(
               ".js-res-consecutive-card",
             );
@@ -1213,7 +1215,7 @@
               };
             }
 
-            function applyRoomRates(rates, charges) {
+            function applyRoomRates(rates, charges, chargeEnabled) {
               if (!P) return;
               if (
                 rates &&
@@ -1229,6 +1231,9 @@
               ) {
                 P.setCharges(charges);
               }
+              if (chargeEnabled && typeof chargeEnabled === "object") {
+                promotionEnabled = chargeEnabled.promotion !== false;
+              }
             }
 
             function loadRoomRatesForNewBooking() {
@@ -1239,11 +1244,14 @@
                 var cachedCharges = JSON.parse(
                   sessionStorage.getItem("graffordChargesMap") || "null",
                 );
+                var cachedChargeEnabled = JSON.parse(
+                  sessionStorage.getItem("graffordChargeEnabledMap") || "null",
+                );
                 if (!cachedCharges) {
                   cachedCharges = extractChargesFromRatesMap(cachedMap);
                 }
                 if (cachedMap && typeof cachedMap === "object") {
-                  applyRoomRates(cachedMap, cachedCharges);
+                  applyRoomRates(cachedMap, cachedCharges, cachedChargeEnabled);
                 }
               } catch (_e) {}
               return fetch(roomRateApiUrl(), { cache: "no-store" })
@@ -1275,11 +1283,18 @@
                         JSON.stringify(runtimeCharges),
                       );
                     }
+                    if (result.data.chargeEnabled) {
+                      sessionStorage.setItem(
+                        "graffordChargeEnabledMap",
+                        JSON.stringify(result.data.chargeEnabled),
+                      );
+                    }
                   } catch (_e) {}
                   applyRoomRates(
                     result.data.rates,
                     result.data.charges ||
                       extractChargesFromRatesMap(result.data.rates),
+                    result.data.chargeEnabled,
                   );
                   // 요율 적용 직후 즉시 업데이트 (사용자가 이미 날짜 선택한 경우)
                   updateWeekdayRateDisplay();
@@ -1425,7 +1440,10 @@
 
             function updateDiscountCards() {
               var pricing = window.GraffordBookingPricing;
-              if (promoRateEl) {
+              if (promoCardEl) {
+                promoCardEl.hidden = !promotionEnabled;
+              }
+              if (promoRateEl && promotionEnabled) {
                 var pct = pricing
                   ? Math.max(
                       0,
@@ -3483,7 +3501,7 @@
                 aria-label="Discounts"
               >
                 <article
-                  class="reservation-discount-card reservation-discount-card--promo reservation-discount-card--on"
+                  class="reservation-discount-card reservation-discount-card--promo reservation-discount-card--on js-res-promo-card"
                 >
                   <div
                     class="reservation-discount-card__icon"
