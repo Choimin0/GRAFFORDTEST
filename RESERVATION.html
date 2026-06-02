@@ -1049,6 +1049,7 @@
             var mobilePriceLeftEl = null;
             var mobilePriceAmountEl = null;
             var mobileStickyPriceRow = null;
+            var contentSection = scope.querySelector("#content");
             var kstNowInfo = getKstNowInfo();
             var today = parseYMDLocal(kstNowInfo.todayYmd);
             if (!today) {
@@ -1885,6 +1886,18 @@
               }
             }
 
+            function updateMobileStickyVisibility() {
+              if (!mobileStickyCta) {
+                return;
+              }
+              var shouldShow = reservationMobileQuery.matches;
+              if (shouldShow && contentSection) {
+                var contentTop = contentSection.getBoundingClientRect().top;
+                shouldShow = contentTop <= 0;
+              }
+              mobileStickyCta.classList.toggle("is-visible", shouldShow);
+            }
+
             if (confirmLink) {
               confirmLink.addEventListener("click", function (e) {
                 if (confirmLink.classList.contains("is-disabled")) {
@@ -1903,17 +1916,24 @@
             }
 
             createMobileStickyCta();
+            updateMobileStickyVisibility();
+            window.addEventListener("scroll", updateMobileStickyVisibility, {
+              passive: true,
+            });
+            window.addEventListener("resize", updateMobileStickyVisibility);
             if (reservationMobileQuery.addEventListener) {
               reservationMobileQuery.addEventListener("change", function () {
                 enhanceMobileReservationRoomLayout();
                 updateMobileRoomAccordions();
                 syncMobileStickyCta(hasValidStaySelection());
+                updateMobileStickyVisibility();
               });
             } else {
               reservationMobileQuery.addListener(function () {
                 enhanceMobileReservationRoomLayout();
                 updateMobileRoomAccordions();
                 syncMobileStickyCta(hasValidStaySelection());
+                updateMobileStickyVisibility();
               });
             }
 

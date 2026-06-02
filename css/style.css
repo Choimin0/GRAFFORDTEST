@@ -7283,6 +7283,15 @@ main.content-section:has(> .site-footer.site-business-footer) {
     .reservation-mobile-sticky[data-reservation-scope="kr"],
   body[data-site-language="en"]
     .reservation-mobile-sticky[data-reservation-scope="en"] {
+    display: none;
+  }
+
+  body:not([data-site-language])
+    .reservation-mobile-sticky[data-reservation-scope="kr"].is-visible,
+  body[data-site-language="kr"]
+    .reservation-mobile-sticky[data-reservation-scope="kr"].is-visible,
+  body[data-site-language="en"]
+    .reservation-mobile-sticky[data-reservation-scope="en"].is-visible {
     display: block;
   }
 
@@ -10121,7 +10130,7 @@ main.content-section.confirm-page.reserveinfo-page {
   margin: 0 0 var(--space-16);
   font-size: var(--font-size-feature-body-sm);
   line-height: var(--line-height-body);
-  color: var(--stone-400);
+  color: var(--stone-600);
 }
 
 .reserve-delete-refund-emphasis {
