@@ -9113,6 +9113,10 @@ main.content-section.confirm-page.payment-page > #payment-error-area-en {
   color: var(--stone-700);
 }
 
+.confirm-required-mark {
+  color: var(--stone-red);
+}
+
 .confirm-label input {
   display: block;
   width: 70%;
