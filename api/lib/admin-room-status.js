@@ -1,4 +1,8 @@
 import { json } from "./admin-common.js";
+import {
+  isRoomBlockActive,
+  pruneExpiredRoomBlockItems,
+} from "./room-block-period.js";
 
 const TABLE_NAME = '"room-status"';
 
@@ -23,7 +27,13 @@ function normalizeBlockItems(value) {
       };
     })
     .filter(function (item) {
-      return item.id && item.startDate && item.endDate && item.startDate < item.endDate;
+      return (
+        item.id &&
+        item.startDate &&
+        item.endDate &&
+        item.startDate < item.endDate &&
+        isRoomBlockActive(item.endDate)
+      );
     });
 }
 
@@ -174,6 +184,7 @@ export async function handleAdminRoomStatus(res, pool, body) {
   }
 
   try {
+    await pruneExpiredRoomBlockItems(pool);
     var sel = await pool.query(
       `SELECT
          room_name,

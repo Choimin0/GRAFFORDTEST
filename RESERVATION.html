@@ -825,7 +825,9 @@
                       class="reservation-discount-card__rate js-res-promo-rate"
                       >—</span
                     >
-                    <span class="reservation-discount-card__pill js-res-promo-pill"
+                    <span
+                      class="reservation-discount-card__pill js-res-promo-pill"
+                      hidden
                       >적용 중</span
                     >
                   </div>
@@ -1277,6 +1279,12 @@
               }
               if (chargeEnabled && typeof chargeEnabled === "object") {
                 promotionEnabled = chargeEnabled.promotion !== false;
+              } else if (
+                promoMeta &&
+                typeof promoMeta === "object" &&
+                promoMeta.promotionEnabled === false
+              ) {
+                promotionEnabled = false;
               }
               if (promoMeta && typeof promoMeta === "object") {
                 if (promoMeta.promotionPeriod) {
@@ -1310,6 +1318,9 @@
                   0,
                   Math.floor(Number(charges.promotion || 0)),
                 );
+              }
+              if (!promotionEnabled) {
+                promotionPercentRaw = 0;
               }
               if (
                 charges &&
@@ -1396,6 +1407,9 @@
                         },
                         promotionInPeriod:
                           result.data.promotionInPeriod !== false,
+                        promotionEnabled:
+                          !result.data.chargeEnabled ||
+                          result.data.chargeEnabled.promotion !== false,
                       }),
                     );
                   } catch (_e) {}
@@ -1407,6 +1421,9 @@
                     {
                       promotionPeriod: result.data.promotionPeriod,
                       promotionInPeriod: result.data.promotionInPeriod,
+                      promotionEnabled:
+                        !result.data.chargeEnabled ||
+                        result.data.chargeEnabled.promotion !== false,
                     },
                   );
                   // 요율 적용 직후 즉시 업데이트 (사용자가 이미 날짜 선택한 경우)
@@ -1566,6 +1583,8 @@
               var promoActiveNow =
                 promotionEnabled && promotionInPeriod && pctApplied > 0;
               var shouldShowPromotionCard = promotionEnabled && pctDisplay > 0;
+              var shouldShowPromotionPill =
+                promotionEnabled && promoActiveNow;
               if (promoCardEl) {
                 promoCardEl.hidden = !shouldShowPromotionCard;
                 promoCardEl.classList.toggle(
@@ -1581,7 +1600,7 @@
                 promoDescEl.textContent = periodText || (isEnScope ? "—" : "—");
               }
               if (promoPillEl) {
-                promoPillEl.hidden = !promoActiveNow;
+                promoPillEl.hidden = !shouldShowPromotionPill;
               }
               if (promoRateEl && shouldShowPromotionCard) {
                 if (pctDisplay > 0) {
@@ -3686,7 +3705,9 @@
                       class="reservation-discount-card__rate js-res-promo-rate"
                       >—</span
                     >
-                    <span class="reservation-discount-card__pill js-res-promo-pill"
+                    <span
+                      class="reservation-discount-card__pill js-res-promo-pill"
+                      hidden
                       >Applied</span
                     >
                   </div>

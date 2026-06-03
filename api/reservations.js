@@ -16,6 +16,7 @@ import {
   getHoldIdFromToken,
 } from "./lib/booking-token.js";
 import { checkRoomAvailability } from "./lib/room-availability.js";
+import { getTodayYmdKst } from "./lib/promotion-period.js";
 import { exportReservationToBigQuery, exportCancellationToBigQuery } from "./lib/bigquery-export.js";
 import {
   buildIcalCalendar,
@@ -209,11 +210,12 @@ function addOneDayYMD(ymd) {
 
 async function getRoomBlockRows(pool, roomFilter) {
   try {
-    var params = [];
-    var where = "";
+    var today = getTodayYmdKst();
+    var params = [today];
+    var where = "WHERE (item->>'endDate') > $1";
     if (roomFilter) {
       params.push(roomFilter);
-      where = "WHERE rs.room_name = $1";
+      where += " AND rs.room_name = $2";
     }
     var result = await pool.query(
       `SELECT

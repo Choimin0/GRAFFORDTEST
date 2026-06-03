@@ -1,6 +1,7 @@
 import { hasActiveHoldOverlap } from "./booking-hold.js";
 import { hasExternalBookingOverlap } from "./ical-sync.js";
 import { validateBookingWindow } from "./booking-window.js";
+import { getTodayYmdKst } from "./promotion-period.js";
 
 const ALLOWED_ROOMS = new Set(["G1", "G2", "G3", "G4"]);
 const LEGACY_TO_ROOM = { A: "G1", B: "G2", C: "G3", D: "G4" };
@@ -37,11 +38,12 @@ function rowDateToYMD(v) {
 
 async function getRoomBlockRows(pool, roomFilter) {
   try {
-    var params = [];
-    var where = "";
+    var today = getTodayYmdKst();
+    var params = [today];
+    var where = "WHERE (item->>'endDate') > $1";
     if (roomFilter) {
       params.push(roomFilter);
-      where = "WHERE rs.room_name = $1";
+      where += " AND rs.room_name = $2";
     }
     var result = await pool.query(
       `SELECT
