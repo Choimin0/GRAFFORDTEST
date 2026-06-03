@@ -4460,7 +4460,35 @@
                   showMessage("프로모션 할인율은 0~100% 사이로 입력해 주세요.");
                   return;
                 }
-                openRateSaveConfirm(roomName, val);
+                var promoDates = null;
+                if (roomName === "promotion") {
+                  var startInput = tbody.querySelector(
+                    ".admin-promo-start-date[data-room-name='promotion']",
+                  );
+                  var endInput = tbody.querySelector(
+                    ".admin-promo-end-date[data-room-name='promotion']",
+                  );
+                  var startVal = startInput
+                    ? String(startInput.value || "").slice(0, 10)
+                    : "";
+                  var endVal = endInput
+                    ? String(endInput.value || "").slice(0, 10)
+                    : "";
+                  if (startVal || endVal) {
+                    if (!startVal || !endVal) {
+                      showMessage(
+                        "프로모션 적용 기간의 시작일과 종료일을 모두 입력해 주세요.",
+                      );
+                      return;
+                    }
+                    if (startVal > endVal) {
+                      showMessage("프로모션 종료일은 시작일 이후여야 합니다.");
+                      return;
+                    }
+                  }
+                  promoDates = { startDate: startVal, endDate: endVal };
+                }
+                openRateSaveConfirm(roomName, val, promoDates);
               });
             });
         }
@@ -4495,7 +4523,7 @@
           }
         }
 
-        function openRateSaveConfirm(roomName, weekdayBaseRate) {
+        function openRateSaveConfirm(roomName, weekdayBaseRate, promoDates) {
           pendingPolicyToggle = null;
           pendingRoomStatusSave = null;
           pendingRoomBlockSave = null;
@@ -4503,6 +4531,10 @@
           pendingRateSave = {
             roomName: roomName,
             weekdayBaseRate: weekdayBaseRate,
+            promotionStartDate:
+              promoDates && promoDates.startDate ? promoDates.startDate : "",
+            promotionEndDate:
+              promoDates && promoDates.endDate ? promoDates.endDate : "",
           };
           setPolicyConfirmTitle("변경 사항을 저장하시겠습니까?");
           setPolicyConfirmSaveLabel("저장");
@@ -4600,7 +4632,12 @@
           var savePromise = nextToggle
             ? saveRoomRateToggle(nextToggle.roomName, nextToggle.isEnabled)
             : nextRate
-              ? saveRoomRateRow(nextRate.roomName, nextRate.weekdayBaseRate)
+              ? saveRoomRateRow(
+                  nextRate.roomName,
+                  nextRate.weekdayBaseRate,
+                  nextRate.promotionStartDate,
+                  nextRate.promotionEndDate,
+                )
               : nextRoomStatus
                 ? saveRoomStatusManageRow(
                     nextRoomStatus.roomName,
@@ -4681,6 +4718,22 @@
               var step = row.roomName === "promotion" ? "1" : "1000";
               var maxAttr = row.roomName === "promotion" ? " max='100'" : "";
               var isEnabled = row.isEnabled !== false;
+              var promoPeriodHtml = "";
+              if (row.roomName === "promotion") {
+                promoPeriodHtml =
+                  "<fieldset class='admin-room-block-fieldset admin-room-policy-period'>" +
+                  "<legend>적용 기간</legend>" +
+                  "<div class='admin-room-block-date-grid'>" +
+                  "<label><span>시작일</span><input class='admin-promo-start-date' data-room-name='promotion' type='date' value='" +
+                  escapeHtml(row.promotionStartDate || "") +
+                  "' /></label>" +
+                  "<label><span>종료일</span><input class='admin-promo-end-date' data-room-name='promotion' type='date' value='" +
+                  escapeHtml(row.promotionEndDate || "") +
+                  "' /></label>" +
+                  "</div>" +
+                  "<p class='admin-room-policy-period-note'>비우면 기간 제한 없이 토글 ON 시 항상 적용됩니다.</p>" +
+                  "</fieldset>";
+              }
               var card = document.createElement("article");
               card.className =
                 "admin-room-policy-card" + (isEnabled ? "" : " is-disabled");
@@ -4721,6 +4774,7 @@
                 String(Number(row.weekdayBaseRate || 0)) +
                 "' />" +
                 "</label>" +
+                promoPeriodHtml +
                 "<button type='button' class='btn reserve-btn confirm-pay-submit reserveinfo-submit-btn admin-save-btn admin-room-rate-save-btn' data-room-name='" +
                 escapeHtml(row.roomName) +
                 "'>저장</button>" +
@@ -5052,15 +5106,25 @@
           validateBlockForm();
         }
 
-        function saveRoomRateRow(roomName, weekdayBaseRate) {
+        function saveRoomRateRow(
+          roomName,
+          weekdayBaseRate,
+          promotionStartDate,
+          promotionEndDate,
+        ) {
           var auth = getAuthPayload();
-          return adminPost("room-rate", {
+          var payload = {
             action: "save",
             roomName: roomName,
             weekdayBaseRate: Math.floor(weekdayBaseRate),
             adminId: auth.adminId,
             adminPw: auth.adminPw,
-          })
+          };
+          if (roomName === "promotion") {
+            payload.promotionStartDate = promotionStartDate || "";
+            payload.promotionEndDate = promotionEndDate || "";
+          }
+          return adminPost("room-rate", payload)
             .then(function (r) {
               return r.json().then(function (data) {
                 return { ok: r.ok, data: data || {} };

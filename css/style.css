@@ -13865,6 +13865,26 @@ main.content-section.confirm-page.admin-page {
   align-items: end;
   padding-top: var(--space-16);
 }
+.admin-room-policy-card__body .admin-room-policy-period {
+  grid-column: 1 / -1;
+  margin: 0;
+  border: 0;
+  padding: 0;
+}
+.admin-room-policy-card__body .admin-room-policy-period legend {
+  color: var(--stone-400);
+  font-size: 0.68rem;
+  font-weight: 400;
+  letter-spacing: 0.14em;
+  margin-bottom: var(--space-8);
+}
+.admin-room-policy-period-note {
+  margin: var(--space-8) 0 0;
+  color: var(--stone-400);
+  font-size: 0.68rem;
+  letter-spacing: 0.04em;
+  line-height: 1.6;
+}
 .admin-room-policy-card__body p {
   grid-column: 1 / -1;
   margin: 0;

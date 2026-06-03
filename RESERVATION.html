@@ -8,7 +8,7 @@
     <link rel="stylesheet" href="css/style.css" />
     <script src="js/nav-hero.js" defer></script>
     <script src="js/mobile-nav.js" defer></script>
-    <script src="js/booking-pricing.js?v=5" defer></script>
+    <script src="js/booking-pricing.js?v=6" defer></script>
     <script src="js/site-language.js" defer></script>
   </head>
   <body class="home-page page-hero-nav-sync reservation-page">
@@ -816,8 +816,8 @@
                   </div>
                   <div class="reservation-discount-card__text">
                     <h4 class="reservation-discount-card__title">프로모션</h4>
-                    <p class="reservation-discount-card__desc">
-                      6/1 ~ 6/30 예약 시
+                    <p class="reservation-discount-card__desc js-res-promo-desc">
+                      —
                     </p>
                   </div>
                   <div class="reservation-discount-card__meta">
@@ -825,7 +825,9 @@
                       class="reservation-discount-card__rate js-res-promo-rate"
                       >—</span
                     >
-                    <span class="reservation-discount-card__pill">적용 중</span>
+                    <span class="reservation-discount-card__pill js-res-promo-pill"
+                      >적용 중</span
+                    >
                   </div>
                 </article>
                 <article
@@ -1011,7 +1013,13 @@
             var inquiryBtn = scope.querySelector(".reservation-inquiry-btn");
             var promoRateEl = scope.querySelector(".js-res-promo-rate");
             var promoCardEl = scope.querySelector(".js-res-promo-card");
+            var promoDescEl = scope.querySelector(".js-res-promo-desc");
+            var promoPillEl = scope.querySelector(".js-res-promo-pill");
             var promotionEnabled = true;
+            var promotionInPeriod = true;
+            var promotionPeriodStart = "";
+            var promotionPeriodEnd = "";
+            var promotionPercentRaw = 0;
             var consecutiveCardEl = scope.querySelector(
               ".js-res-consecutive-card",
             );
@@ -1216,7 +1224,49 @@
               };
             }
 
-            function applyRoomRates(rates, charges, chargeEnabled) {
+            function formatPromotionMd(ymd) {
+              var parts = parseYmdParts(ymd);
+              if (!parts) {
+                return "";
+              }
+              return parts.m + "/" + parts.d;
+            }
+
+            function formatPromotionPeriodDesc(startYmd, endYmd) {
+              var start = formatPromotionMd(startYmd);
+              var end = formatPromotionMd(endYmd);
+              if (!start || !end) {
+                return "";
+              }
+              if (isEnScope) {
+                return (
+                  "Book from " +
+                  start +
+                  " – " +
+                  end +
+                  " (promotional rate applies automatically)."
+                );
+              }
+              return start + " ~ " + end + " 예약 시";
+            }
+
+            function isPromotionInPeriodClient(todayYmd, startYmd, endYmd) {
+              var start = String(startYmd || "").slice(0, 10);
+              var end = String(endYmd || "").slice(0, 10);
+              if (!start && !end) {
+                return true;
+              }
+              if (!start || !end) {
+                return false;
+              }
+              var today = String(todayYmd || kstNowInfo.todayYmd || "").slice(
+                0,
+                10,
+              );
+              return today >= start && today <= end;
+            }
+
+            function applyRoomRates(rates, charges, chargeEnabled, promoMeta) {
               if (!P) return;
               if (
                 rates &&
@@ -1225,15 +1275,51 @@
               ) {
                 P.setRoomWeekdayBase(rates);
               }
+              if (chargeEnabled && typeof chargeEnabled === "object") {
+                promotionEnabled = chargeEnabled.promotion !== false;
+              }
+              if (promoMeta && typeof promoMeta === "object") {
+                if (promoMeta.promotionPeriod) {
+                  promotionPeriodStart = String(
+                    promoMeta.promotionPeriod.startDate || "",
+                  ).slice(0, 10);
+                  promotionPeriodEnd = String(
+                    promoMeta.promotionPeriod.endDate || "",
+                  ).slice(0, 10);
+                }
+                if (promoMeta.promotionInPeriod === false) {
+                  promotionInPeriod = false;
+                } else if (promoMeta.promotionInPeriod === true) {
+                  promotionInPeriod = true;
+                } else {
+                  promotionInPeriod = isPromotionInPeriodClient(
+                    kstNowInfo.todayYmd,
+                    promotionPeriodStart,
+                    promotionPeriodEnd,
+                  );
+                }
+              } else {
+                promotionInPeriod = isPromotionInPeriodClient(
+                  kstNowInfo.todayYmd,
+                  promotionPeriodStart,
+                  promotionPeriodEnd,
+                );
+              }
+              if (charges && typeof charges === "object") {
+                promotionPercentRaw = Math.max(
+                  0,
+                  Math.floor(Number(charges.promotion || 0)),
+                );
+              }
               if (
                 charges &&
                 typeof charges === "object" &&
                 typeof P.setCharges === "function"
               ) {
-                P.setCharges(charges);
-              }
-              if (chargeEnabled && typeof chargeEnabled === "object") {
-                promotionEnabled = chargeEnabled.promotion !== false;
+                P.setCharges(charges, {
+                  promotionEnabled: promotionEnabled,
+                  promotionInPeriod: promotionInPeriod,
+                });
               }
             }
 
@@ -1251,8 +1337,19 @@
                 if (!cachedCharges) {
                   cachedCharges = extractChargesFromRatesMap(cachedMap);
                 }
+                var cachedPromoMeta = null;
+                try {
+                  cachedPromoMeta = JSON.parse(
+                    sessionStorage.getItem("graffordPromotionMeta") || "null",
+                  );
+                } catch (_pm) {}
                 if (cachedMap && typeof cachedMap === "object") {
-                  applyRoomRates(cachedMap, cachedCharges, cachedChargeEnabled);
+                  applyRoomRates(
+                    cachedMap,
+                    cachedCharges,
+                    cachedChargeEnabled,
+                    cachedPromoMeta,
+                  );
                 }
               } catch (_e) {}
               return fetch(roomRateApiUrl(), { cache: "no-store" })
@@ -1290,12 +1387,27 @@
                         JSON.stringify(result.data.chargeEnabled),
                       );
                     }
+                    sessionStorage.setItem(
+                      "graffordPromotionMeta",
+                      JSON.stringify({
+                        promotionPeriod: result.data.promotionPeriod || {
+                          startDate: "",
+                          endDate: "",
+                        },
+                        promotionInPeriod:
+                          result.data.promotionInPeriod !== false,
+                      }),
+                    );
                   } catch (_e) {}
                   applyRoomRates(
                     result.data.rates,
                     result.data.charges ||
                       extractChargesFromRatesMap(result.data.rates),
                     result.data.chargeEnabled,
+                    {
+                      promotionPeriod: result.data.promotionPeriod,
+                      promotionInPeriod: result.data.promotionInPeriod,
+                    },
                   );
                   // 요율 적용 직후 즉시 업데이트 (사용자가 이미 날짜 선택한 경우)
                   updateWeekdayRateDisplay();
@@ -1441,21 +1553,41 @@
 
             function updateDiscountCards() {
               var pricing = window.GraffordBookingPricing;
-              var pct = pricing
+              var pctDisplay = Math.max(
+                0,
+                Math.floor(Number(promotionPercentRaw || 0)),
+              );
+              var pctApplied = pricing
                 ? Math.max(
                     0,
                     Math.floor(Number(pricing.PROMOTION_PERCENT || 0)),
                   )
                 : 0;
-              var shouldShowPromotionCard = promotionEnabled && pct > 0;
+              var promoActiveNow =
+                promotionEnabled && promotionInPeriod && pctApplied > 0;
+              var shouldShowPromotionCard = promotionEnabled && pctDisplay > 0;
               if (promoCardEl) {
                 promoCardEl.hidden = !shouldShowPromotionCard;
+                promoCardEl.classList.toggle(
+                  "reservation-discount-card--on",
+                  promoActiveNow,
+                );
+              }
+              if (promoDescEl && shouldShowPromotionCard) {
+                var periodText = formatPromotionPeriodDesc(
+                  promotionPeriodStart,
+                  promotionPeriodEnd,
+                );
+                promoDescEl.textContent = periodText || (isEnScope ? "—" : "—");
+              }
+              if (promoPillEl) {
+                promoPillEl.hidden = !promoActiveNow;
               }
               if (promoRateEl && shouldShowPromotionCard) {
-                if (pct > 0) {
-                  promoRateEl.textContent = "−" + pct + "%";
+                if (pctDisplay > 0) {
+                  promoRateEl.textContent = "−" + pctDisplay + "%";
                 } else {
-                  promoRateEl.textContent = isEnScope ? "On" : "-10%";
+                  promoRateEl.textContent = isEnScope ? "On" : "—";
                 }
               }
               var nights = 0;
@@ -3545,9 +3677,8 @@
                   </div>
                   <div class="reservation-discount-card__text">
                     <h4 class="reservation-discount-card__title">Promotion</h4>
-                    <p class="reservation-discount-card__desc">
-                      A room-rate discount applies automatically to all bookings
-                      made during the promotional period.
+                    <p class="reservation-discount-card__desc js-res-promo-desc">
+                      —
                     </p>
                   </div>
                   <div class="reservation-discount-card__meta">
@@ -3555,7 +3686,9 @@
                       class="reservation-discount-card__rate js-res-promo-rate"
                       >—</span
                     >
-                    <span class="reservation-discount-card__pill">Applied</span>
+                    <span class="reservation-discount-card__pill js-res-promo-pill"
+                      >Applied</span
+                    >
                   </div>
                 </article>
                 <article

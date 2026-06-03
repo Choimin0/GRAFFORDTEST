@@ -637,7 +637,7 @@
         </div>
       </div>
 
-      <script src="js/booking-pricing.js?v=5"></script>
+      <script src="js/booking-pricing.js?v=6"></script>
       <script src="js/booking-token-client.js?v=3"></script>
       <script src="js/booking-checkout-guard.js?v=4"></script>
       <script src="js/payment-methods.js?v=1"></script>
@@ -835,7 +835,11 @@
               }
               var ch = rateData.charges || rateData;
               if (ch && typeof P.setCharges === "function") {
-                P.setCharges(ch);
+                var enabled = rateData.chargeEnabled || null;
+                P.setCharges(ch, {
+                  promotionEnabled: !enabled || enabled.promotion !== false,
+                  promotionInPeriod: rateData.promotionInPeriod !== false,
+                });
               }
             } catch (_err) {}
           }
@@ -2049,7 +2053,7 @@
         </div>
       </div>
 
-      <script src="js/booking-pricing.js?v=5"></script>
+      <script src="js/booking-pricing.js?v=6"></script>
       <script src="js/booking-token-client.js?v=3"></script>
       <script src="js/booking-checkout-guard.js?v=4"></script>
       <script src="js/payment-methods.js?v=1"></script>
@@ -2249,7 +2253,11 @@
               }
               var ch = rateData.charges || rateData;
               if (ch && typeof P.setCharges === "function") {
-                P.setCharges(ch);
+                var enabled = rateData.chargeEnabled || null;
+                P.setCharges(ch, {
+                  promotionEnabled: !enabled || enabled.promotion !== false,
+                  promotionInPeriod: rateData.promotionInPeriod !== false,
+                });
               }
             } catch (_err) {}
           }

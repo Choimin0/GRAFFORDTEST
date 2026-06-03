@@ -750,7 +750,7 @@
       </main>
 
       <script src="js/intl-phone.js"></script>
-      <script src="js/booking-pricing.js?v=5"></script>
+      <script src="js/booking-pricing.js?v=6"></script>
       <script src="js/booking-reservations.js"></script>
       <script src="js/booking-token-client.js?v=3"></script>
       <script src="js/booking-checkout-guard.js?v=4"></script>
@@ -779,6 +779,29 @@
               consecutiveSale: Number(rateMap["consecutive-sale"] || 0),
               promotion: Number(rateMap["promotion"] || 0),
             };
+          }
+
+          function applyChargesWithPromotionMeta(charges, ratePayload) {
+            if (!P || !charges || typeof P.setCharges !== "function") return;
+            var enabled =
+              ratePayload && ratePayload.chargeEnabled
+                ? ratePayload.chargeEnabled
+                : null;
+            var promoMeta = null;
+            try {
+              promoMeta = JSON.parse(
+                sessionStorage.getItem("graffordPromotionMeta") || "null",
+              );
+            } catch (_pm) {}
+            P.setCharges(charges, {
+              promotionEnabled: !enabled || enabled.promotion !== false,
+              promotionInPeriod:
+                ratePayload && ratePayload.promotionInPeriod === false
+                  ? false
+                  : promoMeta && promoMeta.promotionInPeriod === false
+                    ? false
+                    : true,
+            });
           }
 
           var ROOM_LABEL = { G1: "G1", G2: "G2", G3: "G3", G4: "G4" };
@@ -852,8 +875,8 @@
               if (!savedChargesMap) {
                 savedChargesMap = extractChargesFromRatesMap(savedRateMap);
               }
-              if (savedChargesMap && typeof P.setCharges === "function") {
-                P.setCharges(savedChargesMap);
+              if (savedChargesMap) {
+                applyChargesWithPromotionMeta(savedChargesMap, null);
               }
             } catch (_ec) {}
             recomputeAndApplyQuote(); // 캐시 기반 1차 결과
@@ -870,8 +893,9 @@
                 var runtimeCharges =
                   rateData.charges ||
                   extractChargesFromRatesMap(rateData.rates);
-                if (runtimeCharges && typeof P.setCharges === "function")
-                  P.setCharges(runtimeCharges);
+                if (runtimeCharges) {
+                  applyChargesWithPromotionMeta(runtimeCharges, rateData);
+                }
                 try {
                   sessionStorage.setItem(
                     "graffordRoomRateMap",
@@ -883,6 +907,23 @@
                       JSON.stringify(runtimeCharges),
                     );
                   }
+                  if (rateData.chargeEnabled) {
+                    sessionStorage.setItem(
+                      "graffordChargeEnabledMap",
+                      JSON.stringify(rateData.chargeEnabled),
+                    );
+                  }
+                  sessionStorage.setItem(
+                    "graffordPromotionMeta",
+                    JSON.stringify({
+                      promotionPeriod: rateData.promotionPeriod || {
+                        startDate: "",
+                        endDate: "",
+                      },
+                      promotionInPeriod:
+                        rateData.promotionInPeriod !== false,
+                    }),
+                  );
                 } catch (_es) {}
                 // ★ 최신 요율로 재계산 → DOM 재반영
                 recomputeAndApplyQuote();

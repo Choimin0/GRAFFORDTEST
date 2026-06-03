@@ -1,4 +1,9 @@
 import { json } from "./admin-common.js";
+import {
+  getTodayYmdKst,
+  isPromotionInPeriod,
+  normalizePromotionDate,
+} from "./promotion-period.js";
 
 const TABLE_NAME = '"room-rate"';
 
@@ -35,12 +40,30 @@ async function ensureRoomRateTable(pool) {
      ADD COLUMN IF NOT EXISTS is_enabled BOOLEAN NOT NULL DEFAULT TRUE`,
   );
   await pool.query(
+    `ALTER TABLE ${TABLE_NAME}
+     ADD COLUMN IF NOT EXISTS promotion_start_date DATE,
+     ADD COLUMN IF NOT EXISTS promotion_end_date DATE`,
+  );
+  await pool.query(
     `INSERT INTO ${TABLE_NAME} (room_name, weekday_base_rate, is_enabled)
      VALUES ('G1', 250000, TRUE), ('G2', 250000, TRUE), ('G3', 300000, TRUE), ('G4', 350000, TRUE),
             ('weekend-charge', 20000, TRUE), ('consecutive-sale', 20000, TRUE),
             ('promotion', 0, TRUE), ('extra-guest-charge', 30000, TRUE)
      ON CONFLICT (room_name) DO NOTHING`,
   );
+}
+
+function mapPromotionRowFields(row) {
+  var start = row.promotion_start_date
+    ? String(row.promotion_start_date).slice(0, 10)
+    : "";
+  var end = row.promotion_end_date
+    ? String(row.promotion_end_date).slice(0, 10)
+    : "";
+  return {
+    promotionStartDate: start,
+    promotionEndDate: end,
+  };
 }
 
 export async function handleAdminRoomRate(res, pool, body) {
@@ -72,14 +95,50 @@ export async function handleAdminRoomRate(res, pool, body) {
       json(res, 400, { ok: false, error: "프로모션 할인율은 0~100% 사이로 입력해 주세요." });
       return;
     }
+    var promoStart = null;
+    var promoEnd = null;
+    if (roomName === "promotion") {
+      var startRaw = normalizePromotionDate(body.promotionStartDate);
+      var endRaw = normalizePromotionDate(body.promotionEndDate);
+      if (startRaw || endRaw) {
+        if (!startRaw || !endRaw) {
+          json(res, 400, {
+            ok: false,
+            error: "프로모션 적용 기간의 시작일과 종료일을 모두 입력해 주세요.",
+          });
+          return;
+        }
+        if (startRaw > endRaw) {
+          json(res, 400, {
+            ok: false,
+            error: "프로모션 종료일은 시작일 이후여야 합니다.",
+          });
+          return;
+        }
+        promoStart = startRaw;
+        promoEnd = endRaw;
+      }
+    }
     try {
-      await pool.query(
-        `UPDATE ${TABLE_NAME}
-         SET weekday_base_rate = $2,
-             updated_at = NOW()
-         WHERE room_name = $1`,
-        [roomName, Math.floor(weekdayBaseRate)],
-      );
+      if (roomName === "promotion") {
+        await pool.query(
+          `UPDATE ${TABLE_NAME}
+           SET weekday_base_rate = $2,
+               promotion_start_date = $3::date,
+               promotion_end_date = $4::date,
+               updated_at = NOW()
+           WHERE room_name = $1`,
+          [roomName, Math.floor(weekdayBaseRate), promoStart, promoEnd],
+        );
+      } else {
+        await pool.query(
+          `UPDATE ${TABLE_NAME}
+           SET weekday_base_rate = $2,
+               updated_at = NOW()
+           WHERE room_name = $1`,
+          [roomName, Math.floor(weekdayBaseRate)],
+        );
+      }
     } catch (e) {
       json(res, 500, {
         ok: false,
@@ -115,16 +174,29 @@ export async function handleAdminRoomRate(res, pool, body) {
 
   try {
     var sel = await pool.query(
-      `SELECT room_name, weekday_base_rate, is_enabled
+      `SELECT room_name, weekday_base_rate, is_enabled,
+              promotion_start_date, promotion_end_date
        FROM ${TABLE_NAME}
        ORDER BY room_name ASC`,
     );
+    var todayYmd = getTodayYmdKst();
     var rows = (sel.rows || []).map(function (row) {
-      return {
+      var out = {
         roomName: row.room_name,
         weekdayBaseRate: Number(row.weekday_base_rate || 0),
         isEnabled: row.is_enabled !== false,
       };
+      if (row.room_name === "promotion") {
+        var promoFields = mapPromotionRowFields(row);
+        out.promotionStartDate = promoFields.promotionStartDate;
+        out.promotionEndDate = promoFields.promotionEndDate;
+        out.promotionInPeriod = isPromotionInPeriod(
+          todayYmd,
+          promoFields.promotionStartDate,
+          promoFields.promotionEndDate,
+        );
+      }
+      return out;
     });
     json(res, 200, { ok: true, rows: rows });
   } catch (e) {

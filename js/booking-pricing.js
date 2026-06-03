@@ -30,10 +30,11 @@
     });
   }
 
-  function setCharges(charges) {
+  function setCharges(charges, opts) {
     if (!charges || typeof charges !== "object") {
       return;
     }
+    opts = opts || {};
     var wc = Number(
       charges.weekendCharge !== undefined
         ? charges.weekendCharge
@@ -51,8 +52,18 @@
       CONSECUTIVE_SALE_PER_NIGHT = Math.floor(cs);
     }
     var pr = Number(charges.promotion);
-    if (Number.isFinite(pr) && pr >= 0 && pr <= 100) {
+    var promoToggleOn = opts.promotionEnabled !== false;
+    var promoInPeriod = opts.promotionInPeriod !== false;
+    if (
+      promoToggleOn &&
+      promoInPeriod &&
+      Number.isFinite(pr) &&
+      pr >= 0 &&
+      pr <= 100
+    ) {
       PROMOTION_PERCENT = Math.floor(pr);
+    } else {
+      PROMOTION_PERCENT = 0;
     }
     // 외부 코드에서 읽는 공개 상수도 동기화
     if (root && root.GraffordBookingPricing) {

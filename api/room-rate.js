@@ -1,4 +1,8 @@
 import pg from "pg";
+import {
+  getTodayYmdKst,
+  isPromotionInPeriod,
+} from "./lib/promotion-period.js";
 
 const { Pool } = pg;
 const TABLE_NAME = '"room-rate"';
@@ -61,6 +65,11 @@ async function ensureRoomRateTable(pool) {
      ADD COLUMN IF NOT EXISTS is_enabled BOOLEAN NOT NULL DEFAULT TRUE`,
   );
   await pool.query(
+    `ALTER TABLE ${TABLE_NAME}
+     ADD COLUMN IF NOT EXISTS promotion_start_date DATE,
+     ADD COLUMN IF NOT EXISTS promotion_end_date DATE`,
+  );
+  await pool.query(
     `INSERT INTO ${TABLE_NAME} (room_name, weekday_base_rate, is_enabled)
      VALUES ('G1', 250000, TRUE), ('G2', 250000, TRUE), ('G3', 300000, TRUE), ('G4', 350000, TRUE),
             ('weekend-charge', 20000, TRUE), ('consecutive-sale', 20000, TRUE),
@@ -96,7 +105,8 @@ export default async function handler(req, res) {
   try {
     await ensureRoomRateTable(pool);
     var sel = await pool.query(
-      `SELECT room_name, weekday_base_rate, is_enabled
+      `SELECT room_name, weekday_base_rate, is_enabled,
+              promotion_start_date, promotion_end_date
        FROM ${TABLE_NAME}
        ORDER BY room_name ASC`,
     );
@@ -113,12 +123,15 @@ export default async function handler(req, res) {
       promotion: true,
       extraGuestCharge: true,
     };
+    var promotionPeriod = { startDate: "", endDate: "" };
+    var promotionInPeriod = true;
     var chargeKeyMap = {
       "weekend-charge": "weekendCharge",
       "consecutive-sale": "consecutiveSale",
-      "promotion": "promotion",
+      promotion: "promotion",
       "extra-guest-charge": "extraGuestCharge",
     };
+    var todayYmd = getTodayYmdKst();
     (sel.rows || []).forEach(function (row) {
       var n = Number(row.weekday_base_rate || 0);
       if (chargeKeyMap[row.room_name] !== undefined) {
@@ -126,6 +139,16 @@ export default async function handler(req, res) {
         var enabled = row.is_enabled !== false;
         chargeEnabled[key] = enabled;
         charges[key] = enabled ? n : 0;
+        if (row.room_name === "promotion") {
+          var start = row.promotion_start_date
+            ? String(row.promotion_start_date).slice(0, 10)
+            : "";
+          var end = row.promotion_end_date
+            ? String(row.promotion_end_date).slice(0, 10)
+            : "";
+          promotionPeriod = { startDate: start, endDate: end };
+          promotionInPeriod = isPromotionInPeriod(todayYmd, start, end);
+        }
       } else {
         rates[row.room_name] = n;
       }
@@ -135,6 +158,8 @@ export default async function handler(req, res) {
       rates: rates,
       charges: charges,
       chargeEnabled: chargeEnabled,
+      promotionPeriod: promotionPeriod,
+      promotionInPeriod: promotionInPeriod,
     });
   } catch (e) {
     json(res, 500, {
