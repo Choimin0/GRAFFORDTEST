@@ -52,7 +52,7 @@
       CONSECUTIVE_SALE_PER_NIGHT = Math.floor(cs);
     }
     var pr = Number(charges.promotion);
-    var promoToggleOn = opts.promotionEnabled !== false;
+    var promoToggleOn = opts.promotionEnabled === true;
     var promoInPeriod = opts.promotionInPeriod !== false;
     if (
       promoToggleOn &&

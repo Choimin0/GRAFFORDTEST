@@ -794,7 +794,7 @@
               );
             } catch (_pm) {}
             P.setCharges(charges, {
-              promotionEnabled: !enabled || enabled.promotion !== false,
+              promotionEnabled: !!(enabled && enabled.promotion === true),
               promotionInPeriod:
                 ratePayload && ratePayload.promotionInPeriod === false
                   ? false

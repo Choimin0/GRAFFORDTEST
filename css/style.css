@@ -6565,6 +6565,11 @@ main.content-section:has(> .site-footer.site-business-footer) {
 }
 
 /* 할인 적용 현황 (달력 아래) */
+.js-res-promo-card[hidden],
+.js-res-promo-pill[hidden] {
+  display: none !important;
+}
+
 .reservation-discount-cards {
   display: flex;
   flex-direction: column;

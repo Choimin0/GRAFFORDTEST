@@ -837,7 +837,7 @@
               if (ch && typeof P.setCharges === "function") {
                 var enabled = rateData.chargeEnabled || null;
                 P.setCharges(ch, {
-                  promotionEnabled: !enabled || enabled.promotion !== false,
+                  promotionEnabled: !!(enabled && enabled.promotion === true),
                   promotionInPeriod: rateData.promotionInPeriod !== false,
                 });
               }
@@ -2255,7 +2255,7 @@
               if (ch && typeof P.setCharges === "function") {
                 var enabled = rateData.chargeEnabled || null;
                 P.setCharges(ch, {
-                  promotionEnabled: !enabled || enabled.promotion !== false,
+                  promotionEnabled: !!(enabled && enabled.promotion === true),
                   promotionInPeriod: rateData.promotionInPeriod !== false,
                 });
               }

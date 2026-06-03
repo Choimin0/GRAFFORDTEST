@@ -7,6 +7,19 @@ import {
 const { Pool } = pg;
 const TABLE_NAME = '"room-rate"';
 
+function isPolicyEnabled(val) {
+  if (
+    val === false ||
+    val === "f" ||
+    val === "false" ||
+    val === 0 ||
+    val === "0"
+  ) {
+    return false;
+  }
+  return true;
+}
+
 var poolSingleton = null;
 
 function getDatabaseUrl() {
@@ -125,6 +138,7 @@ export default async function handler(req, res) {
     };
     var promotionPeriod = { startDate: "", endDate: "" };
     var promotionInPeriod = true;
+    var promotionPercent = 0;
     var chargeKeyMap = {
       "weekend-charge": "weekendCharge",
       "consecutive-sale": "consecutiveSale",
@@ -136,10 +150,11 @@ export default async function handler(req, res) {
       var n = Number(row.weekday_base_rate || 0);
       if (chargeKeyMap[row.room_name] !== undefined) {
         var key = chargeKeyMap[row.room_name];
-        var enabled = row.is_enabled !== false;
+        var enabled = isPolicyEnabled(row.is_enabled);
         chargeEnabled[key] = enabled;
         charges[key] = enabled ? n : 0;
         if (row.room_name === "promotion") {
+          promotionPercent = Math.max(0, Math.min(100, Math.floor(n)));
           var start = row.promotion_start_date
             ? String(row.promotion_start_date).slice(0, 10)
             : "";
@@ -160,6 +175,7 @@ export default async function handler(req, res) {
       chargeEnabled: chargeEnabled,
       promotionPeriod: promotionPeriod,
       promotionInPeriod: promotionInPeriod,
+      promotionPercent: promotionPercent,
     });
   } catch (e) {
     json(res, 500, {
