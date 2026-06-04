@@ -73,7 +73,24 @@
     });
   }
 
+  function languageSwitchDisabled() {
+    return (
+      document.body &&
+      document.body.hasAttribute("data-disable-language-switch")
+    );
+  }
+
+  function hideLanguageSwitches() {
+    document.querySelectorAll("[data-language-switch]").forEach(function (node) {
+      node.hidden = true;
+    });
+  }
+
   function updateSwitchState(lang) {
+    if (languageSwitchDisabled()) {
+      hideLanguageSwitches();
+      return;
+    }
     var switchNodes = document.querySelectorAll("[data-language-switch]");
     switchNodes.forEach(function (container) {
       var isMobileSwitch = container.classList.contains("mobile-lang-switch");
@@ -103,6 +120,10 @@
   }
 
   function ensureMobileLanguageSwitch() {
+    if (languageSwitchDisabled()) {
+      hideLanguageSwitches();
+      return;
+    }
     var navs = document.querySelectorAll(".site-nav");
     navs.forEach(function (nav) {
       var drawerFooter = nav.querySelector(".mobile-nav-drawer__footer");
@@ -177,6 +198,7 @@
   }
 
   function handleSwitchClick(event) {
+    if (languageSwitchDisabled()) return;
     var switchContainer = event.target.closest("[data-language-switch]");
     if (!switchContainer) return;
 
@@ -197,6 +219,7 @@
   }
 
   function handleDesktopSwitchKeydown(event) {
+    if (languageSwitchDisabled()) return;
     var switchContainer = event.target.closest("[data-language-switch]");
     if (!switchContainer) return;
     if (switchContainer.classList.contains("mobile-lang-switch")) return;
@@ -208,6 +231,9 @@
   }
 
   function initLanguageSwitch() {
+    if (languageSwitchDisabled()) {
+      hideLanguageSwitches();
+    }
     ensureMobileLanguageSwitch();
     document.addEventListener("click", handleScrollDownClick);
     document.addEventListener("click", handleSwitchClick);

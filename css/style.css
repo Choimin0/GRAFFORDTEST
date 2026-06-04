@@ -578,6 +578,10 @@ html {
   display: none;
 }
 
+body[data-disable-language-switch] [data-language-switch] {
+  display: none !important;
+}
+
 /* Page-level language sections */
 .lang-en {
   display: none;

@@ -91,6 +91,19 @@
     return true;
   }
 
+  function redirectIfCheckoutBlocked(redirectTo) {
+    if (root.GraffordBookingToken && root.GraffordBookingToken.redirectIfCheckoutBlocked) {
+      return root.GraffordBookingToken.redirectIfCheckoutBlocked(redirectTo);
+    }
+    try {
+      if (sessionStorage.getItem("graffordCheckoutBlocked") === "1") {
+        root.location.replace(redirectTo || "RESERVATION.html");
+        return true;
+      }
+    } catch (_e) {}
+    return false;
+  }
+
   function init(options) {
     options = options || {};
     var page = options.page || "confirm";
@@ -123,6 +136,23 @@
     allowCheckoutNavigationFn = function () {
       leaveConfirmed = true;
     };
+
+    if (redirectIfCheckoutBlocked(options.redirectTo)) {
+      return {
+        confirmLeaveAndGo: function () {},
+        shouldGuardNavigation: function () {
+          return false;
+        },
+        allowCheckoutNavigation: allowCheckoutNavigation,
+        abortedOnBlockedCheckout: true,
+      };
+    }
+
+    root.addEventListener("pageshow", function (e) {
+      if (e.persisted) {
+        redirectIfCheckoutBlocked(options.redirectTo);
+      }
+    });
 
     if (abandonCheckoutOnReload(options.redirectTo)) {
       return {

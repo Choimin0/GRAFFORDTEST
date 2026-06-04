@@ -5,6 +5,7 @@
   var PAYMENT_EXPIRED_MSG = "결제 가능 시간이 만료되었습니다";
   var SESSION_EXP_KEY = "graffordBookingSessionExp";
   var HOLD_ID_KEY = "graffordBookingHoldId";
+  var CHECKOUT_BLOCKED_KEY = "graffordCheckoutBlocked";
 
   function apiBase() {
     if (typeof root !== "undefined" && root.__GRAFFORD_API_BASE__) {
@@ -312,9 +313,38 @@
     } catch (_e) {}
   }
 
+  function markCheckoutBlocked() {
+    try {
+      sessionStorage.setItem(CHECKOUT_BLOCKED_KEY, "1");
+    } catch (_e) {}
+  }
+
+  function clearCheckoutBlocked() {
+    try {
+      sessionStorage.removeItem(CHECKOUT_BLOCKED_KEY);
+    } catch (_e) {}
+  }
+
+  function isCheckoutBlocked() {
+    try {
+      return sessionStorage.getItem(CHECKOUT_BLOCKED_KEY) === "1";
+    } catch (_e) {
+      return false;
+    }
+  }
+
+  function redirectIfCheckoutBlocked(redirectTo) {
+    if (!isCheckoutBlocked()) {
+      return false;
+    }
+    root.location.replace(redirectTo || "RESERVATION.html");
+    return true;
+  }
+
   async function abandonCheckoutSession(redirectTo) {
     await releaseBookingHold();
     clearCheckoutSession();
+    markCheckoutBlocked();
     if (redirectTo) {
       root.location.replace(redirectTo);
     }
@@ -338,6 +368,7 @@
 
   function showUnavailableModal(options) {
     options = options || {};
+    markCheckoutBlocked();
     openModal(
       options.message || UNAVAILABLE_MSG,
       function () {
@@ -349,6 +380,7 @@
 
   function showExpiredModal(options) {
     options = options || {};
+    markCheckoutBlocked();
     var redirectTo = options.redirectTo || "RESERVATION.html";
     if (options.releaseHoldOnOpen) {
       releaseBookingHold();
@@ -363,6 +395,7 @@
       onConfirm: function () {
         if (options.releaseHoldOnOpen) {
           clearCheckoutSession();
+          markCheckoutBlocked();
           root.location.replace(redirectTo);
           return;
         }
@@ -475,6 +508,10 @@
     mountTtlTimer: mountTtlTimer,
     clearStoredToken: clearCheckoutTokenState,
     clearCheckoutSession: clearCheckoutSession,
+    markCheckoutBlocked: markCheckoutBlocked,
+    clearCheckoutBlocked: clearCheckoutBlocked,
+    isCheckoutBlocked: isCheckoutBlocked,
+    redirectIfCheckoutBlocked: redirectIfCheckoutBlocked,
     abandonCheckoutSession: abandonCheckoutSession,
     prepareCheckoutSession: prepareCheckoutSession,
     ensureBookingToken: ensureBookingToken,

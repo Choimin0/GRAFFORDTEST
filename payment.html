@@ -6,6 +6,15 @@
     <link rel="icon" href="images/LOGO-transparent.png" type="image/png" />
     <title>결제 진행 - GRAFFORD</title>
     <link rel="stylesheet" href="css/style.css" />
+    <script>
+      (function () {
+        try {
+          if (sessionStorage.getItem("graffordCheckoutBlocked") === "1") {
+            location.replace("RESERVATION.html");
+          }
+        } catch (_e) {}
+      })();
+    </script>
     <script src="js/nav-hero.js" defer></script>
     <script src="js/mobile-nav.js" defer></script>
     <script src="js/site-language.js" defer></script>
@@ -51,7 +60,7 @@
       }
     </style>
   </head>
-  <body>
+  <body data-disable-language-switch>
     <div id="grafford-react-fade-root"></div>
     <nav class="site-nav top-right-nav">
       <a href="index.html" class="nav-logo" aria-label="홈으로 이동">
@@ -83,19 +92,6 @@
         <a href="FACILITIES.html">FACILITIES</a>
       </div>
       <div class="desktop-nav-right" aria-label="데스크톱 유틸 메뉴">
-        <div
-          class="lang-switch"
-          data-language-switch
-          aria-label="Language switch"
-        >
-          <button type="button" class="lang-switch__btn" data-lang-option="kr">
-            KR
-          </button>
-          <span class="lang-switch__divider" aria-hidden="true">|</span>
-          <button type="button" class="lang-switch__btn" data-lang-option="en">
-            EN
-          </button>
-        </div>
         <a href="RESERVATION.html" class="nav-reservation-btn">RESERVATION</a>
       </div>
     </nav>
@@ -638,8 +634,8 @@
       </div>
 
       <script src="js/booking-pricing.js?v=6"></script>
-      <script src="js/booking-token-client.js?v=3"></script>
-      <script src="js/booking-checkout-guard.js?v=4"></script>
+      <script src="js/booking-token-client.js?v=5"></script>
+      <script src="js/booking-checkout-guard.js?v=5"></script>
       <script src="js/payment-methods.js?v=1"></script>
       <script>
         document.addEventListener("DOMContentLoaded", function () {
@@ -2054,8 +2050,8 @@
       </div>
 
       <script src="js/booking-pricing.js?v=6"></script>
-      <script src="js/booking-token-client.js?v=3"></script>
-      <script src="js/booking-checkout-guard.js?v=4"></script>
+      <script src="js/booking-token-client.js?v=5"></script>
+      <script src="js/booking-checkout-guard.js?v=5"></script>
       <script src="js/payment-methods.js?v=1"></script>
       <script>
         document.addEventListener("DOMContentLoaded", function () {
@@ -3233,6 +3229,13 @@
 
         paymentSessionReady.catch(function (err) {
           console.warn("[checkout-guard] payment session init failed:", err);
+          if (
+            window.GraffordBookingToken &&
+            window.GraffordBookingToken.redirectIfCheckoutBlocked()
+          ) {
+            return;
+          }
+          window.location.replace("RESERVATION.html");
         });
       });
     </script>

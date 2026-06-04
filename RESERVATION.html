@@ -926,6 +926,12 @@
 
       <script>
         document.addEventListener("DOMContentLoaded", function () {
+          function clearCheckoutBlockedBeforeConfirm() {
+            try {
+              sessionStorage.removeItem("graffordCheckoutBlocked");
+            } catch (_e) {}
+          }
+
           var reservationScopes =
             document.querySelectorAll(".lang-kr, .lang-en");
           reservationScopes.forEach(function (scope) {
@@ -2065,7 +2071,9 @@
                 mobileReserveLink.addEventListener("click", function (event) {
                   if (mobileReserveLink.classList.contains("is-disabled")) {
                     event.preventDefault();
+                    return;
                   }
+                  clearCheckoutBlockedBeforeConfirm();
                 });
               }
               if (mobileInquiryBtn) {
@@ -2094,7 +2102,9 @@
               confirmLink.addEventListener("click", function (e) {
                 if (confirmLink.classList.contains("is-disabled")) {
                   e.preventDefault();
+                  return;
                 }
+                clearCheckoutBlockedBeforeConfirm();
               });
             }
 
