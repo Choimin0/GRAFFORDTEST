@@ -1,4 +1,5 @@
 import { json } from "./admin-common.js";
+import { purgeExpiredBookings } from "./booking-retention.js";
 
 const BOOKING_TABLE = "booking";
 
@@ -432,6 +433,16 @@ async function getAnnualSalesData(pool, year) {
 
 export async function handleAdminSales(res, pool, body) {
   var type = String(body.type || "monthly").trim().toLowerCase();
+
+  try {
+    await purgeExpiredBookings(pool);
+  } catch (e) {
+    json(res, 500, {
+      ok: false,
+      error: String((e && e.message) || e || "retention purge failed"),
+    });
+    return;
+  }
 
   if (type === "monthly") {
     try {

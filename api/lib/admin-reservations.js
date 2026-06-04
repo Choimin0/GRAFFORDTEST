@@ -1,6 +1,10 @@
 import { decryptBookingPiiResponse } from "./pii-crypto.js";
 import { json } from "./admin-common.js";
 import { getExternalBookingCalendarRows } from "./ical-sync.js";
+import {
+  applyBookingRetentionToRow,
+  purgeExpiredBookings,
+} from "./booking-retention.js";
 
 const BOOKING_TABLE = "booking";
 
@@ -101,6 +105,22 @@ export async function handleAdminReservations(res, pool, body) {
       return;
     }
     try {
+      await purgeExpiredBookings(pool);
+      var requestSel = await pool.query(
+        `SELECT reservation_number, created_at
+         FROM ${BOOKING_TABLE}
+         WHERE reservation_number = $1
+         LIMIT 1`,
+        [requestReservationNumber],
+      );
+      if (!requestSel.rows || !requestSel.rows.length) {
+        json(res, 404, { ok: false, error: "대상 예약을 찾을 수 없습니다." });
+        return;
+      }
+      if (!(await applyBookingRetentionToRow(pool, requestSel.rows[0]))) {
+        json(res, 404, { ok: false, error: "대상 예약을 찾을 수 없습니다." });
+        return;
+      }
       var requestUpd = await pool.query(
         `UPDATE ${BOOKING_TABLE}
          SET guest_request = $2
@@ -141,6 +161,7 @@ export async function handleAdminReservations(res, pool, body) {
 
   try {
     await archivePastReservations(pool);
+    await purgeExpiredBookings(pool);
   } catch (e) {
     json(res, 500, {
       ok: false,

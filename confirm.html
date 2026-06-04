@@ -920,8 +920,7 @@
                         startDate: "",
                         endDate: "",
                       },
-                      promotionInPeriod:
-                        rateData.promotionInPeriod !== false,
+                      promotionInPeriod: rateData.promotionInPeriod !== false,
                     }),
                   );
                 } catch (_es) {}
@@ -2560,7 +2559,8 @@
                     />
                     <span class="payment-method-option__text">
                       <span class="payment-method-option__title"
-                        >Agree all</span
+                        >Agree all
+                        <span class="confirm-required-mark">*</span></span
                       >
                     </span>
                     <span
@@ -2665,7 +2665,8 @@
                     />
                     <span class="payment-method-option__text">
                       <span class="payment-method-option__title"
-                        >Cancellation &amp; refund policy agreement</span
+                        >Cancellation &amp; refund policy agreement
+                        <span class="confirm-required-mark">*</span></span
                       >
                     </span>
                     <span
@@ -2705,7 +2706,8 @@
                         <span class="confirm-consent-title-row">
                           <span class="payment-method-option__title"
                             >Consent to collecting and using personal
-                            information</span
+                            information
+                            <span class="confirm-required-mark">*</span></span
                           >
                           <button
                             type="button"
@@ -2747,7 +2749,8 @@
                       <span class="payment-method-option__text">
                         <span class="payment-method-option__title"
                           >Confirmation of purchase conditions and consent to
-                          proceed with payment</span
+                          proceed with payment
+                          <span class="confirm-required-mark">*</span></span
                         >
                       </span>
                       <span
@@ -2831,7 +2834,7 @@
                     Please enter your name and contact information.
                   </p>
                   <label class="confirm-label"
-                    >Name
+                    >Name <span class="confirm-required-mark">*</span>
                     <input
                       type="text"
                       name="guestName"
@@ -2842,7 +2845,7 @@
                     />
                   </label>
                   <label class="confirm-label confirm-label--contact-intl"
-                    >Contact
+                    >Contact <span class="confirm-required-mark">*</span>
                     <div
                       class="confirm-contact-intl"
                       role="group"
@@ -2867,7 +2870,7 @@
                     </div>
                   </label>
                   <label class="confirm-label"
-                    >Email
+                    >Email <span class="confirm-required-mark">*</span>
                     <input
                       type="email"
                       name="email"

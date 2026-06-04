@@ -753,12 +753,14 @@ main {
   justify-content: center;
   align-items: center;
   padding: 2rem;
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: visible;
 }
 
 .hero-media {
   position: absolute;
   inset: 0;
+  overflow: hidden;
 }
 
 .hero-slide {
@@ -2274,11 +2276,19 @@ body.index-feature-3-lightbox-open {
 
 .scroll-down-btn span {
   display: block;
+  box-sizing: border-box;
   width: 14px;
+  height: 14px;
   margin: 0 auto;
   border-right: 2px solid var(--color-text-on-dark);
   border-bottom: 2px solid var(--color-text-on-dark);
-  transform: rotate(45deg) translateY(-2px);
+  transform: rotate(45deg);
+  transform-origin: center;
+}
+
+.hero-section .scroll-down-btn {
+  bottom: max(2.75rem, calc(1.5rem + env(safe-area-inset-bottom, 0px)));
+  z-index: 2;
 }
 
 /* 메인페이지 n번째 스크롤 */
@@ -11579,7 +11589,7 @@ main.content-section.confirm-page.reserve-check-main {
     transform: translateX(-50%) translateY(0);
   }
   50% {
-    transform: translateX(-50%) translateY(10px);
+    transform: translateX(-50%) translateY(6px);
   }
 }
 

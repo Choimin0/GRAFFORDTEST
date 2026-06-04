@@ -18,6 +18,7 @@ import {
   normalizePhone,
   sendBookingAlimtalk,
 } from "./lib/solapi-alimtalk.js";
+import { applyBookingRetentionToRow } from "./lib/booking-retention.js";
 
 const { Pool } = pg;
 const BOOKING_TABLE = "booking";
@@ -177,7 +178,7 @@ export default async function handler(req, res) {
 
   try {
     var sel = await pool.query(
-      `SELECT guest_name, contact, room_type, check_in_date, check_out_date, status, booking_locale
+      `SELECT guest_name, contact, room_type, check_in_date, check_out_date, status, booking_locale, created_at
        FROM ${BOOKING_TABLE}
        WHERE reservation_number = $1
        LIMIT 1`,
@@ -189,7 +190,11 @@ export default async function handler(req, res) {
       return;
     }
 
-    var row = sel.rows[0];
+    var row = await applyBookingRetentionToRow(pool, sel.rows[0]);
+    if (!row) {
+      json(res, 404, { ok: false, error: "예약을 찾을 수 없습니다." });
+      return;
+    }
     var pii = decryptBookingPiiResponse(row);
     if (!shouldSendAlimtalk(row.booking_locale, pii.contact)) {
       json(res, 200, {

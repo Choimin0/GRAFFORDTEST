@@ -4,6 +4,10 @@ import {
   decryptBookingPiiResponse,
   guestNamesMatch,
 } from "./lib/pii-crypto.js";
+import {
+  applyBookingRetentionToRow,
+  purgeExpiredBookings,
+} from "./lib/booking-retention.js";
 
 const { Pool } = pg;
 const LEGACY_TO_ROOM = { A: "G1", B: "G2", C: "G3", D: "G4" };
@@ -231,6 +235,7 @@ export default async function handler(req, res) {
 
   try {
     await archivePastReservations(pool);
+    await purgeExpiredBookings(pool);
 
     // booking 테이블에서 status 기준으로 한 번에 조회
     var sel = await pool.query(
@@ -250,7 +255,11 @@ export default async function handler(req, res) {
       return;
     }
 
-    var row = sel.rows[0];
+    var row = await applyBookingRetentionToRow(pool, sel.rows[0]);
+    if (!row) {
+      json(res, 404, { ok: false, error: "Not found" });
+      return;
+    }
     if (!guestNamesMatch(row.guest_name, normName, normalizeLookupName)) {
       json(res, 404, { ok: false, error: "Not found" });
       return;

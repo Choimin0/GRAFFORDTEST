@@ -10,6 +10,7 @@ import { shouldSendAlimtalk } from "./booking-locale.js";
 import { queueBookingAlimtalk } from "./solapi-alimtalk.js";
 import { exportCancellationToBigQuery } from "./bigquery-export.js";
 import { json } from "./admin-common.js";
+import { applyBookingRetentionToRow } from "./booking-retention.js";
 
 const BOOKING_TABLE = "booking";
 const CANCEL_REASON_MANUAL = "MANUAL";
@@ -173,7 +174,12 @@ export async function handleAdminPaymentCancel(res, pool, body) {
       return;
     }
 
-    var row = sel.rows[0];
+    var row = await applyBookingRetentionToRow(client, sel.rows[0]);
+    if (!row) {
+      client.release();
+      json(res, 404, { ok: false, error: "취소할 예약을 찾을 수 없습니다." });
+      return;
+    }
     var refundedCount =
       row.refunded_count != null ? Number(row.refunded_count) : 0;
     if (refundedCount !== 0) {

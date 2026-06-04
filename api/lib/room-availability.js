@@ -2,6 +2,10 @@ import { hasActiveHoldOverlap } from "./booking-hold.js";
 import { hasExternalBookingOverlap } from "./ical-sync.js";
 import { validateBookingWindow } from "./booking-window.js";
 import { getTodayYmdKst } from "./promotion-period.js";
+import {
+  applyBookingRetentionToRow,
+  purgeExpiredBookings,
+} from "./booking-retention.js";
 
 const ALLOWED_ROOMS = new Set(["G1", "G2", "G3", "G4"]);
 const LEGACY_TO_ROOM = { A: "G1", B: "G2", C: "G3", D: "G4" };
@@ -115,6 +119,7 @@ export async function checkRoomAvailability(
   excludeReservationNumber,
   excludeHoldId,
 ) {
+  await purgeExpiredBookings(pool);
   var room = normalizeRoomType(roomName);
   if (!ALLOWED_ROOMS.has(room)) {
     return { available: false, reason: "invalid_room" };
@@ -161,7 +166,7 @@ export async function findConfirmedReservation(pool, reservationNumber) {
     return null;
   }
   var result = await pool.query(
-    `SELECT reservation_number, room_type, check_in_date, check_out_date, status
+    `SELECT reservation_number, room_type, check_in_date, check_out_date, status, created_at
      FROM ${BOOKING_TABLE}
      WHERE reservation_number = $1
        AND status = 'confirm'
@@ -171,7 +176,10 @@ export async function findConfirmedReservation(pool, reservationNumber) {
   if (!result.rows || !result.rows.length) {
     return null;
   }
-  var row = result.rows[0];
+  var row = await applyBookingRetentionToRow(pool, result.rows[0]);
+  if (!row) {
+    return null;
+  }
   return {
     reservationNumber: row.reservation_number,
     roomType: normalizeRoomType(row.room_type) || row.room_type,

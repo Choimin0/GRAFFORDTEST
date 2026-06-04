@@ -21,6 +21,7 @@ import {
   resolvePaidAmountForBooking,
 } from "./lib/refund-amount.js";
 import { exportCancellationToBigQuery } from "./lib/bigquery-export.js";
+import { applyBookingRetentionToRow } from "./lib/booking-retention.js";
 const { Pool } = pg;
 
 const BOOKING_TABLE = "booking";
@@ -511,7 +512,12 @@ export default async function handler(req, res) {
       return;
     }
 
-    var row = sel.rows[0];
+    var row = await applyBookingRetentionToRow(client, sel.rows[0]);
+    if (!row) {
+      client.release();
+      json(res, 404, { ok: false, error: "예약을 찾을 수 없습니다." });
+      return;
+    }
     if (!guestNamesMatch(row.guest_name, guestName, normalizeLookupName)) {
       client.release();
       json(res, 404, { ok: false, error: "예약을 찾을 수 없습니다." });

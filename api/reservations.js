@@ -34,6 +34,10 @@ import {
   ALLOWED_PAY,
   normalizePaymentMethodId,
 } from "./lib/payment-methods.js";
+import {
+  applyBookingRetentionToRow,
+  purgeExpiredBookings,
+} from "./lib/booking-retention.js";
 
 const { Pool } = pg;
 
@@ -447,6 +451,7 @@ export default async function handler(req, res) {
         }
       }
       try {
+        await purgeExpiredBookings(pool);
         var rowsForIcal;
         if (roomFilter) {
           var legacyRoom = ROOM_TO_LEGACY[roomFilter] || "";
@@ -506,6 +511,7 @@ export default async function handler(req, res) {
       }
       try {
         await cleanupExpiredBookingHolds(pool);
+        await purgeExpiredBookings(pool);
         var roomForCalLegacy = ROOM_TO_LEGACY[roomForCal] || "";
         var calRows = await pool.query(
           `SELECT check_in_date, check_out_date
@@ -594,6 +600,7 @@ export default async function handler(req, res) {
       return;
     }
     try {
+      await purgeExpiredBookings(pool);
       var sel = await pool.query(
         `SELECT
           id, reservation_number, guest_name, contact, email,
@@ -609,7 +616,11 @@ export default async function handler(req, res) {
         json(res, 404, { ok: false, error: "Not found" });
         return;
       }
-      var dbRow = sel.rows[0];
+      var dbRow = await applyBookingRetentionToRow(pool, sel.rows[0]);
+      if (!dbRow) {
+        json(res, 404, { ok: false, error: "Not found" });
+        return;
+      }
       if (!guestNamesMatch(dbRow.guest_name, normName, normalizeLookupName)) {
         json(res, 404, { ok: false, error: "Not found" });
         return;
@@ -735,7 +746,12 @@ export default async function handler(req, res) {
         json(res, 404, { ok: false, error: "삭제할 예약을 찾을 수 없습니다." });
         return;
       }
-      var delStoredName = delSel.rows[0].guest_name;
+      var delRowCandidate = await applyBookingRetentionToRow(pool, delSel.rows[0]);
+      if (!delRowCandidate) {
+        json(res, 404, { ok: false, error: "삭제할 예약을 찾을 수 없습니다." });
+        return;
+      }
+      var delStoredName = delRowCandidate.guest_name;
       if (
         !guestNamesMatch(delStoredName, delGuestName, normalizeLookupName)
       ) {
@@ -763,7 +779,7 @@ export default async function handler(req, res) {
         json(res, 404, { ok: false, error: "삭제할 예약을 찾을 수 없습니다." });
         return;
       }
-      var delRow = delSel.rows[0];
+      var delRow = delRowCandidate;
       var cancelledAt = new Date();
       try {
         var cancelBqResult = await exportCancellationToBigQuery({
@@ -1085,8 +1101,12 @@ export default async function handler(req, res) {
           [reservationNumber],
         );
         if (dupSel.rows && dupSel.rows.length) {
-          var dupRow = dupSel.rows[0];
+          var dupCandidate = Object.assign({}, dupSel.rows[0], {
+            reservation_number: reservationNumber,
+          });
+          var dupRow = await applyBookingRetentionToRow(pool, dupCandidate);
           if (
+            dupRow &&
             guestNamesMatch(dupRow.guest_name, guestName, normalizeLookupName)
           ) {
             json(res, 409, {

@@ -5,6 +5,7 @@ import { decryptBookingPiiResponse } from "./pii-crypto.js";
 import { json } from "./admin-common.js";
 import { shouldSendAlimtalk } from "./booking-locale.js";
 import { sendBookingAlimtalk } from "./solapi-alimtalk.js";
+import { applyBookingRetentionToRow } from "./booking-retention.js";
 
 const BOOKING_TABLE = "booking";
 
@@ -43,7 +44,7 @@ export async function handleAdminCheckinAlimtalk(res, pool, body) {
   }
 
   var sel = await pool.query(
-    `SELECT guest_name, contact, room_type, check_in_date, check_out_date, status, booking_locale
+    `SELECT guest_name, contact, room_type, check_in_date, check_out_date, status, booking_locale, created_at
      FROM ${BOOKING_TABLE}
      WHERE reservation_number = $1
      LIMIT 1`,
@@ -55,7 +56,11 @@ export async function handleAdminCheckinAlimtalk(res, pool, body) {
     return;
   }
 
-  var row = sel.rows[0];
+  var row = await applyBookingRetentionToRow(pool, sel.rows[0]);
+  if (!row) {
+    json(res, 404, { ok: false, error: "예약을 찾을 수 없습니다." });
+    return;
+  }
   var status = String(row.status || "").toLowerCase();
   if (status !== "confirm" && status !== "completed") {
     json(res, 409, {
