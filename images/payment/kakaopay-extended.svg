@@ -1,5 +1,0 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 88 32" role="img" aria-label="Kakao Pay">
-  <rect width="88" height="32" rx="6" fill="#FFEB00"/>
-  <path fill="#191919" d="M16 9.5c-3.9 0-7 2.4-7 5.4 0 1.9 1.2 3.6 3.1 4.6l-.8 2.9c-.1.3.2.6.6.4l3.5-2.3c.7.1 1.4.2 2.1.2 3.9 0 7-2.4 7-5.4S19.9 9.5 16 9.5z"/>
-  <text x="34" y="21.5" fill="#191919" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="700">pay</text>
-</svg>
