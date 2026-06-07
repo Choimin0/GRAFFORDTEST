@@ -3762,6 +3762,9 @@
         var resEntryCalView = new Date();
         var resEntryCheckInDate = null;
         var resEntryCheckOutDate = null;
+        var resEntryOccupiedNightSet = new Set();
+        var resEntryAirbnbNightSet = new Set();
+        var resEntryAvailabilityRoom = "";
         var resEntryInited = false;
         var resEntrySubmitting = false;
 
@@ -3883,6 +3886,112 @@
 
         function resEntryDateLt(a, b) {
           return a.getTime() < b.getTime();
+        }
+
+        function resEntryAddDays(date, days) {
+          var next = new Date(date);
+          next.setDate(next.getDate() + days);
+          return next;
+        }
+
+        function publicApiUrl() {
+          var base = "";
+          if (typeof window !== "undefined" && window.__GRAFFORD_API_BASE__) {
+            base = String(window.__GRAFFORD_API_BASE__).replace(/\/$/, "");
+          }
+          return base;
+        }
+
+        function canResEntrySelectCheckOut(checkIn, checkOut) {
+          if (!checkIn || !checkOut || !resEntryDateLt(checkIn, checkOut)) {
+            return false;
+          }
+          var cur = new Date(
+            checkIn.getFullYear(),
+            checkIn.getMonth(),
+            checkIn.getDate(),
+          );
+          var end = new Date(
+            checkOut.getFullYear(),
+            checkOut.getMonth(),
+            checkOut.getDate(),
+          );
+          while (resEntryDateLt(cur, end)) {
+            if (resEntryOccupiedNightSet.has(formatResEntryYmd(cur))) {
+              return false;
+            }
+            cur = resEntryAddDays(cur, 1);
+          }
+          return true;
+        }
+
+        function updateResEntryCalHint() {
+          var hintEl = document.querySelector(".admin-res-entry-cal-hint");
+          if (!hintEl) {
+            return;
+          }
+          var baseHint =
+            "달력에서 체크인 날짜를 먼저 선택한 뒤, 체크아웃 날짜를 선택하세요.";
+          if (!resEntryState.room) {
+            hintEl.textContent = baseHint + " 객실을 선택하면 예약 완료 날짜가 표시됩니다.";
+            return;
+          }
+          if (resEntryState.bookingChannel === "airbnb") {
+            hintEl.innerHTML =
+              baseHint +
+              ' <span class="admin-res-entry-cal-legend"><span class="admin-res-entry-cal-legend__booked">예약 완료</span><span class="admin-res-entry-cal-legend__airbnb">Airbnb iCal</span></span>';
+            return;
+          }
+          hintEl.textContent =
+            baseHint + " 회색 표시 날짜는 이미 예약이 완료된 날짜입니다.";
+        }
+
+        function loadResEntryAvailability(room) {
+          var roomKey = String(room || "").trim().toUpperCase();
+          if (!roomKey) {
+            resEntryOccupiedNightSet = new Set();
+            resEntryAirbnbNightSet = new Set();
+            resEntryAvailabilityRoom = "";
+            updateResEntryCalHint();
+            renderReservationEntryCalendar();
+            return Promise.resolve();
+          }
+          resEntryAvailabilityRoom = roomKey;
+          return fetch(
+            publicApiUrl() +
+              "/api/reservations?room=" +
+              encodeURIComponent(roomKey) +
+              "&availability=1",
+          )
+            .then(function (r) {
+              return r.json();
+            })
+            .then(function (data) {
+              if (
+                resEntryAvailabilityRoom !== roomKey ||
+                resEntryState.room !== roomKey
+              ) {
+                return;
+              }
+              if (data && data.ok) {
+                resEntryOccupiedNightSet = new Set(data.occupiedNights || []);
+                resEntryAirbnbNightSet = new Set(data.airbnbIcalNights || []);
+              } else {
+                resEntryOccupiedNightSet = new Set();
+                resEntryAirbnbNightSet = new Set();
+              }
+              updateResEntryCalHint();
+              renderReservationEntryCalendar();
+            })
+            .catch(function () {
+              if (resEntryAvailabilityRoom !== roomKey) {
+                return;
+              }
+              resEntryOccupiedNightSet = new Set();
+              resEntryAirbnbNightSet = new Set();
+              updateResEntryCalHint();
+              renderReservationEntryCalendar();
+            });
         }
 
         function resEntrySetSummaryVal(id, text, isEmpty) {
@@ -4110,6 +4219,9 @@
             grid.appendChild(empty);
           }
 
+          var inCheckoutMode = !!(resEntryCheckInDate && !resEntryCheckOutDate);
+          var showAirbnbIcal = resEntryState.bookingChannel === "airbnb";
+
           for (var d = 1; d <= lastDate; d++) {
             (function (dayNum) {
               var cellDate = new Date(y, m, dayNum);
@@ -4118,13 +4230,44 @@
               btn.type = "button";
               btn.className =
                 "admin-res-entry-cal-cell admin-res-entry-cal-day";
-              btn.textContent = String(dayNum);
               btn.setAttribute("role", "gridcell");
 
+              var ymdStr = formatResEntryYmd(cellDate);
               var isPast = cellDate.getTime() < today.getTime();
+              var isOcc =
+                !!resEntryState.room && resEntryOccupiedNightSet.has(ymdStr);
+              var isAirbnbIcal =
+                showAirbnbIcal && resEntryAirbnbNightSet.has(ymdStr);
+              var disabled = false;
+              var disabledReason = "";
+
               if (isPast) {
-                btn.disabled = true;
+                disabled = true;
+                disabledReason = "past";
+              } else if (isOcc) {
+                if (
+                  !(
+                    inCheckoutMode &&
+                    resEntryCheckInDate &&
+                    resEntryDateLt(resEntryCheckInDate, cellDate) &&
+                    canResEntrySelectCheckOut(resEntryCheckInDate, cellDate)
+                  )
+                ) {
+                  disabled = true;
+                  disabledReason = "occupied-night";
+                }
+              }
+
+              btn.disabled = disabled;
+              btn.dataset.disabledReason = disabledReason || "enabled";
+
+              if (isPast) {
                 btn.classList.add("is-past");
+              } else if (isOcc) {
+                btn.classList.add("is-booked");
+                if (isAirbnbIcal) {
+                  btn.classList.add("is-airbnb-ical");
+                }
               }
 
               if (
@@ -4148,6 +4291,21 @@
                 btn.classList.add("is-range");
               }
 
+              if (
+                disabled &&
+                disabledReason === "occupied-night" &&
+                !isPast
+              ) {
+                btn.classList.add("is-soldout");
+                btn.textContent = "";
+                var soldDay = document.createElement("span");
+                soldDay.className = "admin-res-entry-cal-soldout-day";
+                soldDay.textContent = String(dayNum);
+                btn.appendChild(soldDay);
+              } else {
+                btn.textContent = String(dayNum);
+              }
+
               btn.addEventListener("click", function () {
                 if (btn.disabled) {
                   return;
@@ -4164,6 +4322,11 @@
                 } else if (resEntryDateLt(cellDate, resEntryCheckInDate)) {
                   resEntryCheckInDate = new Date(cellDate);
                   resEntryCheckOutDate = null;
+                } else if (
+                  resEntryOccupiedNightSet.has(ymdStr) &&
+                  !canResEntrySelectCheckOut(resEntryCheckInDate, cellDate)
+                ) {
+                  return;
                 } else {
                   resEntryCheckOutDate = new Date(cellDate);
                 }
@@ -4174,6 +4337,8 @@
               grid.appendChild(btn);
             })(d);
           }
+
+          updateResEntryCalHint();
         }
 
         function resetReservationEntryForm() {
@@ -4190,6 +4355,9 @@
           resEntryCheckInDate = null;
           resEntryCheckOutDate = null;
           resEntryCalView = new Date();
+          resEntryOccupiedNightSet = new Set();
+          resEntryAirbnbNightSet = new Set();
+          resEntryAvailabilityRoom = "";
 
           document
             .querySelectorAll(".admin-res-entry-platform-btn")
@@ -4265,6 +4433,7 @@
                     btn.getAttribute("data-platform") || "";
                   resEntryState.bookingChannel =
                     btn.getAttribute("data-booking-channel") || "";
+                  renderReservationEntryCalendar();
                   updateReservationEntrySummary();
                 });
               });
@@ -4280,7 +4449,11 @@
                     });
                   btn.classList.add("is-selected");
                   resEntryState.room = btn.getAttribute("data-room") || "";
+                  resEntryCheckInDate = null;
+                  resEntryCheckOutDate = null;
                   applyResEntryRoomGuestLimits(resEntryState.room);
+                  loadResEntryAvailability(resEntryState.room);
+                  syncReservationEntryDates();
                   updateReservationEntrySummary();
                 });
               });

@@ -444,6 +444,21 @@ export async function getExternalBookingCalendarRows(pool) {
   }
 }
 
+function collectExternalOccupiedNights(rows) {
+  var occupied = Object.create(null);
+  (rows || []).forEach(function (row) {
+    var ci = rowDateToYMD(row.check_in_date);
+    var co = rowDateToYMD(row.check_out_date);
+    if (!ci || !co || ci >= co) {
+      return;
+    }
+    expandOccupiedNights(ci, co).forEach(function (n) {
+      occupied[n] = true;
+    });
+  });
+  return Object.keys(occupied).sort();
+}
+
 export async function getExternalBookingOccupiedNights(pool, room) {
   if (isIcalImportDisabled()) {
     return [];
@@ -457,18 +472,30 @@ export async function getExternalBookingOccupiedNights(pool, room) {
        ORDER BY check_in_date`,
       [room],
     );
-    var occupied = Object.create(null);
-    (result.rows || []).forEach(function (row) {
-      var ci = rowDateToYMD(row.check_in_date);
-      var co = rowDateToYMD(row.check_out_date);
-      if (!ci || !co || ci >= co) {
-        return;
-      }
-      expandOccupiedNights(ci, co).forEach(function (n) {
-        occupied[n] = true;
-      });
-    });
-    return Object.keys(occupied).sort();
+    return collectExternalOccupiedNights(result.rows);
+  } catch (e) {
+    if (e && (e.code === "42P01" || e.code === "42703")) {
+      return [];
+    }
+    throw e;
+  }
+}
+
+export async function getAirbnbBookingOccupiedNights(pool, room) {
+  if (isIcalImportDisabled()) {
+    return [];
+  }
+  try {
+    var result = await pool.query(
+      `SELECT check_in_date, check_out_date
+       FROM ${EXTERNAL_BOOKING_TABLE}
+       WHERE room_type = $1
+         AND source = 'airbnb'
+         AND check_out_date > CURRENT_DATE - INTERVAL '1 day'
+       ORDER BY check_in_date`,
+      [room],
+    );
+    return collectExternalOccupiedNights(result.rows);
   } catch (e) {
     if (e && (e.code === "42P01" || e.code === "42703")) {
       return [];

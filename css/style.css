@@ -15200,7 +15200,7 @@ main.content-section.confirm-page.admin-page {
 .admin-res-entry-platform-name {
   display: block;
   margin-top: var(--space-6);
-  color: var(--stone-400);
+  color: var(--stone-500);
   font-size: 0.56rem;
   letter-spacing: 0.2em;
   text-transform: uppercase;
@@ -15410,6 +15410,82 @@ main.content-section.confirm-page.admin-page {
   opacity: 0.35;
   cursor: not-allowed;
 }
+.admin-res-entry-cal-day.is-booked:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+.admin-res-entry-cal-day.is-booked:not(:disabled) {
+  opacity: 0.42;
+  cursor: pointer;
+}
+.admin-res-entry-cal-day.is-booked:not(:disabled):hover {
+  opacity: 0.52;
+}
+.admin-res-entry-cal-grid.is-selecting-checkout
+  .admin-res-entry-cal-day.is-booked:not(:disabled) {
+  opacity: 1;
+  color: var(--stone-900);
+}
+.admin-res-entry-cal-grid.is-selecting-checkout
+  .admin-res-entry-cal-day.is-booked:not(:disabled):hover {
+  opacity: 1;
+}
+.admin-res-entry-cal-day.is-airbnb-ical.is-booked:not(:disabled) {
+  background: rgba(255, 90, 95, 0.16);
+  color: #b83a3f;
+  opacity: 1;
+}
+.admin-res-entry-cal-day.is-airbnb-ical.is-booked:disabled {
+  background: rgba(255, 90, 95, 0.12);
+  color: #c25a5e;
+  opacity: 0.55;
+}
+.admin-res-entry-cal-day.is-soldout {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  padding-top: 1px;
+  line-height: 1;
+  color: var(--stone-400);
+  font-weight: 400;
+}
+.admin-res-entry-cal-day.is-soldout.is-airbnb-ical {
+  color: #c25a5e;
+}
+.admin-res-entry-cal-soldout-day {
+  font-size: 0.82rem;
+  line-height: 1.05;
+  color: inherit;
+}
+.admin-res-entry-cal-legend {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.65rem;
+  margin-left: 0.35rem;
+}
+.admin-res-entry-cal-legend__booked,
+.admin-res-entry-cal-legend__airbnb {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.62rem;
+  letter-spacing: 0.04em;
+}
+.admin-res-entry-cal-legend__booked::before,
+.admin-res-entry-cal-legend__airbnb::before {
+  content: "";
+  width: 0.55rem;
+  height: 0.55rem;
+  border-radius: 1px;
+}
+.admin-res-entry-cal-legend__booked::before {
+  background: var(--stone-300);
+}
+.admin-res-entry-cal-legend__airbnb::before {
+  background: rgba(255, 90, 95, 0.45);
+}
 .admin-res-entry-cal-day.is-checkin,
 .admin-res-entry-cal-day.is-checkout {
   background: var(--stone-800);
@@ -15471,6 +15547,7 @@ main.content-section.confirm-page.admin-page {
 }
 .admin-res-entry-field--amount .admin-res-entry-amount-wrap {
   position: relative;
+  max-width: 50%;
   display: block;
 }
 .admin-res-entry-amount-currency {
@@ -15484,6 +15561,7 @@ main.content-section.confirm-page.admin-page {
 }
 .admin-res-entry-field--amount input {
   padding-left: 1.75rem !important;
+  padding-bottom: 0.5rem;
 }
 .admin-res-entry-per-night {
   min-height: 1rem;
@@ -15536,7 +15614,7 @@ main.content-section.confirm-page.admin-page {
   margin: 0;
   color: var(--stone-900);
   font-size: 1rem;
-  font-weight: 300;
+  font-weight: 400;
   letter-spacing: 0.06em;
 }
 .admin-res-entry-panel-body {
@@ -15570,21 +15648,13 @@ main.content-section.confirm-page.admin-page {
   position: relative;
   margin-top: var(--space-20);
   padding-top: var(--space-16);
-  border-top: 1px solid var(--stone-200);
 }
-.admin-res-entry-panel-total::before {
-  content: "";
-  position: absolute;
-  left: 0;
-  top: 0;
-  width: 1.75rem;
-  height: 1px;
-  background: var(--gold-500);
-}
+
 .admin-res-entry-total-label {
   margin: 0 0 var(--space-6);
   color: var(--stone-400);
   font-size: 0.56rem;
+  text-align: center;
   letter-spacing: 0.35em;
   text-transform: uppercase;
 }
@@ -15592,6 +15662,7 @@ main.content-section.confirm-page.admin-page {
   margin: 0;
   color: var(--stone-900);
   font-size: 1.35rem;
+  text-align: center;
   font-weight: 300;
   letter-spacing: 0.04em;
 }
