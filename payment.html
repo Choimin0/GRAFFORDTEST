@@ -2930,7 +2930,10 @@
               }
               verifiedPgTid2 = verifyData.pgTid || null;
               if (GPM) {
-                var verifiedEn = GPM.resolveVerifiedMethod(verifyData, payMethod);
+                var verifiedEn = GPM.resolveVerifiedMethod(
+                  verifyData,
+                  payMethod,
+                );
                 verifiedPayMethod = verifiedEn.methodId;
                 verifiedPgPayProvider = verifiedEn.pgPayProvider;
               } else if (verifyData.paymentMethod) {
@@ -3131,7 +3134,9 @@
             class="btn reserve-btn confirm-leave-btn confirm-leave-btn--continue"
           >
             <span class="confirm-leave-btn__label">확인</span>
-            <span class="confirm-leave-btn__hint" id="payment-alert-modal-confirm-hint"
+            <span
+              class="confirm-leave-btn__hint"
+              id="payment-alert-modal-confirm-hint"
               >결제 화면으로 돌아가기</span
             >
           </button>
