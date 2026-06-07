@@ -2934,7 +2934,7 @@
           var totalRevenue = (data && data.totalRevenue) || 0;
           var cancelCount = (data && data.cancelCount) || 0;
           var cancelRevenue = (data && data.cancelRevenue) || 0;
-          var paymentData = (data && data.paymentRevenue) || [];
+          var platformData = (data && data.platformRevenue) || [];
           var roomStats = (data && data.roomStats) || [];
           var dailyRevenue = (data && data.dailyRevenue) || [];
           var occupancyByDay = (data && data.occupancyByDay) || [];
@@ -3196,13 +3196,13 @@
             return card;
           }
 
-          function makePaymentCard() {
+          function makePlatformCard() {
             var card = document.createElement("section");
             card.className = "admin-sales-chart-wrap admin-sales-mini-card";
-            card.appendChild(makeCardTitle("PAYMENT", "결제수단"));
+            card.appendChild(makeCardTitle("PLATFORM", "결제 플랫폼"));
             var maxValue = Math.max.apply(
               null,
-              (paymentData || [])
+              (platformData || [])
                 .map(function (row) {
                   return Number(row.revenue) || 0;
                 })
@@ -3210,15 +3210,14 @@
             );
             var list = document.createElement("div");
             list.className = "admin-sales-payment-list";
-            (paymentData || []).forEach(function (row) {
+            (platformData || []).forEach(function (row) {
               var revenue = Number(row.revenue) || 0;
               var item = document.createElement("div");
               item.className = "admin-sales-payment-row";
               var top = document.createElement("div");
               top.className = "admin-sales-payment-top";
               var label = document.createElement("span");
-              label.textContent =
-                row.label || formatPaymentMethodLabel(row.method);
+              label.textContent = row.label || "—";
               var amount = document.createElement("strong");
               amount.textContent = formatKRW(revenue);
               top.appendChild(label);
@@ -3233,9 +3232,9 @@
               item.appendChild(track);
               list.appendChild(item);
             });
-            if (!paymentData.length) {
+            if (!platformData.length) {
               list.innerHTML =
-                "<p class='admin-sales-empty'>결제 데이터가 없습니다.</p>";
+                "<p class='admin-sales-empty'>플랫폼별 매출 데이터가 없습니다.</p>";
             }
             card.appendChild(list);
             return card;
@@ -3273,7 +3272,7 @@
           secondGrid.className = "admin-sales-grid admin-sales-grid--lower";
           var sideStack = document.createElement("div");
           sideStack.className = "admin-sales-side-stack";
-          sideStack.appendChild(makePaymentCard());
+          sideStack.appendChild(makePlatformCard());
           sideStack.appendChild(makeCancelCard());
           secondGrid.appendChild(makeHeatmapCard("월별 예약 밀도"));
           secondGrid.appendChild(sideStack);
@@ -3758,6 +3757,7 @@
           checkout: "",
           guests: 2,
           amount: 0,
+          amountEntered: false,
         };
         var resEntryCalView = new Date();
         var resEntryCheckInDate = null;
@@ -4064,7 +4064,7 @@
 
           var totalEl = document.getElementById("admin-res-entry-sum-total");
           if (totalEl) {
-            if (resEntryState.amount > 0) {
+            if (resEntryState.amountEntered) {
               totalEl.innerHTML =
                 '<span class="admin-res-entry-currency-small">₩</span>' +
                 resEntryState.amount.toLocaleString();
@@ -4081,7 +4081,8 @@
               resEntryState.checkin && resEntryState.checkout
             ),
             "admin-res-entry-check-guest": !!guestName,
-            "admin-res-entry-check-amount": resEntryState.amount > 0,
+            "admin-res-entry-check-amount":
+              resEntryState.amountEntered && resEntryState.amount >= 0,
           };
           var doneCount = 0;
           Object.keys(checks).forEach(function (id) {
@@ -4350,6 +4351,7 @@
             checkout: "",
             guests: 2,
             amount: 0,
+            amountEntered: false,
           };
           resEntrySubmitting = false;
           resEntryCheckInDate = null;
@@ -4542,8 +4544,12 @@
             }
             if (totalAmountInput) {
               totalAmountInput.addEventListener("input", function () {
-                resEntryState.amount =
-                  parseInt(totalAmountInput.value, 10) || 0;
+                resEntryState.amountEntered = true;
+                var rawAmount = String(totalAmountInput.value || "").trim();
+                resEntryState.amount = rawAmount === "" ? 0 : parseInt(rawAmount, 10);
+                if (!Number.isFinite(resEntryState.amount) || resEntryState.amount < 0) {
+                  resEntryState.amount = 0;
+                }
                 syncReservationEntryDates();
               });
             }
@@ -4924,19 +4930,30 @@
               { label: "4주", date: "2026-05-22", revenue: 990000 },
               { label: "5주", date: "2026-05-29", revenue: 0 },
             ],
-            paymentRevenue: [
-              { method: "card", label: "신용카드", count: 6, revenue: 2750000 },
+            platformRevenue: [
               {
-                method: "naver",
-                label: "네이버페이",
-                count: 5,
+                platform: "direct",
+                label: "홈페이지",
+                count: 6,
+                revenue: 2750000,
+              },
+              {
+                platform: "airbnb",
+                label: "에어비앤비",
+                count: 3,
                 revenue: 750000,
               },
               {
-                method: "kakaopay",
-                label: "카카오페이",
-                count: 1,
+                platform: "stayfolio",
+                label: "스테이폴리오",
+                count: 2,
                 revenue: 335000,
+              },
+              {
+                platform: "phone",
+                label: "유선예약",
+                count: 1,
+                revenue: 180000,
               },
             ],
             roomStats: [
@@ -5070,6 +5087,14 @@
 
         function getReservationPaidTotal(row) {
           return Number((row && row.totalAmount) || 0);
+        }
+
+        function isExternalManualReservation(row) {
+          return (
+            String((row && row.paymentMethod) || "")
+              .trim()
+              .toLowerCase() === "external-manual"
+          );
         }
 
         function getReservationStatusLabel(row) {
@@ -5263,14 +5288,24 @@
             return;
           }
           var row = findReservationByNumber(reservationNumber) || {};
+          var isExternalManual = isExternalManualReservation(row);
           activeManualCancelReservationNumber = String(reservationNumber || "");
+          var titleEl = document.getElementById("admin-manual-cancel-title");
+          if (titleEl) {
+            titleEl.textContent = isExternalManual
+              ? "이 예약을 취소하시겠습니까?"
+              : "관리자 직접 취소를 진행하시겠습니까?";
+          }
           if (manualCancelMeta) {
-            manualCancelMeta.textContent =
-              (row.reservationNumber || "—") +
-              " · " +
-              (row.guestName || "—") +
-              " · " +
-              formatKRW(getReservationPaidTotal(row));
+            manualCancelMeta.textContent = isExternalManual
+              ? (row.reservationNumber || "—") +
+                  " · " +
+                  (row.guestName || "—")
+              : (row.reservationNumber || "—") +
+                  " · " +
+                  (row.guestName || "—") +
+                  " · " +
+                  formatKRW(getReservationPaidTotal(row));
           }
           setManualCancelMessage("");
           manualCancelModal.hidden = false;
@@ -5289,10 +5324,17 @@
             return;
           }
           var auth = getAuthPayload();
+          var row =
+            findReservationByNumber(activeManualCancelReservationNumber) || {};
+          var isExternalManual = isExternalManualReservation(row);
           if (manualCancelYesBtn) {
             manualCancelYesBtn.disabled = true;
           }
-          setManualCancelMessage("100% 환불 및 취소 처리 중입니다.");
+          setManualCancelMessage(
+            isExternalManual
+              ? "취소 처리 중입니다."
+              : "100% 환불 및 취소 처리 중입니다.",
+          );
           adminPost("payment-cancel", {
             reservationNumber: activeManualCancelReservationNumber,
             adminId: auth.adminId,
@@ -5306,7 +5348,10 @@
             .then(function (result) {
               if (!result.ok || !result.data.ok) {
                 throw new Error(
-                  result.data.error || "관리자 취소(환불) 처리에 실패했습니다.",
+                  isExternalManual
+                    ? result.data.error || "예약 취소 처리에 실패했습니다."
+                    : result.data.error ||
+                        "관리자 취소(환불) 처리에 실패했습니다.",
                 );
               }
               closeManualCancelModal();

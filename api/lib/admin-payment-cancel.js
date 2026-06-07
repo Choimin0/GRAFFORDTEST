@@ -11,6 +11,7 @@ import { queueBookingAlimtalk } from "./solapi-alimtalk.js";
 import { exportCancellationToBigQuery } from "./bigquery-export.js";
 import { json } from "./admin-common.js";
 import { applyBookingRetentionToRow } from "./booking-retention.js";
+import { isExternalManualPaymentMethod } from "./admin-manual-booking.js";
 
 const BOOKING_TABLE = "booking";
 const CANCEL_REASON_MANUAL = "MANUAL";
@@ -196,13 +197,14 @@ export async function handleAdminPaymentCancel(res, pool, body) {
       .toLowerCase()
       .trim();
     var isBankTransfer = isBankTransferMethod(paymentMethodDb);
+    var isExternalManual = isExternalManualPaymentMethod(paymentMethodDb);
     var paidResolution = await resolvePaidAmountForBooking({
       row: row,
       reservationNumber: reservationNumber,
       isBankTransfer: isBankTransfer,
     });
     var paidAmountNum = paidResolution.paidAmount;
-    var refundAmount = paidAmountNum;
+    var refundAmount = isExternalManual ? 0 : paidAmountNum;
 
     console.log(
       "[admin-payment-cancel] 예약번호:",
@@ -223,7 +225,7 @@ export async function handleAdminPaymentCancel(res, pool, body) {
 
     var pgCancelled = false;
 
-    if (!isBankTransfer && refundAmount > 0) {
+    if (!isBankTransfer && !isExternalManual && refundAmount > 0) {
       if (!pgTid) {
         client.release();
         json(res, 400, {
@@ -340,7 +342,10 @@ export async function handleAdminPaymentCancel(res, pool, body) {
     }
 
     var cancelledPii = decryptBookingPiiResponse(updResult.rows[0]);
-    if (shouldSendAlimtalk(row.booking_locale, cancelledPii.contact)) {
+    if (
+      !isExternalManual &&
+      shouldSendAlimtalk(row.booking_locale, cancelledPii.contact)
+    ) {
       queueBookingAlimtalk("cancel-complete", {
         guestName: cancelledPii.guestName,
         contact: cancelledPii.contact,
@@ -363,6 +368,7 @@ export async function handleAdminPaymentCancel(res, pool, body) {
       paidAmountSource: paidResolution.source,
       cancelReason: CANCEL_REASON_MANUAL,
       isBankTransfer: isBankTransfer,
+      isExternalManual: isExternalManual,
     });
   } catch (e) {
     try {

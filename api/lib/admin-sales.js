@@ -10,14 +10,39 @@ const ROOM_COLORS = {
   G4: "#E07B7B",
 };
 
-// 판매 채널 매핑: payment_method → channel name
-// 현재는 자사 채널만 존재. 추후 OTA 채널 추가 시 여기에 매핑을 추가하면 됩니다.
-function resolveChannel(paymentMethod) {
-  var raw = String(paymentMethod || "").trim().toLowerCase();
-  // 야놀자, 에어비앤비 등 OTA 채널이 추가될 경우 아래에 조건을 추가합니다.
-  // if (raw === "yanolja") return "야놀자";
-  // if (raw === "airbnb") return "에어비앤비";
-  return "GRAFFORD";
+const PLATFORM_ORDER = ["direct", "airbnb", "stayfolio", "phone"];
+
+const PLATFORM_LABELS = {
+  direct: "홈페이지",
+  airbnb: "에어비앤비",
+  stayfolio: "스테이폴리오",
+  phone: "유선예약",
+  other: "기타",
+};
+
+const PLATFORM_COLORS = {
+  direct: "#7EB8D4",
+  airbnb: "#F0A87C",
+  stayfolio: "#88C9A0",
+  phone: "#A48FCF",
+  other: "#c8c8c8",
+};
+
+function normalizePlatformId(bookingChannel) {
+  var raw = String(bookingChannel || "")
+    .trim()
+    .toLowerCase();
+  if (!raw || raw === "direct") {
+    return "direct";
+  }
+  if (PLATFORM_ORDER.indexOf(raw) !== -1) {
+    return raw;
+  }
+  return "other";
+}
+
+function resolvePlatformLabel(platformId) {
+  return PLATFORM_LABELS[platformId] || PLATFORM_LABELS.other;
 }
 
 function normalizeMonthKey(value) {
@@ -35,30 +60,6 @@ function normalizeMonthKey(value) {
   return match[1] + "-" + String(month).padStart(2, "0");
 }
 
-function resolvePaymentLabel(paymentMethod) {
-  var raw = String(paymentMethod || "").trim().toLowerCase();
-  if (raw === "card" || raw === "신용카드") return "신용카드";
-  if (raw === "samsung" || raw === "samsungpay" || raw === "삼성페이") {
-    return "삼성페이";
-  }
-  if (raw === "naver" || raw === "네이버페이") return "네이버페이";
-  if (raw === "kakao" || raw === "kakaopay" || raw === "카카오페이") {
-    return "카카오페이";
-  }
-  if (raw === "toss" || raw === "tosspay" || raw === "토스페이") {
-    return "토스페이";
-  }
-  return "기타";
-}
-
-const CHANNEL_COLORS = {
-  GRAFFORD: "#7EB8D4",
-  야놀자: "#E07B7B",
-  에어비앤비: "#F0A87C",
-  "Booking.com": "#88C9A0",
-  기타: "#A48FCF",
-};
-
 async function getMonthlySalesData(pool, month) {
   var monthKey = normalizeMonthKey(month);
   var monthStart = monthKey + "-01";
@@ -66,13 +67,13 @@ async function getMonthlySalesData(pool, month) {
     SELECT
       COUNT(*)::int                          AS reservation_count,
       COALESCE(SUM(total_amount), 0)::bigint AS total_revenue,
-      payment_method,
+      booking_channel,
       room_type
     FROM ${BOOKING_TABLE}
     WHERE status IN ('confirm', 'completed')
       AND check_in_date >= $1::date
       AND check_in_date < ($1::date + INTERVAL '1 month')::date
-    GROUP BY payment_method, room_type
+    GROUP BY booking_channel, room_type
   `;
 
   const cancelQuery = `
@@ -177,12 +178,11 @@ async function getMonthlySalesData(pool, month) {
   var reservationCount = 0;
   var totalRevenue = 0;
 
-  // 채널별 / 객실별 집계
-  var channelMap = {};
+  // 플랫폼별 / 객실별 집계
   var roomMap = {};
   var roomCountMap = {};
-  var paymentMap = {};
-  var paymentCountMap = {};
+  var platformMap = {};
+  var platformCountMap = {};
 
   (statsResult.rows || []).forEach(function (row) {
     var cnt = Number(row.reservation_count) || 0;
@@ -190,25 +190,24 @@ async function getMonthlySalesData(pool, month) {
     reservationCount += cnt;
     totalRevenue += rev;
 
-    var channel = resolveChannel(row.payment_method);
-    channelMap[channel] = (channelMap[channel] || 0) + rev;
+    var platform = normalizePlatformId(row.booking_channel);
+    platformMap[platform] = (platformMap[platform] || 0) + rev;
+    platformCountMap[platform] = (platformCountMap[platform] || 0) + cnt;
 
     var room = String(row.room_type || "").toUpperCase();
     if (room) {
       roomMap[room] = (roomMap[room] || 0) + rev;
       roomCountMap[room] = (roomCountMap[room] || 0) + cnt;
     }
-
-    var payment = String(row.payment_method || "").trim().toLowerCase() || "unknown";
-    paymentMap[payment] = (paymentMap[payment] || 0) + rev;
-    paymentCountMap[payment] = (paymentCountMap[payment] || 0) + cnt;
   });
 
-  var channelRevenue = Object.keys(channelMap).map(function (ch) {
+  var channelRevenue = PLATFORM_ORDER.concat(
+    platformMap.other ? ["other"] : [],
+  ).map(function (platformId) {
     return {
-      label: ch,
-      value: channelMap[ch],
-      color: CHANNEL_COLORS[ch] || "#c8c8c8",
+      label: resolvePlatformLabel(platformId),
+      value: platformMap[platformId] || 0,
+      color: PLATFORM_COLORS[platformId] || "#c8c8c8",
     };
   });
 
@@ -233,18 +232,16 @@ async function getMonthlySalesData(pool, month) {
     };
   });
 
-  var paymentRevenue = Object.keys(paymentMap)
-    .map(function (method) {
-      return {
-        method: method,
-        label: resolvePaymentLabel(method),
-        count: paymentCountMap[method] || 0,
-        revenue: paymentMap[method] || 0,
-      };
-    })
-    .sort(function (a, b) {
-      return b.revenue - a.revenue;
-    });
+  var platformRevenue = PLATFORM_ORDER.concat(
+    platformMap.other ? ["other"] : [],
+  ).map(function (platformId) {
+    return {
+      platform: platformId,
+      label: resolvePlatformLabel(platformId),
+      count: platformCountMap[platformId] || 0,
+      revenue: platformMap[platformId] || 0,
+    };
+  });
 
   var occupancyByDay = (occupancyResult.rows || []).map(function (row) {
     return {
@@ -287,7 +284,7 @@ async function getMonthlySalesData(pool, month) {
     channelRevenue: channelRevenue,
     roomRevenue: roomRevenue,
     roomStats: roomStats,
-    paymentRevenue: paymentRevenue,
+    platformRevenue: platformRevenue,
     dailyRevenue: dailyRevenue,
     occupancyByDay: occupancyByDay,
   };

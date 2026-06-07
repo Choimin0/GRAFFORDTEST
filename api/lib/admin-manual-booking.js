@@ -19,6 +19,15 @@ const ALLOWED_CHANNELS = new Set([
 ]);
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 const MAX_GUEST_REQUEST = 2000;
+const EXTERNAL_MANUAL_PAYMENT_METHOD = "external-manual";
+
+export function isExternalManualPaymentMethod(paymentMethod) {
+  return (
+    String(paymentMethod || "")
+      .trim()
+      .toLowerCase() === EXTERNAL_MANUAL_PAYMENT_METHOD
+  );
+}
 
 const ROOM_GUEST_LIMITS = {
   G1: { base: 2, max: 2 },
@@ -188,8 +197,8 @@ export async function handleCreateManualBooking(res, pool, body) {
     json(res, 400, { ok: false, error: "게스트 이름을 입력해 주세요." });
     return;
   }
-  if (!Number.isFinite(totalAmount) || totalAmount <= 0) {
-    json(res, 400, { ok: false, error: "총 결제 금액을 입력해 주세요." });
+  if (!Number.isFinite(totalAmount) || totalAmount < 0) {
+    json(res, 400, { ok: false, error: "총 결제 금액을 확인해 주세요." });
     return;
   }
 
@@ -296,7 +305,7 @@ export async function handleCreateManualBooking(res, pool, body) {
         guestValidation.extraGuests,
         totalAmount,
         guestRequest || null,
-        "external-manual",
+        EXTERNAL_MANUAL_PAYMENT_METHOD,
         true,
         "kr",
         bookingChannel,
