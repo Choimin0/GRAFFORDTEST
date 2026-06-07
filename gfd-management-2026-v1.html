@@ -51,6 +51,13 @@
           <button
             type="button"
             class="admin-category-btn"
+            data-admin-category="reservation-entry"
+          >
+            예약 등록
+          </button>
+          <button
+            type="button"
+            class="admin-category-btn"
             data-admin-category="room-manage"
           >
             객실 관리
@@ -198,9 +205,13 @@
                   stroke-linejoin="round"
                   aria-hidden="true"
                 >
-                  <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" />
+                  <path
+                    d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"
+                  />
                   <path d="M21 3v5h-5" />
-                  <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16" />
+                  <path
+                    d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"
+                  />
                   <path d="M8 16H3v5" />
                 </svg>
               </button>
@@ -554,6 +565,577 @@
           ></div>
         </div>
       </section>
+
+      <section
+        class="confirm-section admin-reservation-entry-section"
+        id="admin-reservation-entry-section"
+        aria-labelledby="admin-reservation-entry-title"
+        hidden
+      >
+        <div class="admin-dashboard-band admin-res-entry-band">
+          <div>
+            <p class="admin-dashboard-eyebrow">RESERVATION ENTRY</p>
+            <h1
+              class="admin-dashboard-title"
+              id="admin-reservation-entry-title"
+            >
+              예약 수기 입력
+            </h1>
+          </div>
+          <div class="admin-res-entry-progress">
+            <p class="admin-res-entry-progress__label">Progress</p>
+            <p
+              class="admin-res-entry-progress__count"
+              id="admin-res-entry-progress"
+            >
+              0 <span>/ 5 항목</span>
+            </p>
+          </div>
+        </div>
+
+        <div class="admin-res-entry-layout">
+          <div class="admin-res-entry-form">
+            <!-- 01 PLATFORM -->
+            <div class="admin-res-entry-section-block">
+              <div class="admin-res-entry-section-head">
+                <span class="admin-res-entry-section-num">01</span>
+                <span class="admin-res-entry-section-eyebrow">Platform</span>
+              </div>
+              <div class="admin-res-entry-input-group">
+                <p class="admin-res-entry-field-label">
+                  예약 플랫폼 <span class="admin-res-entry-required">*</span>
+                </p>
+                <div
+                  class="admin-res-entry-platform-grid"
+                  role="group"
+                  aria-label="예약 플랫폼"
+                >
+                  <button
+                    type="button"
+                    class="admin-res-entry-platform-btn"
+                    data-platform="에어비앤비"
+                    data-booking-channel="airbnb"
+                  >
+                    <span
+                      class="admin-res-entry-platform-check"
+                      aria-hidden="true"
+                    ></span>
+
+                    <span class="admin-res-entry-platform-name">Airbnb</span>
+                  </button>
+                  <button
+                    type="button"
+                    class="admin-res-entry-platform-btn"
+                    data-platform="네이버"
+                    data-booking-channel="naver"
+                  >
+                    <span
+                      class="admin-res-entry-platform-check"
+                      aria-hidden="true"
+                    ></span>
+
+                    <span class="admin-res-entry-platform-name">Naver</span>
+                  </button>
+                  <button
+                    type="button"
+                    class="admin-res-entry-platform-btn"
+                    data-platform="스테이폴리오"
+                    data-booking-channel="stayfolio"
+                  >
+                    <span
+                      class="admin-res-entry-platform-check"
+                      aria-hidden="true"
+                    ></span>
+
+                    <span class="admin-res-entry-platform-name">Stayfolio</span>
+                  </button>
+                  <button
+                    type="button"
+                    class="admin-res-entry-platform-btn"
+                    data-platform="유선문의"
+                    data-booking-channel="phone"
+                  >
+                    <span
+                      class="admin-res-entry-platform-check"
+                      aria-hidden="true"
+                    ></span>
+
+                    <span class="admin-res-entry-platform-name">Direct</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- 02 ROOM -->
+            <div class="admin-res-entry-section-block">
+              <div class="admin-res-entry-section-head">
+                <span class="admin-res-entry-section-num">02</span>
+                <span class="admin-res-entry-section-eyebrow">Room</span>
+              </div>
+              <div class="admin-res-entry-input-group">
+                <p class="admin-res-entry-field-label">
+                  객실 선택 <span class="admin-res-entry-required">*</span>
+                </p>
+                <div
+                  class="admin-res-entry-room-cards"
+                  role="group"
+                  aria-label="객실 선택"
+                >
+                  <button
+                    type="button"
+                    class="admin-res-entry-room-card"
+                    data-room="G1"
+                    data-base-guests="2"
+                    data-max-guests="2"
+                  >
+                    <span class="admin-res-entry-room-name">G1</span>
+                    <span class="admin-res-entry-room-type">기준 2인 · 최대 2인</span>
+                  </button>
+                  <button
+                    type="button"
+                    class="admin-res-entry-room-card"
+                    data-room="G2"
+                    data-base-guests="2"
+                    data-max-guests="2"
+                  >
+                    <span class="admin-res-entry-room-name">G2</span>
+                    <span class="admin-res-entry-room-type">기준 2인 · 최대 2인</span>
+                  </button>
+                  <button
+                    type="button"
+                    class="admin-res-entry-room-card"
+                    data-room="G3"
+                    data-base-guests="3"
+                    data-max-guests="3"
+                  >
+                    <span class="admin-res-entry-room-name">G3</span>
+                    <span class="admin-res-entry-room-type">기준 3인 · 최대 3인</span>
+                  </button>
+                  <button
+                    type="button"
+                    class="admin-res-entry-room-card"
+                    data-room="G4"
+                    data-base-guests="4"
+                    data-max-guests="5"
+                  >
+                    <span class="admin-res-entry-room-name">G4</span>
+                    <span class="admin-res-entry-room-type">기준 4인 · 최대 5인</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- 03 STAY PERIOD -->
+            <div class="admin-res-entry-section-block">
+              <div class="admin-res-entry-section-head">
+                <span class="admin-res-entry-section-num">03</span>
+                <span class="admin-res-entry-section-eyebrow">Stay Period</span>
+              </div>
+              <div class="admin-res-entry-input-group">
+                <p class="admin-res-entry-field-label">
+                  체크인 / 체크아웃
+                  <span class="admin-res-entry-required">*</span>
+                </p>
+
+                <div
+                  class="admin-res-entry-calendar-wrap"
+                  id="admin-res-entry-calendar-wrap"
+                >
+                  <div
+                    class="admin-res-entry-calendar"
+                    id="admin-res-entry-calendar"
+                    aria-label="체크인·체크아웃 날짜 선택"
+                  >
+                    <div class="admin-res-entry-cal-header">
+                      <button
+                        type="button"
+                        class="admin-res-entry-cal-nav"
+                        id="admin-res-entry-cal-prev"
+                        aria-label="이전 달"
+                      >
+                        ‹
+                      </button>
+                      <span
+                        class="admin-res-entry-cal-month-label"
+                        id="admin-res-entry-cal-month-label"
+                      ></span>
+                      <button
+                        type="button"
+                        class="admin-res-entry-cal-nav"
+                        id="admin-res-entry-cal-next"
+                        aria-label="다음 달"
+                      >
+                        ›
+                      </button>
+                    </div>
+                    <div
+                      class="admin-res-entry-cal-weekdays"
+                      aria-hidden="true"
+                    >
+                      <span>일</span><span>월</span><span>화</span
+                      ><span>수</span><span>목</span><span>금</span
+                      ><span>토</span>
+                    </div>
+                    <div
+                      class="admin-res-entry-cal-grid"
+                      id="admin-res-entry-cal-grid"
+                      role="grid"
+                    ></div>
+                  </div>
+                  <p class="admin-res-entry-cal-hint">
+                    달력에서 체크인 날짜를 먼저 선택한 뒤, 체크아웃 날짜를
+                    선택하세요.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <!-- 04 GUEST INFO -->
+            <div class="admin-res-entry-section-block">
+              <div class="admin-res-entry-section-head">
+                <span class="admin-res-entry-section-num">04</span>
+                <span class="admin-res-entry-section-eyebrow">Guest Info</span>
+              </div>
+              <div class="admin-res-entry-input-row">
+                <label class="admin-res-entry-field">
+                  <span class="admin-res-entry-field-label"
+                    >게스트 이름
+                    <span class="admin-res-entry-required">*</span></span
+                  >
+                  <input
+                    type="text"
+                    id="admin-res-entry-guest-name"
+                    placeholder="홍길동"
+                    autocomplete="name"
+                  />
+                  <span
+                    class="admin-res-entry-field-underline"
+                    aria-hidden="true"
+                  ></span>
+                </label>
+                <label class="admin-res-entry-field">
+                  <span class="admin-res-entry-field-label">연락처</span>
+                  <input
+                    type="tel"
+                    id="admin-res-entry-guest-phone"
+                    placeholder="010-0000-0000"
+                    autocomplete="tel"
+                  />
+                  <span
+                    class="admin-res-entry-field-underline"
+                    aria-hidden="true"
+                  ></span>
+                </label>
+              </div>
+              <div
+                class="admin-res-entry-input-group admin-res-entry-input-group--spaced"
+              >
+                <p class="admin-res-entry-field-label">인원</p>
+                <div class="admin-res-entry-guest-counter">
+                  <button
+                    type="button"
+                    class="admin-res-entry-counter-btn"
+                    id="admin-res-entry-guest-minus"
+                    aria-label="인원 감소"
+                  >
+                    −
+                  </button>
+                  <span
+                    class="admin-res-entry-counter-value"
+                    id="admin-res-entry-guest-count"
+                    >2</span
+                  >
+                  <button
+                    type="button"
+                    class="admin-res-entry-counter-btn"
+                    id="admin-res-entry-guest-plus"
+                    aria-label="인원 증가"
+                  >
+                    +
+                  </button>
+                </div>
+                <p
+                  class="admin-res-entry-guest-hint"
+                  id="admin-res-entry-guest-hint"
+                >
+                  객실을 선택하면 기준·최대 인원이 표시됩니다.
+                </p>
+              </div>
+            </div>
+
+            <!-- 05 PAYMENT -->
+            <div class="admin-res-entry-section-block">
+              <div class="admin-res-entry-section-head">
+                <span class="admin-res-entry-section-num">05</span>
+                <span class="admin-res-entry-section-eyebrow">Payment</span>
+              </div>
+              <label
+                class="admin-res-entry-field admin-res-entry-field--amount"
+              >
+                <span class="admin-res-entry-field-label"
+                  >총 결제 금액
+                  <span class="admin-res-entry-required">*</span></span
+                >
+                <span class="admin-res-entry-amount-wrap">
+                  <span
+                    class="admin-res-entry-amount-currency"
+                    aria-hidden="true"
+                    >₩</span
+                  >
+                  <input
+                    type="number"
+                    id="admin-res-entry-total-amount"
+                    placeholder="0"
+                    min="0"
+                    step="1"
+                    inputmode="numeric"
+                  />
+                </span>
+                <span
+                  class="admin-res-entry-field-underline"
+                  aria-hidden="true"
+                ></span>
+                <span
+                  class="admin-res-entry-per-night"
+                  id="admin-res-entry-per-night"
+                  aria-live="polite"
+                ></span>
+              </label>
+            </div>
+
+            <!-- 06 MEMO -->
+            <div class="admin-res-entry-section-block">
+              <div class="admin-res-entry-section-head">
+                <span class="admin-res-entry-section-num">06</span>
+                <span class="admin-res-entry-section-eyebrow">Memo</span>
+              </div>
+              <label class="admin-res-entry-field">
+                <span class="admin-res-entry-field-label"
+                  >예약 메모 (선택)</span
+                >
+                <textarea
+                  id="admin-res-entry-memo"
+                  rows="4"
+                  placeholder="특이사항, 요청사항, 인수인계 내용 등을 기록합니다."
+                  maxlength="300"
+                ></textarea>
+                <span
+                  class="admin-res-entry-field-underline"
+                  aria-hidden="true"
+                ></span>
+              </label>
+              <p class="admin-res-entry-char-count">
+                <span id="admin-res-entry-char-count">0</span> / 300
+              </p>
+            </div>
+          </div>
+
+          <aside class="admin-res-entry-panel" aria-label="예약 요약">
+            <div class="admin-res-entry-panel-box">
+              <div class="admin-res-entry-panel-header">
+                <p class="admin-res-entry-panel-eyebrow">Summary</p>
+                <h2 class="admin-res-entry-panel-title">예약 요약</h2>
+              </div>
+              <div class="admin-res-entry-panel-body">
+                <div class="admin-res-entry-summary-row">
+                  <span class="admin-res-entry-summary-key">Platform</span>
+                  <span
+                    class="admin-res-entry-summary-val is-empty"
+                    id="admin-res-entry-sum-platform"
+                    >미선택</span
+                  >
+                </div>
+                <div class="admin-res-entry-summary-row">
+                  <span class="admin-res-entry-summary-key">Room</span>
+                  <span
+                    class="admin-res-entry-summary-val is-empty"
+                    id="admin-res-entry-sum-room"
+                    >미선택</span
+                  >
+                </div>
+                <div class="admin-res-entry-summary-row">
+                  <span class="admin-res-entry-summary-key">Check-In</span>
+                  <span
+                    class="admin-res-entry-summary-val is-empty"
+                    id="admin-res-entry-sum-checkin"
+                    >—</span
+                  >
+                </div>
+                <div class="admin-res-entry-summary-row">
+                  <span class="admin-res-entry-summary-key">Check-Out</span>
+                  <span
+                    class="admin-res-entry-summary-val is-empty"
+                    id="admin-res-entry-sum-checkout"
+                    >—</span
+                  >
+                </div>
+                <div class="admin-res-entry-summary-row">
+                  <span class="admin-res-entry-summary-key">Nights</span>
+                  <span
+                    class="admin-res-entry-summary-val is-empty"
+                    id="admin-res-entry-sum-nights"
+                    >—</span
+                  >
+                </div>
+                <div class="admin-res-entry-summary-row">
+                  <span class="admin-res-entry-summary-key">Guest</span>
+                  <span
+                    class="admin-res-entry-summary-val is-empty"
+                    id="admin-res-entry-sum-guest"
+                    >—</span
+                  >
+                </div>
+                <div class="admin-res-entry-summary-row">
+                  <span class="admin-res-entry-summary-key">Guests</span>
+                  <span
+                    class="admin-res-entry-summary-val"
+                    id="admin-res-entry-sum-guest-count"
+                    >2명</span
+                  >
+                </div>
+
+                <div class="admin-res-entry-panel-total">
+                  <p class="admin-res-entry-total-label">Total Amount</p>
+                  <p
+                    class="admin-res-entry-total-amount"
+                    id="admin-res-entry-sum-total"
+                  >
+                    <span class="admin-res-entry-currency-small">₩</span>—
+                  </p>
+                </div>
+
+                <div class="admin-res-entry-checklist">
+                  <p class="admin-res-entry-checklist-label">입력 체크리스트</p>
+                  <div
+                    class="admin-res-entry-check-item"
+                    id="admin-res-entry-check-platform"
+                  >
+                    <span
+                      class="admin-res-entry-check-dot"
+                      aria-hidden="true"
+                    ></span>
+                    <span class="admin-res-entry-check-text"
+                      >예약 플랫폼 선택</span
+                    >
+                  </div>
+                  <div
+                    class="admin-res-entry-check-item"
+                    id="admin-res-entry-check-room"
+                  >
+                    <span
+                      class="admin-res-entry-check-dot"
+                      aria-hidden="true"
+                    ></span>
+                    <span class="admin-res-entry-check-text">객실 선택</span>
+                  </div>
+                  <div
+                    class="admin-res-entry-check-item"
+                    id="admin-res-entry-check-date"
+                  >
+                    <span
+                      class="admin-res-entry-check-dot"
+                      aria-hidden="true"
+                    ></span>
+                    <span class="admin-res-entry-check-text"
+                      >체크인/아웃 날짜</span
+                    >
+                  </div>
+                  <div
+                    class="admin-res-entry-check-item"
+                    id="admin-res-entry-check-guest"
+                  >
+                    <span
+                      class="admin-res-entry-check-dot"
+                      aria-hidden="true"
+                    ></span>
+                    <span class="admin-res-entry-check-text">게스트 이름</span>
+                  </div>
+                  <div
+                    class="admin-res-entry-check-item"
+                    id="admin-res-entry-check-amount"
+                  >
+                    <span
+                      class="admin-res-entry-check-dot"
+                      aria-hidden="true"
+                    ></span>
+                    <span class="admin-res-entry-check-text">결제 금액</span>
+                  </div>
+                </div>
+
+                <button
+                  type="button"
+                  class="admin-res-entry-btn-primary is-disabled"
+                  id="admin-res-entry-submit"
+                  disabled
+                >
+                  <span class="admin-res-entry-btn-label">예약 저장</span>
+                  <span class="admin-res-entry-btn-arrow" aria-hidden="true"
+                    >→</span
+                  >
+                </button>
+                <button
+                  type="button"
+                  class="admin-res-entry-btn-secondary"
+                  id="admin-res-entry-reset"
+                >
+                  초기화
+                </button>
+                <p
+                  class="admin-res-entry-btn-hint"
+                  id="admin-res-entry-btn-hint"
+                >
+                  필수 항목을 모두 입력하면 활성화됩니다
+                </p>
+              </div>
+            </div>
+          </aside>
+        </div>
+      </section>
+
+      <div
+        id="admin-res-entry-success-modal"
+        class="admin-res-entry-overlay"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="admin-res-entry-success-title"
+        hidden
+      >
+        <div class="admin-res-entry-modal">
+          <div class="admin-res-entry-modal-bar" aria-hidden="true"></div>
+          <div class="admin-res-entry-modal-body">
+            <div class="admin-res-entry-modal-icon" aria-hidden="true">✓</div>
+            <p class="admin-res-entry-modal-eyebrow">Reservation Confirmed</p>
+            <h2
+              class="admin-res-entry-modal-heading"
+              id="admin-res-entry-success-title"
+            >
+              예약이 등록되었습니다
+            </h2>
+            <p
+              class="admin-res-entry-modal-desc"
+              id="admin-res-entry-success-desc"
+            >
+              예약 정보가 성공적으로 저장되었습니다.
+            </p>
+            <div class="admin-res-entry-modal-btns">
+              <button
+                type="button"
+                class="admin-res-entry-modal-btn-primary"
+                id="admin-res-entry-success-list"
+              >
+                예약 목록으로
+              </button>
+              <button
+                type="button"
+                class="admin-res-entry-modal-btn-secondary"
+                id="admin-res-entry-success-another"
+              >
+                새 예약 추가
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
 
       <div
         id="admin-request-modal"
@@ -996,6 +1578,7 @@
         });
       });
     </script>
+    <script src="js/booking-pricing.js"></script>
     <script>
       document.addEventListener("DOMContentLoaded", function () {
         var loginForm = document.getElementById("admin-login-form");
@@ -1017,6 +1600,9 @@
         var salesSection = document.getElementById("admin-sales-section");
         var salesAnalyzeSection = document.getElementById(
           "admin-sales-analyze-section",
+        );
+        var reservationEntrySection = document.getElementById(
+          "admin-reservation-entry-section",
         );
         var geminiForm = document.getElementById("admin-gemini-form");
         var geminiQuestionInput = document.getElementById(
@@ -1657,7 +2243,9 @@
             var talkTd = appendCheckinCell(tr, "");
             var isEnglishBooking =
               String(roomCheckin.bookingLocale || "").toLowerCase() === "en" ||
-              String(roomCheckin.contact || "").trim().indexOf("+") === 0;
+              String(roomCheckin.contact || "")
+                .trim()
+                .indexOf("+") === 0;
             if (isEnglishBooking) {
               var emailBtn = document.createElement("button");
               emailBtn.type = "button";
@@ -3162,6 +3750,797 @@
           salesAnnualPanel.appendChild(tableCard);
         }
 
+        var resEntryState = {
+          platform: "",
+          bookingChannel: "",
+          room: "",
+          checkin: "",
+          checkout: "",
+          guests: 2,
+          amount: 0,
+        };
+        var resEntryCalView = new Date();
+        var resEntryCheckInDate = null;
+        var resEntryCheckOutDate = null;
+        var resEntryInited = false;
+        var resEntrySubmitting = false;
+
+        function getResEntryRoomGuestLimits(room) {
+          var roomKey = String(room || "").toUpperCase();
+          var pricing = window.GraffordBookingPricing;
+          if (pricing && typeof pricing.getBaseGuests === "function") {
+            return {
+              base: pricing.getBaseGuests(roomKey),
+              max: pricing.getMaxGuests(roomKey),
+            };
+          }
+          var card = document.querySelector(
+            '.admin-res-entry-room-card[data-room="' + roomKey + '"]',
+          );
+          if (card) {
+            return {
+              base: parseInt(card.getAttribute("data-base-guests") || "2", 10),
+              max: parseInt(card.getAttribute("data-max-guests") || "2", 10),
+            };
+          }
+          return { base: 2, max: 2 };
+        }
+
+        function updateResEntryGuestControls() {
+          var limits = resEntryState.room
+            ? getResEntryRoomGuestLimits(resEntryState.room)
+            : null;
+          var hintEl = document.getElementById("admin-res-entry-guest-hint");
+          var plusBtn = document.getElementById("admin-res-entry-guest-plus");
+          var countEl = document.getElementById("admin-res-entry-guest-count");
+
+          if (countEl) {
+            countEl.textContent = String(resEntryState.guests);
+          }
+          if (hintEl) {
+            if (limits) {
+              hintEl.textContent =
+                "기준 " +
+                limits.base +
+                "인 · 최대 " +
+                limits.max +
+                "인까지 입력 가능";
+            } else {
+              hintEl.textContent =
+                "객실을 선택하면 기준·최대 인원이 표시됩니다.";
+            }
+          }
+          if (plusBtn) {
+            var atMax =
+              limits && resEntryState.guests >= limits.max;
+            plusBtn.disabled = !!atMax;
+            plusBtn.classList.toggle("is-disabled", !!atMax);
+            plusBtn.setAttribute(
+              "aria-disabled",
+              atMax ? "true" : "false",
+            );
+          }
+        }
+
+        function applyResEntryRoomGuestLimits(room) {
+          var limits = getResEntryRoomGuestLimits(room);
+          resEntryState.guests = limits.base;
+          if (resEntryState.guests > limits.max) {
+            resEntryState.guests = limits.max;
+          }
+          updateResEntryGuestControls();
+        }
+
+        function formatResEntryDate(str) {
+          if (!str) {
+            return "—";
+          }
+          var parts = String(str).split("-");
+          if (parts.length !== 3) {
+            return str;
+          }
+          var d = new Date(
+            Number(parts[0]),
+            Number(parts[1]) - 1,
+            Number(parts[2]),
+          );
+          if (isNaN(d.getTime())) {
+            return str;
+          }
+          return (
+            d.getMonth() +
+            1 +
+            "." +
+            d.getDate() +
+            " (" +
+            ["일", "월", "화", "수", "목", "금", "토"][d.getDay()] +
+            ")"
+          );
+        }
+
+        function formatResEntryYmd(date) {
+          if (!date) {
+            return "";
+          }
+          return (
+            date.getFullYear() +
+            "-" +
+            String(date.getMonth() + 1).padStart(2, "0") +
+            "-" +
+            String(date.getDate()).padStart(2, "0")
+          );
+        }
+
+        function resEntrySameDay(a, b) {
+          return (
+            a &&
+            b &&
+            a.getFullYear() === b.getFullYear() &&
+            a.getMonth() === b.getMonth() &&
+            a.getDate() === b.getDate()
+          );
+        }
+
+        function resEntryDateLt(a, b) {
+          return a.getTime() < b.getTime();
+        }
+
+        function resEntrySetSummaryVal(id, text, isEmpty) {
+          var el = document.getElementById(id);
+          if (!el) {
+            return;
+          }
+          el.textContent = text;
+          el.classList.toggle("is-empty", !!isEmpty);
+        }
+
+        function updateReservationEntrySummary() {
+          resEntrySetSummaryVal(
+            "admin-res-entry-sum-platform",
+            resEntryState.platform || "미선택",
+            !resEntryState.platform,
+          );
+          resEntrySetSummaryVal(
+            "admin-res-entry-sum-room",
+            resEntryState.room || "미선택",
+            !resEntryState.room,
+          );
+          resEntrySetSummaryVal(
+            "admin-res-entry-sum-checkin",
+            formatResEntryDate(resEntryState.checkin),
+            !resEntryState.checkin,
+          );
+          resEntrySetSummaryVal(
+            "admin-res-entry-sum-checkout",
+            formatResEntryDate(resEntryState.checkout),
+            !resEntryState.checkout,
+          );
+
+          var nightsEl = document.getElementById("admin-res-entry-sum-nights");
+          if (nightsEl) {
+            if (resEntryState.checkin && resEntryState.checkout) {
+              var nights = Math.round(
+                (new Date(resEntryState.checkout) -
+                  new Date(resEntryState.checkin)) /
+                  86400000,
+              );
+              nightsEl.textContent = nights > 0 ? nights + "박" : "—";
+              nightsEl.classList.toggle("is-empty", nights <= 0);
+            } else {
+              nightsEl.textContent = "—";
+              nightsEl.classList.add("is-empty");
+            }
+          }
+
+          var guestNameInput = document.getElementById(
+            "admin-res-entry-guest-name",
+          );
+          var guestName = guestNameInput
+            ? String(guestNameInput.value || "").trim()
+            : "";
+          resEntrySetSummaryVal(
+            "admin-res-entry-sum-guest",
+            guestName || "—",
+            !guestName,
+          );
+
+          var guestCountEl = document.getElementById(
+            "admin-res-entry-sum-guest-count",
+          );
+          if (guestCountEl) {
+            guestCountEl.textContent = resEntryState.guests + "명";
+          }
+
+          updateResEntryGuestControls();
+
+          var totalEl = document.getElementById("admin-res-entry-sum-total");
+          if (totalEl) {
+            if (resEntryState.amount > 0) {
+              totalEl.innerHTML =
+                '<span class="admin-res-entry-currency-small">₩</span>' +
+                resEntryState.amount.toLocaleString();
+            } else {
+              totalEl.innerHTML =
+                '<span class="admin-res-entry-currency-small">₩</span>—';
+            }
+          }
+
+          var checks = {
+            "admin-res-entry-check-platform": !!resEntryState.bookingChannel,
+            "admin-res-entry-check-room": !!resEntryState.room,
+            "admin-res-entry-check-date": !!(
+              resEntryState.checkin && resEntryState.checkout
+            ),
+            "admin-res-entry-check-guest": !!guestName,
+            "admin-res-entry-check-amount": resEntryState.amount > 0,
+          };
+          var doneCount = 0;
+          Object.keys(checks).forEach(function (id) {
+            var done = checks[id];
+            var item = document.getElementById(id);
+            if (item) {
+              item.classList.toggle("is-done", done);
+            }
+            if (done) {
+              doneCount++;
+            }
+          });
+
+          var progressEl = document.getElementById("admin-res-entry-progress");
+          if (progressEl) {
+            progressEl.innerHTML = doneCount + " <span>/ 5 항목</span>";
+          }
+
+          var submitBtn = document.getElementById("admin-res-entry-submit");
+          var hintEl = document.getElementById("admin-res-entry-btn-hint");
+          var allDone = Object.values(checks).every(Boolean);
+          if (submitBtn) {
+            submitBtn.disabled = !allDone;
+            submitBtn.classList.toggle("is-disabled", !allDone);
+            var labelEl = submitBtn.querySelector(".admin-res-entry-btn-label");
+            if (labelEl) {
+              labelEl.textContent = allDone
+                ? "₩" + resEntryState.amount.toLocaleString() + " 예약 저장"
+                : "예약 저장";
+            }
+          }
+          if (hintEl) {
+            hintEl.textContent = allDone
+              ? ""
+              : "필수 항목을 모두 입력하면 활성화됩니다";
+          }
+        }
+
+        function syncReservationEntryDates() {
+          resEntryState.checkin = resEntryCheckInDate
+            ? formatResEntryYmd(resEntryCheckInDate)
+            : "";
+          resEntryState.checkout = resEntryCheckOutDate
+            ? formatResEntryYmd(resEntryCheckOutDate)
+            : "";
+
+          var checkinDisplay = document.getElementById(
+            "admin-res-entry-checkin-display",
+          );
+          var checkoutDisplay = document.getElementById(
+            "admin-res-entry-checkout-display",
+          );
+          var nightsBadge = document.getElementById(
+            "admin-res-entry-nights-badge",
+          );
+          if (checkinDisplay) {
+            checkinDisplay.textContent = resEntryState.checkin
+              ? formatResEntryDate(resEntryState.checkin)
+              : "—";
+          }
+          if (checkoutDisplay) {
+            checkoutDisplay.textContent = resEntryState.checkout
+              ? formatResEntryDate(resEntryState.checkout)
+              : "—";
+          }
+          if (nightsBadge) {
+            if (resEntryState.checkin && resEntryState.checkout) {
+              var nights = Math.round(
+                (new Date(resEntryState.checkout) -
+                  new Date(resEntryState.checkin)) /
+                  86400000,
+              );
+              nightsBadge.textContent = nights > 0 ? nights + "박" : "— 박";
+            } else {
+              nightsBadge.textContent = "— 박";
+            }
+          }
+
+          var perNightEl = document.getElementById("admin-res-entry-per-night");
+          if (perNightEl) {
+            if (
+              resEntryState.checkin &&
+              resEntryState.checkout &&
+              resEntryState.amount > 0
+            ) {
+              var stayNights = Math.round(
+                (new Date(resEntryState.checkout) -
+                  new Date(resEntryState.checkin)) /
+                  86400000,
+              );
+              if (stayNights > 0) {
+                var perNight = Math.round(resEntryState.amount / stayNights);
+                perNightEl.innerHTML =
+                  "1박 기준 <span>₩" + perNight.toLocaleString() + "</span>";
+              } else {
+                perNightEl.textContent = "";
+              }
+            } else {
+              perNightEl.textContent = "";
+            }
+          }
+
+          updateReservationEntrySummary();
+        }
+
+        function renderReservationEntryCalendar() {
+          var grid = document.getElementById("admin-res-entry-cal-grid");
+          var monthLabel = document.getElementById(
+            "admin-res-entry-cal-month-label",
+          );
+          if (!grid || !monthLabel) {
+            return;
+          }
+
+          var y = resEntryCalView.getFullYear();
+          var m = resEntryCalView.getMonth();
+          monthLabel.textContent = y + "년 " + (m + 1) + "월";
+
+          var today = new Date();
+          today.setHours(0, 0, 0, 0);
+          var firstDay = new Date(y, m, 1).getDay();
+          var lastDate = new Date(y, m + 1, 0).getDate();
+
+          grid.innerHTML = "";
+          grid.classList.toggle(
+            "is-selecting-checkout",
+            !!(resEntryCheckInDate && !resEntryCheckOutDate),
+          );
+
+          var i;
+          for (i = 0; i < firstDay; i++) {
+            var empty = document.createElement("span");
+            empty.className = "admin-res-entry-cal-cell is-empty";
+            empty.setAttribute("aria-hidden", "true");
+            grid.appendChild(empty);
+          }
+
+          for (var d = 1; d <= lastDate; d++) {
+            (function (dayNum) {
+              var cellDate = new Date(y, m, dayNum);
+              cellDate.setHours(0, 0, 0, 0);
+              var btn = document.createElement("button");
+              btn.type = "button";
+              btn.className =
+                "admin-res-entry-cal-cell admin-res-entry-cal-day";
+              btn.textContent = String(dayNum);
+              btn.setAttribute("role", "gridcell");
+
+              var isPast = cellDate.getTime() < today.getTime();
+              if (isPast) {
+                btn.disabled = true;
+                btn.classList.add("is-past");
+              }
+
+              if (
+                resEntryCheckInDate &&
+                resEntrySameDay(cellDate, resEntryCheckInDate)
+              ) {
+                btn.classList.add("is-checkin");
+              }
+              if (
+                resEntryCheckOutDate &&
+                resEntrySameDay(cellDate, resEntryCheckOutDate)
+              ) {
+                btn.classList.add("is-checkout");
+              }
+              if (
+                resEntryCheckInDate &&
+                resEntryCheckOutDate &&
+                resEntryDateLt(resEntryCheckInDate, cellDate) &&
+                resEntryDateLt(cellDate, resEntryCheckOutDate)
+              ) {
+                btn.classList.add("is-range");
+              }
+
+              btn.addEventListener("click", function () {
+                if (btn.disabled) {
+                  return;
+                }
+                if (
+                  !resEntryCheckInDate ||
+                  (resEntryCheckInDate && resEntryCheckOutDate)
+                ) {
+                  resEntryCheckInDate = new Date(cellDate);
+                  resEntryCheckOutDate = null;
+                } else if (resEntrySameDay(cellDate, resEntryCheckInDate)) {
+                  resEntryCheckInDate = null;
+                  resEntryCheckOutDate = null;
+                } else if (resEntryDateLt(cellDate, resEntryCheckInDate)) {
+                  resEntryCheckInDate = new Date(cellDate);
+                  resEntryCheckOutDate = null;
+                } else {
+                  resEntryCheckOutDate = new Date(cellDate);
+                }
+                renderReservationEntryCalendar();
+                syncReservationEntryDates();
+              });
+
+              grid.appendChild(btn);
+            })(d);
+          }
+        }
+
+        function resetReservationEntryForm() {
+          resEntryState = {
+            platform: "",
+            bookingChannel: "",
+            room: "",
+            checkin: "",
+            checkout: "",
+            guests: 2,
+            amount: 0,
+          };
+          resEntrySubmitting = false;
+          resEntryCheckInDate = null;
+          resEntryCheckOutDate = null;
+          resEntryCalView = new Date();
+
+          document
+            .querySelectorAll(".admin-res-entry-platform-btn")
+            .forEach(function (btn) {
+              btn.classList.remove("is-selected");
+            });
+          document
+            .querySelectorAll(".admin-res-entry-room-card")
+            .forEach(function (btn) {
+              btn.classList.remove("is-selected");
+            });
+
+          var guestNameInput = document.getElementById(
+            "admin-res-entry-guest-name",
+          );
+          var guestPhoneInput = document.getElementById(
+            "admin-res-entry-guest-phone",
+          );
+          var totalAmountInput = document.getElementById(
+            "admin-res-entry-total-amount",
+          );
+          var memoInput = document.getElementById("admin-res-entry-memo");
+          var guestCountEl = document.getElementById(
+            "admin-res-entry-guest-count",
+          );
+          var charCountEl = document.getElementById(
+            "admin-res-entry-char-count",
+          );
+
+          if (guestNameInput) {
+            guestNameInput.value = "";
+          }
+          if (guestPhoneInput) {
+            guestPhoneInput.value = "";
+          }
+          if (totalAmountInput) {
+            totalAmountInput.value = "";
+          }
+          if (memoInput) {
+            memoInput.value = "";
+          }
+          if (guestCountEl) {
+            guestCountEl.textContent = "2";
+          }
+          if (charCountEl) {
+            charCountEl.textContent = "0";
+          }
+
+          var submitBtn = document.getElementById("admin-res-entry-submit");
+          if (submitBtn) {
+            submitBtn.disabled = true;
+            submitBtn.classList.add("is-disabled");
+          }
+
+          updateResEntryGuestControls();
+          renderReservationEntryCalendar();
+          syncReservationEntryDates();
+        }
+
+        function initReservationEntryView() {
+          if (!resEntryInited) {
+            document
+              .querySelectorAll(".admin-res-entry-platform-btn")
+              .forEach(function (btn) {
+                btn.addEventListener("click", function () {
+                  document
+                    .querySelectorAll(".admin-res-entry-platform-btn")
+                    .forEach(function (item) {
+                      item.classList.remove("is-selected");
+                    });
+                  btn.classList.add("is-selected");
+                  resEntryState.platform =
+                    btn.getAttribute("data-platform") || "";
+                  resEntryState.bookingChannel =
+                    btn.getAttribute("data-booking-channel") || "";
+                  updateReservationEntrySummary();
+                });
+              });
+
+            document
+              .querySelectorAll(".admin-res-entry-room-card")
+              .forEach(function (btn) {
+                btn.addEventListener("click", function () {
+                  document
+                    .querySelectorAll(".admin-res-entry-room-card")
+                    .forEach(function (item) {
+                      item.classList.remove("is-selected");
+                    });
+                  btn.classList.add("is-selected");
+                  resEntryState.room = btn.getAttribute("data-room") || "";
+                  applyResEntryRoomGuestLimits(resEntryState.room);
+                  updateReservationEntrySummary();
+                });
+              });
+
+            var calPrev = document.getElementById("admin-res-entry-cal-prev");
+            var calNext = document.getElementById("admin-res-entry-cal-next");
+            if (calPrev) {
+              calPrev.addEventListener("click", function () {
+                resEntryCalView = new Date(
+                  resEntryCalView.getFullYear(),
+                  resEntryCalView.getMonth() - 1,
+                  1,
+                );
+                renderReservationEntryCalendar();
+              });
+            }
+            if (calNext) {
+              calNext.addEventListener("click", function () {
+                resEntryCalView = new Date(
+                  resEntryCalView.getFullYear(),
+                  resEntryCalView.getMonth() + 1,
+                  1,
+                );
+                renderReservationEntryCalendar();
+              });
+            }
+
+            var guestMinus = document.getElementById(
+              "admin-res-entry-guest-minus",
+            );
+            var guestPlus = document.getElementById(
+              "admin-res-entry-guest-plus",
+            );
+            if (guestMinus) {
+              guestMinus.addEventListener("click", function () {
+                resEntryState.guests = Math.max(1, resEntryState.guests - 1);
+                updateResEntryGuestControls();
+                updateReservationEntrySummary();
+              });
+            }
+            if (guestPlus) {
+              guestPlus.addEventListener("click", function () {
+                if (!resEntryState.room) {
+                  showMessage("객실을 먼저 선택해 주세요.");
+                  return;
+                }
+                var limits = getResEntryRoomGuestLimits(resEntryState.room);
+                if (resEntryState.guests >= limits.max) {
+                  showMessage(
+                    resEntryState.room +
+                      " 객실은 최대 " +
+                      limits.max +
+                      "명까지 입력할 수 있습니다.",
+                  );
+                  return;
+                }
+                resEntryState.guests = Math.min(
+                  limits.max,
+                  resEntryState.guests + 1,
+                );
+                updateResEntryGuestControls();
+                updateReservationEntrySummary();
+              });
+            }
+
+            var guestNameInput = document.getElementById(
+              "admin-res-entry-guest-name",
+            );
+            var guestPhoneInput = document.getElementById(
+              "admin-res-entry-guest-phone",
+            );
+            var totalAmountInput = document.getElementById(
+              "admin-res-entry-total-amount",
+            );
+            var memoInput = document.getElementById("admin-res-entry-memo");
+
+            if (guestNameInput) {
+              guestNameInput.addEventListener("input", function () {
+                updateReservationEntrySummary();
+              });
+            }
+            if (guestPhoneInput) {
+              guestPhoneInput.addEventListener("input", function () {
+                updateReservationEntrySummary();
+              });
+            }
+            if (totalAmountInput) {
+              totalAmountInput.addEventListener("input", function () {
+                resEntryState.amount =
+                  parseInt(totalAmountInput.value, 10) || 0;
+                syncReservationEntryDates();
+              });
+            }
+            if (memoInput) {
+              memoInput.addEventListener("input", function () {
+                var charCountEl = document.getElementById(
+                  "admin-res-entry-char-count",
+                );
+                if (charCountEl) {
+                  charCountEl.textContent = String(memoInput.value.length);
+                }
+              });
+            }
+
+            var resetBtn = document.getElementById("admin-res-entry-reset");
+            if (resetBtn) {
+              resetBtn.addEventListener("click", resetReservationEntryForm);
+            }
+
+            var submitBtn = document.getElementById("admin-res-entry-submit");
+            if (submitBtn) {
+              submitBtn.addEventListener("click", function () {
+                if (submitBtn.disabled || resEntrySubmitting) {
+                  return;
+                }
+                var guestName = guestNameInput
+                  ? String(guestNameInput.value || "").trim()
+                  : "";
+                if (!resEntryState.bookingChannel) {
+                  showMessage("예약 플랫폼을 선택해 주세요.");
+                  return;
+                }
+                if (!resEntryState.room) {
+                  showMessage("객실을 선택해 주세요.");
+                  return;
+                }
+                var guestLimits = getResEntryRoomGuestLimits(resEntryState.room);
+                if (resEntryState.guests > guestLimits.max) {
+                  showMessage(
+                    resEntryState.room +
+                      " 객실은 최대 " +
+                      guestLimits.max +
+                      "명까지 입력할 수 있습니다.",
+                  );
+                  return;
+                }
+
+                var auth = getAuthPayload();
+                var memoInput = document.getElementById("admin-res-entry-memo");
+                resEntrySubmitting = true;
+                submitBtn.disabled = true;
+                submitBtn.classList.add("is-disabled");
+
+                adminPost("reservations", {
+                  action: "create-manual",
+                  adminId: auth.adminId,
+                  adminPw: auth.adminPw,
+                  bookingChannel: resEntryState.bookingChannel,
+                  roomType: resEntryState.room,
+                  checkIn: resEntryState.checkin,
+                  checkOut: resEntryState.checkout,
+                  guestName: guestName,
+                  contact: guestPhoneInput
+                    ? String(guestPhoneInput.value || "").trim()
+                    : "",
+                  guestCount: resEntryState.guests,
+                  totalAmount: resEntryState.amount,
+                  guestRequest: memoInput
+                    ? String(memoInput.value || "").trim()
+                    : "",
+                })
+                  .then(function (r) {
+                    return r.json().then(function (data) {
+                      return { ok: r.ok, data: data || {} };
+                    });
+                  })
+                  .then(function (result) {
+                    if (!result.ok || !result.data.ok) {
+                      throw new Error(
+                        result.data.error || "예약 저장에 실패했습니다.",
+                      );
+                    }
+
+                    var nights =
+                      resEntryState.checkin && resEntryState.checkout
+                        ? Math.round(
+                            (new Date(resEntryState.checkout) -
+                              new Date(resEntryState.checkin)) /
+                              86400000,
+                          )
+                        : 0;
+                    var descEl = document.getElementById(
+                      "admin-res-entry-success-desc",
+                    );
+                    if (descEl) {
+                      descEl.innerHTML =
+                        "<strong>" +
+                        guestName +
+                        "</strong> 게스트 · " +
+                        resEntryState.room +
+                        "<br>" +
+                        formatResEntryDate(resEntryState.checkin) +
+                        " → " +
+                        formatResEntryDate(resEntryState.checkout) +
+                        " · " +
+                        nights +
+                        "박<br>플랫폼: " +
+                        resEntryState.platform +
+                        " · ₩" +
+                        resEntryState.amount.toLocaleString() +
+                        (result.data.mergedWithIcal
+                          ? "<br><span style='color:var(--gold-500)'>Airbnb iCal 예약과 자동 병합되었습니다.</span>"
+                          : "");
+                    }
+                    var modal = document.getElementById(
+                      "admin-res-entry-success-modal",
+                    );
+                    if (modal) {
+                      modal.hidden = false;
+                    }
+                  })
+                  .catch(function (err) {
+                    showMessage(
+                      (err && err.message) || "예약 저장에 실패했습니다.",
+                    );
+                  })
+                  .finally(function () {
+                    resEntrySubmitting = false;
+                    updateReservationEntrySummary();
+                  });
+              });
+            }
+
+            var successListBtn = document.getElementById(
+              "admin-res-entry-success-list",
+            );
+            var successAnotherBtn = document.getElementById(
+              "admin-res-entry-success-another",
+            );
+            if (successListBtn) {
+              successListBtn.addEventListener("click", function () {
+                var modal = document.getElementById(
+                  "admin-res-entry-success-modal",
+                );
+                if (modal) {
+                  modal.hidden = true;
+                }
+                setActiveCategory("list");
+              });
+            }
+            if (successAnotherBtn) {
+              successAnotherBtn.addEventListener("click", function () {
+                var modal = document.getElementById(
+                  "admin-res-entry-success-modal",
+                );
+                if (modal) {
+                  modal.hidden = true;
+                }
+                resetReservationEntryForm();
+              });
+            }
+
+            resEntryInited = true;
+          }
+
+          renderReservationEntryCalendar();
+          updateResEntryGuestControls();
+          updateReservationEntrySummary();
+        }
+
         function setActiveCategory(category) {
           activeCategory = category;
           categoryButtons.forEach(function (btn) {
@@ -3172,6 +4551,9 @@
           });
           statusSection.hidden = category !== "status";
           bankSection.hidden = category !== "list";
+          if (reservationEntrySection) {
+            reservationEntrySection.hidden = category !== "reservation-entry";
+          }
           roomManageSection.hidden = category !== "room-manage";
           salesSection.hidden = category !== "sales";
           if (salesAnalyzeSection) {
@@ -3187,6 +4569,9 @@
                 (err && err.message) || "목록 조회 중 오류가 발생했습니다.",
               );
             });
+          }
+          if (category === "reservation-entry") {
+            initReservationEntryView();
           }
           if (category === "room-manage") {
             if (isLayoutPreviewMode) {

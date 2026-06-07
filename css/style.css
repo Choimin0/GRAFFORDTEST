@@ -14993,3 +14993,875 @@ main.content-section.confirm-page.admin-page {
     align-self: flex-end;
   }
 }
+
+/* ── 관리자: 예약 등록 (외부 예약 수기 입력) ── */
+.admin-reservation-entry-section {
+  padding-bottom: var(--space-48);
+}
+.admin-res-entry-band {
+  align-items: flex-end;
+}
+.admin-res-entry-desc {
+  margin: var(--space-8) 0 0;
+  color: var(--stone-400);
+  font-size: 0.78rem;
+  letter-spacing: 0.04em;
+}
+.admin-res-entry-progress {
+  text-align: right;
+}
+.admin-res-entry-progress__label {
+  margin: 0 0 var(--space-4);
+  color: var(--stone-400);
+  font-size: 0.56rem;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+}
+.admin-res-entry-progress__count {
+  margin: 0;
+  color: var(--stone-900);
+  font-size: 1.35rem;
+  font-weight: 300;
+  letter-spacing: 0.04em;
+}
+.admin-res-entry-progress__count span {
+  color: var(--stone-400);
+  font-size: 0.88rem;
+}
+.admin-res-entry-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 26.25rem;
+  gap: 0;
+  align-items: start;
+  padding: var(--space-48) var(--space-32);
+  max-width: 90rem;
+  margin: 0 auto;
+}
+.admin-res-entry-form {
+  padding-right: var(--space-48);
+  border-right: 1px solid var(--stone-200);
+}
+.admin-res-entry-section-block {
+  margin-bottom: var(--space-48);
+}
+.admin-res-entry-section-head {
+  display: flex;
+  align-items: center;
+  gap: var(--space-16);
+  margin-bottom: var(--space-28);
+  padding-bottom: var(--space-12);
+  border-bottom: 1px solid var(--stone-200);
+  position: relative;
+}
+.admin-res-entry-section-head::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -1px;
+  width: 1.75rem;
+  height: 1px;
+  background: var(--gold-500);
+}
+.admin-res-entry-section-num {
+  color: var(--stone-400);
+  font-size: 0.56rem;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+}
+.admin-res-entry-section-eyebrow {
+  color: var(--gold-500);
+  font-size: 0.56rem;
+  letter-spacing: 0.44em;
+  text-transform: uppercase;
+}
+.admin-res-entry-input-group {
+  margin-bottom: var(--space-28);
+}
+.admin-res-entry-input-group--spaced {
+  margin-top: var(--space-24);
+}
+.admin-res-entry-input-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-32);
+}
+.admin-res-entry-field-label {
+  display: block;
+  margin-bottom: var(--space-16);
+  color: var(--stone-400);
+  font-size: 0.6rem;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+}
+.admin-res-entry-required {
+  color: var(--gold-500);
+  margin-left: 0.2rem;
+}
+.admin-res-entry-field {
+  position: relative;
+  display: block;
+}
+.admin-res-entry-field input,
+.admin-res-entry-field textarea {
+  width: 100%;
+  padding: var(--space-8) 0 var(--space-10);
+  border: none;
+  border-bottom: 1px solid var(--stone-200);
+  background: transparent;
+  color: var(--stone-900);
+  font-family: inherit;
+  font-size: 0.88rem;
+  letter-spacing: 0.04em;
+  outline: none;
+  transition: border-color 0.3s ease;
+}
+.admin-res-entry-field textarea {
+  resize: none;
+  line-height: 1.7;
+}
+.admin-res-entry-field input::placeholder,
+.admin-res-entry-field textarea::placeholder {
+  color: var(--stone-200);
+}
+.admin-res-entry-field-underline {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 0;
+  height: 1px;
+  background: var(--gold-500);
+  transition: width 0.45s cubic-bezier(0.76, 0, 0.24, 1);
+}
+.admin-res-entry-field input:focus,
+.admin-res-entry-field textarea:focus {
+  border-bottom-color: var(--stone-800);
+}
+.admin-res-entry-field input:focus ~ .admin-res-entry-field-underline,
+.admin-res-entry-field textarea:focus ~ .admin-res-entry-field-underline {
+  width: 100%;
+}
+.admin-res-entry-platform-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: var(--space-8);
+}
+.admin-res-entry-platform-btn {
+  position: relative;
+  overflow: hidden;
+  padding: var(--space-12) var(--space-8);
+  border: 1px solid var(--stone-200);
+  background: transparent;
+  cursor: pointer;
+  text-align: center;
+  transition: all 0.35s ease;
+}
+.admin-res-entry-platform-btn::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 0;
+  height: 1px;
+  background: var(--gold-500);
+  transition: width 0.45s cubic-bezier(0.76, 0, 0.24, 1);
+}
+.admin-res-entry-platform-btn:hover,
+.admin-res-entry-platform-btn.is-selected {
+  border-color: var(--stone-800);
+}
+.admin-res-entry-platform-btn:hover {
+  background: rgba(33, 30, 26, 0.03);
+}
+.admin-res-entry-platform-btn.is-selected {
+  background: var(--stone-50);
+}
+.admin-res-entry-platform-btn:hover::after,
+.admin-res-entry-platform-btn.is-selected::after {
+  width: 100%;
+}
+.admin-res-entry-platform-check {
+  position: absolute;
+  top: 0.375rem;
+  right: 0.375rem;
+  width: 0.375rem;
+  height: 0.375rem;
+  background: var(--gold-500);
+  opacity: 0;
+  transition: opacity 0.3s ease;
+}
+.admin-res-entry-platform-btn.is-selected .admin-res-entry-platform-check {
+  opacity: 1;
+}
+.admin-res-entry-platform-icon {
+  display: block;
+  font-size: 1rem;
+  line-height: 1;
+}
+.admin-res-entry-platform-name {
+  display: block;
+  margin-top: var(--space-6);
+  color: var(--stone-400);
+  font-size: 0.56rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  transition: color 0.3s ease;
+}
+.admin-res-entry-platform-btn:hover .admin-res-entry-platform-name,
+.admin-res-entry-platform-btn.is-selected .admin-res-entry-platform-name {
+  color: var(--stone-900);
+}
+.admin-res-entry-room-cards {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-8);
+}
+.admin-res-entry-room-card {
+  position: relative;
+  overflow: hidden;
+  padding: var(--space-16);
+  border: 1px solid var(--stone-200);
+  background: transparent;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.35s ease;
+}
+.admin-res-entry-room-card::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 0;
+  background: var(--gold-500);
+  transition: width 0.35s cubic-bezier(0.76, 0, 0.24, 1);
+}
+.admin-res-entry-room-card.is-selected::before {
+  width: 2px;
+}
+.admin-res-entry-room-card:hover,
+.admin-res-entry-room-card.is-selected {
+  border-color: var(--stone-800);
+}
+.admin-res-entry-room-card:hover {
+  background: rgba(33, 30, 26, 0.02);
+}
+.admin-res-entry-room-card.is-selected {
+  background: var(--stone-50);
+}
+.admin-res-entry-room-name {
+  display: block;
+  margin-bottom: 0.2rem;
+  padding-left: var(--space-8);
+  color: var(--stone-900);
+  font-size: 0.82rem;
+  letter-spacing: 0.04em;
+  transition: padding-left 0.35s ease;
+}
+.admin-res-entry-room-card.is-selected .admin-res-entry-room-name {
+  padding-left: var(--space-12);
+}
+.admin-res-entry-room-type {
+  display: block;
+  padding-left: var(--space-8);
+  color: var(--stone-400);
+  font-size: 0.56rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  transition: padding-left 0.35s ease;
+}
+.admin-res-entry-room-card.is-selected .admin-res-entry-room-type {
+  padding-left: var(--space-12);
+}
+.admin-res-entry-date-range {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: end;
+  margin-top: var(--space-4);
+  padding: var(--space-20) var(--space-24);
+  border: 1px solid var(--stone-200);
+  background: var(--stone-50);
+  position: relative;
+  overflow: hidden;
+}
+.admin-res-entry-date-range::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: var(--gold-500);
+}
+.admin-res-entry-date-slot-label {
+  display: block;
+  margin-bottom: var(--space-6);
+  color: var(--stone-400);
+  font-size: 0.56rem;
+  letter-spacing: 0.35em;
+  text-transform: uppercase;
+}
+.admin-res-entry-date-display {
+  display: block;
+  padding: var(--space-4) 0 var(--space-6);
+  border-bottom: 1px solid var(--stone-200);
+  color: var(--stone-900);
+  font-size: 0.94rem;
+  letter-spacing: 0.04em;
+  min-height: 1.75rem;
+}
+.admin-res-entry-date-arrow {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-4);
+  padding: 0 var(--space-20) var(--space-8);
+}
+.admin-res-entry-date-arrow-line {
+  position: relative;
+  width: 2rem;
+  height: 1px;
+  background: var(--stone-200);
+}
+.admin-res-entry-date-arrow-line::after {
+  content: "→";
+  position: absolute;
+  right: -0.5rem;
+  top: -0.56rem;
+  color: var(--stone-400);
+  font-size: 0.75rem;
+}
+.admin-res-entry-nights-badge {
+  color: var(--gold-500);
+  font-size: 0.56rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+.admin-res-entry-calendar-wrap {
+  margin-top: var(--space-24);
+}
+.admin-res-entry-calendar {
+  padding: var(--space-20) var(--space-24);
+  border: 1px solid var(--stone-200);
+  background: var(--stone-50);
+}
+.admin-res-entry-cal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-12);
+}
+.admin-res-entry-cal-month-label {
+  color: var(--stone-900);
+  font-size: 0.94rem;
+  letter-spacing: 0.04em;
+}
+.admin-res-entry-cal-nav {
+  width: 2rem;
+  height: 2rem;
+  border: 1px solid var(--stone-200);
+  background: transparent;
+  color: var(--stone-800);
+  cursor: pointer;
+  font-size: 1rem;
+  line-height: 1;
+  transition: border-color 0.3s ease;
+}
+.admin-res-entry-cal-nav:hover,
+.admin-res-entry-cal-nav:focus-visible {
+  border-color: var(--gold-500);
+}
+.admin-res-entry-cal-weekdays {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+  margin-bottom: var(--space-4);
+  color: var(--stone-400);
+  font-size: 0.56rem;
+  letter-spacing: 0.1em;
+  text-align: center;
+}
+.admin-res-entry-cal-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: var(--space-4);
+}
+.admin-res-entry-cal-grid.is-selecting-checkout
+  .admin-res-entry-cal-day:hover:not(:disabled) {
+  background: transparent;
+}
+.admin-res-entry-cal-cell.is-empty {
+  min-height: 2.25rem;
+}
+.admin-res-entry-cal-day {
+  min-height: 2.25rem;
+  border: none;
+  background: transparent;
+  color: var(--stone-900);
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.82rem;
+  transition: background 0.15s ease;
+}
+.admin-res-entry-cal-day:hover:not(:disabled) {
+  background: var(--stone-100);
+}
+.admin-res-entry-cal-day.is-past {
+  opacity: 0.35;
+  cursor: not-allowed;
+}
+.admin-res-entry-cal-day.is-checkin,
+.admin-res-entry-cal-day.is-checkout {
+  background: var(--stone-800);
+  color: var(--stone-50);
+  font-weight: 400;
+}
+.admin-res-entry-cal-day.is-range {
+  background: rgba(168, 131, 62, 0.18);
+}
+.admin-res-entry-cal-hint {
+  margin: var(--space-12) 0 0;
+  color: var(--stone-400);
+  font-size: 0.68rem;
+  letter-spacing: 0.06em;
+}
+.admin-res-entry-guest-counter {
+  display: inline-flex;
+  align-items: center;
+  border-bottom: 1px solid var(--stone-200);
+  padding-bottom: var(--space-10);
+}
+.admin-res-entry-counter-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  border: 1px solid var(--stone-200);
+  background: transparent;
+  color: var(--stone-400);
+  cursor: pointer;
+  font-size: 0.88rem;
+  transition: all 0.3s ease;
+}
+.admin-res-entry-counter-btn:hover {
+  border-color: var(--stone-800);
+  color: var(--stone-800);
+}
+.admin-res-entry-counter-btn.is-disabled,
+.admin-res-entry-counter-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed;
+  border-color: var(--stone-200);
+  color: var(--stone-400);
+}
+.admin-res-entry-guest-hint {
+  margin: var(--space-8) 0 0;
+  color: var(--stone-400);
+  font-size: 0.62rem;
+  letter-spacing: 0.08em;
+}
+.admin-res-entry-counter-value {
+  min-width: 2.5rem;
+  padding: 0 var(--space-16);
+  color: var(--stone-900);
+  font-size: 0.94rem;
+  letter-spacing: 0.06em;
+  text-align: center;
+}
+.admin-res-entry-field--amount .admin-res-entry-amount-wrap {
+  position: relative;
+  display: block;
+}
+.admin-res-entry-amount-currency {
+  position: absolute;
+  left: 0;
+  bottom: 0.625rem;
+  color: var(--stone-400);
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  pointer-events: none;
+}
+.admin-res-entry-field--amount input {
+  padding-left: 1.75rem !important;
+}
+.admin-res-entry-per-night {
+  min-height: 1rem;
+  margin-top: var(--space-6);
+  color: var(--stone-400);
+  font-size: 0.62rem;
+  letter-spacing: 0.1em;
+}
+.admin-res-entry-per-night span {
+  color: var(--gold-500);
+}
+.admin-res-entry-char-count {
+  margin-top: var(--space-4);
+  color: var(--stone-400);
+  font-size: 0.56rem;
+  letter-spacing: 0.1em;
+  text-align: right;
+}
+.admin-res-entry-panel {
+  position: sticky;
+  top: calc(var(--admin-topbar-height) + var(--space-32));
+  padding-left: var(--space-48);
+}
+.admin-res-entry-panel-box {
+  border: 1px solid var(--stone-200);
+  background: var(--stone-50);
+}
+.admin-res-entry-panel-header {
+  position: relative;
+  padding: var(--space-20) var(--space-24);
+  border-bottom: 1px solid var(--stone-200);
+}
+.admin-res-entry-panel-header::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: var(--gold-500);
+}
+.admin-res-entry-panel-eyebrow {
+  margin: 0 0 var(--space-4);
+  color: var(--gold-500);
+  font-size: 0.5rem;
+  letter-spacing: 0.42em;
+  text-transform: uppercase;
+}
+.admin-res-entry-panel-title {
+  margin: 0;
+  color: var(--stone-900);
+  font-size: 1rem;
+  font-weight: 300;
+  letter-spacing: 0.06em;
+}
+.admin-res-entry-panel-body {
+  padding: var(--space-24);
+}
+.admin-res-entry-summary-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  padding: var(--space-12) 0;
+  border-bottom: 1px solid var(--stone-200);
+}
+.admin-res-entry-summary-key {
+  color: var(--stone-400);
+  font-size: 0.6rem;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+}
+.admin-res-entry-summary-val {
+  color: var(--stone-900);
+  font-size: 0.82rem;
+  letter-spacing: 0.04em;
+  text-align: right;
+}
+.admin-res-entry-summary-val.is-empty {
+  color: var(--stone-200);
+  font-style: italic;
+  font-size: 0.68rem;
+}
+.admin-res-entry-panel-total {
+  position: relative;
+  margin-top: var(--space-20);
+  padding-top: var(--space-16);
+  border-top: 1px solid var(--stone-200);
+}
+.admin-res-entry-panel-total::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 1.75rem;
+  height: 1px;
+  background: var(--gold-500);
+}
+.admin-res-entry-total-label {
+  margin: 0 0 var(--space-6);
+  color: var(--stone-400);
+  font-size: 0.56rem;
+  letter-spacing: 0.35em;
+  text-transform: uppercase;
+}
+.admin-res-entry-total-amount {
+  margin: 0;
+  color: var(--stone-900);
+  font-size: 1.35rem;
+  font-weight: 300;
+  letter-spacing: 0.04em;
+}
+.admin-res-entry-currency-small {
+  margin-right: var(--space-4);
+  color: var(--stone-400);
+  font-size: 0.82rem;
+}
+.admin-res-entry-checklist {
+  margin-top: var(--space-24);
+  padding-top: var(--space-20);
+  border-top: 1px solid var(--stone-200);
+}
+.admin-res-entry-checklist-label {
+  margin: 0 0 var(--space-12);
+  color: var(--stone-400);
+  font-size: 0.5rem;
+  letter-spacing: 0.35em;
+  text-transform: uppercase;
+}
+.admin-res-entry-check-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-10);
+  margin-bottom: var(--space-8);
+}
+.admin-res-entry-check-dot {
+  flex-shrink: 0;
+  width: 0.3125rem;
+  height: 0.3125rem;
+  border: 1px solid var(--stone-200);
+  transition: all 0.35s ease;
+}
+.admin-res-entry-check-item.is-done .admin-res-entry-check-dot {
+  background: var(--gold-500);
+  border-color: var(--gold-500);
+}
+.admin-res-entry-check-text {
+  color: var(--stone-400);
+  font-size: 0.68rem;
+  margin-left: var(--space-8);
+  letter-spacing: 0.04em;
+  transition: color 0.3s ease;
+}
+.admin-res-entry-check-item.is-done .admin-res-entry-check-text {
+  color: var(--stone-800);
+}
+.admin-res-entry-btn-primary {
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  margin-top: var(--space-20);
+  padding: var(--space-16) var(--space-20);
+  border: none;
+  background: var(--stone-800);
+  color: var(--stone-50);
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.68rem;
+  letter-spacing: 0.28em;
+  text-transform: uppercase;
+  position: relative;
+  overflow: hidden;
+  transition: background 0.45s cubic-bezier(0.76, 0, 0.24, 1);
+}
+.admin-res-entry-btn-primary::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 0;
+  height: 1px;
+  background: var(--gold-500);
+  transition: width 0.45s cubic-bezier(0.76, 0, 0.24, 1);
+}
+.admin-res-entry-btn-primary:hover:not(:disabled) {
+  background: var(--stone-900);
+}
+.admin-res-entry-btn-primary:hover:not(:disabled)::after {
+  width: 100%;
+}
+.admin-res-entry-btn-primary:hover:not(:disabled) .admin-res-entry-btn-arrow {
+  transform: translateX(4px);
+}
+.admin-res-entry-btn-arrow {
+  transition: transform 0.45s cubic-bezier(0.76, 0, 0.24, 1);
+}
+.admin-res-entry-btn-primary.is-disabled,
+.admin-res-entry-btn-primary:disabled {
+  background: var(--stone-200);
+  color: var(--stone-400);
+  cursor: not-allowed;
+}
+.admin-res-entry-btn-primary.is-disabled::after,
+.admin-res-entry-btn-primary:disabled::after {
+  display: none;
+}
+.admin-res-entry-btn-secondary {
+  display: block;
+  width: 100%;
+  margin-top: var(--space-8);
+  padding: 0.8125rem var(--space-20);
+  border: 1px solid var(--stone-200);
+  background: transparent;
+  color: var(--stone-400);
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.62rem;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  text-align: center;
+  transition: all 0.35s ease;
+}
+.admin-res-entry-btn-secondary:hover {
+  border-color: var(--gold-500);
+  color: var(--gold-500);
+}
+.admin-res-entry-btn-hint {
+  margin: var(--space-8) 0 0;
+  color: var(--stone-400);
+  font-size: 0.56rem;
+  letter-spacing: 0.15em;
+  text-align: center;
+}
+.admin-res-entry-overlay[hidden] {
+  display: none !important;
+}
+.admin-res-entry-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1400;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(15, 13, 11, 0.72);
+  backdrop-filter: blur(3px);
+}
+.admin-res-entry-modal {
+  position: relative;
+  overflow: hidden;
+  width: min(30rem, calc(100vw - 2rem));
+  border: 1px solid var(--stone-200);
+  background: var(--stone-50);
+}
+.admin-res-entry-modal-bar {
+  height: 2px;
+  background: linear-gradient(
+    90deg,
+    var(--stone-800),
+    var(--gold-500),
+    var(--stone-800)
+  );
+  background-size: 200% 100%;
+  animation: adminResEntryGoldFlow 2.5s ease infinite;
+}
+@keyframes adminResEntryGoldFlow {
+  0%,
+  100% {
+    background-position: 0% 0%;
+  }
+  50% {
+    background-position: 100% 0%;
+  }
+}
+.admin-res-entry-modal-body {
+  padding: var(--space-40);
+}
+.admin-res-entry-modal-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  margin-bottom: var(--space-20);
+  border: 1px solid var(--stone-200);
+  color: var(--gold-500);
+  font-size: 1rem;
+}
+.admin-res-entry-modal-eyebrow {
+  margin: 0 0 var(--space-10);
+  color: var(--gold-500);
+  font-size: 0.56rem;
+  letter-spacing: 0.42em;
+  text-transform: uppercase;
+}
+.admin-res-entry-modal-heading {
+  margin: 0 0 var(--space-8);
+  color: var(--stone-900);
+  font-size: 1.35rem;
+  font-weight: 300;
+  letter-spacing: 0.06em;
+}
+.admin-res-entry-modal-desc {
+  margin: 0 0 var(--space-28);
+  color: var(--stone-400);
+  font-size: 0.75rem;
+  letter-spacing: 0.03em;
+  line-height: 1.8;
+}
+.admin-res-entry-modal-btns {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-8);
+}
+.admin-res-entry-modal-btn-primary,
+.admin-res-entry-modal-btn-secondary {
+  padding: 0.875rem var(--space-20);
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 0.62rem;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  text-align: center;
+  transition: all 0.35s ease;
+}
+.admin-res-entry-modal-btn-primary {
+  background: var(--stone-800);
+  color: var(--stone-50);
+}
+.admin-res-entry-modal-btn-primary:hover {
+  background: var(--stone-900);
+}
+.admin-res-entry-modal-btn-secondary {
+  border: 1px solid var(--stone-200);
+  background: transparent;
+  color: var(--stone-400);
+}
+.admin-res-entry-modal-btn-secondary:hover {
+  border-color: var(--gold-500);
+  color: var(--gold-500);
+}
+@media (max-width: 1100px) {
+  .admin-res-entry-layout {
+    grid-template-columns: 1fr;
+    padding: var(--space-32) var(--space-24);
+  }
+  .admin-res-entry-form {
+    padding-right: 0;
+    border-right: none;
+    border-bottom: 1px solid var(--stone-200);
+    padding-bottom: var(--space-40);
+    margin-bottom: var(--space-40);
+  }
+  .admin-res-entry-panel {
+    position: static;
+    padding-left: 0;
+  }
+}
+@media (max-width: 720px) {
+  .admin-res-entry-input-row,
+  .admin-res-entry-room-cards {
+    grid-template-columns: 1fr;
+  }
+  .admin-res-entry-platform-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .admin-res-entry-date-range {
+    grid-template-columns: 1fr;
+    gap: var(--space-16);
+  }
+  .admin-res-entry-date-arrow {
+    flex-direction: row;
+    padding: 0;
+    justify-content: center;
+  }
+  .admin-res-entry-date-arrow-line {
+    width: 3rem;
+  }
+  .admin-res-entry-date-arrow-line::after {
+    top: -0.5rem;
+  }
+}

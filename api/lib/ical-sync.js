@@ -433,6 +433,7 @@ export async function getExternalBookingCalendarRows(pool) {
         paymentMethod: "",
         isExternal: true,
         externalSource: source,
+        externalUid: uid,
       };
     });
   } catch (e) {

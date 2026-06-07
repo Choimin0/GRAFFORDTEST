@@ -5,6 +5,10 @@ import {
   applyBookingRetentionToRow,
   purgeExpiredBookings,
 } from "./booking-retention.js";
+import {
+  handleCreateManualBooking,
+  filterShadowedExternalCalendarRows,
+} from "./admin-manual-booking.js";
 
 const BOOKING_TABLE = "booking";
 
@@ -82,6 +86,8 @@ function mapRow(row, isDeleted) {
         ? Number(row.checkin_alarm_sent_count)
         : 0,
     bookingLocale: row.booking_locale || "kr",
+    bookingChannel: row.booking_channel || "direct",
+    linkedExternalUid: row.linked_external_uid || "",
   };
   if (isDeleted) {
     base.cancelReason = row.cancel_reason || "";
@@ -95,6 +101,10 @@ function mapRow(row, isDeleted) {
 
 export async function handleAdminReservations(res, pool, body) {
   var action = String(body.action || "list").trim().toLowerCase();
+  if (action === "create-manual") {
+    await handleCreateManualBooking(res, pool, body);
+    return;
+  }
   if (action === "save-request") {
     var requestReservationNumber = String(body.reservationNumber || "")
       .trim()
@@ -195,6 +205,8 @@ export async function handleAdminReservations(res, pool, body) {
         payment_method,
         checkin_alarm_sent_count,
         booking_locale,
+        booking_channel,
+        linked_external_uid,
         created_at
         ${extraCols}
       FROM ${BOOKING_TABLE}
@@ -218,6 +230,8 @@ export async function handleAdminReservations(res, pool, body) {
           stay_nights, guest_request, payment_method, bank_confirmed,
           checkin_alarm_sent_count,
           booking_locale,
+          booking_channel,
+          linked_external_uid,
           created_at, (status = 'completed') AS is_past
         FROM ${BOOKING_TABLE}
         WHERE status IN ('confirm', 'completed')
@@ -246,10 +260,17 @@ export async function handleAdminReservations(res, pool, body) {
               ? Number(row.checkin_alarm_sent_count)
               : 0,
           bookingLocale: row.booking_locale || "kr",
+          bookingChannel: row.booking_channel || "direct",
+          linkedExternalUid: row.linked_external_uid || "",
         };
       });
       var externalCalendarRows = await getExternalBookingCalendarRows(pool);
-      result.calendarRows = bookingCalendarRows.concat(externalCalendarRows);
+      result.calendarRows = bookingCalendarRows.concat(
+        filterShadowedExternalCalendarRows(
+          bookingCalendarRows,
+          externalCalendarRows,
+        ),
+      );
     }
 
     json(res, 200, result);
