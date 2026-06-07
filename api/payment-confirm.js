@@ -28,7 +28,6 @@ function sendPaymentConfig(res) {
 
   var storeId = process.env.STORE_ID || "";
   var channelKey = process.env.CHANNEL_KEY || "";
-  var naverPayChannelKey = process.env.NAVER_PAY_CHANNEL_KEY || "";
 
   if (!storeId || !channelKey) {
     res.statusCode = 500;
@@ -46,7 +45,6 @@ function sendPaymentConfig(res) {
     JSON.stringify({
       storeId: storeId,
       channelKey: channelKey,
-      naverPayChannelKey: naverPayChannelKey,
       enabledMethods: resolveEnabledPaymentMethods(),
     }),
   );

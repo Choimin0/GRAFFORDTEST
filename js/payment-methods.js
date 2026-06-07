@@ -32,7 +32,6 @@
       labelEn: "Naver Pay",
       descKr: "네이버페이 간편결제",
       descEn: "Pay quickly with Naver Pay",
-      useDedicatedChannelKey: true,
     },
     kakao: {
       id: "kakao",
@@ -94,20 +93,37 @@
     };
   }
 
+  /** payment.html GRAFFORD_PAYMENT_OPTIONS (없으면 null) */
+  function resolvePagePaymentOptions() {
+    var opts =
+      typeof global !== "undefined" && global.GRAFFORD_PAYMENT_OPTIONS;
+    if (!opts || typeof opts !== "object") {
+      return null;
+    }
+    return {
+      card: opts.card !== false,
+      samsung: !!opts.samsung,
+      naver: !!opts.naver,
+      kakao: !!opts.kakao,
+      toss: !!opts.toss,
+    };
+  }
+
+  /** API 설정(storeId 등) + payment.html 결제수단 노출 옵션 병합 */
+  function mergePaymentConfig(apiConfig) {
+    var api = apiConfig || {};
+    var pageEnabled = resolvePagePaymentOptions();
+    if (!pageEnabled) {
+      return api;
+    }
+    return Object.assign({}, api, { enabledMethods: pageEnabled });
+  }
+
   function hasEnabledEasyPay(enabled) {
     return !!(enabled.samsung || enabled.naver || enabled.kakao || enabled.toss);
   }
 
-  function resolveActiveChannelKey(methodId, config) {
-    var meta = METHODS[normalizeMethodId(methodId)];
-    if (
-      meta &&
-      meta.useDedicatedChannelKey &&
-      config &&
-      config.naverPayChannelKey
-    ) {
-      return config.naverPayChannelKey;
-    }
+  function resolveActiveChannelKey(_methodId, config) {
     return (config && config.channelKey) || "";
   }
 
@@ -234,6 +250,8 @@
     isEasyPayMethodId: isEasyPayMethodId,
     getLabel: getLabel,
     getEnabledMethods: getEnabledMethods,
+    resolvePagePaymentOptions: resolvePagePaymentOptions,
+    mergePaymentConfig: mergePaymentConfig,
     hasEnabledEasyPay: hasEnabledEasyPay,
     resolveActiveChannelKey: resolveActiveChannelKey,
     buildPortoneParams: buildPortoneParams,

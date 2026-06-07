@@ -20,6 +20,19 @@
     <script src="js/site-language.js" defer></script>
     <!-- PortOne v2 Browser SDK -->
     <script src="https://cdn.portone.io/v2/browser-sdk.js"></script>
+    <!--
+      KG이니시스(PortOne) 결제수단 노출 설정
+      true → 결제수단 drawer에 표시 · false → 숨김
+    -->
+    <script>
+      window.GRAFFORD_PAYMENT_OPTIONS = {
+        card: true,
+        samsung: true,
+        naver: true,
+        kakao: true,
+        toss: true,
+      };
+    </script>
     <style>
       .page-loading-overlay {
         position: fixed;
@@ -636,7 +649,7 @@
       <script src="js/booking-pricing.js?v=6"></script>
       <script src="js/booking-token-client.js?v=5"></script>
       <script src="js/booking-checkout-guard.js?v=5"></script>
-      <script src="js/payment-methods.js?v=1"></script>
+      <script src="js/payment-methods.js?v=3"></script>
       <script>
         document.addEventListener("DOMContentLoaded", function () {
           var P = window.GraffordBookingPricing;
@@ -648,6 +661,13 @@
             );
           } catch (e) {
             saved = null;
+          }
+
+          function applyPaymentConfig(raw) {
+            var gpm = window.GraffordPaymentMethods;
+            return gpm && gpm.mergePaymentConfig
+              ? gpm.mergePaymentConfig(raw)
+              : raw;
           }
 
           var loadingMsg = document.getElementById("payment-loading-msg");
@@ -711,7 +731,7 @@
               ? P.computeGuestCount(room, extraGuests)
               : 2 + extraGuests;
           }
-          /* 기본 신용카드. 간편결제는 PAYMENT_EASY_*_ENABLED=true 시 drawer에 노출 */
+          /* 결제수단 노출: head의 GRAFFORD_PAYMENT_OPTIONS 참고 */
           var GPM = window.GraffordPaymentMethods;
           var paymentConfig = null;
           var payMethod = GPM
@@ -1005,6 +1025,15 @@
             "pay-kr-method-drawer-open",
           );
 
+          function syncPaymentDrawerKr() {
+            if (!GPM || !drawerKr) return;
+            GPM.syncDrawerVisibility(
+              drawerKr,
+              applyPaymentConfig(paymentConfig || {}),
+              "kr",
+            );
+          }
+
           function syncDrawerRadiosKr() {
             if (!drawerKr) return;
             var v = effectiveDrawerMethod();
@@ -1018,6 +1047,7 @@
 
           function openDrawerKr() {
             if (!drawerKr) return;
+            syncPaymentDrawerKr();
             syncDrawerRadiosKr();
             drawerKr.hidden = false;
             drawerKr.classList.add("is-open");
@@ -1080,12 +1110,21 @@
             try {
               var cfgRes = await fetch("/api/payment-confirm");
               if (cfgRes.ok) {
-                paymentConfig = await cfgRes.json();
-                if (GPM && drawerKr) {
-                  GPM.syncDrawerVisibility(drawerKr, paymentConfig, "kr");
+                paymentConfig = applyPaymentConfig(await cfgRes.json());
+                if (GPM && paymentConfig) {
+                  var methodCheck = GPM.validateMethodForCheckout(
+                    payMethod,
+                    paymentConfig,
+                  );
+                  if (methodCheck.methodId !== payMethod) {
+                    payMethod = methodCheck.methodId;
+                    saved.payMethod = payMethod;
+                    persistSaved();
+                  }
                 }
               }
             } catch (_cfg) {}
+            syncPaymentDrawerKr();
 
             quote = P
               ? P.computeStay(room, checkIn, checkOut, extraGuests)
@@ -1214,11 +1253,9 @@
               if (!config) {
                 var cfgRes = await fetch("/api/payment-confirm");
                 if (!cfgRes.ok) throw new Error("설정 조회 실패");
-                config = await cfgRes.json();
+                config = applyPaymentConfig(await cfgRes.json());
                 paymentConfig = config;
-                if (GPM && drawerKr) {
-                  GPM.syncDrawerVisibility(drawerKr, config, "kr");
-                }
+                syncPaymentDrawerKr();
               }
             } catch (e) {
               showError(
@@ -1228,6 +1265,7 @@
               );
               return;
             }
+            config = applyPaymentConfig(config);
 
             var checkoutMethod = GPM
               ? GPM.validateMethodForCheckout(payMethod, config)
@@ -2052,7 +2090,7 @@
       <script src="js/booking-pricing.js?v=6"></script>
       <script src="js/booking-token-client.js?v=5"></script>
       <script src="js/booking-checkout-guard.js?v=5"></script>
-      <script src="js/payment-methods.js?v=1"></script>
+      <script src="js/payment-methods.js?v=3"></script>
       <script>
         document.addEventListener("DOMContentLoaded", function () {
           var P = window.GraffordBookingPricing;
@@ -2064,6 +2102,13 @@
             );
           } catch (e) {
             saved = null;
+          }
+
+          function applyPaymentConfig(raw) {
+            var gpm = window.GraffordPaymentMethods;
+            return gpm && gpm.mergePaymentConfig
+              ? gpm.mergePaymentConfig(raw)
+              : raw;
           }
 
           var loadingMsg = document.getElementById("payment-loading-msg-en");
@@ -2129,7 +2174,7 @@
               ? P.computeGuestCount(room, extraGuests)
               : 2 + extraGuests;
           }
-          /* Card by default; easy pay appears when PAYMENT_EASY_*_ENABLED=true */
+          /* Payment methods: see GRAFFORD_PAYMENT_OPTIONS in head */
           var GPM = window.GraffordPaymentMethods;
           var paymentConfig = null;
           var payMethod = GPM
@@ -2443,6 +2488,15 @@
             "pay-en-method-drawer-open",
           );
 
+          function syncPaymentDrawerEn() {
+            if (!GPM || !drawerEn) return;
+            GPM.syncDrawerVisibility(
+              drawerEn,
+              applyPaymentConfig(paymentConfig || {}),
+              "en",
+            );
+          }
+
           function syncDrawerRadiosEn() {
             if (!drawerEn) return;
             var v = effectiveDrawerMethodEn();
@@ -2456,6 +2510,7 @@
 
           function openDrawerEn() {
             if (!drawerEn) return;
+            syncPaymentDrawerEn();
             syncDrawerRadiosEn();
             drawerEn.hidden = false;
             drawerEn.classList.add("is-open");
@@ -2518,12 +2573,21 @@
             try {
               var cfgRes = await fetch("/api/payment-confirm");
               if (cfgRes.ok) {
-                paymentConfig = await cfgRes.json();
-                if (GPM && drawerEn) {
-                  GPM.syncDrawerVisibility(drawerEn, paymentConfig, "en");
+                paymentConfig = applyPaymentConfig(await cfgRes.json());
+                if (GPM && paymentConfig) {
+                  var methodCheckEn = GPM.validateMethodForCheckout(
+                    payMethod,
+                    paymentConfig,
+                  );
+                  if (methodCheckEn.methodId !== payMethod) {
+                    payMethod = methodCheckEn.methodId;
+                    saved.payMethod = payMethod;
+                    persistSavedEn();
+                  }
                 }
               }
             } catch (_cfg) {}
+            syncPaymentDrawerEn();
 
             quote = P
               ? P.computeStay(room, checkIn, checkOut, extraGuests)
@@ -2662,11 +2726,9 @@
               if (!config) {
                 var cfgRes = await fetch("/api/payment-confirm");
                 if (!cfgRes.ok) throw new Error("Config fetch failed");
-                config = await cfgRes.json();
+                config = applyPaymentConfig(await cfgRes.json());
                 paymentConfig = config;
-                if (GPM && drawerEn) {
-                  GPM.syncDrawerVisibility(drawerEn, config, "en");
-                }
+                syncPaymentDrawerEn();
               }
             } catch (e) {
               showError(
@@ -2676,6 +2738,7 @@
               );
               return;
             }
+            config = applyPaymentConfig(config);
 
             var checkoutMethod = GPM
               ? GPM.validateMethodForCheckout(payMethod, config)
