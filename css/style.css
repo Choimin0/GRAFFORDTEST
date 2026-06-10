@@ -8125,72 +8125,30 @@ main.content-section.confirm-page.payment-page > #payment-error-area-en {
 .payment-method-option__icon {
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-start;
   flex-shrink: 0;
-  width: 2.5rem;
+  width: 4rem;
+  height: 2rem;
   color: var(--stone-600);
-}
-
-.payment-method-option--easy-pay .payment-method-option__icon {
-  width: auto;
-  min-width: 2.5rem;
-  max-width: 6.5rem;
 }
 
 .payment-method-option__brand-logo {
   display: block;
-  width: auto;
+  width: 100%;
+  height: 100%;
   max-width: 100%;
-  height: auto;
+  max-height: 100%;
   object-fit: contain;
-}
-
-/* 네이버페이: 심볼형 정방형 배지 — 모바일 최소 높이 24px */
-.payment-method-option__brand-logo--naver {
-  width: 3rem;
-  height: 3rem;
-  min-width: 1.5rem;
-  min-height: 1.5rem;
-}
-
-/* 카카오페이: 확장형 로고 — #FFEB00 배경, 영역 내 최대 크기 */
-.payment-method-option__brand-logo--kakao {
-  width: auto;
-  height: 2rem;
-  min-height: 1.5rem;
-}
-
-/* 삼성페이: 수평형 로고 — 디지털 최소 높이 13px */
-.payment-method-option__brand-logo--samsung {
-  width: auto;
-  height: 1.5rem;
-  min-height: 0.8125rem;
-}
-
-/* 토스페이: 공식 수평형 로고 */
-.payment-method-option__brand-logo--toss {
-  width: auto;
-  height: 1.25rem;
-  min-height: 1rem;
+  object-position: left center;
 }
 
 .payment-method-option__icon--naver,
 .payment-method-option__icon--samsung,
 .payment-method-option__icon--kakao,
 .payment-method-option__icon--toss {
-  width: auto;
-  height: auto;
   border-radius: 0;
   background: transparent;
   color: inherit;
-}
-
-.payment-method-drawer__section-head--easy-pay {
-  padding-top: 0.35rem;
-}
-
-.payment-method-drawer__options--easy-pay {
-  padding-bottom: 0.25rem;
 }
 
 .payment-method-option__text {

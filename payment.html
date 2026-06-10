@@ -435,13 +435,12 @@
             <div
               class="payment-method-drawer__options"
               role="radiogroup"
-              aria-labelledby="payment-method-drawer-section-kr-card"
-              data-payment-section="card"
+              aria-labelledby="payment-method-drawer-section-kr-methods"
             >
               <span
-                id="payment-method-drawer-section-kr-card"
+                id="payment-method-drawer-section-kr-methods"
                 class="visually-hidden"
-                >신용카드 결제</span
+                >결제 수단 선택</span
               >
               <label class="payment-method-option" data-payment-method="card">
                 <input
@@ -490,32 +489,6 @@
                   aria-hidden="true"
                 ></span>
               </label>
-            </div>
-            <div
-              class="payment-method-drawer__section-head payment-method-drawer__section-head--easy-pay"
-              data-payment-section-head="easy_pay"
-              hidden
-            >
-              <span class="payment-method-drawer__section-kicker"
-                >EASY PAY</span
-              >
-              <span
-                class="payment-method-drawer__section-rule"
-                aria-hidden="true"
-              ></span>
-            </div>
-            <div
-              class="payment-method-drawer__options payment-method-drawer__options--easy-pay"
-              role="radiogroup"
-              aria-labelledby="payment-method-drawer-section-kr-easy"
-              data-payment-section="easy_pay"
-              hidden
-            >
-              <span
-                id="payment-method-drawer-section-kr-easy"
-                class="visually-hidden"
-                >간편결제</span
-              >
               <label
                 class="payment-method-option payment-method-option--easy-pay"
                 data-payment-method="samsung"
@@ -533,11 +506,9 @@
                   aria-hidden="true"
                 >
                   <img
-                    class="payment-method-option__brand-logo payment-method-option__brand-logo--samsung"
+                    class="payment-method-option__brand-logo"
                     src="images/payment/samsungpay-horizontal.svg"
                     alt=""
-                    width="66"
-                    height="24"
                     decoding="async"
                   />
                 </span>
@@ -566,11 +537,9 @@
                   aria-hidden="true"
                 >
                   <img
-                    class="payment-method-option__brand-logo payment-method-option__brand-logo--naver"
+                    class="payment-method-option__brand-logo"
                     src="images/payment/naverpay-badge.svg"
                     alt=""
-                    width="48"
-                    height="48"
                     decoding="async"
                   />
                 </span>
@@ -599,11 +568,9 @@
                   aria-hidden="true"
                 >
                   <img
-                    class="payment-method-option__brand-logo payment-method-option__brand-logo--kakao"
+                    class="payment-method-option__brand-logo"
                     src="images/payment/kakaopay-extended.png"
                     alt=""
-                    width="88"
-                    height="32"
                     decoding="async"
                   />
                 </span>
@@ -632,11 +599,9 @@
                   aria-hidden="true"
                 >
                   <img
-                    class="payment-method-option__brand-logo payment-method-option__brand-logo--toss"
+                    class="payment-method-option__brand-logo"
                     src="images/payment/tosspay-logo-blue.png"
                     alt=""
-                    width="104"
-                    height="20"
                     decoding="async"
                   />
                 </span>
@@ -665,7 +630,7 @@
       <script src="js/booking-pricing.js?v=6"></script>
       <script src="js/booking-token-client.js?v=5"></script>
       <script src="js/booking-checkout-guard.js?v=5"></script>
-      <script src="js/payment-methods.js?v=3"></script>
+      <script src="js/payment-methods.js?v=4"></script>
       <script>
         document.addEventListener("DOMContentLoaded", function () {
           var P = window.GraffordBookingPricing;
@@ -1892,13 +1857,12 @@
             <div
               class="payment-method-drawer__options"
               role="radiogroup"
-              aria-labelledby="payment-method-drawer-section-en-card"
-              data-payment-section="card"
+              aria-labelledby="payment-method-drawer-section-en-methods"
             >
               <span
-                id="payment-method-drawer-section-en-card"
+                id="payment-method-drawer-section-en-methods"
                 class="visually-hidden"
-                >Credit card payment</span
+                >Select payment method</span
               >
               <label class="payment-method-option" data-payment-method="card">
                 <input
@@ -1947,32 +1911,6 @@
                   aria-hidden="true"
                 ></span>
               </label>
-            </div>
-            <div
-              class="payment-method-drawer__section-head payment-method-drawer__section-head--easy-pay"
-              data-payment-section-head="easy_pay"
-              hidden
-            >
-              <span class="payment-method-drawer__section-kicker"
-                >EASY PAY</span
-              >
-              <span
-                class="payment-method-drawer__section-rule"
-                aria-hidden="true"
-              ></span>
-            </div>
-            <div
-              class="payment-method-drawer__options payment-method-drawer__options--easy-pay"
-              role="radiogroup"
-              aria-labelledby="payment-method-drawer-section-en-easy"
-              data-payment-section="easy_pay"
-              hidden
-            >
-              <span
-                id="payment-method-drawer-section-en-easy"
-                class="visually-hidden"
-                >Easy pay</span
-              >
               <label
                 class="payment-method-option payment-method-option--easy-pay"
                 data-payment-method="samsung"
@@ -1990,11 +1928,9 @@
                   aria-hidden="true"
                 >
                   <img
-                    class="payment-method-option__brand-logo payment-method-option__brand-logo--samsung"
+                    class="payment-method-option__brand-logo"
                     src="images/payment/samsungpay-horizontal.svg"
                     alt=""
-                    width="66"
-                    height="24"
                     decoding="async"
                   />
                 </span>
@@ -2026,11 +1962,9 @@
                   aria-hidden="true"
                 >
                   <img
-                    class="payment-method-option__brand-logo payment-method-option__brand-logo--naver"
+                    class="payment-method-option__brand-logo"
                     src="images/payment/naverpay-badge.svg"
                     alt=""
-                    width="48"
-                    height="48"
                     decoding="async"
                   />
                 </span>
@@ -2062,11 +1996,9 @@
                   aria-hidden="true"
                 >
                   <img
-                    class="payment-method-option__brand-logo payment-method-option__brand-logo--kakao"
+                    class="payment-method-option__brand-logo"
                     src="images/payment/kakaopay-extended.svg"
                     alt=""
-                    width="88"
-                    height="32"
                     decoding="async"
                   />
                 </span>
@@ -2098,11 +2030,9 @@
                   aria-hidden="true"
                 >
                   <img
-                    class="payment-method-option__brand-logo payment-method-option__brand-logo--toss"
+                    class="payment-method-option__brand-logo"
                     src="images/payment/tosspay-logo-blue.png"
                     alt=""
-                    width="104"
-                    height="20"
                     decoding="async"
                   />
                 </span>
@@ -2134,7 +2064,7 @@
       <script src="js/booking-pricing.js?v=6"></script>
       <script src="js/booking-token-client.js?v=5"></script>
       <script src="js/booking-checkout-guard.js?v=5"></script>
-      <script src="js/payment-methods.js?v=3"></script>
+      <script src="js/payment-methods.js?v=4"></script>
       <script>
         document.addEventListener("DOMContentLoaded", function () {
           var P = window.GraffordBookingPricing;

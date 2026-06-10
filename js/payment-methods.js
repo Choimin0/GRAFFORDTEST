@@ -190,17 +190,7 @@
   function syncDrawerVisibility(drawerEl, config, locale) {
     if (!drawerEl) return;
     var enabled = getEnabledMethods(config);
-    var easyPayVisible = hasEnabledEasyPay(enabled);
     var isEn = String(locale || "").toLowerCase() === "en";
-
-    var easyHead = drawerEl.querySelector(
-      '[data-payment-section-head="easy_pay"]',
-    );
-    var easyOptions = drawerEl.querySelector(
-      '[data-payment-section="easy_pay"]',
-    );
-    if (easyHead) easyHead.hidden = !easyPayVisible;
-    if (easyOptions) easyOptions.hidden = !easyPayVisible;
 
     var easyIds = ["samsung", "naver", "kakao", "toss"];
     for (var i = 0; i < easyIds.length; i++) {
