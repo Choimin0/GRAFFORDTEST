@@ -833,8 +833,18 @@
               var ch = rateData.charges || rateData;
               if (ch && typeof P.setCharges === "function") {
                 var enabled = rateData.chargeEnabled || null;
+                var promoPeriod = rateData.promotionPeriod || null;
+                try {
+                  var promoMeta = JSON.parse(
+                    sessionStorage.getItem("graffordPromotionMeta") || "null",
+                  );
+                  if (promoMeta && promoMeta.promotionPeriod) {
+                    promoPeriod = promoMeta.promotionPeriod;
+                  }
+                } catch (_pm) {}
                 P.setCharges(ch, {
                   promotionEnabled: !!(enabled && enabled.promotion === true),
+                  promotionPeriod: promoPeriod,
                   promotionInPeriod: rateData.promotionInPeriod !== false,
                 });
               }
@@ -2269,8 +2279,18 @@
               var ch = rateData.charges || rateData;
               if (ch && typeof P.setCharges === "function") {
                 var enabled = rateData.chargeEnabled || null;
+                var promoPeriod = rateData.promotionPeriod || null;
+                try {
+                  var promoMeta = JSON.parse(
+                    sessionStorage.getItem("graffordPromotionMeta") || "null",
+                  );
+                  if (promoMeta && promoMeta.promotionPeriod) {
+                    promoPeriod = promoMeta.promotionPeriod;
+                  }
+                } catch (_pm) {}
                 P.setCharges(ch, {
                   promotionEnabled: !!(enabled && enabled.promotion === true),
+                  promotionPeriod: promoPeriod,
                   promotionInPeriod: rateData.promotionInPeriod !== false,
                 });
               }

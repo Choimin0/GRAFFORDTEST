@@ -13,6 +13,10 @@
   var WEEKEND_SURCHARGE_PER_NIGHT = 20000;   // 기본값 (DB에서 덮어씀)
   var CONSECUTIVE_SALE_PER_NIGHT = 20000;    // 기본값 (DB에서 덮어씀)
   var PROMOTION_PERCENT = 0;                  // 기본 프로모션 할인율 (%)
+  var PROMOTION_ENABLED = false;
+  var PROMOTION_PERIOD_START = "";
+  var PROMOTION_PERIOD_END = "";
+  var PROMOTION_LEGACY_IN_PERIOD = true;
   /** 객실별 기준 인원 */
   var BASE_GUESTS = { G1: 2, G2: 2, G3: 3, G4: 4 };
   /** 추가 투숙 가능 인원 (기준 인원 외) */
@@ -51,12 +55,10 @@
     if (Number.isFinite(cs) && cs >= 0) {
       CONSECUTIVE_SALE_PER_NIGHT = Math.floor(cs);
     }
+    PROMOTION_ENABLED = opts.promotionEnabled === true;
     var pr = Number(charges.promotion);
-    var promoToggleOn = opts.promotionEnabled === true;
-    var promoInPeriod = opts.promotionInPeriod !== false;
     if (
-      promoToggleOn &&
-      promoInPeriod &&
+      PROMOTION_ENABLED &&
       Number.isFinite(pr) &&
       pr >= 0 &&
       pr <= 100
@@ -65,6 +67,12 @@
     } else {
       PROMOTION_PERCENT = 0;
     }
+    var period = opts.promotionPeriod;
+    if (period && typeof period === "object") {
+      PROMOTION_PERIOD_START = normalizePromotionYmd(period.startDate);
+      PROMOTION_PERIOD_END = normalizePromotionYmd(period.endDate);
+    }
+    PROMOTION_LEGACY_IN_PERIOD = opts.promotionInPeriod !== false;
     // 외부 코드에서 읽는 공개 상수도 동기화
     if (root && root.GraffordBookingPricing) {
       root.GraffordBookingPricing.WEEKEND_SURCHARGE_PER_NIGHT =
@@ -93,6 +101,60 @@
     }
     var p = str.split("-");
     return new Date(Number(p[0]), Number(p[1]) - 1, Number(p[2]), 12, 0, 0, 0);
+  }
+
+  function normalizePromotionYmd(value) {
+    var s = String(value || "").slice(0, 10);
+    return /^\d{4}-\d{2}-\d{2}$/.test(s) ? s : "";
+  }
+
+  function ymdFromDate(d) {
+    return (
+      d.getFullYear() +
+      "-" +
+      String(d.getMonth() + 1).padStart(2, "0") +
+      "-" +
+      String(d.getDate()).padStart(2, "0")
+    );
+  }
+
+  /** 투숙 박(check-in ~ check-out 전날)이 프로모션 기간과 겹치면 true. 기간 미설정 시 true. */
+  function isStayInPromotionPeriod(checkInStr, checkOutStr, startDate, endDate) {
+    var start = normalizePromotionYmd(startDate);
+    var end = normalizePromotionYmd(endDate);
+    if (!start && !end) {
+      return true;
+    }
+    if (!start || !end) {
+      return false;
+    }
+    var ci = normalizePromotionYmd(checkInStr);
+    var co = normalizePromotionYmd(checkOutStr);
+    if (!ci || !co || co <= ci) {
+      return false;
+    }
+    var checkout = parseYMD(co);
+    if (!checkout) {
+      return false;
+    }
+    checkout.setDate(checkout.getDate() - 1);
+    var lastNight = ymdFromDate(checkout);
+    return ci <= end && lastNight >= start;
+  }
+
+  function isPromotionActiveForStay(checkInStr, checkOutStr) {
+    if (!PROMOTION_ENABLED || PROMOTION_PERCENT <= 0) {
+      return false;
+    }
+    if (PROMOTION_PERIOD_START || PROMOTION_PERIOD_END) {
+      return isStayInPromotionPeriod(
+        checkInStr,
+        checkOutStr,
+        PROMOTION_PERIOD_START,
+        PROMOTION_PERIOD_END,
+      );
+    }
+    return PROMOTION_LEGACY_IN_PERIOD;
   }
 
   /** 체크인 날짜부터 체크아웃 전날까지 각 박의 Date 목록 */
@@ -202,10 +264,13 @@
     var grandTotal = baseTotal + extraGuestTotal;
     var consecutiveSale =
       nights >= 2 ? (nights - 1) * CONSECUTIVE_SALE_PER_NIGHT : 0;
-    // 프로모션: 평일 박요금 합(=전체 박 × 평일 단가) 기준 PROMOTION_PERCENT% — 기존 confirm과 동일
+    // 프로모션: 평일 박요금 합(=전체 박 × 평일 단가) 기준 % — 투숙일이 프로모션 기간과 겹칠 때만
     var promotionBase = nights * baseNightly;
+    var effectivePromoPercent = isPromotionActiveForStay(checkInStr, checkOutStr)
+      ? PROMOTION_PERCENT
+      : 0;
     var promotionDiscount = Math.floor(
-      (promotionBase * PROMOTION_PERCENT) / 100,
+      (promotionBase * effectivePromoPercent) / 100,
     );
     var discountedGrandTotal = Math.max(0, grandTotal - consecutiveSale - promotionDiscount);
 
@@ -225,7 +290,7 @@
       grandTotal: grandTotal,
       consecutiveSale: consecutiveSale,
       promotionDiscount: promotionDiscount,
-      promotionPercent: PROMOTION_PERCENT,
+      promotionPercent: effectivePromoPercent,
       discountedGrandTotal: discountedGrandTotal,
     };
   }
@@ -248,6 +313,8 @@
     isWeekendNight: isWeekendNight,
     clampExtra: clampExtra,
     computeStay: computeStay,
+    isStayInPromotionPeriod: isStayInPromotionPeriod,
+    isPromotionActiveForStay: isPromotionActiveForStay,
     setRoomWeekdayBase: setRoomWeekdayBase,
     setCharges: setCharges,
   };

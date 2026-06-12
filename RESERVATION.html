@@ -1307,7 +1307,12 @@
 
             function resolvePromotionEnabled(chargeEnabled, promoMeta) {
               if (chargeEnabled && typeof chargeEnabled === "object") {
-                return chargeEnabled.promotion === true;
+                if (chargeEnabled.promotion === true) {
+                  return true;
+                }
+                if (chargeEnabled.promotion === false) {
+                  return false;
+                }
               }
               if (promoMeta && typeof promoMeta === "object") {
                 return promoMeta.promotionEnabled === true;
@@ -1392,6 +1397,10 @@
               ) {
                 P.setCharges(charges, {
                   promotionEnabled: promotionEnabled,
+                  promotionPeriod: {
+                    startDate: promotionPeriodStart,
+                    endDate: promotionPeriodEnd,
+                  },
                   promotionInPeriod: promotionInPeriod,
                 });
               }
@@ -1657,8 +1666,25 @@
                     Math.floor(Number(pricing.PROMOTION_PERCENT || 0)),
                   )
                 : 0;
+              var promoInPeriodForStay = promotionInPeriod;
+              if (
+                checkIn &&
+                checkOut &&
+                pricing &&
+                typeof pricing.isStayInPromotionPeriod === "function" &&
+                (promotionPeriodStart || promotionPeriodEnd)
+              ) {
+                promoInPeriodForStay = pricing.isStayInPromotionPeriod(
+                  formatYMD(checkIn),
+                  formatYMD(checkOut),
+                  promotionPeriodStart,
+                  promotionPeriodEnd,
+                );
+              } else if (!promotionPeriodStart && !promotionPeriodEnd) {
+                promoInPeriodForStay = promotionEnabled;
+              }
               var promoActiveNow =
-                promotionEnabled && promotionInPeriod && pctApplied > 0;
+                promotionEnabled && promoInPeriodForStay && pctApplied > 0;
               var hasPromotionPeriod = !!(
                 promotionPeriodStart && promotionPeriodEnd
               );

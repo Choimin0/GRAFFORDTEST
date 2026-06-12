@@ -64,3 +64,52 @@ export function isPromotionInPeriod(todayYmd, startDate, endDate) {
   var today = normalizePromotionDate(todayYmd) || getTodayYmdKst();
   return today >= start && today <= end;
 }
+
+function dayBeforeYmd(ymd) {
+  var parts = normalizePromotionDate(ymd).split("-");
+  if (parts.length !== 3) {
+    return "";
+  }
+  var d = new Date(
+    Number(parts[0]),
+    Number(parts[1]) - 1,
+    Number(parts[2]),
+    12,
+    0,
+    0,
+    0,
+  );
+  if (isNaN(d.getTime())) {
+    return "";
+  }
+  d.setDate(d.getDate() - 1);
+  return (
+    String(d.getFullYear()) +
+    "-" +
+    String(d.getMonth() + 1).padStart(2, "0") +
+    "-" +
+    String(d.getDate()).padStart(2, "0")
+  );
+}
+
+/** 투숙 박(check-in ~ check-out 전날)이 프로모션 기간과 겹치면 true. 기간 미설정 시 true. */
+export function isStayInPromotionPeriod(checkInYmd, checkOutYmd, startDate, endDate) {
+  var start = normalizePromotionDate(startDate);
+  var end = normalizePromotionDate(endDate);
+  if (!start && !end) {
+    return true;
+  }
+  if (!start || !end) {
+    return false;
+  }
+  var ci = normalizePromotionDate(checkInYmd);
+  var co = normalizePromotionDate(checkOutYmd);
+  if (!ci || !co || co <= ci) {
+    return false;
+  }
+  var lastNight = dayBeforeYmd(co);
+  if (!lastNight) {
+    return false;
+  }
+  return ci <= end && lastNight >= start;
+}

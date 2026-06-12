@@ -789,8 +789,15 @@
                 sessionStorage.getItem("graffordPromotionMeta") || "null",
               );
             } catch (_pm) {}
+            var promotionPeriod = null;
+            if (ratePayload && ratePayload.promotionPeriod) {
+              promotionPeriod = ratePayload.promotionPeriod;
+            } else if (promoMeta && promoMeta.promotionPeriod) {
+              promotionPeriod = promoMeta.promotionPeriod;
+            }
             P.setCharges(charges, {
               promotionEnabled: !!(enabled && enabled.promotion === true),
+              promotionPeriod: promotionPeriod,
               promotionInPeriod:
                 ratePayload && ratePayload.promotionInPeriod === false
                   ? false
