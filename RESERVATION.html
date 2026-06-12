@@ -1233,8 +1233,33 @@
               };
             }
 
+            function normalizePromotionYmd(value) {
+              if (value == null || value === "") {
+                return "";
+              }
+              if (value instanceof Date && !isNaN(value.getTime())) {
+                var y = value.getUTCFullYear();
+                var m = String(value.getUTCMonth() + 1).padStart(2, "0");
+                var d = String(value.getUTCDate()).padStart(2, "0");
+                return y + "-" + m + "-" + d;
+              }
+              var s = String(value).trim();
+              var iso = s.match(/^(\d{4}-\d{2}-\d{2})/);
+              if (iso) {
+                return iso[1];
+              }
+              var parsed = new Date(s);
+              if (!isNaN(parsed.getTime())) {
+                var py = parsed.getUTCFullYear();
+                var pm = String(parsed.getUTCMonth() + 1).padStart(2, "0");
+                var pd = String(parsed.getUTCDate()).padStart(2, "0");
+                return py + "-" + pm + "-" + pd;
+              }
+              return "";
+            }
+
             function formatPromotionMd(ymd) {
-              var parts = parseYmdParts(ymd);
+              var parts = parseYmdParts(normalizePromotionYmd(ymd));
               if (!parts) {
                 return "";
               }
@@ -1265,8 +1290,8 @@
             }
 
             function isPromotionInPeriodClient(todayYmd, startYmd, endYmd) {
-              var start = String(startYmd || "").slice(0, 10);
-              var end = String(endYmd || "").slice(0, 10);
+              var start = normalizePromotionYmd(startYmd);
+              var end = normalizePromotionYmd(endYmd);
               if (!start && !end) {
                 return true;
               }
@@ -1290,27 +1315,21 @@
               return false;
             }
 
-            function applyRoomRates(rates, charges, chargeEnabled, promoMeta) {
-              if (!P) return;
+            function applyPromotionMeta(charges, chargeEnabled, promoMeta) {
               promotionEnabled = resolvePromotionEnabled(
                 chargeEnabled,
                 promoMeta,
               );
-              if (
-                rates &&
-                typeof rates === "object" &&
-                typeof P.setRoomWeekdayBase === "function"
-              ) {
-                P.setRoomWeekdayBase(rates);
-              }
+              promotionPeriodStart = "";
+              promotionPeriodEnd = "";
               if (promoMeta && typeof promoMeta === "object") {
                 if (promoMeta.promotionPeriod) {
-                  promotionPeriodStart = String(
+                  promotionPeriodStart = normalizePromotionYmd(
                     promoMeta.promotionPeriod.startDate || "",
-                  ).slice(0, 10);
-                  promotionPeriodEnd = String(
+                  );
+                  promotionPeriodEnd = normalizePromotionYmd(
                     promoMeta.promotionPeriod.endDate || "",
-                  ).slice(0, 10);
+                  );
                 }
                 if (promoMeta.promotionInPeriod === false) {
                   promotionInPeriod = false;
@@ -1351,6 +1370,21 @@
               if (!promotionEnabled) {
                 promotionPercentRaw = 0;
               }
+            }
+
+            function applyRoomRates(rates, charges, chargeEnabled, promoMeta) {
+              applyPromotionMeta(charges, chargeEnabled, promoMeta);
+              if (!P) {
+                updateDiscountCards();
+                return;
+              }
+              if (
+                rates &&
+                typeof rates === "object" &&
+                typeof P.setRoomWeekdayBase === "function"
+              ) {
+                P.setRoomWeekdayBase(rates);
+              }
               if (
                 charges &&
                 typeof charges === "object" &&
@@ -1361,6 +1395,7 @@
                   promotionInPeriod: promotionInPeriod,
                 });
               }
+              updateDiscountCards();
             }
 
             function loadRoomRatesForNewBooking() {
@@ -1643,7 +1678,11 @@
                   promotionPeriodStart,
                   promotionPeriodEnd,
                 );
-                promoDescEl.textContent = periodText || (isEnScope ? "—" : "—");
+                promoDescEl.textContent =
+                  periodText ||
+                  (isEnScope
+                    ? "Promotion discount available"
+                    : "프로모션 할인 적용 중");
               }
               if (promoPillEl) {
                 promoPillEl.hidden = !shouldShowPromotionPill;

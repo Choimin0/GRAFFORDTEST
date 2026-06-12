@@ -1,5 +1,6 @@
 import pg from "pg";
 import {
+  formatPromotionDateFromDb,
   getTodayYmdKst,
   isPromotionInPeriod,
 } from "./lib/promotion-period.js";
@@ -155,12 +156,8 @@ export default async function handler(req, res) {
         charges[key] = enabled ? n : 0;
         if (row.room_name === "promotion") {
           promotionPercent = Math.max(0, Math.min(100, Math.floor(n)));
-          var start = row.promotion_start_date
-            ? String(row.promotion_start_date).slice(0, 10)
-            : "";
-          var end = row.promotion_end_date
-            ? String(row.promotion_end_date).slice(0, 10)
-            : "";
+          var start = formatPromotionDateFromDb(row.promotion_start_date);
+          var end = formatPromotionDateFromDb(row.promotion_end_date);
           promotionPeriod = { startDate: start, endDate: end };
           promotionInPeriod = isPromotionInPeriod(todayYmd, start, end);
         }

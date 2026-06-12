@@ -1,5 +1,6 @@
 import { json } from "./admin-common.js";
 import {
+  formatPromotionDateFromDb,
   getTodayYmdKst,
   isPromotionInPeriod,
   normalizePromotionDate,
@@ -54,15 +55,9 @@ async function ensureRoomRateTable(pool) {
 }
 
 function mapPromotionRowFields(row) {
-  var start = row.promotion_start_date
-    ? String(row.promotion_start_date).slice(0, 10)
-    : "";
-  var end = row.promotion_end_date
-    ? String(row.promotion_end_date).slice(0, 10)
-    : "";
   return {
-    promotionStartDate: start,
-    promotionEndDate: end,
+    promotionStartDate: formatPromotionDateFromDb(row.promotion_start_date),
+    promotionEndDate: formatPromotionDateFromDb(row.promotion_end_date),
   };
 }
 
