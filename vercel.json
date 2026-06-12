@@ -3,8 +3,26 @@
   "framework": null,
   "buildCommand": "echo 'Static HTML at repo root — no Vite app build'",
   "outputDirectory": ".",
+  "rewrites": [
+    {
+      "source": "/api/room-rate",
+      "destination": "/api/reservations?graffordRoute=room-rate"
+    },
+    {
+      "source": "/api/booking-token",
+      "destination": "/api/reservations?graffordRoute=booking-token"
+    },
+    {
+      "source": "/api/reservations-lookup",
+      "destination": "/api/reservations?graffordRoute=reservations-lookup"
+    },
+    {
+      "source": "/api/alimtalk-notify",
+      "destination": "/api/reservations?graffordRoute=alimtalk-notify"
+    }
+  ],
   "functions": {
-    "api/**/*.js": {
+    "api/*.js": {
       "maxDuration": 30
     }
   }

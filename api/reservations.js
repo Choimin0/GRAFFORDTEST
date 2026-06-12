@@ -1,3 +1,12 @@
+/**
+ * GET/POST/DELETE /api/reservations — 예약·달력·iCal
+ *
+ * 통합 라우트 (vercel.json rewrite, 쿼리 graffordRoute):
+ *   room-rate           — 구 GET /api/room-rate
+ *   booking-token       — 구 POST /api/booking-token
+ *   reservations-lookup — 구 POST /api/reservations-lookup
+ *   alimtalk-notify     — 구 POST /api/alimtalk-notify
+ */
 import { parse as parseUrl } from "node:url";
 import pg from "pg";
 import crypto from "node:crypto";
@@ -39,6 +48,10 @@ import {
   applyBookingRetentionToRow,
   purgeExpiredBookings,
 } from "./lib/booking-retention.js";
+import { handlePublicRoomRate } from "./lib/public-room-rate.js";
+import { handlePublicBookingToken } from "./lib/public-booking-token.js";
+import { handlePublicReservationsLookup } from "./lib/public-reservations-lookup.js";
+import { handlePublicAlimtalkNotify } from "./lib/public-alimtalk-notify.js";
 
 const { Pool } = pg;
 
@@ -401,7 +414,20 @@ async function getJsonBody(req) {
   return readBody(req);
 }
 
+function getGraffordRoute(req) {
+  try {
+    var url = new URL(req.url || "", "http://localhost");
+    return String(url.searchParams.get("graffordRoute") || "")
+      .trim()
+      .toLowerCase();
+  } catch (_e) {
+    return "";
+  }
+}
+
 export default async function handler(req, res) {
+  var graffordRoute = getGraffordRoute(req);
+
   if (req.method === "OPTIONS") {
     res.statusCode = 204;
     res.setHeader("Access-Control-Allow-Origin", "*");
@@ -418,6 +444,26 @@ export default async function handler(req, res) {
       error:
         "DB 연결 정보가 없습니다. .env.local 에 POSTGRES_URL 등을 넣은 뒤 vercel dev 를 다시 실행하세요.",
     });
+    return;
+  }
+
+  if (graffordRoute === "room-rate") {
+    await handlePublicRoomRate(req, res, pool);
+    return;
+  }
+
+  if (graffordRoute === "booking-token") {
+    await handlePublicBookingToken(req, res, pool);
+    return;
+  }
+
+  if (graffordRoute === "reservations-lookup") {
+    await handlePublicReservationsLookup(req, res, pool);
+    return;
+  }
+
+  if (graffordRoute === "alimtalk-notify") {
+    await handlePublicAlimtalkNotify(req, res, pool);
     return;
   }
 

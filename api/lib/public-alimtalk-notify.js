@@ -1,53 +1,19 @@
-/**
- * POST /api/alimtalk-notify
- *
- * reserve-complete / delete-complete 페이지에서 호출.
- * DB 예약 상태와 예약자 정보를 검증한 뒤 Solapi 알림톡을 발송합니다.
- */
-import pg from "pg";
 import {
   decryptBookingPiiResponse,
   guestNamesMatch,
-} from "./lib/pii-crypto.js";
-import { shouldSendAlimtalk } from "./lib/booking-locale.js";
+} from "./pii-crypto.js";
+import { shouldSendAlimtalk } from "./booking-locale.js";
 import {
   contactsMatchIntl,
   isInternationalStoredContact,
-} from "./lib/intl-phone.js";
+} from "./intl-phone.js";
 import {
   normalizePhone,
   sendBookingAlimtalk,
-} from "./lib/solapi-alimtalk.js";
-import { applyBookingRetentionToRow } from "./lib/booking-retention.js";
+} from "./solapi-alimtalk.js";
+import { applyBookingRetentionToRow } from "./booking-retention.js";
 
-const { Pool } = pg;
 const BOOKING_TABLE = "booking";
-
-function getDatabaseUrl() {
-  return String(
-    process.env.POSTGRES_URL ||
-      process.env.POSTGRES_PRISMA_URL ||
-      process.env.POSTGRES_URL_NON_POOLING ||
-      process.env.DATABASE_URL ||
-      "",
-  ).trim();
-}
-
-var poolSingleton = null;
-
-function getPool() {
-  var dbUrl = getDatabaseUrl();
-  if (!dbUrl) return null;
-  if (!poolSingleton) {
-    poolSingleton = new Pool({
-      connectionString: dbUrl,
-      max: 1,
-      connectionTimeoutMillis: 20000,
-      idleTimeoutMillis: 15000,
-    });
-  }
-  return poolSingleton;
-}
 
 function json(res, status, body) {
   res.statusCode = status;
@@ -129,25 +95,19 @@ function contactsMatch(storedContact, providedContact) {
   return a === b;
 }
 
-export default async function handler(req, res) {
+export async function handlePublicAlimtalkNotify(req, res, pool) {
   if (req.method === "OPTIONS") {
     res.statusCode = 204;
     res.setHeader("Access-Control-Allow-Origin", "*");
     res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
     res.setHeader("Access-Control-Allow-Headers", "Content-Type");
     res.end();
-    return;
+    return true;
   }
 
   if (req.method !== "POST") {
     json(res, 405, { ok: false, error: "Method not allowed" });
-    return;
-  }
-
-  var pool = getPool();
-  if (!pool) {
-    json(res, 503, { ok: false, error: "Database unavailable" });
-    return;
+    return true;
   }
 
   var body;
@@ -155,13 +115,13 @@ export default async function handler(req, res) {
     body = await getJsonBody(req);
   } catch (e) {
     json(res, 400, { ok: false, error: "Invalid JSON body" });
-    return;
+    return true;
   }
 
   var type = String(body.type || "").trim();
   if (type !== "reserve-complete" && type !== "cancel-complete") {
     json(res, 400, { ok: false, error: "Invalid type" });
-    return;
+    return true;
   }
 
   var reservationNumber = normalizeLookupOrder(body.orderNo || body.reservationNumber);
@@ -173,7 +133,7 @@ export default async function handler(req, res) {
       ok: false,
       error: "orderNo, guestName, contact가 필요합니다.",
     });
-    return;
+    return true;
   }
 
   try {
@@ -187,13 +147,13 @@ export default async function handler(req, res) {
 
     if (!sel.rows || !sel.rows.length) {
       json(res, 404, { ok: false, error: "예약을 찾을 수 없습니다." });
-      return;
+      return true;
     }
 
     var row = await applyBookingRetentionToRow(pool, sel.rows[0]);
     if (!row) {
       json(res, 404, { ok: false, error: "예약을 찾을 수 없습니다." });
-      return;
+      return true;
     }
     var pii = decryptBookingPiiResponse(row);
     if (!shouldSendAlimtalk(row.booking_locale, pii.contact)) {
@@ -202,15 +162,15 @@ export default async function handler(req, res) {
         skipped: true,
         reason: "english_booking",
       });
-      return;
+      return true;
     }
     if (!guestNamesMatch(row.guest_name, guestName, normalizeLookupName)) {
       json(res, 403, { ok: false, error: "예약자 정보가 일치하지 않습니다." });
-      return;
+      return true;
     }
     if (!contactsMatch(pii.contact, contact)) {
       json(res, 403, { ok: false, error: "연락처 정보가 일치하지 않습니다." });
-      return;
+      return true;
     }
 
     var status = String(row.status || "").toLowerCase();
@@ -222,7 +182,7 @@ export default async function handler(req, res) {
           error: "예약 완료 상태가 아닙니다.",
           skipped: true,
         });
-        return;
+        return true;
       }
     } else if (status !== "cancelled") {
       json(res, 409, {
@@ -230,7 +190,7 @@ export default async function handler(req, res) {
         error: "예약 취소 상태가 아닙니다.",
         skipped: true,
       });
-      return;
+      return true;
     }
 
     var sendResult = await sendBookingAlimtalk(type, {
@@ -248,14 +208,14 @@ export default async function handler(req, res) {
         skipped: true,
         reason: sendResult.error || "skipped",
       });
-      return;
+      return true;
     }
     if (!sendResult.ok) {
       json(res, 502, {
         ok: false,
         error: sendResult.error || "알림톡 발송에 실패했습니다.",
       });
-      return;
+      return true;
     }
 
     json(res, 200, { ok: true, sent: true });
@@ -268,4 +228,5 @@ export default async function handler(req, res) {
         (e && e.message ? e.message : String(e)),
     });
   }
+  return true;
 }

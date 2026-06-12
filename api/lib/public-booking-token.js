@@ -1,50 +1,19 @@
-import pg from "pg";
 import {
   issueBookingToken,
   verifyBookingToken,
   getHoldIdFromToken,
-} from "./lib/booking-token.js";
+} from "./booking-token.js";
 import {
   bindBookingHoldReservation,
   releaseBookingHold,
   releaseOpenHoldsForStay,
   upsertBookingHold,
-} from "./lib/booking-hold.js";
+} from "./booking-hold.js";
 import {
   checkRoomAvailability,
   findConfirmedReservation,
-} from "./lib/room-availability.js";
-import { validateBookingWindow } from "./lib/booking-window.js";
-
-const { Pool } = pg;
-
-function getDatabaseUrl() {
-  return String(
-    process.env.POSTGRES_URL ||
-      process.env.POSTGRES_PRISMA_URL ||
-      process.env.POSTGRES_URL_NON_POOLING ||
-      process.env.DATABASE_URL ||
-      "",
-  ).trim();
-}
-
-var poolSingleton = null;
-
-function getPool() {
-  var databaseUrl = getDatabaseUrl();
-  if (!databaseUrl) {
-    return null;
-  }
-  if (!poolSingleton) {
-    poolSingleton = new Pool({
-      connectionString: databaseUrl,
-      max: 1,
-      connectionTimeoutMillis: 20000,
-      idleTimeoutMillis: 15000,
-    });
-  }
-  return poolSingleton;
-}
+} from "./room-availability.js";
+import { validateBookingWindow } from "./booking-window.js";
 
 function json(res, status, body) {
   res.statusCode = status;
@@ -80,28 +49,19 @@ async function readJsonBody(req) {
   });
 }
 
-export default async function handler(req, res) {
+export async function handlePublicBookingToken(req, res, pool) {
   if (req.method === "OPTIONS") {
     res.statusCode = 204;
     res.setHeader("Access-Control-Allow-Origin", "*");
     res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
     res.setHeader("Access-Control-Allow-Headers", "Content-Type");
     res.end();
-    return;
+    return true;
   }
 
   if (req.method !== "POST") {
     json(res, 405, { ok: false, error: "Method not allowed" });
-    return;
-  }
-
-  var pool = getPool();
-  if (!pool) {
-    json(res, 503, {
-      ok: false,
-      error: "DB 연결 정보가 없습니다.",
-    });
-    return;
+    return true;
   }
 
   var body;
@@ -109,7 +69,7 @@ export default async function handler(req, res) {
     body = await readJsonBody(req);
   } catch (_e) {
     json(res, 400, { ok: false, error: "Invalid JSON body" });
-    return;
+    return true;
   }
 
   var action = String(body.action || "").trim().toLowerCase();
@@ -127,7 +87,7 @@ export default async function handler(req, res) {
         ok: false,
         error: "room, checkIn, checkOut are required",
       });
-      return;
+      return true;
     }
     var windowCheck = validateBookingWindow(checkIn, checkOut);
     if (!windowCheck.ok) {
@@ -136,7 +96,7 @@ export default async function handler(req, res) {
         error: windowCheck.error,
         code: windowCheck.code,
       });
-      return;
+      return true;
     }
     var issued = issueBookingToken({
       room: room,
@@ -149,7 +109,7 @@ export default async function handler(req, res) {
         ok: false,
         error: "booking token secret is not configured",
       });
-      return;
+      return true;
     }
     try {
       if (body.replaceOverlapping === true || body.replaceOverlapping === "true") {
@@ -168,7 +128,7 @@ export default async function handler(req, res) {
         ok: false,
         error: e && e.message ? e.message : "Failed to create booking hold",
       });
-      return;
+      return true;
     }
     json(res, 200, {
       ok: true,
@@ -176,7 +136,7 @@ export default async function handler(req, res) {
       expiresAt: issued.expiresAt,
       holdId: issued.holdId,
     });
-    return;
+    return true;
   }
 
   if (action === "bind") {
@@ -185,7 +145,7 @@ export default async function handler(req, res) {
         ok: false,
         error: "bookingToken and reservationNumber are required",
       });
-      return;
+      return true;
     }
     var bindVerify = verifyBookingToken(bookingToken, {
       room: room,
@@ -198,7 +158,7 @@ export default async function handler(req, res) {
         error: bindVerify.error,
         tokenValid: false,
       });
-      return;
+      return true;
     }
     var bindHoldId = getHoldIdFromToken(bookingToken);
     var bound = await bindBookingHoldReservation(
@@ -211,10 +171,10 @@ export default async function handler(req, res) {
         ok: false,
         error: "Active booking hold not found",
       });
-      return;
+      return true;
     }
     json(res, 200, { ok: true, holdId: bindHoldId });
-    return;
+    return true;
   }
 
   if (action === "release") {
@@ -226,11 +186,11 @@ export default async function handler(req, res) {
         ok: false,
         error: "bookingToken or holdId is required",
       });
-      return;
+      return true;
     }
     await releaseBookingHold(pool, releaseHoldId);
     json(res, 200, { ok: true, released: true, holdId: releaseHoldId });
-    return;
+    return true;
   }
 
   if (action === "validate") {
@@ -239,7 +199,7 @@ export default async function handler(req, res) {
         ok: false,
         error: "bookingToken, room, checkIn, checkOut are required",
       });
-      return;
+      return true;
     }
 
     var verify = verifyBookingToken(bookingToken, {
@@ -255,7 +215,7 @@ export default async function handler(req, res) {
         tokenValid: false,
         expired: verify.error === "booking_token_expired",
       });
-      return;
+      return true;
     }
 
     if (reservationNumber) {
@@ -268,7 +228,7 @@ export default async function handler(req, res) {
           alreadyBooked: true,
           reservationNumber: existing.reservationNumber,
         });
-        return;
+        return true;
       }
     }
 
@@ -297,7 +257,7 @@ export default async function handler(req, res) {
           availability.error ||
           "해당 날짜에 예약이 불가합니다. 예약을 다시 확인해주세요",
       });
-      return;
+      return true;
     }
 
     json(res, 200, {
@@ -306,8 +266,9 @@ export default async function handler(req, res) {
       available: true,
       expiresAt: verify.payload && verify.payload.exp ? verify.payload.exp : null,
     });
-    return;
+    return true;
   }
 
   json(res, 400, { ok: false, error: "Invalid action" });
+  return true;
 }

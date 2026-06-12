@@ -1,46 +1,16 @@
-import pg from "pg";
 import crypto from "node:crypto";
 import {
   decryptBookingPiiResponse,
   guestNamesMatch,
-} from "./lib/pii-crypto.js";
+} from "./pii-crypto.js";
 import {
   applyBookingRetentionToRow,
   purgeExpiredBookings,
-} from "./lib/booking-retention.js";
+} from "./booking-retention.js";
 
-const { Pool } = pg;
 const LEGACY_TO_ROOM = { A: "G1", B: "G2", C: "G3", D: "G4" };
 const DEFAULT_CANCEL_TOKEN_TTL_MS = 10 * 60 * 1000;
 const BOOKING_TABLE = "booking";
-
-function getDatabaseUrl() {
-  return String(
-    process.env.POSTGRES_URL ||
-      process.env.POSTGRES_PRISMA_URL ||
-      process.env.POSTGRES_URL_NON_POOLING ||
-      process.env.DATABASE_URL ||
-      "",
-  ).trim();
-}
-
-var poolSingleton = null;
-
-function getPool() {
-  var databaseUrl = getDatabaseUrl();
-  if (!databaseUrl) {
-    return null;
-  }
-  if (!poolSingleton) {
-    poolSingleton = new Pool({
-      connectionString: databaseUrl,
-      max: 1,
-      connectionTimeoutMillis: 20000,
-      idleTimeoutMillis: 15000,
-    });
-  }
-  return poolSingleton;
-}
 
 function json(res, status, body) {
   res.statusCode = status;
@@ -130,6 +100,16 @@ function readBody(req) {
   });
 }
 
+function getDatabaseUrl() {
+  return String(
+    process.env.POSTGRES_URL ||
+      process.env.POSTGRES_PRISMA_URL ||
+      process.env.POSTGRES_URL_NON_POOLING ||
+      process.env.DATABASE_URL ||
+      "",
+  ).trim();
+}
+
 function getCancelTokenSecret() {
   return String(
     process.env.RESERVATION_CANCEL_TOKEN_SECRET ||
@@ -189,37 +169,38 @@ async function archivePastReservations(pool) {
   );
 }
 
-export default async function handler(req, res) {
+async function getJsonBody(req) {
+  if (
+    req.body != null &&
+    typeof req.body === "object" &&
+    !Buffer.isBuffer(req.body)
+  ) {
+    return req.body;
+  }
+  return readBody(req);
+}
+
+export async function handlePublicReservationsLookup(req, res, pool) {
   if (req.method === "OPTIONS") {
     res.statusCode = 204;
     res.setHeader("Access-Control-Allow-Origin", "*");
     res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
     res.setHeader("Access-Control-Allow-Headers", "Content-Type");
     res.end();
-    return;
+    return true;
   }
 
   if (req.method !== "POST") {
     json(res, 405, { ok: false, error: "Method not allowed" });
-    return;
-  }
-
-  var pool = getPool();
-  if (!pool) {
-    json(res, 503, {
-      ok: false,
-      error:
-        "DB 연결 정보가 없습니다. .env.local 에 POSTGRES_URL 등을 넣은 뒤 vercel dev 를 다시 실행하세요.",
-    });
-    return;
+    return true;
   }
 
   var body;
   try {
-    body = await readBody(req);
+    body = await getJsonBody(req);
   } catch (e) {
     json(res, 400, { ok: false, error: "Invalid JSON body" });
-    return;
+    return true;
   }
   var normName = normalizeLookupName(body.guestName || body.name || "");
   var normOrder = normalizeLookupOrder(
@@ -230,14 +211,13 @@ export default async function handler(req, res) {
       ok: false,
       error: "guestName 과 reservationNumber(또는 orderNo)가 필요합니다.",
     });
-    return;
+    return true;
   }
 
   try {
     await archivePastReservations(pool);
     await purgeExpiredBookings(pool);
 
-    // booking 테이블에서 status 기준으로 한 번에 조회
     var sel = await pool.query(
       `SELECT
         id, reservation_number, guest_name, contact, room_type,
@@ -252,24 +232,23 @@ export default async function handler(req, res) {
 
     if (!sel.rows || !sel.rows.length) {
       json(res, 404, { ok: false, error: "Not found" });
-      return;
+      return true;
     }
 
     var row = await applyBookingRetentionToRow(pool, sel.rows[0]);
     if (!row) {
       json(res, 404, { ok: false, error: "Not found" });
-      return;
+      return true;
     }
     if (!guestNamesMatch(row.guest_name, normName, normalizeLookupName)) {
       json(res, 404, { ok: false, error: "Not found" });
-      return;
+      return true;
     }
 
     var pii = decryptBookingPiiResponse(row);
     var isCancelled = row.status === "cancelled";
 
     if (!isCancelled) {
-      // confirm 또는 completed: 정상 예약
       json(res, 200, {
         ok: true,
         source: "database",
@@ -296,10 +275,9 @@ export default async function handler(req, res) {
         },
         cancelToken: issueCancelToken(row.reservation_number, pii.guestName),
       });
-      return;
+      return true;
     }
 
-    // cancelled: 취소된 예약
     json(res, 200, {
       ok: true,
       source: "database",
@@ -333,4 +311,5 @@ export default async function handler(req, res) {
       error: String((e && e.message) || e || "Lookup failed"),
     });
   }
+  return true;
 }

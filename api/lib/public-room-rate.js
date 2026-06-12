@@ -1,11 +1,9 @@
-import pg from "pg";
 import {
   formatPromotionDateFromDb,
   getTodayYmdKst,
   isPromotionInPeriod,
-} from "./lib/promotion-period.js";
+} from "./promotion-period.js";
 
-const { Pool } = pg;
 const TABLE_NAME = '"room-rate"';
 
 function isPolicyEnabled(val) {
@@ -21,38 +19,13 @@ function isPolicyEnabled(val) {
   return true;
 }
 
-var poolSingleton = null;
-
-function getDatabaseUrl() {
-  return String(
-    process.env.POSTGRES_URL ||
-      process.env.POSTGRES_PRISMA_URL ||
-      process.env.POSTGRES_URL_NON_POOLING ||
-      process.env.DATABASE_URL ||
-      "",
-  ).trim();
-}
-
-function getPool() {
-  var databaseUrl = getDatabaseUrl();
-  if (!databaseUrl) {
-    return null;
-  }
-  if (!poolSingleton) {
-    poolSingleton = new Pool({
-      connectionString: databaseUrl,
-      max: 1,
-      connectionTimeoutMillis: 20000,
-      idleTimeoutMillis: 15000,
-    });
-  }
-  return poolSingleton;
-}
-
 function json(res, status, body) {
   res.statusCode = status;
   res.setHeader("Content-Type", "application/json; charset=utf-8");
-  res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
+  res.setHeader(
+    "Cache-Control",
+    "no-store, no-cache, must-revalidate, proxy-revalidate",
+  );
   res.setHeader("Pragma", "no-cache");
   res.setHeader("Expires", "0");
   res.setHeader("Access-Control-Allow-Origin", "*");
@@ -92,28 +65,25 @@ async function ensureRoomRateTable(pool) {
   );
 }
 
-export default async function handler(req, res) {
+export async function handlePublicRoomRate(req, res, pool) {
   if (req.method === "OPTIONS") {
     res.statusCode = 204;
-    res.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
+    res.setHeader(
+      "Cache-Control",
+      "no-store, no-cache, must-revalidate, proxy-revalidate",
+    );
     res.setHeader("Pragma", "no-cache");
     res.setHeader("Expires", "0");
     res.setHeader("Access-Control-Allow-Origin", "*");
     res.setHeader("Access-Control-Allow-Methods", "GET, OPTIONS");
     res.setHeader("Access-Control-Allow-Headers", "Content-Type");
     res.end();
-    return;
+    return true;
   }
 
   if (req.method !== "GET") {
     json(res, 405, { ok: false, error: "Method not allowed" });
-    return;
-  }
-
-  var pool = getPool();
-  if (!pool) {
-    json(res, 503, { ok: false, error: "DB 연결 정보가 없습니다." });
-    return;
+    return true;
   }
 
   try {
@@ -180,4 +150,5 @@ export default async function handler(req, res) {
       error: String((e && e.message) || e || "lookup failed"),
     });
   }
+  return true;
 }
