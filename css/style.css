@@ -6678,6 +6678,11 @@ main.content-section:has(> .site-footer.site-business-footer) {
   letter-spacing: -0.01em;
   background: color-mix(in srgb, var(--gold-500) 35%, var(--stone-100));
   color: var(--stone-800);
+  white-space: nowrap;
+}
+
+.reservation-discount-card--promo .reservation-discount-card__pill {
+  font-variant-numeric: tabular-nums;
 }
 
 .reservation-discount-card__pill--muted {

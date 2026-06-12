@@ -1249,14 +1249,19 @@
               }
               if (isEnScope) {
                 return (
-                  "Book from " +
-                  start +
-                  " – " +
-                  end +
-                  " (promotional rate applies automatically)."
+                  "Promotion running through " + start + " – " + end
                 );
               }
-              return start + " ~ " + end + " 예약 시";
+              return start + " ~ " + end + "까지 프로모션 진행중";
+            }
+
+            function formatPromotionPillPeriod(startYmd, endYmd) {
+              var start = formatPromotionMd(startYmd);
+              var end = formatPromotionMd(endYmd);
+              if (!start || !end) {
+                return "";
+              }
+              return start + " ~ " + end;
             }
 
             function isPromotionInPeriodClient(todayYmd, startYmd, endYmd) {
@@ -1619,10 +1624,13 @@
                 : 0;
               var promoActiveNow =
                 promotionEnabled && promotionInPeriod && pctApplied > 0;
+              var hasPromotionPeriod = !!(
+                promotionPeriodStart && promotionPeriodEnd
+              );
               var shouldShowPromotionCard =
                 promotionEnabled && pctDisplay > 0;
               var shouldShowPromotionPill =
-                promotionEnabled && promoActiveNow;
+                shouldShowPromotionCard && hasPromotionPeriod;
               if (promoCardEl) {
                 promoCardEl.hidden = !shouldShowPromotionCard;
                 promoCardEl.classList.toggle(
@@ -1639,6 +1647,15 @@
               }
               if (promoPillEl) {
                 promoPillEl.hidden = !shouldShowPromotionPill;
+                if (shouldShowPromotionPill) {
+                  var pillPeriodText = formatPromotionPillPeriod(
+                    promotionPeriodStart,
+                    promotionPeriodEnd,
+                  );
+                  promoPillEl.textContent =
+                    pillPeriodText ||
+                    (isEnScope ? "Applied" : "적용 중");
+                }
               }
               if (!promotionEnabled) {
                 if (promoCardEl) {
