@@ -15,13 +15,13 @@
  */
 import pg from "pg";
 import crypto from "node:crypto";
-import { guestNamesMatch } from "./lib/pii-crypto.js";
+import { guestNamesMatch } from "./_lib/pii-crypto.js";
 import {
   computeRefundAmount,
   resolvePaidAmountForBooking,
-} from "./lib/refund-amount.js";
-import { exportCancellationToBigQuery } from "./lib/bigquery-export.js";
-import { applyBookingRetentionToRow } from "./lib/booking-retention.js";
+} from "./_lib/refund-amount.js";
+import { exportCancellationToBigQuery } from "./_lib/bigquery-export.js";
+import { applyBookingRetentionToRow } from "./_lib/booking-retention.js";
 const { Pool } = pg;
 
 const BOOKING_TABLE = "booking";

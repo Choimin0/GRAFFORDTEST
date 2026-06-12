@@ -1,10 +1,10 @@
-import { getPool, json } from "./lib/admin-common.js";
+import { getPool, json } from "./_lib/admin-common.js";
 import {
   syncAllExternalBookings,
   getAllIcalImportTargets,
   normalizeRoomType,
   isIcalImportDisabled,
-} from "./lib/ical-sync.js";
+} from "./_lib/ical-sync.js";
 
 function isAuthorizedSync(req) {
   var syncToken = String(

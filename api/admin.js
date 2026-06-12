@@ -9,15 +9,15 @@ import {
   getJsonBody,
   json,
   requireAdminAuth,
-} from "./lib/admin-common.js";
-import { handleAdminReservations } from "./lib/admin-reservations.js";
-import { handleAdminSales } from "./lib/admin-sales.js";
-import { handleAdminSalesAnalyze } from "./lib/admin-sales-analyze.js";
-import { handleAdminPaymentCancel } from "./lib/admin-payment-cancel.js";
-import { handleAdminRoomStatus } from "./lib/admin-room-status.js";
-import { handleAdminRoomRate } from "./lib/admin-room-rate.js";
-import { handleAdminCheckinAlimtalk } from "./lib/admin-checkin-alimtalk.js";
-import { handleAdminIcalSync } from "./lib/admin-ical-sync.js";
+} from "./_lib/admin-common.js";
+import { handleAdminReservations } from "./_lib/admin-reservations.js";
+import { handleAdminSales } from "./_lib/admin-sales.js";
+import { handleAdminSalesAnalyze } from "./_lib/admin-sales-analyze.js";
+import { handleAdminPaymentCancel } from "./_lib/admin-payment-cancel.js";
+import { handleAdminRoomStatus } from "./_lib/admin-room-status.js";
+import { handleAdminRoomRate } from "./_lib/admin-room-rate.js";
+import { handleAdminCheckinAlimtalk } from "./_lib/admin-checkin-alimtalk.js";
+import { handleAdminIcalSync } from "./_lib/admin-ical-sync.js";
 
 const RESOURCE_HANDLERS = {
   reservations: handleAdminReservations,

@@ -14,12 +14,12 @@ import {
   extractPgTxIdFromPayment,
   extractPortonePaidAmount,
   fetchPortonePayment,
-} from "./lib/portone-client.js";
+} from "./_lib/portone-client.js";
 import {
   extractPaymentMethodFromPortonePayment,
   resolveEnabledPaymentMethods,
   resolveVerifiedPaymentMethod,
-} from "./lib/payment-methods.js";
+} from "./_lib/payment-methods.js";
 
 function sendPaymentConfig(res) {
   res.setHeader("Content-Type", "application/json");

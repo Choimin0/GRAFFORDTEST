@@ -6,9 +6,9 @@
  * - 기타 결제 상태 웹훅: PortOne API로 재검증 후 200 응답
  */
 import pg from "pg";
-import { getBookingHoldByReservationNumber } from "./lib/booking-hold.js";
-import { checkRoomAvailability, findConfirmedReservation } from "./lib/room-availability.js";
-import { fetchPortonePayment } from "./lib/portone-client.js";
+import { getBookingHoldByReservationNumber } from "./_lib/booking-hold.js";
+import { checkRoomAvailability, findConfirmedReservation } from "./_lib/room-availability.js";
+import { fetchPortonePayment } from "./_lib/portone-client.js";
 
 const { Pool } = pg;
 

@@ -14,44 +14,44 @@ import {
   decryptBookingPiiResponse,
   encryptBookingPii,
   guestNamesMatch,
-} from "./lib/pii-crypto.js";
+} from "./_lib/pii-crypto.js";
 import {
   getActiveHoldOccupiedNights,
   cleanupExpiredBookingHolds,
   releaseBookingHold,
-} from "./lib/booking-hold.js";
+} from "./_lib/booking-hold.js";
 import {
   verifyBookingToken,
   getHoldIdFromToken,
-} from "./lib/booking-token.js";
-import { checkRoomAvailability } from "./lib/room-availability.js";
-import { getTodayYmdKst } from "./lib/promotion-period.js";
-import { exportReservationToBigQuery, exportCancellationToBigQuery } from "./lib/bigquery-export.js";
+} from "./_lib/booking-token.js";
+import { checkRoomAvailability } from "./_lib/room-availability.js";
+import { getTodayYmdKst } from "./_lib/promotion-period.js";
+import { exportReservationToBigQuery, exportCancellationToBigQuery } from "./_lib/bigquery-export.js";
 import {
   buildIcalCalendar,
   getAirbnbBookingOccupiedNights,
   getMergedOccupiedNightsForRoom,
-} from "./lib/ical-sync.js";
+} from "./_lib/ical-sync.js";
 import {
   clampExtraGuests,
   computeGuestCount,
   getMaxExtraGuests,
-} from "./lib/room-guest-policy.js";
-import { normalizeBookingLocale } from "./lib/booking-locale.js";
-import { isValidInternationalStoredContact } from "./lib/intl-phone.js";
-import { validateBookingWindow } from "./lib/booking-window.js";
+} from "./_lib/room-guest-policy.js";
+import { normalizeBookingLocale } from "./_lib/booking-locale.js";
+import { isValidInternationalStoredContact } from "./_lib/intl-phone.js";
+import { validateBookingWindow } from "./_lib/booking-window.js";
 import {
   ALLOWED_PAY,
   normalizePaymentMethodId,
-} from "./lib/payment-methods.js";
+} from "./_lib/payment-methods.js";
 import {
   applyBookingRetentionToRow,
   purgeExpiredBookings,
-} from "./lib/booking-retention.js";
-import { handlePublicRoomRate } from "./lib/public-room-rate.js";
-import { handlePublicBookingToken } from "./lib/public-booking-token.js";
-import { handlePublicReservationsLookup } from "./lib/public-reservations-lookup.js";
-import { handlePublicAlimtalkNotify } from "./lib/public-alimtalk-notify.js";
+} from "./_lib/booking-retention.js";
+import { handlePublicRoomRate } from "./_lib/public-room-rate.js";
+import { handlePublicBookingToken } from "./_lib/public-booking-token.js";
+import { handlePublicReservationsLookup } from "./_lib/public-reservations-lookup.js";
+import { handlePublicAlimtalkNotify } from "./_lib/public-alimtalk-notify.js";
 
 const { Pool } = pg;
 
