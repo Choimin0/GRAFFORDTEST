@@ -96,7 +96,7 @@ document.addEventListener("DOMContentLoaded", function () {
       footer.innerHTML =
         '<div class="mobile-nav-footer-links" aria-label="외부 링크">' +
         '<a href="https://map.naver.com/p/search/%ED%86%A0%EC%82%B0%EC%A4%91%EC%95%99%EB%A1%9C22" class="mobile-nav-footer-link" data-mobile-map-link target="_blank" rel="noopener noreferrer">오시는 길</a>' +
-        '<a href="https://www.instagram.com/grafford_tosan/" class="mobile-nav-footer-link" target="_blank" rel="noopener noreferrer">INSTAGRAM</a>' +
+        '<a href="https://www.instagram.com/grafford_stay/" class="mobile-nav-footer-link" target="_blank" rel="noopener noreferrer">INSTAGRAM</a>' +
         "</div>";
       drawer.appendChild(footer);
     }
