@@ -40,8 +40,8 @@
       features: {
         aboutImageKr: "images/mainimg1.jpg",
         aboutImageEn: "images/mainimg1.jpg",
-        philosophyImageKr: "images/mainimg2.jpg",
-        philosophyImageEn: "images/mainimg2.jpg",
+        philosophyImageKr: "images/mainimg1.jpg",
+        philosophyImageEn: "images/mainimg1.jpg",
       },
       spaceGrid: [
         "images/space02.jpg",
@@ -412,7 +412,8 @@
 
   global.buildGraffordRoomCarousel = function (roomPrefix, pattern, pageFile) {
     var imgs = global.getGraffordPageImages(pageFile);
-    var source = pattern || (imgs && imgs.gallery && imgs.gallery.carouselPattern);
+    var source =
+      pattern || (imgs && imgs.gallery && imgs.gallery.carouselPattern);
     if (!Array.isArray(source)) {
       return [];
     }
