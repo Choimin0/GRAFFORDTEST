@@ -1575,7 +1575,7 @@
               todayParts.m - 1,
               todayParts.d,
             );
-            var isTodayAfterCutoff = Number(kstNowInfo.hour || 0) >= 19;
+            var isTodayAfterCutoff = Number(kstNowInfo.hour || 0) >= 12;
             function isBlockedByPastOrCutoff(dateObj) {
               var target = toStartOfDay(dateObj);
               return (

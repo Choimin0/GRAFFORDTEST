@@ -4,7 +4,7 @@ const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
 export const BOOKING_ADVANCE_MONTHS = 3;
 
 /** Same-day check-in blocked at/after this hour (KST), matches frontend cutoff. */
-const CHECKIN_SAME_DAY_CUTOFF_HOUR = 19;
+const CHECKIN_SAME_DAY_CUTOFF_HOUR = 12;
 
 function getKstNowInfo(now) {
   var ref = now instanceof Date && !isNaN(now.getTime()) ? now : new Date();
