@@ -2517,7 +2517,7 @@
           rwWrap.addEventListener("mouseover", function (e) {
             var tip = e.target.dataset && e.target.dataset.tooltip;
             if (tip) {
-              rwTooltipEl.innerHTML = tip;
+              rwTooltipEl.textContent = tip;
               rwTooltipEl.style.display = "block";
               rwTooltipEl.style.left = e.clientX + 14 + "px";
               rwTooltipEl.style.top = e.clientY - 38 + "px";
@@ -2651,29 +2651,29 @@
               card.innerHTML +=
                 "<dl class='admin-calendar-detail-kv'>" +
                 "<div><dt>연동 채널</dt><dd>" +
-                (row.guestName || "외부 예약") +
+                escapeHtml(row.guestName || "외부 예약") +
                 "</dd></div>" +
                 "<div><dt>일정</dt><dd>" +
-                formatReservationSchedule(row) +
+                escapeHtml(formatReservationSchedule(row)) +
                 "</dd></div>" +
                 "<div><dt>메모</dt><dd>" +
-                (row.guestRequest || "—") +
+                escapeHtml(row.guestRequest || "—") +
                 "</dd></div>" +
                 "</dl>";
             } else {
               card.innerHTML +=
                 "<dl class='admin-calendar-detail-kv'>" +
                 "<div><dt>예약번호</dt><dd>" +
-                (row.reservationNumber || "—") +
+                escapeHtml(row.reservationNumber || "—") +
                 "</dd></div>" +
                 "<div><dt>예약자명</dt><dd>" +
-                (row.guestName || "—") +
+                escapeHtml(row.guestName || "—") +
                 "</dd></div>" +
                 "<div><dt>투숙 일정</dt><dd>" +
-                formatReservationSchedule(row) +
+                escapeHtml(formatReservationSchedule(row)) +
                 "</dd></div>" +
                 "<div><dt>총 금액</dt><dd>" +
-                formatKRW(row.totalAmount || 0) +
+                escapeHtml(formatKRW(row.totalAmount || 0)) +
                 "</dd></div>" +
                 "</dl>";
             }
@@ -4700,17 +4700,17 @@
                     if (descEl) {
                       descEl.innerHTML =
                         "<strong>" +
-                        guestName +
+                        escapeHtml(guestName) +
                         "</strong> 게스트 · " +
-                        resEntryState.room +
+                        escapeHtml(resEntryState.room) +
                         "<br>" +
-                        formatResEntryDate(resEntryState.checkin) +
+                        escapeHtml(formatResEntryDate(resEntryState.checkin)) +
                         " → " +
-                        formatResEntryDate(resEntryState.checkout) +
+                        escapeHtml(formatResEntryDate(resEntryState.checkout)) +
                         " · " +
                         nights +
                         "박<br>플랫폼: " +
-                        resEntryState.platform +
+                        escapeHtml(resEntryState.platform) +
                         " · ₩" +
                         resEntryState.amount.toLocaleString() +
                         (result.data.mergedWithIcal
@@ -5583,22 +5583,22 @@
             }
             tr.innerHTML =
               "<td class='admin-sort-hover-cell'>" +
-              (row.reservationNumber || "—") +
+              escapeHtml(row.reservationNumber || "—") +
               "</td>" +
               "<td class='admin-sort-hover-cell'>" +
-              (row.roomType || "—") +
+              escapeHtml(row.roomType || "—") +
               "</td>" +
               "<td class='admin-sort-hover-cell'>" +
-              (row.contact || "—") +
+              escapeHtml(row.contact || "—") +
               "</td>" +
               "<td class='admin-sort-hover-cell'>" +
-              (row.guestName || "—") +
+              escapeHtml(row.guestName || "—") +
               "</td>" +
               "<td class='admin-sort-hover-cell'>" +
-              (row.checkIn || "—") +
+              escapeHtml(row.checkIn || "—") +
               "</td>" +
               "<td class='admin-sort-hover-cell'>" +
-              (row.checkOut || "—") +
+              escapeHtml(row.checkOut || "—") +
               "</td>" +
               "<td class='admin-sort-hover-cell'>" +
               (nights ? nights + "박" : "—") +
@@ -5608,9 +5608,9 @@
               "</td>" +
               "<td class='admin-res-col-payment admin-sort-hover-cell'>" +
               "<span class='" +
-              paymentClass +
+              escapeHtml(paymentClass) +
               "'>" +
-              paymentLabel +
+              escapeHtml(paymentLabel) +
               "</span>" +
               "</td>" +
               cancelCell +
@@ -5618,7 +5618,7 @@
               "<button type='button' class='admin-request-icon-btn" +
               (requestText ? " has-request" : "") +
               "' data-reservation-number='" +
-              (row.reservationNumber || "") +
+              escapeHtml(row.reservationNumber || "") +
               "' aria-label='요청사항 보기'>" +
               "<span class='col-request' aria-hidden='true'>" +
               "<svg viewBox='0 0 16 16' fill='none' stroke='currentColor' stroke-width='1.4'>" +

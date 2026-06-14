@@ -924,24 +924,23 @@ export default async function handler(req, res) {
   }
 
   if (!reservationNumber || reservationNumber.length > MAX_RESV) {
-    console.error("[reservations POST] Invalid reservationNumber:", JSON.stringify(reservationNumber));
+    console.error("[reservations POST] Invalid reservationNumber: length=" + reservationNumber.length);
     json(res, 400, { ok: false, error: "Invalid reservationNumber" });
     return;
   }
   if (!guestName || guestName.length > MAX_NAME) {
-    console.error("[reservations POST] Invalid guestName:", JSON.stringify(guestName));
+    console.error("[reservations POST] Invalid guestName: length=" + guestName.length);
     json(res, 400, { ok: false, error: "Invalid guestName" });
     return;
   }
   if (!contact || contact.length > MAX_CONTACT) {
-    console.error("[reservations POST] Invalid contact:", JSON.stringify(contact));
+    console.error("[reservations POST] Invalid contact: length=" + contact.length);
     json(res, 400, { ok: false, error: "Invalid contact" });
     return;
   }
   if (bookingLocale === "en" && !isValidInternationalStoredContact(contact)) {
     console.error(
-      "[reservations POST] Invalid international contact:",
-      JSON.stringify(contact),
+      "[reservations POST] Invalid international contact format: length=" + contact.length,
     );
     json(res, 400, {
       ok: false,
@@ -950,7 +949,7 @@ export default async function handler(req, res) {
     return;
   }
   if (!ALLOWED_ROOMS.has(roomType)) {
-    console.error("[reservations POST] Invalid roomType:", JSON.stringify(roomType), "raw:", JSON.stringify(body.roomType));
+    console.error("[reservations POST] Invalid roomType:", JSON.stringify(roomType));
     json(res, 400, { ok: false, error: "Invalid roomType" });
     return;
   }
@@ -980,7 +979,7 @@ export default async function handler(req, res) {
     return;
   }
   if (!Number.isFinite(extraGuests) || extraGuests < 0 || extraGuests > 20) {
-    console.error("[reservations POST] Invalid extraGuests:", extraGuests, "raw:", body.extraGuests);
+    console.error("[reservations POST] Invalid extraGuests:", extraGuests);
     json(res, 400, { ok: false, error: "Invalid extraGuests" });
     return;
   }
@@ -1009,7 +1008,7 @@ export default async function handler(req, res) {
     return;
   }
   if (email && !EMAIL_RE.test(email)) {
-    console.error("[reservations POST] Invalid email:", JSON.stringify(email));
+    console.error("[reservations POST] Invalid email format: length=" + email.length);
     json(res, 400, { ok: false, error: "Invalid email format" });
     return;
   }

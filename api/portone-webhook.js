@@ -5,10 +5,62 @@
  * - Transaction.Confirm: 결제 승인 직전 객실 가용 여부 확인 후 200 응답
  * - 기타 결제 상태 웹훅: PortOne API로 재검증 후 200 응답
  */
+import crypto from "node:crypto";
 import pg from "pg";
 import { getBookingHoldByReservationNumber } from "./_lib/booking-hold.js";
 import { checkRoomAvailability, findConfirmedReservation } from "./_lib/room-availability.js";
 import { fetchPortonePayment } from "./_lib/portone-client.js";
+
+/**
+ * PortOne v2 웹훅 HMAC-SHA256 서명 검증 (Svix 호환 포맷).
+ * 헤더: webhook-id, webhook-timestamp, webhook-signature
+ * 서명: v1,{base64(HMAC-SHA256(secret, "{id}.{timestamp}.{rawBody}"))}
+ */
+function verifyWebhookSignature(rawBody, headers) {
+  var secret = String(process.env.PORTONE_WEBHOOK_SECRET || "").trim();
+  if (!secret) {
+    console.warn("[portone-webhook] PORTONE_WEBHOOK_SECRET 미설정 — 서명 검증 건너뜀");
+    return true;
+  }
+
+  var msgId = String(headers["webhook-id"] || "").trim();
+  var msgTimestamp = String(headers["webhook-timestamp"] || "").trim();
+  var msgSignature = String(headers["webhook-signature"] || "").trim();
+
+  if (!msgId || !msgTimestamp || !msgSignature) {
+    console.warn("[portone-webhook] 서명 헤더 누락 (id/timestamp/signature)");
+    return false;
+  }
+
+  var ts = parseInt(msgTimestamp, 10);
+  if (!Number.isFinite(ts) || Math.abs(Date.now() / 1000 - ts) > 300) {
+    console.warn("[portone-webhook] 웹훅 타임스탬프 범위 초과 (replay 공격 방지)");
+    return false;
+  }
+
+  var secretBytes = secret.startsWith("whsec_")
+    ? Buffer.from(secret.slice(6), "base64")
+    : Buffer.from(secret, "utf8");
+
+  var toSign = msgId + "." + msgTimestamp + "." + rawBody;
+  var expectedSig = crypto
+    .createHmac("sha256", secretBytes)
+    .update(toSign, "utf8")
+    .digest("base64");
+
+  return msgSignature.split(" ").some(function (part) {
+    var parts = part.split(",");
+    if (parts.length !== 2 || parts[0] !== "v1") {
+      return false;
+    }
+    var sigBuf = Buffer.from(parts[1], "base64");
+    var expectedBuf = Buffer.from(expectedSig, "base64");
+    if (sigBuf.length !== expectedBuf.length) {
+      return false;
+    }
+    return crypto.timingSafeEqual(sigBuf, expectedBuf);
+  });
+}
 
 const { Pool } = pg;
 
@@ -225,6 +277,13 @@ export default async function handler(req, res) {
   } catch (e) {
     console.error("[portone-webhook] body read error", e);
     res.statusCode = 400;
+    res.end();
+    return;
+  }
+
+  if (!verifyWebhookSignature(rawBody, req.headers)) {
+    console.error("[portone-webhook] 서명 검증 실패 — 요청 거부");
+    res.statusCode = 401;
     res.end();
     return;
   }

@@ -32,8 +32,12 @@ const RESOURCE_HANDLERS = {
 
 export default async function handler(req, res) {
   if (req.method === "OPTIONS") {
+    var origin = (process.env.ALLOWED_ORIGIN || "").trim();
     res.statusCode = 204;
-    res.setHeader("Access-Control-Allow-Origin", "*");
+    if (origin) {
+      res.setHeader("Access-Control-Allow-Origin", origin);
+      res.setHeader("Vary", "Origin");
+    }
     res.setHeader("Access-Control-Allow-Methods", "POST, OPTIONS");
     res.setHeader("Access-Control-Allow-Headers", "Content-Type");
     res.end();
@@ -59,7 +63,7 @@ export default async function handler(req, res) {
     return;
   }
 
-  var authResult = requireAdminAuth(req, body);
+  var authResult = await requireAdminAuth(req, body, pool);
   if (!authResult.ok) {
     json(res, authResult.status, { ok: false, error: authResult.error });
     return;
