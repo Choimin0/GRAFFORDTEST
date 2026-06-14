@@ -12164,12 +12164,28 @@ main.content-section.confirm-page.admin-page {
   background: rgba(38, 32, 28, 0.9);
   color: var(--color-tooltip-fg);
   font-size: 0.8rem;
-  padding: 0.28rem 0.65rem;
+  padding: 0.35rem 0.7rem;
   border-radius: 4px;
   pointer-events: none;
-  white-space: nowrap;
+  white-space: normal;
+  text-align: center;
+  line-height: 1.45;
+  max-width: 12rem;
   display: none;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.22);
+}
+.admin-week-res-modal-panel {
+  position: relative;
+  width: min(100%, 380px);
+  padding-top: var(--space-16);
+}
+.admin-week-res-modal__head {
+  display: flex;
+  justify-content: flex-end;
+  margin: calc(-1 * var(--space-8)) 0 var(--space-8);
+}
+.admin-week-res-modal__content .admin-calendar-detail-item {
+  margin: 0;
 }
 .admin-calendar-nav {
   display: inline-flex;
@@ -12681,21 +12697,34 @@ main.content-section.confirm-page.admin-page {
 }
 .admin-calendar-list-btn {
   flex-shrink: 0;
-  border: 1px solid var(--stone-300);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 1.55rem;
+  padding: 0.28rem 0.72rem;
+  border: 1px solid var(--stone-700);
+  border-radius: var(--radius-sharp);
   background: var(--stone-800);
   color: var(--stone-50);
-  padding: 0.28rem 0.72rem;
   cursor: pointer;
   font-family: var(--font-family-body-en);
   font-size: 0.62rem;
+  font-weight: 400;
   letter-spacing: 0.14em;
   line-height: 1.4;
+  -webkit-appearance: none;
+  appearance: none;
+  transition:
+    background 0.25s ease,
+    border-color 0.25s ease,
+    color 0.25s ease;
 }
 .admin-calendar-list-btn:hover,
 .admin-calendar-list-btn:focus-visible {
   background: var(--gold-500);
   border-color: var(--gold-500);
   color: var(--stone-50);
+  outline: none;
 }
 .admin-calendar-detail-title {
   margin: var(--space-8) 0 var(--space-24);

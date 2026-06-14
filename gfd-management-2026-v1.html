@@ -1397,6 +1397,35 @@
         </div>
       </div>
 
+      <div
+        id="admin-week-res-modal"
+        class="admin-request-modal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="admin-week-res-modal-title"
+        hidden
+      >
+        <div class="admin-request-modal__panel admin-week-res-modal-panel">
+          <div class="admin-week-res-modal__head">
+            <h2 id="admin-week-res-modal-title" class="visually-hidden">
+              예약 상세
+            </h2>
+            <button
+              type="button"
+              class="admin-manual-cancel-modal__close"
+              id="admin-week-res-close"
+              aria-label="닫기"
+            >
+              ×
+            </button>
+          </div>
+          <div
+            id="admin-week-res-modal-content"
+            class="admin-week-res-modal__content"
+          ></div>
+        </div>
+      </div>
+
       <section
         class="confirm-section admin-sales-section"
         id="admin-sales-section"
@@ -1726,6 +1755,11 @@
         var checkinResendYesBtn = document.getElementById(
           "admin-checkin-resend-yes",
         );
+        var weekResModal = document.getElementById("admin-week-res-modal");
+        var weekResModalContent = document.getElementById(
+          "admin-week-res-modal-content",
+        );
+        var weekResCloseBtn = document.getElementById("admin-week-res-close");
         var activeManualCancelReservationNumber = "";
         var activeCheckinResendReservationNumber = "";
         var activeCheckinResendBtn = null;
@@ -1862,12 +1896,6 @@
         var selectedCheckinDate = getTodayYmdKst();
         var selectedCalendarDate = getTodayYmdKst();
         var roomStatusWeekStart = getTodayYmdKst();
-        var query = new URLSearchParams(window.location.search || "");
-        var isLocalhost =
-          window.location.hostname === "localhost" ||
-          window.location.hostname === "127.0.0.1";
-        var isLayoutPreviewMode =
-          isLocalhost && query.get("adminPreview") === "1";
 
         function setLoggedOutView() {
           if (categoryNav) {
@@ -2375,6 +2403,60 @@
           renderRoomStatusTable();
         }
 
+        function getWeekResKey(row) {
+          return row
+            ? row.reservationNumber ||
+                String(row.guestName) + dateKey(row.checkIn)
+            : "";
+        }
+
+        function getWeekResStatusForRow(row, ymd) {
+          if (!row) {
+            return { state: "vacant", label: "공실", row: null };
+          }
+          var ci = dateKey(row.checkIn);
+          var co = dateKey(row.checkOut);
+          if (ci === ymd && co > ymd) {
+            return {
+              state: "checkin",
+              label: row.isExternal ? "에어비앤비" : "체크인",
+              row: row,
+            };
+          }
+          if (ci < ymd && ymd < co) {
+            return {
+              state: "stay",
+              label: row.isExternal ? "에어비앤비" : "재실",
+              row: row,
+            };
+          }
+          if (co === ymd && ci < ymd) {
+            return {
+              state: "checkout",
+              label: row.isExternal ? "에어비앤비" : "체크아웃",
+              row: row,
+            };
+          }
+          return {
+            state: "stay",
+            label: row.isExternal ? "에어비앤비" : "재실",
+            row: row,
+          };
+        }
+
+        function findReservationByWeekKey(resKey) {
+          if (!resKey) {
+            return null;
+          }
+          var rows = getReservationRows();
+          for (var i = 0; i < rows.length; i += 1) {
+            if (getWeekResKey(rows[i]) === resKey) {
+              return rows[i];
+            }
+          }
+          return null;
+        }
+
         function renderRoomStatusTable() {
           if (!roomStatusListEl) {
             return;
@@ -2417,23 +2499,35 @@
             }
           });
 
-          function getWeekResKey(row) {
-            return row
-              ? row.reservationNumber ||
-                  String(row.guestName) + dateKey(row.checkIn)
-              : "";
-          }
           function getWeekResColor(row) {
             return row
               ? weekColorMap[getWeekResKey(row)] || "var(--stone-200)"
               : "var(--stone-200)";
           }
           function formatWeekTooltip(row) {
+            if (!row) {
+              return "";
+            }
+            var name =
+              String(row.guestName || "").trim() ||
+              (row.isExternal ? "외부 예약" : "—");
             return (
-              formatMD(dateKey(row.checkIn)) +
-              " ~ " +
-              formatMD(dateKey(row.checkOut))
+              name +
+              "<br />" +
+              formatKoreanMonthDay(dateKey(row.checkIn)) +
+              "~" +
+              formatKoreanMonthDay(dateKey(row.checkOut))
             );
+          }
+          function setWeekCellClickData(el, room, date, row) {
+            if (!el) {
+              return;
+            }
+            el.dataset.room = room;
+            el.dataset.date = date;
+            if (row) {
+              el.dataset.resKey = getWeekResKey(row);
+            }
           }
 
           var rwTable = document.createElement("table");
@@ -2491,16 +2585,19 @@
                 leftDiv.className = "room-week-half room-week-half-left";
                 leftDiv.style.background = getWeekResColor(checkoutDayRes);
                 leftDiv.dataset.tooltip = formatWeekTooltip(checkoutDayRes);
+                setWeekCellClickData(leftDiv, room, d, checkoutDayRes);
                 var rightDiv = document.createElement("div");
                 rightDiv.className = "room-week-half room-week-half-right";
                 rightDiv.style.background = getWeekResColor(checkinDayRes);
                 rightDiv.dataset.tooltip = formatWeekTooltip(checkinDayRes);
+                setWeekCellClickData(rightDiv, room, d, checkinDayRes);
                 td.appendChild(leftDiv);
                 td.appendChild(rightDiv);
               } else if (activeRes) {
                 td.className = "admin-room-week-cell is-filled";
                 td.style.background = getWeekResColor(activeRes);
                 td.dataset.tooltip = formatWeekTooltip(activeRes);
+                setWeekCellClickData(td, room, d, activeRes);
               } else {
                 td.className = "admin-room-week-cell";
               }
@@ -2526,7 +2623,7 @@
           rwWrap.addEventListener("mouseover", function (e) {
             var tip = e.target.dataset && e.target.dataset.tooltip;
             if (tip) {
-              rwTooltipEl.textContent = tip;
+              rwTooltipEl.innerHTML = tip;
               rwTooltipEl.style.display = "block";
               rwTooltipEl.style.left = e.clientX + 14 + "px";
               rwTooltipEl.style.top = e.clientY - 38 + "px";
@@ -2543,11 +2640,38 @@
           rwWrap.addEventListener("mouseout", function () {
             rwTooltipEl.style.display = "none";
           });
+          rwWrap.addEventListener("click", function (e) {
+            var target = e.target;
+            while (target && target !== rwWrap) {
+              if (
+                target.dataset &&
+                target.dataset.room &&
+                target.dataset.date &&
+                target.dataset.resKey
+              ) {
+                openWeekResModal(
+                  target.dataset.room,
+                  target.dataset.date,
+                  target.dataset.resKey,
+                );
+                return;
+              }
+              target = target.parentElement;
+            }
+          });
         }
 
         function formatMD(ymd) {
           var p = String(ymd || "").split("-");
           return Number(p[1]) + "/" + Number(p[2]);
+        }
+
+        function formatKoreanMonthDay(ymd) {
+          var p = String(ymd || "").split("-");
+          if (p.length !== 3) {
+            return String(ymd || "");
+          }
+          return Number(p[1]) + "월" + Number(p[2]) + "일";
         }
 
         function findReservationsByDate(ymd) {
@@ -2611,6 +2735,85 @@
             });
         }
 
+        function buildCalendarDetailCard(room, status) {
+          var row = status.row;
+          var card = document.createElement("article");
+          card.className = "admin-calendar-detail-item is-" + status.state;
+          var statusClass =
+            "admin-room-state-badge admin-room-state-badge--" + status.state;
+          card.innerHTML =
+            "<div class='admin-calendar-detail-item__head'>" +
+            "<strong>" +
+            room +
+            "</strong>" +
+            "<span class='" +
+            statusClass +
+            "'>" +
+            status.label +
+            "</span>" +
+            "</div>";
+          if (row) {
+            if (row.isExternal) {
+              card.innerHTML +=
+                "<dl class='admin-calendar-detail-kv'>" +
+                "<div><dt>연동 채널</dt><dd>" +
+                (row.guestName || "외부 예약") +
+                "</dd></div>" +
+                "<div><dt>일정</dt><dd>" +
+                formatReservationSchedule(row) +
+                "</dd></div>" +
+                "<div><dt>메모</dt><dd>" +
+                (row.guestRequest || "—") +
+                "</dd></div>" +
+                "</dl>";
+            } else {
+              card.innerHTML +=
+                "<dl class='admin-calendar-detail-kv'>" +
+                "<div><dt>예약번호</dt><dd>" +
+                (row.reservationNumber || "—") +
+                "</dd></div>" +
+                "<div><dt>예약자명</dt><dd>" +
+                (row.guestName || "—") +
+                "</dd></div>" +
+                "<div><dt>투숙 일정</dt><dd>" +
+                formatReservationSchedule(row) +
+                "</dd></div>" +
+                "<div><dt>총 금액</dt><dd>" +
+                formatKRW(row.totalAmount || 0) +
+                "</dd></div>" +
+                "</dl>";
+            }
+          }
+          return card;
+        }
+
+        function openWeekResModal(room, ymd, resKey) {
+          if (!weekResModal || !weekResModalContent) {
+            return;
+          }
+          var row = findReservationByWeekKey(resKey);
+          var status = row
+            ? getWeekResStatusForRow(row, ymd)
+            : getRoomStatusForDate(room, ymd);
+          if (!status.row) {
+            return;
+          }
+          weekResModalContent.innerHTML = "";
+          weekResModalContent.appendChild(
+            buildCalendarDetailCard(room, status),
+          );
+          weekResModal.hidden = false;
+        }
+
+        function closeWeekResModal() {
+          if (weekResModal) {
+            weekResModal.hidden = true;
+          }
+          if (weekResModalContent) {
+            weekResModalContent.innerHTML = "";
+          }
+        }
+
         function renderCalendarDetail(ymd) {
           if (!calendarDetail || !calendarDetailTitle || !calendarDetailList) {
             return;
@@ -2622,55 +2825,9 @@
           calendarDetailList.innerHTML = "";
           getAdminRooms().forEach(function (room) {
             var status = getRoomStatusForDate(room, selectedCalendarDate);
-            var row = status.row;
-            var card = document.createElement("article");
-            card.className = "admin-calendar-detail-item is-" + status.state;
-            var statusClass =
-              "admin-room-state-badge admin-room-state-badge--" + status.state;
-            card.innerHTML =
-              "<div class='admin-calendar-detail-item__head'>" +
-              "<strong>" +
-              room +
-              "</strong>" +
-              "<span class='" +
-              statusClass +
-              "'>" +
-              status.label +
-              "</span>" +
-              "</div>";
-            if (row) {
-              if (row.isExternal) {
-                card.innerHTML +=
-                  "<dl class='admin-calendar-detail-kv'>" +
-                  "<div><dt>연동 채널</dt><dd>" +
-                  (row.guestName || "외부 예약") +
-                  "</dd></div>" +
-                  "<div><dt>일정</dt><dd>" +
-                  formatReservationSchedule(row) +
-                  "</dd></div>" +
-                  "<div><dt>메모</dt><dd>" +
-                  (row.guestRequest || "—") +
-                  "</dd></div>" +
-                  "</dl>";
-              } else {
-                card.innerHTML +=
-                  "<dl class='admin-calendar-detail-kv'>" +
-                  "<div><dt>예약번호</dt><dd>" +
-                  (row.reservationNumber || "—") +
-                  "</dd></div>" +
-                  "<div><dt>예약자명</dt><dd>" +
-                  (row.guestName || "—") +
-                  "</dd></div>" +
-                  "<div><dt>투숙 일정</dt><dd>" +
-                  formatReservationSchedule(row) +
-                  "</dd></div>" +
-                  "<div><dt>총 금액</dt><dd>" +
-                  formatKRW(row.totalAmount || 0) +
-                  "</dd></div>" +
-                  "</dl>";
-              }
-            }
-            calendarDetailList.appendChild(card);
+            calendarDetailList.appendChild(
+              buildCalendarDetailCard(room, status),
+            );
           });
         }
 
@@ -4841,267 +4998,11 @@
             initReservationEntryView();
           }
           if (category === "room-manage") {
-            if (isLayoutPreviewMode) {
-              roomRateRows = [
-                { roomName: "G1", weekdayBaseRate: 250000 },
-                { roomName: "G2", weekdayBaseRate: 250000 },
-                { roomName: "G3", weekdayBaseRate: 300000 },
-                { roomName: "G4", weekdayBaseRate: 350000 },
-              ];
-              roomChargeRows = [
-                {
-                  roomName: "weekend-charge",
-                  weekdayBaseRate: 20000,
-                  isEnabled: true,
-                },
-                {
-                  roomName: "consecutive-sale",
-                  weekdayBaseRate: 20000,
-                  isEnabled: false,
-                },
-                { roomName: "promotion", weekdayBaseRate: 5, isEnabled: false },
-                {
-                  roomName: "extra-guest-charge",
-                  weekdayBaseRate: 30000,
-                  isEnabled: true,
-                },
-              ];
-              renderRoomRateTable();
-              roomStatusManageRows = [
-                {
-                  roomName: "G1",
-                  statusType: "available",
-                  statusText: "정상 운영 중",
-                  updatedAt: "2026-05-17",
-                },
-                {
-                  roomName: "G2",
-                  statusType: "available",
-                  statusText: "청소 완료",
-                  updatedAt: "2026-05-15",
-                },
-                {
-                  roomName: "G3",
-                  statusType: "repair",
-                  statusText: "보일러 수리",
-                  updatedAt: "2026-05-16",
-                },
-                {
-                  roomName: "G4",
-                  statusType: "repair",
-                  statusText: "2026년 하반기 미판매 예정",
-                  updatedAt: "2026-05-10",
-                },
-              ];
-              renderRoomManageTable();
-              setActiveRoomManageTab(activeRoomManageTab || "rate");
-              return;
-            }
             setActiveRoomManageTab(activeRoomManageTab || "rate");
           }
           if (category === "sales") {
             setActiveSalesTab(activeSalesTab);
           }
-        }
-
-        function enableLayoutPreviewMode() {
-          setLoggedInView();
-          latestRows = [
-            {
-              reservationNumber: "20260501-AAAAAA",
-              guestName: "홍길동",
-              contact: "010-1111-2222",
-              roomType: "G1",
-              checkIn: "2026-05-04",
-              checkOut: "2026-05-06",
-              guestCount: 2,
-              guestRequest: "조용한 객실 요청",
-              totalAmount: 560000,
-              paymentMethod: "naver",
-            },
-            {
-              reservationNumber: "20260502-BBBBBB",
-              guestName: "김민영",
-              contact: "010-3333-4444",
-              roomType: "G3",
-              checkIn: "2026-05-06",
-              checkOut: "2026-05-17",
-              guestCount: 4,
-              guestRequest: "",
-              totalAmount: 990000,
-              paymentMethod: "card",
-            },
-            {
-              reservationNumber: "20260508-DDDDDD",
-              guestName: "이철수",
-              contact: "010-7777-8888",
-              roomType: "G1",
-              checkIn: "2026-05-08",
-              checkOut: "2026-05-10",
-              guestCount: 2,
-              guestRequest: "",
-              totalAmount: 480000,
-              paymentMethod: "card",
-            },
-            {
-              reservationNumber: "20260510-EEEEEE",
-              guestName: "최지영",
-              contact: "010-9999-0000",
-              roomType: "G2",
-              checkIn: "2026-05-10",
-              checkOut: "2026-05-14",
-              guestCount: 3,
-              guestRequest:
-                "늦은 체크인 예정인데 아이도 데려오고 문구도 오버되고 이것저것",
-              totalAmount: 720000,
-              paymentMethod: "naver",
-            },
-            {
-              reservationNumber: "20260511-FFFFFF",
-              guestName: "정하늘",
-              contact: "010-1234-5678",
-              roomType: "G4",
-              checkIn: "2026-05-09",
-              checkOut: "2026-05-13",
-              guestCount: 2,
-              guestRequest: "",
-              totalAmount: 640000,
-              paymentMethod: "card",
-            },
-          ];
-          latestCalendarRows = latestRows.concat([
-            {
-              reservationNumber: "20260420-CCCCCC",
-              guestName: "박테스트",
-              contact: "010-5555-6666",
-              roomType: "G2",
-              checkIn: "2026-04-20",
-              checkOut: "2026-04-22",
-              guestCount: 2,
-              guestRequest: "",
-              totalAmount: 420000,
-              paymentMethod: "card",
-              isPast: true,
-            },
-          ]);
-          reservationListRows = latestRows.slice();
-          setRoomStatusRows([
-            {
-              roomName: "G1",
-              statusType: "available",
-              statusText: "정상 운영 중",
-            },
-            {
-              roomName: "G2",
-              statusType: "available",
-              statusText: "청소 완료",
-            },
-            { roomName: "G3", statusType: "repair", statusText: "보일러 수리" },
-            { roomName: "G4", statusType: "repair", statusText: "" },
-          ]);
-          renderStatusCalendar();
-          renderTodayStatusPanels();
-          setActiveCategory("status");
-          renderSalesMonthly({
-            month: "2026-05",
-            reservationCount: 12,
-            totalRevenue: 8640000,
-            cancelCount: 2,
-            cancelRevenue: 750000,
-            cancellationRate: 14,
-            occupiedRoomNights: 37,
-            maxRoomNights: 124,
-            dailyRevenue: [
-              { label: "1주", date: "2026-05-01", revenue: 0 },
-              { label: "2주", date: "2026-05-08", revenue: 2272500 },
-              { label: "3주", date: "2026-05-15", revenue: 500000 },
-              { label: "4주", date: "2026-05-22", revenue: 990000 },
-              { label: "5주", date: "2026-05-29", revenue: 0 },
-            ],
-            platformRevenue: [
-              {
-                platform: "direct",
-                label: "홈페이지",
-                count: 6,
-                revenue: 2750000,
-              },
-              {
-                platform: "airbnb",
-                label: "에어비앤비",
-                count: 3,
-                revenue: 750000,
-              },
-              {
-                platform: "stayfolio",
-                label: "스테이폴리오",
-                count: 2,
-                revenue: 335000,
-              },
-              {
-                platform: "phone",
-                label: "유선예약",
-                count: 1,
-                revenue: 180000,
-              },
-            ],
-            roomStats: [
-              {
-                label: "G1",
-                reservationCount: 8,
-                revenue: 750000,
-                revenueRate: 26,
-              },
-              {
-                label: "G2",
-                reservationCount: 6,
-                revenue: 487500,
-                revenueRate: 19,
-              },
-              {
-                label: "G3",
-                reservationCount: 14,
-                revenue: 2282500,
-                revenueRate: 45,
-              },
-              {
-                label: "G4",
-                reservationCount: 4,
-                revenue: 315000,
-                revenueRate: 13,
-              },
-            ],
-            roomRevenue: [
-              { label: "G1", value: 2160000 },
-              { label: "G2", value: 1920000 },
-              { label: "G3", value: 2880000 },
-              { label: "G4", value: 1680000 },
-            ],
-            occupancyByDay: [
-              { date: "2026-05-01", count: 1 },
-              { date: "2026-05-02", count: 2 },
-              { date: "2026-05-03", count: 0 },
-              { date: "2026-05-04", count: 2 },
-              { date: "2026-05-05", count: 1 },
-              { date: "2026-05-06", count: 2 },
-              { date: "2026-05-07", count: 2 },
-              { date: "2026-05-08", count: 3 },
-              { date: "2026-05-09", count: 3 },
-              { date: "2026-05-10", count: 4 },
-              { date: "2026-05-11", count: 4 },
-              { date: "2026-05-12", count: 4 },
-              { date: "2026-05-13", count: 3 },
-              { date: "2026-05-14", count: 1 },
-            ],
-          });
-          renderSalesAnnual({
-            monthlyRevenue: [
-              0, 0, 0, 3200000, 5400000, 8640000, 0, 0, 0, 0, 0, 0,
-            ],
-            annualRevenue: [{ year: 2026, revenue: 17240000 }],
-          });
-          showMessage(
-            "로컬 레이아웃 프리뷰 모드입니다. (URL: ?adminPreview=1)",
-          );
         }
 
         function showMessage(text) {
@@ -6871,7 +6772,7 @@
             roomManageBlockPanel.hidden = activeRoomManageTab !== "block";
           }
 
-          if (activeRoomManageTab === "rate" && !isLayoutPreviewMode) {
+          if (activeRoomManageTab === "rate") {
             loadRoomRateRows().catch(function (err) {
               showMessage(
                 (err && err.message) ||
@@ -6879,7 +6780,7 @@
               );
             });
           }
-          if (activeRoomManageTab === "status" && !isLayoutPreviewMode) {
+          if (activeRoomManageTab === "status") {
             loadRoomStatusManageRows().catch(function (err) {
               showMessage(
                 (err && err.message) ||
@@ -6888,28 +6789,6 @@
             });
           }
           if (activeRoomManageTab === "block") {
-            if (isLayoutPreviewMode) {
-              roomBlockRows = [
-                {
-                  id: "preview-block-1",
-                  roomName: "G1",
-                  startDate: "2026-05-19",
-                  endDate: "2026-05-21",
-                  reason: "수리·점검",
-                  memo: "욕실 배관 점검",
-                },
-                {
-                  id: "preview-block-2",
-                  roomName: "G4",
-                  startDate: "2026-07-01",
-                  endDate: "2026-12-31",
-                  reason: "장기 미판매",
-                  memo: "2026년 하반기 운영 계획",
-                },
-              ];
-              renderRoomBlockPanel();
-              return;
-            }
             loadRoomStatusRows()
               .then(function () {
                 renderRoomBlockPanel();
@@ -7374,6 +7253,18 @@
           });
         }
 
+        if (weekResCloseBtn) {
+          weekResCloseBtn.addEventListener("click", closeWeekResModal);
+        }
+
+        if (weekResModal) {
+          weekResModal.addEventListener("click", function (e) {
+            if (e.target === weekResModal) {
+              closeWeekResModal();
+            }
+          });
+        }
+
         if (manualCancelModal) {
           manualCancelModal.addEventListener("click", function (e) {
             if (e.target === manualCancelModal) {
@@ -7430,6 +7321,9 @@
             !policyConfirmModal.hidden
           ) {
             closePolicyConfirm();
+          }
+          if (e.key === "Escape" && weekResModal && !weekResModal.hidden) {
+            closeWeekResModal();
           }
         });
 
@@ -7582,11 +7476,7 @@
           });
         }
 
-        if (isLayoutPreviewMode) {
-          enableLayoutPreviewMode();
-        } else {
-          setLoggedOutView();
-        }
+        setLoggedOutView();
       });
     </script>
   </body>
