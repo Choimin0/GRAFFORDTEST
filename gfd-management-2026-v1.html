@@ -358,13 +358,26 @@
             class="admin-calendar-detail admin-dashboard-aside"
             aria-live="polite"
           >
-            <p class="admin-dashboard-eyebrow">SELECTED DATE</p>
-            <h2
-              id="admin-calendar-detail-title"
-              class="admin-calendar-detail-title"
-            >
-              —
-            </h2>
+            <div class="admin-calendar-detail__top">
+              <div class="admin-calendar-detail__heading">
+                <p class="admin-dashboard-eyebrow">SELECTED DATE</p>
+                <h2
+                  id="admin-calendar-detail-title"
+                  class="admin-calendar-detail-title"
+                >
+                  —
+                </h2>
+              </div>
+              <button
+                type="button"
+                id="admin-calendar-list-copy-btn"
+                class="admin-calendar-list-btn"
+                aria-label="선택 날짜 예약 명단 복사"
+                title="선택 날짜 예약 명단 복사"
+              >
+                LIST
+              </button>
+            </div>
             <div
               id="admin-calendar-detail-list"
               class="admin-calendar-detail-list"
@@ -689,7 +702,9 @@
                     data-max-guests="2"
                   >
                     <span class="admin-res-entry-room-name">G1</span>
-                    <span class="admin-res-entry-room-type">기준 2인 · 최대 2인</span>
+                    <span class="admin-res-entry-room-type"
+                      >기준 2인 · 최대 2인</span
+                    >
                   </button>
                   <button
                     type="button"
@@ -699,7 +714,9 @@
                     data-max-guests="2"
                   >
                     <span class="admin-res-entry-room-name">G2</span>
-                    <span class="admin-res-entry-room-type">기준 2인 · 최대 2인</span>
+                    <span class="admin-res-entry-room-type"
+                      >기준 2인 · 최대 2인</span
+                    >
                   </button>
                   <button
                     type="button"
@@ -709,7 +726,9 @@
                     data-max-guests="3"
                   >
                     <span class="admin-res-entry-room-name">G3</span>
-                    <span class="admin-res-entry-room-type">기준 3인 · 최대 3인</span>
+                    <span class="admin-res-entry-room-type"
+                      >기준 3인 · 최대 3인</span
+                    >
                   </button>
                   <button
                     type="button"
@@ -719,7 +738,9 @@
                     data-max-guests="5"
                   >
                     <span class="admin-res-entry-room-name">G4</span>
-                    <span class="admin-res-entry-room-type">기준 4인 · 최대 5인</span>
+                    <span class="admin-res-entry-room-type"
+                      >기준 4인 · 최대 5인</span
+                    >
                   </button>
                 </div>
               </div>
@@ -1742,6 +1763,9 @@
         var calendarDetailList = document.getElementById(
           "admin-calendar-detail-list",
         );
+        var calendarListCopyBtn = document.getElementById(
+          "admin-calendar-list-copy-btn",
+        );
         var todayCheckinListEl = document.getElementById(
           "admin-today-checkin-list",
         );
@@ -2241,11 +2265,28 @@
             appendCheckinCell(tr, roomCheckin.guestName || "—");
             appendCheckinCell(tr, formatGuestCount(roomCheckin));
             var talkTd = appendCheckinCell(tr, "");
-            var isEnglishBooking =
-              String(roomCheckin.bookingLocale || "").toLowerCase() === "en" ||
-              String(roomCheckin.contact || "")
-                .trim()
-                .indexOf("+") === 0;
+            var isEnglishBooking = (function () {
+              var contactRaw = String(roomCheckin.contact || "").trim();
+              var contactDial =
+                contactRaw.indexOf("+") === 0
+                  ? (function () {
+                      var m = contactRaw
+                        .slice(1)
+                        .trim()
+                        .match(/^(\d{1,4})/);
+                      return m ? m[1] : "";
+                    })()
+                  : "";
+              if (contactDial === "82") {
+                return false;
+              }
+              if (contactRaw.indexOf("+") === 0) {
+                return true;
+              }
+              return (
+                String(roomCheckin.bookingLocale || "").toLowerCase() === "en"
+              );
+            })();
             if (isEnglishBooking) {
               var emailBtn = document.createElement("button");
               emailBtn.type = "button";
@@ -2522,6 +2563,52 @@
             return "—";
           }
           return (row.checkIn || "—") + " ~ " + (row.checkOut || "—");
+        }
+
+        function formatCalendarListCell(value) {
+          var text = String(value == null ? "" : value).trim();
+          return text || "—";
+        }
+
+        function buildSelectedDateReservationListText(ymd) {
+          var dateLabel = formatDateLabel(
+            ymd || selectedCalendarDate || getTodayYmdKst(),
+          );
+          var header = "";
+          var lines = [header];
+          getAdminRooms().forEach(function (room) {
+            var status = getRoomStatusForDate(room, ymd);
+            var row = status.row;
+            var guestCount = "—";
+            if (row && row.guestCount != null && row.guestCount !== "") {
+              guestCount = String(row.guestCount);
+            }
+            lines.push(
+              [
+                dateLabel,
+                room,
+                formatCalendarListCell(row && row.guestName),
+                formatCalendarListCell(row && row.contact),
+                guestCount,
+                formatCalendarListCell(row && row.checkIn),
+                formatCalendarListCell(row && row.checkOut),
+                formatCalendarListCell(row && row.guestRequest),
+              ].join(" | "),
+            );
+          });
+          return lines.join("\n");
+        }
+
+        function handleCalendarListCopyClick() {
+          var ymd = selectedCalendarDate || getTodayYmdKst();
+          var text = buildSelectedDateReservationListText(ymd);
+          copyTextToClipboard(text)
+            .then(function () {
+              showMessage(formatDateLabel(ymd) + " 예약 명단을 복사했습니다.");
+            })
+            .catch(function () {
+              showMessage("예약 명단 복사에 실패했습니다.");
+            });
         }
 
         function renderCalendarDetail(ymd) {
@@ -3814,14 +3901,10 @@
             }
           }
           if (plusBtn) {
-            var atMax =
-              limits && resEntryState.guests >= limits.max;
+            var atMax = limits && resEntryState.guests >= limits.max;
             plusBtn.disabled = !!atMax;
             plusBtn.classList.toggle("is-disabled", !!atMax);
-            plusBtn.setAttribute(
-              "aria-disabled",
-              atMax ? "true" : "false",
-            );
+            plusBtn.setAttribute("aria-disabled", atMax ? "true" : "false");
           }
         }
 
@@ -3933,7 +4016,8 @@
           var baseHint =
             "달력에서 체크인 날짜를 먼저 선택한 뒤, 체크아웃 날짜를 선택하세요.";
           if (!resEntryState.room) {
-            hintEl.textContent = baseHint + " 객실을 선택하면 예약 완료 날짜가 표시됩니다.";
+            hintEl.textContent =
+              baseHint + " 객실을 선택하면 예약 완료 날짜가 표시됩니다.";
             return;
           }
           if (resEntryState.bookingChannel === "airbnb") {
@@ -3947,7 +4031,9 @@
         }
 
         function loadResEntryAvailability(room) {
-          var roomKey = String(room || "").trim().toUpperCase();
+          var roomKey = String(room || "")
+            .trim()
+            .toUpperCase();
           if (!roomKey) {
             resEntryOccupiedNightSet = new Set();
             resEntryAirbnbNightSet = new Set();
@@ -4292,11 +4378,7 @@
                 btn.classList.add("is-range");
               }
 
-              if (
-                disabled &&
-                disabledReason === "occupied-night" &&
-                !isPast
-              ) {
+              if (disabled && disabledReason === "occupied-night" && !isPast) {
                 btn.classList.add("is-soldout");
                 btn.textContent = "";
                 var soldDay = document.createElement("span");
@@ -4546,8 +4628,12 @@
               totalAmountInput.addEventListener("input", function () {
                 resEntryState.amountEntered = true;
                 var rawAmount = String(totalAmountInput.value || "").trim();
-                resEntryState.amount = rawAmount === "" ? 0 : parseInt(rawAmount, 10);
-                if (!Number.isFinite(resEntryState.amount) || resEntryState.amount < 0) {
+                resEntryState.amount =
+                  rawAmount === "" ? 0 : parseInt(rawAmount, 10);
+                if (
+                  !Number.isFinite(resEntryState.amount) ||
+                  resEntryState.amount < 0
+                ) {
                   resEntryState.amount = 0;
                 }
                 syncReservationEntryDates();
@@ -4586,7 +4672,9 @@
                   showMessage("객실을 선택해 주세요.");
                   return;
                 }
-                var guestLimits = getResEntryRoomGuestLimits(resEntryState.room);
+                var guestLimits = getResEntryRoomGuestLimits(
+                  resEntryState.room,
+                );
                 if (resEntryState.guests > guestLimits.max) {
                   showMessage(
                     resEntryState.room +
@@ -5298,14 +5386,12 @@
           }
           if (manualCancelMeta) {
             manualCancelMeta.textContent = isExternalManual
-              ? (row.reservationNumber || "—") +
-                  " · " +
-                  (row.guestName || "—")
+              ? (row.reservationNumber || "—") + " · " + (row.guestName || "—")
               : (row.reservationNumber || "—") +
-                  " · " +
-                  (row.guestName || "—") +
-                  " · " +
-                  formatKRW(getReservationPaidTotal(row));
+                " · " +
+                (row.guestName || "—") +
+                " · " +
+                formatKRW(getReservationPaidTotal(row));
           }
           setManualCancelMessage("");
           manualCancelModal.hidden = false;
@@ -7373,6 +7459,13 @@
           icalRefreshBtn.addEventListener("click", function () {
             syncAirbnbCalendar();
           });
+        }
+
+        if (calendarListCopyBtn) {
+          calendarListCopyBtn.addEventListener(
+            "click",
+            handleCalendarListCopyClick,
+          );
         }
 
         if (checkinPrevDateBtn) {

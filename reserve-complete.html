@@ -387,6 +387,16 @@
           var guestName = (saved && saved.guestName) || "";
           var contact = (saved && saved.contact) || "";
           var bookingLocale = (saved && saved.bookingLocale) || "kr";
+          if (
+            window.GraffordAlimtalkNotify &&
+            typeof window.GraffordAlimtalkNotify.resolveEffectiveBookingLocale ===
+              "function"
+          ) {
+            bookingLocale = window.GraffordAlimtalkNotify.resolveEffectiveBookingLocale(
+              bookingLocale,
+              contact,
+            );
+          }
           var email = (saved && saved.email) || "";
           var guestRequest = (saved && saved.guestRequest) || "";
           var guestCount = (saved && saved.guestCount) || "";

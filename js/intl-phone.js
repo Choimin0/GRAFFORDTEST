@@ -390,11 +390,12 @@
     contactDigitsForMatch: contactDigitsForMatch,
     stripLeadingZero: stripLeadingZero,
     isInternationalStored: function (stored) {
-      return (
-        String(stored || "")
-          .trim()
-          .indexOf("+") === 0
-      );
+      var s = String(stored || "").trim();
+      if (s.indexOf("+") !== 0) {
+        return false;
+      }
+      var m = s.slice(1).trim().match(/^(\d{1,4})/);
+      return !(m && m[1] === "82");
     },
   };
 })(typeof window !== "undefined" ? window : globalThis);

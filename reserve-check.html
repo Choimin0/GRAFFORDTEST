@@ -9,6 +9,7 @@
     <script src="js/nav-hero.js" defer></script>
     <script src="js/mobile-nav.js" defer></script>
     <script src="js/site-language.js" defer></script>
+    <script src="js/alimtalk-notify.js" defer></script>
     <script src="js/booking-pricing.js?v=5"></script>
   </head>
   <body class="reserve-check-page">
@@ -327,6 +328,16 @@
           var guestName = (saved && saved.guestName) || "";
           var contact = (saved && saved.contact) || "";
           var bookingLocale = (saved && saved.bookingLocale) || "kr";
+          if (
+            window.GraffordAlimtalkNotify &&
+            typeof window.GraffordAlimtalkNotify.resolveEffectiveBookingLocale ===
+              "function"
+          ) {
+            bookingLocale = window.GraffordAlimtalkNotify.resolveEffectiveBookingLocale(
+              bookingLocale,
+              contact,
+            );
+          }
           var email = (saved && saved.email) || "";
           var guestRequest = (saved && saved.guestRequest) || "";
           var guestCount = (saved && saved.guestCount) || "";

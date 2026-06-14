@@ -23,6 +23,30 @@
     return base + "/api/alimtalk-notify";
   }
 
+  function storedContactDialCode(contact) {
+    var s = String(contact || "").trim();
+    if (s.indexOf("+") !== 0) {
+      return null;
+    }
+    var m = s.slice(1).trim().match(/^(\d{1,4})/);
+    return m ? m[1] : null;
+  }
+
+  function isInternationalStoredContact(contact) {
+    var s = String(contact || "").trim();
+    return s.indexOf("+") === 0 && storedContactDialCode(s) !== "82";
+  }
+
+  function resolveEffectiveBookingLocale(bookingLocale, contact) {
+    if (storedContactDialCode(contact) === "82") {
+      return "kr";
+    }
+    if (isInternationalStoredContact(contact)) {
+      return "en";
+    }
+    return String(bookingLocale || "").toLowerCase() === "en" ? "en" : "kr";
+  }
+
   function shouldSkipAlimtalk(payload) {
     if (!payload) {
       return false;
@@ -30,13 +54,10 @@
     if (payload.skipAlimtalk === true) {
       return true;
     }
-    if (String(payload.bookingLocale || "").toLowerCase() === "en") {
-      return true;
-    }
-    if (String(payload.contact || "").trim().indexOf("+") === 0) {
-      return true;
-    }
-    return false;
+    return (
+      resolveEffectiveBookingLocale(payload.bookingLocale, payload.contact) ===
+      "en"
+    );
   }
 
   function requestAlimtalk(type, payload) {
@@ -98,6 +119,7 @@
   }
 
   global.GraffordAlimtalkNotify = {
+    resolveEffectiveBookingLocale: resolveEffectiveBookingLocale,
     sendReserveComplete: function (payload) {
       return requestAlimtalk("reserve-complete", payload || {});
     },

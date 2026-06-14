@@ -7,6 +7,7 @@ import {
   applyBookingRetentionToRow,
   purgeExpiredBookings,
 } from "./booking-retention.js";
+import { resolveEffectiveBookingLocale } from "./booking-locale.js";
 
 const LEGACY_TO_ROOM = { A: "G1", B: "G2", C: "G3", D: "G4" };
 const DEFAULT_CANCEL_TOKEN_TTL_MS = 10 * 60 * 1000;
@@ -271,7 +272,10 @@ export async function handlePublicReservationsLookup(req, res, pool) {
           createdAtIso: row.created_at
             ? new Date(row.created_at).toISOString()
             : null,
-          bookingLocale: row.booking_locale || "kr",
+          bookingLocale: resolveEffectiveBookingLocale(
+            row.booking_locale,
+            pii.contact,
+          ),
         },
         cancelToken: issueCancelToken(row.reservation_number, pii.guestName),
       });
@@ -302,7 +306,10 @@ export async function handlePublicReservationsLookup(req, res, pool) {
           ? new Date(row.created_at).toISOString()
           : null,
         cancelReason: row.cancel_reason || "",
-        bookingLocale: row.booking_locale || "kr",
+        bookingLocale: resolveEffectiveBookingLocale(
+          row.booking_locale,
+          pii.contact,
+        ),
       },
     });
   } catch (e) {

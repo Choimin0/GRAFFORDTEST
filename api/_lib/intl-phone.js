@@ -5,8 +5,24 @@
 
 const INTL_STORED_RE = /^\+\d{1,4}\s+\S/;
 
+export function storedContactDialCode(contact) {
+  var s = String(contact || "").trim();
+  if (!s.startsWith("+")) {
+    return null;
+  }
+  var m = s.slice(1).trim().match(/^(\d{1,4})/);
+  return m ? m[1] : null;
+}
+
+/** DB/저장 연락처가 대한민국(+82) 국제 형식인지 */
+export function isKoreaStoredContact(contact) {
+  return storedContactDialCode(contact) === "82";
+}
+
+/** DB/저장 연락처가 국제 형식(+국가번호)인지 (+82 제외) */
 export function isInternationalStoredContact(contact) {
-  return String(contact || "").trim().startsWith("+");
+  var s = String(contact || "").trim();
+  return s.startsWith("+") && !isKoreaStoredContact(s);
 }
 
 export function isValidInternationalStoredContact(contact) {

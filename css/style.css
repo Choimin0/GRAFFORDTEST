@@ -12666,6 +12666,37 @@ main.content-section.confirm-page.admin-page {
   border: 1px solid var(--stone-200);
   background: var(--stone-50);
 }
+.admin-calendar-detail__top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-12);
+  margin-bottom: var(--space-24);
+}
+.admin-calendar-detail__heading {
+  min-width: 0;
+}
+.admin-calendar-detail__heading .admin-calendar-detail-title {
+  margin-bottom: 0;
+}
+.admin-calendar-list-btn {
+  flex-shrink: 0;
+  border: 1px solid var(--stone-300);
+  background: var(--stone-800);
+  color: var(--stone-50);
+  padding: 0.28rem 0.72rem;
+  cursor: pointer;
+  font-family: var(--font-family-body-en);
+  font-size: 0.62rem;
+  letter-spacing: 0.14em;
+  line-height: 1.4;
+}
+.admin-calendar-list-btn:hover,
+.admin-calendar-list-btn:focus-visible {
+  background: var(--gold-500);
+  border-color: var(--gold-500);
+  color: var(--stone-50);
+}
 .admin-calendar-detail-title {
   margin: var(--space-8) 0 var(--space-24);
   color: var(--stone-800);
