@@ -3,6 +3,8 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="js/page-images.js"></script>
+    <script src="js/apply-page-images.js" defer></script>
     <link rel="icon" href="images/LOGO-transparent.png" type="image/png" />
     <title>RESERVATION - GRAFFORD</title>
     <link rel="stylesheet" href="css/style.css" />
@@ -15,7 +17,7 @@
     <div id="grafford-react-fade-root"></div>
     <nav class="site-nav top-right-nav nav-hero-sync-hidden">
       <a href="index.html" class="nav-logo" aria-label="Home">
-        <img src="images/LOGO.png" alt="GRAFFORD LOGO" />
+        <img data-g-img="nav.logo" alt="GRAFFORD LOGO" />
       </a>
       <button
         type="button"
@@ -63,7 +65,7 @@
       <section class="hero-section fullpage-section" id="hero">
         <div class="hero-media" aria-hidden="true">
           <img
-            src="images/reservation.jpeg"
+            data-g-img="hero.kr"
             alt=""
             class="hero-slide is-active"
           />
@@ -148,7 +150,7 @@
                   <img
                     class="gallery-main-img"
                     id="gallery-main-img"
-                    src="images/A00.jpg"
+                    data-g-img="gallery.defaultMainKr"
                     alt="Room photo"
                   />
                   <div class="gallery-image-overlay" aria-hidden="true">
@@ -947,10 +949,10 @@
             );
 
             var roomImages = {
-              G1: ["images/A00.jpg", "images/A01.jpg", "images/A02.jpg"],
-              G2: ["images/B00.jpg", "images/B01.jpg", "images/B02.jpg"],
-              G3: ["images/C00.jpg", "images/C01.jpg", "images/C02.jpg"],
-              G4: ["images/D00.jpg", "images/D01.jpg", "images/D02.jpg"],
+              G1: window.getGraffordPageImages().gallery.carousel.G1,
+              G2: window.getGraffordPageImages().gallery.carousel.G2,
+              G3: window.getGraffordPageImages().gallery.carousel.G3,
+              G4: window.getGraffordPageImages().gallery.carousel.G4,
             };
 
             var galleryTaglines = {
@@ -3054,8 +3056,9 @@
           window.initSiteBusinessFooter({
             instagram: {
               href: "https://www.instagram.com/p/DWaqvQKkzye/",
-              imgSrc: "images/insta.png",
+              imgSrc: window.getGraffordFooterImages().instagram,
             },
+            logoSrc: window.getGraffordFooterImages().logo,
             lines: [
               "대표 : GRAFFORD",
               "주소 : 제주특별자치도 서귀포시 표선면 토산중앙로 22",
@@ -3075,7 +3078,7 @@
       <section class="hero-section fullpage-section">
         <div class="hero-media" aria-hidden="true">
           <img
-            src="images/reservation.jpeg"
+            data-g-img="hero.en"
             alt=""
             class="hero-slide is-active"
           />
@@ -3154,7 +3157,7 @@
                   </button>
                   <img
                     class="gallery-main-img"
-                    src="images/A00.jpg"
+                    data-g-img="gallery.defaultMainEn"
                     alt="Room photo"
                   />
                   <div class="gallery-image-overlay" aria-hidden="true">

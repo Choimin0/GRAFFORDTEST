@@ -3,6 +3,8 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="js/page-images.js"></script>
+    <script src="js/apply-page-images.js" defer></script>
     <link rel="icon" href="images/LOGO-transparent.png" type="image/png" />
     <title>결제 진행 - GRAFFORD</title>
     <link rel="stylesheet" href="css/style.css" />
@@ -78,7 +80,7 @@
     <div id="grafford-react-fade-root"></div>
     <nav class="site-nav top-right-nav">
       <a href="index.html" class="nav-logo" aria-label="홈으로 이동">
-        <img src="images/LOGO.png" alt="GRAFFORD LOGO" />
+        <img data-g-img="nav.logo" alt="GRAFFORD LOGO" />
       </a>
       <button
         type="button"
@@ -508,7 +510,7 @@
                 >
                   <img
                     class="payment-method-option__brand-logo"
-                    src="images/payment/samsungpay-horizontal.svg"
+                    data-g-img="paymentMethods.kr.samsung"
                     alt=""
                     decoding="async"
                   />
@@ -539,7 +541,7 @@
                 >
                   <img
                     class="payment-method-option__brand-logo"
-                    src="images/payment/naverpay-badge.svg"
+                    data-g-img="paymentMethods.kr.naver"
                     alt=""
                     decoding="async"
                   />
@@ -570,7 +572,7 @@
                 >
                   <img
                     class="payment-method-option__brand-logo"
-                    src="images/payment/kakaopay-extended.png"
+                    data-g-img="paymentMethods.kr.kakao"
                     alt=""
                     decoding="async"
                   />
@@ -601,7 +603,7 @@
                 >
                   <img
                     class="payment-method-option__brand-logo"
-                    src="images/payment/tosspay-logo-blue.png"
+                    data-g-img="paymentMethods.kr.toss"
                     alt=""
                     decoding="async"
                   />
@@ -1521,8 +1523,9 @@
           window.initSiteBusinessFooter({
             instagram: {
               href: "https://www.instagram.com/p/DWaqvQKkzye/",
-              imgSrc: "images/insta.png",
+              imgSrc: window.getGraffordFooterImages().instagram,
             },
+            logoSrc: window.getGraffordFooterImages().logo,
             lines: [
               "대표 : GRAFFORD",
               "주소 : 제주특별자치도 서귀포시 표선면 토산중앙로 22",
@@ -1940,7 +1943,7 @@
                 >
                   <img
                     class="payment-method-option__brand-logo"
-                    src="images/payment/samsungpay-horizontal.svg"
+                    data-g-img="paymentMethods.en.samsung"
                     alt=""
                     decoding="async"
                   />
@@ -1974,7 +1977,7 @@
                 >
                   <img
                     class="payment-method-option__brand-logo"
-                    src="images/payment/naverpay-badge.svg"
+                    data-g-img="paymentMethods.en.naver"
                     alt=""
                     decoding="async"
                   />
@@ -2008,7 +2011,7 @@
                 >
                   <img
                     class="payment-method-option__brand-logo"
-                    src="images/payment/kakaopay-extended.svg"
+                    data-g-img="paymentMethods.en.kakao"
                     alt=""
                     decoding="async"
                   />
@@ -2042,7 +2045,7 @@
                 >
                   <img
                     class="payment-method-option__brand-logo"
-                    src="images/payment/tosspay-logo-blue.png"
+                    data-g-img="paymentMethods.en.toss"
                     alt=""
                     decoding="async"
                   />

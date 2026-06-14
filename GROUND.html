@@ -3,6 +3,8 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="js/page-images.js"></script>
+    <script src="js/apply-page-images.js" defer></script>
     <link rel="icon" href="images/LOGO-transparent.png" type="image/png" />
     <title>GROUND - GRAFFORD</title>
     <link rel="stylesheet" href="css/style.css" />
@@ -14,7 +16,7 @@
     <div id="grafford-react-fade-root"></div>
     <nav class="site-nav top-right-nav nav-hero-sync-hidden">
       <a href="index.html" class="nav-logo" aria-label="홈으로 이동">
-        <img src="images/LOGO.png" alt="GRAFFORD LOGO" />
+        <img data-g-img="nav.logo" alt="GRAFFORD LOGO" />
       </a>
       <button
         type="button"
@@ -61,7 +63,7 @@
     <div class="lang-kr">
       <section class="hero-section fullpage-section" id="hero">
         <div class="hero-media" aria-hidden="true">
-          <img src="images/GROUND.png" alt="" class="hero-slide is-active" />
+          <img data-g-img="hero.kr" alt="" class="hero-slide is-active" />
           <div class="hero-overlay"></div>
         </div>
         <header class="site-header hero-header hero-header--story-copy">
@@ -104,7 +106,7 @@
           <a href="#room-detail-g1-kr" class="ground-room-thumb">
             <img
               class="ground-room-thumb__img"
-              src="images/A00.jpg"
+              data-g-img="roomThumbs.g1"
               alt="G1 객실 상세로 이동"
               width="800"
               height="600"
@@ -115,7 +117,7 @@
           <a href="#room-detail-g2-kr" class="ground-room-thumb">
             <img
               class="ground-room-thumb__img"
-              src="images/B00.jpg"
+              data-g-img="roomThumbs.g2"
               alt="G2 객실 상세로 이동"
               width="800"
               height="600"
@@ -126,7 +128,7 @@
           <a href="#room-detail-g3-kr" class="ground-room-thumb">
             <img
               class="ground-room-thumb__img"
-              src="images/C00.jpg"
+              data-g-img="roomThumbs.g3"
               alt="G3 객실 상세로 이동"
               width="800"
               height="600"
@@ -137,7 +139,7 @@
           <a href="#room-detail-g4-kr" class="ground-room-thumb">
             <img
               class="ground-room-thumb__img"
-              src="images/D00.jpg"
+              data-g-img="roomThumbs.g4"
               alt="G4 객실 상세로 이동"
               width="800"
               height="600"
@@ -175,7 +177,7 @@
                   </button>
                   <img
                     class="room-slot-main-img"
-                    src="images/A00.jpg"
+                    data-g-img="roomThumbs.g1"
                     alt="Room G1"
                   />
                   <button
@@ -293,7 +295,7 @@
                   </button>
                   <img
                     class="room-slot-main-img"
-                    src="images/B00.jpg"
+                    data-g-img="roomThumbs.g2"
                     alt="Room G2"
                   />
                   <button
@@ -411,7 +413,7 @@
                   </button>
                   <img
                     class="room-slot-main-img"
-                    src="images/C00.jpg"
+                    data-g-img="roomThumbs.g3"
                     alt="Room G3"
                   />
                   <button
@@ -529,7 +531,7 @@
                   </button>
                   <img
                     class="room-slot-main-img"
-                    src="images/D00.jpg"
+                    data-g-img="roomThumbs.g4"
                     alt="Room G4"
                   />
                   <button
@@ -671,12 +673,7 @@
             });
           });
 
-          var roomCarouselImages = {
-            G1: ["images/A00.jpg", "images/A01.jpg", "images/A02.jpg"],
-            G2: ["images/B00.jpg", "images/B01.jpg", "images/B02.jpg"],
-            G3: ["images/C00.jpg", "images/C01.jpg", "images/C02.jpg"],
-            G4: ["images/D00.jpg", "images/D01.jpg", "images/D02.jpg"],
-          };
+          var roomCarouselImages = window.getGraffordPageImages().roomCarousel;
 
           function startRoomSlotCarousel(slot, startDelay) {
             var room = slot.getAttribute("data-room");
@@ -1110,8 +1107,9 @@
           window.initSiteBusinessFooter({
             instagram: {
               href: "https://www.instagram.com/p/DWaqvQKkzye/",
-              imgSrc: "images/insta.png",
+              imgSrc: window.getGraffordFooterImages().instagram,
             },
+            logoSrc: window.getGraffordFooterImages().logo,
             lines: [
               "대표 : GRAFFORD",
               "주소 : 제주특별자치도 서귀포시 표선면 토산중앙로 22",
@@ -1129,7 +1127,7 @@
     <div class="lang-en">
       <section class="hero-section fullpage-section">
         <div class="hero-media" aria-hidden="true">
-          <img src="images/rooms.jpeg" alt="" class="hero-slide is-active" />
+          <img data-g-img="hero.en" alt="" class="hero-slide is-active" />
           <div class="hero-overlay"></div>
         </div>
         <header class="site-header hero-header hero-header--story-copy">
@@ -1167,7 +1165,7 @@
           <a href="#room-detail-g1-en" class="ground-room-thumb">
             <img
               class="ground-room-thumb__img"
-              src="images/A00.jpg"
+              data-g-img="roomThumbs.g1"
               alt="Go to room G1 details"
               width="800"
               height="600"
@@ -1178,7 +1176,7 @@
           <a href="#room-detail-g2-en" class="ground-room-thumb">
             <img
               class="ground-room-thumb__img"
-              src="images/B00.jpg"
+              data-g-img="roomThumbs.g2"
               alt="Go to room G2 details"
               width="800"
               height="600"
@@ -1189,7 +1187,7 @@
           <a href="#room-detail-g3-en" class="ground-room-thumb">
             <img
               class="ground-room-thumb__img"
-              src="images/C00.jpg"
+              data-g-img="roomThumbs.g3"
               alt="Go to room G3 details"
               width="800"
               height="600"
@@ -1200,7 +1198,7 @@
           <a href="#room-detail-g4-en" class="ground-room-thumb">
             <img
               class="ground-room-thumb__img"
-              src="images/D00.jpg"
+              data-g-img="roomThumbs.g4"
               alt="Go to room G4 details"
               width="800"
               height="600"
@@ -1238,7 +1236,7 @@
                   </button>
                   <img
                     class="room-slot-main-img"
-                    src="images/A00.jpg"
+                    data-g-img="roomThumbs.g1"
                     alt="Room G1"
                   />
                   <button
@@ -1359,7 +1357,7 @@
                   </button>
                   <img
                     class="room-slot-main-img"
-                    src="images/B00.jpg"
+                    data-g-img="roomThumbs.g2"
                     alt="Room G2"
                   />
                   <button
@@ -1479,7 +1477,7 @@
                   </button>
                   <img
                     class="room-slot-main-img"
-                    src="images/C00.jpg"
+                    data-g-img="roomThumbs.g3"
                     alt="Room G3"
                   />
                   <button
@@ -1599,7 +1597,7 @@
                   </button>
                   <img
                     class="room-slot-main-img"
-                    src="images/D00.jpg"
+                    data-g-img="roomThumbs.g4"
                     alt="Room G4"
                   />
                   <button

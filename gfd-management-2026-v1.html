@@ -3,6 +3,8 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="js/page-images.js"></script>
+    <script src="js/apply-page-images.js" defer></script>
     <link rel="icon" href="images/LOGO-transparent.png" type="image/png" />
     <title>관리자 페이지 - GRAFFORD</title>
     <link rel="stylesheet" href="css/style.css" />
@@ -74,13 +76,6 @@
           >
             매출 현황
           </button>
-          <button
-            type="button"
-            class="admin-category-btn"
-            data-admin-category="sales-analyze"
-          >
-            매출 분석
-          </button>
         </div>
       </nav>
       <section
@@ -95,7 +90,7 @@
               class="admin-top-logo"
               aria-label="메인으로 이동"
             >
-              <img src="images/LOGO.png" alt="GRAFFORD" />
+              <img data-g-img="nav.logo" alt="GRAFFORD" />
             </a>
             <div class="admin-login-copy">
               <p class="admin-login-copy__title">ADMIN ONLY</p>
@@ -1488,117 +1483,6 @@
         </div>
       </section>
 
-      <section
-        class="confirm-section admin-sales-section"
-        id="admin-sales-analyze-section"
-        aria-labelledby="admin-sales-analyze-title"
-        hidden
-      >
-        <div class="admin-dashboard-band admin-sales-band">
-          <div>
-            <p class="admin-dashboard-eyebrow">REVENUE</p>
-            <h1 class="admin-dashboard-title" id="admin-sales-analyze-title">
-              매출 분석
-            </h1>
-          </div>
-        </div>
-
-        <div class="admin-gemini-card" id="admin-gemini-card">
-          <header class="admin-gemini-card__head">
-            <span class="admin-gemini-card__sparkle" aria-hidden="true"
-              >✦ ✦</span
-            >
-            <h2 class="admin-gemini-card__title">Gemini Analyzer</h2>
-            <p class="admin-gemini-card__desc">
-              BigQuery 예약·취소 데이터를 바탕으로 운영·마케팅 전략을
-              질문하세요. API는 <strong>분석 시작</strong> 버튼을 눌렀을 때만
-              호출됩니다.
-            </p>
-          </header>
-
-          <div
-            class="admin-gemini-suggestions"
-            role="group"
-            aria-label="추천 질문"
-          >
-            <button
-              type="button"
-              class="admin-gemini-suggestion"
-              data-gemini-suggestion="객실별(G1~G4) 예약 건수·매출·취소율을 비교하고, 성과가 낮은 객실에 대한 개선안을 제안해 주세요."
-            >
-              <span aria-hidden="true">📊</span> 객실별 예약/취소율 비교
-            </button>
-            <button
-              type="button"
-              class="admin-gemini-suggestion"
-              data-gemini-suggestion="최근 취소 데이터의 리드 타임(예약~취소 간격) 패턴을 분석하고, 취소가 많이 발생하는 시점·객실을 정리해 주세요."
-            >
-              <span aria-hidden="true">⏳</span> 취소 리드 타임 분석
-            </button>
-            <button
-              type="button"
-              class="admin-gemini-suggestion"
-              data-gemini-suggestion="취소율을 낮추기 위한 이탈 방지 마케팅(재예약 유도, 조기 예약 혜택 등) 아이디어를 3가지 제안해 주세요."
-            >
-              <span aria-hidden="true">💡</span> 이탈 방지 마케팅 기획
-            </button>
-          </div>
-
-          <form id="admin-gemini-form" class="admin-gemini-form" novalidate>
-            <label class="admin-gemini-input-wrap" for="admin-gemini-question">
-              <span class="visually-hidden">분석 질문</span>
-              <textarea
-                id="admin-gemini-question"
-                class="admin-gemini-input"
-                rows="4"
-                placeholder="BigQuery 데이터에 기반하여 궁금한 운영 및 마케팅 전략을 물어보세요..."
-                maxlength="2000"
-              ></textarea>
-            </label>
-            <button
-              type="submit"
-              class="admin-gemini-submit btn reserve-btn confirm-pay-submit"
-              id="admin-gemini-submit"
-            >
-              분석 시작
-            </button>
-          </form>
-
-          <p
-            id="admin-gemini-error"
-            class="admin-gemini-error"
-            role="alert"
-            hidden
-          ></p>
-
-          <div
-            id="admin-gemini-result"
-            class="admin-gemini-result"
-            hidden
-            aria-live="polite"
-          >
-            <h3 class="admin-gemini-result__title">분석 결과</h3>
-            <div
-              id="admin-gemini-result-body"
-              class="admin-gemini-result__body"
-            ></div>
-          </div>
-        </div>
-      </section>
-
-      <div
-        id="admin-analyze-loading-overlay"
-        class="page-loading-overlay"
-        hidden
-      >
-        <div class="page-loading-overlay__box" role="status" aria-live="polite">
-          <div class="page-loading-overlay__spinner" aria-hidden="true"></div>
-          <p id="admin-analyze-loading-text" class="page-loading-overlay__text">
-            BigQuery 데이터를 조회하고 Gemini가 분석 중입니다…
-          </p>
-        </div>
-      </div>
-
       <footer
         id="site-business-footer-mount"
         data-site-business-footer-mount
@@ -1614,8 +1498,9 @@
           naverMapAddress: true,
           instagram: {
             href: "https://www.instagram.com/grafford_tosan?igsh=NnEwMWxtOGx2Y2w3",
-            imgSrc: "images/insta.png",
+            imgSrc: window.getGraffordFooterImages().instagram,
           },
+            logoSrc: window.getGraffordFooterImages().logo,
           lines: [
             "대표 : GRAFFORD",
             "주소 : 제주특별자치도 서귀포시 토산중앙로 22",
@@ -1630,6 +1515,8 @@
     </script>
     <script src="js/booking-pricing.js"></script>
     <script>
+      var ADMIN_LEFT_KEY = "graffordAdminPageLeft";
+
       document.addEventListener("DOMContentLoaded", function () {
         var loginForm = document.getElementById("admin-login-form");
         var loginSection = document.getElementById("admin-login-section");
@@ -1648,30 +1535,8 @@
           "admin-room-manage-section",
         );
         var salesSection = document.getElementById("admin-sales-section");
-        var salesAnalyzeSection = document.getElementById(
-          "admin-sales-analyze-section",
-        );
         var reservationEntrySection = document.getElementById(
           "admin-reservation-entry-section",
-        );
-        var geminiForm = document.getElementById("admin-gemini-form");
-        var geminiQuestionInput = document.getElementById(
-          "admin-gemini-question",
-        );
-        var geminiSubmitBtn = document.getElementById("admin-gemini-submit");
-        var geminiErrorEl = document.getElementById("admin-gemini-error");
-        var geminiResultEl = document.getElementById("admin-gemini-result");
-        var geminiResultBodyEl = document.getElementById(
-          "admin-gemini-result-body",
-        );
-        var geminiSuggestionBtns = document.querySelectorAll(
-          ".admin-gemini-suggestion",
-        );
-        var analyzeLoadingOverlay = document.getElementById(
-          "admin-analyze-loading-overlay",
-        );
-        var analyzeLoadingTextEl = document.getElementById(
-          "admin-analyze-loading-text",
         );
         var salesMonthlyPanel = document.getElementById("admin-sales-monthly");
         var salesAnnualPanel = document.getElementById("admin-sales-annual");
@@ -1896,6 +1761,35 @@
         var selectedCheckinDate = getTodayYmdKst();
         var selectedCalendarDate = getTodayYmdKst();
         var roomStatusWeekStart = getTodayYmdKst();
+
+        function consumeAdminLeftFlag() {
+          try {
+            if (sessionStorage.getItem(ADMIN_LEFT_KEY) === "1") {
+              sessionStorage.removeItem(ADMIN_LEFT_KEY);
+              return true;
+            }
+          } catch (_e) {}
+          return false;
+        }
+
+        function forceAdminLogout(message) {
+          if (idInput) {
+            idInput.value = "";
+          }
+          if (pwInput) {
+            pwInput.value = "";
+          }
+          latestRows = [];
+          latestCalendarRows = [];
+          reservationListRows = [];
+          selectedCheckinDate = getTodayYmdKst();
+          selectedCalendarDate = getTodayYmdKst();
+          roomStatusWeekStart = getTodayYmdKst();
+          setLoggedOutView();
+          if (message) {
+            showMessage(message);
+          }
+        }
 
         function setLoggedOutView() {
           if (categoryNav) {
@@ -2925,92 +2819,6 @@
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(body),
           });
-        }
-
-        function setAnalyzeLoading(isLoading, message) {
-          if (analyzeLoadingOverlay) {
-            analyzeLoadingOverlay.hidden = !isLoading;
-          }
-          if (analyzeLoadingTextEl && message) {
-            analyzeLoadingTextEl.textContent = message;
-          }
-          if (geminiSubmitBtn) {
-            geminiSubmitBtn.disabled = !!isLoading;
-          }
-          if (geminiQuestionInput) {
-            geminiQuestionInput.disabled = !!isLoading;
-          }
-        }
-
-        function showGeminiError(message) {
-          if (!geminiErrorEl) {
-            return;
-          }
-          if (message) {
-            geminiErrorEl.textContent = message;
-            geminiErrorEl.hidden = false;
-          } else {
-            geminiErrorEl.textContent = "";
-            geminiErrorEl.hidden = true;
-          }
-        }
-
-        function showGeminiResult(text) {
-          if (!geminiResultEl || !geminiResultBodyEl) {
-            return;
-          }
-          geminiResultBodyEl.textContent = text || "";
-          geminiResultEl.hidden = !text;
-        }
-
-        function runSalesAnalyze(question) {
-          var auth = getAuthPayload();
-          if (!auth.adminId || !auth.adminPw) {
-            showGeminiError("관리자 로그인이 필요합니다.");
-            return Promise.resolve();
-          }
-          showGeminiError("");
-          setAnalyzeLoading(
-            true,
-            "BigQuery 데이터를 조회하고 Gemini가 분석 중입니다…",
-          );
-          return adminPost("sales-analyze", {
-            adminId: auth.adminId,
-            adminPw: auth.adminPw,
-            question: question,
-          })
-            .then(function (r) {
-              return r.json().then(function (data) {
-                return { ok: r.ok, data: data || {} };
-              });
-            })
-            .then(function (result) {
-              if (!result.ok || !result.data.ok) {
-                throw new Error(
-                  result.data.error || "매출 분석 요청에 실패했습니다.",
-                );
-              }
-              showGeminiResult(result.data.analysis || "");
-              if (geminiResultEl) {
-                geminiResultEl.scrollIntoView({
-                  behavior: "smooth",
-                  block: "nearest",
-                });
-              }
-            })
-            .catch(function (err) {
-              showGeminiResult("");
-              showGeminiError(
-                (err && err.message) || "매출 분석 중 오류가 발생했습니다.",
-              );
-            })
-            .finally(function () {
-              setAnalyzeLoading(false);
-              if (analyzeLoadingTextEl) {
-                analyzeLoadingTextEl.textContent =
-                  "BigQuery 데이터를 조회하고 Gemini가 분석 중입니다…";
-              }
-            });
         }
 
         function loadSalesData(tab) {
@@ -4980,9 +4788,6 @@
           }
           roomManageSection.hidden = category !== "room-manage";
           salesSection.hidden = category !== "sales";
-          if (salesAnalyzeSection) {
-            salesAnalyzeSection.hidden = category !== "sales-analyze";
-          }
           if (category === "status") {
             renderStatusCalendar();
             renderTodayStatusPanels();
@@ -7425,58 +7230,38 @@
           });
         });
 
-        geminiSuggestionBtns.forEach(function (btn) {
-          btn.addEventListener("click", function () {
-            if (!geminiQuestionInput) {
-              return;
-            }
-            geminiQuestionInput.value =
-              btn.getAttribute("data-gemini-suggestion") || "";
-            geminiQuestionInput.focus();
-          });
-        });
-
-        if (geminiForm) {
-          geminiForm.addEventListener("submit", function (e) {
-            e.preventDefault();
-            if (loginForm && !loginForm.hidden) {
-              showGeminiError("관리자 로그인 후 이용할 수 있습니다.");
-              return;
-            }
-            var question = String(
-              (geminiQuestionInput && geminiQuestionInput.value) || "",
-            ).trim();
-            if (!question) {
-              showGeminiError("분석할 질문을 입력해 주세요.");
-              if (geminiQuestionInput) {
-                geminiQuestionInput.focus();
-              }
-              return;
-            }
-            runSalesAnalyze(question);
-          });
-        }
-
         if (logoutBtn) {
           logoutBtn.addEventListener("click", function () {
-            if (idInput) {
-              idInput.value = "";
-            }
-            if (pwInput) {
-              pwInput.value = "";
-            }
-            latestRows = [];
-            latestCalendarRows = [];
-            reservationListRows = [];
-            selectedCheckinDate = getTodayYmdKst();
-            selectedCalendarDate = getTodayYmdKst();
-            roomStatusWeekStart = getTodayYmdKst();
-            setLoggedOutView();
-            showMessage("로그아웃되었습니다.");
+            forceAdminLogout("로그아웃되었습니다.");
           });
         }
 
-        setLoggedOutView();
+        window.addEventListener("pagehide", function () {
+          try {
+            if (loginForm && loginForm.hidden) {
+              sessionStorage.setItem(ADMIN_LEFT_KEY, "1");
+            }
+          } catch (_e) {}
+        });
+
+        window.addEventListener("pageshow", function (e) {
+          var leftPage = consumeAdminLeftFlag();
+          var restoredLoggedIn =
+            e.persisted && loginForm && loginForm.hidden === true;
+          if (leftPage || restoredLoggedIn) {
+            forceAdminLogout(
+              leftPage
+                ? "페이지를 벗어났습니다. 다시 로그인해 주세요."
+                : "다시 로그인해 주세요.",
+            );
+          }
+        });
+
+        if (consumeAdminLeftFlag()) {
+          forceAdminLogout("페이지를 벗어났습니다. 다시 로그인해 주세요.");
+        } else {
+          setLoggedOutView();
+        }
       });
     </script>
   </body>

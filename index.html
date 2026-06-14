@@ -3,6 +3,8 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="js/page-images.js"></script>
+    <script src="js/apply-page-images.js" defer></script>
     <title>그라포드 GRAFFORD</title>
     <meta name="title" content="그라포드 GRAFFORD" />
     <meta
@@ -64,7 +66,7 @@
     </div>
     <nav class="site-nav top-right-nav nav-hero-hidden">
       <a href="index.html" class="nav-logo" aria-label="홈으로 이동">
-        <img src="images/LOGO.png" alt="GRAFFORD LOGO" />
+        <img data-g-img="nav.logo" alt="GRAFFORD LOGO" />
       </a>
       <button
         type="button"
@@ -111,16 +113,16 @@
     <div class="lang-kr">
       <section class="hero-section fullpage-section" id="hero">
         <div class="hero-media" aria-hidden="true">
-          <img src="images/main01.png" alt="" class="hero-slide is-active" />
-          <img src="images/reservation.jpeg" alt="" class="hero-slide" />
-          <img src="images/rooms.jpeg" alt="" class="hero-slide" />
-          <img src="images/story.jpeg" alt="" class="hero-slide" />
+          <img data-g-img="hero.kr.0" alt="" class="hero-slide is-active" />
+          <img data-g-img="hero.kr.1" alt="" class="hero-slide" />
+          <img data-g-img="hero.kr.2" alt="" class="hero-slide" />
+          <img data-g-img="hero.kr.3" alt="" class="hero-slide" />
           <div class="hero-overlay"></div>
         </div>
         <header class="site-header hero-header hero-header--index-brand">
           <h1 class="hero-title-logo">
             <img
-              src="images/LOGO.png"
+              data-g-img="hero.logoKr"
               alt="GRAFFORD"
               class="hero-logo-img"
               width="800"
@@ -171,7 +173,7 @@
           <article class="feature feature-index-1 scroll-fade">
             <div class="feature-media">
               <img
-                src="images/mainimg1.jpg"
+                data-g-img="features.aboutImageKr"
                 alt="High Quality 객실 이미지"
                 class="feature-image"
               />
@@ -238,7 +240,7 @@
             </div>
             <div class="feature-media">
               <img
-                src="images/mainimg2.jpg"
+                data-g-img="features.philosophyImageKr"
                 alt="Private Terrace 이미지"
                 class="feature-image"
               />
@@ -442,7 +444,7 @@
           const sliderImage = document.getElementById("slider-image");
           const prevButton = document.getElementById("slider-prev");
           const nextButton = document.getElementById("slider-next");
-          const sliderImages = ["images/A.jpg", "images/B.jpg", "images/C.jpg"];
+          const sliderImages = window.getGraffordPageImages().slider;
           const heroSlideGroups = Array.from(
             document.querySelectorAll(".hero-media"),
           )
@@ -536,14 +538,7 @@
           }
 
           /* PC: [0] 좌 메인, [1–4] 중앙 2×2, [5] 우 메인. 모바일: [0] 대표 2×2칸, [1][2] 오른쪽 열, [3][4][5] 하단 행 (css/mobiledesign.html 모자이크) */
-          var indexFeature3SpaceImages = [
-            "images/space02.jpg",
-            "images/A01.jpg",
-            "images/reservation.jpeg",
-            "images/rooms.jpeg",
-            "images/GROUND.png",
-            "images/D00.jpg",
-          ];
+          var indexFeature3SpaceImages = window.getGraffordPageImages().spaceGrid;
 
           function initIndexFeature3SpaceGrid(layoutRoot, images, altPrefix) {
             if (!layoutRoot || !images || !images.length) {
@@ -682,8 +677,9 @@
           window.initSiteBusinessFooter({
             instagram: {
               href: "https://www.instagram.com/grafford_tosan?igsh=NnEwMWxtOGx2Y2w3",
-              imgSrc: "images/insta.png",
+              imgSrc: window.getGraffordFooterImages().instagram,
             },
+            logoSrc: window.getGraffordFooterImages().logo,
             lines: [
               "대표 : GRAFFORD",
               "주소 : 제주특별자치도 서귀포시 표선면 토산중앙로 22",
@@ -766,16 +762,16 @@
     <div class="lang-en">
       <section class="hero-section fullpage-section">
         <div class="hero-media" aria-hidden="true">
-          <img src="images/mainimg0.jpg" alt="" class="hero-slide is-active" />
-          <img src="images/reservation.jpeg" alt="" class="hero-slide" />
-          <img src="images/rooms.jpeg" alt="" class="hero-slide" />
-          <img src="images/story.jpeg" alt="" class="hero-slide" />
+          <img data-g-img="hero.en.0" alt="" class="hero-slide is-active" />
+          <img data-g-img="hero.en.1" alt="" class="hero-slide" />
+          <img data-g-img="hero.en.2" alt="" class="hero-slide" />
+          <img data-g-img="hero.en.3" alt="" class="hero-slide" />
           <div class="hero-overlay"></div>
         </div>
         <header class="site-header hero-header hero-header--index-brand">
           <h1 class="hero-title-logo">
             <img
-              src="images/LOGO.png"
+              data-g-img="hero.logoEn"
               alt="GRAFFORD"
               class="hero-logo-img"
               width="800"
@@ -821,7 +817,7 @@
           <article class="feature feature-index-1 scroll-fade">
             <div class="feature-media">
               <img
-                src="images/mainimg1.jpg"
+                data-g-img="features.aboutImageEn"
                 alt="High Quality 객실 이미지"
                 class="feature-image"
               />
@@ -888,7 +884,7 @@
             </div>
             <div class="feature-media">
               <img
-                src="images/mainimg2.jpg"
+                data-g-img="features.philosophyImageEn"
                 alt="Private Terrace 이미지"
                 class="feature-image"
               />

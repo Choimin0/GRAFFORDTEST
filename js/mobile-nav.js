@@ -47,11 +47,17 @@ document.addEventListener("DOMContentLoaded", function () {
     }
 
     if (!drawer.querySelector(".mobile-nav-drawer__header")) {
+      var drawerLogo =
+        (window.getGraffordSharedImage &&
+          window.getGraffordSharedImage("js/mobile-nav.js", "drawerLogo")) ||
+        "images/LOGO.png";
       var header = document.createElement("div");
       header.className = "mobile-nav-drawer__header";
       header.innerHTML =
         '<a href="index.html" class="mobile-nav-drawer__logo" aria-label="홈으로 이동">' +
-        '<img src="images/LOGO.png" alt="GRAFFORD LOGO" />' +
+        '<img src="' +
+        drawerLogo +
+        '" alt="GRAFFORD LOGO" />' +
         "</a>" +
         '<button type="button" class="mobile-nav-close-btn" aria-label="메뉴 닫기"></button>';
       drawer.insertBefore(header, drawer.firstChild);

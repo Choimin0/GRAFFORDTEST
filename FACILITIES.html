@@ -3,6 +3,8 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="js/page-images.js"></script>
+    <script src="js/apply-page-images.js" defer></script>
     <link rel="icon" href="images/LOGO-transparent.png" type="image/png" />
     <title>FACILITIES - GRAFFORD</title>
     <link rel="stylesheet" href="css/style.css" />
@@ -14,7 +16,7 @@
     <div id="grafford-react-fade-root"></div>
     <nav class="site-nav top-right-nav nav-hero-sync-hidden">
       <a href="index.html" class="nav-logo" aria-label="홈으로 이동">
-        <img src="images/LOGO.png" alt="GRAFFORD LOGO" />
+        <img data-g-img="nav.logo" alt="GRAFFORD LOGO" />
       </a>
       <button
         type="button"
@@ -61,7 +63,7 @@
     <div class="lang-kr">
       <section class="hero-section fullpage-section" id="hero">
         <div class="hero-media" aria-hidden="true">
-          <img src="images/space.jpeg" alt="" class="hero-slide is-active" />
+          <img data-g-img="hero.kr" alt="" class="hero-slide is-active" />
           <div class="hero-overlay"></div>
         </div>
         <header class="site-header hero-header hero-header--story-copy">
@@ -87,7 +89,7 @@
           <article class="feature facilities-feature-1 scroll-fade">
             <div class="feature-media">
               <img
-                src="images/lounge.jpg"
+                data-g-img="features.cafeLoungeKr"
                 alt="공용 공간 이미지"
                 class="feature-image"
               />
@@ -148,7 +150,7 @@
             </div>
             <div class="feature-media">
               <img
-                src="images/mainimg2.jpg"
+                data-g-img="features.outdoorJacuzziKr"
                 alt="야외 시설 이미지"
                 class="feature-image"
               />
@@ -158,7 +160,7 @@
           <article class="feature facilities-feature-3 scroll-fade">
             <div class="feature-media">
               <img
-                src="images/mainimg1.jpg"
+                data-g-img="features.courtyardKr"
                 alt="부대 서비스 이미지"
                 class="feature-image"
               />
@@ -242,8 +244,9 @@
           window.initSiteBusinessFooter({
             instagram: {
               href: "https://www.instagram.com/p/DWaqvQKkzye/",
-              imgSrc: "images/insta.png",
+              imgSrc: window.getGraffordFooterImages().instagram,
             },
+            logoSrc: window.getGraffordFooterImages().logo,
             lines: [
               "대표 : GRAFFORD",
               "주소 : 제주특별자치도 서귀포시 표선면 토산중앙로 22",
@@ -261,7 +264,7 @@
     <div class="lang-en">
       <section class="hero-section fullpage-section">
         <div class="hero-media" aria-hidden="true">
-          <img src="images/space.jpeg" alt="" class="hero-slide is-active" />
+          <img data-g-img="hero.en" alt="" class="hero-slide is-active" />
           <div class="hero-overlay"></div>
         </div>
         <header class="site-header hero-header hero-header--story-copy">
@@ -283,7 +286,7 @@
           <article class="feature facilities-feature-1 scroll-fade">
             <div class="feature-media">
               <img
-                src="images/lounge.jpg"
+                data-g-img="features.cafeLoungeEn"
                 alt="공용 공간 이미지"
                 class="feature-image"
               />
@@ -347,7 +350,7 @@
             </div>
             <div class="feature-media">
               <img
-                src="images/mainimg2.jpg"
+                data-g-img="features.outdoorJacuzziEn"
                 alt="야외 시설 이미지"
                 class="feature-image"
               />
@@ -357,7 +360,7 @@
           <article class="feature facilities-feature-3 scroll-fade">
             <div class="feature-media">
               <img
-                src="images/mainimg1.jpg"
+                data-g-img="features.courtyardEn"
                 alt="부대 서비스 이미지"
                 class="feature-image"
               />

@@ -531,7 +531,14 @@ function initSiteBusinessFooter(options) {
     linesEn = [];
   }
 
-  var logoSrc = options.logoSrc || "images/LOGO-circle-transparent.png";
+  var logoSrc =
+    options.logoSrc ||
+    (window.getGraffordSharedImage &&
+      window.getGraffordSharedImage(
+        "js/site-business-footer.js",
+        "defaultFooterLogo",
+      )) ||
+    "images/LOGO-circle-transparent.png";
   var logoAlt = options.logoAlt || "GRAFFORD";
 
   function escapeHtml(s) {
