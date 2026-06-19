@@ -13,7 +13,7 @@ import {
   confirmPortonePayment,
   extractPgTxIdFromPayment,
   extractPortonePaidAmount,
-  fetchPortonePayment,
+  fetchPortonePaymentUntilPaid,
 } from "./_lib/portone-client.js";
 import {
   extractPaymentMethodFromPortonePayment,
@@ -165,19 +165,25 @@ export default async function handler(req, res) {
       }
     }
 
-    var paymentLookup = await fetchPortonePayment(paymentId);
+    var paymentLookup = await fetchPortonePaymentUntilPaid(paymentId, {
+      maxAttempts: 15,
+      delayMs: 1000,
+    });
     if (!paymentLookup.ok) {
       console.error(
         "[payment-confirm] PortOne API error",
         paymentId,
         paymentLookup.error,
+        paymentLookup.status || "",
       );
       res.statusCode = 400;
       res.end(
         JSON.stringify({
           ok: false,
           error: paymentLookup.error,
+          status: paymentLookup.status || null,
           detail: paymentLookup.detail || null,
+          timedOut: !!paymentLookup.timedOut,
         }),
       );
       return;

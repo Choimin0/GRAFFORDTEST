@@ -45,6 +45,77 @@ function getPortoneApiSecret() {
   return String(process.env.PORTONE_API_SECRET || "").trim();
 }
 
+export function sleep(ms) {
+  return new Promise(function (resolve) {
+    setTimeout(resolve, ms);
+  });
+}
+
+var PENDING_PAYMENT_STATUSES = {
+  READY: true,
+  PENDING: true,
+};
+
+var FAILURE_PAYMENT_STATUSES = {
+  FAILED: true,
+  CANCELLED: true,
+  PARTIAL_CANCELLED: true,
+};
+
+/**
+ * 모바일 redirect 복귀 직후 READY/PENDING 상태일 수 있어 PAID까지 짧게 폴링합니다.
+ */
+export async function fetchPortonePaymentUntilPaid(paymentId, options) {
+  options = options || {};
+  var maxAttempts =
+    options.maxAttempts != null ? Number(options.maxAttempts) : 15;
+  var delayMs = options.delayMs != null ? Number(options.delayMs) : 1000;
+  var lastLookup = null;
+
+  for (var attempt = 0; attempt < maxAttempts; attempt++) {
+    lastLookup = await fetchPortonePayment(paymentId);
+    if (!lastLookup.ok) {
+      return lastLookup;
+    }
+
+    var status = lastLookup.data && lastLookup.data.status;
+    if (status === "PAID") {
+      return lastLookup;
+    }
+    if (FAILURE_PAYMENT_STATUSES[status]) {
+      return {
+        ok: false,
+        error: "결제가 완료되지 않았습니다. (status: " + status + ")",
+        status: status,
+        data: lastLookup.data,
+      };
+    }
+    if (!PENDING_PAYMENT_STATUSES[status] && status) {
+      return {
+        ok: false,
+        error: "결제가 완료되지 않았습니다. (status: " + status + ")",
+        status: status,
+        data: lastLookup.data,
+      };
+    }
+    if (attempt < maxAttempts - 1) {
+      await sleep(delayMs);
+    }
+  }
+
+  var finalStatus =
+    lastLookup && lastLookup.data && lastLookup.data.status
+      ? lastLookup.data.status
+      : "UNKNOWN";
+  return {
+    ok: false,
+    error: "결제가 완료되지 않았습니다. (status: " + finalStatus + ")",
+    status: finalStatus,
+    data: lastLookup && lastLookup.data,
+    timedOut: true,
+  };
+}
+
 export async function fetchPortonePayment(paymentId) {
   var apiSecret = getPortoneApiSecret();
   if (!apiSecret) {

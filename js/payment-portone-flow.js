@@ -2,15 +2,15 @@
  * PortOne v2 결제 완료 처리 (PC 반환값 + 모바일 redirectUrl 복귀 공통)
  */
 (function (global) {
-  function parsePortoneRedirectFromLocation(loc) {
-    loc = loc || global.location;
+  function parsePortoneSearchParams(searchLike) {
+    var result = {};
     try {
-      var search = new URLSearchParams(loc.search || "");
+      var search = new URLSearchParams(searchLike || "");
       var paymentId = String(search.get("paymentId") || "").trim();
       if (!paymentId) {
         return null;
       }
-      return {
+      result = {
         paymentId: paymentId,
         code: search.get("code") || undefined,
         message: search.get("message") || undefined,
@@ -22,6 +22,28 @@
     } catch (_e) {
       return null;
     }
+    return result;
+  }
+
+  function parsePortoneRedirectFromLocation(loc) {
+    loc = loc || global.location;
+    var fromSearch = parsePortoneSearchParams(loc.search || "");
+    if (fromSearch) {
+      return fromSearch;
+    }
+    var hash = String(loc.hash || "");
+    if (!hash || hash === "#") {
+      return null;
+    }
+    var hashQuery = hash.charAt(0) === "#" ? hash.slice(1) : hash;
+    if (hashQuery.charAt(0) === "?") {
+      hashQuery = hashQuery.slice(1);
+    }
+    var hashIdx = hashQuery.indexOf("?");
+    if (hashIdx >= 0) {
+      hashQuery = hashQuery.slice(hashIdx + 1);
+    }
+    return parsePortoneSearchParams(hashQuery);
   }
 
   function hasPortoneRedirectParams(loc) {
@@ -30,15 +52,84 @@
 
   function clearPortoneRedirectQuery(loc) {
     loc = loc || global.location;
-    if (!loc.search) {
-      return;
-    }
-    if (!/(?:^|[?&])(?:paymentId|code)=/.test(loc.search)) {
+    var hadSearch =
+      loc.search &&
+      /(?:^|[?&])(?:paymentId|code)=/.test(loc.search);
+    var hadHash =
+      loc.hash && /(?:^|[#&?])(?:paymentId|code)=/.test(loc.hash);
+    if (!hadSearch && !hadHash) {
       return;
     }
     try {
-      global.history.replaceState(null, "", loc.pathname + (loc.hash || ""));
+      global.history.replaceState(null, "", loc.pathname);
     } catch (_e) {}
+  }
+
+  function portoneRedirectStorageKey(orderNo) {
+    return "graffordPortoneRedirect:" + String(orderNo || "").trim();
+  }
+
+  function persistPortoneRedirectResult(orderNo, redirectResult) {
+    if (!orderNo || !redirectResult || !redirectResult.paymentId) {
+      return;
+    }
+    try {
+      sessionStorage.setItem(
+        portoneRedirectStorageKey(orderNo),
+        JSON.stringify(redirectResult),
+      );
+    } catch (_e) {}
+  }
+
+  function loadPersistedPortoneRedirectResult(orderNo) {
+    try {
+      var raw = sessionStorage.getItem(portoneRedirectStorageKey(orderNo));
+      if (!raw) {
+        return null;
+      }
+      var parsed = JSON.parse(raw);
+      if (!parsed || !parsed.paymentId) {
+        return null;
+      }
+      return parsed;
+    } catch (_e) {
+      return null;
+    }
+  }
+
+  function clearPersistedPortoneRedirectResult(orderNo) {
+    try {
+      sessionStorage.removeItem(portoneRedirectStorageKey(orderNo));
+    } catch (_e) {}
+  }
+
+  function resolvePortoneRedirectResult(loc, orderNo) {
+    var fromLocation = parsePortoneRedirectFromLocation(loc);
+    if (fromLocation) {
+      if (orderNo && fromLocation.paymentId === orderNo) {
+        persistPortoneRedirectResult(orderNo, fromLocation);
+      }
+      return fromLocation;
+    }
+    if (!orderNo) {
+      return null;
+    }
+    return loadPersistedPortoneRedirectResult(orderNo);
+  }
+
+  async function verifyPortonePaymentWithRetry(body, showPageLoading, messages) {
+    if (showPageLoading) {
+      showPageLoading(
+        (messages && messages.verifying) || "결제 확인 중입니다...",
+      );
+    }
+    var verifyRes = await fetch("/api/payment-confirm", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+    var verifyData = await verifyRes.json();
+    return { verifyRes: verifyRes, verifyData: verifyData };
   }
 
   function buildPortoneRedirectUrl(loc) {
@@ -201,18 +292,19 @@
 
     try {
       showPageLoading(messages.verifying || "결제 확인 중입니다...");
-      var verifyRes = await fetch("/api/payment-confirm", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
+      var verifyOutcome = await verifyPortonePaymentWithRetry(
+        {
           paymentId: response.paymentId,
           expectedAmount: finalAmount,
           paymentToken: response.paymentToken || null,
           txId: response.txId || null,
           requestedPaymentMethod: payMethod,
-        }),
-      });
-      var verifyData = await verifyRes.json();
+        },
+        showPageLoading,
+        messages,
+      );
+      var verifyRes = verifyOutcome.verifyRes;
+      var verifyData = verifyOutcome.verifyData;
       if (!verifyRes.ok || !verifyData.ok) {
         var verifyErrMsg = verifyData.error || verifyData.message || "";
         if (verifyData.expected != null && verifyData.actual != null) {
@@ -333,6 +425,7 @@
     }
 
     clearPaymentFinalizeInProgress(orderNo);
+    clearPersistedPortoneRedirectResult(orderNo);
 
     var bookingCreatedAtIso = (saveData && saveData.createdAtIso) || "";
     try {
@@ -387,12 +480,28 @@
     isPaymentFinalizeInProgress: isPaymentFinalizeInProgress,
     preparePaymentDeparture: preparePaymentDeparture,
     finalizePortoneCheckout: finalizePortoneCheckout,
+    resolvePortoneRedirectResult: resolvePortoneRedirectResult,
+    persistPortoneRedirectResult: persistPortoneRedirectResult,
+    loadPersistedPortoneRedirectResult: loadPersistedPortoneRedirectResult,
+    clearPersistedPortoneRedirectResult: clearPersistedPortoneRedirectResult,
   };
 
   function showEarlyRedirectLoading() {
     if (!hasPortoneRedirectParams()) {
       return;
     }
+    try {
+      var earlyRedirect = parsePortoneRedirectFromLocation();
+      if (earlyRedirect && earlyRedirect.paymentId) {
+        var savedRaw = global.sessionStorage.getItem("graffordPaymentData");
+        if (savedRaw) {
+          var saved = JSON.parse(savedRaw);
+          if (saved && saved.orderNo === earlyRedirect.paymentId) {
+            persistPortoneRedirectResult(saved.orderNo, earlyRedirect);
+          }
+        }
+      }
+    } catch (_persist) {}
     function apply() {
       var overlay = global.document.getElementById("page-loading-overlay");
       var text = global.document.getElementById("page-loading-text");

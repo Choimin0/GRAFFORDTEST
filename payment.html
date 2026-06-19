@@ -14,9 +14,14 @@
           if (sessionStorage.getItem("graffordCheckoutBlocked") === "1") {
             var hasPortoneReturn = false;
             try {
-              hasPortoneReturn = !!new URLSearchParams(
-                location.search || "",
-              ).get("paymentId");
+              if (new URLSearchParams(location.search || "").get("paymentId")) {
+                hasPortoneReturn = true;
+              } else {
+                var hash = String(location.hash || "");
+                if (hash.indexOf("paymentId=") >= 0) {
+                  hasPortoneReturn = true;
+                }
+              }
             } catch (_q) {}
             if (!hasPortoneReturn) {
               location.replace("RESERVATION.html");
@@ -30,7 +35,7 @@
     <script src="js/site-language.js" defer></script>
     <!-- PortOne v2 Browser SDK -->
     <script src="https://cdn.portone.io/v2/browser-sdk.js"></script>
-    <script src="js/payment-portone-flow.js?v=2"></script>
+    <script src="js/payment-portone-flow.js?v=3"></script>
     <!--
       KG이니시스(PortOne) 결제수단 노출 설정
       true → 결제수단 drawer에 표시 · false → 숨김
@@ -1173,14 +1178,6 @@
             refreshPaymentMethodUiKr();
           }
 
-          bootstrapKr()
-            .then(function () {
-              return handlePortoneRedirectReturn();
-            })
-            .catch(function () {
-              hideLoading();
-            });
-
           function showError(msg) {
             hidePageLoading();
             if (processingMsg) processingMsg.hidden = true;
@@ -1251,11 +1248,12 @@
               return false;
             }
             var flow = window.GraffordPortoneFlow;
-            if (!flow || !flow.parsePortoneRedirectFromLocation) {
+            if (!flow || !flow.resolvePortoneRedirectResult) {
               return false;
             }
-            var redirectResult = flow.parsePortoneRedirectFromLocation(
+            var redirectResult = flow.resolvePortoneRedirectResult(
               window.location,
+              orderNo,
             );
             if (!redirectResult) {
               return false;
@@ -1273,9 +1271,13 @@
             if (window.GraffordCheckoutGuard) {
               window.GraffordCheckoutGuard.allowCheckoutNavigation();
             }
+            flow.persistPortoneRedirectResult(orderNo, redirectResult);
             flow.clearPortoneRedirectQuery(window.location);
             if (redirectResult.code) {
               resetPaymentGuard();
+              if (flow.clearPersistedPortoneRedirectResult) {
+                flow.clearPersistedPortoneRedirectResult(orderNo);
+              }
               showError(redirectResult.message || "결제가 취소되었습니다");
               return true;
             }
@@ -1286,6 +1288,33 @@
             );
             return true;
           }
+
+          function runPaymentPageInitKr() {
+            var flow = window.GraffordPortoneFlow;
+            var hadPortoneReturn =
+              flow &&
+              (flow.hasPortoneRedirectParams() ||
+                (flow.loadPersistedPortoneRedirectResult &&
+                  flow.loadPersistedPortoneRedirectResult(orderNo)));
+            if (hadPortoneReturn) {
+              var savedAmtEarly = Number(saved.totalAmount || 0);
+              if (savedAmtEarly > 0) {
+                finalAmount = savedAmtEarly;
+              }
+              showPageLoading("결제 확인 중입니다...");
+              var redirectFinalizePromise = handlePortoneRedirectReturn();
+              return bootstrapKr().then(function () {
+                return redirectFinalizePromise;
+              });
+            }
+            return bootstrapKr().then(function () {
+              return handlePortoneRedirectReturn();
+            });
+          }
+
+          runPaymentPageInitKr().catch(function () {
+            hideLoading();
+          });
 
           window.addEventListener("pageshow", function (e) {
             if (!e.persisted || bookingLocale === "en") {
@@ -2627,14 +2656,6 @@
             refreshPaymentMethodUiEn();
           }
 
-          bootstrapEn()
-            .then(function () {
-              return handlePortoneRedirectReturnEn();
-            })
-            .catch(function () {
-              hideLoading();
-            });
-
           function showError(msg) {
             hidePageLoading();
             if (processingMsg) processingMsg.hidden = true;
@@ -2707,11 +2728,12 @@
               return false;
             }
             var flow = window.GraffordPortoneFlow;
-            if (!flow || !flow.parsePortoneRedirectFromLocation) {
+            if (!flow || !flow.resolvePortoneRedirectResult) {
               return false;
             }
-            var redirectResult = flow.parsePortoneRedirectFromLocation(
+            var redirectResult = flow.resolvePortoneRedirectResult(
               window.location,
+              orderNo,
             );
             if (!redirectResult) {
               return false;
@@ -2729,9 +2751,13 @@
             if (window.GraffordCheckoutGuard) {
               window.GraffordCheckoutGuard.allowCheckoutNavigation();
             }
+            flow.persistPortoneRedirectResult(orderNo, redirectResult);
             flow.clearPortoneRedirectQuery(window.location);
             if (redirectResult.code) {
               resetPaymentGuard();
+              if (flow.clearPersistedPortoneRedirectResult) {
+                flow.clearPersistedPortoneRedirectResult(orderNo);
+              }
               showError(redirectResult.message || "Payment was cancelled");
               return true;
             }
@@ -2742,6 +2768,33 @@
             );
             return true;
           }
+
+          function runPaymentPageInitEn() {
+            var flow = window.GraffordPortoneFlow;
+            var hadPortoneReturn =
+              flow &&
+              (flow.hasPortoneRedirectParams() ||
+                (flow.loadPersistedPortoneRedirectResult &&
+                  flow.loadPersistedPortoneRedirectResult(orderNo)));
+            if (hadPortoneReturn) {
+              var savedAmtEarly = Number(saved.totalAmount || 0);
+              if (savedAmtEarly > 0) {
+                finalAmount = savedAmtEarly;
+              }
+              showPageLoading("Verifying payment...");
+              var redirectFinalizePromise = handlePortoneRedirectReturnEn();
+              return bootstrapEn().then(function () {
+                return redirectFinalizePromise;
+              });
+            }
+            return bootstrapEn().then(function () {
+              return handlePortoneRedirectReturnEn();
+            });
+          }
+
+          runPaymentPageInitEn().catch(function () {
+            hideLoading();
+          });
 
           window.addEventListener("pageshow", function (e) {
             if (!e.persisted || bookingLocale !== "en") {
