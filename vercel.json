@@ -28,7 +28,7 @@
       "headers": [
         {
           "key": "Content-Security-Policy",
-          "value": "default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.iamport.kr https://pay.portone.io https://cdn.portone.io; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; connect-src 'self' https://api.portone.io https://cdn.iamport.kr https://payment.portone.io; frame-src https://pay.portone.io https://payment.portone.io; font-src 'self' data:; object-src 'none'; base-uri 'self';"
+          "value": "default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.iamport.kr https://pay.portone.io https://cdn.portone.io https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; connect-src 'self' https://api.portone.io https://cdn.iamport.kr https://payment.portone.io https://*.iamport.co; frame-src https://pay.portone.io https://payment.portone.io https://*.iamport.co; font-src 'self' data:; object-src 'none'; base-uri 'self';"
         }
       ]
     }
