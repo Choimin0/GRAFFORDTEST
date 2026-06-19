@@ -384,16 +384,6 @@
             return new Date(Number(p[0]), Number(p[1]) - 1, Number(p[2]));
           }
 
-          function countStayNights(ciStr, coStr) {
-            var a = parseYmdLocal(ciStr);
-            var b = parseYmdLocal(coStr);
-            if (!a || !b) {
-              return 0;
-            }
-            var diff = Math.round((b - a) / 86400000);
-            return diff > 0 ? diff : 0;
-          }
-
           var roomNameKr = document.getElementById("complete-room-name");
           if (roomNameKr) {
             roomNameKr.textContent =
@@ -408,7 +398,6 @@
           }
           var ciDate = parseYmdLocal(checkIn);
           var coDate = parseYmdLocal(checkOut);
-          var stayNights = countStayNights(checkIn, checkOut);
           var checkInKrLine = ciDate
             ? ciDate.toLocaleDateString("ko-KR", {
                 year: "numeric",
@@ -423,7 +412,7 @@
                 month: "long",
                 day: "numeric",
                 weekday: "short",
-              }) + (stayNights > 0 ? " · " + stayNights + "박" : "")
+              })
             : "—";
           var checkInEnLine = ciDate
             ? ciDate.toLocaleDateString("en-US", {
@@ -439,10 +428,7 @@
                 month: "long",
                 day: "numeric",
                 weekday: "short",
-              }) +
-              (stayNights > 0
-                ? " · " + stayNights + (stayNights === 1 ? " night" : " nights")
-                : "")
+              })
             : "—";
           var amountTextKr =
             Number(discountedAmount || 0).toLocaleString("ko-KR") + "원";
