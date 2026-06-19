@@ -12167,7 +12167,7 @@ main.content-section.confirm-page.admin-page {
   padding: 0.35rem 0.7rem;
   border-radius: 4px;
   pointer-events: none;
-  white-space: normal;
+  white-space: pre-line;
   text-align: center;
   line-height: 1.45;
   max-width: 12rem;
@@ -14034,40 +14034,13 @@ main.content-section.confirm-page.admin-page {
   letter-spacing: 0.08em;
 }
 .admin-manual-cancel-confirm-btn.btn.reserve-btn {
-  min-width: 6.5rem;
+  min-width: 5rem;
   margin: 0;
-  padding: 0.65rem 1.1rem;
-  border: 1px solid color-mix(in srgb, var(--stone-green) 35%, var(--stone-200));
-  background: color-mix(in srgb, var(--stone-green) 9%, var(--stone-50));
-  background-image: none;
-  color: var(--stone-green);
-  font-size: 0.8rem;
-  letter-spacing: 0.1em;
-  cursor: pointer;
-  transition:
-    background 0.35s ease,
-    border-color 0.35s ease,
-    color 0.35s ease;
-}
-.admin-manual-cancel-confirm-btn.btn.reserve-btn:hover,
-.admin-manual-cancel-confirm-btn.btn.reserve-btn:focus-visible {
-  border-color: var(--stone-green);
-  background: color-mix(in srgb, var(--stone-green) 14%, var(--stone-50));
-  background-image: none;
-  color: var(--stone-green);
-  animation: none;
-  outline: none;
-}
-.admin-manual-cancel-confirm-btn.btn.reserve-btn:disabled {
-  border-color: var(--stone-200);
-  background: var(--stone-100);
-  color: var(--stone-400);
-  cursor: not-allowed;
 }
 .admin-request-modal__actions
-  .admin-manual-cancel-dismiss-btn.reserveinfo-submit-btn.confirm-pay-submit.btn.reserve-btn {
+  .admin-manual-cancel-dismiss-btn.admin-request-cancel-btn.btn.reserve-btn {
   min-width: 5rem;
-  height: auto;
+  margin: 0;
   padding: 0.65rem 1.2rem;
   font-size: 0.8rem;
 }

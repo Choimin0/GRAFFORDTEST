@@ -226,16 +226,6 @@ export async function handleAdminPaymentCancel(res, pool, body) {
     var pgCancelled = false;
 
     if (!isBankTransfer && !isExternalManual && refundAmount > 0) {
-      if (!pgTid) {
-        client.release();
-        json(res, 400, {
-          ok: false,
-          error:
-            "PG 결제 거래번호(pg_tid)가 없어 환불을 진행할 수 없습니다. 결제 정보를 확인해 주세요.",
-        });
-        return;
-      }
-
       var paymentLookup = await fetchPortonePayment(reservationNumber);
       if (!paymentLookup.ok) {
         var lookupErr = paymentLookup.error || "";

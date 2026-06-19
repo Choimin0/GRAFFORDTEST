@@ -1308,17 +1308,19 @@
           <div class="admin-request-modal__actions">
             <button
               type="button"
-              class="btn reserve-btn admin-manual-cancel-confirm-btn"
-              id="admin-manual-cancel-yes"
+              class="btn reserve-btn admin-request-cancel-btn admin-manual-cancel-dismiss-btn"
+              id="admin-manual-cancel-no"
+              data-manual-cancel-action="dismiss"
             >
-              취소합니다
+              아니오
             </button>
             <button
               type="button"
-              class="btn reserve-btn confirm-pay-submit reserveinfo-submit-btn admin-save-btn admin-manual-cancel-dismiss-btn"
-              id="admin-manual-cancel-no"
+              class="btn reserve-btn confirm-pay-submit reserveinfo-submit-btn admin-save-btn admin-manual-cancel-confirm-btn"
+              id="admin-manual-cancel-yes"
+              data-manual-cancel-action="confirm"
             >
-              아니오
+              네
             </button>
           </div>
         </div>
@@ -1626,6 +1628,7 @@
         );
         var weekResCloseBtn = document.getElementById("admin-week-res-close");
         var activeManualCancelReservationNumber = "";
+        var manualCancelSubmitting = false;
         var activeCheckinResendReservationNumber = "";
         var activeCheckinResendBtn = null;
         var searchForm = document.getElementById("admin-search-form");
@@ -2441,7 +2444,7 @@
               (row.isExternal ? "외부 예약" : "—");
             return (
               name +
-              "<br />" +
+              "\n" +
               formatKoreanMonthDay(dateKey(row.checkIn)) +
               "~" +
               formatKoreanMonthDay(dateKey(row.checkOut))
@@ -5154,12 +5157,25 @@
           manualCancelMessage.textContent = text || "";
         }
 
+        function setManualCancelButtonsDisabled(disabled) {
+          if (manualCancelYesBtn) {
+            manualCancelYesBtn.disabled = !!disabled;
+          }
+          if (manualCancelNoBtn) {
+            manualCancelNoBtn.disabled = !!disabled;
+          }
+          if (manualCancelCloseBtn) {
+            manualCancelCloseBtn.disabled = !!disabled;
+          }
+        }
+
         function openManualCancelModal(reservationNumber) {
           if (!manualCancelModal) {
             return;
           }
           var row = findReservationByNumber(reservationNumber) || {};
           var isExternalManual = isExternalManualReservation(row);
+          manualCancelSubmitting = false;
           activeManualCancelReservationNumber = String(reservationNumber || "");
           var titleEl = document.getElementById("admin-manual-cancel-title");
           if (titleEl) {
@@ -5177,35 +5193,52 @@
                 formatKRW(getReservationPaidTotal(row));
           }
           setManualCancelMessage("");
+          setManualCancelButtonsDisabled(false);
+          if (manualCancelModal.style.pointerEvents === "none") {
+            manualCancelModal.style.pointerEvents = "";
+          }
           manualCancelModal.hidden = false;
         }
 
-        function closeManualCancelModal() {
+        function closeManualCancelModal(force) {
+          if (manualCancelSubmitting && force !== true) {
+            return;
+          }
+          manualCancelSubmitting = false;
           if (manualCancelModal) {
+            manualCancelModal.style.pointerEvents = "none";
             manualCancelModal.hidden = true;
+            window.setTimeout(function () {
+              if (manualCancelModal) {
+                manualCancelModal.style.pointerEvents = "";
+              }
+            }, 0);
           }
           activeManualCancelReservationNumber = "";
           setManualCancelMessage("");
+          setManualCancelButtonsDisabled(false);
         }
 
         function confirmManualCancel() {
-          if (!activeManualCancelReservationNumber) {
+          if (
+            manualCancelSubmitting ||
+            !activeManualCancelReservationNumber
+          ) {
             return;
           }
+          var reservationNumber = activeManualCancelReservationNumber;
           var auth = getAuthPayload();
-          var row =
-            findReservationByNumber(activeManualCancelReservationNumber) || {};
+          var row = findReservationByNumber(reservationNumber) || {};
           var isExternalManual = isExternalManualReservation(row);
-          if (manualCancelYesBtn) {
-            manualCancelYesBtn.disabled = true;
-          }
+          manualCancelSubmitting = true;
+          setManualCancelButtonsDisabled(true);
           setManualCancelMessage(
             isExternalManual
               ? "취소 처리 중입니다."
               : "100% 환불 및 취소 처리 중입니다.",
           );
           adminPost("payment-cancel", {
-            reservationNumber: activeManualCancelReservationNumber,
+            reservationNumber: reservationNumber,
             adminId: auth.adminId,
             adminPw: auth.adminPw,
           })
@@ -5223,18 +5256,15 @@
                         "관리자 취소(환불) 처리에 실패했습니다.",
                 );
               }
-              closeManualCancelModal();
+              closeManualCancelModal(true);
               return loadReservationList("current");
             })
             .catch(function (err) {
+              manualCancelSubmitting = false;
+              setManualCancelButtonsDisabled(false);
               setManualCancelMessage(
                 (err && err.message) || "취소 처리 중 오류가 발생했습니다.",
               );
-            })
-            .finally(function () {
-              if (manualCancelYesBtn) {
-                manualCancelYesBtn.disabled = false;
-              }
             });
         }
 
@@ -7105,18 +7135,30 @@
         }
 
         if (manualCancelCloseBtn) {
-          manualCancelCloseBtn.addEventListener(
-            "click",
-            closeManualCancelModal,
-          );
+          manualCancelCloseBtn.addEventListener("click", function () {
+            closeManualCancelModal();
+          });
         }
 
-        if (manualCancelNoBtn) {
-          manualCancelNoBtn.addEventListener("click", closeManualCancelModal);
-        }
-
-        if (manualCancelYesBtn) {
-          manualCancelYesBtn.addEventListener("click", confirmManualCancel);
+        if (manualCancelModal) {
+          manualCancelModal.addEventListener("click", function (e) {
+            var actionBtn =
+              e.target.closest &&
+              e.target.closest("[data-manual-cancel-action]");
+            if (!actionBtn || !manualCancelModal.contains(actionBtn)) {
+              return;
+            }
+            e.preventDefault();
+            e.stopPropagation();
+            var action = actionBtn.getAttribute("data-manual-cancel-action");
+            if (action === "confirm") {
+              confirmManualCancel();
+              return;
+            }
+            if (action === "dismiss") {
+              closeManualCancelModal();
+            }
+          });
         }
 
         if (checkinResendNoBtn) {
