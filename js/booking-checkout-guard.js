@@ -36,6 +36,38 @@
     }
   }
 
+  function isPaymentInProgress() {
+    try {
+      if (sessionStorage.getItem("graffordInPaymentFlow") === "1") {
+        return true;
+      }
+      var keys = Object.keys(sessionStorage);
+      for (var i = 0; i < keys.length; i++) {
+        if (
+          keys[i].indexOf("graffordPaymentProcessing:") === 0 &&
+          sessionStorage.getItem(keys[i]) === "1"
+        ) {
+          return true;
+        }
+      }
+    } catch (_e) {}
+    return false;
+  }
+
+  function hasPortoneRedirectReturn() {
+    if (
+      root.GraffordPortoneFlow &&
+      root.GraffordPortoneFlow.hasPortoneRedirectParams
+    ) {
+      return root.GraffordPortoneFlow.hasPortoneRedirectParams(root.location);
+    }
+    try {
+      return !!new URLSearchParams(root.location.search || "").get("paymentId");
+    } catch (_e) {
+      return false;
+    }
+  }
+
   function allowCheckoutNavigation() {
     if (allowCheckoutNavigationFn) {
       allowCheckoutNavigationFn();
@@ -77,7 +109,13 @@
 
   function abandonCheckoutOnReload(redirectTo) {
     var target = redirectTo || "RESERVATION.html";
-    if (!isPageReload() || isCheckoutNavigationAllowed() || !hasActiveCheckoutSession()) {
+    if (
+      hasPortoneRedirectReturn() ||
+      isPaymentInProgress() ||
+      !isPageReload() ||
+      isCheckoutNavigationAllowed() ||
+      !hasActiveCheckoutSession()
+    ) {
       return false;
     }
     if (root.GraffordBookingToken) {
@@ -115,7 +153,7 @@
       typeof options.hideLeaveOverlay === "function"
         ? options.hideLeaveOverlay
         : function () {};
-    var onExpired =
+    var onExpiredOption =
       typeof options.onExpired === "function"
         ? options.onExpired
         : function () {
@@ -123,6 +161,12 @@
               root.GraffordBookingToken.showExpiredModal();
             }
           };
+    function onExpired() {
+      if (isPaymentInProgress()) {
+        return;
+      }
+      onExpiredOption();
+    }
     var ttlElementIds = options.ttlElementIds || [];
     var leaveConfirmButtons = options.leaveConfirmButtons || [];
     var leaveCancelButtons = options.leaveCancelButtons || [];
@@ -166,7 +210,11 @@
     }
 
     markCheckoutActive();
-    clearCheckoutNavigationAllowance();
+    if (hasPortoneRedirectReturn() || isPaymentInProgress()) {
+      allowCheckoutNavigation();
+    } else {
+      clearCheckoutNavigationAllowance();
+    }
 
     var timerStop = null;
     function startTtlTimer() {
@@ -294,7 +342,8 @@
         if (
           !hasActiveCheckoutSession() ||
           leaveConfirmed ||
-          isCheckoutNavigationAllowed()
+          isCheckoutNavigationAllowed() ||
+          isPaymentInProgress()
         ) {
           return;
         }
@@ -306,7 +355,8 @@
         if (
           !hasActiveCheckoutSession() ||
           leaveConfirmed ||
-          isCheckoutNavigationAllowed()
+          isCheckoutNavigationAllowed() ||
+          isPaymentInProgress()
         ) {
           return;
         }
@@ -336,5 +386,7 @@
     isCheckoutActive: isCheckoutActive,
     allowCheckoutNavigation: allowCheckoutNavigation,
     clearCheckoutNavigationAllowance: clearCheckoutNavigationAllowance,
+    isPaymentInProgress: isPaymentInProgress,
+    hasPortoneRedirectReturn: hasPortoneRedirectReturn,
   };
 })(typeof window !== "undefined" ? window : this);

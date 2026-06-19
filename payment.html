@@ -12,7 +12,15 @@
       (function () {
         try {
           if (sessionStorage.getItem("graffordCheckoutBlocked") === "1") {
-            location.replace("RESERVATION.html");
+            var hasPortoneReturn = false;
+            try {
+              hasPortoneReturn = !!new URLSearchParams(
+                location.search || "",
+              ).get("paymentId");
+            } catch (_q) {}
+            if (!hasPortoneReturn) {
+              location.replace("RESERVATION.html");
+            }
           }
         } catch (_e) {}
       })();
@@ -22,6 +30,7 @@
     <script src="js/site-language.js" defer></script>
     <!-- PortOne v2 Browser SDK -->
     <script src="https://cdn.portone.io/v2/browser-sdk.js"></script>
+    <script src="js/payment-portone-flow.js?v=2"></script>
     <!--
       KG이니시스(PortOne) 결제수단 노출 설정
       true → 결제수단 drawer에 표시 · false → 숨김
@@ -632,8 +641,8 @@
 
       <script src="js/booking-pricing.js?v=6"></script>
       <script src="js/booking-token-client.js?v=5"></script>
-      <script src="js/booking-checkout-guard.js?v=5"></script>
-      <script src="js/payment-methods.js?v=4"></script>
+      <script src="js/booking-checkout-guard.js?v=7"></script>
+      <script src="js/payment-methods.js?v=5"></script>
       <script>
         document.addEventListener("DOMContentLoaded", function () {
           var P = window.GraffordBookingPricing;
@@ -748,12 +757,20 @@
 
           function markPaymentProcessing() {
             paymentInProgress = true;
-            try {
-              sessionStorage.setItem(
-                "graffordPaymentProcessing:" + orderNo,
-                "1",
-              );
-            } catch (_e) {}
+            if (
+              window.GraffordPortoneFlow &&
+              window.GraffordPortoneFlow.preparePaymentDeparture
+            ) {
+              window.GraffordPortoneFlow.preparePaymentDeparture(orderNo);
+            } else {
+              try {
+                sessionStorage.setItem(
+                  "graffordPaymentProcessing:" + orderNo,
+                  "1",
+                );
+                sessionStorage.setItem("graffordInPaymentFlow", "1");
+              } catch (_e) {}
+            }
             if (submitBtn) submitBtn.disabled = true;
           }
 
@@ -1156,9 +1173,13 @@
             refreshPaymentMethodUiKr();
           }
 
-          bootstrapKr().catch(function () {
-            hideLoading();
-          });
+          bootstrapKr()
+            .then(function () {
+              return handlePortoneRedirectReturn();
+            })
+            .catch(function () {
+              hideLoading();
+            });
 
           function showError(msg) {
             hidePageLoading();
@@ -1171,6 +1192,107 @@
               });
             }
           }
+
+          function buildPortoneRedirectUrl() {
+            var flow = window.GraffordPortoneFlow;
+            return flow
+              ? flow.buildPortoneRedirectUrl(window.location)
+              : window.location.origin + window.location.pathname;
+          }
+
+          function buildPortoneFinalizeOptions(response) {
+            return {
+              response: response,
+              showError: showError,
+              showPageLoading: showPageLoading,
+              resetPaymentGuard: resetPaymentGuard,
+              persistSaved: persistSaved,
+              refreshPaymentMethodUi: refreshPaymentMethodUiKr,
+              reservationsApiUrl: reservationsApiUrl,
+              GPM: GPM,
+              orderNo: orderNo,
+              finalAmount: finalAmount,
+              payMethod: payMethod,
+              saved: saved,
+              preSavedCancelToken: preSavedCancelToken,
+              bookingToken: bookingToken,
+              bookingLocale: bookingLocale,
+              room: room,
+              checkIn: checkIn,
+              checkOut: checkOut,
+              stayNights: stayNights,
+              extraGuests: extraGuests,
+              guestCount: guestCount,
+              guestName: guestName,
+              contact: contact,
+              email: email,
+              guestRequest: guestRequest,
+              paymentSettledKey: paymentSettledKey,
+              processingMsg: processingMsg,
+              messages: {
+                cancelled: "결제가 취소되었습니다",
+                verifying: "결제 확인 중입니다...",
+                verifyFailed:
+                  "결제 검증에 실패했습니다. 결제가 정상적으로 이루어졌다면 고객센터로 문의해 주세요.\n",
+                verifyNetworkError:
+                  "결제 검증 중 네트워크 오류가 발생했습니다. 결제가 정상적으로 이루어졌다면 고객센터로 문의해 주세요.\n(",
+                savingReservation: "예약 정보를 저장하는 중입니다...",
+                saveFailed:
+                  "결제는 완료되었으나 예약 저장에 실패했습니다.\n고객센터로 문의해 주세요.\n(결제번호: ",
+                saveNetworkError:
+                  "결제는 완료되었으나 예약 저장 중 오류가 발생했습니다.\n고객센터로 문의해 주세요.\n(결제번호: ",
+                redirecting: "완료 화면으로 이동하는 중입니다...",
+              },
+            };
+          }
+
+          async function handlePortoneRedirectReturn() {
+            if (bookingLocale === "en") {
+              return false;
+            }
+            var flow = window.GraffordPortoneFlow;
+            if (!flow || !flow.parsePortoneRedirectFromLocation) {
+              return false;
+            }
+            var redirectResult = flow.parsePortoneRedirectFromLocation(
+              window.location,
+            );
+            if (!redirectResult) {
+              return false;
+            }
+            if (redirectResult.paymentId !== orderNo) {
+              flow.clearPortoneRedirectQuery(window.location);
+              return false;
+            }
+            if (
+              flow.isPaymentFinalizeInProgress &&
+              flow.isPaymentFinalizeInProgress(orderNo)
+            ) {
+              return true;
+            }
+            if (window.GraffordCheckoutGuard) {
+              window.GraffordCheckoutGuard.allowCheckoutNavigation();
+            }
+            flow.clearPortoneRedirectQuery(window.location);
+            if (redirectResult.code) {
+              resetPaymentGuard();
+              showError(redirectResult.message || "결제가 취소되었습니다");
+              return true;
+            }
+            markPaymentProcessing();
+            if (processingMsg) processingMsg.hidden = false;
+            await flow.finalizePortoneCheckout(
+              buildPortoneFinalizeOptions(redirectResult),
+            );
+            return true;
+          }
+
+          window.addEventListener("pageshow", function (e) {
+            if (!e.persisted || bookingLocale === "en") {
+              return;
+            }
+            handlePortoneRedirectReturn();
+          });
 
           async function startPayment() {
             if (paymentInProgress) {
@@ -1296,6 +1418,8 @@
 
             var orderName =
               "GRAFFORD 숙박 예약 (" + (ROOM_LABELS[room] || room) + ")";
+            var portoneRedirectUrl = buildPortoneRedirectUrl();
+            var portoneFlow = window.GraffordPortoneFlow;
             var portoneParams = GPM
               ? GPM.buildPortoneParams(
                   payMethod,
@@ -1310,10 +1434,7 @@
                       email: email || undefined,
                     },
                     locale: "KO_KR",
-                    redirectUrl:
-                      window.location.origin +
-                      window.location.pathname.replace("payment.html", "") +
-                      "payment.html",
+                    redirectUrl: portoneRedirectUrl,
                     confirmUrl: portoneWebhookApiUrl(),
                     noticeUrls: [portoneWebhookApiUrl()],
                   },
@@ -1333,13 +1454,15 @@
                     email: email || undefined,
                   },
                   locale: "KO_KR",
-                  redirectUrl:
-                    window.location.origin +
-                    window.location.pathname.replace("payment.html", "") +
-                    "payment.html",
+                  redirectUrl: portoneRedirectUrl,
                   confirmUrl: portoneWebhookApiUrl(),
                   noticeUrls: [portoneWebhookApiUrl()],
                 };
+            if (portoneFlow && portoneFlow.enhancePortoneRequestParams) {
+              portoneParams = portoneFlow.enhancePortoneRequestParams(
+                portoneParams,
+              );
+            }
 
             var response;
             try {
@@ -1352,161 +1475,26 @@
               return;
             }
 
+            if (
+              portoneFlow &&
+              portoneFlow.isRedirectDeferredResponse(response, portoneParams)
+            ) {
+              showPageLoading(
+                "결제창으로 이동합니다. 결제 완료 후 자동으로 돌아옵니다...",
+              );
+              return;
+            }
+
             if (!response || response.code) {
               showError("결제가 취소되었습니다");
               return;
             }
 
-            var verifiedPgTid = null;
-            var verifiedPayMethod = payMethod;
-            var verifiedPgPayProvider = null;
-            try {
-              showPageLoading("결제 확인 중입니다...");
-              var verifyRes = await fetch("/api/payment-confirm", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                  paymentId: response.paymentId,
-                  expectedAmount: finalAmount,
-                  paymentToken: response.paymentToken || null,
-                  txId: response.txId || null,
-                  requestedPaymentMethod: payMethod,
-                }),
-              });
-              var verifyData = await verifyRes.json();
-              if (!verifyRes.ok || !verifyData.ok) {
-                var verifyErrMsg = verifyData.error || verifyData.message || "";
-                if (verifyData.expected != null && verifyData.actual != null) {
-                  verifyErrMsg +=
-                    "\n(결제 금액: 예상 " +
-                    verifyData.expected +
-                    "원 / 실제 " +
-                    verifyData.actual +
-                    "원)";
-                }
-                showError(
-                  "결제 검증에 실패했습니다. 결제가 정상적으로 이루어졌다면 고객센터로 문의해 주세요.\n" +
-                    verifyErrMsg,
-                );
-                return;
-              }
-              verifiedPgTid = verifyData.pgTid || null;
-              if (GPM) {
-                var verified = GPM.resolveVerifiedMethod(verifyData, payMethod);
-                verifiedPayMethod = verified.methodId;
-                verifiedPgPayProvider = verified.pgPayProvider;
-              } else if (verifyData.paymentMethod) {
-                verifiedPayMethod = verifyData.paymentMethod;
-                verifiedPgPayProvider = verifyData.pgPayProvider || null;
-              }
-            } catch (e) {
-              showError(
-                "결제 검증 중 네트워크 오류가 발생했습니다. 결제가 정상적으로 이루어졌다면 고객센터로 문의해 주세요.\n(" +
-                  (e && e.message ? e.message : String(e)) +
-                  ")",
+            if (portoneFlow) {
+              await portoneFlow.finalizePortoneCheckout(
+                buildPortoneFinalizeOptions(response),
               );
-              return;
             }
-
-            payMethod = verifiedPayMethod;
-            saved.payMethod = payMethod;
-            persistSaved();
-            refreshPaymentMethodUiKr();
-
-            if (processingMsg) {
-              processingMsg.hidden = false;
-              processingMsg.textContent = "예약 정보를 저장하는 중입니다...";
-            }
-
-            var fetchedCancelToken = preSavedCancelToken;
-            {
-              var saveRes, saveData;
-              try {
-                showPageLoading("예약 정보를 저장하는 중입니다...");
-                saveRes = await fetch(reservationsApiUrl(), {
-                  method: "POST",
-                  headers: { "Content-Type": "application/json" },
-                  body: JSON.stringify({
-                    reservationNumber: orderNo,
-                    guestName: guestName,
-                    contact: contact,
-                    email: email,
-                    guestRequest: guestRequest,
-                    roomType: room,
-                    checkIn: checkIn,
-                    checkOut: checkOut,
-                    stayNights: stayNights,
-                    extraGuests: extraGuests,
-                    totalAmount: finalAmount,
-                    paymentMethod: verifiedPayMethod,
-                    pgPayProvider: verifiedPgPayProvider,
-                    guestCount: guestCount,
-                    pgTid: verifiedPgTid,
-                    bookingToken: bookingToken,
-                    bookingLocale: bookingLocale,
-                  }),
-                });
-                saveData = await saveRes.json();
-              } catch (e) {
-                showError(
-                  "결제는 완료되었으나 예약 저장 중 오류가 발생했습니다.\n고객센터로 문의해 주세요.\n(결제번호: " +
-                    orderNo +
-                    ")\n(" +
-                    (e && e.message ? e.message : String(e)) +
-                    ")",
-                );
-                return;
-              }
-
-              if (saveData && saveData.unavailable) {
-                resetPaymentGuard();
-                window.GraffordBookingToken.showUnavailableModal();
-                return;
-              }
-
-              // 409: 이미 저장된 예약 (선저장 경로) → 성공으로 처리
-              if (saveRes.status !== 409 && (!saveRes.ok || !saveData.ok)) {
-                showError(
-                  "결제는 완료되었으나 예약 저장에 실패했습니다.\n고객센터로 문의해 주세요.\n(결제번호: " +
-                    orderNo +
-                    ")\n" +
-                    (saveData.error || ""),
-                );
-                return;
-              }
-              fetchedCancelToken =
-                (saveData && saveData.cancelToken) || fetchedCancelToken;
-            }
-            var bookingCreatedAtIso = (saveData && saveData.createdAtIso) || "";
-            sessionStorage.removeItem("graffordInPaymentFlow");
-            sessionStorage.setItem(paymentSettledKey, "1");
-            if (window.GraffordBookingToken) {
-              window.GraffordBookingToken.clearCheckoutSession();
-            }
-
-            sessionStorage.setItem(
-              "graffordReserveCompleteData",
-              JSON.stringify({
-                orderNo: orderNo,
-                room: room,
-                checkIn: checkIn,
-                checkOut: checkOut,
-                guestName: guestName,
-                contact: contact,
-                email: email,
-                guestRequest: guestRequest,
-                guestCount: String(guestCount),
-                extraGuests: String(extraGuests),
-                totalAmount: String(finalAmount),
-                payMethod: payMethod,
-                cancelToken: fetchedCancelToken,
-                bookingCreatedAtIso: bookingCreatedAtIso,
-                bookingLocale: bookingLocale,
-              }),
-            );
-
-            showPageLoading("완료 화면으로 이동하는 중입니다...");
-            window.location.href = "reserve-complete.html";
           }
 
           if (submitBtn) {
@@ -2077,8 +2065,8 @@
 
       <script src="js/booking-pricing.js?v=6"></script>
       <script src="js/booking-token-client.js?v=5"></script>
-      <script src="js/booking-checkout-guard.js?v=5"></script>
-      <script src="js/payment-methods.js?v=4"></script>
+      <script src="js/booking-checkout-guard.js?v=7"></script>
+      <script src="js/payment-methods.js?v=5"></script>
       <script>
         document.addEventListener("DOMContentLoaded", function () {
           var P = window.GraffordBookingPricing;
@@ -2195,12 +2183,20 @@
 
           function markPaymentProcessing() {
             paymentInProgress = true;
-            try {
-              sessionStorage.setItem(
-                "graffordPaymentProcessing:" + orderNo,
-                "1",
-              );
-            } catch (_e) {}
+            if (
+              window.GraffordPortoneFlow &&
+              window.GraffordPortoneFlow.preparePaymentDeparture
+            ) {
+              window.GraffordPortoneFlow.preparePaymentDeparture(orderNo);
+            } else {
+              try {
+                sessionStorage.setItem(
+                  "graffordPaymentProcessing:" + orderNo,
+                  "1",
+                );
+                sessionStorage.setItem("graffordInPaymentFlow", "1");
+              } catch (_e) {}
+            }
             if (submitBtn) submitBtn.disabled = true;
           }
 
@@ -2631,9 +2627,13 @@
             refreshPaymentMethodUiEn();
           }
 
-          bootstrapEn().catch(function () {
-            hideLoading();
-          });
+          bootstrapEn()
+            .then(function () {
+              return handlePortoneRedirectReturnEn();
+            })
+            .catch(function () {
+              hideLoading();
+            });
 
           function showError(msg) {
             hidePageLoading();
@@ -2646,6 +2646,109 @@
               });
             }
           }
+
+          function buildPortoneRedirectUrlEn() {
+            var flow = window.GraffordPortoneFlow;
+            return flow
+              ? flow.buildPortoneRedirectUrl(window.location)
+              : window.location.origin + window.location.pathname;
+          }
+
+          function buildPortoneFinalizeOptionsEn(response) {
+            return {
+              response: response,
+              showError: showError,
+              showPageLoading: showPageLoading,
+              resetPaymentGuard: resetPaymentGuard,
+              persistSaved: persistSavedEn,
+              refreshPaymentMethodUi: refreshPaymentMethodUiEn,
+              reservationsApiUrl: reservationsApiUrl,
+              GPM: GPM,
+              orderNo: orderNo,
+              finalAmount: finalAmount,
+              payMethod: payMethod,
+              saved: saved,
+              preSavedCancelToken: preSavedCancelToken,
+              bookingToken: bookingToken,
+              bookingLocale: bookingLocale,
+              room: room,
+              checkIn: checkIn,
+              checkOut: checkOut,
+              stayNights: stayNights,
+              extraGuests: extraGuests,
+              guestCount: guestCount,
+              guestName: guestName,
+              contact: contact,
+              email: email,
+              guestRequest: guestRequest,
+              paymentSettledKey: paymentSettledKey,
+              processingMsg: processingMsg,
+              messages: {
+                cancelled: "Payment was cancelled",
+                verifying: "Verifying payment...",
+                verifyFailed:
+                  "Payment verification failed. If you believe your payment went through, please contact support.\n",
+                verifyNetworkError:
+                  "Network error during payment verification. If you believe your payment went through, please contact support.\n(",
+                amountMismatchFormat:
+                  "\n(Expected: {expected} KRW / Actual: {actual} KRW)",
+                savingReservation: "Saving reservation...",
+                saveFailed:
+                  "Payment completed but reservation save failed. Please contact support.\n(Payment ID: ",
+                saveNetworkError:
+                  "Payment completed but reservation save failed. Please contact support.\n(Payment ID: ",
+                redirecting: "Moving to completion page...",
+              },
+            };
+          }
+
+          async function handlePortoneRedirectReturnEn() {
+            if (bookingLocale !== "en") {
+              return false;
+            }
+            var flow = window.GraffordPortoneFlow;
+            if (!flow || !flow.parsePortoneRedirectFromLocation) {
+              return false;
+            }
+            var redirectResult = flow.parsePortoneRedirectFromLocation(
+              window.location,
+            );
+            if (!redirectResult) {
+              return false;
+            }
+            if (redirectResult.paymentId !== orderNo) {
+              flow.clearPortoneRedirectQuery(window.location);
+              return false;
+            }
+            if (
+              flow.isPaymentFinalizeInProgress &&
+              flow.isPaymentFinalizeInProgress(orderNo)
+            ) {
+              return true;
+            }
+            if (window.GraffordCheckoutGuard) {
+              window.GraffordCheckoutGuard.allowCheckoutNavigation();
+            }
+            flow.clearPortoneRedirectQuery(window.location);
+            if (redirectResult.code) {
+              resetPaymentGuard();
+              showError(redirectResult.message || "Payment was cancelled");
+              return true;
+            }
+            markPaymentProcessing();
+            if (processingMsg) processingMsg.hidden = false;
+            await flow.finalizePortoneCheckout(
+              buildPortoneFinalizeOptionsEn(redirectResult),
+            );
+            return true;
+          }
+
+          window.addEventListener("pageshow", function (e) {
+            if (!e.persisted || bookingLocale !== "en") {
+              return;
+            }
+            handlePortoneRedirectReturnEn();
+          });
 
           async function startPayment() {
             if (paymentInProgress) {
@@ -2775,6 +2878,8 @@
               "GRAFFORD Stay Reservation (" + (ROOM_LABELS[room] || room) + ")";
             var portoneLocale =
               GPM && GPM.isEasyPayMethodId(payMethod) ? "KO_KR" : "EN_US";
+            var portoneRedirectUrlEn = buildPortoneRedirectUrlEn();
+            var portoneFlowEn = window.GraffordPortoneFlow;
             var portoneParams = GPM
               ? GPM.buildPortoneParams(
                   payMethod,
@@ -2789,10 +2894,7 @@
                       email: email || undefined,
                     },
                     locale: portoneLocale,
-                    redirectUrl:
-                      window.location.origin +
-                      window.location.pathname.replace("payment.html", "") +
-                      "payment.html",
+                    redirectUrl: portoneRedirectUrlEn,
                     confirmUrl: portoneWebhookApiUrl(),
                     noticeUrls: [portoneWebhookApiUrl()],
                   },
@@ -2812,13 +2914,15 @@
                     email: email || undefined,
                   },
                   locale: "EN_US",
-                  redirectUrl:
-                    window.location.origin +
-                    window.location.pathname.replace("payment.html", "") +
-                    "payment.html",
+                  redirectUrl: portoneRedirectUrlEn,
                   confirmUrl: portoneWebhookApiUrl(),
                   noticeUrls: [portoneWebhookApiUrl()],
                 };
+            if (portoneFlowEn && portoneFlowEn.enhancePortoneRequestParams) {
+              portoneParams = portoneFlowEn.enhancePortoneRequestParams(
+                portoneParams,
+              );
+            }
 
             var response;
             try {
@@ -2831,168 +2935,26 @@
               return;
             }
 
+            if (
+              portoneFlowEn &&
+              portoneFlowEn.isRedirectDeferredResponse(response, portoneParams)
+            ) {
+              showPageLoading(
+                "Opening payment. You will return here automatically after payment...",
+              );
+              return;
+            }
+
             if (!response || response.code) {
               showError("Payment was cancelled");
               return;
             }
 
-            var verifiedPgTid2 = null;
-            var verifiedPayMethod = payMethod;
-            var verifiedPgPayProvider = null;
-            try {
-              showPageLoading("Verifying payment...");
-              var verifyRes = await fetch("/api/payment-confirm", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                  paymentId: response.paymentId,
-                  expectedAmount: finalAmount,
-                  paymentToken: response.paymentToken || null,
-                  txId: response.txId || null,
-                  requestedPaymentMethod: payMethod,
-                }),
-              });
-              var verifyData = await verifyRes.json();
-              if (!verifyRes.ok || !verifyData.ok) {
-                var verifyErrMsgEn =
-                  verifyData.error || verifyData.message || "";
-                if (verifyData.expected != null && verifyData.actual != null) {
-                  verifyErrMsgEn +=
-                    "\n(Expected: " +
-                    verifyData.expected +
-                    " KRW / Actual: " +
-                    verifyData.actual +
-                    " KRW)";
-                }
-                showError(
-                  "Payment verification failed. If you believe your payment went through, please contact support.\n" +
-                    verifyErrMsgEn,
-                );
-                return;
-              }
-              verifiedPgTid2 = verifyData.pgTid || null;
-              if (GPM) {
-                var verifiedEn = GPM.resolveVerifiedMethod(
-                  verifyData,
-                  payMethod,
-                );
-                verifiedPayMethod = verifiedEn.methodId;
-                verifiedPgPayProvider = verifiedEn.pgPayProvider;
-              } else if (verifyData.paymentMethod) {
-                verifiedPayMethod = verifyData.paymentMethod;
-                verifiedPgPayProvider = verifyData.pgPayProvider || null;
-              }
-            } catch (e) {
-              showError(
-                "Network error during payment verification. If you believe your payment went through, please contact support.\n(" +
-                  (e && e.message ? e.message : String(e)) +
-                  ")",
+            if (portoneFlowEn) {
+              await portoneFlowEn.finalizePortoneCheckout(
+                buildPortoneFinalizeOptionsEn(response),
               );
-              return;
             }
-
-            payMethod = verifiedPayMethod;
-            saved.payMethod = payMethod;
-            persistSavedEn();
-            refreshPaymentMethodUiEn();
-
-            if (processingMsg) {
-              processingMsg.hidden = false;
-              processingMsg.textContent = "Saving reservation...";
-            }
-
-            var fetchedCancelToken2 = preSavedCancelToken;
-            {
-              var saveRes2, saveData2;
-              try {
-                showPageLoading("Saving reservation...");
-                saveRes2 = await fetch(reservationsApiUrl(), {
-                  method: "POST",
-                  headers: { "Content-Type": "application/json" },
-                  body: JSON.stringify({
-                    reservationNumber: orderNo,
-                    guestName: guestName,
-                    contact: contact,
-                    email: email,
-                    guestRequest: guestRequest,
-                    roomType: room,
-                    checkIn: checkIn,
-                    checkOut: checkOut,
-                    stayNights: stayNights,
-                    extraGuests: extraGuests,
-                    totalAmount: finalAmount,
-                    paymentMethod: verifiedPayMethod,
-                    pgPayProvider: verifiedPgPayProvider,
-                    guestCount: guestCount,
-                    pgTid: verifiedPgTid2,
-                    bookingToken: bookingToken,
-                    bookingLocale: bookingLocale,
-                  }),
-                });
-                saveData2 = await saveRes2.json();
-              } catch (e) {
-                showError(
-                  "Payment completed but reservation save failed. Please contact support.\n(Payment ID: " +
-                    orderNo +
-                    ")\n(" +
-                    (e && e.message ? e.message : String(e)) +
-                    ")",
-                );
-                return;
-              }
-
-              if (saveData2 && saveData2.unavailable) {
-                resetPaymentGuard();
-                window.GraffordBookingToken.showUnavailableModal({
-                  redirectTo: "RESERVATION.html",
-                });
-                return;
-              }
-
-              // 409: already saved (pre-save path) → treat as success
-              if (saveRes2.status !== 409 && (!saveRes2.ok || !saveData2.ok)) {
-                showError(
-                  "Payment completed but reservation save failed. Please contact support.\n(Payment ID: " +
-                    orderNo +
-                    ")\n" +
-                    (saveData2.error || ""),
-                );
-                return;
-              }
-              fetchedCancelToken2 =
-                (saveData2 && saveData2.cancelToken) || fetchedCancelToken2;
-            }
-            var bookingCreatedAtIso2 =
-              (saveData2 && saveData2.createdAtIso) || "";
-            sessionStorage.removeItem("graffordInPaymentFlow");
-            sessionStorage.setItem(paymentSettledKey, "1");
-            if (window.GraffordBookingToken) {
-              window.GraffordBookingToken.clearCheckoutSession();
-            }
-
-            sessionStorage.setItem(
-              "graffordReserveCompleteData",
-              JSON.stringify({
-                orderNo: orderNo,
-                room: room,
-                checkIn: checkIn,
-                checkOut: checkOut,
-                guestName: guestName,
-                contact: contact,
-                email: email,
-                guestRequest: guestRequest,
-                guestCount: String(guestCount),
-                extraGuests: String(extraGuests),
-                totalAmount: String(finalAmount),
-                payMethod: payMethod,
-                cancelToken: fetchedCancelToken2,
-                bookingCreatedAtIso: bookingCreatedAtIso2,
-                bookingLocale: bookingLocale,
-              }),
-            );
-
-            showPageLoading("Moving to completion page...");
-            window.location.href = "reserve-complete.html";
           }
 
           if (submitBtn) {
@@ -3295,6 +3257,18 @@
 
         paymentSessionReady.catch(function (err) {
           console.warn("[checkout-guard] payment session init failed:", err);
+          if (
+            window.GraffordPortoneFlow &&
+            window.GraffordPortoneFlow.hasPortoneRedirectParams()
+          ) {
+            return;
+          }
+          if (
+            window.GraffordCheckoutGuard &&
+            window.GraffordCheckoutGuard.isPaymentInProgress()
+          ) {
+            return;
+          }
           if (
             window.GraffordBookingToken &&
             window.GraffordBookingToken.redirectIfCheckoutBlocked()

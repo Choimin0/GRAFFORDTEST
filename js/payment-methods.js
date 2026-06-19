@@ -162,6 +162,10 @@
       noticeUrls: ctx.noticeUrls,
     };
 
+    if (params.redirectUrl) {
+      params.forceRedirect = true;
+    }
+
     if (meta.category === "easy_pay" && meta.easyPayProvider) {
       params.easyPay = { easyPayProvider: meta.easyPayProvider };
       if (id === "naver" && ctx.checkOut) {
