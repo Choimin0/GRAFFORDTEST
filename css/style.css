@@ -12787,6 +12787,34 @@ main.content-section.confirm-page.admin-page {
   background: transparent;
   color: var(--stone-400);
 }
+.admin-room-state-badges {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+.admin-calendar-detail-item.is-split {
+  border-color: color-mix(in srgb, var(--gold-500) 28%, var(--stone-200));
+}
+.admin-calendar-detail-split {
+  display: grid;
+  gap: var(--space-12);
+}
+.admin-calendar-detail-split__block {
+  padding-top: var(--space-8);
+  border-top: 1px solid rgba(58, 53, 49, 0.1);
+}
+.admin-calendar-detail-split__block:first-child {
+  padding-top: 0;
+  border-top: 0;
+}
+.admin-calendar-detail-split__label {
+  margin: 0 0 var(--space-8);
+  color: var(--stone-600);
+  font-size: 0.68rem;
+  letter-spacing: 0.1em;
+}
 .admin-calendar-detail-kv {
   display: grid;
   gap: var(--space-8);

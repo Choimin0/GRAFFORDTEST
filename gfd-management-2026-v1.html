@@ -2052,7 +2052,7 @@
             });
         }
 
-        function getRoomStatusForDate(room, ymd) {
+        function getRoomReservationPartsForDate(room, ymd) {
           var rows = getRoomRows(room);
           var checkinRow = null;
           var stayRow = null;
@@ -2068,11 +2068,34 @@
               checkoutRow = row;
             }
           });
+          return {
+            checkinRow: checkinRow,
+            stayRow: stayRow,
+            checkoutRow: checkoutRow,
+          };
+        }
+
+        function getRoomStatusForDate(room, ymd) {
+          var parts = getRoomReservationPartsForDate(room, ymd);
+          var checkinRow = parts.checkinRow;
+          var stayRow = parts.stayRow;
+          var checkoutRow = parts.checkoutRow;
+          if (checkoutRow && checkinRow) {
+            return {
+              state: "split",
+              label: "체크아웃 · 체크인",
+              row: checkinRow,
+              checkoutRow: checkoutRow,
+              checkinRow: checkinRow,
+              isSimultaneousTurnover: true,
+            };
+          }
           if (checkinRow) {
             return {
               state: "checkin",
               label: checkinRow.isExternal ? "에어비앤비" : "체크인",
               row: checkinRow,
+              isSimultaneousTurnover: false,
             };
           }
           if (stayRow) {
@@ -2080,6 +2103,7 @@
               state: "stay",
               label: stayRow.isExternal ? "에어비앤비" : "재실",
               row: stayRow,
+              isSimultaneousTurnover: false,
             };
           }
           if (checkoutRow) {
@@ -2087,14 +2111,24 @@
               state: "checkout",
               label: checkoutRow.isExternal ? "에어비앤비" : "체크아웃",
               row: checkoutRow,
+              isSimultaneousTurnover: false,
             };
           }
-          return { state: "vacant", label: "공실", row: null };
+          return {
+            state: "vacant",
+            label: "공실",
+            row: null,
+            isSimultaneousTurnover: false,
+          };
         }
 
         function isRoomOccupiedOnDate(room, ymd) {
           var status = getRoomStatusForDate(room, ymd);
-          return status.state === "checkin" || status.state === "stay";
+          return (
+            status.state === "checkin" ||
+            status.state === "stay" ||
+            status.state === "split"
+          );
         }
 
         function renderStatusMetrics() {
@@ -2611,6 +2645,7 @@
                 formatCalendarListCell(row && row.checkIn),
                 formatCalendarListCell(row && row.checkOut),
                 formatCalendarListCell(row && row.guestRequest),
+                status.isSimultaneousTurnover ? "TRUE" : "FALSE",
               ].join(" | "),
             );
           });
@@ -2629,54 +2664,96 @@
             });
         }
 
+        function buildRoomStateBadgeHtml(state, label) {
+          return (
+            "<span class='admin-room-state-badge admin-room-state-badge--" +
+            state +
+            "'>" +
+            escapeHtml(label) +
+            "</span>"
+          );
+        }
+
+        function buildCalendarDetailStatusBadgesHtml(status) {
+          if (status.state === "split") {
+            var checkoutLabel = status.checkoutRow.isExternal
+              ? "에어비앤비"
+              : "체크아웃";
+            var checkinLabel = status.checkinRow.isExternal
+              ? "에어비앤비"
+              : "체크인";
+            return (
+              "<span class='admin-room-state-badges'>" +
+              buildRoomStateBadgeHtml("checkout", checkoutLabel) +
+              buildRoomStateBadgeHtml("checkin", checkinLabel) +
+              "</span>"
+            );
+          }
+          return buildRoomStateBadgeHtml(status.state, status.label);
+        }
+
+        function buildCalendarReservationDetailHtml(row) {
+          if (!row) {
+            return "";
+          }
+          if (row.isExternal) {
+            return (
+              "<dl class='admin-calendar-detail-kv'>" +
+              "<div><dt>연동 채널</dt><dd>" +
+              escapeHtml(row.guestName || "외부 예약") +
+              "</dd></div>" +
+              "<div><dt>일정</dt><dd>" +
+              escapeHtml(formatReservationSchedule(row)) +
+              "</dd></div>" +
+              "<div><dt>메모</dt><dd>" +
+              escapeHtml(row.guestRequest || "—") +
+              "</dd></div>" +
+              "</dl>"
+            );
+          }
+          return (
+            "<dl class='admin-calendar-detail-kv'>" +
+            "<div><dt>예약번호</dt><dd>" +
+            escapeHtml(row.reservationNumber || "—") +
+            "</dd></div>" +
+            "<div><dt>예약자명</dt><dd>" +
+            escapeHtml(row.guestName || "—") +
+            "</dd></div>" +
+            "<div><dt>투숙 일정</dt><dd>" +
+            escapeHtml(formatReservationSchedule(row)) +
+            "</dd></div>" +
+            "<div><dt>총 금액</dt><dd>" +
+            escapeHtml(formatKRW(row.totalAmount || 0)) +
+            "</dd></div>" +
+            "</dl>"
+          );
+        }
+
         function buildCalendarDetailCard(room, status) {
           var row = status.row;
           var card = document.createElement("article");
           card.className = "admin-calendar-detail-item is-" + status.state;
-          var statusClass =
-            "admin-room-state-badge admin-room-state-badge--" + status.state;
           card.innerHTML =
             "<div class='admin-calendar-detail-item__head'>" +
             "<strong>" +
             room +
             "</strong>" +
-            "<span class='" +
-            statusClass +
-            "'>" +
-            status.label +
-            "</span>" +
+            buildCalendarDetailStatusBadgesHtml(status) +
             "</div>";
-          if (row) {
-            if (row.isExternal) {
-              card.innerHTML +=
-                "<dl class='admin-calendar-detail-kv'>" +
-                "<div><dt>연동 채널</dt><dd>" +
-                escapeHtml(row.guestName || "외부 예약") +
-                "</dd></div>" +
-                "<div><dt>일정</dt><dd>" +
-                escapeHtml(formatReservationSchedule(row)) +
-                "</dd></div>" +
-                "<div><dt>메모</dt><dd>" +
-                escapeHtml(row.guestRequest || "—") +
-                "</dd></div>" +
-                "</dl>";
-            } else {
-              card.innerHTML +=
-                "<dl class='admin-calendar-detail-kv'>" +
-                "<div><dt>예약번호</dt><dd>" +
-                escapeHtml(row.reservationNumber || "—") +
-                "</dd></div>" +
-                "<div><dt>예약자명</dt><dd>" +
-                escapeHtml(row.guestName || "—") +
-                "</dd></div>" +
-                "<div><dt>투숙 일정</dt><dd>" +
-                escapeHtml(formatReservationSchedule(row)) +
-                "</dd></div>" +
-                "<div><dt>총 금액</dt><dd>" +
-                escapeHtml(formatKRW(row.totalAmount || 0)) +
-                "</dd></div>" +
-                "</dl>";
-            }
+          if (status.state === "split") {
+            card.innerHTML +=
+              "<div class='admin-calendar-detail-split'>" +
+              "<div class='admin-calendar-detail-split__block'>" +
+              "<p class='admin-calendar-detail-split__label'>체크아웃</p>" +
+              buildCalendarReservationDetailHtml(status.checkoutRow) +
+              "</div>" +
+              "<div class='admin-calendar-detail-split__block'>" +
+              "<p class='admin-calendar-detail-split__label'>체크인</p>" +
+              buildCalendarReservationDetailHtml(status.checkinRow) +
+              "</div>" +
+              "</div>";
+          } else if (row) {
+            card.innerHTML += buildCalendarReservationDetailHtml(row);
           }
           return card;
         }
