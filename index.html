@@ -114,9 +114,6 @@
       <section class="hero-section fullpage-section" id="hero">
         <div class="hero-media" aria-hidden="true">
           <img data-g-img="hero.kr.0" alt="" class="hero-slide is-active" />
-          <img data-g-img="hero.kr.1" alt="" class="hero-slide" />
-          <img data-g-img="hero.kr.2" alt="" class="hero-slide" />
-          <img data-g-img="hero.kr.3" alt="" class="hero-slide" />
           <div class="hero-overlay"></div>
         </div>
         <header class="site-header hero-header hero-header--index-brand">
@@ -389,17 +386,12 @@
                 </div>
               </div>
             </div>
-            <div class="feature-media index-location-map" aria-hidden="true">
-              <p class="index-location-map__eyebrow">JEJU · KOREA</p>
-              <div class="index-location-map__pin">
-                <span class="map-pin-pulse"></span>
-                <span class="map-pin-pulse-2"></span>
-                <span class="map-pin-dot"></span>
-                <span class="map-pin-line"></span>
-              </div>
-              <p class="index-location-map__coords">
-                126.779252899456<br />33.3089855801718
-              </p>
+            <div class="feature-media">
+              <img
+                data-g-img="locationImageKr"
+                alt="그라포드 위치 외관"
+                class="feature-image"
+              />
             </div>
           </article>
           <article
@@ -445,31 +437,6 @@
           const prevButton = document.getElementById("slider-prev");
           const nextButton = document.getElementById("slider-next");
           const sliderImages = window.getGraffordPageImages().slider;
-          const heroSlideGroups = Array.from(
-            document.querySelectorAll(".hero-media"),
-          )
-            .map(function (heroMedia) {
-              const slides = Array.from(
-                heroMedia.querySelectorAll(".hero-slide"),
-              );
-              if (!slides.length) {
-                return null;
-              }
-              let activeIndex = slides.findIndex(function (slide) {
-                return slide.classList.contains("is-active");
-              });
-              if (activeIndex < 0) {
-                activeIndex = 0;
-                slides[0].classList.add("is-active");
-              }
-              return {
-                slides: slides,
-                index: activeIndex,
-              };
-            })
-            .filter(function (group) {
-              return group && group.slides.length > 1;
-            });
           let sliderIndex = 0;
 
           const observer = new IntersectionObserver(
@@ -527,18 +494,9 @@
             });
           }
 
-          if (heroSlideGroups.length) {
-            setInterval(function () {
-              heroSlideGroups.forEach(function (group) {
-                group.slides[group.index].classList.remove("is-active");
-                group.index = (group.index + 1) % group.slides.length;
-                group.slides[group.index].classList.add("is-active");
-              });
-            }, 5000);
-          }
-
           /* PC: [0] 좌 메인, [1–4] 중앙 2×2, [5] 우 메인. 모바일: [0] 대표 2×2칸, [1][2] 오른쪽 열, [3][4][5] 하단 행 (css/mobiledesign.html 모자이크) */
-          var indexFeature3SpaceImages = window.getGraffordPageImages().spaceGrid;
+          var indexFeature3SpaceImages =
+            window.getGraffordPageImages().spaceGrid;
 
           function initIndexFeature3SpaceGrid(layoutRoot, images, altPrefix) {
             if (!layoutRoot || !images || !images.length) {
@@ -668,6 +626,31 @@
             });
 
           initIndexFeature3SpaceLightbox();
+
+          var heroSlideGroups = [];
+          document.querySelectorAll(".hero-media").forEach(function (mediaEl) {
+            var slides = mediaEl.querySelectorAll(".hero-slide");
+            if (slides.length <= 1) {
+              return;
+            }
+            var activeIndex = 0;
+            slides.forEach(function (slide, index) {
+              if (slide.classList.contains("is-active")) {
+                activeIndex = index;
+              }
+            });
+            heroSlideGroups.push({ slides: slides, index: activeIndex });
+          });
+
+          if (heroSlideGroups.length) {
+            setInterval(function () {
+              heroSlideGroups.forEach(function (group) {
+                group.slides[group.index].classList.remove("is-active");
+                group.index = (group.index + 1) % group.slides.length;
+                group.slides[group.index].classList.add("is-active");
+              });
+            }, 5000);
+          }
         });
       </script>
       <script defer src="js/grafford-page-fade.js"></script>
@@ -763,9 +746,6 @@
       <section class="hero-section fullpage-section">
         <div class="hero-media" aria-hidden="true">
           <img data-g-img="hero.en.0" alt="" class="hero-slide is-active" />
-          <img data-g-img="hero.en.1" alt="" class="hero-slide" />
-          <img data-g-img="hero.en.2" alt="" class="hero-slide" />
-          <img data-g-img="hero.en.3" alt="" class="hero-slide" />
           <div class="hero-overlay"></div>
         </div>
         <header class="site-header hero-header hero-header--index-brand">
@@ -1036,17 +1016,12 @@
                 </div>
               </div>
             </div>
-            <div class="feature-media index-location-map" aria-hidden="true">
-              <p class="index-location-map__eyebrow">JEJU · KOREA</p>
-              <div class="index-location-map__pin">
-                <span class="map-pin-pulse"></span>
-                <span class="map-pin-pulse-2"></span>
-                <span class="map-pin-dot"></span>
-                <span class="map-pin-line"></span>
-              </div>
-              <p class="index-location-map__coords">
-                33.3089855801718<br />126.779252899456
-              </p>
+            <div class="feature-media">
+              <img
+                data-g-img="locationImageEn"
+                alt="GRAFFORD location exterior"
+                class="feature-image"
+              />
             </div>
           </article>
           <article

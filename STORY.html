@@ -4,6 +4,26 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <script src="js/page-images.js"></script>
+    <script>
+      (function () {
+        var storyImgs =
+          window.GRAFFORD_PAGE_IMAGES &&
+          window.GRAFFORD_PAGE_IMAGES["STORY.html"];
+        var firstCafe =
+          storyImgs &&
+          storyImgs.features &&
+          storyImgs.features.cafeGalleryKr &&
+          storyImgs.features.cafeGalleryKr[0];
+        if (!firstCafe) {
+          return;
+        }
+        var link = document.createElement("link");
+        link.rel = "preload";
+        link.as = "image";
+        link.href = firstCafe;
+        document.head.appendChild(link);
+      })();
+    </script>
     <script src="js/apply-page-images.js" defer></script>
     <link rel="icon" href="images/LOGO-transparent.png" type="image/png" />
     <title>STORY - GRAFFORD</title>
@@ -206,10 +226,18 @@
                 }
               });
             },
-            { threshold: 0.2 },
+            { threshold: 0.08, rootMargin: "0px 0px -5% 0px" },
           );
 
           fadeTargets.forEach(function (el) {
+            var rect = el.getBoundingClientRect();
+            var inView =
+              rect.top < window.innerHeight * 0.92 &&
+              rect.bottom > window.innerHeight * 0.05;
+            if (inView) {
+              el.classList.add("is-visible");
+              return;
+            }
             observer.observe(el);
           });
 
@@ -229,19 +257,16 @@
             });
           });
 
-          var storyCafeImages = window.getGraffordPageImages().features.cafeGalleryKr;
-
-          function startStoryCafeGallery(slot) {
-            var imgs = storyCafeImages;
+          function startStoryCafeGallery(slot, imgs) {
             var imgEl = slot.querySelector(".room-slot-main-img");
             var thumbsEl = slot.querySelector(".room-slot-thumbs");
             var btnPrev = slot.querySelector(".room-slot-nav-prev");
             var btnNext = slot.querySelector(".room-slot-nav-next");
-            if (!imgs.length || !imgEl || !thumbsEl) {
+            if (!imgs || !imgs.length || !imgEl || !thumbsEl) {
               return;
             }
             var index = 0;
-            var fadeMs = 650;
+            var fadeMs = 400;
             var intervalMs = 5000;
             var autoTimer = null;
             var label = "카페";
@@ -305,6 +330,13 @@
               autoTimer = window.setInterval(goNext, intervalMs);
             }
 
+            imgEl.src = imgs[0];
+            imgEl.alt = label + " 사진 1";
+            imgs.slice(1).forEach(function (src) {
+              var preload = new Image();
+              preload.src = src;
+            });
+
             renderThumbs();
             if (btnPrev) {
               btnPrev.addEventListener("click", function () {
@@ -319,11 +351,10 @@
               });
             }
 
-            window.setTimeout(function () {
-              resetAutoTimer();
-            }, 400);
+            resetAutoTimer();
           }
 
+          var storyPageImages = window.getGraffordPageImages();
           var storyCafeSlots = document.querySelectorAll(
             ".feature-story-2 .room-image-slot--carousel",
           );
@@ -332,7 +363,12 @@
               return;
             }
             slot.dataset.galleryInitialized = "true";
-            startStoryCafeGallery(slot);
+            var langRoot = slot.closest(".lang-kr, .lang-en");
+            var imgs =
+              langRoot && langRoot.classList.contains("lang-en")
+                ? storyPageImages.features.cafeGalleryEn
+                : storyPageImages.features.cafeGalleryKr;
+            startStoryCafeGallery(slot, imgs);
           });
         });
       </script>
