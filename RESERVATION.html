@@ -64,11 +64,7 @@
     <div class="lang-kr">
       <section class="hero-section fullpage-section" id="hero">
         <div class="hero-media" aria-hidden="true">
-          <img
-            data-g-img="hero.kr"
-            alt=""
-            class="hero-slide is-active"
-          />
+          <img data-g-img="hero.kr" alt="" class="hero-slide is-active" />
           <div class="hero-overlay"></div>
         </div>
         <header class="site-header hero-header hero-header--story-copy">
@@ -459,7 +455,7 @@
                       </div>
                       <div class="room-spec-cell" role="listitem">
                         <span class="room-spec-label">투숙 인원</span>
-                        <p class="room-spec-value">기준 3인 · 최대 3인</p>
+                        <p class="room-spec-value">기준 2인 · 최대 3인</p>
                       </div>
                       <div class="room-spec-cell" role="listitem">
                         <span class="room-spec-label">구성</span>
@@ -819,7 +815,9 @@
                   </div>
                   <div class="reservation-discount-card__text">
                     <h4 class="reservation-discount-card__title">프로모션</h4>
-                    <p class="reservation-discount-card__desc js-res-promo-desc">
+                    <p
+                      class="reservation-discount-card__desc js-res-promo-desc"
+                    >
                       —
                     </p>
                   </div>
@@ -1275,9 +1273,7 @@
                 return "";
               }
               if (isEnScope) {
-                return (
-                  "Promotion running through " + start + " – " + end
-                );
+                return "Promotion running through " + start + " – " + end;
               }
               return start + " ~ " + end + "까지 프로모션 진행중";
             }
@@ -1690,8 +1686,7 @@
               var hasPromotionPeriod = !!(
                 promotionPeriodStart && promotionPeriodEnd
               );
-              var shouldShowPromotionCard =
-                promotionEnabled && pctDisplay > 0;
+              var shouldShowPromotionCard = promotionEnabled && pctDisplay > 0;
               var shouldShowPromotionPill =
                 shouldShowPromotionCard && hasPromotionPeriod;
               if (promoCardEl) {
@@ -1720,8 +1715,7 @@
                     promotionPeriodEnd,
                   );
                   promoPillEl.textContent =
-                    pillPeriodText ||
-                    (isEnScope ? "Applied" : "적용 중");
+                    pillPeriodText || (isEnScope ? "Applied" : "적용 중");
                 }
               }
               if (!promotionEnabled) {
@@ -3077,11 +3071,7 @@
     <div class="lang-en">
       <section class="hero-section fullpage-section">
         <div class="hero-media" aria-hidden="true">
-          <img
-            data-g-img="hero.en"
-            alt=""
-            class="hero-slide is-active"
-          />
+          <img data-g-img="hero.en" alt="" class="hero-slide is-active" />
           <div class="hero-overlay"></div>
         </div>
         <header class="site-header hero-header hero-header--story-copy">
@@ -3717,11 +3707,7 @@
                     &#10094;
                   </button>
                   <span class="cal-month-label"></span>
-                  <button
-                    type="button"
-                    class="cal-nav"
-                    aria-label="Next month"
-                  >
+                  <button type="button" class="cal-nav" aria-label="Next month">
                     &#10095;
                   </button>
                 </div>
@@ -3834,7 +3820,9 @@
                   </div>
                   <div class="reservation-discount-card__text">
                     <h4 class="reservation-discount-card__title">Promotion</h4>
-                    <p class="reservation-discount-card__desc js-res-promo-desc">
+                    <p
+                      class="reservation-discount-card__desc js-res-promo-desc"
+                    >
                       —
                     </p>
                   </div>
