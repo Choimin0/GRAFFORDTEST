@@ -477,7 +477,16 @@
           <table class="admin-table admin-reservation-table">
             <thead>
               <tr>
-                <th>예약번호</th>
+                <th>
+                  <button
+                    type="button"
+                    class="admin-sortable-head"
+                    data-admin-sort="reservation"
+                  >
+                    예약번호
+                    <span class="admin-sort-icons" aria-hidden="true"></span>
+                  </button>
+                </th>
                 <th>
                   <button
                     type="button"
@@ -5605,6 +5614,8 @@
             return copied;
           }
           function getSortValue(row) {
+            if (sortKey === "reservation")
+              return String((row && row.reservationNumber) || "");
             if (sortKey === "room") return String((row && row.roomType) || "");
             if (sortKey === "guest")
               return String((row && row.guestName) || "");
