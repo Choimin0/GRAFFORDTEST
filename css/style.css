@@ -6364,11 +6364,6 @@ main.content-section:has(> .site-footer.site-business-footer) {
   background: transparent !important;
 }
 
-.reservation-gallery .gallery-main-wrap {
-  display: flex;
-  flex-direction: column;
-}
-
 .reservation-gallery .gallery-image-frame {
   position: relative;
   width: 100%;
@@ -6438,29 +6433,8 @@ main.content-section:has(> .site-footer.site-business-footer) {
   align-self: flex-end;
 }
 
-.reservation-gallery .gallery-thumbs {
-  position: static;
-  left: auto;
-  right: auto;
-  bottom: auto;
-  width: 100%;
-  margin-top: var(--space-12);
-  padding: 0 var(--space-4);
-  box-sizing: border-box;
-  gap: var(--space-8);
-}
-
-.reservation-gallery .gallery-thumb {
-  flex: 1 1 0;
-  min-width: 0;
-  height: 3px;
-  border-radius: 0;
-  opacity: 0.35;
-}
-
-.reservation-gallery .gallery-thumb.is-active {
-  opacity: 1;
-  background-color: var(--stone-800);
+.reservation-gallery .gallery-image-frame .gallery-thumbs {
+  z-index: 3;
 }
 
 .booking-calendar-head {
