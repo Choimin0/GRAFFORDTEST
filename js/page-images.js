@@ -188,6 +188,19 @@
     ],
   };
 
+  function buildRoomGalleryFirstImages() {
+    var out = {};
+    Object.keys(ROOM_GALLERY_IMAGES).forEach(function (room) {
+      var first = ROOM_GALLERY_IMAGES[room][0];
+      if (first) {
+        out[room] = [first];
+      }
+    });
+    return out;
+  }
+
+  var ROOM_GALLERY_FIRST_IMAGES = buildRoomGalleryFirstImages();
+
   global.GRAFFORD_PAGE_IMAGES = {
     /* ─────────────────────────────────────────────
      * index.html — 메인 홈
@@ -237,7 +250,7 @@
       },
       hero: {
         kr: "images/STORY.jpg",
-        en: "images/story.jpeg",
+        en: "images/story.jpg",
       },
       features: {
         originKr: "images/G4/KKH_3578.jpg",
@@ -406,13 +419,9 @@
         logo: "images/LOGO.png",
       },
       gallery: {
-        defaultMainKr: "images/A00.jpg",
-        defaultMainEn: "images/A00.jpg",
-        carouselPattern: [
-          "images/{room}00.jpg",
-          "images/{room}01.jpg",
-          "images/{room}02.jpg",
-        ],
+        defaultMainKr: ROOM_GALLERY_IMAGES.G1[0],
+        defaultMainEn: ROOM_GALLERY_IMAGES.G1[0],
+        carousel: ROOM_GALLERY_FIRST_IMAGES,
       },
       footer: {
         instagram: "images/insta.png",
@@ -429,13 +438,9 @@
         logo: "images/LOGO.png",
       },
       gallery: {
-        defaultMainKr: "images/A00.jpg",
-        defaultMainEn: "images/A00.jpg",
-        carouselPattern: [
-          "images/{room}00.jpg",
-          "images/{room}01.jpg",
-          "images/{room}02.jpg",
-        ],
+        defaultMainKr: ROOM_GALLERY_IMAGES.G1[0],
+        defaultMainEn: ROOM_GALLERY_IMAGES.G1[0],
+        carousel: ROOM_GALLERY_FIRST_IMAGES,
       },
       footer: {
         instagram: "images/insta.png",
@@ -571,15 +576,35 @@
     return (imgs && imgs.footer) || {};
   };
 
-  global.buildGraffordRoomCarousel = function (roomPrefix, pattern, pageFile) {
+  function normalizeRoomGalleryKey(roomKey) {
+    var key = String(roomKey || "")
+      .trim()
+      .toUpperCase();
+    var legacyMap = { A: "G1", B: "G2", C: "G3", D: "G4" };
+    return legacyMap[key] || key;
+  }
+
+  global.buildGraffordRoomCarousel = function (roomKey, pattern, pageFile) {
     var imgs = global.getGraffordPageImages(pageFile);
+    var gallery = imgs && imgs.gallery;
+    var normalizedKey = normalizeRoomGalleryKey(roomKey);
+
+    if (gallery && gallery.carousel && !Array.isArray(gallery.carousel)) {
+      var roomList = gallery.carousel[normalizedKey];
+      if (Array.isArray(roomList)) {
+        return roomList.slice();
+      }
+    }
+
     var source =
-      pattern || (imgs && imgs.gallery && imgs.gallery.carouselPattern);
+      pattern ||
+      (gallery && gallery.carousel) ||
+      (gallery && gallery.carouselPattern);
     if (!Array.isArray(source)) {
       return [];
     }
     return source.map(function (entry) {
-      return String(entry).replace("{room}", roomPrefix);
+      return String(entry).replace("{room}", roomKey);
     });
   };
 })(typeof window !== "undefined" ? window : globalThis);

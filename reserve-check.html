@@ -314,7 +314,6 @@
             G3: "G3",
             G4: "G4",
           };
-          var ROOM_IMAGE_PREFIX = { G1: "A", G2: "B", G3: "C", G4: "D" };
           var saved = null;
           try {
             saved = JSON.parse(
@@ -486,8 +485,7 @@
           setText("complete-email-en", email || "—");
           setText("complete-request-en", guestRequest || "—");
 
-          var prefix = ROOM_IMAGE_PREFIX[room] || "A";
-          var images = window.buildGraffordRoomCarousel(prefix);
+          var images = window.buildGraffordRoomCarousel(room);
           var mainImg = document.getElementById("complete-gallery-main");
           var prevBtn = document.getElementById("complete-gallery-prev");
           var nextBtn = document.getElementById("complete-gallery-next");
