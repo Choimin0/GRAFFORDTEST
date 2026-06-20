@@ -1,6 +1,6 @@
 /** 객실별 기준 인원 · 추가 인원 정책 (서버 검증용) */
-export const BASE_GUESTS = { G1: 2, G2: 2, G3: 3, G4: 4 };
-export const MAX_EXTRA_GUESTS = { G1: 0, G2: 0, G3: 0, G4: 1 };
+export const BASE_GUESTS = { G1: 2, G2: 2, G3: 2, G4: 4 };
+export const MAX_EXTRA_GUESTS = { G1: 0, G2: 0, G3: 1, G4: 1 };
 
 export function normalizeRoom(room) {
   var r = String(room || "G1").toUpperCase();

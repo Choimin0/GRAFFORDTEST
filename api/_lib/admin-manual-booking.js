@@ -32,7 +32,7 @@ export function isExternalManualPaymentMethod(paymentMethod) {
 const ROOM_GUEST_LIMITS = {
   G1: { base: 2, max: 2 },
   G2: { base: 2, max: 2 },
-  G3: { base: 3, max: 3 },
+  G3: { base: 2, max: 3 },
   G4: { base: 4, max: 5 },
 };
 

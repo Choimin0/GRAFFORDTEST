@@ -25,9 +25,9 @@
   var PROMOTION_PERIOD_END = "";
   var PROMOTION_LEGACY_IN_PERIOD = true;
   /** 객실별 기준 인원 */
-  var BASE_GUESTS = { G1: 2, G2: 2, G3: 3, G4: 4 };
+  var BASE_GUESTS = { G1: 2, G2: 2, G3: 2, G4: 4 };
   /** 추가 투숙 가능 인원 (기준 인원 외) */
-  var MAX_EXTRA_GUESTS = { G1: 0, G2: 0, G3: 0, G4: 1 };
+  var MAX_EXTRA_GUESTS = { G1: 0, G2: 0, G3: 1, G4: 1 };
 
   function setRoomWeekdayBase(nextMap) {
     if (!nextMap || typeof nextMap !== "object") {
