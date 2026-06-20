@@ -4,26 +4,6 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <script src="js/page-images.js"></script>
-    <script>
-      (function () {
-        var storyImgs =
-          window.GRAFFORD_PAGE_IMAGES &&
-          window.GRAFFORD_PAGE_IMAGES["STORY.html"];
-        var firstCafe =
-          storyImgs &&
-          storyImgs.features &&
-          storyImgs.features.cafeGalleryKr &&
-          storyImgs.features.cafeGalleryKr[0];
-        if (!firstCafe) {
-          return;
-        }
-        var link = document.createElement("link");
-        link.rel = "preload";
-        link.as = "image";
-        link.href = firstCafe;
-        document.head.appendChild(link);
-      })();
-    </script>
     <script src="js/apply-page-images.js" defer></script>
     <link rel="icon" href="images/LOGO-transparent.png" type="image/png" />
     <title>STORY - GRAFFORD</title>

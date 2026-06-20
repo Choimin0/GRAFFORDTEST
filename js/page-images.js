@@ -13,12 +13,12 @@
 
   var ROOM_GALLERY_IMAGES = {
     G1: [
-      "images/G1/KKH_3026.jpg",
+      "images/G1/KKH_3878.jpg",
       "images/G1/KKH_3036.jpg",
       "images/G1/KKH_3055.jpg",
       "images/G1/KKH_3124.jpg",
       "images/G1/KKH_3869.jpg",
-      "images/G1/KKH_3878.jpg",
+      "images/G1/KKH_3026.jpg",
       "images/G1/KKH_3882.jpg",
       "images/G1/KKH_3884.jpg",
       "images/G1/KKH_3889.jpg",
@@ -38,7 +38,7 @@
       "images/G1/KKH_3979.jpg",
     ],
     G2: [
-      "images/G2/KKH_2815.jpg",
+      "images/G2/KKH_3490.jpg",
       "images/G2/KKH_2817.jpg",
       "images/G2/KKH_2826.jpg",
       "images/G2/KKH_2829.jpg",
@@ -70,12 +70,12 @@
       "images/G2/KKH_3253.jpg",
       "images/G2/KKH_3264.jpg",
       "images/G2/KKH_3269.jpg",
-      "images/G2/KKH_3490.jpg",
+      "images/G2/KKH_2815.jpg",
       "images/G2/KKH_3494.jpg",
       "images/G2/KKH_3683.jpg",
     ],
     G3: [
-      "images/G3/KKH_2866.jpg",
+      "images/G3/KKH_3647.jpg",
       "images/G3/KKH_2868.jpg",
       "images/G3/KKH_2871.jpg",
       "images/G3/KKH_2874.jpg",
@@ -120,13 +120,13 @@
       "images/G3/KKH_3631.jpg",
       "images/G3/KKH_3632.jpg",
       "images/G3/KKH_3643.jpg",
-      "images/G3/KKH_3647.jpg",
+      "images/G3/KKH_2866.jpg",
       "images/G3/KKH_3651.jpg",
       "images/G3/KKH_3659.jpg",
       "images/G3/KKH_3912.jpg",
     ],
     G4: [
-      "images/G4/KKH_2911.jpg",
+      "images/G4/KKH_3161.jpg",
       "images/G4/KKH_2912.jpg",
       "images/G4/KKH_2917.jpg",
       "images/G4/KKH_2920.jpg",
@@ -149,7 +149,7 @@
       "images/G4/KKH_2993.jpg",
       "images/G4/KKH_2997.jpg",
       "images/G4/KKH_3159.jpg",
-      "images/G4/KKH_3161.jpg",
+      "images/G4/KKH_2911.jpg",
       "images/G4/KKH_3173.jpg",
       "images/G4/KKH_3178.jpg",
       "images/G4/KKH_3192.jpg",
@@ -194,13 +194,13 @@
      * ───────────────────────────────────────────── */
     "index.html": {
       favicon: "images/LOGO-transparent.png",
-      ogImage: "https://www.grafford.kr/images/main01.png",
+      ogImage: "https://www.grafford.kr/images/공동/KKH_3560.jpg",
       nav: {
         logo: "images/LOGO.png",
       },
       hero: {
-        kr: ["images/main01.png"],
-        en: ["images/mainimg0.jpg"],
+        kr: ["images/공동/KKH_3560.jpg"],
+        en: ["images/공동/KKH_3560.jpg"],
         logoKr: "images/LOGO.png",
         logoEn: "images/LOGO.png",
       },
@@ -218,8 +218,8 @@
         "images/G3/KKH_3121.jpg",
         "images/G3/KKH_3507.jpg",
       ],
-      locationImageKr: "images/공동/KKH_3560.jpg",
-      locationImageEn: "images/공동/KKH_3560.jpg",
+      locationImageKr: "images/공동/KKH_3001.jpg",
+      locationImageEn: "images/공동/KKH_3001.jpg",
       slider: ["images/A.jpg", "images/B.jpg", "images/C.jpg"],
       footer: {
         instagram: "images/insta.png",
@@ -236,7 +236,7 @@
         logo: "images/LOGO.png",
       },
       hero: {
-        kr: "images/STORY.png",
+        kr: "images/STORY.jpg",
         en: "images/story.jpeg",
       },
       features: {
@@ -276,8 +276,8 @@
         logo: "images/LOGO.png",
       },
       hero: {
-        kr: "images/GROUND.png",
-        en: "images/rooms.jpeg",
+        kr: "images/GROUND.jpg",
+        en: "images/GROUND.jpg",
       },
       roomThumbs: {
         g1: ROOM_GALLERY_IMAGES.G1[0],
@@ -505,6 +505,8 @@
       "images/C-groundplan.png",
       "images/D-groundplan.png",
       "images/D03.jpg",
+      "images/GROUND.png",
+      "images/STORY.png",
       "images/icons/confirm.png",
       "images/icons/language.png",
       "images/mainimg3.jpg",

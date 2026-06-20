@@ -117,15 +117,7 @@
           <div class="hero-overlay"></div>
         </div>
         <header class="site-header hero-header hero-header--index-brand">
-          <h1 class="hero-title-logo">
-            <img
-              data-g-img="hero.logoKr"
-              alt="GRAFFORD"
-              class="hero-logo-img"
-              width="800"
-              height="200"
-            />
-          </h1>
+          <h1 class="visually-hidden">GRAFFORD</h1>
           <p class="hero-tagline">The tranquility the earth conveys</p>
         </header>
         <button
@@ -508,6 +500,8 @@
                 var slot = Number(img.getAttribute("data-space-slot"));
                 var src = images[slot];
                 if (src) {
+                  img.loading = "lazy";
+                  img.decoding = "async";
                   img.src = src;
                   img.alt = altPrefix + " " + (slot + 1);
                 }
@@ -749,15 +743,7 @@
           <div class="hero-overlay"></div>
         </div>
         <header class="site-header hero-header hero-header--index-brand">
-          <h1 class="hero-title-logo">
-            <img
-              data-g-img="hero.logoEn"
-              alt="GRAFFORD"
-              class="hero-logo-img"
-              width="800"
-              height="200"
-            />
-          </h1>
+          <h1 class="visually-hidden">GRAFFORD</h1>
           <p class="hero-tagline"></p>
         </header>
         <button class="scroll-down-btn" aria-label="다음 섹션으로 이동">

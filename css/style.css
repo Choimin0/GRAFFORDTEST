@@ -681,6 +681,32 @@ body[data-site-language="en"] .lang-en .hero-slide:first-child {
   pointer-events: none;
 }
 
+/* index: 히어로 구간 — 내비 로고만 표시 (히어로·내비 동일 요소로 위치 일치) */
+body.home-page .top-right-nav.nav-hero-hidden {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: none;
+  background-color: transparent;
+  backdrop-filter: none;
+  -webkit-backdrop-filter: none;
+}
+
+body.home-page .top-right-nav.nav-hero-hidden .nav-logo {
+  pointer-events: auto;
+}
+
+body.home-page .top-right-nav.nav-hero-hidden > :not(.nav-logo) {
+  visibility: hidden;
+  opacity: 0;
+  pointer-events: none;
+}
+
+@media (min-width: 769px) {
+  body.home-page .top-right-nav.nav-hero-hidden {
+    background-color: transparent;
+  }
+}
+
 /* 히어로 동기 페이지: 내비 opacity 전환을 .hero-slide와 동일 시간으로 */
 .page-hero-nav-sync .top-right-nav {
   transition:
@@ -752,6 +778,10 @@ main {
 
 /* 메인페이지 첫 화면 */
 .hero-section {
+  --hero-bottom-ui-offset: max(
+    2.75rem,
+    calc(1.5rem + env(safe-area-inset-bottom, 0px))
+  );
   position: relative;
   display: flex;
   justify-content: center;
@@ -759,6 +789,12 @@ main {
   padding: 2rem;
   overflow-x: hidden;
   overflow-y: visible;
+}
+
+.hero-section:has(> .hero-header--index-brand) {
+  padding: 0;
+  justify-content: stretch;
+  align-items: stretch;
 }
 
 .hero-media {
@@ -796,6 +832,15 @@ main {
   );
 }
 
+/* index: 히어로 텍스트용 오버레이만 옅게 (다른 페이지는 기본값 유지) */
+body.home-page .hero-overlay {
+  background: linear-gradient(
+    to bottom,
+    color-mix(in srgb, var(--stone-900) 10%, transparent),
+    color-mix(in srgb, var(--stone-900) 14%, transparent)
+  );
+}
+
 .hero-header {
   position: relative;
   z-index: 1;
@@ -815,69 +860,52 @@ main {
   margin-top: 0.5rem;
 }
 
-/* index.html 전용: 히어로 로고 + 태그라인 가로 폭 일치 (PC / 모바일 분리) */
+/* index.html 전용: 히어로 로고(좌상) + 태그라인(우하) */
 .hero-header.hero-header--index-brand {
-  min-height: auto;
-  align-items: stretch;
-  box-sizing: border-box;
-}
-
-.hero-header.hero-header--index-brand .hero-title-logo {
-  margin: 0;
-  width: 100%;
-  font-size: 0;
-  line-height: 0;
-}
-
-.hero-header.hero-header--index-brand .hero-logo-img {
+  position: absolute;
+  inset: 0;
+  z-index: 1;
+  width: auto;
+  min-height: 0;
+  padding: 0;
   display: block;
-  width: 100%;
-  height: auto;
-  object-fit: contain;
-  object-position: center;
+  border-radius: 0;
+  pointer-events: none;
+  background: transparent;
+  box-shadow: none;
 }
 
 .hero-header.hero-header--index-brand .hero-tagline {
-  width: 100%;
-  margin-top: 0.75rem;
-  text-align: center;
+  position: absolute;
+  right: clamp(var(--space-24), 4.5vw, var(--space-80));
+  bottom: var(--hero-bottom-ui-offset);
+  width: auto;
+  max-width: min(28rem, calc(100% - 5rem));
+  margin: 0;
+  padding: 0;
+  text-align: right;
   box-sizing: border-box;
   color: var(--color-text-on-dark);
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  min-height: calc(2rem + 0.7rem);
+  pointer-events: auto;
+  z-index: 2;
 }
 
-@media (min-width: 768px) {
-  .hero-header.hero-header--index-brand {
-    width: min(640px, 82%);
-    padding-left: 0;
-    padding-right: 0;
-  }
-
-  .hero-header.hero-header--index-brand .hero-logo-img {
-    max-height: clamp(3.75rem, 7.5vw, 6rem);
-  }
-
+@media (min-width: 769px) {
   .hero-header.hero-header--index-brand .hero-tagline {
     font-size: clamp(1rem, 1.35vw, 1.2rem);
     letter-spacing: 0.02em;
-    padding: 0 0.25rem;
   }
 }
 
-@media (max-width: 767px) {
-  .hero-header.hero-header--index-brand {
-    width: min(100%, 92vw);
-    padding-left: 0.5rem;
-    padding-right: 0.5rem;
-  }
-
-  .hero-header.hero-header--index-brand .hero-logo-img {
-    max-height: clamp(2.5rem, 13vw, 4rem);
-  }
-
+@media (max-width: 768px) {
   .hero-header.hero-header--index-brand .hero-tagline {
     font-size: clamp(0.875rem, 3.8vw, 1rem);
     line-height: 1.45;
-    padding: 0 0.35rem;
+    max-width: min(16rem, calc(100% - 3.5rem));
   }
 }
 
@@ -2291,7 +2319,7 @@ body.index-feature-3-lightbox-open {
 }
 
 .hero-section .scroll-down-btn {
-  bottom: max(2.75rem, calc(1.5rem + env(safe-area-inset-bottom, 0px)));
+  bottom: var(--hero-bottom-ui-offset);
   z-index: 2;
 }
 

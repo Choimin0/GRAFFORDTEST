@@ -732,6 +732,17 @@
               });
             }
 
+            function preloadAdjacent(fromIndex, count) {
+              for (var n = 1; n <= count; n++) {
+                var src = imgs[(fromIndex + n) % imgs.length];
+                if (!src) {
+                  continue;
+                }
+                var preload = new Image();
+                preload.src = src;
+              }
+            }
+
             function goToIndex(newIndex) {
               newIndex = ((newIndex % imgs.length) + imgs.length) % imgs.length;
               if (newIndex === index) {
@@ -744,6 +755,7 @@
               window.setTimeout(function () {
                 imgEl.src = imgs[index];
                 imgEl.alt = label + " 사진 " + (index + 1);
+                preloadAdjacent(index, 2);
                 var onLoad = function () {
                   imgEl.removeEventListener("load", onLoad);
                   window.requestAnimationFrame(function () {
@@ -772,6 +784,7 @@
               autoTimer = window.setInterval(goNext, intervalMs);
             }
 
+            preloadAdjacent(0, 2);
             renderThumbs();
             if (btnPrev) {
               btnPrev.addEventListener("click", function () {
@@ -791,10 +804,28 @@
             }, startDelay);
           }
 
+          var carouselObserver = new IntersectionObserver(
+            function (entries) {
+              entries.forEach(function (entry) {
+                if (!entry.isIntersecting) {
+                  return;
+                }
+                var slot = entry.target;
+                if (slot.dataset.carouselStarted === "true") {
+                  return;
+                }
+                slot.dataset.carouselStarted = "true";
+                carouselObserver.unobserve(slot);
+                startRoomSlotCarousel(slot, 0);
+              });
+            },
+            { rootMargin: "240px 0px", threshold: 0.05 },
+          );
+
           document
             .querySelectorAll(".room-image-slot--carousel")
-            .forEach(function (slot, i) {
-              startRoomSlotCarousel(slot, i * 400);
+            .forEach(function (slot) {
+              carouselObserver.observe(slot);
             });
 
           var mobileRoomQuery = window.matchMedia("(max-width: 767px)");
