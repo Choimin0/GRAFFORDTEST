@@ -903,9 +903,7 @@ body.home-page .hero-overlay {
 
 @media (max-width: 768px) {
   .hero-header.hero-header--index-brand .hero-tagline {
-    font-size: clamp(0.875rem, 3.8vw, 1rem);
-    line-height: 1.45;
-    max-width: min(16rem, calc(100% - 3.5rem));
+    display: none;
   }
 }
 
@@ -13845,6 +13843,16 @@ main.content-section.confirm-page.admin-page {
 .admin-room-rate-head {
   padding: var(--space-24);
   border-bottom: 1px solid var(--stone-200);
+}
+.admin-room-rate-head__row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-16);
+}
+.admin-room-rate-head__row .admin-room-rate-batch-save-btn {
+  flex-shrink: 0;
+  min-width: 5.5rem;
 }
 .admin-room-rate-head h2,
 .admin-room-policy-card h3 {

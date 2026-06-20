@@ -9,8 +9,15 @@
     G3: 300000,
     G4: 350000,
   };
+  var ROOM_WEEKEND_BASE = {
+    G1: 270000,
+    G2: 270000,
+    G3: 320000,
+    G4: 370000,
+  };
   var EXTRA_PER_PERSON_PER_NIGHT = 30000;
   var WEEKEND_SURCHARGE_PER_NIGHT = 20000;   // 기본값 (DB에서 덮어씀)
+  var WEEKEND_SURCHARGE_ENABLED = true;
   var CONSECUTIVE_SALE_PER_NIGHT = 20000;    // 기본값 (DB에서 덮어씀)
   var PROMOTION_PERCENT = 0;                  // 기본 프로모션 할인율 (%)
   var PROMOTION_ENABLED = false;
@@ -34,11 +41,24 @@
     });
   }
 
+  function setRoomWeekendBase(nextMap) {
+    if (!nextMap || typeof nextMap !== "object") {
+      return;
+    }
+    ["G1", "G2", "G3", "G4"].forEach(function (room) {
+      var n = Number(nextMap[room]);
+      if (Number.isFinite(n) && n >= 0) {
+        ROOM_WEEKEND_BASE[room] = Math.floor(n);
+      }
+    });
+  }
+
   function setCharges(charges, opts) {
     if (!charges || typeof charges !== "object") {
       return;
     }
     opts = opts || {};
+    WEEKEND_SURCHARGE_ENABLED = opts.weekendChargeEnabled !== false;
     var wc = Number(
       charges.weekendCharge !== undefined
         ? charges.weekendCharge
@@ -77,6 +97,8 @@
     if (root && root.GraffordBookingPricing) {
       root.GraffordBookingPricing.WEEKEND_SURCHARGE_PER_NIGHT =
         WEEKEND_SURCHARGE_PER_NIGHT;
+      root.GraffordBookingPricing.WEEKEND_SURCHARGE_ENABLED =
+        WEEKEND_SURCHARGE_ENABLED;
       root.GraffordBookingPricing.CONSECUTIVE_SALE_PER_NIGHT =
         CONSECUTIVE_SALE_PER_NIGHT;
       root.GraffordBookingPricing.PROMOTION_PERCENT = PROMOTION_PERCENT;
@@ -216,6 +238,20 @@
     return n;
   }
 
+  function getWeekendRatePerNight(room) {
+    room = String(room || "G1").toUpperCase();
+    var baseNightly = ROOM_WEEKDAY_BASE.hasOwnProperty(room)
+      ? ROOM_WEEKDAY_BASE[room]
+      : ROOM_WEEKDAY_BASE.G1;
+    if (WEEKEND_SURCHARGE_ENABLED) {
+      return baseNightly + WEEKEND_SURCHARGE_PER_NIGHT;
+    }
+    if (ROOM_WEEKEND_BASE.hasOwnProperty(room)) {
+      return ROOM_WEEKEND_BASE[room];
+    }
+    return baseNightly;
+  }
+
   /**
    * @param {string} room G1–G4
    * @param {string} checkInStr YYYY-MM-DD
@@ -255,11 +291,11 @@
         weekdayNights += 1;
       }
     });
-    var weekendRatePerNight = baseNightly + WEEKEND_SURCHARGE_PER_NIGHT;
+    var weekendRatePerNight = getWeekendRatePerNight(room);
     var weekdaySubtotal = weekdayNights * baseNightly;
     var weekendSubtotal = weekendNights * weekendRatePerNight;
     var baseTotal = weekdaySubtotal + weekendSubtotal;
-    var weekendSurcharge = weekendNights * WEEKEND_SURCHARGE_PER_NIGHT;
+    var weekendSurcharge = weekendNights * (weekendRatePerNight - baseNightly);
     var extraGuestTotal = extraGuests * EXTRA_PER_PERSON_PER_NIGHT * nights;
     var grandTotal = baseTotal + extraGuestTotal;
     var consecutiveSale =
@@ -297,6 +333,7 @@
 
   root.GraffordBookingPricing = {
     ROOM_WEEKDAY_BASE: ROOM_WEEKDAY_BASE,
+    ROOM_WEEKEND_BASE: ROOM_WEEKEND_BASE,
     BASE_GUESTS: BASE_GUESTS,
     MAX_EXTRA_GUESTS: MAX_EXTRA_GUESTS,
     getBaseGuests: getBaseGuests,
@@ -305,17 +342,20 @@
     computeGuestCount: computeGuestCount,
     EXTRA_PER_PERSON_PER_NIGHT: EXTRA_PER_PERSON_PER_NIGHT,
     WEEKEND_SURCHARGE_PER_NIGHT: WEEKEND_SURCHARGE_PER_NIGHT,
+    WEEKEND_SURCHARGE_ENABLED: WEEKEND_SURCHARGE_ENABLED,
     CONSECUTIVE_SALE_PER_NIGHT: CONSECUTIVE_SALE_PER_NIGHT,
     PROMOTION_PERCENT: PROMOTION_PERCENT,
     parseYMD: parseYMD,
     countNights: countNights,
     eachNightDate: eachNightDate,
     isWeekendNight: isWeekendNight,
+    getWeekendRatePerNight: getWeekendRatePerNight,
     clampExtra: clampExtra,
     computeStay: computeStay,
     isStayInPromotionPeriod: isStayInPromotionPeriod,
     isPromotionActiveForStay: isPromotionActiveForStay,
     setRoomWeekdayBase: setRoomWeekdayBase,
+    setRoomWeekendBase: setRoomWeekendBase,
     setCharges: setCharges,
   };
 })(typeof window !== "undefined" ? window : this);

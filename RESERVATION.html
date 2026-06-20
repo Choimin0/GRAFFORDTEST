@@ -10,7 +10,7 @@
     <link rel="stylesheet" href="css/style.css" />
     <script src="js/nav-hero.js" defer></script>
     <script src="js/mobile-nav.js" defer></script>
-    <script src="js/booking-pricing.js?v=6" defer></script>
+    <script src="js/booking-pricing.js?v=7" defer></script>
     <script src="js/site-language.js" defer></script>
   </head>
   <body class="home-page page-hero-nav-sync reservation-page">
@@ -1375,7 +1375,13 @@
               }
             }
 
-            function applyRoomRates(rates, charges, chargeEnabled, promoMeta) {
+            function applyRoomRates(
+              rates,
+              charges,
+              chargeEnabled,
+              promoMeta,
+              weekendBaseRates,
+            ) {
               applyPromotionMeta(charges, chargeEnabled, promoMeta);
               if (!P) {
                 updateDiscountCards();
@@ -1389,6 +1395,13 @@
                 P.setRoomWeekdayBase(rates);
               }
               if (
+                weekendBaseRates &&
+                typeof weekendBaseRates === "object" &&
+                typeof P.setRoomWeekendBase === "function"
+              ) {
+                P.setRoomWeekendBase(weekendBaseRates);
+              }
+              if (
                 charges &&
                 typeof charges === "object" &&
                 typeof P.setCharges === "function"
@@ -1400,6 +1413,9 @@
                     endDate: promotionPeriodEnd,
                   },
                   promotionInPeriod: promotionInPeriod,
+                  weekendChargeEnabled: !!(
+                    chargeEnabled && chargeEnabled.weekendCharge !== false
+                  ),
                 });
               }
               updateDiscountCards();
@@ -1419,6 +1435,12 @@
                 var cachedChargeEnabled = JSON.parse(
                   sessionStorage.getItem("graffordChargeEnabledMap") || "null",
                 );
+                var cachedWeekendRates = null;
+                try {
+                  cachedWeekendRates = JSON.parse(
+                    sessionStorage.getItem("graffordWeekendRateMap") || "null",
+                  );
+                } catch (_wr) {}
                 if (!cachedCharges) {
                   cachedCharges = extractChargesFromRatesMap(cachedMap);
                 }
@@ -1434,6 +1456,7 @@
                     cachedCharges,
                     cachedChargeEnabled,
                     cachedPromoMeta,
+                    cachedWeekendRates,
                   );
                 }
               } catch (_e) {}
@@ -1470,6 +1493,12 @@
                       sessionStorage.setItem(
                         "graffordChargeEnabledMap",
                         JSON.stringify(result.data.chargeEnabled),
+                      );
+                    }
+                    if (result.data.weekendBaseRates) {
+                      sessionStorage.setItem(
+                        "graffordWeekendRateMap",
+                        JSON.stringify(result.data.weekendBaseRates),
                       );
                     }
                     sessionStorage.setItem(
@@ -1509,6 +1538,7 @@
                         Math.floor(Number(result.data.promotionPercent || 0)),
                       ),
                     },
+                    result.data.weekendBaseRates,
                   );
                   // 요율 적용 직후 즉시 업데이트 (사용자가 이미 날짜 선택한 경우)
                   updateWeekdayRateDisplay();

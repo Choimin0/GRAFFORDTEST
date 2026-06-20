@@ -748,7 +748,7 @@
       </main>
 
       <script src="js/intl-phone.js"></script>
-      <script src="js/booking-pricing.js?v=6"></script>
+      <script src="js/booking-pricing.js?v=7"></script>
       <script src="js/booking-reservations.js"></script>
       <script src="js/booking-token-client.js?v=5"></script>
       <script src="js/booking-checkout-guard.js?v=5"></script>
@@ -806,6 +806,9 @@
                   : promoMeta && promoMeta.promotionInPeriod === false
                     ? false
                     : true,
+              weekendChargeEnabled: !!(
+                enabled && enabled.weekendCharge !== false
+              ),
             });
           }
 
@@ -874,6 +877,18 @@
               if (savedRateMap && typeof P.setRoomWeekdayBase === "function") {
                 P.setRoomWeekdayBase(savedRateMap);
               }
+              var savedWeekendRateMap = null;
+              try {
+                savedWeekendRateMap = JSON.parse(
+                  sessionStorage.getItem("graffordWeekendRateMap") || "null",
+                );
+              } catch (_sw) {}
+              if (
+                savedWeekendRateMap &&
+                typeof P.setRoomWeekendBase === "function"
+              ) {
+                P.setRoomWeekendBase(savedWeekendRateMap);
+              }
               var savedChargesMap = JSON.parse(
                 sessionStorage.getItem("graffordChargesMap") || "null",
               );
@@ -895,6 +910,12 @@
               if (rateRes.ok && rateData && rateData.ok && rateData.rates) {
                 if (typeof P.setRoomWeekdayBase === "function")
                   P.setRoomWeekdayBase(rateData.rates);
+                if (
+                  rateData.weekendBaseRates &&
+                  typeof P.setRoomWeekendBase === "function"
+                ) {
+                  P.setRoomWeekendBase(rateData.weekendBaseRates);
+                }
                 var runtimeCharges =
                   rateData.charges ||
                   extractChargesFromRatesMap(rateData.rates);
@@ -916,6 +937,12 @@
                     sessionStorage.setItem(
                       "graffordChargeEnabledMap",
                       JSON.stringify(rateData.chargeEnabled),
+                    );
+                  }
+                  if (rateData.weekendBaseRates) {
+                    sessionStorage.setItem(
+                      "graffordWeekendRateMap",
+                      JSON.stringify(rateData.weekendBaseRates),
                     );
                   }
                   sessionStorage.setItem(

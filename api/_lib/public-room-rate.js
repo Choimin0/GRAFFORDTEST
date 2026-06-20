@@ -57,11 +57,23 @@ async function ensureRoomRateTable(pool) {
      ADD COLUMN IF NOT EXISTS promotion_end_date DATE`,
   );
   await pool.query(
-    `INSERT INTO ${TABLE_NAME} (room_name, weekday_base_rate, is_enabled)
-     VALUES ('G1', 250000, TRUE), ('G2', 250000, TRUE), ('G3', 300000, TRUE), ('G4', 350000, TRUE),
-            ('weekend-charge', 20000, TRUE), ('consecutive-sale', 20000, TRUE),
-            ('promotion', 0, TRUE), ('extra-guest-charge', 30000, TRUE)
+    `ALTER TABLE ${TABLE_NAME}
+     ADD COLUMN IF NOT EXISTS weekend_base_rate BIGINT
+     CHECK (weekend_base_rate IS NULL OR weekend_base_rate >= 0)`,
+  );
+  await pool.query(
+    `INSERT INTO ${TABLE_NAME} (room_name, weekday_base_rate, weekend_base_rate, is_enabled)
+     VALUES ('G1', 250000, 270000, TRUE), ('G2', 250000, 270000, TRUE),
+            ('G3', 300000, 320000, TRUE), ('G4', 350000, 370000, TRUE),
+            ('weekend-charge', 20000, NULL, TRUE), ('consecutive-sale', 20000, NULL, TRUE),
+            ('promotion', 0, NULL, TRUE), ('extra-guest-charge', 30000, NULL, TRUE)
      ON CONFLICT (room_name) DO NOTHING`,
+  );
+  await pool.query(
+    `UPDATE ${TABLE_NAME}
+     SET weekend_base_rate = weekday_base_rate + 20000
+     WHERE room_name IN ('G1', 'G2', 'G3', 'G4')
+       AND weekend_base_rate IS NULL`,
   );
 }
 
@@ -89,12 +101,13 @@ export async function handlePublicRoomRate(req, res, pool) {
   try {
     await ensureRoomRateTable(pool);
     var sel = await pool.query(
-      `SELECT room_name, weekday_base_rate, is_enabled,
+      `SELECT room_name, weekday_base_rate, weekend_base_rate, is_enabled,
               promotion_start_date, promotion_end_date
        FROM ${TABLE_NAME}
        ORDER BY room_name ASC`,
     );
     var rates = {};
+    var weekendBaseRates = {};
     var charges = {
       weekendCharge: 20000,
       consecutiveSale: 20000,
@@ -133,11 +146,17 @@ export async function handlePublicRoomRate(req, res, pool) {
         }
       } else {
         rates[row.room_name] = n;
+        if (/^G[1-4]$/.test(row.room_name)) {
+          var weekendStored = row.weekend_base_rate;
+          weekendBaseRates[row.room_name] =
+            weekendStored == null ? n + 20000 : Number(weekendStored || 0);
+        }
       }
     });
     json(res, 200, {
       ok: true,
       rates: rates,
+      weekendBaseRates: weekendBaseRates,
       charges: charges,
       chargeEnabled: chargeEnabled,
       promotionPeriod: promotionPeriod,

@@ -644,7 +644,7 @@
         </div>
       </div>
 
-      <script src="js/booking-pricing.js?v=6"></script>
+      <script src="js/booking-pricing.js?v=7"></script>
       <script src="js/booking-token-client.js?v=5"></script>
       <script src="js/booking-checkout-guard.js?v=7"></script>
       <script src="js/payment-methods.js?v=5"></script>
@@ -855,6 +855,12 @@
               ) {
                 P.setRoomWeekdayBase(rateData.rates);
               }
+              if (
+                rateData.weekendBaseRates &&
+                typeof P.setRoomWeekendBase === "function"
+              ) {
+                P.setRoomWeekendBase(rateData.weekendBaseRates);
+              }
               var ch = rateData.charges || rateData;
               if (ch && typeof P.setCharges === "function") {
                 var enabled = rateData.chargeEnabled || null;
@@ -871,6 +877,9 @@
                   promotionEnabled: !!(enabled && enabled.promotion === true),
                   promotionPeriod: promoPeriod,
                   promotionInPeriod: rateData.promotionInPeriod !== false,
+                  weekendChargeEnabled: !!(
+                    enabled && enabled.weekendCharge !== false
+                  ),
                 });
               }
             } catch (_err) {}
@@ -2092,7 +2101,7 @@
         </div>
       </div>
 
-      <script src="js/booking-pricing.js?v=6"></script>
+      <script src="js/booking-pricing.js?v=7"></script>
       <script src="js/booking-token-client.js?v=5"></script>
       <script src="js/booking-checkout-guard.js?v=7"></script>
       <script src="js/payment-methods.js?v=5"></script>
@@ -2305,6 +2314,12 @@
               ) {
                 P.setRoomWeekdayBase(rateData.rates);
               }
+              if (
+                rateData.weekendBaseRates &&
+                typeof P.setRoomWeekendBase === "function"
+              ) {
+                P.setRoomWeekendBase(rateData.weekendBaseRates);
+              }
               var ch = rateData.charges || rateData;
               if (ch && typeof P.setCharges === "function") {
                 var enabled = rateData.chargeEnabled || null;
@@ -2321,6 +2336,9 @@
                   promotionEnabled: !!(enabled && enabled.promotion === true),
                   promotionPeriod: promoPeriod,
                   promotionInPeriod: rateData.promotionInPeriod !== false,
+                  weekendChargeEnabled: !!(
+                    enabled && enabled.weekendCharge !== false
+                  ),
                 });
               }
             } catch (_err) {}
