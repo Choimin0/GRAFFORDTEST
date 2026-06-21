@@ -1890,6 +1890,65 @@
           return out;
         }
 
+        function dateRangeOverlaps(ci1, co1, ci2, co2) {
+          ci1 = dateKey(ci1);
+          co1 = dateKey(co1);
+          ci2 = dateKey(ci2);
+          co2 = dateKey(co2);
+          if (!ci1 || !co1 || !ci2 || !co2 || ci1 >= co1 || ci2 >= co2) {
+            return false;
+          }
+          return ci1 < co2 && ci2 < co1;
+        }
+
+        function filterShadowedExternalCalendarRows(bookingRows, externalRows) {
+          var bookings = bookingRows || [];
+          return (externalRows || []).filter(function (ext) {
+            return !bookings.some(function (booking) {
+              if (!booking || booking.isExternal) {
+                return false;
+              }
+              var channel = String(booking.bookingChannel || "")
+                .trim()
+                .toLowerCase();
+              var linkedUid = String(booking.linkedExternalUid || "").trim();
+              var extUid = String(ext.externalUid || "").trim();
+              if (linkedUid && extUid && linkedUid === extUid) {
+                return true;
+              }
+              if (
+                channel === "airbnb" &&
+                String(booking.roomType || "") === String(ext.roomType || "") &&
+                dateRangeOverlaps(
+                  booking.checkIn,
+                  booking.checkOut,
+                  ext.checkIn,
+                  ext.checkOut,
+                )
+              ) {
+                return true;
+              }
+              return false;
+            });
+          });
+        }
+
+        function normalizeCalendarRows(rows) {
+          var all = rows || [];
+          var bookings = all.filter(function (row) {
+            return row && !row.isExternal;
+          });
+          var external = all.filter(function (row) {
+            return row && row.isExternal;
+          });
+          if (!external.length) {
+            return all;
+          }
+          return bookings.concat(
+            filterShadowedExternalCalendarRows(bookings, external),
+          );
+        }
+
         function getReservationCountByDate() {
           var counts = Object.create(null);
           (latestCalendarRows || []).forEach(function (row) {
@@ -2403,9 +2462,9 @@
             };
           }
           return {
-            state: "stay",
-            label: row.isExternal ? "에어비앤비" : "재실",
-            row: row,
+            state: "vacant",
+            label: "공실",
+            row: null,
           };
         }
 
@@ -7220,7 +7279,9 @@
               reservationListRows = result.data.rows || [];
               reservationTabCounts[tab] = reservationListRows.length;
               if (result.data.calendarRows) {
-                latestCalendarRows = result.data.calendarRows;
+                latestCalendarRows = normalizeCalendarRows(
+                  result.data.calendarRows,
+                );
                 latestRows = latestCalendarRows;
               }
               applyListView(true);
@@ -7297,7 +7358,9 @@
               }
               setLoggedInView();
               latestRows = result.data.rows || [];
-              latestCalendarRows = result.data.calendarRows || latestRows || [];
+              latestCalendarRows = normalizeCalendarRows(
+                result.data.calendarRows || latestRows || [],
+              );
               return loadRoomStatusRows()
                 .catch(function () {
                   setRoomStatusRows([]);

@@ -82,15 +82,30 @@ function validateGuestCount(room, guestCount) {
   return { ok: true, guestCount: gc, extraGuests: Math.max(0, gc - limits.base) };
 }
 
+function dateRangeOverlaps(ci1, co1, ci2, co2) {
+  ci1 = String(ci1 || "").slice(0, 10);
+  co1 = String(co1 || "").slice(0, 10);
+  ci2 = String(ci2 || "").slice(0, 10);
+  co2 = String(co2 || "").slice(0, 10);
+  if (!ci1 || !co1 || !ci2 || !co2 || ci1 >= co1 || ci2 >= co2) {
+    return false;
+  }
+  return ci1 < co2 && ci2 < co1;
+}
+
 async function findMatchingExternalBooking(pool, room, checkIn, checkOut) {
   try {
     var result = await pool.query(
       `SELECT external_uid
        FROM ${EXTERNAL_BOOKING_TABLE}
        WHERE room_type = $1
-         AND check_in_date = $2::date
-         AND check_out_date = $3::date
-       ORDER BY last_synced_at DESC NULLS LAST, created_at DESC
+         AND check_in_date < $3::date
+         AND check_out_date > $2::date
+       ORDER BY
+         (check_in_date = $2::date AND check_out_date = $3::date) DESC,
+         (check_out_date - check_in_date) ASC,
+         last_synced_at DESC NULLS LAST,
+         created_at DESC
        LIMIT 1`,
       [room, checkIn, checkOut],
     );
@@ -148,11 +163,17 @@ export function filterShadowedExternalCalendarRows(bookingRows, externalRows) {
       if (linkedUid && extUid && linkedUid === extUid) {
         return true;
       }
+      if (booking.roomType !== ext.roomType) {
+        return false;
+      }
       if (
         channel === "airbnb" &&
-        booking.roomType === ext.roomType &&
-        booking.checkIn === ext.checkIn &&
-        booking.checkOut === ext.checkOut
+        dateRangeOverlaps(
+          booking.checkIn,
+          booking.checkOut,
+          ext.checkIn,
+          ext.checkOut,
+        )
       ) {
         return true;
       }
