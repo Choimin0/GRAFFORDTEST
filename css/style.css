@@ -13110,6 +13110,44 @@ main.content-section.confirm-page.admin-page {
   background: var(--stone-100);
   color: var(--stone-400);
 }
+.admin-booking-platform-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 1.42rem;
+  min-width: 4.6rem;
+  padding: 0.18rem 0.45rem;
+  font-size: 0.66rem;
+  letter-spacing: 0.04em;
+  line-height: 1;
+  white-space: nowrap;
+  box-sizing: border-box;
+}
+.admin-booking-platform-badge.is-airbnb {
+  background: color-mix(in srgb, #f0a87c 18%, var(--stone-50));
+  color: #c46f3a;
+}
+.admin-booking-platform-badge.is-naver {
+  background: color-mix(in srgb, var(--stone-green) 14%, var(--stone-50));
+  color: var(--stone-green);
+}
+.admin-booking-platform-badge.is-stayfolio {
+  background: color-mix(in srgb, #88c9a0 18%, var(--stone-50));
+  color: #3f8f63;
+}
+.admin-booking-platform-badge.is-phone {
+  background: color-mix(in srgb, #a48fcf 16%, var(--stone-50));
+  color: #6f57a8;
+}
+.admin-booking-platform-badge.is-unknown {
+  background: var(--stone-100);
+  color: var(--stone-400);
+}
+.admin-checkin-table .admin-booking-platform-badge {
+  min-width: 0;
+  font-size: 0.62rem;
+  padding: 0.22rem 0.38rem;
+}
 .admin-reservation-cancel-badge {
   min-width: 4.6rem;
   border: 0;

@@ -2285,6 +2285,15 @@
                 emailBtn.title = guestEmail;
               }
               talkTd.appendChild(emailBtn);
+            } else if (!hasValidReservationContact(roomCheckin)) {
+              var platformBadge = createBookingPlatformBadgeElement(
+                resolveBookingPlatformId(roomCheckin),
+              );
+              if (platformBadge) {
+                talkTd.appendChild(platformBadge);
+              } else {
+                talkTd.textContent = "—";
+              }
             } else {
               var sendBtn = document.createElement("button");
               sendBtn.type = "button";
@@ -4932,6 +4941,86 @@
           return Number(n || 0).toLocaleString("ko-KR") + "원";
         }
 
+        var BOOKING_PLATFORM_LABELS = {
+          airbnb: "에어비앤비",
+          naver: "네이버예약",
+          stayfolio: "스테이폴리오",
+          phone: "유선문의",
+        };
+
+        function hasValidReservationContact(row) {
+          var contact = String((row && row.contact) || "").trim();
+          return !!contact && contact !== "-";
+        }
+
+        function resolveBookingPlatformId(row) {
+          if (!row) {
+            return "";
+          }
+          var channel = String(row.bookingChannel || "")
+            .trim()
+            .toLowerCase();
+          if (channel && channel !== "direct" && BOOKING_PLATFORM_LABELS[channel]) {
+            return channel;
+          }
+          if (row.isExternal) {
+            var source = String(row.externalSource || "")
+              .trim()
+              .toLowerCase();
+            if (source === "airbnb" || source === "ical") {
+              return "airbnb";
+            }
+          }
+          return "";
+        }
+
+        function formatBookingPlatformLabel(platformId) {
+          return BOOKING_PLATFORM_LABELS[platformId] || "";
+        }
+
+        function getBookingPlatformClass(platformId) {
+          if (platformId === "airbnb") {
+            return "is-airbnb";
+          }
+          if (platformId === "naver") {
+            return "is-naver";
+          }
+          if (platformId === "stayfolio") {
+            return "is-stayfolio";
+          }
+          if (platformId === "phone") {
+            return "is-phone";
+          }
+          return "is-unknown";
+        }
+
+        function createBookingPlatformBadgeElement(platformId) {
+          var label = formatBookingPlatformLabel(platformId);
+          if (!label) {
+            return null;
+          }
+          var span = document.createElement("span");
+          span.className =
+            "admin-booking-platform-badge " +
+            getBookingPlatformClass(platformId);
+          span.textContent = label;
+          return span;
+        }
+
+        function buildBookingPlatformBadgeHtml(platformId) {
+          var label = formatBookingPlatformLabel(platformId);
+          if (!label) {
+            return "";
+          }
+          return (
+            "<span class='admin-booking-platform-badge " +
+            escapeHtml(getBookingPlatformClass(platformId)) +
+            "'>" +
+            escapeHtml(label) +
+            "</span>"
+          );
+        }
+
         function formatPaymentMethodLabel(method) {
           var raw = String(method || "")
             .trim()
@@ -5625,6 +5714,13 @@
             if (sortKey === "amount") return getReservationPaidTotal(row);
             if (sortKey === "status") return getReservationStatusLabel(row);
             if (sortKey === "payment") {
+              if (isExternalManualReservation(row)) {
+                return (
+                  formatBookingPlatformLabel(
+                    resolveBookingPlatformId(row),
+                  ) || "결제수단 미확인"
+                );
+              }
               return formatPaymentMethodLabel(row && row.paymentMethod);
             }
             return reservationDateNumber(row);
@@ -5693,12 +5789,30 @@
           rows.forEach(function (row) {
             var tr = document.createElement("tr");
             var nights = getStayPeriodNights(row);
-            var paymentLabel = formatPaymentMethodLabel(
-              row && row.paymentMethod,
-            );
-            var paymentClass =
-              "admin-reservation-payment " +
-              getPaymentClass(row && row.paymentMethod);
+            var isExternalManual = isExternalManualReservation(row);
+            var paymentCellHtml;
+            if (isExternalManual) {
+              paymentCellHtml =
+                buildBookingPlatformBadgeHtml(
+                  resolveBookingPlatformId(row),
+                ) ||
+                "<span class='admin-reservation-payment is-unknown'>" +
+                  escapeHtml("결제수단 미확인") +
+                  "</span>";
+            } else {
+              var paymentLabel = formatPaymentMethodLabel(
+                row && row.paymentMethod,
+              );
+              var paymentClass =
+                "admin-reservation-payment " +
+                getPaymentClass(row && row.paymentMethod);
+              paymentCellHtml =
+                "<span class='" +
+                escapeHtml(paymentClass) +
+                "'>" +
+                escapeHtml(paymentLabel) +
+                "</span>";
+            }
             var requestText = row && row.guestRequest ? row.guestRequest : "";
             var cancelCell;
             if (activeResTab === "current") {
@@ -5741,11 +5855,7 @@
               buildAmountCellHtml(row) +
               "</td>" +
               "<td class='admin-res-col-payment admin-sort-hover-cell'>" +
-              "<span class='" +
-              escapeHtml(paymentClass) +
-              "'>" +
-              escapeHtml(paymentLabel) +
-              "</span>" +
+              paymentCellHtml +
               "</td>" +
               cancelCell +
               "<td class='admin-res-col-request'>" +
