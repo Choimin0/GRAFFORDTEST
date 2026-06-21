@@ -4243,7 +4243,14 @@
                 resEntryConfirmedOccupiedNightSet = new Set(
                   data.confirmedOccupiedNights || [],
                 );
-                resEntryAirbnbNightSet = new Set(data.airbnbIcalNights || []);
+                var airbnbNights = data.airbnbIcalNights || [];
+                if (!airbnbNights.length) {
+                  var confirmedLookup = resEntryConfirmedOccupiedNightSet;
+                  airbnbNights = (data.occupiedNights || []).filter(function (n) {
+                    return !confirmedLookup.has(n);
+                  });
+                }
+                resEntryAirbnbNightSet = new Set(airbnbNights);
               } else {
                 resEntryOccupiedNightSet = new Set();
                 resEntryConfirmedOccupiedNightSet = new Set();
@@ -4560,7 +4567,12 @@
                 btn.classList.add("is-range");
               }
 
-              if (disabled && disabledReason === "occupied-night" && !isPast) {
+              if (
+                disabled &&
+                disabledReason === "occupied-night" &&
+                !isPast &&
+                !isAirbnbIcal
+              ) {
                 btn.classList.add("is-soldout");
                 btn.textContent = "";
                 var soldDay = document.createElement("span");

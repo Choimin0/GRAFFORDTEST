@@ -547,6 +547,33 @@ export async function getAirbnbBookingOccupiedNights(pool, room) {
   }
 }
 
+/** Airbnb iCal nights for admin calendar display (live fetch + DB). */
+export async function getAirbnbIcalOccupiedNights(pool, room) {
+  if (isIcalImportDisabled()) {
+    return [];
+  }
+  var merged = Object.create(null);
+
+  var dbNights = await getAirbnbBookingOccupiedNights(pool, room);
+  dbNights.forEach(function (n) {
+    merged[n] = true;
+  });
+
+  var fetched = await fetchExternalOccupiedNights(room, { useCache: true });
+  if (fetched.ok) {
+    fetched.nights.forEach(function (n) {
+      merged[n] = true;
+    });
+  } else if (!dbNights.length) {
+    var fallbackNights = await getExternalBookingOccupiedNights(pool, room);
+    fallbackNights.forEach(function (n) {
+      merged[n] = true;
+    });
+  }
+
+  return Object.keys(merged).sort();
+}
+
 export async function hasExternalBookingOverlap(pool, roomName, checkIn, checkOut) {
   if (isIcalImportDisabled()) {
     return false;

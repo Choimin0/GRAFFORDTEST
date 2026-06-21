@@ -15373,6 +15373,10 @@ main.content-section.confirm-page.admin-page {
 }
 .admin-res-entry-cal-day.is-soldout.is-airbnb-ical {
   color: #c25a5e;
+  background: rgba(255, 90, 95, 0.12);
+}
+.admin-res-entry-cal-day.is-airbnb-ical:not(.is-soldout) {
+  font-weight: 500;
 }
 .admin-res-entry-cal-soldout-day {
   font-size: 0.82rem;

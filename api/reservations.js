@@ -29,7 +29,7 @@ import { getTodayYmdKst } from "./_lib/promotion-period.js";
 import { exportReservationToBigQuery, exportCancellationToBigQuery } from "./_lib/bigquery-export.js";
 import {
   buildIcalCalendar,
-  getAirbnbBookingOccupiedNights,
+  getAirbnbIcalOccupiedNights,
   getMergedOccupiedNightsForRoom,
 } from "./_lib/ical-sync.js";
 import {
@@ -585,7 +585,7 @@ export default async function handler(req, res) {
           checkouts[co] = true;
         });
         var importedNights = await getMergedOccupiedNightsForRoom(pool, roomForCal);
-        var airbnbIcalNights = await getAirbnbBookingOccupiedNights(
+        var airbnbIcalNights = await getAirbnbIcalOccupiedNights(
           pool,
           roomForCal,
         );
