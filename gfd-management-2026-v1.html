@@ -1901,34 +1901,40 @@
           return ci1 < co2 && ci2 < co1;
         }
 
+        function isAirbnbNotAvailablePlaceholder(row) {
+          if (!row || !row.isExternal) {
+            return false;
+          }
+          var memo = String(row.guestRequest || "").trim().toLowerCase();
+          return /^airbnb\s*\(\s*not\s+available\s*\)$/.test(memo);
+        }
+
         function filterShadowedExternalCalendarRows(bookingRows, externalRows) {
           var bookings = bookingRows || [];
           return (externalRows || []).filter(function (ext) {
+            if (isAirbnbNotAvailablePlaceholder(ext)) {
+              return false;
+            }
             return !bookings.some(function (booking) {
               if (!booking || booking.isExternal) {
                 return false;
               }
-              var channel = String(booking.bookingChannel || "")
-                .trim()
-                .toLowerCase();
               var linkedUid = String(booking.linkedExternalUid || "").trim();
               var extUid = String(ext.externalUid || "").trim();
               if (linkedUid && extUid && linkedUid === extUid) {
                 return true;
               }
               if (
-                channel === "airbnb" &&
-                String(booking.roomType || "") === String(ext.roomType || "") &&
-                dateRangeOverlaps(
-                  booking.checkIn,
-                  booking.checkOut,
-                  ext.checkIn,
-                  ext.checkOut,
-                )
+                String(booking.roomType || "") !== String(ext.roomType || "")
               ) {
-                return true;
+                return false;
               }
-              return false;
+              return dateRangeOverlaps(
+                booking.checkIn,
+                booking.checkOut,
+                ext.checkIn,
+                ext.checkOut,
+              );
             });
           });
         }
@@ -1939,10 +1945,10 @@
             return row && !row.isExternal;
           });
           var external = all.filter(function (row) {
-            return row && row.isExternal;
+            return row && row.isExternal && !isAirbnbNotAvailablePlaceholder(row);
           });
           if (!external.length) {
-            return all;
+            return bookings;
           }
           return bookings.concat(
             filterShadowedExternalCalendarRows(bookings, external),
@@ -2287,6 +2293,11 @@
                 return String(row.roomType || "").toUpperCase() === room;
               })
               .sort(function (a, b) {
+                var extDiff =
+                  (a.isExternal ? 1 : 0) - (b.isExternal ? 1 : 0);
+                if (extDiff !== 0) {
+                  return extDiff;
+                }
                 return compareYmd(dateKey(a.checkOut), dateKey(b.checkOut));
               })[0];
             var tr = document.createElement("tr");
@@ -2573,9 +2584,13 @@
 
           var rwTbody = document.createElement("tbody");
           rooms.forEach(function (room) {
-            var roomRows = rows.filter(function (row) {
-              return String(row.roomType || "").toUpperCase() === room;
-            });
+            var roomRows = rows
+              .filter(function (row) {
+                return String(row.roomType || "").toUpperCase() === room;
+              })
+              .sort(function (a, b) {
+                return (a.isExternal ? 1 : 0) - (b.isExternal ? 1 : 0);
+              });
             var tr = document.createElement("tr");
             var roomTh = document.createElement("th");
             roomTh.scope = "row";
@@ -2590,11 +2605,11 @@
               for (var ri = 0; ri < roomRows.length; ri++) {
                 var rci = dateKey(roomRows[ri].checkIn);
                 var rco = dateKey(roomRows[ri].checkOut);
-                if (rci < d && d < rco) {
+                if (rci < d && d < rco && !ongoingRes) {
                   ongoingRes = roomRows[ri];
-                } else if (rco === d && rci < d) {
+                } else if (rco === d && rci < d && !checkoutDayRes) {
                   checkoutDayRes = roomRows[ri];
-                } else if (rci === d && rco > d) {
+                } else if (rci === d && rco > d && !checkinDayRes) {
                   checkinDayRes = roomRows[ri];
                 }
               }

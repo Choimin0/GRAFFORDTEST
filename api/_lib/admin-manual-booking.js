@@ -157,7 +157,6 @@ export function filterShadowedExternalCalendarRows(bookingRows, externalRows) {
   var bookings = bookingRows || [];
   return (externalRows || []).filter(function (ext) {
     return !bookings.some(function (booking) {
-      var channel = String(booking.bookingChannel || "").trim().toLowerCase();
       var linkedUid = String(booking.linkedExternalUid || "").trim();
       var extUid = String(ext.externalUid || "").trim();
       if (linkedUid && extUid && linkedUid === extUid) {
@@ -166,18 +165,12 @@ export function filterShadowedExternalCalendarRows(bookingRows, externalRows) {
       if (booking.roomType !== ext.roomType) {
         return false;
       }
-      if (
-        channel === "airbnb" &&
-        dateRangeOverlaps(
-          booking.checkIn,
-          booking.checkOut,
-          ext.checkIn,
-          ext.checkOut,
-        )
-      ) {
-        return true;
-      }
-      return false;
+      return dateRangeOverlaps(
+        booking.checkIn,
+        booking.checkOut,
+        ext.checkIn,
+        ext.checkOut,
+      );
     });
   });
 }

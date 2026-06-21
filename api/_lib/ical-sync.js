@@ -171,14 +171,46 @@ export function parseIcsEvents(icsText) {
   return events;
 }
 
+function countBlockNights(ci, co) {
+  if (!ci || !co || ci >= co) {
+    return 0;
+  }
+  return expandOccupiedNights(ci, co).length;
+}
+
+/** Airbnb listing placeholder blocks (often ~1yr "Not available") — not real guest holds. */
+export function shouldIgnoreExternalBlock(ci, co, summary) {
+  var nights = countBlockNights(ci, co);
+  if (nights <= 0) {
+    return true;
+  }
+  var text = String(summary || "").trim().toLowerCase();
+  if (/^airbnb\s*\(\s*not\s+available\s*\)$/.test(text)) {
+    return true;
+  }
+  if (nights >= 180) {
+    return true;
+  }
+  if (
+    nights >= 30 &&
+    (/not\s*available/.test(text) || /unavailable/.test(text))
+  ) {
+    return true;
+  }
+  return false;
+}
+
 export function collectIcsOccupiedNights(icsText) {
   var occupied = Object.create(null);
   parseIcsEvents(icsText).forEach(function (ev) {
+    if (shouldIgnoreExternalBlock(ev.dtStart, ev.dtEnd, ev.summary)) {
+      return;
+    }
     expandOccupiedNights(ev.dtStart, ev.dtEnd).forEach(function (n) {
       occupied[n] = true;
     });
   });
-  return Object.keys(occupied);
+  return Object.keys(occupied).sort();
 }
 
 function parseRoomFromIcalImportEntry(raw) {
@@ -415,7 +447,8 @@ export async function getExternalBookingCalendarRows(pool) {
        WHERE check_out_date > CURRENT_DATE - INTERVAL '1 day'
        ORDER BY check_in_date ASC, room_type ASC`,
     );
-    return (result.rows || []).map(function (row) {
+    return (result.rows || [])
+      .map(function (row) {
       var source = String(row.source || "ical").trim().toLowerCase();
       var uid = String(row.external_uid || "").trim();
       return {
@@ -435,7 +468,14 @@ export async function getExternalBookingCalendarRows(pool) {
         externalSource: source,
         externalUid: uid,
       };
-    });
+    })
+      .filter(function (row) {
+        return !shouldIgnoreExternalBlock(
+          row.checkIn,
+          row.checkOut,
+          row.guestRequest,
+        );
+      });
   } catch (e) {
     if (e && (e.code === "42P01" || e.code === "42703")) {
       return [];
@@ -449,6 +489,9 @@ function collectExternalOccupiedNights(rows) {
   (rows || []).forEach(function (row) {
     var ci = rowDateToYMD(row.check_in_date);
     var co = rowDateToYMD(row.check_out_date);
+    if (shouldIgnoreExternalBlock(ci, co, row.summary)) {
+      return;
+    }
     if (!ci || !co || ci >= co) {
       return;
     }
@@ -465,7 +508,7 @@ export async function getExternalBookingOccupiedNights(pool, room) {
   }
   try {
     var result = await pool.query(
-      `SELECT check_in_date, check_out_date
+      `SELECT check_in_date, check_out_date, summary
        FROM ${EXTERNAL_BOOKING_TABLE}
        WHERE room_type = $1
          AND check_out_date > CURRENT_DATE - INTERVAL '1 day'
@@ -487,7 +530,7 @@ export async function getAirbnbBookingOccupiedNights(pool, room) {
   }
   try {
     var result = await pool.query(
-      `SELECT check_in_date, check_out_date
+      `SELECT check_in_date, check_out_date, summary
        FROM ${EXTERNAL_BOOKING_TABLE}
        WHERE room_type = $1
          AND source = 'airbnb'
@@ -521,22 +564,9 @@ export async function hasExternalBookingOverlap(pool, roomName, checkIn, checkOu
   }
 
   if (!fetched.ok) {
-    try {
-      var result = await pool.query(
-        `SELECT 1
-         FROM ${EXTERNAL_BOOKING_TABLE}
-         WHERE room_type = $1
-           AND check_in_date < $3::date
-           AND check_out_date > $2::date
-         LIMIT 1`,
-        [room, checkIn, checkOut],
-      );
-      return !!(result.rows && result.rows.length);
-    } catch (e) {
-      if (e && (e.code === "42P01" || e.code === "42703")) {
-        return false;
-      }
-      throw e;
+    nights = await getExternalBookingOccupiedNights(pool, room);
+    if (!nights.length) {
+      return false;
     }
   }
 
@@ -609,6 +639,9 @@ export async function syncExternalBookingsForTarget(pool, room, url) {
   for (var i = 0; i < fetched.events.length; i++) {
     var ev = fetched.events[i];
     var uid = syntheticUidForEvent(ev, room, url, i);
+    if (shouldIgnoreExternalBlock(ev.dtStart, ev.dtEnd, ev.summary)) {
+      continue;
+    }
     seenUids[uid] = true;
     await pool.query(
       `INSERT INTO ${EXTERNAL_BOOKING_TABLE} (
