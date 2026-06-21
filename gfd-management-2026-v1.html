@@ -4003,6 +4003,7 @@
         var resEntryCheckInDate = null;
         var resEntryCheckOutDate = null;
         var resEntryOccupiedNightSet = new Set();
+        var resEntryConfirmedOccupiedNightSet = new Set();
         var resEntryAirbnbNightSet = new Set();
         var resEntryAvailabilityRoom = "";
         var resEntryInited = false;
@@ -4138,6 +4139,16 @@
           return base;
         }
 
+        function isResEntryNightHardBlocked(ymd) {
+          if (!resEntryOccupiedNightSet.has(ymd)) {
+            return false;
+          }
+          if (resEntryState.bookingChannel === "airbnb") {
+            return resEntryConfirmedOccupiedNightSet.has(ymd);
+          }
+          return true;
+        }
+
         function canResEntrySelectCheckOut(checkIn, checkOut) {
           if (!checkIn || !checkOut || !resEntryDateLt(checkIn, checkOut)) {
             return false;
@@ -4153,7 +4164,7 @@
             checkOut.getDate(),
           );
           while (resEntryDateLt(cur, end)) {
-            if (resEntryOccupiedNightSet.has(formatResEntryYmd(cur))) {
+            if (isResEntryNightHardBlocked(formatResEntryYmd(cur))) {
               return false;
             }
             cur = resEntryAddDays(cur, 1);
@@ -4168,15 +4179,29 @@
           }
           var baseHint =
             "달력에서 체크인 날짜를 먼저 선택한 뒤, 체크아웃 날짜를 선택하세요.";
+          var legendHtml =
+            ' <span class="admin-res-entry-cal-legend"><span class="admin-res-entry-cal-legend__booked">예약 완료</span><span class="admin-res-entry-cal-legend__airbnb">Airbnb iCal</span></span>';
           if (!resEntryState.room) {
             hintEl.textContent =
               baseHint + " 객실을 선택하면 예약 완료 날짜가 표시됩니다.";
             return;
           }
-          if (resEntryState.bookingChannel === "airbnb") {
+          if (resEntryAirbnbNightSet.size > 0) {
+            if (resEntryState.bookingChannel === "airbnb") {
+              hintEl.innerHTML =
+                baseHint +
+                " 분홍색 날짜는 Airbnb iCal 연동 예약이며, 선택해 예약자 정보를 입력할 수 있습니다." +
+                legendHtml;
+              return;
+            }
             hintEl.innerHTML =
               baseHint +
-              ' <span class="admin-res-entry-cal-legend"><span class="admin-res-entry-cal-legend__booked">예약 완료</span><span class="admin-res-entry-cal-legend__airbnb">Airbnb iCal</span></span>';
+              " 분홍색 날짜는 Airbnb iCal 연동 예약입니다. Airbnb 채널을 선택하면 해당 날짜를 입력할 수 있습니다." +
+              legendHtml;
+            return;
+          }
+          if (resEntryState.bookingChannel === "airbnb") {
+            hintEl.innerHTML = baseHint + legendHtml;
             return;
           }
           hintEl.textContent =
@@ -4189,6 +4214,7 @@
             .toUpperCase();
           if (!roomKey) {
             resEntryOccupiedNightSet = new Set();
+            resEntryConfirmedOccupiedNightSet = new Set();
             resEntryAirbnbNightSet = new Set();
             resEntryAvailabilityRoom = "";
             updateResEntryCalHint();
@@ -4214,9 +4240,13 @@
               }
               if (data && data.ok) {
                 resEntryOccupiedNightSet = new Set(data.occupiedNights || []);
+                resEntryConfirmedOccupiedNightSet = new Set(
+                  data.confirmedOccupiedNights || [],
+                );
                 resEntryAirbnbNightSet = new Set(data.airbnbIcalNights || []);
               } else {
                 resEntryOccupiedNightSet = new Set();
+                resEntryConfirmedOccupiedNightSet = new Set();
                 resEntryAirbnbNightSet = new Set();
               }
               updateResEntryCalHint();
@@ -4227,6 +4257,7 @@
                 return;
               }
               resEntryOccupiedNightSet = new Set();
+              resEntryConfirmedOccupiedNightSet = new Set();
               resEntryAirbnbNightSet = new Set();
               updateResEntryCalHint();
               renderReservationEntryCalendar();
@@ -4460,7 +4491,6 @@
           }
 
           var inCheckoutMode = !!(resEntryCheckInDate && !resEntryCheckOutDate);
-          var showAirbnbIcal = resEntryState.bookingChannel === "airbnb";
 
           for (var d = 1; d <= lastDate; d++) {
             (function (dayNum) {
@@ -4474,17 +4504,16 @@
 
               var ymdStr = formatResEntryYmd(cellDate);
               var isPast = cellDate.getTime() < today.getTime();
-              var isOcc =
-                !!resEntryState.room && resEntryOccupiedNightSet.has(ymdStr);
               var isAirbnbIcal =
-                showAirbnbIcal && resEntryAirbnbNightSet.has(ymdStr);
+                !!resEntryState.room && resEntryAirbnbNightSet.has(ymdStr);
+              var isHardBlocked = isResEntryNightHardBlocked(ymdStr);
               var disabled = false;
               var disabledReason = "";
 
               if (isPast) {
                 disabled = true;
                 disabledReason = "past";
-              } else if (isOcc) {
+              } else if (isHardBlocked) {
                 if (
                   !(
                     inCheckoutMode &&
@@ -4503,7 +4532,7 @@
 
               if (isPast) {
                 btn.classList.add("is-past");
-              } else if (isOcc) {
+              } else if (isHardBlocked || isAirbnbIcal) {
                 btn.classList.add("is-booked");
                 if (isAirbnbIcal) {
                   btn.classList.add("is-airbnb-ical");
@@ -4559,7 +4588,7 @@
                   resEntryCheckInDate = new Date(cellDate);
                   resEntryCheckOutDate = null;
                 } else if (
-                  resEntryOccupiedNightSet.has(ymdStr) &&
+                  isResEntryNightHardBlocked(ymdStr) &&
                   !canResEntrySelectCheckOut(resEntryCheckInDate, cellDate)
                 ) {
                   return;
@@ -4593,6 +4622,7 @@
           resEntryCheckOutDate = null;
           resEntryCalView = new Date();
           resEntryOccupiedNightSet = new Set();
+          resEntryConfirmedOccupiedNightSet = new Set();
           resEntryAirbnbNightSet = new Set();
           resEntryAvailabilityRoom = "";
 
@@ -4671,6 +4701,7 @@
                   resEntryState.bookingChannel =
                     btn.getAttribute("data-booking-channel") || "";
                   renderReservationEntryCalendar();
+                  updateResEntryCalHint();
                   updateReservationEntrySummary();
                 });
               });

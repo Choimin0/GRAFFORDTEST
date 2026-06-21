@@ -570,6 +570,7 @@ export default async function handler(req, res) {
           [[roomForCal, roomForCalLegacy]],
         );
         var occupied = Object.create(null);
+        var confirmedOccupied = Object.create(null);
         var checkouts = Object.create(null);
         (calRows.rows || []).forEach(function (row) {
           var ci = rowDateToYMD(row.check_in_date);
@@ -579,6 +580,7 @@ export default async function handler(req, res) {
           }
           expandOccupiedNights(ci, co).forEach(function (n) {
             occupied[n] = true;
+            confirmedOccupied[n] = true;
           });
           checkouts[co] = true;
         });
@@ -595,17 +597,20 @@ export default async function handler(req, res) {
           expandOccupiedNights(String(row.start_date), String(row.end_date)).forEach(
             function (n) {
               occupied[n] = true;
+              confirmedOccupied[n] = true;
             },
           );
         });
         var holdNights = await getActiveHoldOccupiedNights(pool, roomForCal);
         holdNights.forEach(function (n) {
           occupied[n] = true;
+          confirmedOccupied[n] = true;
         });
         json(res, 200, {
           ok: true,
           room: roomForCal,
           occupiedNights: Object.keys(occupied).sort(),
+          confirmedOccupiedNights: Object.keys(confirmedOccupied).sort(),
           airbnbIcalNights: airbnbIcalNights,
           checkoutDays: Object.keys(checkouts).sort(),
           importedIcalNightsCount: importedNights.length,
