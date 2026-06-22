@@ -15474,6 +15474,44 @@ main.content-section.confirm-page.admin-page {
   max-width: 50%;
   display: block;
 }
+.admin-res-entry-amount-label-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-8);
+  flex-wrap: wrap;
+}
+.admin-res-entry-amount-label-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-12);
+  margin-left: auto;
+}
+.admin-res-entry-amount-mode-tag {
+  color: var(--stone-400);
+  font-size: 0.62rem;
+  letter-spacing: 0.08em;
+}
+.admin-res-entry-friend-discount {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-6);
+  cursor: pointer;
+  color: var(--stone-600);
+  font-size: 0.62rem;
+  letter-spacing: 0.06em;
+  user-select: none;
+}
+.admin-res-entry-friend-discount input {
+  width: 0.875rem;
+  height: 0.875rem;
+  margin: 0;
+  cursor: pointer;
+  accent-color: var(--gold-500);
+}
+.admin-res-entry-field--amount input.is-auto-amount {
+  color: var(--gold-600);
+}
 .admin-res-entry-amount-currency {
   position: absolute;
   left: 0;

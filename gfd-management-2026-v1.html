@@ -894,13 +894,36 @@
                 <span class="admin-res-entry-section-num">05</span>
                 <span class="admin-res-entry-section-eyebrow">Payment</span>
               </div>
-              <label
+              <div
                 class="admin-res-entry-field admin-res-entry-field--amount"
               >
-                <span class="admin-res-entry-field-label"
-                  >총 결제 금액
-                  <span class="admin-res-entry-required">*</span></span
+                <div
+                  class="admin-res-entry-field-label admin-res-entry-amount-label-row"
                 >
+                  <span class="admin-res-entry-amount-label-main"
+                    >총 결제 금액
+                    <span class="admin-res-entry-required">*</span></span
+                  >
+                  <span
+                    class="admin-res-entry-amount-label-actions"
+                    id="admin-res-entry-amount-actions"
+                    hidden
+                  >
+                    <span class="admin-res-entry-amount-mode-tag"
+                      >직접 입력</span
+                    >
+                    <label
+                      class="admin-res-entry-friend-discount"
+                      for="admin-res-entry-friend-discount"
+                    >
+                      <input
+                        type="checkbox"
+                        id="admin-res-entry-friend-discount"
+                      />
+                      <span>지인 할인</span>
+                    </label>
+                  </span>
+                </div>
                 <span class="admin-res-entry-amount-wrap">
                   <span
                     class="admin-res-entry-amount-currency"
@@ -925,7 +948,7 @@
                   id="admin-res-entry-per-night"
                   aria-live="polite"
                 ></span>
-              </label>
+              </div>
             </div>
 
             <!-- 06 MEMO -->
@@ -3989,6 +4012,8 @@
           salesAnnualPanel.appendChild(tableCard);
         }
 
+        var RES_ENTRY_FRIEND_DISCOUNT_RATE = 0.3;
+        var resEntryPricingPromise = null;
         var resEntryState = {
           platform: "",
           bookingChannel: "",
@@ -3998,6 +4023,7 @@
           guests: 2,
           amount: 0,
           amountEntered: false,
+          friendDiscount: false,
         };
         var resEntryCalView = new Date();
         var resEntryCheckInDate = null;
@@ -4069,6 +4095,194 @@
             resEntryState.guests = limits.max;
           }
           updateResEntryGuestControls();
+        }
+
+        function isResEntryDirectChannel() {
+          return resEntryState.bookingChannel === "phone";
+        }
+
+        function resEntryRoomRateApiUrl() {
+          var base = "";
+          if (typeof window !== "undefined" && window.__GRAFFORD_API_BASE__) {
+            base = String(window.__GRAFFORD_API_BASE__).replace(/\/$/, "");
+          }
+          return base + "/api/room-rate";
+        }
+
+        function loadResEntryPricing() {
+          var P = window.GraffordBookingPricing;
+          if (!P) {
+            return Promise.resolve(false);
+          }
+          if (resEntryPricingPromise) {
+            return resEntryPricingPromise;
+          }
+          resEntryPricingPromise = fetch(resEntryRoomRateApiUrl())
+            .then(function (r) {
+              return r.json();
+            })
+            .then(function (data) {
+              if (!data || !data.ok) {
+                resEntryPricingPromise = null;
+                return false;
+              }
+              if (data.rates && typeof P.setRoomWeekdayBase === "function") {
+                P.setRoomWeekdayBase(data.rates);
+              }
+              if (
+                data.weekendBaseRates &&
+                typeof P.setRoomWeekendBase === "function"
+              ) {
+                P.setRoomWeekendBase(data.weekendBaseRates);
+              }
+              if (data.charges && typeof P.setCharges === "function") {
+                P.setCharges(data.charges, {
+                  promotionEnabled: !!(
+                    data.chargeEnabled && data.chargeEnabled.promotion
+                  ),
+                  promotionPeriod: data.promotionPeriod || null,
+                  promotionInPeriod: data.promotionInPeriod !== false,
+                  weekendChargeEnabled: !!(
+                    data.chargeEnabled &&
+                    data.chargeEnabled.weekendCharge !== false
+                  ),
+                });
+              }
+              return true;
+            })
+            .catch(function () {
+              resEntryPricingPromise = null;
+              return false;
+            });
+          return resEntryPricingPromise;
+        }
+
+        function getResEntryExtraGuests(room, guestCount) {
+          var P = window.GraffordBookingPricing;
+          if (!P) {
+            return 0;
+          }
+          var roomKey = String(room || "").toUpperCase();
+          var base = P.getBaseGuests(roomKey);
+          var extra = Math.max(0, Math.floor(Number(guestCount) || 0) - base);
+          return P.clampExtra(roomKey, extra);
+        }
+
+        function computeResEntryFriendDiscountAmount() {
+          var P = window.GraffordBookingPricing;
+          if (
+            !P ||
+            !isResEntryDirectChannel() ||
+            !resEntryState.room ||
+            !resEntryState.checkin ||
+            !resEntryState.checkout
+          ) {
+            return null;
+          }
+          var extraGuests = getResEntryExtraGuests(
+            resEntryState.room,
+            resEntryState.guests,
+          );
+          var stay = P.computeStay(
+            resEntryState.room,
+            resEntryState.checkin,
+            resEntryState.checkout,
+            extraGuests,
+          );
+          if (!stay || !stay.nights) {
+            return null;
+          }
+          var roomFee = stay.grandTotal - stay.consecutiveSale;
+          if (roomFee < 0) {
+            roomFee = 0;
+          }
+          return Math.floor(roomFee * (1 - RES_ENTRY_FRIEND_DISCOUNT_RATE));
+        }
+
+        function updateResEntryAmountControls() {
+          var actionsEl = document.getElementById(
+            "admin-res-entry-amount-actions",
+          );
+          var friendCb = document.getElementById(
+            "admin-res-entry-friend-discount",
+          );
+          var totalAmountInput = document.getElementById(
+            "admin-res-entry-total-amount",
+          );
+          var isDirect = isResEntryDirectChannel();
+
+          if (actionsEl) {
+            actionsEl.hidden = !isDirect;
+          }
+          if (!isDirect) {
+            resEntryState.friendDiscount = false;
+            if (friendCb) {
+              friendCb.checked = false;
+            }
+          } else if (friendCb) {
+            friendCb.checked = !!resEntryState.friendDiscount;
+          }
+          if (totalAmountInput) {
+            var readOnly = isDirect && resEntryState.friendDiscount;
+            totalAmountInput.readOnly = readOnly;
+            totalAmountInput.classList.toggle("is-auto-amount", readOnly);
+          }
+        }
+
+        function syncResEntryAmountFromFriendDiscount() {
+          if (!isResEntryDirectChannel() || !resEntryState.friendDiscount) {
+            updateResEntryAmountControls();
+            return Promise.resolve();
+          }
+          return loadResEntryPricing().then(function () {
+            var amount = computeResEntryFriendDiscountAmount();
+            var totalAmountInput = document.getElementById(
+              "admin-res-entry-total-amount",
+            );
+            if (amount != null && amount >= 0) {
+              resEntryState.amount = amount;
+              resEntryState.amountEntered = true;
+              if (totalAmountInput) {
+                totalAmountInput.value = String(amount);
+              }
+            } else {
+              resEntryState.amount = 0;
+              resEntryState.amountEntered = false;
+              if (totalAmountInput) {
+                totalAmountInput.value = "";
+              }
+            }
+            updateResEntryAmountControls();
+            updateResEntryPerNightDisplay();
+            updateReservationEntrySummary();
+          });
+        }
+
+        function updateResEntryPerNightDisplay() {
+          var perNightEl = document.getElementById("admin-res-entry-per-night");
+          if (!perNightEl) {
+            return;
+          }
+          if (
+            resEntryState.checkin &&
+            resEntryState.checkout &&
+            resEntryState.amount > 0
+          ) {
+            var stayNights = Math.round(
+              (new Date(resEntryState.checkout) -
+                new Date(resEntryState.checkin)) /
+                86400000,
+            );
+            if (stayNights > 0) {
+              var perNight = Math.round(resEntryState.amount / stayNights);
+              perNightEl.innerHTML =
+                "1박 기준 <span>₩" + perNight.toLocaleString() + "</span>";
+            } else {
+              perNightEl.textContent = "";
+            }
+          } else {
+            perNightEl.textContent = "";
+          }
         }
 
         function formatResEntryDate(str) {
@@ -4338,6 +4552,7 @@
           }
 
           updateResEntryGuestControls();
+          updateResEntryAmountControls();
 
           var totalEl = document.getElementById("admin-res-entry-sum-total");
           if (totalEl) {
@@ -4438,31 +4653,12 @@
             }
           }
 
-          var perNightEl = document.getElementById("admin-res-entry-per-night");
-          if (perNightEl) {
-            if (
-              resEntryState.checkin &&
-              resEntryState.checkout &&
-              resEntryState.amount > 0
-            ) {
-              var stayNights = Math.round(
-                (new Date(resEntryState.checkout) -
-                  new Date(resEntryState.checkin)) /
-                  86400000,
-              );
-              if (stayNights > 0) {
-                var perNight = Math.round(resEntryState.amount / stayNights);
-                perNightEl.innerHTML =
-                  "1박 기준 <span>₩" + perNight.toLocaleString() + "</span>";
-              } else {
-                perNightEl.textContent = "";
-              }
-            } else {
-              perNightEl.textContent = "";
-            }
-          }
+          updateResEntryPerNightDisplay();
 
           updateReservationEntrySummary();
+          if (resEntryState.friendDiscount) {
+            syncResEntryAmountFromFriendDiscount();
+          }
         }
 
         function renderReservationEntryCalendar() {
@@ -4628,6 +4824,7 @@
             guests: 2,
             amount: 0,
             amountEntered: false,
+            friendDiscount: false,
           };
           resEntrySubmitting = false;
           resEntryCheckInDate = null;
@@ -4674,6 +4871,20 @@
           }
           if (totalAmountInput) {
             totalAmountInput.value = "";
+            totalAmountInput.readOnly = false;
+            totalAmountInput.classList.remove("is-auto-amount");
+          }
+          var friendDiscountCb = document.getElementById(
+            "admin-res-entry-friend-discount",
+          );
+          if (friendDiscountCb) {
+            friendDiscountCb.checked = false;
+          }
+          var amountActionsEl = document.getElementById(
+            "admin-res-entry-amount-actions",
+          );
+          if (amountActionsEl) {
+            amountActionsEl.hidden = true;
           }
           if (memoInput) {
             memoInput.value = "";
@@ -4712,9 +4923,14 @@
                     btn.getAttribute("data-platform") || "";
                   resEntryState.bookingChannel =
                     btn.getAttribute("data-booking-channel") || "";
+                  updateResEntryAmountControls();
                   renderReservationEntryCalendar();
                   updateResEntryCalHint();
-                  updateReservationEntrySummary();
+                  if (resEntryState.friendDiscount) {
+                    syncResEntryAmountFromFriendDiscount();
+                  } else {
+                    updateReservationEntrySummary();
+                  }
                 });
               });
 
@@ -4734,7 +4950,6 @@
                   applyResEntryRoomGuestLimits(resEntryState.room);
                   loadResEntryAvailability(resEntryState.room);
                   syncReservationEntryDates();
-                  updateReservationEntrySummary();
                 });
               });
 
@@ -4771,7 +4986,11 @@
               guestMinus.addEventListener("click", function () {
                 resEntryState.guests = Math.max(1, resEntryState.guests - 1);
                 updateResEntryGuestControls();
-                updateReservationEntrySummary();
+                if (resEntryState.friendDiscount) {
+                  syncResEntryAmountFromFriendDiscount();
+                } else {
+                  updateReservationEntrySummary();
+                }
               });
             }
             if (guestPlus) {
@@ -4795,7 +5014,34 @@
                   resEntryState.guests + 1,
                 );
                 updateResEntryGuestControls();
-                updateReservationEntrySummary();
+                if (resEntryState.friendDiscount) {
+                  syncResEntryAmountFromFriendDiscount();
+                } else {
+                  updateReservationEntrySummary();
+                }
+              });
+            }
+
+            var friendDiscountCb = document.getElementById(
+              "admin-res-entry-friend-discount",
+            );
+            if (friendDiscountCb) {
+              friendDiscountCb.addEventListener("change", function () {
+                resEntryState.friendDiscount = !!friendDiscountCb.checked;
+                if (resEntryState.friendDiscount) {
+                  syncResEntryAmountFromFriendDiscount();
+                } else {
+                  resEntryState.amount = 0;
+                  resEntryState.amountEntered = false;
+                  var totalAmountInputReset = document.getElementById(
+                    "admin-res-entry-total-amount",
+                  );
+                  if (totalAmountInputReset) {
+                    totalAmountInputReset.value = "";
+                  }
+                  updateResEntryAmountControls();
+                  syncReservationEntryDates();
+                }
               });
             }
 
@@ -4822,6 +5068,9 @@
             }
             if (totalAmountInput) {
               totalAmountInput.addEventListener("input", function () {
+                if (resEntryState.friendDiscount) {
+                  return;
+                }
                 resEntryState.amountEntered = true;
                 var rawAmount = String(totalAmountInput.value || "").trim();
                 resEntryState.amount =
@@ -5001,6 +5250,8 @@
 
           renderReservationEntryCalendar();
           updateResEntryGuestControls();
+          updateResEntryAmountControls();
+          loadResEntryPricing();
           updateReservationEntrySummary();
         }
 
