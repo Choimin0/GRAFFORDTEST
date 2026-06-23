@@ -15,12 +15,21 @@ function getSolapiConfig() {
     apiSecret: trimEnv("SOLAPI_API_SECRET"),
     pfId: trimEnv("SOLAPI_PF_ID"),
     from: normalizePhone(trimEnv("SOLAPI_FROM")),
+    adminPhone: normalizePhone(trimEnv("SOLAPI_ADMIN_PHONE")),
     templateReserveComplete: trimEnv("SOLAPI_TEMPLATE_RESERVE_COMPLETE"),
     templateCancelComplete: trimEnv("SOLAPI_TEMPLATE_CANCEL_COMPLETE"),
     templateCheckinAlarm: trimEnv("SOLAPI_TEMPLATE_CHECKIN_ALARM"),
     propertyAddress:
       trimEnv("SOLAPI_PROPERTY_ADDRESS") || DEFAULT_PROPERTY_ADDRESS,
   };
+}
+
+function isValidKrMobile(phone) {
+  return /^01\d{8,9}$/.test(String(phone || ""));
+}
+
+function shouldNotifyAdmin(type) {
+  return type === "reserve-complete" || type === "cancel-complete";
 }
 
 function getMessageService(config) {
@@ -138,48 +147,7 @@ function validateConfig(config, templateId, type) {
   return null;
 }
 
-/**
- * 예약 완료 / 예약 취소 완료 카카오 알림톡 발송.
- * Solapi 콘솔에서 대체발송(SMS) 설정 시 disableSms를 지정하지 않으면 자동 적용됩니다.
- *
- * @param {"reserve-complete"|"cancel-complete"|"checkin-alarm"} type
- * @param {{
- *   guestName: string,
- *   contact: string,
- *   reservationNumber: string,
- *   roomType: string,
- *   checkIn: string,
- *   checkOut: string,
- * }} payload
- */
-export async function sendBookingAlimtalk(type, payload) {
-  var config = getSolapiConfig();
-  var templateId =
-    type === "cancel-complete"
-      ? config.templateCancelComplete
-      : type === "checkin-alarm"
-        ? config.templateCheckinAlarm
-        : config.templateReserveComplete;
-
-  var configError = validateConfig(config, templateId, type);
-  if (configError) {
-    return { ok: false, skipped: true, error: configError };
-  }
-
-  var to = normalizePhone(payload && payload.contact);
-  if (!/^01\d{8,9}$/.test(to)) {
-    return { ok: false, skipped: true, error: "Invalid contact number" };
-  }
-
-  var variables = buildBaseVariables(payload || {});
-  if (type === "reserve-complete" || type === "checkin-alarm") {
-    variables["#{숙소주소}"] = config.propertyAddress;
-  }
-  if (type === "checkin-alarm") {
-    variables["#{비밀번호}"] = contactLast4(to);
-  }
-
-  var messageService = getMessageService(config);
+async function sendAlimtalkToPhone(messageService, config, templateId, variables, to) {
   try {
     var result = await messageService.send({
       to: to,
@@ -211,6 +179,87 @@ export async function sendBookingAlimtalk(type, payload) {
       error: formatSolapiError(err),
     };
   }
+}
+
+/**
+ * 예약 완료 / 예약 취소 완료 카카오 알림톡 발송.
+ * reserve-complete / cancel-complete 는 SOLAPI_ADMIN_PHONE 이 설정된 경우 관리자에게도 동일 템플릿을 발송합니다.
+ * Solapi 콘솔에서 대체발송(SMS) 설정 시 disableSms를 지정하지 않으면 자동 적용됩니다.
+ *
+ * @param {"reserve-complete"|"cancel-complete"|"checkin-alarm"} type
+ * @param {{
+ *   guestName: string,
+ *   contact: string,
+ *   reservationNumber: string,
+ *   roomType: string,
+ *   checkIn: string,
+ *   checkOut: string,
+ * }} payload
+ */
+export async function sendBookingAlimtalk(type, payload) {
+  var config = getSolapiConfig();
+  var templateId =
+    type === "cancel-complete"
+      ? config.templateCancelComplete
+      : type === "checkin-alarm"
+        ? config.templateCheckinAlarm
+        : config.templateReserveComplete;
+
+  var configError = validateConfig(config, templateId, type);
+  if (configError) {
+    return { ok: false, skipped: true, error: configError };
+  }
+
+  var to = normalizePhone(payload && payload.contact);
+  if (!isValidKrMobile(to)) {
+    return { ok: false, skipped: true, error: "Invalid contact number" };
+  }
+
+  var variables = buildBaseVariables(payload || {});
+  if (type === "reserve-complete" || type === "checkin-alarm") {
+    variables["#{숙소주소}"] = config.propertyAddress;
+  }
+  if (type === "checkin-alarm") {
+    variables["#{비밀번호}"] = contactLast4(to);
+  }
+
+  var messageService = getMessageService(config);
+  var guestResult = await sendAlimtalkToPhone(
+    messageService,
+    config,
+    templateId,
+    variables,
+    to,
+  );
+
+  if (!shouldNotifyAdmin(type)) {
+    return guestResult;
+  }
+
+  var adminPhone = config.adminPhone;
+  if (!adminPhone || !isValidKrMobile(adminPhone) || adminPhone === to) {
+    return guestResult;
+  }
+
+  var adminResult = await sendAlimtalkToPhone(
+    messageService,
+    config,
+    templateId,
+    variables,
+    adminPhone,
+  );
+  if (!adminResult.ok) {
+    console.error(
+      "sendBookingAlimtalk admin notification failed",
+      type,
+      adminResult.error,
+    );
+  }
+
+  return Object.assign({}, guestResult, {
+    adminSent: adminResult.ok === true,
+    adminError: adminResult.ok ? null : adminResult.error || null,
+  });
 }
 
 /** API 응답을 막지 않도록 백그라운드 발송 (관리자 취소 등) */
