@@ -28,13 +28,27 @@
           </button>
         </div>
       </header>
+      <button
+        type="button"
+        class="admin-sidebar-open-btn"
+        id="admin-sidebar-open-btn"
+        hidden
+        aria-label="메뉴 열기"
+      >
+        &gt;
+      </button>
       <nav
         id="admin-category-nav"
         class="admin-category-nav"
         aria-label="관리자 카테고리"
         hidden
       >
-        <p class="admin-sidebar-label">ADMIN MENU</p>
+        <p
+          class="admin-sidebar-label admin-sidebar-label--toggle"
+          data-admin-sidebar-collapse
+        >
+          ADMIN MENU
+        </p>
         <div class="admin-category-list">
           <button
             type="button"
@@ -1541,6 +1555,7 @@
     </main>
 
     <script src="js/site-business-footer.js"></script>
+    <script src="js/admin-sidebar-mobile.js"></script>
     <script>
       document.addEventListener("DOMContentLoaded", function () {
         window.initSiteBusinessFooter({

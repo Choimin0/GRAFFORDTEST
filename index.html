@@ -649,6 +649,7 @@
       </script>
       <script defer src="js/grafford-page-fade.js"></script>
       <script src="js/site-business-footer.js"></script>
+      <script src="js/admin-entry.js"></script>
       <script>
         document.addEventListener("DOMContentLoaded", function () {
           window.initSiteBusinessFooter({
@@ -667,70 +668,6 @@
               " ",
               "© 2026 GRAFFORD. all rights reserved.",
             ],
-          });
-
-          var clickCount = 0;
-          var resetTimer = null;
-          var isShiftPressed = false;
-          var isGPressed = false;
-
-          function isAdminShortcutPressed() {
-            return isShiftPressed && isGPressed;
-          }
-
-          document.addEventListener("keydown", function (event) {
-            if (event.key === "Shift") {
-              isShiftPressed = true;
-              return;
-            }
-            if (event.code === "KeyG") {
-              isGPressed = true;
-            }
-          });
-
-          document.addEventListener("keyup", function (event) {
-            if (event.key === "Shift") {
-              isShiftPressed = false;
-              return;
-            }
-            if (event.code === "KeyG") {
-              isGPressed = false;
-            }
-          });
-
-          window.addEventListener("blur", function () {
-            isShiftPressed = false;
-            isGPressed = false;
-          });
-
-          function handleFooterLogoClick() {
-            if (!isAdminShortcutPressed()) {
-              clickCount = 0;
-              if (resetTimer) {
-                window.clearTimeout(resetTimer);
-                resetTimer = null;
-              }
-              return;
-            }
-            clickCount += 1;
-            if (resetTimer) {
-              window.clearTimeout(resetTimer);
-            }
-            resetTimer = window.setTimeout(function () {
-              clickCount = 0;
-              resetTimer = null;
-            }, 2000);
-            if (clickCount >= 5) {
-              window.location.href = "gfd-management-2026-v1.html";
-            }
-          }
-
-          document.addEventListener("click", function (event) {
-            var logo = event.target.closest(".site-business-footer__logo");
-            if (!logo) {
-              return;
-            }
-            handleFooterLogoClick();
           });
         });
       </script>

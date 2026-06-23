@@ -4423,6 +4423,11 @@ main.content-section:has(> .site-footer.site-business-footer) {
     display: none;
   }
 
+  .site-business-footer__copyright {
+    -webkit-tap-highlight-color: transparent;
+    user-select: none;
+  }
+
   .site-business-footer__bottom {
     flex-direction: column;
     align-items: flex-start;
@@ -13468,6 +13473,51 @@ main.content-section.confirm-page.admin-page {
     overflow-x: hidden;
     overflow-y: auto;
     padding: var(--space-24) 0;
+    transition: transform 0.28s ease;
+  }
+  .admin-sidebar-label--toggle {
+    cursor: pointer;
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+  .admin-page.is-sidebar-collapsed > .admin-category-nav {
+    transform: translateX(-100%);
+    pointer-events: none;
+  }
+  .admin-page.is-sidebar-collapsed
+    > .confirm-section:not(.admin-login-section) {
+    width: 100vw;
+    margin-left: 0;
+  }
+  .admin-sidebar-open-btn {
+    position: fixed;
+    top: var(--admin-topbar-height);
+    left: 0;
+    z-index: 1150;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.75rem;
+    height: 2rem;
+    padding: 0;
+    border: 0;
+    border-right: 1px solid color-mix(in srgb, var(--stone-50) 8%, transparent);
+    border-bottom: 1px solid color-mix(in srgb, var(--stone-50) 8%, transparent);
+    border-radius: 0 0 var(--radius-soft) 0;
+    background: var(--stone-900);
+    color: var(--gold-500);
+    font-family: var(--font-family-body-en);
+    font-size: 0.72rem;
+    line-height: 1;
+    cursor: pointer;
+  }
+  .admin-sidebar-open-btn[hidden] {
+    display: none !important;
+  }
+  .admin-sidebar-open-btn:hover,
+  .admin-sidebar-open-btn:focus-visible {
+    color: var(--stone-50);
+    outline: none;
   }
   .admin-sidebar-label {
     display: block;
