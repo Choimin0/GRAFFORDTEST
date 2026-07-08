@@ -7665,21 +7665,24 @@ main.content-section.confirm-page.payment-page > #payment-error-area-en {
     top: auto;
   }
 
-  /* payment.html — 모바일: booking summary 숨김, price/policy 먼저 · 결제 요약은 하단 */
+  /* payment.html — 모바일: booking summary 숨김, 결제 요약·결제하기 상단 · price/policy 하단 */
   .payment-page-shell .payment-layout__main
     > .payment-panel[aria-labelledby*="booking-summary-title"] {
     display: none;
   }
 
-  .payment-page-shell .payment-layout__main {
-    order: 0;
+  .payment-page-shell .payment-layout__sidebar {
+    order: -1;
+    border-top: none;
+    border-bottom: 1px solid var(--stone-200);
+    padding-top: 0;
+    padding-bottom: var(--space-32);
+    margin-top: 0;
+    margin-bottom: var(--space-16);
   }
 
-  .payment-page-shell .payment-layout__sidebar {
-    order: 1;
-    border-top: 1px solid var(--stone-200);
-    padding-top: var(--space-32);
-    margin-top: var(--space-16);
+  .payment-page-shell .payment-layout__main {
+    order: 0;
   }
 }
 
