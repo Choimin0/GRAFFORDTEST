@@ -4,6 +4,7 @@
   var CHECKOUT_BLOCKED_KEY = "graffordCheckoutBlocked";
   var CHECKOUT_SEAL_BACK_KEY = "graffordCheckoutSealBack";
   var BLOCK_PAYMENT_FORWARD_KEY = "graffordBlockPaymentForward";
+  var PAYMENT_NAV_KEY = "graffordCheckoutPaymentNav";
   var CHECKOUT_SEAL_REDIRECT = "RESERVATION.html";
   var ALLOWED_PATH_RE =
     /(?:^|\/)(?:confirm|payment)\.html(?:[?#].*)?$/i;
@@ -11,6 +12,7 @@
     /(?:^|\.)((?:inicis|portone|iamport|kcp|nicepay|tosspayments|kakaopay)\.)/i;
   var allowCheckoutNavigationFn = null;
   var disallowCheckoutNavigationFn = null;
+  var allowNavigateToPaymentFn = null;
 
   function isCheckoutPath(url) {
     try {
@@ -265,6 +267,7 @@
         sessionStorage.getItem(BLOCK_PAYMENT_FORWARD_KEY) === "1" &&
         /\/payment\.html$/i.test(root.location.pathname || "") &&
         !isCheckoutNavigationAllowed() &&
+        !isPaymentNavigationAllowed() &&
         !hasPortoneRedirectReturn() &&
         !isPaymentInProgress()
       ) {
@@ -287,6 +290,37 @@
     } catch (_e) {}
   }
 
+  function isPaymentNavigationAllowed() {
+    try {
+      return sessionStorage.getItem(PAYMENT_NAV_KEY) === "1";
+    } catch (_e) {
+      return false;
+    }
+  }
+
+  function clearPaymentNavigationAllowance() {
+    try {
+      sessionStorage.removeItem(PAYMENT_NAV_KEY);
+    } catch (_e) {}
+  }
+
+  function clearCheckoutNavigationAllowance() {
+    try {
+      sessionStorage.removeItem(ALLOW_NAV_KEY);
+    } catch (_e) {}
+    clearPaymentNavigationAllowance();
+  }
+
+  function allowNavigateToPayment() {
+    allowCheckoutNavigation();
+    try {
+      sessionStorage.setItem(PAYMENT_NAV_KEY, "1");
+    } catch (_e) {}
+    if (allowNavigateToPaymentFn) {
+      allowNavigateToPaymentFn();
+    }
+  }
+
   function allowCheckoutNavigation() {
     if (allowCheckoutNavigationFn) {
       allowCheckoutNavigationFn();
@@ -294,12 +328,6 @@
     try {
       sessionStorage.setItem(ALLOW_NAV_KEY, "1");
       sessionStorage.removeItem(BLOCK_PAYMENT_FORWARD_KEY);
-    } catch (_e) {}
-  }
-
-  function clearCheckoutNavigationAllowance() {
-    try {
-      sessionStorage.removeItem(ALLOW_NAV_KEY);
     } catch (_e) {}
   }
 
@@ -401,12 +429,20 @@
     var pendingLeaveUrl = "";
     var leaveConfirmed = false;
     var checkoutPageUrl = root.location.href;
+    var beforeUnloadHandler = null;
 
     allowCheckoutNavigationFn = function () {
       leaveConfirmed = true;
     };
     disallowCheckoutNavigationFn = function () {
       leaveConfirmed = false;
+    };
+    allowNavigateToPaymentFn = function () {
+      leaveConfirmed = true;
+      if (beforeUnloadHandler) {
+        root.removeEventListener("beforeunload", beforeUnloadHandler);
+        beforeUnloadHandler = null;
+      }
     };
 
     function rememberCheckoutReferrer() {
@@ -469,6 +505,26 @@
     }
 
     function isBlockedForwardToPayment(url) {
+      if (page !== "confirm") {
+        return false;
+      }
+      if (
+        leaveConfirmed ||
+        isCheckoutNavigationAllowed() ||
+        isPaymentNavigationAllowed()
+      ) {
+        return false;
+      }
+      try {
+        return /\/payment\.html$/i.test(
+          new URL(url, root.location.href).pathname,
+        );
+      } catch (_e) {
+        return false;
+      }
+    }
+
+    function isConfirmToPaymentUrl(url) {
       if (page !== "confirm") {
         return false;
       }
@@ -782,6 +838,12 @@
       if (!hasActiveCheckoutSession()) {
         return false;
       }
+      if (
+        isConfirmToPaymentUrl(url) &&
+        (isCheckoutNavigationAllowed() || isPaymentNavigationAllowed())
+      ) {
+        return false;
+      }
       if (isCheckoutPath(url)) {
         if (isAllowedCheckoutDestination(url)) {
           return false;
@@ -844,18 +906,20 @@
     setupCheckoutPopstateTrap();
 
     if (guardEnabled) {
-      root.addEventListener("beforeunload", function (e) {
+      beforeUnloadHandler = function (e) {
         if (
           !hasActiveCheckoutSession() ||
           leaveConfirmed ||
           isCheckoutNavigationAllowed() ||
+          isPaymentNavigationAllowed() ||
           isPaymentInProgress()
         ) {
           return;
         }
         e.preventDefault();
         e.returnValue = "";
-      });
+      };
+      root.addEventListener("beforeunload", beforeUnloadHandler);
 
     root.addEventListener("pagehide", function () {
       if (isPaymentInProgress()) {
@@ -864,7 +928,8 @@
       if (
         !hasActiveCheckoutSession() ||
         leaveConfirmed ||
-        isCheckoutNavigationAllowed()
+        isCheckoutNavigationAllowed() ||
+        isPaymentNavigationAllowed()
       ) {
         return;
       }
@@ -880,6 +945,7 @@
       confirmLeaveAndGo: confirmLeaveAndGo,
       shouldGuardNavigation: shouldGuardNavigation,
       allowCheckoutNavigation: allowCheckoutNavigation,
+      allowNavigateToPayment: allowNavigateToPayment,
       disallowCheckoutNavigation: disallowCheckoutNavigation,
     };
   }
@@ -899,8 +965,11 @@
     markCheckoutActive: markCheckoutActive,
     isCheckoutActive: isCheckoutActive,
     allowCheckoutNavigation: allowCheckoutNavigation,
+    allowNavigateToPayment: allowNavigateToPayment,
     disallowCheckoutNavigation: disallowCheckoutNavigation,
     clearCheckoutNavigationAllowance: clearCheckoutNavigationAllowance,
+    clearPaymentNavigationAllowance: clearPaymentNavigationAllowance,
+    isPaymentNavigationAllowed: isPaymentNavigationAllowed,
     redirectIfPaymentForwardBlocked: redirectIfPaymentForwardBlocked,
     clearPaymentForwardBlock: clearPaymentForwardBlock,
     markPaymentForwardBlocked: markPaymentForwardBlocked,

@@ -19,7 +19,7 @@
       })();
     </script>
     <script src="js/booking-token-client.js?v=5"></script>
-    <script src="js/booking-checkout-guard.js?v=12"></script>
+    <script src="js/booking-checkout-guard.js?v=13"></script>
     <script src="js/nav-hero.js" defer></script>
     <script src="js/mobile-nav.js" defer></script>
     <script src="js/site-language.js" defer></script>
@@ -1841,7 +1841,11 @@
                   }),
                 );
                 if (window.GraffordCheckoutGuard) {
-                  window.GraffordCheckoutGuard.allowCheckoutNavigation();
+                  if (window.GraffordCheckoutGuard.allowNavigateToPayment) {
+                    window.GraffordCheckoutGuard.allowNavigateToPayment();
+                  } else {
+                    window.GraffordCheckoutGuard.allowCheckoutNavigation();
+                  }
                 }
                 window.location.href = "payment.html";
               })
@@ -2178,7 +2182,11 @@
                     }),
                   );
                   if (window.GraffordCheckoutGuard) {
-                    window.GraffordCheckoutGuard.allowCheckoutNavigation();
+                    if (window.GraffordCheckoutGuard.allowNavigateToPayment) {
+                      window.GraffordCheckoutGuard.allowNavigateToPayment();
+                    } else {
+                      window.GraffordCheckoutGuard.allowCheckoutNavigation();
+                    }
                   }
                   window.location.href = "payment.html";
                 })
