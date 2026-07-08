@@ -77,8 +77,8 @@ async function seedCheckoutSession(page, kind) {
 }
 
 async function waitForGuard(page) {
-  await page.waitForFunction(() => window.GraffordCheckoutGuard);
-  await page.waitForTimeout(1000);
+  await page.waitForFunction(() => window.__graffordCheckoutGuardReady === true);
+  await page.waitForTimeout(200);
 }
 
 async function openCheckoutPage(page, targetPath) {
@@ -212,6 +212,80 @@ async function runSingleTest(browser, viewport, isMobile, fn) {
   }
 }
 
+async function testReloadAbandon(page, pageName, targetPath) {
+  await openCheckoutPage(page, targetPath);
+  await page.reload({ waitUntil: "domcontentloaded" });
+  await page.waitForTimeout(700);
+  const url = page.url();
+  const ok = /RESERVATION\.html/i.test(url);
+  return {
+    ok,
+    label: `${pageName} 새로고침 시 RESERVATION 이동`,
+    detail: ok ? "RESERVATION.html로 이동됨" : `현재 URL: ${url}`,
+  };
+}
+
+async function allowNavToPayment(page) {
+  await page.evaluate(() => {
+    if (window.GraffordCheckoutGuard) {
+      window.GraffordCheckoutGuard.allowCheckoutNavigation();
+    }
+    sessionStorage.setItem("graffordInPaymentFlow", "1");
+  });
+}
+
+async function testPaymentBackToConfirm(page) {
+  await seedCheckoutSession(page, "payment");
+  await page.goto(`${BASE}/RESERVATION.html`, { waitUntil: "domcontentloaded" });
+  await page.goto(`${BASE}/confirm.html`, { waitUntil: "domcontentloaded" });
+  await waitForGuard(page);
+  await allowNavToPayment(page);
+  await page.goto(`${BASE}/payment.html`, { waitUntil: "domcontentloaded" });
+  await waitForGuard(page);
+
+  await page.goBack();
+  await page.waitForTimeout(700);
+
+  const url = page.url();
+  const ok = /confirm\.html/i.test(url);
+  return {
+    ok,
+    label: "payment → confirm 뒤로가기 허용",
+    detail: ok ? "confirm.html로 이동됨" : `현재 URL: ${url}`,
+  };
+}
+
+async function testConfirmCannotReturnToPayment(page) {
+  await seedCheckoutSession(page, "confirm");
+  await page.goto(`${BASE}/RESERVATION.html`, { waitUntil: "domcontentloaded" });
+  await page.goto(`${BASE}/confirm.html`, { waitUntil: "domcontentloaded" });
+  await waitForGuard(page);
+  await allowNavToPayment(page);
+  await page.goto(`${BASE}/payment.html`, { waitUntil: "domcontentloaded" });
+  await waitForGuard(page);
+  await page.goBack();
+  await page.waitForTimeout(700);
+  await waitForGuard(page);
+
+  await page.goBack();
+  await page.waitForTimeout(700);
+
+  const url = page.url();
+  const overlayVisible = await page
+    .locator("#confirm-leave-overlay.is-visible, #confirm-leave-overlay-en.is-visible")
+    .first()
+    .isVisible()
+    .catch(() => false);
+  const ok = /confirm\.html/i.test(url) && overlayVisible && !/payment\.html/i.test(url);
+  return {
+    ok,
+    label: "confirm → payment 뒤로가기 차단",
+    detail: ok
+      ? "confirm 유지 + 이탈 팝업 표시"
+      : `url=${url}, overlay=${overlayVisible}`,
+  };
+}
+
 async function runProfile(browser, profileName, viewport, isMobile) {
   const results = [];
 
@@ -243,7 +317,24 @@ async function runProfile(browser, profileName, viewport, isMobile) {
         return testDirectBlockedReentry(page, target.pageName, target.path);
       }),
     );
+    results.push(
+      await runSingleTest(browser, viewport, isMobile, async (page) => {
+        await seedCheckoutSession(page, target.pageName);
+        return testReloadAbandon(page, target.pageName, target.path);
+      }),
+    );
   }
+
+  results.push(
+    await runSingleTest(browser, viewport, isMobile, async (page) => {
+      return testPaymentBackToConfirm(page);
+    }),
+  );
+  results.push(
+    await runSingleTest(browser, viewport, isMobile, async (page) => {
+      return testConfirmCannotReturnToPayment(page);
+    }),
+  );
 
   return { profileName, results };
 }

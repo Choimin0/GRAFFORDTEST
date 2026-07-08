@@ -273,11 +273,11 @@
       hasPortoneRedirectReturn() ||
       isPaymentInProgress() ||
       !isPageReload() ||
-      isCheckoutNavigationAllowed() ||
       !hasActiveCheckoutSession()
     ) {
       return false;
     }
+    clearCheckoutNavigationAllowance();
     if (root.GraffordBookingToken) {
       root.GraffordBookingToken.abandonCheckoutSession(target);
     } else {
@@ -346,16 +346,24 @@
     function rememberCheckoutReferrer() {
       try {
         var ref = root.document.referrer || "";
-        if (!ref) {
-          sessionStorage.removeItem("graffordCheckoutPrevPath");
+        if (ref) {
+          var refPath = new URL(ref, root.location.href).pathname;
+          if (isCheckoutPath(ref)) {
+            sessionStorage.setItem("graffordCheckoutPrevPath", refPath);
+            return;
+          }
+        }
+        if (
+          page === "payment" &&
+          sessionStorage.getItem("graffordInPaymentFlow") === "1"
+        ) {
+          sessionStorage.setItem(
+            "graffordCheckoutPrevPath",
+            new URL("confirm.html", root.location.href).pathname,
+          );
           return;
         }
-        var refPath = new URL(ref, root.location.href).pathname;
-        if (isCheckoutPath(ref)) {
-          sessionStorage.setItem("graffordCheckoutPrevPath", refPath);
-        } else {
-          sessionStorage.removeItem("graffordCheckoutPrevPath");
-        }
+        sessionStorage.removeItem("graffordCheckoutPrevPath");
       } catch (_e) {
         try {
           sessionStorage.removeItem("graffordCheckoutPrevPath");
@@ -371,16 +379,26 @@
       }
     }
 
-    function isInternalCheckoutBack() {
-      var prevPath = readCheckoutReferrerPath();
-      if (!prevPath || !isCheckoutPath(prevPath)) {
+    function isAllowedCheckoutBack() {
+      if (page !== "payment") {
         return false;
       }
       try {
         var currentPath = new URL(root.location.href).pathname;
-        return prevPath !== currentPath;
+        if (!/\/payment\.html$/i.test(currentPath)) {
+          return false;
+        }
       } catch (_e) {
+        return false;
+      }
+      var prevPath = readCheckoutReferrerPath();
+      if (prevPath && /\/confirm\.html$/i.test(prevPath)) {
         return true;
+      }
+      try {
+        return sessionStorage.getItem("graffordInPaymentFlow") === "1";
+      } catch (_e2) {
+        return false;
       }
     }
 
@@ -391,6 +409,24 @@
         checkoutPageUrl,
       );
       pendingLeaveUrl = destinationUrl || "RESERVATION.html";
+      showLeaveOverlay();
+    }
+
+    function isAllowedCheckoutDestination(url) {
+      if (page !== "payment") {
+        return false;
+      }
+      try {
+        return /\/confirm\.html$/i.test(
+          new URL(url, root.location.href).pathname,
+        );
+      } catch (_e) {
+        return false;
+      }
+    }
+
+    function showLeaveOverlayForNavigation(url) {
+      pendingLeaveUrl = url || checkoutSealRedirectUrl();
       showLeaveOverlay();
     }
 
@@ -420,6 +456,19 @@
           return;
         }
         if (isCheckoutPath(event.destination.url)) {
+          if (isAllowedCheckoutDestination(event.destination.url)) {
+            return;
+          }
+          if (event.canIntercept && typeof event.intercept === "function") {
+            event.intercept({
+              handler: function () {
+                showLeaveOverlayForNavigation(checkoutSealRedirectUrl());
+              },
+            });
+          } else if (event.cancelable !== false) {
+            event.preventDefault();
+            showLeaveOverlayForNavigation(checkoutSealRedirectUrl());
+          }
           return;
         }
         if (!hasActiveCheckoutSession() || isPaymentInProgress()) {
@@ -465,7 +514,7 @@
         if (e.state && e.state.checkoutGuard === true) {
           return;
         }
-        if (isInternalCheckoutBack()) {
+        if (isAllowedCheckoutBack()) {
           allowCheckoutNavigation();
           root.history.go(-1);
           return;
@@ -583,10 +632,16 @@
       if (!guardEnabled || leaveConfirmed) {
         return false;
       }
-      if (!isCheckoutActive()) {
+      if (isPaymentInProgress()) {
         return false;
       }
-      return !isCheckoutPath(url);
+      if (!hasActiveCheckoutSession()) {
+        return false;
+      }
+      if (isCheckoutPath(url)) {
+        return !isAllowedCheckoutDestination(url);
+      }
+      return true;
     }
 
     function interceptNavigation(event, url) {
@@ -661,18 +716,15 @@
         leaveConfirmed ||
         isCheckoutNavigationAllowed()
       ) {
-        if (
-          page === "payment" &&
-          (leaveConfirmed || isCheckoutNavigationAllowed()) &&
-          hasActiveCheckoutSession()
-        ) {
-          activateCheckoutBackSeal();
-        }
         return;
       }
       abandonCheckoutOnPageExit();
     });
     }
+
+    try {
+      root.__graffordCheckoutGuardReady = true;
+    } catch (_readyErr) {}
 
     return {
       confirmLeaveAndGo: confirmLeaveAndGo,

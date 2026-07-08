@@ -752,7 +752,7 @@
       <script src="js/booking-pricing.js?v=7"></script>
       <script src="js/booking-reservations.js"></script>
       <script src="js/booking-token-client.js?v=5"></script>
-      <script src="js/booking-checkout-guard.js?v=10"></script>
+      <script src="js/booking-checkout-guard.js?v=11"></script>
       <script>
         document.addEventListener("DOMContentLoaded", async function () {
           var P = window.GraffordBookingPricing;
@@ -842,6 +842,107 @@
             10,
           );
           var extraGuests = P ? P.clampExtra(roomRaw, extraGuestsRaw) : 0;
+
+          // ── 뒤로가기 가드 (비동기 요금 API보다 먼저 설치) ─────────────
+          var referrer = String(document.referrer || "");
+          var cameFromReservation = /RESERVATION\.html$/i.test(referrer);
+          var cameFromPayment = /payment\.html$/i.test(referrer);
+
+          if (cameFromReservation && !cameFromPayment) {
+            sessionStorage.removeItem("graffordInPaymentFlow");
+            sessionStorage.removeItem("graffordPaymentData");
+          }
+
+          var inPaymentFlow =
+            sessionStorage.getItem("graffordInPaymentFlow") === "1";
+
+          var leaveOverlayKr = document.getElementById("confirm-leave-overlay");
+          var leaveOverlayEn = document.getElementById(
+            "confirm-leave-overlay-en",
+          );
+          var leaveConfirmBtn = document.getElementById(
+            "confirm-leave-confirm",
+          );
+          var leaveCancelBtn = document.getElementById("confirm-leave-cancel");
+          var leaveConfirmBtnEn = document.getElementById(
+            "confirm-leave-confirm-en",
+          );
+          var leaveCancelBtnEn = document.getElementById(
+            "confirm-leave-cancel-en",
+          );
+
+          function activeLeaveOverlay() {
+            var lang = document.body.getAttribute("data-site-language") || "kr";
+            return lang === "en" ? leaveOverlayEn : leaveOverlayKr;
+          }
+
+          function showLeaveOverlay() {
+            var el = activeLeaveOverlay();
+            if (el) el.classList.add("is-visible");
+          }
+          function hideLeaveOverlay() {
+            if (leaveOverlayKr) leaveOverlayKr.classList.remove("is-visible");
+            if (leaveOverlayEn) leaveOverlayEn.classList.remove("is-visible");
+          }
+
+          if (
+            window.GraffordCheckoutGuard &&
+            window.GraffordCheckoutGuard.abandonCheckoutOnReload()
+          ) {
+            return;
+          }
+
+          var checkoutSessionReady = Promise.resolve(null);
+          if (window.GraffordBookingToken && checkIn && checkOut && roomRaw) {
+            checkoutSessionReady =
+              window.GraffordBookingToken.prepareCheckoutSession(
+                roomRaw,
+                checkIn,
+                checkOut,
+                { reset: cameFromReservation && !cameFromPayment },
+              );
+          }
+
+          if (window.GraffordCheckoutGuard) {
+            window.GraffordCheckoutGuard.init({
+              page: "confirm",
+              inPaymentFlow: inPaymentFlow,
+              sessionReady: checkoutSessionReady,
+              ttlElementIds: ["booking-ttl-kr", "booking-ttl-en"],
+              showLeaveOverlay: showLeaveOverlay,
+              hideLeaveOverlay: hideLeaveOverlay,
+              leaveConfirmButtons: [leaveConfirmBtn, leaveConfirmBtnEn],
+              leaveCancelButtons: [leaveCancelBtn, leaveCancelBtnEn],
+              onExpired: function () {
+                if (window.GraffordBookingToken) {
+                  window.GraffordBookingToken.showExpiredModal();
+                }
+              },
+            });
+          }
+
+          checkoutSessionReady.catch(function (err) {
+            console.warn("[booking-token] session prepare failed:", err);
+          });
+
+          if (leaveOverlayKr) {
+            leaveOverlayKr.addEventListener("click", function (e) {
+              if (e.target === leaveOverlayKr) hideLeaveOverlay();
+            });
+          }
+          if (leaveOverlayEn) {
+            leaveOverlayEn.addEventListener("click", function (e) {
+              if (e.target === leaveOverlayEn) hideLeaveOverlay();
+            });
+          }
+
+          var backLinks = document.querySelectorAll(".confirm-back-inline");
+          backLinks.forEach(function (link) {
+            link.addEventListener("click", function (e) {
+              e.preventDefault();
+              showLeaveOverlay();
+            });
+          });
 
           // ── 요금 계산 + DOM 반영 (재사용 가능한 함수) ───────────
           var quote = {
@@ -1338,112 +1439,6 @@
           var emailInput = document.getElementById("f-email");
           var guestRequestInput = document.getElementById("guest-request-kr");
           var hasTriedSubmit = false;
-
-          // ── 뒤로가기 가드 ──────────────────────────────────────────
-          var referrer = String(document.referrer || "");
-          var cameFromReservation = /RESERVATION\.html$/i.test(referrer);
-          var cameFromPayment = /payment\.html$/i.test(referrer);
-
-          // reservation -> confirm 최초 진입 시 결제 세션만 정리 (홀드/토큰은 prepareCheckoutSession에서 처리)
-          if (cameFromReservation && !cameFromPayment) {
-            sessionStorage.removeItem("graffordInPaymentFlow");
-            sessionStorage.removeItem("graffordPaymentData");
-          }
-
-          var inPaymentFlow =
-            sessionStorage.getItem("graffordInPaymentFlow") === "1";
-
-          var leaveOverlayKr = document.getElementById("confirm-leave-overlay");
-          var leaveOverlayEn = document.getElementById(
-            "confirm-leave-overlay-en",
-          );
-          var leaveConfirmBtn = document.getElementById(
-            "confirm-leave-confirm",
-          );
-          var leaveCancelBtn = document.getElementById("confirm-leave-cancel");
-          var leaveConfirmBtnEn = document.getElementById(
-            "confirm-leave-confirm-en",
-          );
-          var leaveCancelBtnEn = document.getElementById(
-            "confirm-leave-cancel-en",
-          );
-
-          function activeLeaveOverlay() {
-            var lang = document.body.getAttribute("data-site-language") || "kr";
-            return lang === "en" ? leaveOverlayEn : leaveOverlayKr;
-          }
-
-          function showLeaveOverlay() {
-            var el = activeLeaveOverlay();
-            if (el) el.classList.add("is-visible");
-          }
-          function hideLeaveOverlay() {
-            if (leaveOverlayKr) leaveOverlayKr.classList.remove("is-visible");
-            if (leaveOverlayEn) leaveOverlayEn.classList.remove("is-visible");
-          }
-
-          if (
-            window.GraffordCheckoutGuard &&
-            window.GraffordCheckoutGuard.abandonCheckoutOnReload()
-          ) {
-            return;
-          }
-
-          var checkoutSessionReady = Promise.resolve(null);
-          if (window.GraffordBookingToken && checkIn && checkOut && roomRaw) {
-            checkoutSessionReady =
-              window.GraffordBookingToken.prepareCheckoutSession(
-                roomRaw,
-                checkIn,
-                checkOut,
-                { reset: cameFromReservation && !cameFromPayment },
-              );
-          }
-
-          if (window.GraffordCheckoutGuard) {
-            window.GraffordCheckoutGuard.init({
-              page: "confirm",
-              inPaymentFlow: inPaymentFlow,
-              sessionReady: checkoutSessionReady,
-              ttlElementIds: ["booking-ttl-kr", "booking-ttl-en"],
-              showLeaveOverlay: showLeaveOverlay,
-              hideLeaveOverlay: hideLeaveOverlay,
-              leaveConfirmButtons: [leaveConfirmBtn, leaveConfirmBtnEn],
-              leaveCancelButtons: [leaveCancelBtn, leaveCancelBtnEn],
-              onExpired: function () {
-                if (window.GraffordBookingToken) {
-                  window.GraffordBookingToken.showExpiredModal();
-                }
-              },
-            });
-          }
-
-          checkoutSessionReady.catch(function (err) {
-            console.warn("[booking-token] session prepare failed:", err);
-          });
-
-          if (leaveOverlayKr) {
-            leaveOverlayKr.addEventListener("click", function (e) {
-              if (e.target === leaveOverlayKr) hideLeaveOverlay();
-            });
-          }
-          if (leaveOverlayEn) {
-            leaveOverlayEn.addEventListener("click", function (e) {
-              if (e.target === leaveOverlayEn) hideLeaveOverlay();
-            });
-          }
-
-          // 인라인 뒤로가기(<) 버튼도 동일한 이탈 확인 팝업 사용
-          var backLinks = document.querySelectorAll(".confirm-back-inline");
-          backLinks.forEach(function (link) {
-            link.addEventListener("click", function (e) {
-              if (inPaymentFlow) {
-                return;
-              }
-              e.preventDefault();
-              showLeaveOverlay();
-            });
-          });
 
           // ── Payment flow 복귀 시 폼 사전 입력 ──────────────────────
           if (inPaymentFlow) {
