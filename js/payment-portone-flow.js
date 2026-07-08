@@ -65,6 +65,195 @@
     } catch (_e) {}
   }
 
+  var PORTONE_GATEWAY_HOST_RE =
+    /(?:^|\.)((?:inicis|portone|iamport|kcp|nicepay|tosspayments|kakaopay)\.)/i;
+
+  function isPortoneGatewayUrl(url) {
+    try {
+      var parsed = new URL(String(url || ""), global.location.href);
+      return PORTONE_GATEWAY_HOST_RE.test(parsed.hostname);
+    } catch (_e) {
+      return PORTONE_GATEWAY_HOST_RE.test(String(url || ""));
+    }
+  }
+
+  function portoneFallbackUrl(loc) {
+    loc = loc || global.location;
+    try {
+      var stored = global.sessionStorage.getItem("graffordPortoneFallbackUrl");
+      if (stored) {
+        return stored;
+      }
+    } catch (_e) {}
+    return loc.origin + loc.pathname;
+  }
+
+  function installPortoneGatewayBackGuard() {
+    if (global.__graffordPortoneGatewayBackGuard) {
+      return;
+    }
+    global.__graffordPortoneGatewayBackGuard = true;
+
+    if (
+      "navigation" in global &&
+      global.navigation &&
+      typeof global.navigation.addEventListener === "function"
+    ) {
+      global.navigation.addEventListener("navigate", function (event) {
+        if (event.navigationType !== "traverse") {
+          return;
+        }
+        var destUrl =
+          event.destination && event.destination.url
+            ? event.destination.url
+            : "";
+        if (!isPortoneGatewayUrl(destUrl)) {
+          return;
+        }
+        if (typeof event.preventDefault === "function") {
+          event.preventDefault();
+        }
+        if (typeof event.intercept !== "function") {
+          global.location.replace(portoneFallbackUrl());
+          return;
+        }
+        event.intercept({
+          handler: function () {
+            global.location.replace(portoneFallbackUrl());
+          },
+        });
+      });
+    }
+
+    if (global.__graffordPortoneLegacyPgSkip) {
+      return;
+    }
+    global.__graffordPortoneLegacyPgSkip = true;
+
+    global.addEventListener("popstate", function () {
+      try {
+        if (
+          global.sessionStorage.getItem("graffordPortonePgBarrier") !== "1"
+        ) {
+          return;
+        }
+      } catch (_e) {
+        return;
+      }
+      try {
+        global.history.pushState(
+          { graffordPortonePgBarrier: true },
+          "",
+          global.location.pathname,
+        );
+      } catch (_e2) {}
+    });
+  }
+
+  function installLegacyPgHistoryBarrier(loc) {
+    loc = loc || global.location;
+    if (!isMobileLikeEnvironment()) {
+      return;
+    }
+    try {
+      global.sessionStorage.setItem("graffordPortonePgBarrier", "1");
+    } catch (_e) {
+      return;
+    }
+    try {
+      global.history.pushState(
+        { graffordPortonePgBarrier: true },
+        "",
+        loc.pathname,
+      );
+    } catch (_e2) {}
+  }
+
+  function clearLegacyPgHistoryBarrier() {
+    try {
+      global.sessionStorage.removeItem("graffordPortonePgBarrier");
+    } catch (_e) {}
+  }
+
+  function sanitizePortoneHistoryAfterReturn(loc) {
+    loc = loc || global.location;
+    clearPortoneRedirectQuery(loc);
+    try {
+      global.history.replaceState(
+        { graffordPortoneReturn: true },
+        "",
+        loc.pathname,
+      );
+    } catch (_e) {}
+    try {
+      global.sessionStorage.removeItem("graffordPortoneHistoryPendingClean");
+    } catch (_e2) {}
+    installPortoneGatewayBackGuard();
+    installLegacyPgHistoryBarrier(loc);
+  }
+
+  function clearPaymentDeparture(orderNo) {
+    try {
+      global.sessionStorage.removeItem("graffordInPaymentFlow");
+      global.sessionStorage.removeItem(
+        "graffordPaymentProcessing:" + String(orderNo || "").trim(),
+      );
+      global.sessionStorage.removeItem("graffordPortoneFallbackUrl");
+      global.sessionStorage.removeItem("graffordPortoneHistoryPendingClean");
+    } catch (_e) {}
+  }
+
+  function isBackForwardNavigation() {
+    try {
+      var entries = performance.getEntriesByType("navigation");
+      if (entries && entries[0] && entries[0].type === "back_forward") {
+        return true;
+      }
+    } catch (_e) {}
+    try {
+      return !!(performance.navigation && performance.navigation.type === 2);
+    } catch (_e2) {
+      return false;
+    }
+  }
+
+  function shouldResetStalePaymentDeparture(loc, orderNo) {
+    loc = loc || global.location;
+    if (!orderNo) {
+      return false;
+    }
+    if (hasPortoneRedirectParams(loc)) {
+      return false;
+    }
+    if (isPaymentFinalizeInProgress(orderNo)) {
+      return false;
+    }
+    try {
+      if (
+        global.sessionStorage.getItem(
+          "graffordPaymentProcessing:" + String(orderNo || "").trim(),
+        ) !== "1"
+      ) {
+        return false;
+      }
+    } catch (_e) {
+      return false;
+    }
+    if (isPortoneGatewayUrl(global.document && global.document.referrer)) {
+      return true;
+    }
+    return isBackForwardNavigation();
+  }
+
+  function resetStalePaymentDepartureIfNeeded(loc, orderNo) {
+    if (!shouldResetStalePaymentDeparture(loc, orderNo)) {
+      return false;
+    }
+    clearPaymentDeparture(orderNo);
+    clearLegacyPgHistoryBarrier();
+    return true;
+  }
+
   function portoneRedirectStorageKey(orderNo) {
     return "graffordPortoneRedirect:" + String(orderNo || "").trim();
   }
@@ -204,13 +393,20 @@
   }
 
   function preparePaymentDeparture(orderNo) {
+    clearLegacyPgHistoryBarrier();
     try {
       sessionStorage.setItem("graffordInPaymentFlow", "1");
       sessionStorage.setItem(
         "graffordPaymentProcessing:" + String(orderNo || "").trim(),
         "1",
       );
+      sessionStorage.setItem(
+        "graffordPortoneFallbackUrl",
+        global.location.origin + global.location.pathname,
+      );
+      sessionStorage.setItem("graffordPortoneHistoryPendingClean", "1");
     } catch (_e) {}
+    installPortoneGatewayBackGuard();
     if (global.GraffordCheckoutGuard) {
       global.GraffordCheckoutGuard.allowCheckoutNavigation();
     }
@@ -426,12 +622,12 @@
 
     clearPaymentFinalizeInProgress(orderNo);
     clearPersistedPortoneRedirectResult(orderNo);
+    clearPaymentDeparture(orderNo);
+    clearLegacyPgHistoryBarrier();
 
     var bookingCreatedAtIso = (saveData && saveData.createdAtIso) || "";
     try {
-      sessionStorage.removeItem("graffordInPaymentFlow");
       sessionStorage.setItem(paymentSettledKey, "1");
-      sessionStorage.removeItem("graffordPaymentProcessing:" + orderNo);
     } catch (_ss) {}
     if (global.GraffordBookingToken) {
       global.GraffordBookingToken.clearCheckoutSession();
@@ -473,6 +669,10 @@
     parsePortoneRedirectFromLocation: parsePortoneRedirectFromLocation,
     hasPortoneRedirectParams: hasPortoneRedirectParams,
     clearPortoneRedirectQuery: clearPortoneRedirectQuery,
+    sanitizePortoneHistoryAfterReturn: sanitizePortoneHistoryAfterReturn,
+    clearPaymentDeparture: clearPaymentDeparture,
+    resetStalePaymentDepartureIfNeeded: resetStalePaymentDepartureIfNeeded,
+    isPortoneGatewayUrl: isPortoneGatewayUrl,
     buildPortoneRedirectUrl: buildPortoneRedirectUrl,
     isMobileLikeEnvironment: isMobileLikeEnvironment,
     enhancePortoneRequestParams: enhancePortoneRequestParams,
@@ -485,6 +685,21 @@
     loadPersistedPortoneRedirectResult: loadPersistedPortoneRedirectResult,
     clearPersistedPortoneRedirectResult: clearPersistedPortoneRedirectResult,
   };
+
+  installPortoneGatewayBackGuard();
+
+  function resumePgHistoryBarrierIfNeeded() {
+    try {
+      if (global.sessionStorage.getItem("graffordPortonePgBarrier") !== "1") {
+        return;
+      }
+    } catch (_e) {
+      return;
+    }
+    installLegacyPgHistoryBarrier(global.location);
+  }
+
+  resumePgHistoryBarrierIfNeeded();
 
   function showEarlyRedirectLoading() {
     if (!hasPortoneRedirectParams()) {

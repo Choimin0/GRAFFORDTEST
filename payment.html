@@ -35,7 +35,7 @@
     <script src="js/site-language.js" defer></script>
     <!-- PortOne v2 Browser SDK -->
     <script src="https://cdn.portone.io/v2/browser-sdk.js"></script>
-    <script src="js/payment-portone-flow.js?v=3"></script>
+    <script src="js/payment-portone-flow.js?v=4"></script>
     <!--
       KG이니시스(PortOne) 결제수단 노출 설정
       true → 결제수단 drawer에 표시 · false → 숨김
@@ -771,6 +771,7 @@
             paymentInProgress = false;
             try {
               sessionStorage.removeItem("graffordPaymentProcessing:" + orderNo);
+              sessionStorage.removeItem("graffordInPaymentFlow");
             } catch (_e) {}
             if (submitBtn) submitBtn.disabled = false;
           }
@@ -800,6 +801,15 @@
               return;
             }
             if (
+              window.GraffordPortoneFlow &&
+              window.GraffordPortoneFlow.resetStalePaymentDepartureIfNeeded &&
+              window.GraffordPortoneFlow.resetStalePaymentDepartureIfNeeded(
+                window.location,
+                orderNo,
+              )
+            ) {
+              paymentInProgress = false;
+            } else if (
               sessionStorage.getItem("graffordPaymentProcessing:" + orderNo) ===
               "1"
             ) {
@@ -1283,7 +1293,9 @@
               return false;
             }
             if (redirectResult.paymentId !== orderNo) {
-              flow.clearPortoneRedirectQuery(window.location);
+              flow.sanitizePortoneHistoryAfterReturn
+                ? flow.sanitizePortoneHistoryAfterReturn(window.location)
+                : flow.clearPortoneRedirectQuery(window.location);
               return false;
             }
             if (
@@ -1296,7 +1308,11 @@
               window.GraffordCheckoutGuard.allowCheckoutNavigation();
             }
             flow.persistPortoneRedirectResult(orderNo, redirectResult);
-            flow.clearPortoneRedirectQuery(window.location);
+            if (flow.sanitizePortoneHistoryAfterReturn) {
+              flow.sanitizePortoneHistoryAfterReturn(window.location);
+            } else {
+              flow.clearPortoneRedirectQuery(window.location);
+            }
             if (redirectResult.code) {
               resetPaymentGuard();
               if (flow.clearPersistedPortoneRedirectResult) {
@@ -1343,6 +1359,15 @@
           window.addEventListener("pageshow", function (e) {
             if (!e.persisted || bookingLocale === "en") {
               return;
+            }
+            var flow = window.GraffordPortoneFlow;
+            if (
+              flow &&
+              flow.resetStalePaymentDepartureIfNeeded &&
+              flow.resetStalePaymentDepartureIfNeeded(window.location, orderNo)
+            ) {
+              resetPaymentGuard();
+              hidePageLoading();
             }
             handlePortoneRedirectReturn();
           });
@@ -2230,6 +2255,7 @@
             paymentInProgress = false;
             try {
               sessionStorage.removeItem("graffordPaymentProcessing:" + orderNo);
+              sessionStorage.removeItem("graffordInPaymentFlow");
             } catch (_e) {}
             if (submitBtn) submitBtn.disabled = false;
           }
@@ -2259,6 +2285,15 @@
               return;
             }
             if (
+              window.GraffordPortoneFlow &&
+              window.GraffordPortoneFlow.resetStalePaymentDepartureIfNeeded &&
+              window.GraffordPortoneFlow.resetStalePaymentDepartureIfNeeded(
+                window.location,
+                orderNo,
+              )
+            ) {
+              paymentInProgress = false;
+            } else if (
               sessionStorage.getItem("graffordPaymentProcessing:" + orderNo) ===
               "1"
             ) {
@@ -2772,7 +2807,9 @@
               return false;
             }
             if (redirectResult.paymentId !== orderNo) {
-              flow.clearPortoneRedirectQuery(window.location);
+              flow.sanitizePortoneHistoryAfterReturn
+                ? flow.sanitizePortoneHistoryAfterReturn(window.location)
+                : flow.clearPortoneRedirectQuery(window.location);
               return false;
             }
             if (
@@ -2785,7 +2822,11 @@
               window.GraffordCheckoutGuard.allowCheckoutNavigation();
             }
             flow.persistPortoneRedirectResult(orderNo, redirectResult);
-            flow.clearPortoneRedirectQuery(window.location);
+            if (flow.sanitizePortoneHistoryAfterReturn) {
+              flow.sanitizePortoneHistoryAfterReturn(window.location);
+            } else {
+              flow.clearPortoneRedirectQuery(window.location);
+            }
             if (redirectResult.code) {
               resetPaymentGuard();
               if (flow.clearPersistedPortoneRedirectResult) {
@@ -2832,6 +2873,15 @@
           window.addEventListener("pageshow", function (e) {
             if (!e.persisted || bookingLocale !== "en") {
               return;
+            }
+            var flow = window.GraffordPortoneFlow;
+            if (
+              flow &&
+              flow.resetStalePaymentDepartureIfNeeded &&
+              flow.resetStalePaymentDepartureIfNeeded(window.location, orderNo)
+            ) {
+              resetPaymentGuard();
+              hidePageLoading();
             }
             handlePortoneRedirectReturnEn();
           });
