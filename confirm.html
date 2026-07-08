@@ -19,7 +19,7 @@
       })();
     </script>
     <script src="js/booking-token-client.js?v=5"></script>
-    <script src="js/booking-checkout-guard.js?v=14"></script>
+    <script src="js/booking-checkout-guard.js?v=15"></script>
     <script src="js/nav-hero.js" defer></script>
     <script src="js/mobile-nav.js" defer></script>
     <script src="js/site-language.js" defer></script>
@@ -842,31 +842,6 @@
                   showLeaveOverlay();
                 });
               });
-
-            function installConfirmPayFormGuards() {
-              ["confirm-form", "confirm-form-en"].forEach(function (formId) {
-                var form = document.getElementById(formId);
-                if (!form || form.__graffordPayFormGuard) {
-                  return;
-                }
-                form.__graffordPayFormGuard = true;
-                form.addEventListener(
-                  "submit",
-                  function (e) {
-                    e.preventDefault();
-                  },
-                  true,
-                );
-              });
-            }
-
-            installConfirmPayFormGuards();
-            if (document.readyState === "loading") {
-              document.addEventListener(
-                "DOMContentLoaded",
-                installConfirmPayFormGuards,
-              );
-            }
           })();
         </script>
 
@@ -1502,6 +1477,8 @@
           var emailInput = document.getElementById("f-email");
           var guestRequestInput = document.getElementById("guest-request-kr");
           var hasTriedSubmit = false;
+          var inPaymentFlow =
+            sessionStorage.getItem("graffordInPaymentFlow") === "1";
 
           // ── Payment flow 복귀 시 폼 사전 입력 ──────────────────────
           if (inPaymentFlow) {
@@ -1595,7 +1572,9 @@
           }
 
           var confirmForm = document.getElementById("confirm-form");
-          var paySubmitBtn = confirmForm.querySelector(".confirm-pay-submit");
+          var paySubmitBtn = confirmForm
+            ? confirmForm.querySelector(".confirm-pay-submit")
+            : null;
           var R = window.GraffordReservations;
 
           function markSectionError(section, hasError) {
@@ -1647,6 +1626,7 @@
             markSectionError(guideSection, !agreeAll.checked);
           }
 
+          if (confirmForm) {
           confirmForm.addEventListener("submit", function (e) {
             e.preventDefault();
             hasTriedSubmit = true;
@@ -1671,6 +1651,7 @@
             var payInput = confirmForm.querySelector(
               'input[name="paymentMethod"]',
             );
+            var paymentMethod = (payInput && payInput.value) || "card";
 
             markSectionError(agreeSection, hasAgreeError);
             markSectionError(cancelSection, hasRefundError);
@@ -1839,7 +1820,7 @@
                   stayNights: nights,
                   extraGuests: extraGuests,
                   totalAmount: totalAmount,
-                  paymentMethod: payInput.value,
+                  paymentMethod: paymentMethod,
                   guestCount: guestCount,
                   bookingToken: bookingToken,
                 };
@@ -1862,7 +1843,7 @@
                       ? guestRequestInput.value.trim()
                       : "",
                     guestCount: String(guestCount),
-                    payMethod: payInput.value,
+                    payMethod: paymentMethod,
                     bookingToken: bookingToken,
                   }),
                 );
@@ -1886,6 +1867,7 @@
                 if (paySubmitBtn) paySubmitBtn.disabled = false;
               });
           });
+          }
 
           [guestNameInput, contactInput, emailInput].forEach(function (el) {
             if (!el) {

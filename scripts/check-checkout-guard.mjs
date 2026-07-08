@@ -27,6 +27,19 @@ function startStaticServer() {
   return new Promise((resolve) => {
     const server = createServer((req, res) => {
       const urlPath = decodeURIComponent((req.url || "/").split("?")[0]);
+      if (urlPath === "/api/booking-token") {
+        let body = "";
+        req.on("data", (c) => (body += c));
+        req.on("end", () => {
+          let action = "";
+          try {
+            action = JSON.parse(body || "{}").action || "";
+          } catch (_e) {}
+          res.writeHead(200, { "Content-Type": "application/json" });
+          res.end(JSON.stringify({ ok: true, action, tokenValid: true }));
+        });
+        return;
+      }
       const filePath = join(ROOT, urlPath === "/" ? "index.html" : urlPath.slice(1));
       try {
         const data = readFileSync(filePath);
@@ -310,6 +323,38 @@ async function testForwardToPaymentBlocked(page) {
   };
 }
 
+async function testPayButtonNavigatesToPayment(page) {
+  await seedCheckoutSession(page, "confirm");
+  await page.goto(`${BASE}/RESERVATION.html`, { waitUntil: "domcontentloaded" });
+  await page.goto(`${BASE}/confirm.html`, { waitUntil: "domcontentloaded" });
+  await waitForGuard(page);
+
+  await page.fill("#f-name", "홍길동");
+  await page.fill("#f-contact", "01012345678");
+  await page.fill("#f-email", "test@example.com");
+  await page.evaluate(() => {
+    ["agree-all", "agree-privacy", "agree-purchase", "agree-refund"].forEach((id) => {
+      const el = document.getElementById(id);
+      if (el) el.checked = true;
+    });
+    const nights = document.getElementById("f-nights");
+    if (nights && (!nights.value || Number(nights.value) < 1)) {
+      nights.value = "2";
+    }
+  });
+
+  await page.locator("#confirm-form .confirm-pay-submit").click();
+  await page.waitForURL(/\/payment\.html/i, { timeout: 15000 });
+
+  const url = page.url();
+  const ok = /payment\.html/i.test(url);
+  return {
+    ok,
+    label: "confirm 결제하기 → payment 이동",
+    detail: ok ? "payment.html로 이동됨" : `현재 URL: ${url}`,
+  };
+}
+
 async function runProfile(browser, profileName, viewport, isMobile) {
   const results = [];
 
@@ -362,6 +407,12 @@ async function runProfile(browser, profileName, viewport, isMobile) {
   results.push(
     await runSingleTest(browser, viewport, isMobile, async (page) => {
       return testForwardToPaymentBlocked(page);
+    }),
+  );
+
+  results.push(
+    await runSingleTest(browser, viewport, isMobile, async (page) => {
+      return testPayButtonNavigatesToPayment(page);
     }),
   );
 
