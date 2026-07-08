@@ -37,6 +37,8 @@
     <!-- PortOne v2 Browser SDK -->
     <script src="https://cdn.portone.io/v2/browser-sdk.js"></script>
     <script src="js/payment-portone-flow.js?v=5"></script>
+    <script src="js/booking-token-client.js?v=5"></script>
+    <script src="js/booking-checkout-guard.js?v=12"></script>
     <!--
       KG이니시스(PortOne) 결제수단 노출 설정
       true → 결제수단 drawer에 표시 · false → 숨김
@@ -661,8 +663,6 @@
       </div>
 
       <script src="js/booking-pricing.js?v=7"></script>
-      <script src="js/booking-token-client.js?v=5"></script>
-      <script src="js/booking-checkout-guard.js?v=11"></script>
       <script src="js/payment-methods.js?v=6"></script>
       <script>
         document.addEventListener("DOMContentLoaded", function () {
@@ -2149,8 +2149,6 @@
       </div>
 
       <script src="js/booking-pricing.js?v=7"></script>
-      <script src="js/booking-token-client.js?v=5"></script>
-      <script src="js/booking-checkout-guard.js?v=11"></script>
       <script src="js/payment-methods.js?v=6"></script>
       <script>
         document.addEventListener("DOMContentLoaded", function () {
@@ -3199,6 +3197,106 @@
 
     <script>
       (function () {
+        var leaveOverlay = document.getElementById("checkout-leave-overlay");
+        var leaveConfirmBtn = document.getElementById("checkout-leave-confirm");
+        var leaveCancelBtn = document.getElementById("checkout-leave-cancel");
+
+        function showLeaveOverlay() {
+          if (leaveOverlay) leaveOverlay.classList.add("is-visible");
+        }
+        function hideLeaveOverlay() {
+          if (leaveOverlay) leaveOverlay.classList.remove("is-visible");
+        }
+
+        if (leaveOverlay) {
+          leaveOverlay.addEventListener("click", function (e) {
+            if (e.target === leaveOverlay) hideLeaveOverlay();
+          });
+        }
+
+        if (
+          window.GraffordCheckoutGuard &&
+          window.GraffordCheckoutGuard.abandonCheckoutOnReload()
+        ) {
+          return;
+        }
+
+        window.__graffordPaymentCheckoutSessionReady = Promise.resolve(null);
+        if (window.GraffordBookingToken) {
+          window.__graffordPaymentCheckoutSessionReady = Promise.resolve().then(
+            function () {
+              var token = window.GraffordBookingToken.readStoredToken();
+              if (!token) {
+                try {
+                  var saved = JSON.parse(
+                    sessionStorage.getItem("graffordPaymentData") || "null",
+                  );
+                  token = saved && saved.bookingToken ? saved.bookingToken : "";
+                  if (token) {
+                    window.GraffordBookingToken.writeStoredToken(token);
+                  }
+                } catch (_e) {}
+              }
+              if (
+                !token ||
+                !window.GraffordBookingToken.hasIssuedCheckoutSession()
+              ) {
+                throw new Error("checkout session missing");
+              }
+              return token;
+            },
+          );
+        }
+
+        if (window.GraffordCheckoutGuard) {
+          window.__graffordPaymentCheckoutGuard = window.GraffordCheckoutGuard.init({
+            page: "payment",
+            sessionReady: window.__graffordPaymentCheckoutSessionReady,
+            ttlElementIds: ["booking-ttl-pay-kr", "booking-ttl-pay-en"],
+            showLeaveOverlay: showLeaveOverlay,
+            hideLeaveOverlay: hideLeaveOverlay,
+            leaveConfirmButtons: [leaveConfirmBtn],
+            leaveCancelButtons: [leaveCancelBtn],
+            onExpired: function () {
+              if (window.GraffordBookingToken) {
+                window.GraffordBookingToken.showPaymentExpiredModal();
+              }
+            },
+          });
+        }
+
+        if (window.__graffordPaymentCheckoutSessionReady) {
+          window.__graffordPaymentCheckoutSessionReady.catch(function (err) {
+            console.warn("[checkout-guard] payment session init failed:", err);
+            if (
+              window.GraffordPortoneFlow &&
+              window.GraffordPortoneFlow.hasPortoneRedirectParams()
+            ) {
+              return;
+            }
+            if (
+              window.GraffordCheckoutGuard &&
+              window.GraffordCheckoutGuard.isPaymentInProgress()
+            ) {
+              return;
+            }
+            if (
+              window.GraffordBookingToken &&
+              window.GraffordBookingToken.redirectIfCheckoutBlocked()
+            ) {
+              return;
+            }
+            if (window.GraffordCheckoutGuard) {
+              window.GraffordCheckoutGuard.activateCheckoutBackSeal();
+            }
+            window.location.replace("RESERVATION.html");
+          });
+        }
+      })();
+    </script>
+
+    <script>
+      (function () {
         var modal = null;
         var msgEl = null;
         var headingEl = null;
@@ -3335,102 +3433,6 @@
         </p>
       </div>
     </div>
-    <script>
-      document.addEventListener("DOMContentLoaded", function () {
-        var leaveOverlay = document.getElementById("checkout-leave-overlay");
-        var leaveConfirmBtn = document.getElementById("checkout-leave-confirm");
-        var leaveCancelBtn = document.getElementById("checkout-leave-cancel");
-
-        function showLeaveOverlay() {
-          if (leaveOverlay) leaveOverlay.classList.add("is-visible");
-        }
-        function hideLeaveOverlay() {
-          if (leaveOverlay) leaveOverlay.classList.remove("is-visible");
-        }
-
-        if (leaveOverlay) {
-          leaveOverlay.addEventListener("click", function (e) {
-            if (e.target === leaveOverlay) hideLeaveOverlay();
-          });
-        }
-
-        if (
-          window.GraffordCheckoutGuard &&
-          window.GraffordCheckoutGuard.abandonCheckoutOnReload()
-        ) {
-          return;
-        }
-
-        var paymentSessionReady = Promise.resolve(null);
-        if (window.GraffordBookingToken) {
-          paymentSessionReady = Promise.resolve().then(function () {
-            var token = window.GraffordBookingToken.readStoredToken();
-            if (!token) {
-              try {
-                var saved = JSON.parse(
-                  sessionStorage.getItem("graffordPaymentData") || "null",
-                );
-                token = saved && saved.bookingToken ? saved.bookingToken : "";
-                if (token) {
-                  window.GraffordBookingToken.writeStoredToken(token);
-                }
-              } catch (_e) {}
-            }
-            if (
-              !token ||
-              !window.GraffordBookingToken.hasIssuedCheckoutSession()
-            ) {
-              throw new Error("checkout session missing");
-            }
-            return token;
-          });
-        }
-
-        if (window.GraffordCheckoutGuard) {
-          window.GraffordCheckoutGuard.init({
-            page: "payment",
-            guardPopstate: false,
-            sessionReady: paymentSessionReady,
-            ttlElementIds: ["booking-ttl-pay-kr", "booking-ttl-pay-en"],
-            showLeaveOverlay: showLeaveOverlay,
-            hideLeaveOverlay: hideLeaveOverlay,
-            leaveConfirmButtons: [leaveConfirmBtn],
-            leaveCancelButtons: [leaveCancelBtn],
-            onExpired: function () {
-              if (window.GraffordBookingToken) {
-                window.GraffordBookingToken.showPaymentExpiredModal();
-              }
-            },
-          });
-        }
-
-        paymentSessionReady.catch(function (err) {
-          console.warn("[checkout-guard] payment session init failed:", err);
-          if (
-            window.GraffordPortoneFlow &&
-            window.GraffordPortoneFlow.hasPortoneRedirectParams()
-          ) {
-            return;
-          }
-          if (
-            window.GraffordCheckoutGuard &&
-            window.GraffordCheckoutGuard.isPaymentInProgress()
-          ) {
-            return;
-          }
-          if (
-            window.GraffordBookingToken &&
-            window.GraffordBookingToken.redirectIfCheckoutBlocked()
-          ) {
-            return;
-          }
-          if (window.GraffordCheckoutGuard) {
-            window.GraffordCheckoutGuard.activateCheckoutBackSeal();
-          }
-          window.location.replace("RESERVATION.html");
-        });
-      });
-    </script>
     <script defer src="js/grafford-page-fade.js"></script>
   </body>
 </html>

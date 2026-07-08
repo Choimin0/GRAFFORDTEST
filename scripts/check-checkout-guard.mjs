@@ -286,6 +286,30 @@ async function testConfirmCannotReturnToPayment(page) {
   };
 }
 
+async function testForwardToPaymentBlocked(page) {
+  await seedCheckoutSession(page, "confirm");
+  await page.goto(`${BASE}/RESERVATION.html`, { waitUntil: "domcontentloaded" });
+  await page.goto(`${BASE}/confirm.html`, { waitUntil: "domcontentloaded" });
+  await waitForGuard(page);
+  await allowNavToPayment(page);
+  await page.goto(`${BASE}/payment.html`, { waitUntil: "domcontentloaded" });
+  await waitForGuard(page);
+  await page.goBack();
+  await page.waitForTimeout(700);
+  await waitForGuard(page);
+
+  await page.goForward();
+  await page.waitForTimeout(700);
+
+  const url = page.url();
+  const ok = /confirm\.html/i.test(url) && !/\/payment\.html/i.test(url);
+  return {
+    ok,
+    label: "confirm → payment 앞으로가기 차단",
+    detail: ok ? "confirm 유지" : `현재 URL: ${url}`,
+  };
+}
+
 async function runProfile(browser, profileName, viewport, isMobile) {
   const results = [];
 
@@ -333,6 +357,11 @@ async function runProfile(browser, profileName, viewport, isMobile) {
   results.push(
     await runSingleTest(browser, viewport, isMobile, async (page) => {
       return testConfirmCannotReturnToPayment(page);
+    }),
+  );
+  results.push(
+    await runSingleTest(browser, viewport, isMobile, async (page) => {
+      return testForwardToPaymentBlocked(page);
     }),
   );
 

@@ -3,6 +3,7 @@
   var ALLOW_NAV_KEY = "graffordCheckoutAllowNav";
   var CHECKOUT_BLOCKED_KEY = "graffordCheckoutBlocked";
   var CHECKOUT_SEAL_BACK_KEY = "graffordCheckoutSealBack";
+  var BLOCK_PAYMENT_FORWARD_KEY = "graffordBlockPaymentForward";
   var CHECKOUT_SEAL_REDIRECT = "RESERVATION.html";
   var ALLOWED_PATH_RE =
     /(?:^|\/)(?:confirm|payment)\.html(?:[?#].*)?$/i;
@@ -104,6 +105,31 @@
     } catch (_e) {}
   }
 
+  function installCheckoutBlockedPageshowGuard() {
+    if (root.__graffordCheckoutBlockedPageshow) {
+      return;
+    }
+    root.__graffordCheckoutBlockedPageshow = true;
+    root.addEventListener("pageshow", function () {
+      if (!isCheckoutPath(root.location.href)) {
+        return;
+      }
+      if (redirectIfPaymentForwardBlocked()) {
+        return;
+      }
+      if (
+        sessionStorage.getItem(CHECKOUT_BLOCKED_KEY) === "1" &&
+        !hasPortoneRedirectReturn() &&
+        !isPaymentInProgress()
+      ) {
+        try {
+          sessionStorage.setItem(CHECKOUT_SEAL_BACK_KEY, "1");
+        } catch (_e) {}
+        root.location.replace(checkoutSealRedirectUrl());
+      }
+    });
+  }
+
   function installCheckoutHistorySealGuard() {
     if (root.__graffordCheckoutHistorySealGuard) {
       return;
@@ -122,16 +148,20 @@
         if (event.navigationType !== "traverse") {
           return;
         }
-        if (
-          !root.navigation.currentEntry ||
-          event.destination.index >= root.navigation.currentEntry.index
-        ) {
+        if (!root.navigation.currentEntry) {
           return;
         }
         var destUrl =
           event.destination && event.destination.url
             ? event.destination.url
             : "";
+        var isBack =
+          event.destination.index < root.navigation.currentEntry.index;
+        var isForward =
+          event.destination.index > root.navigation.currentEntry.index;
+        if (!isBack && !isForward) {
+          return;
+        }
         if (!shouldBlockSealedHistoryDestination(destUrl)) {
           return;
         }
@@ -221,12 +251,49 @@
     }
   }
 
+  function confirmPageUrl() {
+    try {
+      return new URL("confirm.html", root.location.href).href;
+    } catch (_e) {
+      return "confirm.html";
+    }
+  }
+
+  function redirectIfPaymentForwardBlocked() {
+    try {
+      if (
+        sessionStorage.getItem(BLOCK_PAYMENT_FORWARD_KEY) === "1" &&
+        /\/payment\.html$/i.test(root.location.pathname || "") &&
+        !isCheckoutNavigationAllowed() &&
+        !hasPortoneRedirectReturn() &&
+        !isPaymentInProgress()
+      ) {
+        root.location.replace(confirmPageUrl());
+        return true;
+      }
+    } catch (_e) {}
+    return false;
+  }
+
+  function clearPaymentForwardBlock() {
+    try {
+      sessionStorage.removeItem(BLOCK_PAYMENT_FORWARD_KEY);
+    } catch (_e) {}
+  }
+
+  function markPaymentForwardBlocked() {
+    try {
+      sessionStorage.setItem(BLOCK_PAYMENT_FORWARD_KEY, "1");
+    } catch (_e) {}
+  }
+
   function allowCheckoutNavigation() {
     if (allowCheckoutNavigationFn) {
       allowCheckoutNavigationFn();
     }
     try {
       sessionStorage.setItem(ALLOW_NAV_KEY, "1");
+      sessionStorage.removeItem(BLOCK_PAYMENT_FORWARD_KEY);
     } catch (_e) {}
   }
 
@@ -333,7 +400,6 @@
     var guardEnabled = options.guardEnabled !== false;
     var pendingLeaveUrl = "";
     var leaveConfirmed = false;
-    var popstateReady = false;
     var checkoutPageUrl = root.location.href;
 
     allowCheckoutNavigationFn = function () {
@@ -402,6 +468,30 @@
       }
     }
 
+    function isBlockedForwardToPayment(url) {
+      if (page !== "confirm") {
+        return false;
+      }
+      try {
+        return /\/payment\.html$/i.test(
+          new URL(url, root.location.href).pathname,
+        );
+      } catch (_e) {
+        return false;
+      }
+    }
+
+    function returnToConfirmFromPayment() {
+      markPaymentForwardBlocked();
+      clearCheckoutNavigationAllowance();
+      allowCheckoutNavigation();
+      try {
+        root.location.replace(confirmPageUrl());
+      } catch (_e2) {
+        root.location.href = confirmPageUrl();
+      }
+    }
+
     function showLeaveOverlayForBack(destinationUrl) {
       history.pushState(
         { checkoutGuard: true, page: page },
@@ -449,14 +539,38 @@
         if (event.navigationType !== "traverse") {
           return;
         }
-        if (
-          !root.navigation.currentEntry ||
-          event.destination.index >= root.navigation.currentEntry.index
-        ) {
+        if (!root.navigation.currentEntry) {
           return;
         }
-        if (isCheckoutPath(event.destination.url)) {
-          if (isAllowedCheckoutDestination(event.destination.url)) {
+        var destUrl =
+          event.destination && event.destination.url
+            ? event.destination.url
+            : "";
+        var isBack =
+          event.destination.index < root.navigation.currentEntry.index;
+        var isForward =
+          event.destination.index > root.navigation.currentEntry.index;
+
+        if (isForward && isBlockedForwardToPayment(destUrl)) {
+          if (event.canIntercept && typeof event.intercept === "function") {
+            event.intercept({
+              handler: function () {
+                showLeaveOverlayForNavigation(checkoutSealRedirectUrl());
+              },
+            });
+          } else if (event.cancelable !== false) {
+            event.preventDefault();
+            showLeaveOverlayForNavigation(checkoutSealRedirectUrl());
+          }
+          return;
+        }
+
+        if (!isBack) {
+          return;
+        }
+
+        if (isCheckoutPath(destUrl)) {
+          if (isAllowedCheckoutDestination(destUrl)) {
             return;
           }
           if (event.canIntercept && typeof event.intercept === "function") {
@@ -477,13 +591,13 @@
         if (event.canIntercept && typeof event.intercept === "function") {
           event.intercept({
             handler: function () {
-              pendingLeaveUrl = event.destination.url;
+              pendingLeaveUrl = destUrl;
               showLeaveOverlay();
             },
           });
         } else if (event.cancelable !== false) {
           event.preventDefault();
-          pendingLeaveUrl = event.destination.url || "RESERVATION.html";
+          pendingLeaveUrl = destUrl || "RESERVATION.html";
           showLeaveOverlay();
         }
       });
@@ -501,22 +615,27 @@
         checkoutPageUrl,
       );
 
-      requestAnimationFrame(function () {
-        requestAnimationFrame(function () {
-          popstateReady = true;
-        });
-      });
-
       root.addEventListener("popstate", function (e) {
-        if (!popstateReady || leaveConfirmed) {
+        if (leaveConfirmed) {
           return;
         }
         if (e.state && e.state.checkoutGuard === true) {
           return;
         }
         if (isAllowedCheckoutBack()) {
-          allowCheckoutNavigation();
-          root.history.go(-1);
+          returnToConfirmFromPayment();
+          return;
+        }
+        if (
+          page === "confirm" &&
+          isBlockedForwardToPayment(root.location.href)
+        ) {
+          showLeaveOverlayForNavigation(checkoutSealRedirectUrl());
+          history.pushState(
+            { checkoutGuard: true, page: page },
+            "",
+            checkoutPageUrl,
+          );
           return;
         }
         showLeaveOverlayForBack("RESERVATION.html");
@@ -524,6 +643,17 @@
     }
 
     rememberCheckoutReferrer();
+
+    if (redirectIfPaymentForwardBlocked()) {
+      return {
+        confirmLeaveAndGo: function () {},
+        shouldGuardNavigation: function () {
+          return false;
+        },
+        allowCheckoutNavigation: allowCheckoutNavigation,
+        abortedOnPaymentForwardBlock: true,
+      };
+    }
 
     if (redirectIfCheckoutBlocked(options.redirectTo)) {
       return {
@@ -537,6 +667,9 @@
     }
 
     root.addEventListener("pageshow", function (e) {
+      if (redirectIfPaymentForwardBlocked()) {
+        return;
+      }
       if (e.persisted) {
         if (redirectIfCheckoutBlocked(options.redirectTo)) {
           return;
@@ -573,6 +706,13 @@
       clearCheckoutNavigationAllowance();
     }
 
+    if (
+      page === "confirm" &&
+      sessionStorage.getItem("graffordInPaymentFlow") === "1"
+    ) {
+      markPaymentForwardBlocked();
+    }
+
     var timerStop = null;
     function startTtlTimer() {
       if (timerStop || !root.GraffordBookingToken || !ttlElementIds.length) {
@@ -601,10 +741,14 @@
       leaveConfirmed = true;
       hideLeaveOverlay();
       activateCheckoutBackSeal();
+      clearPaymentForwardBlock();
       var target = url || CHECKOUT_SEAL_REDIRECT;
       if (root.GraffordBookingToken) {
         root.GraffordBookingToken.abandonCheckoutSession(target);
       } else {
+        try {
+          sessionStorage.setItem(CHECKOUT_BLOCKED_KEY, "1");
+        } catch (_e) {}
         root.location.replace(target);
       }
     }
@@ -639,7 +783,13 @@
         return false;
       }
       if (isCheckoutPath(url)) {
-        return !isAllowedCheckoutDestination(url);
+        if (isAllowedCheckoutDestination(url)) {
+          return false;
+        }
+        if (isBlockedForwardToPayment(url)) {
+          return true;
+        }
+        return true;
       }
       return true;
     }
@@ -751,11 +901,18 @@
     allowCheckoutNavigation: allowCheckoutNavigation,
     disallowCheckoutNavigation: disallowCheckoutNavigation,
     clearCheckoutNavigationAllowance: clearCheckoutNavigationAllowance,
+    redirectIfPaymentForwardBlocked: redirectIfPaymentForwardBlocked,
+    clearPaymentForwardBlock: clearPaymentForwardBlock,
+    markPaymentForwardBlocked: markPaymentForwardBlocked,
     isPaymentInProgress: isPaymentInProgress,
     hasPortoneRedirectReturn: hasPortoneRedirectReturn,
   };
 
+  installCheckoutBlockedPageshowGuard();
   installCheckoutHistorySealGuard();
+  if (isCheckoutPath(root.location.href)) {
+    redirectIfPaymentForwardBlocked();
+  }
   if (root.document && root.document.readyState === "loading") {
     root.document.addEventListener(
       "DOMContentLoaded",

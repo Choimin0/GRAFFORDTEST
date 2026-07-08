@@ -18,6 +18,8 @@
         } catch (_e) {}
       })();
     </script>
+    <script src="js/booking-token-client.js?v=5"></script>
+    <script src="js/booking-checkout-guard.js?v=12"></script>
     <script src="js/nav-hero.js" defer></script>
     <script src="js/mobile-nav.js" defer></script>
     <script src="js/site-language.js" defer></script>
@@ -740,6 +742,109 @@
           </div>
         </div>
 
+        <script>
+          (function () {
+            var referrer = String(document.referrer || "");
+            var cameFromReservation = /RESERVATION\.html$/i.test(referrer);
+            var cameFromPayment = /payment\.html$/i.test(referrer);
+
+            if (cameFromReservation && !cameFromPayment) {
+              sessionStorage.removeItem("graffordInPaymentFlow");
+              sessionStorage.removeItem("graffordPaymentData");
+            }
+
+            var inPaymentFlow =
+              sessionStorage.getItem("graffordInPaymentFlow") === "1";
+
+            function getLeaveElements() {
+              return {
+                kr: document.getElementById("confirm-leave-overlay"),
+                en: document.getElementById("confirm-leave-overlay-en"),
+                confirmBtn: document.getElementById("confirm-leave-confirm"),
+                cancelBtn: document.getElementById("confirm-leave-cancel"),
+                confirmBtnEn: document.getElementById("confirm-leave-confirm-en"),
+                cancelBtnEn: document.getElementById("confirm-leave-cancel-en"),
+              };
+            }
+
+            function activeLeaveOverlay() {
+              var els = getLeaveElements();
+              var lang =
+                document.body.getAttribute("data-site-language") || "kr";
+              return lang === "en"
+                ? els.en || els.kr
+                : els.kr || els.en;
+            }
+
+            function showLeaveOverlay() {
+              var el = activeLeaveOverlay();
+              if (el) el.classList.add("is-visible");
+            }
+            function hideLeaveOverlay() {
+              var els = getLeaveElements();
+              if (els.kr) els.kr.classList.remove("is-visible");
+              if (els.en) els.en.classList.remove("is-visible");
+            }
+
+            if (
+              window.GraffordCheckoutGuard &&
+              window.GraffordCheckoutGuard.abandonCheckoutOnReload()
+            ) {
+              return;
+            }
+
+            window.__graffordConfirmCheckoutSessionReady = Promise.resolve(null);
+
+            if (window.GraffordCheckoutGuard) {
+              var els = getLeaveElements();
+              window.__graffordConfirmCheckoutGuard =
+                window.GraffordCheckoutGuard.init({
+                  page: "confirm",
+                  inPaymentFlow: inPaymentFlow,
+                  sessionReady: window.__graffordConfirmCheckoutSessionReady,
+                  ttlElementIds: ["booking-ttl-kr", "booking-ttl-en"],
+                  showLeaveOverlay: showLeaveOverlay,
+                  hideLeaveOverlay: hideLeaveOverlay,
+                  leaveConfirmButtons: [els.confirmBtn, els.confirmBtnEn],
+                  leaveCancelButtons: [els.cancelBtn, els.cancelBtnEn],
+                  onExpired: function () {
+                    if (window.GraffordBookingToken) {
+                      window.GraffordBookingToken.showExpiredModal();
+                    }
+                  },
+                });
+            }
+
+            function wireLeaveOverlayDismiss() {
+              var els = getLeaveElements();
+              if (els.kr && !els.kr.__graffordLeaveDismiss) {
+                els.kr.__graffordLeaveDismiss = true;
+                els.kr.addEventListener("click", function (e) {
+                  if (e.target === els.kr) hideLeaveOverlay();
+                });
+              }
+              if (els.en && !els.en.__graffordLeaveDismiss) {
+                els.en.__graffordLeaveDismiss = true;
+                els.en.addEventListener("click", function (e) {
+                  if (e.target === els.en) hideLeaveOverlay();
+                });
+              }
+            }
+
+            wireLeaveOverlayDismiss();
+            document.addEventListener("DOMContentLoaded", wireLeaveOverlayDismiss);
+
+            document
+              .querySelectorAll(".confirm-back-inline")
+              .forEach(function (link) {
+                link.addEventListener("click", function (e) {
+                  e.preventDefault();
+                  showLeaveOverlay();
+                });
+              });
+          })();
+        </script>
+
         <footer
           id="site-business-footer-mount"
           data-site-business-footer-mount
@@ -751,8 +856,6 @@
       <script src="js/intl-phone.js"></script>
       <script src="js/booking-pricing.js?v=7"></script>
       <script src="js/booking-reservations.js"></script>
-      <script src="js/booking-token-client.js?v=5"></script>
-      <script src="js/booking-checkout-guard.js?v=11"></script>
       <script>
         document.addEventListener("DOMContentLoaded", async function () {
           var P = window.GraffordBookingPricing;
@@ -843,47 +946,9 @@
           );
           var extraGuests = P ? P.clampExtra(roomRaw, extraGuestsRaw) : 0;
 
-          // ── 뒤로가기 가드 (비동기 요금 API보다 먼저 설치) ─────────────
           var referrer = String(document.referrer || "");
           var cameFromReservation = /RESERVATION\.html$/i.test(referrer);
           var cameFromPayment = /payment\.html$/i.test(referrer);
-
-          if (cameFromReservation && !cameFromPayment) {
-            sessionStorage.removeItem("graffordInPaymentFlow");
-            sessionStorage.removeItem("graffordPaymentData");
-          }
-
-          var inPaymentFlow =
-            sessionStorage.getItem("graffordInPaymentFlow") === "1";
-
-          var leaveOverlayKr = document.getElementById("confirm-leave-overlay");
-          var leaveOverlayEn = document.getElementById(
-            "confirm-leave-overlay-en",
-          );
-          var leaveConfirmBtn = document.getElementById(
-            "confirm-leave-confirm",
-          );
-          var leaveCancelBtn = document.getElementById("confirm-leave-cancel");
-          var leaveConfirmBtnEn = document.getElementById(
-            "confirm-leave-confirm-en",
-          );
-          var leaveCancelBtnEn = document.getElementById(
-            "confirm-leave-cancel-en",
-          );
-
-          function activeLeaveOverlay() {
-            var lang = document.body.getAttribute("data-site-language") || "kr";
-            return lang === "en" ? leaveOverlayEn : leaveOverlayKr;
-          }
-
-          function showLeaveOverlay() {
-            var el = activeLeaveOverlay();
-            if (el) el.classList.add("is-visible");
-          }
-          function hideLeaveOverlay() {
-            if (leaveOverlayKr) leaveOverlayKr.classList.remove("is-visible");
-            if (leaveOverlayEn) leaveOverlayEn.classList.remove("is-visible");
-          }
 
           if (
             window.GraffordCheckoutGuard &&
@@ -892,9 +957,13 @@
             return;
           }
 
-          var checkoutSessionReady = Promise.resolve(null);
-          if (window.GraffordBookingToken && checkIn && checkOut && roomRaw) {
-            checkoutSessionReady =
+          if (
+            window.GraffordBookingToken &&
+            checkIn &&
+            checkOut &&
+            roomRaw
+          ) {
+            window.__graffordConfirmCheckoutSessionReady =
               window.GraffordBookingToken.prepareCheckoutSession(
                 roomRaw,
                 checkIn,
@@ -903,46 +972,14 @@
               );
           }
 
-          if (window.GraffordCheckoutGuard) {
-            window.GraffordCheckoutGuard.init({
-              page: "confirm",
-              inPaymentFlow: inPaymentFlow,
-              sessionReady: checkoutSessionReady,
-              ttlElementIds: ["booking-ttl-kr", "booking-ttl-en"],
-              showLeaveOverlay: showLeaveOverlay,
-              hideLeaveOverlay: hideLeaveOverlay,
-              leaveConfirmButtons: [leaveConfirmBtn, leaveConfirmBtnEn],
-              leaveCancelButtons: [leaveCancelBtn, leaveCancelBtnEn],
-              onExpired: function () {
-                if (window.GraffordBookingToken) {
-                  window.GraffordBookingToken.showExpiredModal();
-                }
-              },
+          if (
+            window.__graffordConfirmCheckoutSessionReady &&
+            window.__graffordConfirmCheckoutSessionReady.catch
+          ) {
+            window.__graffordConfirmCheckoutSessionReady.catch(function (err) {
+              console.warn("[booking-token] session prepare failed:", err);
             });
           }
-
-          checkoutSessionReady.catch(function (err) {
-            console.warn("[booking-token] session prepare failed:", err);
-          });
-
-          if (leaveOverlayKr) {
-            leaveOverlayKr.addEventListener("click", function (e) {
-              if (e.target === leaveOverlayKr) hideLeaveOverlay();
-            });
-          }
-          if (leaveOverlayEn) {
-            leaveOverlayEn.addEventListener("click", function (e) {
-              if (e.target === leaveOverlayEn) hideLeaveOverlay();
-            });
-          }
-
-          var backLinks = document.querySelectorAll(".confirm-back-inline");
-          backLinks.forEach(function (link) {
-            link.addEventListener("click", function (e) {
-              e.preventDefault();
-              showLeaveOverlay();
-            });
-          });
 
           // ── 요금 계산 + DOM 반영 (재사용 가능한 함수) ───────────
           var quote = {
