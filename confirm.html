@@ -12,6 +12,7 @@
       (function () {
         try {
           if (sessionStorage.getItem("graffordCheckoutBlocked") === "1") {
+            sessionStorage.setItem("graffordCheckoutSealBack", "1");
             location.replace("RESERVATION.html");
           }
         } catch (_e) {}
@@ -751,7 +752,7 @@
       <script src="js/booking-pricing.js?v=7"></script>
       <script src="js/booking-reservations.js"></script>
       <script src="js/booking-token-client.js?v=5"></script>
-      <script src="js/booking-checkout-guard.js?v=7"></script>
+      <script src="js/booking-checkout-guard.js?v=10"></script>
       <script>
         document.addEventListener("DOMContentLoaded", async function () {
           var P = window.GraffordBookingPricing;

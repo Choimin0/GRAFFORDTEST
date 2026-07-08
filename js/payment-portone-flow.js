@@ -80,6 +80,9 @@
   function portoneFallbackUrl(loc) {
     loc = loc || global.location;
     try {
+      if (global.sessionStorage.getItem("graffordCheckoutBlocked") === "1") {
+        return loc.origin + "/RESERVATION.html";
+      }
       var stored = global.sessionStorage.getItem("graffordPortoneFallbackUrl");
       if (stored) {
         return stored;
@@ -107,7 +110,17 @@
           event.destination && event.destination.url
             ? event.destination.url
             : "";
-        if (!isPortoneGatewayUrl(destUrl)) {
+        var blockedDestination = false;
+        if (
+          global.GraffordCheckoutGuard &&
+          global.GraffordCheckoutGuard.shouldBlockSealedHistoryDestination
+        ) {
+          blockedDestination =
+            global.GraffordCheckoutGuard.shouldBlockSealedHistoryDestination(
+              destUrl,
+            );
+        }
+        if (!blockedDestination && !isPortoneGatewayUrl(destUrl)) {
           return;
         }
         if (typeof event.preventDefault === "function") {
@@ -684,6 +697,7 @@
     persistPortoneRedirectResult: persistPortoneRedirectResult,
     loadPersistedPortoneRedirectResult: loadPersistedPortoneRedirectResult,
     clearPersistedPortoneRedirectResult: clearPersistedPortoneRedirectResult,
+    clearLegacyPgHistoryBarrier: clearLegacyPgHistoryBarrier,
   };
 
   installPortoneGatewayBackGuard();

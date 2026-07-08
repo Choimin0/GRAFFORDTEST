@@ -8,6 +8,7 @@
     <link rel="icon" href="images/LOGO-transparent.png" type="image/png" />
     <title>RESERVATION - GRAFFORD</title>
     <link rel="stylesheet" href="css/style.css" />
+    <script src="js/booking-checkout-guard.js?v=10"></script>
     <script src="js/nav-hero.js" defer></script>
     <script src="js/mobile-nav.js" defer></script>
     <script src="js/booking-pricing.js?v=7" defer></script>
@@ -937,7 +938,11 @@
           function clearCheckoutBlockedBeforeConfirm() {
             try {
               sessionStorage.removeItem("graffordCheckoutBlocked");
+              sessionStorage.removeItem("graffordCheckoutSealBack");
             } catch (_e) {}
+            if (window.GraffordCheckoutGuard) {
+              window.GraffordCheckoutGuard.clearCheckoutBackSeal();
+            }
           }
 
           var reservationScopes =

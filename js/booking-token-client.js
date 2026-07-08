@@ -323,6 +323,9 @@
     try {
       sessionStorage.removeItem(CHECKOUT_BLOCKED_KEY);
     } catch (_e) {}
+    if (root.GraffordCheckoutGuard) {
+      root.GraffordCheckoutGuard.clearCheckoutBackSeal();
+    }
   }
 
   function isCheckoutBlocked() {
@@ -337,6 +340,9 @@
     if (!isCheckoutBlocked()) {
       return false;
     }
+    if (root.GraffordCheckoutGuard) {
+      root.GraffordCheckoutGuard.activateCheckoutBackSeal();
+    }
     root.location.replace(redirectTo || "RESERVATION.html");
     return true;
   }
@@ -345,6 +351,14 @@
     await releaseBookingHold();
     clearCheckoutSession();
     markCheckoutBlocked();
+    if (root.GraffordCheckoutGuard) {
+      root.GraffordCheckoutGuard.activateCheckoutBackSeal();
+    } else if (
+      root.GraffordPortoneFlow &&
+      root.GraffordPortoneFlow.clearLegacyPgHistoryBarrier
+    ) {
+      root.GraffordPortoneFlow.clearLegacyPgHistoryBarrier();
+    }
     if (redirectTo) {
       root.location.replace(redirectTo);
     }
@@ -354,6 +368,14 @@
     releaseBookingHoldKeepalive();
     clearCheckoutSession();
     markCheckoutBlocked();
+    if (root.GraffordCheckoutGuard) {
+      root.GraffordCheckoutGuard.activateCheckoutBackSeal();
+    } else if (
+      root.GraffordPortoneFlow &&
+      root.GraffordPortoneFlow.clearLegacyPgHistoryBarrier
+    ) {
+      root.GraffordPortoneFlow.clearLegacyPgHistoryBarrier();
+    }
   }
 
   function openModal(message, onConfirm, confirmLabel) {

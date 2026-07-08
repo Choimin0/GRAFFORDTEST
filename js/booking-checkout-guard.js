@@ -1,8 +1,13 @@
 (function (root) {
   var CHECKOUT_ACTIVE_KEY = "graffordCheckoutActive";
   var ALLOW_NAV_KEY = "graffordCheckoutAllowNav";
+  var CHECKOUT_BLOCKED_KEY = "graffordCheckoutBlocked";
+  var CHECKOUT_SEAL_BACK_KEY = "graffordCheckoutSealBack";
+  var CHECKOUT_SEAL_REDIRECT = "RESERVATION.html";
   var ALLOWED_PATH_RE =
     /(?:^|\/)(?:confirm|payment)\.html(?:[?#].*)?$/i;
+  var PORTONE_GATEWAY_HOST_RE =
+    /(?:^|\.)((?:inicis|portone|iamport|kcp|nicepay|tosspayments|kakaopay)\.)/i;
   var allowCheckoutNavigationFn = null;
 
   function isCheckoutPath(url) {
@@ -11,6 +16,160 @@
       return ALLOWED_PATH_RE.test(path);
     } catch (_e) {
       return ALLOWED_PATH_RE.test(String(url || ""));
+    }
+  }
+
+  function isPortoneGatewayUrl(url) {
+    if (
+      root.GraffordPortoneFlow &&
+      root.GraffordPortoneFlow.isPortoneGatewayUrl
+    ) {
+      return root.GraffordPortoneFlow.isPortoneGatewayUrl(url);
+    }
+    try {
+      var parsed = new URL(String(url || ""), root.location.href);
+      return PORTONE_GATEWAY_HOST_RE.test(parsed.hostname);
+    } catch (_e) {
+      return PORTONE_GATEWAY_HOST_RE.test(String(url || ""));
+    }
+  }
+
+  function isCheckoutHistorySealed() {
+    try {
+      return sessionStorage.getItem(CHECKOUT_BLOCKED_KEY) === "1";
+    } catch (_e) {
+      return false;
+    }
+  }
+
+  function isCheckoutBackSealActive() {
+    try {
+      return sessionStorage.getItem(CHECKOUT_SEAL_BACK_KEY) === "1";
+    } catch (_e) {
+      return false;
+    }
+  }
+
+  function shouldBlockSealedHistoryDestination(url) {
+    if (!isCheckoutHistorySealed()) {
+      return false;
+    }
+    return isCheckoutPath(url) || isPortoneGatewayUrl(url);
+  }
+
+  function checkoutSealRedirectUrl() {
+    try {
+      return new URL(CHECKOUT_SEAL_REDIRECT, root.location.href).href;
+    } catch (_e) {
+      return CHECKOUT_SEAL_REDIRECT;
+    }
+  }
+
+  function activateCheckoutBackSeal() {
+    try {
+      sessionStorage.setItem(CHECKOUT_BLOCKED_KEY, "1");
+      sessionStorage.setItem(CHECKOUT_SEAL_BACK_KEY, "1");
+    } catch (_e) {}
+    if (
+      root.GraffordPortoneFlow &&
+      root.GraffordPortoneFlow.clearLegacyPgHistoryBarrier
+    ) {
+      root.GraffordPortoneFlow.clearLegacyPgHistoryBarrier();
+    }
+    pushCheckoutBackSealState();
+  }
+
+  function clearCheckoutBackSeal() {
+    try {
+      sessionStorage.removeItem(CHECKOUT_SEAL_BACK_KEY);
+    } catch (_e) {}
+  }
+
+  function isReservationPage(loc) {
+    loc = loc || root.location;
+    return /(?:^|\/)RESERVATION\.html$/i.test(loc.pathname || "");
+  }
+
+  function pushCheckoutBackSealState() {
+    if (!isCheckoutBackSealActive()) {
+      return;
+    }
+    try {
+      root.history.pushState(
+        { graffordCheckoutSeal: true },
+        "",
+        root.location.href,
+      );
+    } catch (_e) {}
+  }
+
+  function installCheckoutHistorySealGuard() {
+    if (root.__graffordCheckoutHistorySealGuard) {
+      return;
+    }
+    root.__graffordCheckoutHistorySealGuard = true;
+
+    if (
+      "navigation" in root &&
+      root.navigation &&
+      typeof root.navigation.addEventListener === "function"
+    ) {
+      root.navigation.addEventListener("navigate", function (event) {
+        if (!isCheckoutHistorySealed()) {
+          return;
+        }
+        if (event.navigationType !== "traverse") {
+          return;
+        }
+        if (
+          !root.navigation.currentEntry ||
+          event.destination.index >= root.navigation.currentEntry.index
+        ) {
+          return;
+        }
+        var destUrl =
+          event.destination && event.destination.url
+            ? event.destination.url
+            : "";
+        if (!shouldBlockSealedHistoryDestination(destUrl)) {
+          return;
+        }
+        if (typeof event.preventDefault === "function") {
+          event.preventDefault();
+        }
+        if (typeof event.intercept !== "function") {
+          root.location.replace(checkoutSealRedirectUrl());
+          return;
+        }
+        event.intercept({
+          handler: function () {
+            root.location.replace(checkoutSealRedirectUrl());
+          },
+        });
+      });
+    }
+
+    root.addEventListener("popstate", function () {
+      if (!isCheckoutBackSealActive()) {
+        return;
+      }
+      if (isReservationPage()) {
+        pushCheckoutBackSealState();
+        return;
+      }
+      if (shouldBlockSealedHistoryDestination(root.location.href)) {
+        root.location.replace(checkoutSealRedirectUrl());
+      }
+    });
+  }
+
+  function maybeActivateCheckoutBackSealOnPage() {
+    if (!isCheckoutBackSealActive()) {
+      return;
+    }
+    installCheckoutHistorySealGuard();
+    if (isReservationPage()) {
+      pushCheckoutBackSealState();
     }
   }
 
@@ -370,7 +529,8 @@
     function confirmLeaveAndGo(url) {
       leaveConfirmed = true;
       hideLeaveOverlay();
-      var target = url || "RESERVATION.html";
+      activateCheckoutBackSeal();
+      var target = url || CHECKOUT_SEAL_REDIRECT;
       if (root.GraffordBookingToken) {
         root.GraffordBookingToken.abandonCheckoutSession(target);
       } else {
@@ -494,6 +654,13 @@
   root.GraffordCheckoutGuard = {
     init: init,
     isCheckoutPath: isCheckoutPath,
+    isPortoneGatewayUrl: isPortoneGatewayUrl,
+    isCheckoutHistorySealed: isCheckoutHistorySealed,
+    isCheckoutBackSealActive: isCheckoutBackSealActive,
+    shouldBlockSealedHistoryDestination: shouldBlockSealedHistoryDestination,
+    activateCheckoutBackSeal: activateCheckoutBackSeal,
+    clearCheckoutBackSeal: clearCheckoutBackSeal,
+    maybeActivateCheckoutBackSealOnPage: maybeActivateCheckoutBackSealOnPage,
     isPageReload: isPageReload,
     abandonCheckoutOnReload: abandonCheckoutOnReload,
     markCheckoutActive: markCheckoutActive,
@@ -503,4 +670,14 @@
     isPaymentInProgress: isPaymentInProgress,
     hasPortoneRedirectReturn: hasPortoneRedirectReturn,
   };
+
+  installCheckoutHistorySealGuard();
+  if (root.document && root.document.readyState === "loading") {
+    root.document.addEventListener(
+      "DOMContentLoaded",
+      maybeActivateCheckoutBackSealOnPage,
+    );
+  } else {
+    maybeActivateCheckoutBackSealOnPage();
+  }
 })(typeof window !== "undefined" ? window : this);
