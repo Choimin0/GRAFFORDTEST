@@ -774,6 +774,12 @@
               sessionStorage.removeItem("graffordPaymentProcessing:" + orderNo);
               sessionStorage.removeItem("graffordInPaymentFlow");
             } catch (_e) {}
+            if (
+              window.GraffordCheckoutGuard &&
+              window.GraffordCheckoutGuard.disallowCheckoutNavigation
+            ) {
+              window.GraffordCheckoutGuard.disallowCheckoutNavigation();
+            }
             if (submitBtn) submitBtn.disabled = false;
           }
 
@@ -2258,6 +2264,12 @@
               sessionStorage.removeItem("graffordPaymentProcessing:" + orderNo);
               sessionStorage.removeItem("graffordInPaymentFlow");
             } catch (_e) {}
+            if (
+              window.GraffordCheckoutGuard &&
+              window.GraffordCheckoutGuard.disallowCheckoutNavigation
+            ) {
+              window.GraffordCheckoutGuard.disallowCheckoutNavigation();
+            }
             if (submitBtn) submitBtn.disabled = false;
           }
 

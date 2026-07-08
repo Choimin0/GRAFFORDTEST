@@ -165,9 +165,6 @@
 
   function installLegacyPgHistoryBarrier(loc) {
     loc = loc || global.location;
-    if (!isMobileLikeEnvironment()) {
-      return;
-    }
     try {
       global.sessionStorage.setItem("graffordPortonePgBarrier", "1");
     } catch (_e) {
@@ -491,6 +488,7 @@
 
     if (!response || response.code) {
       clearPaymentFinalizeInProgress(orderNo);
+      clearPaymentDeparture(orderNo);
       showError(messages.cancelled || "결제가 취소되었습니다");
       return false;
     }
@@ -644,6 +642,11 @@
     } catch (_ss) {}
     if (global.GraffordBookingToken) {
       global.GraffordBookingToken.clearCheckoutSession();
+    }
+
+    if (global.GraffordCheckoutGuard &&
+        typeof global.GraffordCheckoutGuard.activateCheckoutBackSeal === "function") {
+      global.GraffordCheckoutGuard.activateCheckoutBackSeal();
     }
 
     try {

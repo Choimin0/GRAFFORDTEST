@@ -9,6 +9,7 @@
   var PORTONE_GATEWAY_HOST_RE =
     /(?:^|\.)((?:inicis|portone|iamport|kcp|nicepay|tosspayments|kakaopay)\.)/i;
   var allowCheckoutNavigationFn = null;
+  var disallowCheckoutNavigationFn = null;
 
   function isCheckoutPath(url) {
     try {
@@ -239,6 +240,13 @@
     } catch (_e) {}
   }
 
+  function disallowCheckoutNavigation() {
+    if (disallowCheckoutNavigationFn) {
+      disallowCheckoutNavigationFn();
+    }
+    clearCheckoutNavigationAllowance();
+  }
+
   function isPageReload() {
     try {
       var entries = performance.getEntriesByType("navigation");
@@ -334,6 +342,9 @@
 
     allowCheckoutNavigationFn = function () {
       leaveConfirmed = true;
+    };
+    disallowCheckoutNavigationFn = function () {
+      leaveConfirmed = false;
     };
 
     function rememberCheckoutReferrer() {
@@ -480,7 +491,20 @@
 
     root.addEventListener("pageshow", function (e) {
       if (e.persisted) {
-        redirectIfCheckoutBlocked(options.redirectTo);
+        if (redirectIfCheckoutBlocked(options.redirectTo)) {
+          return;
+        }
+        if (leaveConfirmed && isCheckoutNavigationAllowed()) {
+          leaveConfirmed = false;
+          clearCheckoutNavigationAllowance();
+        }
+        if (
+          !isCheckoutActive() &&
+          !hasPortoneRedirectReturn() &&
+          !isPaymentInProgress()
+        ) {
+          root.location.replace(options.redirectTo || CHECKOUT_SEAL_REDIRECT);
+        }
       }
     });
 
@@ -631,23 +655,33 @@
         e.returnValue = "";
       });
 
-      root.addEventListener("pagehide", function () {
+    root.addEventListener("pagehide", function () {
+      if (isPaymentInProgress()) {
+        return;
+      }
+      if (
+        !hasActiveCheckoutSession() ||
+        leaveConfirmed ||
+        isCheckoutNavigationAllowed()
+      ) {
         if (
-          !hasActiveCheckoutSession() ||
-          leaveConfirmed ||
-          isCheckoutNavigationAllowed() ||
-          isPaymentInProgress()
+          page === "payment" &&
+          (leaveConfirmed || isCheckoutNavigationAllowed()) &&
+          hasActiveCheckoutSession()
         ) {
-          return;
+          activateCheckoutBackSeal();
         }
-        abandonCheckoutOnPageExit();
-      });
+        return;
+      }
+      abandonCheckoutOnPageExit();
+    });
     }
 
     return {
       confirmLeaveAndGo: confirmLeaveAndGo,
       shouldGuardNavigation: shouldGuardNavigation,
       allowCheckoutNavigation: allowCheckoutNavigation,
+      disallowCheckoutNavigation: disallowCheckoutNavigation,
     };
   }
 
@@ -666,6 +700,7 @@
     markCheckoutActive: markCheckoutActive,
     isCheckoutActive: isCheckoutActive,
     allowCheckoutNavigation: allowCheckoutNavigation,
+    disallowCheckoutNavigation: disallowCheckoutNavigation,
     clearCheckoutNavigationAllowance: clearCheckoutNavigationAllowance,
     isPaymentInProgress: isPaymentInProgress,
     hasPortoneRedirectReturn: hasPortoneRedirectReturn,
