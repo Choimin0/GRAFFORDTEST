@@ -270,12 +270,12 @@ function todayYMDUtc() {
 }
 
 async function archivePastReservations(pool) {
-  // 체크인일이 지난 'confirm' 예약을 'completed'로 상태 전환
+  // 체크아웃일이 지난 'confirm' 예약을 'completed'로 상태 전환
   await pool.query(
     `UPDATE ${BOOKING_TABLE}
      SET status = 'completed'
      WHERE status = 'confirm'
-       AND check_in_date < CURRENT_DATE`,
+       AND check_out_date < CURRENT_DATE`,
   );
 }
 
@@ -1025,8 +1025,8 @@ export default async function handler(req, res) {
   var sn = Math.floor(stayNights);
   var eg = Math.floor(extraGuests);
   var ta = Math.floor(totalAmount);
-  // 체크인일이 이미 지났으면 'completed', 아니면 'confirm'
-  var insertStatus = checkIn < todayYMDUtc() ? "completed" : "confirm";
+  // 체크아웃일이 이미 지났으면 'completed', 아니면 'confirm'
+  var insertStatus = checkOut < getTodayYmdKst() ? "completed" : "confirm";
 
   var encPii = encryptBookingPii({
     guestName: guestName,

@@ -271,7 +271,7 @@ export async function handleCreateManualBooking(res, pool, body) {
   }
 
   var todayYmd = getTodayYmdKst();
-  var insertStatus = checkIn < todayYmd ? "completed" : "confirm";
+  var insertStatus = checkOut < todayYmd ? "completed" : "confirm";
   var reservationNumber = generateManualReservationNumber(todayYmd);
   var encPii = encryptBookingPii({
     guestName: guestName,

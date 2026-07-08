@@ -350,6 +350,12 @@
     }
   }
 
+  function abandonCheckoutSessionKeepalive() {
+    releaseBookingHoldKeepalive();
+    clearCheckoutSession();
+    markCheckoutBlocked();
+  }
+
   function openModal(message, onConfirm, confirmLabel) {
     var modalApi = root.GraffordPaymentModal;
     if (modalApi && typeof modalApi.open === "function") {
@@ -513,6 +519,7 @@
     isCheckoutBlocked: isCheckoutBlocked,
     redirectIfCheckoutBlocked: redirectIfCheckoutBlocked,
     abandonCheckoutSession: abandonCheckoutSession,
+    abandonCheckoutSessionKeepalive: abandonCheckoutSessionKeepalive,
     prepareCheckoutSession: prepareCheckoutSession,
     ensureBookingToken: ensureBookingToken,
     bindBookingToken: bindBookingToken,

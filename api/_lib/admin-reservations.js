@@ -61,7 +61,7 @@ async function archivePastReservations(pool) {
     `UPDATE ${BOOKING_TABLE}
      SET status = 'completed'
      WHERE status = 'confirm'
-       AND check_in_date < CURRENT_DATE`,
+       AND check_out_date < CURRENT_DATE`,
   );
 }
 

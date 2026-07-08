@@ -216,10 +216,11 @@ export async function sendBookingAlimtalk(type, payload) {
   }
 
   var variables = buildBaseVariables(payload || {});
-  if (type === "reserve-complete" || type === "checkin-alarm") {
+  if (type === "reserve-complete") {
     variables["#{숙소주소}"] = config.propertyAddress;
   }
   if (type === "checkin-alarm") {
+    variables["#{주소}"] = config.propertyAddress;
     variables["#{비밀번호}"] = contactLast4(to);
   }
 

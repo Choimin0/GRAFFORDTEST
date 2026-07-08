@@ -39,14 +39,14 @@
     <!--
       KG이니시스(PortOne) 결제수단 노출 설정
       true → 결제수단 drawer에 표시 · false → 숨김
-      현재 삼성페이 숨겨짐
+      삼성페이·카카오페이 비노출
     -->
     <script>
       window.GRAFFORD_PAYMENT_OPTIONS = {
         card: true,
         samsung: false,
         naver: true,
-        kakao: true,
+        kakao: false,
         toss: true,
       };
     </script>
@@ -646,7 +646,7 @@
 
       <script src="js/booking-pricing.js?v=7"></script>
       <script src="js/booking-token-client.js?v=5"></script>
-      <script src="js/booking-checkout-guard.js?v=7"></script>
+      <script src="js/booking-checkout-guard.js?v=9"></script>
       <script src="js/payment-methods.js?v=5"></script>
       <script>
         document.addEventListener("DOMContentLoaded", function () {
@@ -2103,7 +2103,7 @@
 
       <script src="js/booking-pricing.js?v=7"></script>
       <script src="js/booking-token-client.js?v=5"></script>
-      <script src="js/booking-checkout-guard.js?v=7"></script>
+      <script src="js/booking-checkout-guard.js?v=9"></script>
       <script src="js/payment-methods.js?v=5"></script>
       <script>
         document.addEventListener("DOMContentLoaded", function () {
