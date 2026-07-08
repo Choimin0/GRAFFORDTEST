@@ -3028,5 +3028,171 @@
         ></footer>
       </main>
     </div>
+
+    <!-- 시간 초과 / 예약 불가 등 안내 팝업 (payment.html과 동일한 스타일) -->
+    <div
+      id="confirm-alert-modal"
+      class="confirm-leave-overlay"
+      hidden
+      aria-hidden="true"
+      aria-modal="true"
+      role="dialog"
+      aria-labelledby="confirm-alert-modal-heading"
+    >
+      <div class="confirm-leave-dialog">
+        <div class="confirm-leave-dialog__accent" aria-hidden="true"></div>
+        <div class="confirm-leave-dialog__inner">
+          <p class="confirm-leave-eyebrow" id="confirm-alert-modal-eyebrow">
+            WARNING
+          </p>
+          <h2 id="confirm-alert-modal-heading" class="confirm-leave-heading">
+            안내
+          </h2>
+          <span class="confirm-leave-rule" aria-hidden="true"></span>
+          <p id="confirm-alert-modal-msg" class="confirm-leave-body">
+            안내 메시지입니다.
+          </p>
+        </div>
+        <div class="confirm-leave-actions">
+          <button
+            type="button"
+            id="confirm-alert-modal-confirm"
+            class="btn reserve-btn confirm-leave-btn confirm-leave-btn--continue"
+          >
+            <span class="confirm-leave-btn__label">확인</span>
+            <span
+              class="confirm-leave-btn__hint"
+              id="confirm-alert-modal-confirm-hint"
+              hidden
+            ></span>
+          </button>
+        </div>
+      </div>
+    </div>
+    <script>
+      (function () {
+        var modal = null;
+        var msgEl = null;
+        var headingEl = null;
+        var eyebrowEl = null;
+        var confirmBtn = null;
+        var confirmBtnLabel = null;
+        var confirmBtnHint = null;
+        var closeTimer = null;
+        var confirmHandler = null;
+        var dismissible = true;
+
+        function closeModal() {
+          if (!dismissible) {
+            return;
+          }
+          if (!modal) return;
+          modal.classList.remove("is-visible");
+          document.body.style.overflow = "";
+          if (closeTimer) window.clearTimeout(closeTimer);
+          closeTimer = window.setTimeout(function () {
+            if (!modal.classList.contains("is-visible")) {
+              modal.hidden = true;
+              modal.setAttribute("aria-hidden", "true");
+            }
+          }, 400);
+          confirmHandler = null;
+        }
+
+        function openModal(options) {
+          options = options || {};
+          if (!modal) return;
+          if (typeof options.beforeOpen === "function") {
+            options.beforeOpen();
+          }
+          if (headingEl) {
+            if (typeof options.heading === "string") {
+              headingEl.textContent = options.heading;
+              headingEl.hidden = !options.heading;
+            } else {
+              headingEl.textContent = "안내";
+              headingEl.hidden = false;
+            }
+          }
+          if (eyebrowEl) {
+            if (typeof options.eyebrow === "string") {
+              eyebrowEl.textContent = options.eyebrow;
+              eyebrowEl.hidden = !options.eyebrow;
+            } else {
+              eyebrowEl.textContent = "WARNING";
+              eyebrowEl.hidden = false;
+            }
+          }
+          if (msgEl) {
+            msgEl.textContent = options.message || "";
+            msgEl.hidden = options.message === "";
+          }
+          if (confirmBtnLabel) {
+            confirmBtnLabel.textContent = options.confirmLabel || "확인";
+          }
+          if (confirmBtnHint) {
+            if (options.confirmHint === "" || !options.confirmHint) {
+              confirmBtnHint.hidden = true;
+            } else {
+              confirmBtnHint.hidden = false;
+              confirmBtnHint.textContent = options.confirmHint;
+            }
+          }
+          confirmHandler =
+            typeof options.onConfirm === "function" ? options.onConfirm : null;
+          dismissible = options.dismissible !== false;
+          modal.hidden = false;
+          modal.setAttribute("aria-hidden", "false");
+          document.body.style.overflow = "hidden";
+          requestAnimationFrame(function () {
+            modal.classList.add("is-visible");
+          });
+          if (confirmBtn) confirmBtn.focus();
+        }
+
+        document.addEventListener("DOMContentLoaded", function () {
+          modal = document.getElementById("confirm-alert-modal");
+          if (!modal) return;
+          msgEl = document.getElementById("confirm-alert-modal-msg");
+          headingEl = document.getElementById("confirm-alert-modal-heading");
+          eyebrowEl = document.getElementById("confirm-alert-modal-eyebrow");
+          confirmBtn = document.getElementById("confirm-alert-modal-confirm");
+          confirmBtnLabel = confirmBtn
+            ? confirmBtn.querySelector(".confirm-leave-btn__label")
+            : null;
+          confirmBtnHint = document.getElementById(
+            "confirm-alert-modal-confirm-hint",
+          );
+
+          if (confirmBtn) {
+            confirmBtn.addEventListener("click", function () {
+              var handler = confirmHandler;
+              closeModal();
+              if (typeof handler === "function") {
+                handler();
+              }
+            });
+          }
+          modal.addEventListener("click", function (e) {
+            if (e.target === modal) closeModal();
+          });
+          document.addEventListener("keydown", function (e) {
+            if (
+              e.key === "Escape" &&
+              modal &&
+              !modal.hidden &&
+              modal.classList.contains("is-visible")
+            ) {
+              closeModal();
+            }
+          });
+        });
+
+        window.GraffordPaymentModal = {
+          open: openModal,
+          close: closeModal,
+        };
+      })();
+    </script>
   </body>
 </html>

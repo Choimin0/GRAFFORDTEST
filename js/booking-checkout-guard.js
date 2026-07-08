@@ -135,18 +135,14 @@
         if (!shouldBlockSealedHistoryDestination(destUrl)) {
           return;
         }
-        if (typeof event.preventDefault === "function") {
-          event.preventDefault();
+        event.preventDefault();
+        if (event.canIntercept && typeof event.intercept === "function") {
+          event.intercept({
+            handler: function () {
+              root.location.replace(checkoutSealRedirectUrl());
+            },
+          });
         }
-        if (typeof event.intercept !== "function") {
-          root.location.replace(checkoutSealRedirectUrl());
-          return;
-        }
-        event.intercept({
-          handler: function () {
-            root.location.replace(checkoutSealRedirectUrl());
-          },
-        });
       });
     }
 
@@ -429,16 +425,18 @@
         if (!hasActiveCheckoutSession() || isPaymentInProgress()) {
           return;
         }
-        if (typeof event.intercept !== "function") {
-          return;
+        if (event.canIntercept && typeof event.intercept === "function") {
+          event.intercept({
+            handler: function () {
+              pendingLeaveUrl = event.destination.url;
+              showLeaveOverlay();
+            },
+          });
+        } else if (event.cancelable !== false) {
+          event.preventDefault();
+          pendingLeaveUrl = event.destination.url || "RESERVATION.html";
+          showLeaveOverlay();
         }
-
-        event.intercept({
-          handler: function () {
-            pendingLeaveUrl = event.destination.url;
-            showLeaveOverlay();
-          },
-        });
       });
       return true;
     }
@@ -637,9 +635,8 @@
       true,
     );
 
-    if (!setupCheckoutNavigateGuard()) {
-      setupCheckoutPopstateTrap();
-    }
+    setupCheckoutNavigateGuard();
+    setupCheckoutPopstateTrap();
 
     if (guardEnabled) {
       root.addEventListener("beforeunload", function (e) {

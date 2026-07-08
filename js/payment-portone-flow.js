@@ -123,18 +123,14 @@
         if (!blockedDestination && !isPortoneGatewayUrl(destUrl)) {
           return;
         }
-        if (typeof event.preventDefault === "function") {
-          event.preventDefault();
+        event.preventDefault();
+        if (event.canIntercept && typeof event.intercept === "function") {
+          event.intercept({
+            handler: function () {
+              global.location.replace(portoneFallbackUrl());
+            },
+          });
         }
-        if (typeof event.intercept !== "function") {
-          global.location.replace(portoneFallbackUrl());
-          return;
-        }
-        event.intercept({
-          handler: function () {
-            global.location.replace(portoneFallbackUrl());
-          },
-        });
       });
     }
 
