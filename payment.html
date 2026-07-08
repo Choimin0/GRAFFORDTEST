@@ -49,6 +49,21 @@
         kakao: false,
         toss: true,
       };
+      (function () {
+        var o = window.GRAFFORD_PAYMENT_OPTIONS;
+        if (!o || typeof o !== "object") return;
+        var selectors = [];
+        if (!o.samsung) selectors.push('[data-payment-method="samsung"]');
+        if (!o.kakao) selectors.push('[data-payment-method="kakao"]');
+        if (!selectors.length) return;
+        var style = document.createElement("style");
+        style.id = "grafford-payment-method-visibility";
+        style.textContent =
+          ".payment-method-drawer " +
+          selectors.join(", .payment-method-drawer ") +
+          " { display: none !important; }";
+        document.head.appendChild(style);
+      })();
     </script>
     <style>
       .page-loading-overlay {
@@ -498,7 +513,7 @@
                 <span class="payment-method-option__text">
                   <span class="payment-method-option__title">신용카드</span>
                   <span class="payment-method-option__desc"
-                    >국내외 모든 카드 사용 가능</span
+                    >국내 모든 카드 사용 가능</span
                   >
                 </span>
                 <span
@@ -647,7 +662,7 @@
       <script src="js/booking-pricing.js?v=7"></script>
       <script src="js/booking-token-client.js?v=5"></script>
       <script src="js/booking-checkout-guard.js?v=9"></script>
-      <script src="js/payment-methods.js?v=5"></script>
+      <script src="js/payment-methods.js?v=6"></script>
       <script>
         document.addEventListener("DOMContentLoaded", function () {
           var P = window.GraffordBookingPricing;
@@ -1943,7 +1958,7 @@
                 <span class="payment-method-option__text">
                   <span class="payment-method-option__title">Credit card</span>
                   <span class="payment-method-option__desc"
-                    >Domestic and international cards accepted</span
+                    >All Korean cards accepted</span
                   >
                 </span>
                 <span
@@ -2104,7 +2119,7 @@
       <script src="js/booking-pricing.js?v=7"></script>
       <script src="js/booking-token-client.js?v=5"></script>
       <script src="js/booking-checkout-guard.js?v=9"></script>
-      <script src="js/payment-methods.js?v=5"></script>
+      <script src="js/payment-methods.js?v=6"></script>
       <script>
         document.addEventListener("DOMContentLoaded", function () {
           var P = window.GraffordBookingPricing;

@@ -8175,6 +8175,10 @@ main.content-section.confirm-page.payment-page > #payment-error-area-en {
     background-color 0.2s ease;
 }
 
+.payment-method-drawer .payment-method-option[hidden] {
+  display: none !important;
+}
+
 .payment-method-option:hover {
   background: var(--stone-100);
 }

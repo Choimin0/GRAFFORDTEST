@@ -10,8 +10,8 @@
       portonePayMethod: "CARD",
       labelKr: "신용카드",
       labelEn: "Credit card",
-      descKr: "국내외 모든 카드 사용 가능",
-      descEn: "Domestic and international cards accepted",
+      descKr: "국내 모든 카드 사용 가능",
+      descEn: "All Korean cards accepted",
     },
     samsung: {
       id: "samsung",
@@ -199,18 +199,27 @@
     var easyIds = ["samsung", "naver", "kakao", "toss"];
     for (var i = 0; i < easyIds.length; i++) {
       var methodId = easyIds[i];
-      var label = drawerEl.querySelector(
+      var labels = drawerEl.querySelectorAll(
         '[data-payment-method="' + methodId + '"]',
       );
-      if (!label) continue;
-      label.hidden = !enabled[methodId];
-      var title = label.querySelector(".payment-method-option__title");
-      var desc = label.querySelector(".payment-method-option__desc");
-      if (title) title.textContent = getLabel(methodId, locale);
-      if (desc && METHODS[methodId]) {
-        desc.textContent = isEn
-          ? METHODS[methodId].descEn
-          : METHODS[methodId].descKr;
+      if (!labels.length) continue;
+      for (var j = 0; j < labels.length; j++) {
+        var label = labels[j];
+        var isVisible = !!enabled[methodId];
+        label.hidden = !isVisible;
+        var input = label.querySelector('input[type="radio"]');
+        if (input) {
+          input.disabled = !isVisible;
+          if (!isVisible) input.checked = false;
+        }
+        var title = label.querySelector(".payment-method-option__title");
+        var desc = label.querySelector(".payment-method-option__desc");
+        if (title) title.textContent = getLabel(methodId, locale);
+        if (desc && METHODS[methodId]) {
+          desc.textContent = isEn
+            ? METHODS[methodId].descEn
+            : METHODS[methodId].descKr;
+        }
       }
     }
   }
