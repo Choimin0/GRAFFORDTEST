@@ -331,11 +331,11 @@
     var baseNightly = ROOM_WEEKDAY_BASE.hasOwnProperty(room)
       ? ROOM_WEEKDAY_BASE[room]
       : ROOM_WEEKDAY_BASE.G1;
-    if (ROOM_WEEKEND_BASE.hasOwnProperty(room)) {
-      return ROOM_WEEKEND_BASE[room];
-    }
     if (WEEKEND_SURCHARGE_ENABLED) {
       return baseNightly + WEEKEND_SURCHARGE_PER_NIGHT;
+    }
+    if (ROOM_WEEKEND_BASE.hasOwnProperty(room)) {
+      return ROOM_WEEKEND_BASE[room];
     }
     return baseNightly;
   }

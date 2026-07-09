@@ -7448,6 +7448,9 @@
         }
 
         function getRoomWeekendRateFromRow(row, weekdayRate, weekendCharge) {
+          if (isWeekendSurchargeEnabled()) {
+            return Number(weekdayRate || 0) + Number(weekendCharge || 0);
+          }
           if (
             row &&
             row.weekendBaseRate != null &&
@@ -7455,10 +7458,7 @@
           ) {
             return Number(row.weekendBaseRate);
           }
-          if (isWeekendSurchargeEnabled()) {
-            return weekdayRate + weekendCharge;
-          }
-          return weekdayRate + weekendCharge;
+          return Number(weekdayRate || 0);
         }
 
         function collectRoomRatePayload(roomName, rootEl) {
@@ -7746,69 +7746,73 @@
         }
 
         function renderRoomRateTable() {
-          if (!roomRateBody) return;
-          roomRateBody.innerHTML = "";
-          if (!roomRateRows.length) {
-            roomRateBody.innerHTML =
-              "<p class='admin-sales-pending'>객실 요금 데이터가 없습니다.</p>";
-          } else {
-            var weekendCharge = getWeekendChargeAmount();
-            var surchargeEnabled = isWeekendSurchargeEnabled();
-            roomRateRows.forEach(function (row) {
-              var weekdayRate = Number(row.weekdayBaseRate || 0);
-              var weekendRate = getRoomWeekendRateFromRow(
-                row,
-                weekdayRate,
-                weekendCharge,
-              );
-              var weekendFieldHtml = surchargeEnabled
-                ? "<div class='admin-room-rate-field is-readonly'>" +
-                  "<span>주말 기본 요금</span>" +
-                  "<strong data-weekend-display-for='" +
-                  escapeHtml(row.roomName || "") +
-                  "'>" +
-                  formatKRW(weekendRate) +
-                  "</strong>" +
-                  "</div>"
-                : "<label class='admin-room-rate-field'>" +
-                  "<span>주말 기본 요금</span>" +
+          if (roomRateBody) {
+            roomRateBody.innerHTML = "";
+            if (!roomRateRows.length) {
+              roomRateBody.innerHTML =
+                "<p class='admin-sales-pending'>객실 요금 데이터가 없습니다.</p>";
+            } else {
+              var weekendCharge = getWeekendChargeAmount();
+              var surchargeEnabled = isWeekendSurchargeEnabled();
+              roomRateRows.forEach(function (row) {
+                var weekdayRate = Number(row.weekdayBaseRate || 0);
+                var weekendRate = getRoomWeekendRateFromRow(
+                  row,
+                  weekdayRate,
+                  weekendCharge,
+                );
+                var weekendFieldHtml = surchargeEnabled
+                  ? "<div class='admin-room-rate-field is-readonly'>" +
+                    "<span>주말 기본 요금</span>" +
+                    "<strong data-weekend-display-for='" +
+                    escapeHtml(row.roomName || "") +
+                    "'>" +
+                    formatKRW(weekendRate) +
+                    "</strong>" +
+                    "</div>"
+                  : "<label class='admin-room-rate-field'>" +
+                    "<span>주말 기본 요금</span>" +
+                    "<input class='admin-room-status-input admin-room-rate-input' data-room-name='" +
+                    escapeHtml(row.roomName || "") +
+                    "' data-rate-field='weekend' data-currency='krw' type='text' inputmode='numeric' value='" +
+                    formatKRW(weekendRate) +
+                    "' />" +
+                    "</label>";
+                var card = document.createElement("article");
+                card.className = "admin-room-rate-card";
+                card.innerHTML =
+                  "<div class='admin-room-rate-card__room'>" +
+                  "<span>" +
+                  escapeHtml(row.roomName || "—") +
+                  "</span>" +
+                  "</div>" +
+                  "<label class='admin-room-rate-field'>" +
+                  "<span>평일 기본 요금</span>" +
                   "<input class='admin-room-status-input admin-room-rate-input' data-room-name='" +
                   escapeHtml(row.roomName || "") +
-                  "' data-rate-field='weekend' data-currency='krw' type='text' inputmode='numeric' value='" +
-                  formatKRW(weekendRate) +
+                  "' data-rate-field='weekday' data-currency='krw' type='text' inputmode='numeric' value='" +
+                  formatKRW(weekdayRate) +
                   "' />" +
-                  "</label>";
-              var card = document.createElement("article");
-              card.className = "admin-room-rate-card";
-              card.innerHTML =
-                "<div class='admin-room-rate-card__room'>" +
-                "<span>" +
-                escapeHtml(row.roomName || "—") +
-                "</span>" +
-                "</div>" +
-                "<label class='admin-room-rate-field'>" +
-                "<span>평일 기본 요금</span>" +
-                "<input class='admin-room-status-input admin-room-rate-input' data-room-name='" +
-                escapeHtml(row.roomName || "") +
-                "' data-rate-field='weekday' data-currency='krw' type='text' inputmode='numeric' value='" +
-                formatKRW(weekdayRate) +
-                "' />" +
-                "</label>" +
-                weekendFieldHtml +
-                "<button type='button' class='btn reserve-btn confirm-pay-submit reserveinfo-submit-btn admin-save-btn admin-room-rate-save-btn' data-room-name='" +
-                escapeHtml(row.roomName || "") +
-                "'>저장</button>";
-              roomRateBody.appendChild(card);
-            });
-            attachRateSaveBtns(roomRateBody);
-            attachRoomRateBatchSaveBtn();
-            if (
-              window.GraffordAdminSeasonalRate &&
-              typeof window.GraffordAdminSeasonalRate.refreshActiveCriteria ===
-                "function"
-            ) {
-              window.GraffordAdminSeasonalRate.refreshActiveCriteria();
+                  "</label>" +
+                  weekendFieldHtml +
+                  "<button type='button' class='btn reserve-btn confirm-pay-submit reserveinfo-submit-btn admin-save-btn admin-room-rate-save-btn' data-room-name='" +
+                  escapeHtml(row.roomName || "") +
+                  "'>저장</button>";
+                roomRateBody.appendChild(card);
+              });
+              attachRateSaveBtns(roomRateBody);
+              attachRoomRateBatchSaveBtn();
             }
+          }
+
+          if (
+            window.GraffordAdminSeasonalRate &&
+            typeof window.GraffordAdminSeasonalRate.refreshActiveCriteria ===
+              "function"
+          ) {
+            try {
+              window.GraffordAdminSeasonalRate.refreshActiveCriteria();
+            } catch (_e) {}
           }
 
           if (!roomChargeBody) return;
@@ -7944,16 +7948,37 @@
           "promotion",
           "extra-guest-charge",
         ];
+        var CHARGE_DEFAULTS = {
+          "weekend-charge": 20000,
+          "consecutive-sale": 20000,
+          promotion: 0,
+          "extra-guest-charge": 30000,
+        };
 
         function splitRateRows(rows) {
           roomRateRows = [];
-          roomChargeRows = [];
+          var chargeByName = {};
           (rows || []).forEach(function (row) {
+            if (!row || !row.roomName) {
+              return;
+            }
             if (CHARGE_NAME_SET.includes(row.roomName)) {
-              roomChargeRows.push(row);
-            } else {
+              chargeByName[row.roomName] = row;
+            } else if (/^G[1-4]$/.test(String(row.roomName || ""))) {
               roomRateRows.push(row);
             }
+          });
+          roomChargeRows = CHARGE_NAME_SET.map(function (name) {
+            if (chargeByName[name]) {
+              return chargeByName[name];
+            }
+            return {
+              roomName: name,
+              weekdayBaseRate: CHARGE_DEFAULTS[name],
+              isEnabled: true,
+              promotionStartDate: "",
+              promotionEndDate: "",
+            };
           });
         }
 

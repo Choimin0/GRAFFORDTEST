@@ -125,10 +125,10 @@ async function ensureRoomRateSchema(pool) {
     await pool.query(
       `INSERT INTO ${TABLE_NAME}
          (room_name, weekday_base_rate, weekend_base_rate, is_enabled)
-       SELECT $1, $2, $3, TRUE
+       SELECT $1::varchar(32), $2::bigint, $3::bigint, TRUE
        WHERE NOT EXISTS (
          SELECT 1 FROM ${TABLE_NAME}
-         WHERE room_name = $1 AND ${BASE_ROW_FILTER}
+         WHERE room_name = $1::varchar(32) AND ${BASE_ROW_FILTER}
        )`,
       [seed[0], seed[1], seed[2]],
     );
@@ -156,6 +156,22 @@ async function getWeekendChargeAmount(pool) {
   return Number(row.weekday_base_rate || 0);
 }
 
+async function syncBaseWeekendRatesFromSurcharge(pool) {
+  var surchargeEnabled = await isWeekendSurchargeEnabled(pool);
+  if (!surchargeEnabled) {
+    return;
+  }
+  var surchargeAmount = await getWeekendChargeAmount(pool);
+  await pool.query(
+    `UPDATE ${TABLE_NAME}
+     SET weekend_base_rate = weekday_base_rate + $1,
+         updated_at = NOW()
+     WHERE room_name IN ('G1', 'G2', 'G3', 'G4')
+       AND ${BASE_ROW_FILTER}`,
+    [Math.floor(surchargeAmount || 0)],
+  );
+}
+
 async function isWeekendSurchargeEnabled(pool) {
   var sel = await pool.query(
     `SELECT is_enabled
@@ -179,18 +195,21 @@ function resolveSeasonalWeekendRate(
   return Math.floor(Number(weekendBaseRate || 0));
 }
 
-function mapRoomRateRow(row) {
+function mapRoomRateRow(row, surchargeEnabled, surchargeAmount) {
   var out = {
     roomName: row.room_name,
     weekdayBaseRate: Number(row.weekday_base_rate || 0),
     isEnabled: row.is_enabled !== false,
   };
   if (/^G[1-4]$/.test(row.room_name) && !isSeasonalRow(row)) {
-    var weekendRate = row.weekend_base_rate;
-    out.weekendBaseRate =
-      weekendRate == null
-        ? Number(row.weekday_base_rate || 0) + 20000
-        : Number(weekendRate || 0);
+    var weekday = Number(row.weekday_base_rate || 0);
+    if (surchargeEnabled) {
+      out.weekendBaseRate = weekday + Math.floor(surchargeAmount || 0);
+    } else {
+      var weekendRate = row.weekend_base_rate;
+      out.weekendBaseRate =
+        weekendRate == null ? weekday : Number(weekendRate || 0);
+    }
   }
   if (row.room_name === "promotion") {
     var promoFields = mapPromotionRowFields(row);
@@ -570,6 +589,9 @@ export async function handleAdminRoomRate(res, pool, body) {
           weekdayBaseRate,
           isGRoom ? weekendBaseRate : null,
         );
+        if (roomName === "weekend-charge") {
+          await syncBaseWeekendRatesFromSurcharge(pool);
+        }
       }
     } catch (e) {
       json(res, 500, {
@@ -595,6 +617,9 @@ export async function handleAdminRoomRate(res, pool, body) {
          WHERE room_name = $1 AND ${BASE_ROW_FILTER}`,
         [toggleRoomName, body.isEnabled === true],
       );
+      if (toggleRoomName === "weekend-charge" && body.isEnabled === true) {
+        await syncBaseWeekendRatesFromSurcharge(pool);
+      }
     } catch (e) {
       json(res, 500, {
         ok: false,
@@ -613,8 +638,10 @@ export async function handleAdminRoomRate(res, pool, body) {
        ORDER BY room_name ASC`,
     );
     var todayYmd = getTodayYmdKst();
+    var surchargeEnabled = await isWeekendSurchargeEnabled(pool);
+    var surchargeAmount = await getWeekendChargeAmount(pool);
     var rows = (sel.rows || []).map(function (row) {
-      var out = mapRoomRateRow(row);
+      var out = mapRoomRateRow(row, surchargeEnabled, surchargeAmount);
       if (row.room_name === "promotion") {
         out.promotionInPeriod = isPromotionInPeriod(
           todayYmd,

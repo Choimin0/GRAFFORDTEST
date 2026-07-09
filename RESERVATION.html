@@ -883,26 +883,6 @@
                 </article>
               </div>
               <div
-                class="reservation-pricing-bar"
-                aria-label="객실 요금 안내"
-              >
-                <div class="reservation-rate-row">
-                  <span class="reservation-rate-label">평일 요금</span>
-                  <span class="reservation-rate-amount js-res-weekday-rate"
-                    >—</span
-                  >
-                </div>
-                <div class="reservation-rate-row">
-                  <span class="reservation-rate-label">주말 요금</span>
-                  <span class="reservation-rate-amount js-res-weekend-rate"
-                    >—</span
-                  >
-                </div>
-                <p class="reservation-rate-note js-res-rate-note" hidden>
-                  선택한 일정에 기간별 요금이 적용됩니다.
-                </p>
-              </div>
-              <div
                 class="reservation-price-summary"
                 id="reservation-price-summary"
               >
@@ -1047,9 +1027,6 @@
             );
             var extraGuestsFeeNoteEl =
               scope.querySelector(".js-extra-fee-note");
-            var weekdayRateEl = scope.querySelector(".js-res-weekday-rate");
-            var weekendRateEl = scope.querySelector(".js-res-weekend-rate");
-            var rateNoteEl = scope.querySelector(".js-res-rate-note");
             var resPriceLeftEl = scope.querySelector(".js-res-price-left");
             var resPriceAmountEl = scope.querySelector(".js-res-price-amount");
             var inquiryBtn = scope.querySelector(".reservation-inquiry-btn");
@@ -1592,7 +1569,6 @@
                     result.data.seasonalRates,
                   );
                   // 요율 적용 직후 즉시 업데이트 (사용자가 이미 날짜 선택한 경우)
-                  updateWeekdayRateDisplay();
                   updatePricingSummary();
                 })
                 .catch(function () {
@@ -1600,7 +1576,6 @@
                 })
                 .finally(function () {
                   roomRatesLoaded = true;
-                  updateWeekdayRateDisplay();
                   updatePricingSummary();
                 });
             }
@@ -1833,17 +1808,16 @@
                     0,
                     Math.floor(Number(pricing.CONSECUTIVE_SALE_PER_NIGHT || 0)),
                   )
-                : 20000;
-              if (!perNight) {
-                perNight = 20000;
-              }
+                : 0;
+              var consecutiveEnabled = perNight > 0;
               if (consecutiveCardEl) {
+                consecutiveCardEl.hidden = !consecutiveEnabled;
                 consecutiveCardEl.classList.toggle(
                   "reservation-discount-card--on",
-                  stayOn,
+                  consecutiveEnabled && stayOn,
                 );
               }
-              if (consecutiveDescEl) {
+              if (consecutiveDescEl && consecutiveEnabled) {
                 consecutiveDescEl.textContent = isEnScope
                   ? "For stays of 2 nights or more: −" +
                     perNight.toLocaleString("en-US") +
@@ -1852,22 +1826,25 @@
                     perNight.toLocaleString("ko-KR") +
                     "원";
               }
-              if (consecutiveRateEl) {
+              if (consecutiveRateEl && consecutiveEnabled) {
                 consecutiveRateEl.textContent =
                   "−" + perNight.toLocaleString(isEnScope ? "en-US" : "ko-KR");
               }
               if (consecutiveBadgeEl) {
-                consecutiveBadgeEl.textContent = stayOn
-                  ? isEnScope
-                    ? "Applied"
-                    : "적용 중"
-                  : isEnScope
-                    ? "2+ nights"
-                    : "2박 이상";
-                consecutiveBadgeEl.classList.toggle(
-                  "reservation-discount-card__pill--muted",
-                  !stayOn,
-                );
+                consecutiveBadgeEl.hidden = !consecutiveEnabled;
+                if (consecutiveEnabled) {
+                  consecutiveBadgeEl.textContent = stayOn
+                    ? isEnScope
+                      ? "Applied"
+                      : "적용 중"
+                    : isEnScope
+                      ? "2+ nights"
+                      : "2박 이상";
+                  consecutiveBadgeEl.classList.toggle(
+                    "reservation-discount-card__pill--muted",
+                    !stayOn,
+                  );
+                }
               }
             }
 
@@ -2052,69 +2029,7 @@
               renderExtraGuestsStepper();
             }
 
-            function updateRateDisplay() {
-              if (!P || !weekdayRateEl || !weekendRateEl) {
-                return;
-              }
-              var ci = checkIn ? formatYMD(checkIn) : "";
-              var co = checkOut ? formatYMD(checkOut) : "";
-              var refYmd = ci || formatYMD(today);
-              var weekdayRate = null;
-              var weekendRate = null;
-              var hasSeasonal = false;
-
-              if (ci && co && P.countNights(ci, co) > 0) {
-                var stayQuote = P.computeStay(currentRoom, ci, co, 0);
-                if (stayQuote.weekdayNights > 0) {
-                  weekdayRate = stayQuote.weekdayRatePerNight;
-                }
-                if (stayQuote.weekendNights > 0) {
-                  weekendRate = stayQuote.weekendRatePerNight;
-                }
-                if (typeof P.eachNightDate === "function") {
-                  P.eachNightDate(ci, co).forEach(function (nightDate) {
-                    var nightRates = P.getEffectiveRatesForNight(
-                      currentRoom,
-                      nightDate,
-                    );
-                    if (nightRates && nightRates.source === "seasonal") {
-                      hasSeasonal = true;
-                    }
-                  });
-                }
-              }
-
-              var refRates =
-                typeof P.getEffectiveRatesForDate === "function"
-                  ? P.getEffectiveRatesForDate(currentRoom, refYmd)
-                  : null;
-              if (weekdayRate == null && refRates) {
-                weekdayRate = refRates.weekday;
-              }
-              if (weekendRate == null && refRates) {
-                weekendRate = refRates.weekend;
-              }
-              if (refRates && refRates.source === "seasonal") {
-                hasSeasonal = true;
-              }
-
-              weekdayRateEl.textContent = formatMoneyTotal(
-                Math.max(0, Number(weekdayRate || 0)),
-              );
-              weekendRateEl.textContent = formatMoneyTotal(
-                Math.max(0, Number(weekendRate || 0)),
-              );
-              if (rateNoteEl) {
-                rateNoteEl.hidden = !hasSeasonal;
-              }
-            }
-
-            function updateWeekdayRateDisplay() {
-              updateRateDisplay();
-            }
-
             function updatePricingSummary() {
-              updateRateDisplay();
               updateDiscountCards();
               updateConfirmCtaState();
               if (!P) {
@@ -2771,7 +2686,6 @@
               });
               syncRoomCopy();
               rebuildExtraSelect();
-              updateWeekdayRateDisplay();
               renderGallery();
               renderCalendar();
               updatePricingSummary();
@@ -4017,26 +3931,6 @@
                     >
                   </div>
                 </article>
-              </div>
-              <div
-                class="reservation-pricing-bar"
-                aria-label="Room rate guide"
-              >
-                <div class="reservation-rate-row">
-                  <span class="reservation-rate-label">Weekday rate</span>
-                  <span class="reservation-rate-amount js-res-weekday-rate"
-                    >—</span
-                  >
-                </div>
-                <div class="reservation-rate-row">
-                  <span class="reservation-rate-label">Weekend rate</span>
-                  <span class="reservation-rate-amount js-res-weekend-rate"
-                    >—</span
-                  >
-                </div>
-                <p class="reservation-rate-note js-res-rate-note" hidden>
-                  Period rate applies to your selected dates.
-                </p>
               </div>
               <div class="reservation-price-summary">
                 <div class="reservation-price-total-row">

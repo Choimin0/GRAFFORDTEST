@@ -144,10 +144,10 @@ async function ensureRoomRateSchema(pool) {
     await pool.query(
       `INSERT INTO ${TABLE_NAME}
          (room_name, weekday_base_rate, weekend_base_rate, is_enabled)
-       SELECT $1, $2, $3, TRUE
+       SELECT $1::varchar(32), $2::bigint, $3::bigint, TRUE
        WHERE NOT EXISTS (
          SELECT 1 FROM ${TABLE_NAME}
-         WHERE room_name = $1 AND ${BASE_ROW_FILTER}
+         WHERE room_name = $1::varchar(32) AND ${BASE_ROW_FILTER}
        )`,
       [seed[0], seed[1], seed[2]],
     );
@@ -261,10 +261,25 @@ export async function handlePublicRoomRate(req, res, pool) {
       } else if (/^G[1-4]$/.test(row.room_name)) {
         rates[row.room_name] = n;
         var weekendStored = row.weekend_base_rate;
-        weekendBaseRates[row.room_name] =
-          weekendStored == null ? n + 20000 : Number(weekendStored || 0);
+        if (chargeEnabled.weekendCharge !== false) {
+          weekendBaseRates[row.room_name] =
+            n + Math.floor(Number(charges.weekendCharge || 0));
+        } else {
+          weekendBaseRates[row.room_name] =
+            weekendStored == null ? n : Number(weekendStored || 0);
+        }
       }
     });
+    // weekend-charge 행이 G행보다 뒤에 올 수 있으므로 한 번 더 동기화
+    if (chargeEnabled.weekendCharge !== false) {
+      ["G1", "G2", "G3", "G4"].forEach(function (room) {
+        if (rates[room] != null) {
+          weekendBaseRates[room] =
+            Number(rates[room] || 0) +
+            Math.floor(Number(charges.weekendCharge || 0));
+        }
+      });
+    }
     var seasonalRates = await listSeasonalRates(
       pool,
       chargeEnabled.weekendCharge !== false,
