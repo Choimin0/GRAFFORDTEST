@@ -1314,38 +1314,11 @@
               return isEn ? guests + "P" : guests + "인";
             }
 
-            function formatRoomRateLabel(kind, perNight, nights) {
-              var kindLabel =
-                kind === "weekend"
-                  ? isEn
-                    ? "Weekend"
-                    : "주말"
-                  : isEn
-                    ? "Weekday"
-                    : "평일";
-              var rateText = formatMoneyByLanguage(perNight, language);
-              if (isEn) {
-                return (
-                  roomRaw +
-                  " · " +
-                  kindLabel +
-                  " " +
-                  rateText +
-                  " × " +
-                  nights +
-                  (nights === 1 ? " night" : " nights")
-                );
+            function formatStayKindBadge(kind) {
+              if (kind === "weekend") {
+                return isEn ? "Weekend" : "주말";
               }
-              return (
-                roomRaw +
-                " · " +
-                kindLabel +
-                " " +
-                rateText +
-                " × " +
-                nights +
-                "박"
-              );
+              return isEn ? "Weekday" : "평일";
             }
 
             function appendSection(title, modifier) {
@@ -1373,11 +1346,19 @@
               name.appendChild(
                 createTextEl("span", "confirm-price-row__label", label),
               );
-              if (badge) {
+              var badges = Array.isArray(badge)
+                ? badge
+                : badge
+                  ? [badge]
+                  : [];
+              badges.forEach(function (badgeText) {
+                if (!badgeText) {
+                  return;
+                }
                 name.appendChild(
-                  createTextEl("span", "confirm-price-badge", badge),
+                  createTextEl("span", "confirm-price-badge", badgeText),
                 );
-              }
+              });
 
               row.appendChild(name);
               row.appendChild(
@@ -1398,34 +1379,33 @@
                 if (quote.weekdayNights > 0) {
                   appendPriceRow(
                     roomSection,
-                    formatRoomRateLabel(
-                      "weekday",
-                      quote.weekdayRatePerNight != null
-                        ? quote.weekdayRatePerNight
-                        : quote.baseNightly,
-                      quote.weekdayNights,
-                    ),
-                    "",
+                    ROOM_LABEL[roomRaw],
+                    [
+                      formatStayKindBadge("weekday"),
+                      formatNightBadge(quote.weekdayNights),
+                    ],
                     formatMoneyByLanguage(quote.weekdaySubtotal, language),
                   );
                 }
                 if (quote.weekendNights > 0) {
                   appendPriceRow(
                     roomSection,
-                    formatRoomRateLabel(
-                      "weekend",
-                      quote.weekendRatePerNight,
-                      quote.weekendNights,
-                    ),
-                    "",
+                    ROOM_LABEL[roomRaw],
+                    [
+                      formatStayKindBadge("weekend"),
+                      formatNightBadge(quote.weekendNights),
+                    ],
                     formatMoneyByLanguage(quote.weekendSubtotal, language),
                   );
                 }
               } else {
                 appendPriceRow(
                   roomSection,
-                  ROOM_LABEL[roomRaw] + (isEn ? " · Weekday" : " · 평일"),
-                  formatNightBadge(quote.nights),
+                  ROOM_LABEL[roomRaw],
+                  [
+                    formatStayKindBadge("weekday"),
+                    formatNightBadge(quote.nights),
+                  ],
                   formatMoneyByLanguage(quote.baseTotal, language),
                 );
                 if (quote.weekendSurcharge > 0) {
