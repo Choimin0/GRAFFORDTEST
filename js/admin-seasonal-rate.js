@@ -1,6 +1,5 @@
 /**
  * Admin: 기간별 요금 옵션 (seasonal room rates)
- * Preview: gfd-management-2026-v1.html?preview=seasonal-rate
  */
 (function (root) {
   var ROOMS = ["G1", "G2", "G3", "G4"];
@@ -19,11 +18,7 @@
     "DECEMBER",
   ];
 
-  var isPreviewMode = /(?:^|[?&])preview=seasonal-rate(?:&|$)/i.test(
-    String((root.location && root.location.search) || ""),
-  );
   var seasonalRates = [];
-  var previewNextId = 100;
   var calView = new Date();
   calView.setDate(1);
   var calRangeStart = "";
@@ -138,59 +133,6 @@
     return Number(String(raw || "").replace(/[^\d]/g, ""));
   }
 
-  function getPreviewMockRates() {
-    return [
-      {
-        id: 1,
-        roomName: "G1",
-        startDate: "2026-07-15",
-        endDate: "2026-08-24",
-        weekdayBaseRate: 350000,
-        weekendBaseRate: 370000,
-        createdAt: "2026-07-01T10:00:00.000Z",
-        updatedAt: "2026-07-01T10:00:00.000Z",
-      },
-      {
-        id: 2,
-        roomName: "G3",
-        startDate: "2026-07-15",
-        endDate: "2026-08-24",
-        weekdayBaseRate: 350000,
-        weekendBaseRate: 370000,
-        createdAt: "2026-07-02T10:00:00.000Z",
-        updatedAt: "2026-07-02T10:00:00.000Z",
-      },
-      {
-        id: 3,
-        roomName: "G4",
-        startDate: "2026-07-15",
-        endDate: "2026-08-24",
-        weekdayBaseRate: 350000,
-        weekendBaseRate: 370000,
-        createdAt: "2026-07-03T10:00:00.000Z",
-        updatedAt: "2026-07-03T10:00:00.000Z",
-      },
-    ];
-  }
-
-  function ensurePreviewBanner() {
-    if (!isPreviewMode) {
-      return;
-    }
-    var existing = document.getElementById("admin-seasonal-preview-banner");
-    if (existing) {
-      return;
-    }
-    var banner = document.createElement("div");
-    banner.id = "admin-seasonal-preview-banner";
-    banner.className = "admin-seasonal-preview-banner";
-    banner.innerHTML =
-      "<strong>PREVIEW MODE</strong><span>기간별 요금 UI 미리보기 — 저장·삭제는 반영되지 않습니다.</span>";
-    var shell = document.querySelector(".admin-shell");
-    if (shell) {
-      shell.insertBefore(banner, shell.firstChild);
-    }
-  }
 
   function renderActiveCriteria() {
     var el = document.getElementById("admin-room-rate-active-criteria");
@@ -601,9 +543,6 @@
   }
 
   function postSeasonal(action, payload) {
-    if (isPreviewMode) {
-      return Promise.resolve({ ok: true, preview: true });
-    }
     var auth = deps.getAuthPayload();
     return deps
       .adminPost("room-rate", Object.assign({ action: action }, payload, auth))
@@ -626,34 +565,6 @@
     }
     var payload = collectSeasonalPayload();
     var action = editingId ? "seasonal-update" : "seasonal-save";
-    if (isPreviewMode) {
-      if (editingId) {
-        seasonalRates = seasonalRates.map(function (row) {
-          if (row.id === editingId) {
-            return Object.assign({}, row, payload, {
-              id: editingId,
-              updatedAt: new Date().toISOString(),
-            });
-          }
-          return row;
-        });
-      } else {
-        previewNextId += 1;
-        seasonalRates.unshift(
-          Object.assign({}, payload, {
-            id: previewNextId,
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString(),
-          }),
-        );
-      }
-      applySeasonalRatesToPricing();
-      renderSeasonalList();
-      closeSeasonalForm();
-      closeEditModal();
-      deps.showMessage("미리보기 모드: 변경 사항이 로컬에만 반영되었습니다.");
-      return;
-    }
     postSeasonal(action, payload)
       .then(function (result) {
         if (!result.ok || !result.data.ok) {
@@ -686,15 +597,6 @@
     var id = pendingDeleteId;
     pendingDeleteId = null;
     if (!id) {
-      return Promise.resolve();
-    }
-    if (isPreviewMode) {
-      seasonalRates = seasonalRates.filter(function (row) {
-        return row.id !== id;
-      });
-      applySeasonalRatesToPricing();
-      renderSeasonalList();
-      deps.showMessage("미리보기 모드: 삭제가 로컬에만 반영되었습니다.");
       return Promise.resolve();
     }
     return postSeasonal("seasonal-delete", { id: id })
@@ -819,21 +721,6 @@
         ? resolveWeekendRate(weekdayRate, 0)
         : parseRateValue(weekendInput && weekendInput.value),
     };
-    if (isPreviewMode) {
-      seasonalRates = seasonalRates.map(function (row) {
-        if (row.id === editingId) {
-          return Object.assign({}, row, payload, {
-            updatedAt: new Date().toISOString(),
-          });
-        }
-        return row;
-      });
-      applySeasonalRatesToPricing();
-      renderSeasonalList();
-      closeEditModal();
-      deps.showMessage("미리보기 모드: 수정이 로컬에만 반영되었습니다.");
-      return;
-    }
     postSeasonal("seasonal-update", payload)
       .then(function (result) {
         if (!result.ok || !result.data.ok) {
@@ -983,19 +870,7 @@
 
   function init(config) {
     deps = Object.assign(deps, config || {});
-    ensurePreviewBanner();
     bindSeasonalUi();
-    if (isPreviewMode) {
-      seasonalRates = getPreviewMockRates();
-      applySeasonalRatesToPricing();
-      renderSeasonalList();
-      renderActiveCriteria();
-      var ratePanel = document.getElementById("admin-room-manage-rate-panel");
-      if (ratePanel) {
-        ratePanel.scrollIntoView({ behavior: "smooth", block: "start" });
-      }
-      return;
-    }
     renderSeasonalList();
     renderActiveCriteria();
   }
@@ -1036,6 +911,5 @@
     handlePolicyConfirmSave: handlePolicyConfirmSave,
     isDeletePending: isDeletePending,
     clearDeletePending: clearDeletePending,
-    isPreviewMode: isPreviewMode,
   };
 })(typeof window !== "undefined" ? window : this);

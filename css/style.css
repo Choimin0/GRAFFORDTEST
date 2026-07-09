@@ -13036,6 +13036,13 @@ main.content-section.confirm-page.admin-page {
 .admin-reservation-table td.admin-res-col-payment {
   text-align: center;
 }
+.admin-reservation-table th.admin-res-col-edit,
+.admin-reservation-table td.admin-res-col-edit {
+  width: 5.5%;
+  text-align: center;
+  padding-left: 0.5rem;
+  padding-right: 0.5rem;
+}
 .admin-reservation-table th.admin-res-col-cancel,
 .admin-reservation-table td.admin-res-col-cancel {
   width: 7.5%;
@@ -13196,6 +13203,31 @@ main.content-section.confirm-page.admin-page {
 .admin-reservation-cancel-badge:focus-visible {
   outline: 2px solid color-mix(in srgb, var(--stone-red) 35%, transparent);
   outline-offset: 2px;
+}
+.admin-reservation-edit-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.8rem;
+  height: 1.8rem;
+  border: 1px solid var(--stone-200);
+  background: var(--stone-50);
+  color: var(--stone-400);
+  cursor: pointer;
+  transition:
+    border-color 0.2s ease,
+    color 0.2s ease,
+    background 0.2s ease;
+}
+.admin-reservation-edit-btn svg {
+  display: block;
+}
+.admin-reservation-edit-btn:hover,
+.admin-reservation-edit-btn:focus-visible {
+  border-color: var(--gold-500);
+  background: color-mix(in srgb, var(--gold-500) 8%, var(--stone-50));
+  color: var(--gold-500);
+  outline: none;
 }
 .admin-cancel-reason-badge {
   position: relative;
@@ -13360,6 +13392,53 @@ main.content-section.confirm-page.admin-page {
 .admin-request-modal__label textarea:focus-visible {
   outline: none;
   border-color: var(--gold-500);
+}
+.admin-request-modal__label input {
+  width: 100%;
+  border: 1px solid var(--stone-200);
+  background: transparent;
+  color: var(--stone-800);
+  padding: var(--space-12);
+  font-family: var(--font-family-body-kr);
+  font-size: 0.88rem;
+  line-height: 1.4;
+  box-sizing: border-box;
+}
+.admin-request-modal__label input:focus,
+.admin-request-modal__label input:focus-visible {
+  outline: none;
+  border-color: var(--gold-500);
+}
+.admin-edit-reservation-panel {
+  width: min(100%, 520px);
+}
+.admin-edit-reservation-detail {
+  display: grid;
+  gap: var(--space-8);
+  margin-bottom: var(--space-24);
+  padding-bottom: var(--space-20);
+  border-bottom: 1px solid var(--stone-200);
+}
+.admin-edit-reservation-detail__row {
+  display: grid;
+  grid-template-columns: 5.5rem 1fr;
+  gap: var(--space-12);
+  align-items: baseline;
+}
+.admin-edit-reservation-detail__row span {
+  color: var(--stone-400);
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+}
+.admin-edit-reservation-detail__row strong {
+  color: var(--stone-800);
+  font-size: 0.88rem;
+  font-weight: 400;
+  letter-spacing: 0.02em;
+}
+.admin-edit-reservation-fields {
+  display: grid;
+  gap: var(--space-16);
 }
 .admin-request-message {
   margin: var(--space-12) 0 0;
@@ -14734,7 +14813,7 @@ main.content-section.confirm-page.admin-page {
 .admin-seasonal-edit-form__grid {
   margin-top: var(--space-16);
 }
-.admin-seasonal-preview-banner {
+.admin-preview-banner {
   display: flex;
   align-items: center;
   gap: var(--space-12);
@@ -14745,7 +14824,7 @@ main.content-section.confirm-page.admin-page {
   font-size: 0.74rem;
   letter-spacing: 0.06em;
 }
-.admin-seasonal-preview-banner strong {
+.admin-preview-banner strong {
   color: var(--gold-500);
   font-family: var(--font-family-body-en);
   font-size: 0.62rem;

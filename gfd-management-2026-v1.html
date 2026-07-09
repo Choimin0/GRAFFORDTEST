@@ -576,6 +576,7 @@
                     <span class="admin-sort-icons" aria-hidden="true"></span>
                   </button>
                 </th>
+                <th class="admin-res-col-edit">수정</th>
                 <th class="admin-res-col-cancel" id="admin-res-cancel-head">
                   취소
                 </th>
@@ -1241,6 +1242,106 @@
         </div>
       </div>
 
+      <div
+        id="admin-edit-reservation-modal"
+        class="admin-request-modal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="admin-edit-reservation-title"
+        hidden
+      >
+        <div
+          class="admin-request-modal__panel admin-edit-reservation-panel"
+        >
+          <div class="admin-request-modal__head">
+            <p class="admin-dashboard-eyebrow">EDIT RESERVATION</p>
+            <h2 id="admin-edit-reservation-title">예약 수정</h2>
+            <p id="admin-edit-reservation-meta"></p>
+          </div>
+          <div class="admin-edit-reservation-detail" aria-label="예약 세부 정보">
+            <div class="admin-edit-reservation-detail__row">
+              <span>예약번호</span>
+              <strong id="admin-edit-detail-number">—</strong>
+            </div>
+            <div class="admin-edit-reservation-detail__row">
+              <span>객실</span>
+              <strong id="admin-edit-detail-room">—</strong>
+            </div>
+            <div class="admin-edit-reservation-detail__row">
+              <span>체크인</span>
+              <strong id="admin-edit-detail-checkin">—</strong>
+            </div>
+            <div class="admin-edit-reservation-detail__row">
+              <span>체크아웃</span>
+              <strong id="admin-edit-detail-checkout">—</strong>
+            </div>
+            <div class="admin-edit-reservation-detail__row">
+              <span>박수</span>
+              <strong id="admin-edit-detail-nights">—</strong>
+            </div>
+            <div class="admin-edit-reservation-detail__row">
+              <span>인원</span>
+              <strong id="admin-edit-detail-guests">—</strong>
+            </div>
+            <div class="admin-edit-reservation-detail__row">
+              <span>결제</span>
+              <strong id="admin-edit-detail-payment">—</strong>
+            </div>
+          </div>
+          <div class="admin-edit-reservation-fields">
+            <label class="admin-request-modal__label">
+              연락처
+              <input
+                id="admin-edit-contact-input"
+                type="text"
+                inputmode="tel"
+                autocomplete="off"
+                maxlength="40"
+              />
+            </label>
+            <label class="admin-request-modal__label">
+              예약자명
+              <input
+                id="admin-edit-guest-name-input"
+                type="text"
+                autocomplete="off"
+                maxlength="100"
+              />
+            </label>
+            <label class="admin-request-modal__label">
+              금액
+              <input
+                id="admin-edit-amount-input"
+                type="text"
+                inputmode="numeric"
+                autocomplete="off"
+              />
+            </label>
+          </div>
+          <p
+            id="admin-edit-reservation-message"
+            class="admin-request-message"
+            hidden
+          ></p>
+          <div class="admin-request-modal__actions">
+            <button
+              type="button"
+              class="btn reserve-btn admin-request-cancel-btn"
+              id="admin-edit-reservation-cancel"
+            >
+              취소
+            </button>
+            <button
+              type="button"
+              class="btn reserve-btn confirm-pay-submit reserveinfo-submit-btn admin-save-btn admin-request-save-btn"
+              id="admin-edit-reservation-save"
+            >
+              저장
+            </button>
+          </div>
+        </div>
+      </div>
+
       <section
         class="confirm-section"
         id="admin-room-manage-section"
@@ -1783,6 +1884,10 @@
     <script src="js/admin-seasonal-rate.js"></script>
     <script>
       var ADMIN_LEFT_KEY = "graffordAdminPageLeft";
+      var isReservationListPreview =
+        /(?:^|[?&])preview=reservation-list(?:&|$)/i.test(
+          String(window.location.search || ""),
+        );
 
       document.addEventListener("DOMContentLoaded", function () {
         var loginForm = document.getElementById("admin-login-form");
@@ -1848,6 +1953,49 @@
         );
         var requestSaveBtn = document.getElementById("admin-request-save");
         var requestCancelBtn = document.getElementById("admin-request-cancel");
+        var editReservationModal = document.getElementById(
+          "admin-edit-reservation-modal",
+        );
+        var editReservationMeta = document.getElementById(
+          "admin-edit-reservation-meta",
+        );
+        var editReservationMessage = document.getElementById(
+          "admin-edit-reservation-message",
+        );
+        var editContactInput = document.getElementById(
+          "admin-edit-contact-input",
+        );
+        var editGuestNameInput = document.getElementById(
+          "admin-edit-guest-name-input",
+        );
+        var editAmountInput = document.getElementById(
+          "admin-edit-amount-input",
+        );
+        var editReservationSaveBtn = document.getElementById(
+          "admin-edit-reservation-save",
+        );
+        var editReservationCancelBtn = document.getElementById(
+          "admin-edit-reservation-cancel",
+        );
+        var editDetailNumber = document.getElementById(
+          "admin-edit-detail-number",
+        );
+        var editDetailRoom = document.getElementById("admin-edit-detail-room");
+        var editDetailCheckin = document.getElementById(
+          "admin-edit-detail-checkin",
+        );
+        var editDetailCheckout = document.getElementById(
+          "admin-edit-detail-checkout",
+        );
+        var editDetailNights = document.getElementById(
+          "admin-edit-detail-nights",
+        );
+        var editDetailGuests = document.getElementById(
+          "admin-edit-detail-guests",
+        );
+        var editDetailPayment = document.getElementById(
+          "admin-edit-detail-payment",
+        );
         var policyConfirmModal = document.getElementById(
           "admin-policy-confirm-modal",
         );
@@ -2003,6 +2151,8 @@
         var sortDirection = "";
         var reservationTabCounts = { current: 0, past: 0, deleted: 0 };
         var activeRequestReservationNumber = "";
+        var activeEditReservationNumber = "";
+        var editReservationSubmitting = false;
         var pendingPolicyToggle = null;
         var pendingRateSave = null;
         var pendingRateBatchSave = null;
@@ -2042,6 +2192,9 @@
         }
 
         function forceAdminLogout(message) {
+          if (isReservationListPreview) {
+            return;
+          }
           if (idInput) {
             idInput.value = "";
           }
@@ -2058,6 +2211,204 @@
           if (message) {
             showMessage(message);
           }
+        }
+
+        function ensureReservationListPreviewBanner() {
+          if (!isReservationListPreview) {
+            return;
+          }
+          if (document.getElementById("admin-preview-banner")) {
+            return;
+          }
+          var banner = document.createElement("div");
+          banner.id = "admin-preview-banner";
+          banner.className = "admin-preview-banner";
+          banner.innerHTML =
+            "<strong>PREVIEW MODE</strong><span>예약 목록 UI 미리보기 — 저장·취소는 반영되지 않습니다.</span>";
+          var shell = document.querySelector(".admin-shell");
+          if (shell) {
+            shell.insertBefore(banner, shell.firstChild);
+          }
+        }
+
+        function getReservationListPreviewRows(tab) {
+          var currentRows = [
+            {
+              reservationNumber: "20260709-A1B2C3",
+              guestName: "김민수",
+              contact: "010-1234-5678",
+              email: "minsu@example.com",
+              roomType: "G1",
+              checkIn: "2026-07-12",
+              checkOut: "2026-07-14",
+              guestCount: 2,
+              totalAmount: 540000,
+              stayPeriod: 2,
+              guestRequest: "늦은 체크인 예정입니다.",
+              paymentMethod: "card",
+              createdAt: "2026. 07. 01. 14:22:10",
+              checkinAlarmSentCount: 0,
+              bookingLocale: "kr",
+              bookingChannel: "direct",
+            },
+            {
+              reservationNumber: "20260710-D4E5F6",
+              guestName: "이서연",
+              contact: "010-9876-5432",
+              email: "seoyeon@example.com",
+              roomType: "G3",
+              checkIn: "2026-07-18",
+              checkOut: "2026-07-19",
+              guestCount: 3,
+              totalAmount: 320000,
+              stayPeriod: 1,
+              guestRequest: "",
+              paymentMethod: "naver",
+              createdAt: "2026. 07. 02. 09:11:40",
+              checkinAlarmSentCount: 1,
+              bookingLocale: "kr",
+              bookingChannel: "direct",
+            },
+            {
+              reservationNumber: "20260711-G7H8I9",
+              guestName: "Airbnb Guest",
+              contact: "-",
+              email: "",
+              roomType: "G2",
+              checkIn: "2026-07-20",
+              checkOut: "2026-07-22",
+              guestCount: 2,
+              totalAmount: 480000,
+              stayPeriod: 2,
+              guestRequest: "플랫폼 예약",
+              paymentMethod: "external-manual",
+              createdAt: "2026. 07. 03. 18:05:00",
+              checkinAlarmSentCount: 0,
+              bookingLocale: "en",
+              bookingChannel: "airbnb",
+            },
+          ];
+          var pastRows = [
+            {
+              reservationNumber: "20260601-P1A2B3",
+              guestName: "박지훈",
+              contact: "010-2222-3333",
+              email: "jihun@example.com",
+              roomType: "G4",
+              checkIn: "2026-06-10",
+              checkOut: "2026-06-12",
+              guestCount: 4,
+              totalAmount: 720000,
+              stayPeriod: 2,
+              guestRequest: "",
+              paymentMethod: "card",
+              createdAt: "2026. 05. 20. 11:00:00",
+              checkinAlarmSentCount: 1,
+              bookingLocale: "kr",
+              bookingChannel: "direct",
+              isPast: true,
+            },
+            {
+              reservationNumber: "20260615-P4C5D6",
+              guestName: "최유진",
+              contact: "010-4444-5555",
+              email: "yujin@example.com",
+              roomType: "G1",
+              checkIn: "2026-06-20",
+              checkOut: "2026-06-21",
+              guestCount: 2,
+              totalAmount: 270000,
+              stayPeriod: 1,
+              guestRequest: "조식 문의",
+              paymentMethod: "kakao",
+              createdAt: "2026. 06. 01. 16:40:00",
+              checkinAlarmSentCount: 1,
+              bookingLocale: "kr",
+              bookingChannel: "direct",
+              isPast: true,
+            },
+          ];
+          var deletedRows = [
+            {
+              reservationNumber: "20260501-X1Y2Z3",
+              guestName: "정하늘",
+              contact: "010-7777-8888",
+              email: "haneul@example.com",
+              roomType: "G2",
+              checkIn: "2026-05-15",
+              checkOut: "2026-05-17",
+              guestCount: 2,
+              totalAmount: 500000,
+              stayPeriod: 2,
+              guestRequest: "",
+              paymentMethod: "card",
+              createdAt: "2026. 04. 28. 10:20:00",
+              checkinAlarmSentCount: 0,
+              bookingLocale: "kr",
+              bookingChannel: "direct",
+              cancelReason: "mind-change",
+              otherReason: "",
+              cancelledAt: "2026. 05. 01. 12:00:00",
+              refundAmount: 500000,
+              deletedAt: "2026. 05. 01. 12:00:00",
+            },
+            {
+              reservationNumber: "20260520-Q9W8E7",
+              guestName: "오세린",
+              contact: "010-6666-1111",
+              email: "serin@example.com",
+              roomType: "G3",
+              checkIn: "2026-05-25",
+              checkOut: "2026-05-26",
+              guestCount: 2,
+              totalAmount: 310000,
+              stayPeriod: 1,
+              guestRequest: "창가 객실 요청",
+              paymentMethod: "toss",
+              createdAt: "2026. 05. 10. 08:30:00",
+              checkinAlarmSentCount: 0,
+              bookingLocale: "kr",
+              bookingChannel: "direct",
+              cancelReason: "other",
+              otherReason: "일정 변경으로 재예약 예정",
+              cancelledAt: "2026. 05. 18. 19:15:00",
+              refundAmount: 279000,
+              deletedAt: "2026. 05. 18. 19:15:00",
+            },
+          ];
+          if (tab === "past") {
+            return pastRows;
+          }
+          if (tab === "deleted") {
+            return deletedRows;
+          }
+          return currentRows;
+        }
+
+        function applyReservationListPreviewData(tab) {
+          reservationTabCounts = {
+            current: getReservationListPreviewRows("current").length,
+            past: getReservationListPreviewRows("past").length,
+            deleted: getReservationListPreviewRows("deleted").length,
+          };
+          reservationListRows = getReservationListPreviewRows(tab || "current");
+          applyListView(true);
+          renderReservationTabCounts();
+          showMessage("");
+        }
+
+        function enterReservationListPreview() {
+          ensureReservationListPreviewBanner();
+          if (idInput) {
+            idInput.value = "preview";
+          }
+          if (pwInput) {
+            pwInput.value = "preview";
+          }
+          setLoggedInView();
+          activeResTab = "current";
+          setActiveCategory("list");
+          applyReservationListPreviewData("current");
         }
 
         function setLoggedOutView() {
@@ -5852,6 +6203,251 @@
           setRequestMessage("");
         }
 
+        function setEditReservationMessage(text) {
+          if (!editReservationMessage) {
+            return;
+          }
+          editReservationMessage.hidden = !text;
+          editReservationMessage.textContent = text || "";
+        }
+
+        function setEditReservationButtonsDisabled(disabled) {
+          if (editReservationSaveBtn) {
+            editReservationSaveBtn.disabled = !!disabled;
+          }
+          if (editReservationCancelBtn) {
+            editReservationCancelBtn.disabled = !!disabled;
+          }
+          if (editContactInput) {
+            editContactInput.disabled = !!disabled;
+          }
+          if (editGuestNameInput) {
+            editGuestNameInput.disabled = !!disabled;
+          }
+          if (editAmountInput) {
+            editAmountInput.disabled = !!disabled;
+          }
+        }
+
+        function formatEditAmountInput(value) {
+          var digits = String(value || "").replace(/\D/g, "");
+          if (!digits) {
+            return "";
+          }
+          return Number(digits).toLocaleString("ko-KR");
+        }
+
+        function parseEditAmountInput(value) {
+          var digits = String(value || "").replace(/\D/g, "");
+          if (!digits) {
+            return NaN;
+          }
+          return Number(digits);
+        }
+
+        function getEditPaymentLabel(row) {
+          if (isExternalManualReservation(row)) {
+            return (
+              formatBookingPlatformLabel(resolveBookingPlatformId(row)) ||
+              "결제수단 미확인"
+            );
+          }
+          return formatPaymentMethodLabel(row && row.paymentMethod);
+        }
+
+        function updateReservationFieldsLocal(
+          reservationNumber,
+          guestName,
+          contact,
+          totalAmount,
+        ) {
+          [reservationListRows, latestRows, latestCalendarRows].forEach(
+            function (list) {
+              (list || []).forEach(function (row) {
+                if (
+                  String((row && row.reservationNumber) || "") ===
+                  String(reservationNumber || "")
+                ) {
+                  row.guestName = guestName;
+                  row.contact = contact;
+                  row.totalAmount = totalAmount;
+                }
+              });
+            },
+          );
+        }
+
+        function openEditReservationModal(reservationNumber) {
+          if (!editReservationModal) {
+            return;
+          }
+          if (activeResTab !== "current") {
+            showMessage("다가올 예약만 수정할 수 있습니다.");
+            return;
+          }
+          var row = findReservationByNumber(reservationNumber) || {};
+          if (!row.reservationNumber) {
+            showMessage("예약 정보를 찾을 수 없습니다.");
+            return;
+          }
+          editReservationSubmitting = false;
+          activeEditReservationNumber = String(
+            row.reservationNumber || reservationNumber || "",
+          );
+          var nights = getStayPeriodNights(row);
+          if (editReservationMeta) {
+            editReservationMeta.textContent =
+              (row.reservationNumber || "—") +
+              " · " +
+              (row.guestName || "—") +
+              " · " +
+              (row.roomType || "—");
+          }
+          if (editDetailNumber) {
+            editDetailNumber.textContent = row.reservationNumber || "—";
+          }
+          if (editDetailRoom) {
+            editDetailRoom.textContent = row.roomType || "—";
+          }
+          if (editDetailCheckin) {
+            editDetailCheckin.textContent = row.checkIn || "—";
+          }
+          if (editDetailCheckout) {
+            editDetailCheckout.textContent = row.checkOut || "—";
+          }
+          if (editDetailNights) {
+            editDetailNights.textContent = nights ? nights + "박" : "—";
+          }
+          if (editDetailGuests) {
+            editDetailGuests.textContent = row.guestCount
+              ? String(row.guestCount) + "명"
+              : "—";
+          }
+          if (editDetailPayment) {
+            editDetailPayment.textContent = getEditPaymentLabel(row);
+          }
+          if (editContactInput) {
+            editContactInput.value = formatAdminSearchContact(
+              row.contact || "",
+            );
+          }
+          if (editGuestNameInput) {
+            editGuestNameInput.value = row.guestName || "";
+          }
+          if (editAmountInput) {
+            editAmountInput.value = formatEditAmountInput(
+              getReservationPaidTotal(row),
+            );
+          }
+          setEditReservationMessage("");
+          setEditReservationButtonsDisabled(false);
+          editReservationModal.hidden = false;
+          if (editContactInput) {
+            editContactInput.focus();
+          }
+        }
+
+        function closeEditReservationModal(force) {
+          if (editReservationSubmitting && force !== true) {
+            return;
+          }
+          editReservationSubmitting = false;
+          if (editReservationModal) {
+            editReservationModal.hidden = true;
+          }
+          activeEditReservationNumber = "";
+          setEditReservationMessage("");
+          setEditReservationButtonsDisabled(false);
+        }
+
+        function saveEditReservationModal() {
+          if (
+            editReservationSubmitting ||
+            !activeEditReservationNumber ||
+            !editGuestNameInput ||
+            !editContactInput ||
+            !editAmountInput
+          ) {
+            return;
+          }
+          var guestName = String(editGuestNameInput.value || "").trim();
+          var contact = String(editContactInput.value || "").trim();
+          var totalAmount = parseEditAmountInput(editAmountInput.value);
+          if (!guestName) {
+            setEditReservationMessage("예약자명을 입력해 주세요.");
+            editGuestNameInput.focus();
+            return;
+          }
+          if (!contact) {
+            setEditReservationMessage("연락처를 입력해 주세요.");
+            editContactInput.focus();
+            return;
+          }
+          if (!Number.isFinite(totalAmount) || totalAmount < 0) {
+            setEditReservationMessage("금액을 확인해 주세요.");
+            editAmountInput.focus();
+            return;
+          }
+          var auth = getAuthPayload();
+          var reservationNumber = activeEditReservationNumber;
+          editReservationSubmitting = true;
+          setEditReservationButtonsDisabled(true);
+          setEditReservationMessage("저장 중입니다.");
+          if (isReservationListPreview) {
+            updateReservationFieldsLocal(
+              reservationNumber,
+              guestName,
+              contact,
+              totalAmount,
+            );
+            applyListView();
+            closeEditReservationModal(true);
+            showMessage("미리보기 모드: 변경 사항이 로컬에만 반영되었습니다.");
+            return;
+          }
+          adminPost("reservations", {
+            action: "update-reservation",
+            reservationNumber: reservationNumber,
+            guestName: guestName,
+            contact: contact,
+            totalAmount: totalAmount,
+            adminId: auth.adminId,
+            adminPw: auth.adminPw,
+          })
+            .then(function (r) {
+              return r.json().then(function (data) {
+                return { ok: r.ok, data: data || {} };
+              });
+            })
+            .then(function (result) {
+              if (!result.ok || !result.data.ok) {
+                throw new Error(
+                  result.data.error || "예약 수정에 실패했습니다.",
+                );
+              }
+              updateReservationFieldsLocal(
+                result.data.reservationNumber || reservationNumber,
+                result.data.guestName != null
+                  ? result.data.guestName
+                  : guestName,
+                result.data.contact != null ? result.data.contact : contact,
+                result.data.totalAmount != null
+                  ? Number(result.data.totalAmount)
+                  : totalAmount,
+              );
+              applyListView();
+              closeEditReservationModal(true);
+              showMessage("예약 정보가 수정되었습니다.");
+            })
+            .catch(function (err) {
+              editReservationSubmitting = false;
+              setEditReservationButtonsDisabled(false);
+              setEditReservationMessage(
+                (err && err.message) || "예약 수정 중 오류가 발생했습니다.",
+              );
+            });
+        }
+
         function setManualCancelMessage(text) {
           if (!manualCancelMessage) {
             return;
@@ -5940,6 +6536,27 @@
               ? "취소 처리 중입니다."
               : "100% 환불 및 취소 처리 중입니다.",
           );
+          if (isReservationListPreview) {
+            reservationListRows = (reservationListRows || []).filter(
+              function (row) {
+                return (
+                  String((row && row.reservationNumber) || "") !==
+                  String(reservationNumber || "")
+                );
+              },
+            );
+            reservationTabCounts.current = Math.max(
+              0,
+              (reservationTabCounts.current || 0) - 1,
+            );
+            reservationTabCounts.deleted =
+              (reservationTabCounts.deleted || 0) + 1;
+            applyListView();
+            renderReservationTabCounts();
+            closeManualCancelModal(true);
+            showMessage("미리보기 모드: 취소가 로컬에만 반영되었습니다.");
+            return;
+          }
           adminPost("payment-cancel", {
             reservationNumber: reservationNumber,
             adminId: auth.adminId,
@@ -6156,6 +6773,19 @@
             requestSaveBtn.disabled = true;
           }
           setRequestMessage("저장 중입니다.");
+          if (isReservationListPreview) {
+            updateReservationRequestLocal(
+              activeRequestReservationNumber,
+              nextRequest,
+            );
+            applyListView();
+            closeRequestModal();
+            showMessage("미리보기 모드: 변경 사항이 로컬에만 반영되었습니다.");
+            if (requestSaveBtn) {
+              requestSaveBtn.disabled = false;
+            }
+            return;
+          }
           adminPost("reservations", {
             action: "save-request",
             reservationNumber: activeRequestReservationNumber,
@@ -6369,7 +6999,7 @@
           if (!rows || !rows.length) {
             var emptyTr = document.createElement("tr");
             var emptyTd = document.createElement("td");
-            emptyTd.colSpan = 11;
+            emptyTd.colSpan = 12;
             emptyTd.textContent = "예약 내역이 없습니다.";
             emptyTr.appendChild(emptyTd);
             tableBody.appendChild(emptyTr);
@@ -6403,6 +7033,22 @@
                 "</span>";
             }
             var requestText = row && row.guestRequest ? row.guestRequest : "";
+            var editCell;
+            if (activeResTab === "current") {
+              editCell =
+                "<td class='admin-res-col-edit'>" +
+                "<button type='button' class='admin-reservation-edit-btn' data-reservation-number='" +
+                escapeHtml(row.reservationNumber || "") +
+                "' aria-label='예약 수정'>" +
+                "<svg width='14' height='14' viewBox='0 0 24 24' aria-hidden='true' focusable='false'>" +
+                "<path fill='currentColor' d='M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zm2.92 2.08H5v-.92l9.06-9.06.92.92L5.92 19.33zM20.71 7.04a1.003 1.003 0 0 0 0-1.42l-2.34-2.34a1.003 1.003 0 0 0-1.42 0l-1.83 1.83 3.75 3.75 1.84-1.82z'/>" +
+                "</svg>" +
+                "</button>" +
+                "</td>";
+            } else {
+              editCell =
+                "<td class='admin-res-col-edit admin-sort-hover-cell'>—</td>";
+            }
             var cancelCell;
             if (activeResTab === "current") {
               cancelCell =
@@ -6446,6 +7092,7 @@
               "<td class='admin-res-col-payment admin-sort-hover-cell'>" +
               paymentCellHtml +
               "</td>" +
+              editCell +
               cancelCell +
               "<td class='admin-res-col-request'>" +
               "<button type='button' class='admin-request-icon-btn" +
@@ -7813,6 +8460,15 @@
         }
 
         function loadReservationTabCounts() {
+          if (isReservationListPreview) {
+            reservationTabCounts = {
+              current: getReservationListPreviewRows("current").length,
+              past: getReservationListPreviewRows("past").length,
+              deleted: getReservationListPreviewRows("deleted").length,
+            };
+            renderReservationTabCounts();
+            return Promise.resolve();
+          }
           var auth = getAuthPayload();
           var collectionMap = {
             current: "reservations",
@@ -7845,6 +8501,10 @@
         }
 
         function loadReservationList(tab) {
+          if (isReservationListPreview) {
+            applyReservationListPreviewData(tab);
+            return Promise.resolve();
+          }
           var auth = getAuthPayload();
           var collectionMap = {
             current: "reservations",
@@ -8120,6 +8780,15 @@
               );
               return;
             }
+            var editBtn =
+              e.target.closest &&
+              e.target.closest(".admin-reservation-edit-btn");
+            if (editBtn) {
+              openEditReservationModal(
+                editBtn.getAttribute("data-reservation-number") || "",
+              );
+              return;
+            }
             var btn =
               e.target.closest && e.target.closest(".admin-request-icon-btn");
             if (!btn) {
@@ -8135,6 +8804,38 @@
 
         if (requestCancelBtn) {
           requestCancelBtn.addEventListener("click", closeRequestModal);
+        }
+
+        if (editReservationSaveBtn) {
+          editReservationSaveBtn.addEventListener(
+            "click",
+            saveEditReservationModal,
+          );
+        }
+
+        if (editReservationCancelBtn) {
+          editReservationCancelBtn.addEventListener(
+            "click",
+            function () {
+              closeEditReservationModal();
+            },
+          );
+        }
+
+        if (editContactInput) {
+          editContactInput.addEventListener("input", function () {
+            editContactInput.value = formatAdminSearchContact(
+              editContactInput.value,
+            );
+          });
+        }
+
+        if (editAmountInput) {
+          editAmountInput.addEventListener("input", function () {
+            editAmountInput.value = formatEditAmountInput(
+              editAmountInput.value,
+            );
+          });
         }
 
         if (manualCancelCloseBtn) {
@@ -8208,6 +8909,14 @@
           });
         }
 
+        if (editReservationModal) {
+          editReservationModal.addEventListener("click", function (e) {
+            if (e.target === editReservationModal) {
+              closeEditReservationModal();
+            }
+          });
+        }
+
         if (policyConfirmSaveBtn) {
           policyConfirmSaveBtn.addEventListener("click", savePolicyToggle);
         }
@@ -8227,6 +8936,13 @@
         document.addEventListener("keydown", function (e) {
           if (e.key === "Escape" && requestModal && !requestModal.hidden) {
             closeRequestModal();
+          }
+          if (
+            e.key === "Escape" &&
+            editReservationModal &&
+            !editReservationModal.hidden
+          ) {
+            closeEditReservationModal();
           }
           if (
             e.key === "Escape" &&
@@ -8404,14 +9120,8 @@
           });
         }
 
-        if (
-          window.GraffordAdminSeasonalRate &&
-          window.GraffordAdminSeasonalRate.isPreviewMode
-        ) {
-          setLoggedInView();
-          roomManageSection.hidden = false;
-          setActiveCategory("room-manage");
-          setActiveRoomManageTab("rate");
+        if (isReservationListPreview) {
+          enterReservationListPreview();
         } else if (consumeAdminLeftFlag()) {
           forceAdminLogout("페이지를 벗어났습니다. 다시 로그인해 주세요.");
         } else {

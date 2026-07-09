@@ -1,4 +1,7 @@
-import { decryptBookingPiiResponse } from "./pii-crypto.js";
+import {
+  decryptBookingPiiResponse,
+  encryptBookingPii,
+} from "./pii-crypto.js";
 import { json } from "./admin-common.js";
 import { getExternalBookingCalendarRows } from "./ical-sync.js";
 import {
@@ -11,6 +14,8 @@ import {
 } from "./admin-manual-booking.js";
 
 const BOOKING_TABLE = "booking";
+const MAX_GUEST_NAME = 100;
+const MAX_CONTACT = 40;
 
 // collection → booking 테이블 status 필터 매핑
 const ALLOWED_COLLECTIONS = {
@@ -151,6 +156,116 @@ export async function handleAdminReservations(res, pool, body) {
       json(res, 500, {
         ok: false,
         error: String((e && e.message) || e || "request update failed"),
+      });
+    }
+    return;
+  }
+
+  if (action === "update-reservation") {
+    var updateReservationNumber = String(body.reservationNumber || "")
+      .trim()
+      .replace(/^GRF-/i, "");
+    var nextGuestName = String(body.guestName || "").trim();
+    var nextContact = String(body.contact || "").trim();
+    var nextTotalAmount = Number(
+      String(body.totalAmount != null ? body.totalAmount : "")
+        .replace(/[^\d.-]/g, ""),
+    );
+    if (!updateReservationNumber) {
+      json(res, 400, { ok: false, error: "reservationNumber가 필요합니다." });
+      return;
+    }
+    if (!nextGuestName) {
+      json(res, 400, { ok: false, error: "예약자명을 입력해 주세요." });
+      return;
+    }
+    if (nextGuestName.length > MAX_GUEST_NAME) {
+      json(res, 400, {
+        ok: false,
+        error: "예약자명은 " + MAX_GUEST_NAME + "자 이내로 입력해 주세요.",
+      });
+      return;
+    }
+    if (!nextContact) {
+      json(res, 400, { ok: false, error: "연락처를 입력해 주세요." });
+      return;
+    }
+    if (nextContact.length > MAX_CONTACT) {
+      json(res, 400, {
+        ok: false,
+        error: "연락처는 " + MAX_CONTACT + "자 이내로 입력해 주세요.",
+      });
+      return;
+    }
+    if (!Number.isFinite(nextTotalAmount) || nextTotalAmount < 0) {
+      json(res, 400, { ok: false, error: "금액을 확인해 주세요." });
+      return;
+    }
+    nextTotalAmount = Math.floor(nextTotalAmount);
+    try {
+      await archivePastReservations(pool);
+      await purgeExpiredBookings(pool);
+      var updateSel = await pool.query(
+        `SELECT reservation_number, created_at, status
+         FROM ${BOOKING_TABLE}
+         WHERE reservation_number = $1
+         LIMIT 1`,
+        [updateReservationNumber],
+      );
+      if (!updateSel.rows || !updateSel.rows.length) {
+        json(res, 404, { ok: false, error: "대상 예약을 찾을 수 없습니다." });
+        return;
+      }
+      if (!(await applyBookingRetentionToRow(pool, updateSel.rows[0]))) {
+        json(res, 404, { ok: false, error: "대상 예약을 찾을 수 없습니다." });
+        return;
+      }
+      if (String(updateSel.rows[0].status || "") !== "confirm") {
+        json(res, 400, {
+          ok: false,
+          error: "다가올 예약만 수정할 수 있습니다.",
+        });
+        return;
+      }
+      var encryptedPii = encryptBookingPii({
+        guestName: nextGuestName,
+        contact: nextContact,
+      });
+      var updateUpd = await pool.query(
+        `UPDATE ${BOOKING_TABLE}
+         SET guest_name = $2,
+             contact = $3,
+             total_amount = $4
+         WHERE reservation_number = $1
+           AND status = 'confirm'
+         RETURNING
+           reservation_number,
+           guest_name,
+           contact,
+           total_amount`,
+        [
+          updateReservationNumber,
+          encryptedPii.guest_name,
+          encryptedPii.contact,
+          nextTotalAmount,
+        ],
+      );
+      if (!updateUpd.rows || !updateUpd.rows.length) {
+        json(res, 404, { ok: false, error: "대상 예약을 찾을 수 없습니다." });
+        return;
+      }
+      var updated = mapRow(updateUpd.rows[0], false);
+      json(res, 200, {
+        ok: true,
+        reservationNumber: updated.reservationNumber,
+        guestName: updated.guestName,
+        contact: updated.contact,
+        totalAmount: updated.totalAmount,
+      });
+    } catch (e) {
+      json(res, 500, {
+        ok: false,
+        error: String((e && e.message) || e || "reservation update failed"),
       });
     }
     return;
