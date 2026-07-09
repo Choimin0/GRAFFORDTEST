@@ -1045,8 +1045,16 @@
               if (!savedChargesMap) {
                 savedChargesMap = extractChargesFromRatesMap(savedRateMap);
               }
+              var savedChargeEnabled = null;
+              try {
+                savedChargeEnabled = JSON.parse(
+                  sessionStorage.getItem("graffordChargeEnabledMap") || "null",
+                );
+              } catch (_ce) {}
               if (savedChargesMap) {
-                applyChargesWithPromotionMeta(savedChargesMap, null);
+                applyChargesWithPromotionMeta(savedChargesMap, {
+                  chargeEnabled: savedChargeEnabled,
+                });
               }
             } catch (_ec) {}
             recomputeAndApplyQuote(); // 캐시 기반 1차 결과

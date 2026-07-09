@@ -180,7 +180,11 @@ async function listSeasonalRates(pool, surchargeEnabled, surchargeAmount) {
       weekdayBaseRate: weekday,
       weekendBaseRate: resolveSeasonalWeekendRate(
         weekday,
-        weekendStored == null ? weekday + surchargeAmount : weekendStored,
+        weekendStored == null
+          ? surchargeEnabled
+            ? weekday + Math.floor(Number(surchargeAmount || 0))
+            : weekday
+          : weekendStored,
         surchargeEnabled,
         surchargeAmount,
       ),
@@ -244,6 +248,9 @@ export async function handlePublicRoomRate(req, res, pool) {
       "extra-guest-charge": "extraGuestCharge",
     };
     var todayYmd = getTodayYmdKst();
+    // weekend-charge는 room_name 정렬상 G1–G4보다 뒤에 오므로,
+    // 요금 정책(ON/OFF)을 먼저 확정한 뒤 주말 요금을 계산한다.
+    var storedWeekendByRoom = {};
     (sel.rows || []).forEach(function (row) {
       var n = Number(row.weekday_base_rate || 0);
       if (chargeKeyMap[row.room_name] !== undefined) {
@@ -260,26 +267,23 @@ export async function handlePublicRoomRate(req, res, pool) {
         }
       } else if (/^G[1-4]$/.test(row.room_name)) {
         rates[row.room_name] = n;
-        var weekendStored = row.weekend_base_rate;
-        if (chargeEnabled.weekendCharge !== false) {
-          weekendBaseRates[row.room_name] =
-            n + Math.floor(Number(charges.weekendCharge || 0));
-        } else {
-          weekendBaseRates[row.room_name] =
-            weekendStored == null ? n : Number(weekendStored || 0);
-        }
+        storedWeekendByRoom[row.room_name] = row.weekend_base_rate;
       }
     });
-    // weekend-charge 행이 G행보다 뒤에 올 수 있으므로 한 번 더 동기화
-    if (chargeEnabled.weekendCharge !== false) {
-      ["G1", "G2", "G3", "G4"].forEach(function (room) {
-        if (rates[room] != null) {
-          weekendBaseRates[room] =
-            Number(rates[room] || 0) +
-            Math.floor(Number(charges.weekendCharge || 0));
-        }
-      });
-    }
+    ["G1", "G2", "G3", "G4"].forEach(function (room) {
+      if (rates[room] == null) {
+        return;
+      }
+      var weekday = Number(rates[room] || 0);
+      if (chargeEnabled.weekendCharge !== false) {
+        weekendBaseRates[room] =
+          weekday + Math.floor(Number(charges.weekendCharge || 0));
+      } else {
+        var weekendStored = storedWeekendByRoom[room];
+        weekendBaseRates[room] =
+          weekendStored == null ? weekday : Number(weekendStored || 0);
+      }
+    });
     var seasonalRates = await listSeasonalRates(
       pool,
       chargeEnabled.weekendCharge !== false,

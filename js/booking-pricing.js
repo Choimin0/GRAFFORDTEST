@@ -17,7 +17,8 @@
   };
   var EXTRA_PER_PERSON_PER_NIGHT = 30000;
   var WEEKEND_SURCHARGE_PER_NIGHT = 20000;   // 기본값 (DB에서 덮어씀)
-  var WEEKEND_SURCHARGE_ENABLED = true;
+  // API 로드 전 기본은 OFF — ON이면 금·토에 +추가요금이 붙으므로 안전하게 시작
+  var WEEKEND_SURCHARGE_ENABLED = false;
   var CONSECUTIVE_SALE_PER_NIGHT = 20000;    // 기본값 (DB에서 덮어씀)
   var PROMOTION_PERCENT = 0;                  // 기본 프로모션 할인율 (%)
   var PROMOTION_ENABLED = false;

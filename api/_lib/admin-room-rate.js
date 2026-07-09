@@ -224,7 +224,11 @@ function mapSeasonalRow(row, surchargeEnabled, surchargeAmount) {
   var weekendStored = row.weekend_base_rate;
   var weekend = resolveSeasonalWeekendRate(
     weekday,
-    weekendStored == null ? weekday + surchargeAmount : weekendStored,
+    weekendStored == null
+      ? surchargeEnabled
+        ? weekday + Math.floor(Number(surchargeAmount || 0))
+        : weekday
+      : weekendStored,
     surchargeEnabled,
     surchargeAmount,
   );
@@ -386,10 +390,16 @@ async function saveRoomRateRow(pool, roomName, weekdayBaseRate, weekendBaseRate)
     throw new Error("use promotion save path");
   }
   if (/^G[1-4]$/.test(roomName)) {
-    var weekendVal =
-      weekendBaseRate == null || !Number.isFinite(Number(weekendBaseRate))
-        ? Math.floor(weekdayBaseRate) + 20000
-        : Math.floor(Number(weekendBaseRate));
+    var weekendVal;
+    if (weekendBaseRate == null || !Number.isFinite(Number(weekendBaseRate))) {
+      var surchargeEnabled = await isWeekendSurchargeEnabled(pool);
+      weekendVal = surchargeEnabled
+        ? Math.floor(weekdayBaseRate) +
+          Math.floor((await getWeekendChargeAmount(pool)) || 0)
+        : Math.floor(weekdayBaseRate);
+    } else {
+      weekendVal = Math.floor(Number(weekendBaseRate));
+    }
     await pool.query(
       `UPDATE ${TABLE_NAME}
        SET weekday_base_rate = $2,
