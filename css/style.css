@@ -5889,6 +5889,10 @@ main.content-section:has(> .site-footer.site-business-footer) {
   flex-wrap: wrap;
 }
 
+.reservation-rate-row + .reservation-rate-row {
+  margin-top: 0.45rem;
+}
+
 .reservation-rate-label {
   font-size: 0.95rem;
   color: var(--grafford-mud2);
@@ -14396,6 +14400,357 @@ main.content-section.confirm-page.admin-page {
   font-size: 0.68rem;
   letter-spacing: 0.06em;
 }
+.admin-room-rate-active-criteria {
+  padding: var(--space-20) var(--space-24);
+  border-bottom: 1px solid var(--stone-200);
+  background: color-mix(in srgb, var(--gold-500) 4%, var(--stone-50));
+}
+.admin-room-rate-active-criteria__head h3 {
+  margin: var(--space-8) 0 0;
+  color: var(--stone-800);
+  font-size: 0.92rem;
+  font-weight: 400;
+  letter-spacing: 0.08em;
+}
+.admin-room-rate-active-criteria__rule {
+  margin: var(--space-12) 0 var(--space-16);
+  color: var(--stone-400);
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+}
+.admin-room-rate-active-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--space-12);
+}
+.admin-room-rate-active-item {
+  display: grid;
+  gap: var(--space-4);
+  padding: var(--space-12);
+  border: 1px solid var(--stone-200);
+  background: var(--stone-50);
+}
+.admin-room-rate-active-item__room {
+  color: var(--gold-500);
+  font-family: var(--font-family-body-en);
+  font-size: 0.68rem;
+  letter-spacing: 0.12em;
+}
+.admin-room-rate-active-item__rates {
+  color: var(--stone-800);
+  font-size: 0.78rem;
+  letter-spacing: 0.04em;
+}
+.admin-room-rate-active-item__source {
+  color: var(--stone-400);
+  font-size: 0.64rem;
+  letter-spacing: 0.08em;
+}
+.admin-seasonal-rate-section {
+  border-top: 1px solid var(--stone-200);
+}
+.admin-seasonal-rate-head {
+  border-bottom: 1px solid var(--stone-200);
+}
+.admin-seasonal-rate-list {
+  display: grid;
+}
+.admin-seasonal-rate-add-area {
+  display: grid;
+}
+.admin-seasonal-rate-row {
+  display: grid;
+  grid-template-columns: 4rem minmax(0, 1.4fr) 7.5rem 7.5rem 5.5rem;
+  gap: var(--space-16);
+  align-items: center;
+  padding: var(--space-20) var(--space-24);
+  border-bottom: 1px solid var(--stone-200);
+}
+.admin-seasonal-rate-row--head {
+  background: var(--stone-100);
+  color: var(--stone-400);
+  font-size: 0.64rem;
+  letter-spacing: 0.14em;
+  padding-top: var(--space-16);
+  padding-bottom: var(--space-16);
+}
+.admin-seasonal-rate-head-price,
+.admin-seasonal-rate-price {
+  display: grid;
+  gap: var(--space-4);
+  justify-items: end;
+  align-content: center;
+  width: 100%;
+  text-align: right;
+}
+.admin-seasonal-rate-head-price small,
+.admin-seasonal-rate-price small {
+  display: block;
+  width: 100%;
+  color: var(--stone-400);
+  font-size: 0.58rem;
+  letter-spacing: 0.12em;
+  text-align: right;
+}
+.admin-seasonal-rate-head-price strong,
+.admin-seasonal-rate-price strong {
+  display: block;
+  width: 100%;
+  color: var(--stone-800);
+  font-size: 0.82rem;
+  font-weight: 400;
+  letter-spacing: 0.04em;
+  text-align: right;
+  line-height: 1.35;
+}
+.admin-seasonal-rate-head-price strong {
+  color: var(--stone-400);
+  font-size: 0.64rem;
+  letter-spacing: 0.14em;
+}
+.admin-seasonal-rate-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-8);
+}
+.admin-seasonal-rate-edit-btn,
+.admin-seasonal-rate-delete-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border: 1px solid var(--stone-200);
+  background: var(--stone-50);
+  color: var(--stone-800);
+  font-size: 0.95rem;
+  line-height: 1;
+  cursor: pointer;
+  transition: border-color 0.2s ease, color 0.2s ease;
+}
+.admin-seasonal-rate-edit-btn svg {
+  display: block;
+}
+.admin-seasonal-rate-form__field.is-readonly strong {
+  min-height: 1.85rem;
+  border-bottom: 1px solid var(--stone-200);
+  color: var(--stone-800);
+  font-size: 0.92rem;
+  font-weight: 400;
+  line-height: 1.85rem;
+  text-align: right;
+}
+.admin-seasonal-rate-edit-btn:hover,
+.admin-seasonal-rate-delete-btn:hover,
+.admin-seasonal-rate-edit-btn:focus-visible,
+.admin-seasonal-rate-delete-btn:focus-visible {
+  border-color: var(--gold-500);
+  color: var(--gold-500);
+  outline: none;
+}
+.admin-seasonal-rate-add-btn {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: var(--space-4) var(--space-16);
+  align-items: center;
+  width: 100%;
+  margin: 0;
+  padding: var(--space-24);
+  border: 0;
+  border-bottom: 1px solid var(--stone-200);
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+}
+.admin-seasonal-rate-add-btn.is-open {
+  border-bottom-color: transparent;
+}
+.admin-seasonal-rate-add-btn span {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.2rem;
+  height: 2.2rem;
+  border-radius: 50%;
+  background: var(--stone-800);
+  color: var(--stone-50);
+  font-size: 1.2rem;
+  line-height: 1;
+}
+.admin-seasonal-rate-add-btn strong {
+  color: var(--stone-800);
+  font-size: 0.88rem;
+  font-weight: 400;
+  letter-spacing: 0.06em;
+}
+.admin-seasonal-rate-add-btn small {
+  grid-column: 2;
+  color: var(--stone-400);
+  font-size: 0.68rem;
+  letter-spacing: 0.06em;
+}
+.admin-seasonal-rate-form {
+  padding: var(--space-8) var(--space-24) var(--space-24);
+  border-bottom: 1px solid var(--stone-200);
+  background: var(--stone-100);
+}
+.admin-seasonal-rate-form[hidden] {
+  display: none !important;
+}
+.admin-seasonal-rate-empty {
+  margin: 0;
+  padding: var(--space-24);
+  color: var(--stone-400);
+  font-size: 0.78rem;
+  letter-spacing: 0.06em;
+}
+.admin-seasonal-rate-room {
+  color: var(--gold-500);
+  font-family: var(--font-family-body-en);
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+}
+.admin-seasonal-rate-period {
+  color: var(--stone-800);
+  font-size: 0.78rem;
+  letter-spacing: 0.04em;
+}
+.admin-seasonal-rate-form__grid {
+  display: grid;
+  grid-template-columns: 7rem minmax(0, 1.6fr) minmax(0, 1fr) minmax(0, 1fr);
+  gap: var(--space-24);
+  align-items: start;
+}
+.admin-seasonal-rate-form__field {
+  display: grid;
+  gap: var(--space-8);
+  min-width: 0;
+  position: relative;
+}
+.admin-seasonal-rate-form__field > span {
+  color: var(--stone-400);
+  font-size: 0.68rem;
+  letter-spacing: 0.14em;
+}
+.admin-seasonal-rate-form__field select,
+.admin-seasonal-rate-form__field input {
+  width: 100%;
+  border: 0;
+  border-bottom: 1px solid var(--stone-200);
+  border-radius: 0;
+  background: transparent;
+  color: var(--stone-800);
+  font-family: var(--font-family-body-kr);
+  font-size: 0.82rem;
+  padding: 0.55rem 0;
+}
+.admin-seasonal-rate-form__field input[readonly] {
+  cursor: pointer;
+}
+.admin-seasonal-rate-form__field select:focus,
+.admin-seasonal-rate-form__field input:focus {
+  outline: none;
+  border-bottom-color: var(--gold-500);
+}
+.admin-seasonal-rate-form__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--space-12);
+  margin-top: var(--space-24);
+}
+.admin-seasonal-cal-popup {
+  position: absolute;
+  top: calc(100% + var(--space-8));
+  left: 0;
+  z-index: 20;
+  padding: var(--space-16);
+  border: 1px solid var(--stone-200);
+  background: var(--stone-50);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.08);
+}
+.admin-seasonal-cal-dual {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(220px, 1fr));
+  gap: var(--space-24);
+}
+.admin-seasonal-cal-month__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-8);
+}
+.admin-seasonal-cal-month__head strong {
+  color: var(--stone-800);
+  font-size: 0.78rem;
+  font-weight: 400;
+  letter-spacing: 0.08em;
+}
+.admin-seasonal-cal-nav,
+.admin-seasonal-cal-nav-spacer {
+  width: 1.8rem;
+  height: 1.8rem;
+}
+.admin-seasonal-cal-nav {
+  border: 1px solid var(--stone-200);
+  background: transparent;
+  color: var(--stone-800);
+  cursor: pointer;
+}
+.admin-seasonal-cal-weekdays,
+.admin-seasonal-cal-grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  gap: 2px;
+  text-align: center;
+}
+.admin-seasonal-cal-weekdays {
+  margin-bottom: var(--space-4);
+  color: var(--stone-400);
+  font-size: 0.56rem;
+  letter-spacing: 0.08em;
+}
+.admin-seasonal-cal-cell.is-empty {
+  min-height: 1.9rem;
+}
+.admin-seasonal-cal-day {
+  min-height: 1.9rem;
+  border: none;
+  background: transparent;
+  color: var(--stone-800);
+  font-size: 0.78rem;
+  cursor: pointer;
+}
+.admin-seasonal-cal-day.is-range {
+  background: rgba(168, 131, 62, 0.16);
+}
+.admin-seasonal-cal-day.is-endpoint {
+  background: var(--stone-800);
+  color: var(--stone-50);
+}
+.admin-seasonal-edit-panel {
+  width: min(100%, 720px);
+  padding: var(--space-24);
+}
+.admin-seasonal-edit-form__grid {
+  margin-top: var(--space-16);
+}
+.admin-seasonal-preview-banner {
+  display: flex;
+  align-items: center;
+  gap: var(--space-12);
+  padding: var(--space-12) var(--space-24);
+  background: color-mix(in srgb, var(--gold-500) 18%, var(--stone-50));
+  border-bottom: 1px solid color-mix(in srgb, var(--gold-500) 35%, var(--stone-200));
+  color: var(--stone-800);
+  font-size: 0.74rem;
+  letter-spacing: 0.06em;
+}
+.admin-seasonal-preview-banner strong {
+  color: var(--gold-500);
+  font-family: var(--font-family-body-en);
+  font-size: 0.62rem;
+  letter-spacing: 0.18em;
+}
 @media (max-width: 980px) {
   .admin-room-rate-layout {
     grid-template-columns: 1fr;
@@ -14403,6 +14758,22 @@ main.content-section.confirm-page.admin-page {
   .admin-room-rate-card {
     grid-template-columns: 1fr;
     gap: var(--space-16);
+  }
+  .admin-seasonal-rate-row {
+    grid-template-columns: 1fr;
+    gap: var(--space-12);
+  }
+  .admin-seasonal-rate-row--head {
+    display: none;
+  }
+  .admin-seasonal-rate-form__grid {
+    grid-template-columns: 1fr;
+  }
+  .admin-seasonal-cal-dual {
+    grid-template-columns: 1fr;
+  }
+  .admin-room-rate-active-grid {
+    grid-template-columns: 1fr;
   }
   .admin-room-status-card {
     grid-template-columns: 1fr;

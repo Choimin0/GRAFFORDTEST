@@ -1005,6 +1005,8 @@
             );
             var enEl = document.getElementById("f-total-amount-en");
             if (enEl) enEl.value = String(quote.discountedGrandTotal);
+            renderPricingSummary(document.querySelector(".lang-kr"), "kr");
+            renderPricingSummary(document.querySelector(".lang-en"), "en");
           }
 
           // ── 1) 캐시된 요율로 1차 계산 ──────────────────────────
@@ -1027,6 +1029,15 @@
                 typeof P.setRoomWeekendBase === "function"
               ) {
                 P.setRoomWeekendBase(savedWeekendRateMap);
+              }
+              var savedSeasonalRates = null;
+              try {
+                savedSeasonalRates = JSON.parse(
+                  sessionStorage.getItem("graffordSeasonalRateList") || "null",
+                );
+              } catch (_ss) {}
+              if (typeof P.setSeasonalRates === "function") {
+                P.setSeasonalRates(savedSeasonalRates || []);
               }
               var savedChargesMap = JSON.parse(
                 sessionStorage.getItem("graffordChargesMap") || "null",
@@ -1056,6 +1067,9 @@
                 ) {
                   P.setRoomWeekendBase(rateData.weekendBaseRates);
                 }
+                if (typeof P.setSeasonalRates === "function") {
+                  P.setSeasonalRates(rateData.seasonalRates || []);
+                }
                 var runtimeCharges =
                   rateData.charges ||
                   extractChargesFromRatesMap(rateData.rates);
@@ -1083,6 +1097,12 @@
                     sessionStorage.setItem(
                       "graffordWeekendRateMap",
                       JSON.stringify(rateData.weekendBaseRates),
+                    );
+                  }
+                  if (rateData.seasonalRates) {
+                    sessionStorage.setItem(
+                      "graffordSeasonalRateList",
+                      JSON.stringify(rateData.seasonalRates),
                     );
                   }
                   sessionStorage.setItem(
@@ -1294,6 +1314,40 @@
               return isEn ? guests + "P" : guests + "인";
             }
 
+            function formatRoomRateLabel(kind, perNight, nights) {
+              var kindLabel =
+                kind === "weekend"
+                  ? isEn
+                    ? "Weekend"
+                    : "주말"
+                  : isEn
+                    ? "Weekday"
+                    : "평일";
+              var rateText = formatMoneyByLanguage(perNight, language);
+              if (isEn) {
+                return (
+                  roomRaw +
+                  " · " +
+                  kindLabel +
+                  " " +
+                  rateText +
+                  " × " +
+                  nights +
+                  (nights === 1 ? " night" : " nights")
+                );
+              }
+              return (
+                roomRaw +
+                " · " +
+                kindLabel +
+                " " +
+                rateText +
+                " × " +
+                nights +
+                "박"
+              );
+            }
+
             function appendSection(title, modifier) {
               var section = document.createElement("section");
               section.className = "confirm-price-section";
@@ -1344,16 +1398,26 @@
                 if (quote.weekdayNights > 0) {
                   appendPriceRow(
                     roomSection,
-                    roomRaw + (isEn ? " · Weekday" : " · 평일"),
-                    formatNightBadge(quote.weekdayNights),
+                    formatRoomRateLabel(
+                      "weekday",
+                      quote.weekdayRatePerNight != null
+                        ? quote.weekdayRatePerNight
+                        : quote.baseNightly,
+                      quote.weekdayNights,
+                    ),
+                    "",
                     formatMoneyByLanguage(quote.weekdaySubtotal, language),
                   );
                 }
                 if (quote.weekendNights > 0) {
                   appendPriceRow(
                     roomSection,
-                    roomRaw + (isEn ? " · Weekend" : " · 주말"),
-                    formatNightBadge(quote.weekendNights),
+                    formatRoomRateLabel(
+                      "weekend",
+                      quote.weekendRatePerNight,
+                      quote.weekendNights,
+                    ),
+                    "",
                     formatMoneyByLanguage(quote.weekendSubtotal, language),
                   );
                 }

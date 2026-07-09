@@ -893,6 +893,9 @@
               ) {
                 P.setRoomWeekendBase(rateData.weekendBaseRates);
               }
+              if (typeof P.setSeasonalRates === "function") {
+                P.setSeasonalRates(rateData.seasonalRates || []);
+              }
               var ch = rateData.charges || rateData;
               if (ch && typeof P.setCharges === "function") {
                 var enabled = rateData.chargeEnabled || null;
@@ -989,7 +992,11 @@
               row(
                 room +
                   " (평일) " +
-                  formatKrw(q.baseNightly) +
+                  formatKrw(
+                    q.weekdayRatePerNight != null
+                      ? q.weekdayRatePerNight
+                      : q.baseNightly,
+                  ) +
                   " × " +
                   q.weekdayNights +
                   "박",
@@ -2381,6 +2388,9 @@
               ) {
                 P.setRoomWeekendBase(rateData.weekendBaseRates);
               }
+              if (typeof P.setSeasonalRates === "function") {
+                P.setSeasonalRates(rateData.seasonalRates || []);
+              }
               var ch = rateData.charges || rateData;
               if (ch && typeof P.setCharges === "function") {
                 var enabled = rateData.chargeEnabled || null;
@@ -2495,7 +2505,11 @@
               row(
                 room +
                   " (weeknight) " +
-                  formatKrwEn(q.baseNightly) +
+                  formatKrwEn(
+                    q.weekdayRatePerNight != null
+                      ? q.weekdayRatePerNight
+                      : q.baseNightly,
+                  ) +
                   " × " +
                   q.weekdayNights +
                   " night" +

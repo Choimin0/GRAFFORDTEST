@@ -4,16 +4,16 @@
  */
 (function (root) {
   var ROOM_WEEKDAY_BASE = {
-    G1: 250000,
-    G2: 250000,
-    G3: 300000,
-    G4: 350000,
+    G1: 280000,
+    G2: 280000,
+    G3: 320000,
+    G4: 410000,
   };
   var ROOM_WEEKEND_BASE = {
-    G1: 270000,
-    G2: 270000,
+    G1: 280000,
+    G2: 280000,
     G3: 320000,
-    G4: 370000,
+    G4: 410000,
   };
   var EXTRA_PER_PERSON_PER_NIGHT = 30000;
   var WEEKEND_SURCHARGE_PER_NIGHT = 20000;   // 기본값 (DB에서 덮어씀)
@@ -24,6 +24,8 @@
   var PROMOTION_PERIOD_START = "";
   var PROMOTION_PERIOD_END = "";
   var PROMOTION_LEGACY_IN_PERIOD = true;
+  /** 기간별 요금 옵션 (겹치면 createdAt 최신 우선) */
+  var SEASONAL_RATES = [];
   /** 객실별 기준 인원 */
   var BASE_GUESTS = { G1: 2, G2: 2, G3: 2, G4: 4 };
   /** 추가 투숙 가능 인원 (기준 인원 외) */
@@ -117,6 +119,92 @@
     }
   }
 
+  function setSeasonalRates(nextList) {
+    if (!Array.isArray(nextList)) {
+      SEASONAL_RATES = [];
+      return;
+    }
+    SEASONAL_RATES = nextList
+      .map(function (row) {
+        return {
+          id: Number(row.id || 0),
+          roomName: String(row.roomName || row.room_name || "")
+            .trim()
+            .toUpperCase(),
+          startDate: normalizePromotionYmd(row.startDate || row.start_date),
+          endDate: normalizePromotionYmd(row.endDate || row.end_date),
+          weekdayBaseRate: Math.floor(Number(row.weekdayBaseRate || row.weekday_base_rate || 0)),
+          weekendBaseRate: Math.floor(Number(row.weekendBaseRate || row.weekend_base_rate || 0)),
+          createdAt: String(row.createdAt || row.created_at || ""),
+          updatedAt: String(row.updatedAt || row.updated_at || ""),
+        };
+      })
+      .filter(function (row) {
+        return (
+          /^G[1-4]$/.test(row.roomName) &&
+          row.startDate &&
+          row.endDate &&
+          row.weekdayBaseRate >= 0 &&
+          row.weekendBaseRate >= 0
+        );
+      });
+  }
+
+  function findSeasonalRateForNight(room, d) {
+    var ymd = ymdFromDate(d);
+    var matches = SEASONAL_RATES.filter(function (row) {
+      return (
+        row.roomName === room &&
+        row.startDate <= ymd &&
+        ymd <= row.endDate
+      );
+    });
+    if (!matches.length) {
+      return null;
+    }
+    matches.sort(function (a, b) {
+      var ua = String(a.updatedAt || a.createdAt || "");
+      var ub = String(b.updatedAt || b.createdAt || "");
+      if (ua !== ub) {
+        return ub.localeCompare(ua);
+      }
+      return Number(b.id || 0) - Number(a.id || 0);
+    });
+    return matches[0];
+  }
+
+  function getEffectiveRatesForNight(room, d) {
+    room = String(room || "G1").toUpperCase();
+    var seasonal = findSeasonalRateForNight(room, d);
+    if (seasonal) {
+      var weekday = seasonal.weekdayBaseRate;
+      var weekend = seasonal.weekendBaseRate;
+      if (WEEKEND_SURCHARGE_ENABLED) {
+        weekend = weekday + WEEKEND_SURCHARGE_PER_NIGHT;
+      }
+      return {
+        weekday: weekday,
+        weekend: weekend,
+        source: "seasonal",
+      };
+    }
+    var weekday = ROOM_WEEKDAY_BASE.hasOwnProperty(room)
+      ? ROOM_WEEKDAY_BASE[room]
+      : ROOM_WEEKDAY_BASE.G1;
+    return {
+      weekday: weekday,
+      weekend: getWeekendRatePerNight(room),
+      source: "base",
+    };
+  }
+
+  function getEffectiveRatesForDate(room, ymd) {
+    var d = parseYMD(ymd);
+    if (!d) {
+      return null;
+    }
+    return getEffectiveRatesForNight(room, d);
+  }
   function parseYMD(str) {
     if (!str || !/^\d{4}-\d{2}-\d{2}$/.test(str)) {
       return null;
@@ -243,11 +331,11 @@
     var baseNightly = ROOM_WEEKDAY_BASE.hasOwnProperty(room)
       ? ROOM_WEEKDAY_BASE[room]
       : ROOM_WEEKDAY_BASE.G1;
-    if (WEEKEND_SURCHARGE_ENABLED) {
-      return baseNightly + WEEKEND_SURCHARGE_PER_NIGHT;
-    }
     if (ROOM_WEEKEND_BASE.hasOwnProperty(room)) {
       return ROOM_WEEKEND_BASE[room];
+    }
+    if (WEEKEND_SURCHARGE_ENABLED) {
+      return baseNightly + WEEKEND_SURCHARGE_PER_NIGHT;
     }
     return baseNightly;
   }
@@ -284,24 +372,36 @@
     var baseNightly = ROOM_WEEKDAY_BASE[room];
     var weekdayNights = 0;
     var weekendNights = 0;
+    var weekdaySubtotal = 0;
+    var weekendSubtotal = 0;
+    var weekendSurcharge = 0;
+    var promotionBase = 0;
     nightsArr.forEach(function (d) {
+      var effective = getEffectiveRatesForNight(room, d);
       if (isWeekendNight(d)) {
         weekendNights += 1;
+        weekendSubtotal += effective.weekend;
+        weekendSurcharge += effective.weekend - effective.weekday;
       } else {
         weekdayNights += 1;
+        weekdaySubtotal += effective.weekday;
+        promotionBase += effective.weekday;
       }
     });
-    var weekendRatePerNight = getWeekendRatePerNight(room);
-    var weekdaySubtotal = weekdayNights * baseNightly;
-    var weekendSubtotal = weekendNights * weekendRatePerNight;
     var baseTotal = weekdaySubtotal + weekendSubtotal;
-    var weekendSurcharge = weekendNights * (weekendRatePerNight - baseNightly);
+    var weekendRatePerNight =
+      weekendNights > 0
+        ? Math.floor(weekendSubtotal / weekendNights)
+        : getWeekendRatePerNight(room);
+    var weekdayRatePerNight =
+      weekdayNights > 0
+        ? Math.floor(weekdaySubtotal / weekdayNights)
+        : baseNightly;
     var extraGuestTotal = extraGuests * EXTRA_PER_PERSON_PER_NIGHT * nights;
     var grandTotal = baseTotal + extraGuestTotal;
     var consecutiveSale =
       nights >= 2 ? (nights - 1) * CONSECUTIVE_SALE_PER_NIGHT : 0;
-    // 프로모션: 평일 박요금 합(=전체 박 × 평일 단가) 기준 % — 투숙일이 프로모션 기간과 겹칠 때만
-    var promotionBase = nights * baseNightly;
+    // 프로모션: 평일 박요금 합 기준 % — 투숙일이 프로모션 기간과 겹칠 때만
     var effectivePromoPercent = isPromotionActiveForStay(checkInStr, checkOutStr)
       ? PROMOTION_PERCENT
       : 0;
@@ -321,6 +421,7 @@
       weekdaySubtotal: weekdaySubtotal,
       weekendSubtotal: weekendSubtotal,
       weekendRatePerNight: weekendRatePerNight,
+      weekdayRatePerNight: weekdayRatePerNight,
       weekendSurcharge: weekendSurcharge,
       extraGuestTotal: extraGuestTotal,
       grandTotal: grandTotal,
@@ -356,6 +457,9 @@
     isPromotionActiveForStay: isPromotionActiveForStay,
     setRoomWeekdayBase: setRoomWeekdayBase,
     setRoomWeekendBase: setRoomWeekendBase,
+    setSeasonalRates: setSeasonalRates,
+    getEffectiveRatesForDate: getEffectiveRatesForDate,
+    getEffectiveRatesForNight: getEffectiveRatesForNight,
     setCharges: setCharges,
   };
 })(typeof window !== "undefined" ? window : this);

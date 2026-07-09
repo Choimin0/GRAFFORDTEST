@@ -1305,10 +1305,121 @@
                 <p>
                   평일 요금은 항상 직접 수정할 수 있습니다. 주말 추가요금이
                   ON이면 주말 요금이 자동 계산되고, OFF이면 주말 요금을 직접
-                  입력해 저장할 수 있습니다.
+                  입력해 저장할 수 있습니다. 기간별 요금이 설정된 날짜에는 해당
+                  옵션이 기본 요금보다 우선 적용됩니다.
                 </p>
               </div>
+              <div
+                id="admin-room-rate-active-criteria"
+                class="admin-room-rate-active-criteria"
+              ></div>
               <div id="admin-room-rate-body" class="admin-room-rate-list"></div>
+              <section
+                class="admin-seasonal-rate-section"
+                aria-labelledby="admin-seasonal-rate-title"
+              >
+                <div class="admin-room-rate-head admin-seasonal-rate-head">
+                  <p class="admin-dashboard-eyebrow">SEASONAL RATE</p>
+                  <h2 id="admin-seasonal-rate-title">기간별 요금 옵션</h2>
+                  <p>
+                    객실별로 특정 기간에 적용할 평일·주말 요금을 등록합니다.
+                    동일 객실에 기간이 겹치는 옵션이 있으면 가장 최근에 등록된
+                    옵션이 우선 적용됩니다.
+                  </p>
+                </div>
+                <div id="admin-seasonal-rate-list" class="admin-seasonal-rate-list"></div>
+                <div class="admin-seasonal-rate-add-area">
+                  <button
+                    type="button"
+                    class="admin-seasonal-rate-add-btn"
+                    id="admin-seasonal-rate-add-btn"
+                    aria-label="기간별 요금 옵션 추가"
+                    aria-expanded="false"
+                    aria-controls="admin-seasonal-rate-form"
+                  >
+                    <span>+</span>
+                    <strong>기간별 요금 옵션 추가</strong>
+                    <small>객실, 기간, 요금을 입력한 뒤 저장하세요.</small>
+                  </button>
+                  <div id="admin-seasonal-rate-form" class="admin-seasonal-rate-form" hidden>
+                  <div class="admin-seasonal-rate-form__grid">
+                    <label class="admin-seasonal-rate-form__field">
+                      <span>객실</span>
+                      <select id="admin-seasonal-room-select">
+                        <option value="G1">G1</option>
+                        <option value="G2">G2</option>
+                        <option value="G3">G3</option>
+                        <option value="G4">G4</option>
+                      </select>
+                    </label>
+                    <label class="admin-seasonal-rate-form__field admin-seasonal-rate-form__field--period">
+                      <span>적용 기간</span>
+                      <input
+                        id="admin-seasonal-period-input"
+                        type="text"
+                        readonly
+                        placeholder="시작일 · 종료일 선택"
+                      />
+                      <div
+                        id="admin-seasonal-cal-popup"
+                        class="admin-seasonal-cal-popup"
+                        hidden
+                      >
+                        <div
+                          id="admin-seasonal-cal-wrap"
+                          class="admin-seasonal-cal-dual"
+                        ></div>
+                      </div>
+                    </label>
+                    <label class="admin-seasonal-rate-form__field">
+                      <span>평일 요금</span>
+                      <input
+                        id="admin-seasonal-weekday-input"
+                        type="text"
+                        inputmode="numeric"
+                        placeholder="0"
+                        data-currency="krw"
+                      />
+                    </label>
+                    <label class="admin-seasonal-rate-form__field" id="admin-seasonal-weekend-field">
+                      <span>주말 요금</span>
+                      <input
+                        id="admin-seasonal-weekend-input"
+                        type="text"
+                        inputmode="numeric"
+                        placeholder="0"
+                        data-currency="krw"
+                      />
+                    </label>
+                    <div
+                      class="admin-seasonal-rate-form__field is-readonly"
+                      id="admin-seasonal-weekend-auto"
+                      hidden
+                    >
+                      <span>주말 요금 (자동)</span>
+                      <strong id="admin-seasonal-weekend-auto-value">0원</strong>
+                    </div>
+                  </div>
+                  <div class="admin-seasonal-rate-form__actions">
+                    <button
+                      type="button"
+                      class="btn reserve-btn admin-request-cancel-btn"
+                      id="admin-seasonal-cancel-btn"
+                    >
+                      취소
+                    </button>
+                    <button
+                      type="button"
+                      class="btn reserve-btn confirm-pay-submit reserveinfo-submit-btn admin-save-btn is-disabled"
+                      id="admin-seasonal-save-btn"
+                      disabled
+                    >
+                      저장
+                    </button>
+                  </div>
+                </div>
+                </div>
+              </section>
             </section>
             <aside
               class="admin-room-policy-list"
@@ -1456,6 +1567,97 @@
       </div>
 
       <div
+        id="admin-seasonal-edit-modal"
+        class="admin-request-modal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="admin-seasonal-edit-title"
+        hidden
+      >
+        <div class="admin-request-modal__panel admin-seasonal-edit-panel">
+          <div class="admin-request-modal__head">
+            <p class="admin-dashboard-eyebrow">SEASONAL RATE</p>
+            <h2 id="admin-seasonal-edit-title">기간별 요금 옵션 수정</h2>
+          </div>
+          <div class="admin-seasonal-rate-form__grid admin-seasonal-edit-form__grid">
+            <label class="admin-seasonal-rate-form__field">
+              <span>객실</span>
+              <select id="admin-seasonal-edit-room-select">
+                <option value="G1">G1</option>
+                <option value="G2">G2</option>
+                <option value="G3">G3</option>
+                <option value="G4">G4</option>
+              </select>
+            </label>
+            <label class="admin-seasonal-rate-form__field admin-seasonal-rate-form__field--period">
+              <span>적용 기간</span>
+              <input
+                id="admin-seasonal-edit-period-input"
+                type="text"
+                readonly
+                placeholder="시작일 · 종료일 선택"
+              />
+              <div
+                id="admin-seasonal-edit-cal-popup"
+                class="admin-seasonal-cal-popup"
+                hidden
+              >
+                <div
+                  id="admin-seasonal-edit-cal-wrap"
+                  class="admin-seasonal-cal-dual"
+                ></div>
+              </div>
+            </label>
+            <label class="admin-seasonal-rate-form__field">
+              <span>평일 요금</span>
+              <input
+                id="admin-seasonal-edit-weekday-input"
+                type="text"
+                inputmode="numeric"
+                placeholder="0"
+                data-currency="krw"
+              />
+            </label>
+            <label class="admin-seasonal-rate-form__field" id="admin-seasonal-edit-weekend-field">
+              <span>주말 요금</span>
+              <input
+                id="admin-seasonal-edit-weekend-input"
+                type="text"
+                inputmode="numeric"
+                placeholder="0"
+                data-currency="krw"
+              />
+            </label>
+            <div
+              class="admin-seasonal-rate-form__field is-readonly"
+              id="admin-seasonal-edit-weekend-auto"
+              hidden
+            >
+              <span>주말 요금 (자동)</span>
+              <strong id="admin-seasonal-edit-weekend-auto-value">0원</strong>
+            </div>
+          </div>
+          <div class="admin-request-modal__actions">
+            <button
+              type="button"
+              class="btn reserve-btn admin-request-cancel-btn"
+              id="admin-seasonal-edit-cancel-btn"
+            >
+              취소
+            </button>
+            <button
+              type="button"
+              class="btn reserve-btn confirm-pay-submit reserveinfo-submit-btn admin-save-btn is-disabled"
+              id="admin-seasonal-edit-save-btn"
+              disabled
+            >
+              저장
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div
         id="admin-week-res-modal"
         class="admin-request-modal"
         role="dialog"
@@ -1578,6 +1780,7 @@
       });
     </script>
     <script src="js/booking-pricing.js"></script>
+    <script src="js/admin-seasonal-rate.js"></script>
     <script>
       var ADMIN_LEFT_KEY = "graffordAdminPageLeft";
 
@@ -4163,6 +4366,9 @@
                   ),
                 });
               }
+              if (typeof P.setSeasonalRates === "function") {
+                P.setSeasonalRates(data.seasonalRates || []);
+              }
               return true;
             })
             .catch(function () {
@@ -6595,14 +6801,17 @@
         }
 
         function getRoomWeekendRateFromRow(row, weekdayRate, weekendCharge) {
+          if (
+            row &&
+            row.weekendBaseRate != null &&
+            Number.isFinite(Number(row.weekendBaseRate))
+          ) {
+            return Number(row.weekendBaseRate);
+          }
           if (isWeekendSurchargeEnabled()) {
             return weekdayRate + weekendCharge;
           }
-          return Number(
-            row && row.weekendBaseRate != null
-              ? row.weekendBaseRate
-              : weekdayRate + weekendCharge,
-          );
+          return weekdayRate + weekendCharge;
         }
 
         function collectRoomRatePayload(roomName, rootEl) {
@@ -6630,8 +6839,23 @@
             weekdayBaseRate: weekdayRate,
           };
           if (isWeekendSurchargeEnabled()) {
-            payload.weekendBaseRate =
-              weekdayRate + getWeekendChargeAmount();
+            var weekendDisplay = rootEl
+              ? rootEl.querySelector(
+                  "[data-weekend-display-for='" + roomName + "']",
+                )
+              : null;
+            if (weekendDisplay) {
+              var displayedWeekend = parseRateInputValue(weekendDisplay);
+              if (Number.isFinite(displayedWeekend) && displayedWeekend >= 0) {
+                payload.weekendBaseRate = displayedWeekend;
+              } else {
+                payload.weekendBaseRate =
+                  weekdayRate + getWeekendChargeAmount();
+              }
+            } else {
+              payload.weekendBaseRate =
+                weekdayRate + getWeekendChargeAmount();
+            }
           } else if (weekendInput) {
             var weekendRate = parseRateInputValue(weekendInput);
             if (!Number.isFinite(weekendRate) || weekendRate < 0) {
@@ -6780,6 +7004,13 @@
         }
 
         function closePolicyConfirm() {
+          if (
+            window.GraffordAdminSeasonalRate &&
+            typeof window.GraffordAdminSeasonalRate.clearDeletePending ===
+              "function"
+          ) {
+            window.GraffordAdminSeasonalRate.clearDeletePending();
+          }
           pendingPolicyToggle = null;
           pendingRateSave = null;
           pendingRateBatchSave = null;
@@ -6793,6 +7024,26 @@
         }
 
         function savePolicyToggle() {
+          if (
+            window.GraffordAdminSeasonalRate &&
+            typeof window.GraffordAdminSeasonalRate.isDeletePending ===
+              "function" &&
+            window.GraffordAdminSeasonalRate.isDeletePending()
+          ) {
+            if (policyConfirmSaveBtn) {
+              policyConfirmSaveBtn.disabled = true;
+            }
+            window.GraffordAdminSeasonalRate.handlePolicyConfirmSave()
+              .then(function () {
+                closePolicyConfirm();
+              })
+              .finally(function () {
+                if (policyConfirmSaveBtn) {
+                  policyConfirmSaveBtn.disabled = false;
+                }
+              });
+            return;
+          }
           if (
             !pendingPolicyToggle &&
             !pendingRateSave &&
@@ -6904,6 +7155,13 @@
             });
             attachRateSaveBtns(roomRateBody);
             attachRoomRateBatchSaveBtn();
+            if (
+              window.GraffordAdminSeasonalRate &&
+              typeof window.GraffordAdminSeasonalRate.refreshActiveCriteria ===
+                "function"
+            ) {
+              window.GraffordAdminSeasonalRate.refreshActiveCriteria();
+            }
           }
 
           if (!roomChargeBody) return;
@@ -7070,6 +7328,15 @@
               }
               splitRateRows(result.data.rows || []);
               renderRoomRateTable();
+              if (
+                window.GraffordAdminSeasonalRate &&
+                typeof window.GraffordAdminSeasonalRate.setSeasonalRates ===
+                  "function"
+              ) {
+                window.GraffordAdminSeasonalRate.setSeasonalRates(
+                  result.data.seasonalRates || [],
+                );
+              }
               showMessage("");
             });
         }
@@ -8112,7 +8379,40 @@
           }
         });
 
-        if (consumeAdminLeftFlag()) {
+        if (
+          window.GraffordAdminSeasonalRate &&
+          typeof window.GraffordAdminSeasonalRate.init === "function"
+        ) {
+          window.GraffordAdminSeasonalRate.init({
+            adminPost: adminPost,
+            getAuthPayload: getAuthPayload,
+            formatKRW: formatKRW,
+            escapeHtml: escapeHtml,
+            getTodayYmdKst: getTodayYmdKst,
+            showMessage: showMessage,
+            getChargeRow: getChargeRow,
+            isWeekendSurchargeEnabled: isWeekendSurchargeEnabled,
+            getWeekendChargeAmount: getWeekendChargeAmount,
+            getRoomWeekendRateFromRow: getRoomWeekendRateFromRow,
+            roomRateRows: function () {
+              return roomRateRows;
+            },
+            policyConfirmModal: policyConfirmModal,
+            setPolicyConfirmTitle: setPolicyConfirmTitle,
+            setPolicyConfirmSaveLabel: setPolicyConfirmSaveLabel,
+            closePolicyConfirm: closePolicyConfirm,
+          });
+        }
+
+        if (
+          window.GraffordAdminSeasonalRate &&
+          window.GraffordAdminSeasonalRate.isPreviewMode
+        ) {
+          setLoggedInView();
+          roomManageSection.hidden = false;
+          setActiveCategory("room-manage");
+          setActiveRoomManageTab("rate");
+        } else if (consumeAdminLeftFlag()) {
           forceAdminLogout("페이지를 벗어났습니다. 다시 로그인해 주세요.");
         } else {
           setLoggedOutView();
