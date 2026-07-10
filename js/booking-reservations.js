@@ -5,16 +5,28 @@
   var STORAGE_KEY = "grafford_reservations_v1";
   var MAX_RECORDS = 200;
 
-  function pad2(n) {
-    return n < 10 ? "0" + n : String(n);
+  function getTodayYmdKstCompact() {
+    var parts = new Intl.DateTimeFormat("en-CA", {
+      timeZone: "Asia/Seoul",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    }).formatToParts(new Date());
+    var map = {};
+    parts.forEach(function (p) {
+      if (p.type !== "literal") {
+        map[p.type] = p.value;
+      }
+    });
+    return (
+      String(map.year || "") +
+      String(map.month || "01") +
+      String(map.day || "01")
+    );
   }
 
   function generateOrderNumber() {
-    var d = new Date();
-    var ymd =
-      d.getFullYear() +
-      pad2(d.getMonth() + 1) +
-      pad2(d.getDate());
+    var ymd = getTodayYmdKstCompact();
     var rnd = Math.random().toString(36).substring(2, 8).toUpperCase();
     return ymd + "-" + rnd;
   }

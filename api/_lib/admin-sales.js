@@ -1,5 +1,6 @@
 import { json } from "./admin-common.js";
 import { purgeExpiredBookings } from "./booking-retention.js";
+import { getTodayYmdKst } from "./promotion-period.js";
 
 const BOOKING_TABLE = "booking";
 
@@ -45,16 +46,28 @@ function resolvePlatformLabel(platformId) {
   return PLATFORM_LABELS[platformId] || PLATFORM_LABELS.other;
 }
 
+function dateToYmd(value) {
+  if (value == null || value === "") {
+    return "";
+  }
+  if (typeof value === "string") {
+    return value.slice(0, 10);
+  }
+  if (value instanceof Date && !isNaN(value.getTime())) {
+    var y = value.getUTCFullYear();
+    var m = String(value.getUTCMonth() + 1).padStart(2, "0");
+    var d = String(value.getUTCDate()).padStart(2, "0");
+    return y + "-" + m + "-" + d;
+  }
+  return String(value).slice(0, 10);
+}
+
 function normalizeMonthKey(value) {
   var raw = String(value || "").trim();
   var match = raw.match(/^(\d{4})-(\d{1,2})$/);
   if (!match) {
-    var now = new Date();
-    return (
-      now.getUTCFullYear() +
-      "-" +
-      String(now.getUTCMonth() + 1).padStart(2, "0")
-    );
+    var todayKst = getTodayYmdKst();
+    return todayKst.slice(0, 7);
   }
   var month = Math.min(12, Math.max(1, Number(match[2]) || 1));
   return match[1] + "-" + String(month).padStart(2, "0");
@@ -82,8 +95,8 @@ async function getMonthlySalesData(pool, month) {
       COALESCE(SUM(total_amount), 0)::bigint AS cancel_revenue
     FROM ${BOOKING_TABLE}
     WHERE status = 'cancelled'
-      AND COALESCE(cancelled_at, created_at) >= $1::date
-      AND COALESCE(cancelled_at, created_at) < ($1::date + INTERVAL '1 month')
+      AND (COALESCE(cancelled_at, created_at) AT TIME ZONE 'Asia/Seoul')::date >= $1::date
+      AND (COALESCE(cancelled_at, created_at) AT TIME ZONE 'Asia/Seoul')::date < ($1::date + INTERVAL '1 month')::date
   `;
 
   const occupancyQuery = `
@@ -245,10 +258,7 @@ async function getMonthlySalesData(pool, month) {
 
   var occupancyByDay = (occupancyResult.rows || []).map(function (row) {
     return {
-      date:
-        row.day instanceof Date
-          ? row.day.toISOString().slice(0, 10)
-          : String(row.day || "").slice(0, 10),
+      date: dateToYmd(row.day),
       count: Number(row.occupied_rooms) || 0,
     };
   });
@@ -261,10 +271,7 @@ async function getMonthlySalesData(pool, month) {
   var dailyRevenue = (dailyRevenueResult.rows || []).map(function (row) {
     return {
       label: String(row.week_no || "") + "주",
-      date:
-        row.week_start instanceof Date
-          ? row.week_start.toISOString().slice(0, 10)
-          : String(row.week_start || "").slice(0, 10),
+      date: dateToYmd(row.week_start),
       revenue: Number(row.revenue) || 0,
     };
   });
@@ -293,7 +300,7 @@ async function getMonthlySalesData(pool, month) {
 async function getAnnualSalesData(pool, year) {
   var selectedYear = parseInt(year, 10);
   if (!Number.isFinite(selectedYear) || selectedYear < 1900 || selectedYear > 9999) {
-    selectedYear = new Date().getUTCFullYear();
+    selectedYear = Number(getTodayYmdKst().slice(0, 4));
   }
   const monthlyQuery = `
     WITH year_bounds AS (
@@ -317,13 +324,13 @@ async function getAnnualSalesData(pool, year) {
     ),
     cancelled AS (
       SELECT
-        EXTRACT(MONTH FROM COALESCE(cancelled_at, created_at))::int AS month,
+        EXTRACT(MONTH FROM (COALESCE(cancelled_at, created_at) AT TIME ZONE 'Asia/Seoul'))::int AS month,
         COUNT(*)::int AS cancel_count,
         COALESCE(SUM(total_amount), 0)::bigint AS cancel_revenue
       FROM ${BOOKING_TABLE}, year_bounds
       WHERE status = 'cancelled'
-        AND COALESCE(cancelled_at, created_at) >= year_start
-        AND COALESCE(cancelled_at, created_at) < next_year_start
+        AND (COALESCE(cancelled_at, created_at) AT TIME ZONE 'Asia/Seoul')::date >= year_start
+        AND (COALESCE(cancelled_at, created_at) AT TIME ZONE 'Asia/Seoul')::date < next_year_start
       GROUP BY month
     )
     SELECT

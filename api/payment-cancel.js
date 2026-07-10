@@ -166,7 +166,19 @@ function normalizeCheckInYmd(v) {
   }
   var d = new Date(v);
   if (isNaN(d.getTime())) return null;
-  return d.toISOString().slice(0, 10);
+  // DATE 컬럼이 Date로 오면 UTC 자정 → getUTC*로 달력일 보존
+  if (
+    d.getUTCHours() === 0 &&
+    d.getUTCMinutes() === 0 &&
+    d.getUTCSeconds() === 0 &&
+    d.getUTCMilliseconds() === 0
+  ) {
+    var y = d.getUTCFullYear();
+    var mo = String(d.getUTCMonth() + 1).padStart(2, "0");
+    var da = String(d.getUTCDate()).padStart(2, "0");
+    return y + "-" + mo + "-" + da;
+  }
+  return formatYmdKst(d);
 }
 
 function remainDaysUntilCheckInKst(checkInYmd) {

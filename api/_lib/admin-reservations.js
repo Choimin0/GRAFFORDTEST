@@ -12,6 +12,7 @@ import {
   handleCreateManualBooking,
   filterShadowedExternalCalendarRows,
 } from "./admin-manual-booking.js";
+import { getTodayYmdKst } from "./promotion-period.js";
 
 const BOOKING_TABLE = "booking";
 const MAX_GUEST_NAME = 100;
@@ -62,11 +63,15 @@ function formatDateTimeKst(v) {
 }
 
 async function archivePastReservations(pool) {
+  // 체크아웃일이 KST 기준 오늘 이전이면 'completed'로 전환
+  // (체크아웃일 = 오늘 또는 이후 → confirm 유지)
+  var todayKst = getTodayYmdKst();
   await pool.query(
     `UPDATE ${BOOKING_TABLE}
      SET status = 'completed'
      WHERE status = 'confirm'
-       AND check_out_date < CURRENT_DATE`,
+       AND check_out_date < $1::date`,
+    [todayKst],
   );
 }
 

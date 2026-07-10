@@ -3,6 +3,8 @@
  * cron 없이 관련 API 호출 시 만료 건을 확인·삭제합니다.
  * 기준: booking.created_at (예약 생성일)
  */
+import { getTodayYmdKst } from "./promotion-period.js";
+
 const BOOKING_TABLE = "booking";
 const BOOKING_HOLD_TABLE = "booking_hold";
 
@@ -30,8 +32,12 @@ export function isBookingRetentionExpired(createdAt) {
   if (isNaN(created.getTime())) {
     return false;
   }
-  var cutoff = new Date();
-  cutoff.setUTCFullYear(cutoff.getUTCFullYear() - RETENTION_YEARS);
+  // KST 기준 "오늘"에서 RETENTION_YEARS년 전 자정과 비교
+  var todayYmd = getTodayYmdKst();
+  var y = Number(todayYmd.slice(0, 4)) - RETENTION_YEARS;
+  var cutoff = new Date(
+    Date.UTC(y, Number(todayYmd.slice(5, 7)) - 1, Number(todayYmd.slice(8, 10))),
+  );
   return created.getTime() < cutoff.getTime();
 }
 

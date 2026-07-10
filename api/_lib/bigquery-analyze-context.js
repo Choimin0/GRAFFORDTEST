@@ -54,7 +54,7 @@ async function runQuery(client, sql) {
   return rows || [];
 }
 
-/** ko-KR DateTimeFormat 문자열 → Date (실패 시 null) */
+/** ko-KR DateTimeFormat 문자열(KST) → Date (실패 시 null) */
 export function parseKstDateTime(value) {
   var text = String(value || "").trim();
   if (!text) {
@@ -64,14 +64,16 @@ export function parseKstDateTime(value) {
     /^(\d{4})\.\s*(\d{1,2})\.\s*(\d{1,2})\.?\s*(\d{1,2}):(\d{2}):(\d{2})/,
   );
   if (m) {
-    return new Date(
+    // Asia/Seoul = UTC+9 (DST 없음)
+    var utcMs = Date.UTC(
       Number(m[1]),
       Number(m[2]) - 1,
       Number(m[3]),
-      Number(m[4]),
+      Number(m[4]) - 9,
       Number(m[5]),
       Number(m[6]),
     );
+    return new Date(utcMs);
   }
   var iso = new Date(text);
   return isNaN(iso.getTime()) ? null : iso;
@@ -129,7 +131,7 @@ export async function fetchAnalyzeContext() {
     "COUNT(*) AS reservation_count, SUM(SAFE_CAST(amount AS INT64)) AS total_revenue " +
     "FROM " +
     reserveTable +
-    " WHERE SAFE.PARSE_DATE('%Y-%m-%d', check_in) >= DATE_SUB(CURRENT_DATE(), INTERVAL 12 MONTH) " +
+    " WHERE SAFE.PARSE_DATE('%Y-%m-%d', check_in) >= DATE_SUB(CURRENT_DATE('Asia/Seoul'), INTERVAL 12 MONTH) " +
     "GROUP BY month ORDER BY month";
 
   var cancelSummarySql =

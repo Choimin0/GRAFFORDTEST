@@ -1,4 +1,5 @@
 import { expandOccupiedNights } from "./booking-hold.js";
+import { getTodayYmdKst } from "./promotion-period.js";
 
 const ALLOWED_ROOMS = new Set(["G1", "G2", "G3", "G4"]);
 const LEGACY_TO_ROOM = { A: "G1", B: "G2", C: "G3", D: "G4" };
@@ -441,11 +442,13 @@ export async function getExternalBookingCalendarRows(pool) {
     return [];
   }
   try {
+    var todayKst = getTodayYmdKst();
     var result = await pool.query(
       `SELECT room_type, external_uid, source, check_in_date, check_out_date, summary
        FROM ${EXTERNAL_BOOKING_TABLE}
-       WHERE check_out_date > CURRENT_DATE - INTERVAL '1 day'
+       WHERE check_out_date >= $1::date
        ORDER BY check_in_date ASC, room_type ASC`,
+      [todayKst],
     );
     return (result.rows || [])
       .map(function (row) {
@@ -507,13 +510,14 @@ export async function getExternalBookingOccupiedNights(pool, room) {
     return [];
   }
   try {
+    var todayKst = getTodayYmdKst();
     var result = await pool.query(
       `SELECT check_in_date, check_out_date, summary
        FROM ${EXTERNAL_BOOKING_TABLE}
        WHERE room_type = $1
-         AND check_out_date > CURRENT_DATE - INTERVAL '1 day'
+         AND check_out_date >= $2::date
        ORDER BY check_in_date`,
-      [room],
+      [room, todayKst],
     );
     return collectExternalOccupiedNights(result.rows);
   } catch (e) {
@@ -529,14 +533,15 @@ export async function getAirbnbBookingOccupiedNights(pool, room) {
     return [];
   }
   try {
+    var todayKst = getTodayYmdKst();
     var result = await pool.query(
       `SELECT check_in_date, check_out_date, summary
        FROM ${EXTERNAL_BOOKING_TABLE}
        WHERE room_type = $1
          AND source = 'airbnb'
-         AND check_out_date > CURRENT_DATE - INTERVAL '1 day'
+         AND check_out_date >= $2::date
        ORDER BY check_in_date`,
-      [room],
+      [room, todayKst],
     );
     return collectExternalOccupiedNights(result.rows);
   } catch (e) {

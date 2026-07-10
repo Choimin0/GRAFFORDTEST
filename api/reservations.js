@@ -265,17 +265,16 @@ async function hasRoomBlockOverlap(pool, roomName, checkIn, checkOut) {
   });
 }
 
-function todayYMDUtc() {
-  return new Date().toISOString().slice(0, 10);
-}
-
 async function archivePastReservations(pool) {
-  // 체크아웃일이 지난 'confirm' 예약을 'completed'로 상태 전환
+  // 체크아웃일이 KST 기준 오늘 이전이면 'completed'로 전환
+  // (체크아웃일 = 오늘 또는 이후 → confirm 유지)
+  var todayKst = getTodayYmdKst();
   await pool.query(
     `UPDATE ${BOOKING_TABLE}
      SET status = 'completed'
      WHERE status = 'confirm'
-       AND check_out_date < CURRENT_DATE`,
+       AND check_out_date < $1::date`,
+    [todayKst],
   );
 }
 

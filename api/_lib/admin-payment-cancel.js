@@ -41,6 +41,15 @@ function normalizeReservationNumber(s) {
   return t;
 }
 
+function formatYmdKst(d) {
+  return new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Asia/Seoul",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(d);
+}
+
 function normalizeCheckInYmd(v) {
   if (v == null || v === "") return null;
   if (typeof v === "string") {
@@ -50,7 +59,19 @@ function normalizeCheckInYmd(v) {
   }
   var d = new Date(v);
   if (isNaN(d.getTime())) return null;
-  return d.toISOString().slice(0, 10);
+  // DATE 컬럼이 Date로 오면 UTC 자정 → getUTC*로 달력일 보존
+  if (
+    d.getUTCHours() === 0 &&
+    d.getUTCMinutes() === 0 &&
+    d.getUTCSeconds() === 0 &&
+    d.getUTCMilliseconds() === 0
+  ) {
+    var y = d.getUTCFullYear();
+    var mo = String(d.getUTCMonth() + 1).padStart(2, "0");
+    var da = String(d.getUTCDate()).padStart(2, "0");
+    return y + "-" + mo + "-" + da;
+  }
+  return formatYmdKst(d);
 }
 
 function isBankTransferMethod(paymentMethodDb) {

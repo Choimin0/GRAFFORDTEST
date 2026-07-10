@@ -4115,9 +4115,9 @@
           if (!containerEl) return;
           containerEl.innerHTML = "";
 
-          var now = new Date();
-          var year = now.getFullYear();
-          var month = now.getMonth() + 1;
+          var nowYmd = getTodayYmdKst();
+          var year = Number(nowYmd.slice(0, 4));
+          var month = Number(nowYmd.slice(5, 7));
           if (occupancyByDay && occupancyByDay.length) {
             var first = String(occupancyByDay[0].date || "");
             var mm = first.match(/^(\d{4})-(\d{2})-/);

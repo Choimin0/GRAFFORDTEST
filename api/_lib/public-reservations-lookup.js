@@ -8,6 +8,7 @@ import {
   purgeExpiredBookings,
 } from "./booking-retention.js";
 import { resolveEffectiveBookingLocale } from "./booking-locale.js";
+import { getTodayYmdKst } from "./promotion-period.js";
 
 const LEGACY_TO_ROOM = { A: "G1", B: "G2", C: "G3", D: "G4" };
 const DEFAULT_CANCEL_TOKEN_TTL_MS = 10 * 60 * 1000;
@@ -162,11 +163,15 @@ function issueCancelToken(reservationNumber, guestName) {
 }
 
 async function archivePastReservations(pool) {
+  // 체크아웃일이 KST 기준 오늘 이전이면 'completed'로 전환
+  // (체크아웃일 = 오늘 또는 이후 → confirm 유지)
+  var todayKst = getTodayYmdKst();
   await pool.query(
     `UPDATE ${BOOKING_TABLE}
      SET status = 'completed'
      WHERE status = 'confirm'
-       AND check_out_date < CURRENT_DATE`,
+       AND check_out_date < $1::date`,
+    [todayKst],
   );
 }
 

@@ -1080,12 +1080,17 @@
             var kstNowInfo = getKstNowInfo();
             var today = parseYMDLocal(kstNowInfo.todayYmd);
             if (!today) {
-              var fallbackNow = new Date();
-              today = new Date(
-                fallbackNow.getFullYear(),
-                fallbackNow.getMonth(),
-                fallbackNow.getDate(),
-              );
+              // KST 파싱 실패 시에도 브라우저 로컬이 아닌 KST 문자열로 재시도
+              var parts = String(kstNowInfo.todayYmd || "").split("-");
+              if (parts.length === 3) {
+                today = new Date(
+                  Number(parts[0]),
+                  Number(parts[1]) - 1,
+                  Number(parts[2]),
+                );
+              } else {
+                today = new Date();
+              }
             }
 
             function addMonthsKeepingDay(baseDate, monthsToAdd) {
