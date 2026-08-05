@@ -26,6 +26,10 @@ import {
 } from "./_lib/booking-token.js";
 import { checkRoomAvailability } from "./_lib/room-availability.js";
 import { getTodayYmdKst } from "./_lib/promotion-period.js";
+import {
+  archivePastReservations,
+  getInitialBookingStatusForCheckout,
+} from "./_lib/booking-archive.js";
 import { exportReservationToBigQuery, exportCancellationToBigQuery } from "./_lib/bigquery-export.js";
 import {
   buildIcalCalendar,
@@ -263,19 +267,6 @@ async function hasRoomBlockOverlap(pool, roomName, checkIn, checkOut) {
   return rows.some(function (row) {
     return String(row.start_date) < checkOut && String(row.end_date) > checkIn;
   });
-}
-
-async function archivePastReservations(pool) {
-  // 체크아웃일이 KST 기준 오늘 이전이면 'completed'로 전환
-  // (체크아웃일 = 오늘 또는 이후 → confirm 유지)
-  var todayKst = getTodayYmdKst();
-  await pool.query(
-    `UPDATE ${BOOKING_TABLE}
-     SET status = 'completed'
-     WHERE status = 'confirm'
-       AND check_out_date < $1::date`,
-    [todayKst],
-  );
 }
 
 /** [check_in, check_out) 구간의 숙박일(밤) — check_out 아침 퇴실 전날 밤까지 */
@@ -1024,8 +1015,7 @@ export default async function handler(req, res) {
   var sn = Math.floor(stayNights);
   var eg = Math.floor(extraGuests);
   var ta = Math.floor(totalAmount);
-  // 체크아웃일이 이미 지났으면 'completed', 아니면 'confirm'
-  var insertStatus = checkOut < getTodayYmdKst() ? "completed" : "confirm";
+  var insertStatus = getInitialBookingStatusForCheckout(checkOut);
 
   var encPii = encryptBookingPii({
     guestName: guestName,

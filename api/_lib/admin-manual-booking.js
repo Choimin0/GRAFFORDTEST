@@ -7,6 +7,7 @@ import {
 } from "./room-availability.js";
 import { hasActiveHoldOverlap } from "./booking-hold.js";
 import { getTodayYmdKst } from "./promotion-period.js";
+import { getInitialBookingStatusForCheckout } from "./booking-archive.js";
 
 const BOOKING_TABLE = "booking";
 const EXTERNAL_BOOKING_TABLE = "external_booking";
@@ -271,7 +272,7 @@ export async function handleCreateManualBooking(res, pool, body) {
   }
 
   var todayYmd = getTodayYmdKst();
-  var insertStatus = checkOut < todayYmd ? "completed" : "confirm";
+  var insertStatus = getInitialBookingStatusForCheckout(checkOut);
   var reservationNumber = generateManualReservationNumber(todayYmd);
   var encPii = encryptBookingPii({
     guestName: guestName,

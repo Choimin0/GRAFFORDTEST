@@ -967,9 +967,6 @@
                     id="admin-res-entry-amount-actions"
                     hidden
                   >
-                    <span class="admin-res-entry-amount-mode-tag"
-                      >직접 입력</span
-                    >
                     <label
                       class="admin-res-entry-friend-discount"
                       for="admin-res-entry-friend-discount"
@@ -2151,7 +2148,9 @@
         var calendarDetailList = document.getElementById(
           "admin-calendar-detail-list",
         );
-        var calendarLockBtn = document.getElementById("admin-calendar-lock-btn");
+        var calendarLockBtn = document.getElementById(
+          "admin-calendar-lock-btn",
+        );
         var calendarListCopyBtn = document.getElementById(
           "admin-calendar-list-copy-btn",
         );
@@ -3429,8 +3428,10 @@
           var targetYmd = ymd || selectedCalendarDate || getTodayYmdKst();
           var lines = [formatKoreanMonthDay(targetYmd)];
           getAdminRooms().forEach(function (room) {
-            var checkinRow = getRoomReservationPartsForDate(room, targetYmd)
-              .checkinRow;
+            var checkinRow = getRoomReservationPartsForDate(
+              room,
+              targetYmd,
+            ).checkinRow;
             if (!checkinRow) {
               return;
             }

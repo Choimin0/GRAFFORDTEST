@@ -7633,7 +7633,8 @@ main.content-section.confirm-page.payment-page > #payment-error-area-en {
   }
 
   /* payment.html — 모바일: booking summary 숨김, 결제 요약·결제하기 상단 · price/policy 하단 */
-  .payment-page-shell .payment-layout__main
+  .payment-page-shell
+    .payment-layout__main
     > .payment-panel[aria-labelledby*="booking-summary-title"] {
     display: none;
   }
@@ -12099,7 +12100,11 @@ main.content-section.confirm-page.admin-page {
 }
 .admin-checkin-send-btn.is-direct:hover,
 .admin-checkin-send-btn.is-direct:focus-visible {
-  background-color: color-mix(in srgb, var(--stone-green) 82%, var(--stone-900));
+  background-color: color-mix(
+    in srgb,
+    var(--stone-green) 82%,
+    var(--stone-900)
+  );
   outline: none;
 }
 .admin-checkin-email-btn {
@@ -13797,7 +13802,10 @@ main.content-section.confirm-page.admin-page {
 .admin-search-row {
   display: grid;
   grid-template-columns:
-    minmax(70px, 0.5fr) minmax(140px, 1fr) minmax(240px, 1.6fr) minmax(140px, 1fr)
+    minmax(70px, 0.5fr) minmax(140px, 1fr) minmax(240px, 1.6fr) minmax(
+      140px,
+      1fr
+    )
     minmax(140px, 1fr) auto auto;
   gap: 0.55rem;
   margin-top: 1.5rem;
@@ -14574,7 +14582,10 @@ main.content-section.confirm-page.admin-page {
 }
 .admin-seasonal-rate-row {
   display: grid;
-  grid-template-columns: 4rem minmax(0, 1.2fr) minmax(0, 0.9fr) 7.5rem 7.5rem 5.5rem;
+  grid-template-columns: 4rem minmax(0, 1.2fr) minmax(
+      0,
+      0.9fr
+    ) 7.5rem 7.5rem 5.5rem;
   gap: var(--space-16);
   align-items: center;
   padding: var(--space-20) var(--space-24);
@@ -14640,7 +14651,9 @@ main.content-section.confirm-page.admin-page {
   font-size: 0.95rem;
   line-height: 1;
   cursor: pointer;
-  transition: border-color 0.2s ease, color 0.2s ease;
+  transition:
+    border-color 0.2s ease,
+    color 0.2s ease;
 }
 .admin-seasonal-rate-edit-btn svg {
   display: block;
@@ -14740,7 +14753,10 @@ main.content-section.confirm-page.admin-page {
 }
 .admin-seasonal-rate-form__grid {
   display: grid;
-  grid-template-columns: 7rem minmax(0, 1.2fr) minmax(8rem, 1fr) minmax(0, 1fr) minmax(0, 1fr);
+  grid-template-columns: 7rem minmax(0, 1.2fr) minmax(8rem, 1fr) minmax(
+      0,
+      1fr
+    ) minmax(0, 1fr);
   gap: var(--space-24);
   align-items: start;
 }
@@ -14863,7 +14879,8 @@ main.content-section.confirm-page.admin-page {
   gap: var(--space-12);
   padding: var(--space-12) var(--space-24);
   background: color-mix(in srgb, var(--gold-500) 18%, var(--stone-50));
-  border-bottom: 1px solid color-mix(in srgb, var(--gold-500) 35%, var(--stone-200));
+  border-bottom: 1px solid
+    color-mix(in srgb, var(--gold-500) 35%, var(--stone-200));
   color: var(--stone-800);
   font-size: 0.74rem;
   letter-spacing: 0.06em;
@@ -16097,6 +16114,7 @@ main.content-section.confirm-page.admin-page {
 .admin-res-entry-field--amount input {
   padding-left: 1.75rem !important;
   padding-bottom: 0.5rem;
+  margin-right: 0.5rem;
 }
 .admin-res-entry-per-night {
   min-height: 1rem;
