@@ -376,7 +376,6 @@
     var weekdaySubtotal = 0;
     var weekendSubtotal = 0;
     var weekendSurcharge = 0;
-    var promotionBase = 0;
     nightsArr.forEach(function (d) {
       var effective = getEffectiveRatesForNight(room, d);
       if (isWeekendNight(d)) {
@@ -386,7 +385,6 @@
       } else {
         weekdayNights += 1;
         weekdaySubtotal += effective.weekday;
-        promotionBase += effective.weekday;
       }
     });
     var baseTotal = weekdaySubtotal + weekendSubtotal;
@@ -402,12 +400,12 @@
     var grandTotal = baseTotal + extraGuestTotal;
     var consecutiveSale =
       nights >= 2 ? (nights - 1) * CONSECUTIVE_SALE_PER_NIGHT : 0;
-    // 프로모션: 평일 박요금 합 기준 % — 투숙일이 프로모션 기간과 겹칠 때만
+    // 프로모션: 객실 박요금 합(주중·주말) 기준 % — 투숙일이 프로모션 기간과 겹칠 때만
     var effectivePromoPercent = isPromotionActiveForStay(checkInStr, checkOutStr)
       ? PROMOTION_PERCENT
       : 0;
     var promotionDiscount = Math.floor(
-      (promotionBase * effectivePromoPercent) / 100,
+      (baseTotal * effectivePromoPercent) / 100,
     );
     var discountedGrandTotal = Math.max(0, grandTotal - consecutiveSale - promotionDiscount);
 
