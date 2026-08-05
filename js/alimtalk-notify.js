@@ -34,11 +34,16 @@
 
   function isInternationalStoredContact(contact) {
     var s = String(contact || "").trim();
-    return s.indexOf("+") === 0 && storedContactDialCode(s) !== "82";
+    return s.indexOf("+") === 0 && !isKoreaStoredContact(s);
+  }
+
+  function isKoreaStoredContact(contact) {
+    var s = String(contact || "").trim();
+    return /^\+82(?:[\s-]|[1-9]|$)/.test(s);
   }
 
   function resolveEffectiveBookingLocale(bookingLocale, contact) {
-    if (storedContactDialCode(contact) === "82") {
+    if (isKoreaStoredContact(contact)) {
       return "kr";
     }
     if (isInternationalStoredContact(contact)) {

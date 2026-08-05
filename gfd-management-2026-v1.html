@@ -377,15 +377,26 @@
                   —
                 </h2>
               </div>
-              <button
-                type="button"
-                id="admin-calendar-list-copy-btn"
-                class="admin-calendar-list-btn"
-                aria-label="선택 날짜 예약 명단 복사"
-                title="선택 날짜 예약 명단 복사"
-              >
-                LIST
-              </button>
+              <div class="admin-calendar-detail__actions">
+                <button
+                  type="button"
+                  id="admin-calendar-lock-btn"
+                  class="admin-calendar-list-btn admin-calendar-lock-btn"
+                  aria-label="선택 날짜 도어락 코드 저장"
+                  title="선택 날짜 도어락 코드 저장"
+                >
+                  LOCK
+                </button>
+                <button
+                  type="button"
+                  id="admin-calendar-list-copy-btn"
+                  class="admin-calendar-list-btn"
+                  aria-label="선택 날짜 예약 명단 복사"
+                  title="선택 날짜 예약 명단 복사"
+                >
+                  LIST
+                </button>
+              </div>
             </div>
             <div
               id="admin-calendar-detail-list"
@@ -909,9 +920,7 @@
                 <span class="admin-res-entry-section-num">05</span>
                 <span class="admin-res-entry-section-eyebrow">Payment</span>
               </div>
-              <div
-                class="admin-res-entry-field admin-res-entry-field--amount"
-              >
+              <div class="admin-res-entry-field admin-res-entry-field--amount">
                 <div
                   class="admin-res-entry-field-label admin-res-entry-amount-label-row"
                 >
@@ -1250,15 +1259,16 @@
         aria-labelledby="admin-edit-reservation-title"
         hidden
       >
-        <div
-          class="admin-request-modal__panel admin-edit-reservation-panel"
-        >
+        <div class="admin-request-modal__panel admin-edit-reservation-panel">
           <div class="admin-request-modal__head">
             <p class="admin-dashboard-eyebrow">EDIT RESERVATION</p>
             <h2 id="admin-edit-reservation-title">예약 수정</h2>
             <p id="admin-edit-reservation-meta"></p>
           </div>
-          <div class="admin-edit-reservation-detail" aria-label="예약 세부 정보">
+          <div
+            class="admin-edit-reservation-detail"
+            aria-label="예약 세부 정보"
+          >
             <div class="admin-edit-reservation-detail__row">
               <span>예약번호</span>
               <strong id="admin-edit-detail-number">—</strong>
@@ -1428,7 +1438,10 @@
                     옵션이 우선 적용됩니다.
                   </p>
                 </div>
-                <div id="admin-seasonal-rate-list" class="admin-seasonal-rate-list"></div>
+                <div
+                  id="admin-seasonal-rate-list"
+                  class="admin-seasonal-rate-list"
+                ></div>
                 <div class="admin-seasonal-rate-add-area">
                   <button
                     type="button"
@@ -1442,83 +1455,94 @@
                     <strong>기간별 요금 옵션 추가</strong>
                     <small>객실, 기간, 요금을 입력한 뒤 저장하세요.</small>
                   </button>
-                  <div id="admin-seasonal-rate-form" class="admin-seasonal-rate-form" hidden>
-                  <div class="admin-seasonal-rate-form__grid">
-                    <label class="admin-seasonal-rate-form__field">
-                      <span>객실</span>
-                      <select id="admin-seasonal-room-select">
-                        <option value="G1">G1</option>
-                        <option value="G2">G2</option>
-                        <option value="G3">G3</option>
-                        <option value="G4">G4</option>
-                      </select>
-                    </label>
-                    <label class="admin-seasonal-rate-form__field admin-seasonal-rate-form__field--period">
-                      <span>적용 기간</span>
-                      <input
-                        id="admin-seasonal-period-input"
-                        type="text"
-                        readonly
-                        placeholder="시작일 · 종료일 선택"
-                      />
+                  <div
+                    id="admin-seasonal-rate-form"
+                    class="admin-seasonal-rate-form"
+                    hidden
+                  >
+                    <div class="admin-seasonal-rate-form__grid">
+                      <label class="admin-seasonal-rate-form__field">
+                        <span>객실</span>
+                        <select id="admin-seasonal-room-select">
+                          <option value="G1">G1</option>
+                          <option value="G2">G2</option>
+                          <option value="G3">G3</option>
+                          <option value="G4">G4</option>
+                        </select>
+                      </label>
+                      <label
+                        class="admin-seasonal-rate-form__field admin-seasonal-rate-form__field--period"
+                      >
+                        <span>적용 기간</span>
+                        <input
+                          id="admin-seasonal-period-input"
+                          type="text"
+                          readonly
+                          placeholder="시작일 · 종료일 선택"
+                        />
+                        <div
+                          id="admin-seasonal-cal-popup"
+                          class="admin-seasonal-cal-popup"
+                          hidden
+                        >
+                          <div
+                            id="admin-seasonal-cal-wrap"
+                            class="admin-seasonal-cal-dual"
+                          ></div>
+                        </div>
+                      </label>
+                      <label class="admin-seasonal-rate-form__field">
+                        <span>평일 요금</span>
+                        <input
+                          id="admin-seasonal-weekday-input"
+                          type="text"
+                          inputmode="numeric"
+                          placeholder="0"
+                          data-currency="krw"
+                        />
+                      </label>
+                      <label
+                        class="admin-seasonal-rate-form__field"
+                        id="admin-seasonal-weekend-field"
+                      >
+                        <span>주말 요금</span>
+                        <input
+                          id="admin-seasonal-weekend-input"
+                          type="text"
+                          inputmode="numeric"
+                          placeholder="0"
+                          data-currency="krw"
+                        />
+                      </label>
                       <div
-                        id="admin-seasonal-cal-popup"
-                        class="admin-seasonal-cal-popup"
+                        class="admin-seasonal-rate-form__field is-readonly"
+                        id="admin-seasonal-weekend-auto"
                         hidden
                       >
-                        <div
-                          id="admin-seasonal-cal-wrap"
-                          class="admin-seasonal-cal-dual"
-                        ></div>
+                        <span>주말 요금 (자동)</span>
+                        <strong id="admin-seasonal-weekend-auto-value"
+                          >0원</strong
+                        >
                       </div>
-                    </label>
-                    <label class="admin-seasonal-rate-form__field">
-                      <span>평일 요금</span>
-                      <input
-                        id="admin-seasonal-weekday-input"
-                        type="text"
-                        inputmode="numeric"
-                        placeholder="0"
-                        data-currency="krw"
-                      />
-                    </label>
-                    <label class="admin-seasonal-rate-form__field" id="admin-seasonal-weekend-field">
-                      <span>주말 요금</span>
-                      <input
-                        id="admin-seasonal-weekend-input"
-                        type="text"
-                        inputmode="numeric"
-                        placeholder="0"
-                        data-currency="krw"
-                      />
-                    </label>
-                    <div
-                      class="admin-seasonal-rate-form__field is-readonly"
-                      id="admin-seasonal-weekend-auto"
-                      hidden
-                    >
-                      <span>주말 요금 (자동)</span>
-                      <strong id="admin-seasonal-weekend-auto-value">0원</strong>
+                    </div>
+                    <div class="admin-seasonal-rate-form__actions">
+                      <button
+                        type="button"
+                        class="btn reserve-btn admin-request-cancel-btn"
+                        id="admin-seasonal-cancel-btn"
+                      >
+                        취소
+                      </button>
+                      <button
+                        type="button"
+                        class="btn reserve-btn confirm-pay-submit reserveinfo-submit-btn admin-save-btn is-disabled"
+                        id="admin-seasonal-save-btn"
+                        disabled
+                      >
+                        저장
+                      </button>
                     </div>
                   </div>
-                  <div class="admin-seasonal-rate-form__actions">
-                    <button
-                      type="button"
-                      class="btn reserve-btn admin-request-cancel-btn"
-                      id="admin-seasonal-cancel-btn"
-                    >
-                      취소
-                    </button>
-                    <button
-                      type="button"
-                      class="btn reserve-btn confirm-pay-submit reserveinfo-submit-btn admin-save-btn is-disabled"
-                      id="admin-seasonal-save-btn"
-                      disabled
-                    >
-                      저장
-                    </button>
-                  </div>
-                </div>
                 </div>
               </section>
             </section>
@@ -1680,7 +1704,9 @@
             <p class="admin-dashboard-eyebrow">SEASONAL RATE</p>
             <h2 id="admin-seasonal-edit-title">기간별 요금 옵션 수정</h2>
           </div>
-          <div class="admin-seasonal-rate-form__grid admin-seasonal-edit-form__grid">
+          <div
+            class="admin-seasonal-rate-form__grid admin-seasonal-edit-form__grid"
+          >
             <label class="admin-seasonal-rate-form__field">
               <span>객실</span>
               <select id="admin-seasonal-edit-room-select">
@@ -1690,7 +1716,9 @@
                 <option value="G4">G4</option>
               </select>
             </label>
-            <label class="admin-seasonal-rate-form__field admin-seasonal-rate-form__field--period">
+            <label
+              class="admin-seasonal-rate-form__field admin-seasonal-rate-form__field--period"
+            >
               <span>적용 기간</span>
               <input
                 id="admin-seasonal-edit-period-input"
@@ -1719,7 +1747,10 @@
                 data-currency="krw"
               />
             </label>
-            <label class="admin-seasonal-rate-form__field" id="admin-seasonal-edit-weekend-field">
+            <label
+              class="admin-seasonal-rate-form__field"
+              id="admin-seasonal-edit-weekend-field"
+            >
               <span>주말 요금</span>
               <input
                 id="admin-seasonal-edit-weekend-input"
@@ -1867,7 +1898,7 @@
             href: "https://www.instagram.com/grafford_stay/",
             imgSrc: window.getGraffordFooterImages().instagram,
           },
-            logoSrc: window.getGraffordFooterImages().logo,
+          logoSrc: window.getGraffordFooterImages().logo,
           lines: [
             "대표 : GRAFFORD",
             "주소 : 제주특별자치도 서귀포시 토산중앙로 22",
@@ -2078,6 +2109,7 @@
         var calendarDetailList = document.getElementById(
           "admin-calendar-detail-list",
         );
+        var calendarLockBtn = document.getElementById("admin-calendar-lock-btn");
         var calendarListCopyBtn = document.getElementById(
           "admin-calendar-list-copy-btn",
         );
@@ -2497,7 +2529,9 @@
           if (!row || !row.isExternal) {
             return false;
           }
-          var memo = String(row.guestRequest || "").trim().toLowerCase();
+          var memo = String(row.guestRequest || "")
+            .trim()
+            .toLowerCase();
           return /^airbnb\s*\(\s*not\s+available\s*\)$/.test(memo);
         }
 
@@ -2537,7 +2571,9 @@
             return row && !row.isExternal;
           });
           var external = all.filter(function (row) {
-            return row && row.isExternal && !isAirbnbNotAvailablePlaceholder(row);
+            return (
+              row && row.isExternal && !isAirbnbNotAvailablePlaceholder(row)
+            );
           });
           if (!external.length) {
             return bookings;
@@ -2885,8 +2921,7 @@
                 return String(row.roomType || "").toUpperCase() === room;
               })
               .sort(function (a, b) {
-                var extDiff =
-                  (a.isExternal ? 1 : 0) - (b.isExternal ? 1 : 0);
+                var extDiff = (a.isExternal ? 1 : 0) - (b.isExternal ? 1 : 0);
                 if (extDiff !== 0) {
                   return extDiff;
                 }
@@ -2911,28 +2946,7 @@
             appendCheckinCell(tr, roomCheckin.guestName || "—");
             appendCheckinCell(tr, formatGuestCount(roomCheckin));
             var talkTd = appendCheckinCell(tr, "");
-            var isEnglishBooking = (function () {
-              var contactRaw = String(roomCheckin.contact || "").trim();
-              var contactDial =
-                contactRaw.indexOf("+") === 0
-                  ? (function () {
-                      var m = contactRaw
-                        .slice(1)
-                        .trim()
-                        .match(/^(\d{1,4})/);
-                      return m ? m[1] : "";
-                    })()
-                  : "";
-              if (contactDial === "82") {
-                return false;
-              }
-              if (contactRaw.indexOf("+") === 0) {
-                return true;
-              }
-              return (
-                String(roomCheckin.bookingLocale || "").toLowerCase() === "en"
-              );
-            })();
+            var isEnglishBooking = isEnglishBookingForCheckin(roomCheckin);
             if (isEnglishBooking) {
               var emailBtn = document.createElement("button");
               emailBtn.type = "button";
@@ -2960,6 +2974,9 @@
               var sendBtn = document.createElement("button");
               sendBtn.type = "button";
               sendBtn.className = "admin-checkin-send-btn";
+              if (isDirectWebsiteBooking(roomCheckin)) {
+                sendBtn.classList.add("is-direct");
+              }
               sendBtn.textContent = "전송";
               sendBtn.dataset.room = room;
               sendBtn.dataset.reservationNumber =
@@ -3302,7 +3319,7 @@
           if (p.length !== 3) {
             return String(ymd || "");
           }
-          return Number(p[1]) + "월" + Number(p[2]) + "일";
+          return Number(p[1]) + "월 " + Number(p[2]) + "일";
         }
 
         function findReservationsByDate(ymd) {
@@ -3323,6 +3340,35 @@
         function formatCalendarListCell(value) {
           var text = String(value == null ? "" : value).trim();
           return text || "—";
+        }
+
+        function extractContactLast4(contact) {
+          var digits = normalizeContactDigits(contact);
+          if (!digits) {
+            return "";
+          }
+          if (digits.length <= 4) {
+            return digits;
+          }
+          return digits.slice(-4);
+        }
+
+        function buildSelectedDateLockText(ymd) {
+          var targetYmd = ymd || selectedCalendarDate || getTodayYmdKst();
+          var lines = [formatKoreanMonthDay(targetYmd)];
+          getAdminRooms().forEach(function (room) {
+            var checkinRow = getRoomReservationPartsForDate(room, targetYmd)
+              .checkinRow;
+            if (!checkinRow) {
+              return;
+            }
+            var last4 = extractContactLast4(checkinRow.contact);
+            if (!last4) {
+              return;
+            }
+            lines.push(room + " " + last4);
+          });
+          return lines.join("\n");
         }
 
         function buildSelectedDateReservationListText(ymd) {
@@ -3353,6 +3399,20 @@
             );
           });
           return lines.join("\n");
+        }
+
+        function handleCalendarLockClick() {
+          var ymd = selectedCalendarDate || getTodayYmdKst();
+          var text = buildSelectedDateLockText(ymd);
+          copyTextToClipboard(text)
+            .then(function () {
+              showMessage(
+                formatKoreanMonthDay(ymd) + " 도어락 코드를 저장했습니다.",
+              );
+            })
+            .catch(function () {
+              showMessage("도어락 코드 저장에 실패했습니다.");
+            });
         }
 
         function handleCalendarListCopyClick() {
@@ -4582,7 +4642,10 @@
         }
 
         var RES_ENTRY_FRIEND_DISCOUNT_RATE = 0.3;
+        /** Stayfolio 중개 수수료율 — 변경 시 이 값만 수정 0.11 = 11%*/
+        var RES_ENTRY_STAYFOLIO_FEE_RATE = 0.11;
         var resEntryPricingPromise = null;
+        var resEntryStayfolioFeeTimer = null;
         var resEntryState = {
           platform: "",
           bookingChannel: "",
@@ -4593,6 +4656,7 @@
           amount: 0,
           amountEntered: false,
           friendDiscount: false,
+          stayfolioAmountIsNet: false,
         };
         var resEntryCalView = new Date();
         var resEntryCheckInDate = null;
@@ -4668,6 +4732,110 @@
 
         function isResEntryDirectChannel() {
           return resEntryState.bookingChannel === "phone";
+        }
+
+        function isResEntryStayfolioChannel() {
+          return resEntryState.bookingChannel === "stayfolio";
+        }
+
+        function parseResEntryAmountInputValue(inputEl) {
+          var rawAmount = inputEl ? String(inputEl.value || "").trim() : "";
+          if (rawAmount === "") {
+            return null;
+          }
+          var amount = parseInt(rawAmount, 10);
+          if (!Number.isFinite(amount) || amount < 0) {
+            return 0;
+          }
+          return amount;
+        }
+
+        function computeResEntryStayfolioNetAmount(grossAmount) {
+          var gross = Math.max(0, Math.floor(Number(grossAmount) || 0));
+          if (gross <= 0) {
+            return 0;
+          }
+          return Math.floor(gross * (1 - RES_ENTRY_STAYFOLIO_FEE_RATE));
+        }
+
+        function applyResEntryStayfolioFeeFromInput(options) {
+          options = options || {};
+          if (!isResEntryStayfolioChannel() || resEntryState.friendDiscount) {
+            return;
+          }
+          var totalAmountInput = document.getElementById(
+            "admin-res-entry-total-amount",
+          );
+          if (!totalAmountInput) {
+            return;
+          }
+          if (resEntryState.stayfolioAmountIsNet && !options.force) {
+            return;
+          }
+          var gross = parseResEntryAmountInputValue(totalAmountInput);
+          if (gross == null) {
+            resEntryState.amount = 0;
+            resEntryState.amountEntered = false;
+            resEntryState.stayfolioAmountIsNet = false;
+            return;
+          }
+          var net = computeResEntryStayfolioNetAmount(gross);
+          resEntryState.amount = net;
+          resEntryState.amountEntered = gross > 0;
+          resEntryState.stayfolioAmountIsNet = true;
+          if (String(net) !== String(totalAmountInput.value || "").trim()) {
+            totalAmountInput.value = String(net);
+          }
+          updateResEntryPerNightDisplay();
+          updateReservationEntrySummary();
+        }
+
+        function scheduleResEntryStayfolioFeeApply() {
+          if (resEntryStayfolioFeeTimer) {
+            window.clearTimeout(resEntryStayfolioFeeTimer);
+          }
+          resEntryStayfolioFeeTimer = window.setTimeout(function () {
+            resEntryStayfolioFeeTimer = null;
+            applyResEntryStayfolioFeeFromInput({ force: true });
+          }, 400);
+        }
+
+        function handleResEntryAmountInput() {
+          if (resEntryState.friendDiscount) {
+            return;
+          }
+          var totalAmountInput = document.getElementById(
+            "admin-res-entry-total-amount",
+          );
+          if (isResEntryStayfolioChannel()) {
+            resEntryState.stayfolioAmountIsNet = false;
+            var gross = parseResEntryAmountInputValue(totalAmountInput);
+            if (gross == null) {
+              resEntryState.amount = 0;
+              resEntryState.amountEntered = false;
+            } else {
+              resEntryState.amountEntered = gross > 0;
+              resEntryState.amount = computeResEntryStayfolioNetAmount(gross);
+            }
+            scheduleResEntryStayfolioFeeApply();
+            updateResEntryPerNightDisplay();
+            updateReservationEntrySummary();
+            return;
+          }
+          resEntryState.stayfolioAmountIsNet = false;
+          resEntryState.amountEntered = true;
+          var rawAmount = totalAmountInput
+            ? String(totalAmountInput.value || "").trim()
+            : "";
+          resEntryState.amount = rawAmount === "" ? 0 : parseInt(rawAmount, 10);
+          if (
+            !Number.isFinite(resEntryState.amount) ||
+            resEntryState.amount < 0
+          ) {
+            resEntryState.amount = 0;
+          }
+          updateResEntryPerNightDisplay();
+          updateReservationEntrySummary();
         }
 
         function resEntryRoomRateApiUrl() {
@@ -5032,9 +5200,11 @@
                 var airbnbNights = data.airbnbIcalNights || [];
                 if (!airbnbNights.length) {
                   var confirmedLookup = resEntryConfirmedOccupiedNightSet;
-                  airbnbNights = (data.occupiedNights || []).filter(function (n) {
-                    return !confirmedLookup.has(n);
-                  });
+                  airbnbNights = (data.occupiedNights || []).filter(
+                    function (n) {
+                      return !confirmedLookup.has(n);
+                    },
+                  );
                 }
                 resEntryAirbnbNightSet = new Set(airbnbNights);
               } else {
@@ -5397,7 +5567,12 @@
             amount: 0,
             amountEntered: false,
             friendDiscount: false,
+            stayfolioAmountIsNet: false,
           };
+          if (resEntryStayfolioFeeTimer) {
+            window.clearTimeout(resEntryStayfolioFeeTimer);
+            resEntryStayfolioFeeTimer = null;
+          }
           resEntrySubmitting = false;
           resEntryCheckInDate = null;
           resEntryCheckOutDate = null;
@@ -5495,11 +5670,24 @@
                     btn.getAttribute("data-platform") || "";
                   resEntryState.bookingChannel =
                     btn.getAttribute("data-booking-channel") || "";
+                  resEntryState.stayfolioAmountIsNet = false;
                   updateResEntryAmountControls();
                   renderReservationEntryCalendar();
                   updateResEntryCalHint();
                   if (resEntryState.friendDiscount) {
                     syncResEntryAmountFromFriendDiscount();
+                  } else if (isResEntryStayfolioChannel()) {
+                    var stayfolioAmountInput = document.getElementById(
+                      "admin-res-entry-total-amount",
+                    );
+                    var stayfolioRaw = stayfolioAmountInput
+                      ? String(stayfolioAmountInput.value || "").trim()
+                      : "";
+                    if (stayfolioRaw) {
+                      applyResEntryStayfolioFeeFromInput({ force: true });
+                    } else {
+                      updateReservationEntrySummary();
+                    }
                   } else {
                     updateReservationEntrySummary();
                   }
@@ -5640,20 +5828,23 @@
             }
             if (totalAmountInput) {
               totalAmountInput.addEventListener("input", function () {
+                handleResEntryAmountInput();
+                syncReservationEntryDates();
+              });
+              totalAmountInput.addEventListener("blur", function () {
                 if (resEntryState.friendDiscount) {
                   return;
                 }
-                resEntryState.amountEntered = true;
-                var rawAmount = String(totalAmountInput.value || "").trim();
-                resEntryState.amount =
-                  rawAmount === "" ? 0 : parseInt(rawAmount, 10);
                 if (
-                  !Number.isFinite(resEntryState.amount) ||
-                  resEntryState.amount < 0
+                  isResEntryStayfolioChannel() &&
+                  !resEntryState.stayfolioAmountIsNet
                 ) {
-                  resEntryState.amount = 0;
+                  if (resEntryStayfolioFeeTimer) {
+                    window.clearTimeout(resEntryStayfolioFeeTimer);
+                    resEntryStayfolioFeeTimer = null;
+                  }
+                  applyResEntryStayfolioFeeFromInput({ force: true });
                 }
-                syncReservationEntryDates();
               });
             }
             if (memoInput) {
@@ -5701,6 +5892,16 @@
                   );
                   return;
                 }
+                if (
+                  isResEntryStayfolioChannel() &&
+                  !resEntryState.stayfolioAmountIsNet
+                ) {
+                  if (resEntryStayfolioFeeTimer) {
+                    window.clearTimeout(resEntryStayfolioFeeTimer);
+                    resEntryStayfolioFeeTimer = null;
+                  }
+                  applyResEntryStayfolioFeeFromInput({ force: true });
+                }
 
                 var auth = getAuthPayload();
                 var memoInput = document.getElementById("admin-res-entry-memo");
@@ -5738,11 +5939,15 @@
                       );
                     }
 
+                    var savedRoom = resEntryState.room;
+                    var savedCheckin = resEntryState.checkin;
+                    var savedCheckout = resEntryState.checkout;
+                    var savedPlatform = resEntryState.platform;
+                    var savedAmount = resEntryState.amount;
                     var nights =
-                      resEntryState.checkin && resEntryState.checkout
+                      savedCheckin && savedCheckout
                         ? Math.round(
-                            (new Date(resEntryState.checkout) -
-                              new Date(resEntryState.checkin)) /
+                            (new Date(savedCheckout) - new Date(savedCheckin)) /
                               86400000,
                           )
                         : 0;
@@ -5754,21 +5959,22 @@
                         "<strong>" +
                         escapeHtml(guestName) +
                         "</strong> 게스트 · " +
-                        escapeHtml(resEntryState.room) +
+                        escapeHtml(savedRoom) +
                         "<br>" +
-                        escapeHtml(formatResEntryDate(resEntryState.checkin)) +
+                        escapeHtml(formatResEntryDate(savedCheckin)) +
                         " → " +
-                        escapeHtml(formatResEntryDate(resEntryState.checkout)) +
+                        escapeHtml(formatResEntryDate(savedCheckout)) +
                         " · " +
                         nights +
                         "박<br>플랫폼: " +
-                        escapeHtml(resEntryState.platform) +
+                        escapeHtml(savedPlatform) +
                         " · ₩" +
-                        resEntryState.amount.toLocaleString() +
+                        savedAmount.toLocaleString() +
                         (result.data.mergedWithIcal
                           ? "<br><span style='color:var(--gold-500)'>Airbnb iCal 예약과 자동 병합되었습니다.</span>"
                           : "");
                     }
+                    resetReservationEntryForm();
                     var modal = document.getElementById(
                       "admin-res-entry-success-modal",
                     );
@@ -5813,7 +6019,6 @@
                 if (modal) {
                   modal.hidden = true;
                 }
-                resetReservationEntryForm();
               });
             }
 
@@ -5893,6 +6098,25 @@
           return !!contact && contact !== "-";
         }
 
+        /** +82 대한민국 국제 형식 (+852 홍콩 등과 구분) */
+        function isKoreaInternationalContact(contact) {
+          var s = String(contact || "").trim();
+          return /^\+82(?:[\s-]|[1-9]|$)/.test(s);
+        }
+
+        function isEnglishBookingForCheckin(row) {
+          var contactRaw = String((row && row.contact) || "").trim();
+          if (isKoreaInternationalContact(contactRaw)) {
+            return false;
+          }
+          if (contactRaw.indexOf("+") === 0) {
+            return true;
+          }
+          return (
+            String((row && row.bookingLocale) || "").toLowerCase() === "en"
+          );
+        }
+
         function resolveBookingPlatformId(row) {
           if (!row) {
             return "";
@@ -5900,7 +6124,11 @@
           var channel = String(row.bookingChannel || "")
             .trim()
             .toLowerCase();
-          if (channel && channel !== "direct" && BOOKING_PLATFORM_LABELS[channel]) {
+          if (
+            channel &&
+            channel !== "direct" &&
+            BOOKING_PLATFORM_LABELS[channel]
+          ) {
             return channel;
           }
           if (row.isExternal) {
@@ -5912,6 +6140,16 @@
             }
           }
           return "";
+        }
+
+        function isDirectWebsiteBooking(row) {
+          if (!row || row.isExternal) {
+            return false;
+          }
+          var channel = String(row.bookingChannel || "direct")
+            .trim()
+            .toLowerCase();
+          return !channel || channel === "direct";
         }
 
         function formatBookingPlatformLabel(platformId) {
@@ -6519,10 +6757,7 @@
         }
 
         function confirmManualCancel() {
-          if (
-            manualCancelSubmitting ||
-            !activeManualCancelReservationNumber
-          ) {
+          if (manualCancelSubmitting || !activeManualCancelReservationNumber) {
             return;
           }
           var reservationNumber = activeManualCancelReservationNumber;
@@ -6935,9 +7170,8 @@
             if (sortKey === "payment") {
               if (isExternalManualReservation(row)) {
                 return (
-                  formatBookingPlatformLabel(
-                    resolveBookingPlatformId(row),
-                  ) || "결제수단 미확인"
+                  formatBookingPlatformLabel(resolveBookingPlatformId(row)) ||
+                  "결제수단 미확인"
                 );
               }
               return formatPaymentMethodLabel(row && row.paymentMethod);
@@ -7012,9 +7246,7 @@
             var paymentCellHtml;
             if (isExternalManual) {
               paymentCellHtml =
-                buildBookingPlatformBadgeHtml(
-                  resolveBookingPlatformId(row),
-                ) ||
+                buildBookingPlatformBadgeHtml(resolveBookingPlatformId(row)) ||
                 "<span class='admin-reservation-payment is-unknown'>" +
                   escapeHtml("결제수단 미확인") +
                   "</span>";
@@ -7328,7 +7560,10 @@
               btn.addEventListener("click", function () {
                 var roomName = btn.getAttribute("data-room-name") || "";
                 if (/^G[1-4]$/.test(roomName)) {
-                  var collected = collectRoomRatePayload(roomName, roomRateBody);
+                  var collected = collectRoomRatePayload(
+                    roomName,
+                    roomRateBody,
+                  );
                   if (collected.error) {
                     showMessage(collected.error);
                     return;
@@ -7387,7 +7622,9 @@
         }
 
         function attachRoomRateBatchSaveBtn() {
-          var batchBtn = document.getElementById("admin-room-rate-batch-save-btn");
+          var batchBtn = document.getElementById(
+            "admin-room-rate-batch-save-btn",
+          );
           if (!batchBtn || batchBtn.__bound) {
             return;
           }
@@ -7500,8 +7737,7 @@
                   weekdayRate + getWeekendChargeAmount();
               }
             } else {
-              payload.weekendBaseRate =
-                weekdayRate + getWeekendChargeAmount();
+              payload.weekendBaseRate = weekdayRate + getWeekendChargeAmount();
             }
           } else if (weekendInput) {
             var weekendRate = parseRateInputValue(weekendInput);
@@ -7552,7 +7788,12 @@
           }
         }
 
-        function openRateSaveConfirm(roomName, weekdayBaseRate, promoDates, weekendBaseRate) {
+        function openRateSaveConfirm(
+          roomName,
+          weekdayBaseRate,
+          promoDates,
+          weekendBaseRate,
+        ) {
           pendingPolicyToggle = null;
           pendingRateBatchSave = null;
           pendingRoomStatusSave = null;
@@ -7584,7 +7825,9 @@
           pendingRoomBlockSave = null;
           pendingRoomBlockRelease = null;
           pendingRateBatchSave = { items: items || [] };
-          setPolicyConfirmTitle("G1~G4 객실 요금 변경 사항을 저장하시겠습니까?");
+          setPolicyConfirmTitle(
+            "G1~G4 객실 요금 변경 사항을 저장하시겠습니까?",
+          );
           setPolicyConfirmSaveLabel("저장");
           if (policyConfirmModal) {
             policyConfirmModal.hidden = false;
@@ -7722,15 +7965,15 @@
                     nextRate.promotionEndDate,
                     nextRate.weekendBaseRate,
                   )
-              : nextRoomStatus
-                ? saveRoomStatusManageRow(
-                    nextRoomStatus.roomName,
-                    nextRoomStatus.statusType,
-                    nextRoomStatus.statusText,
-                  )
-                : nextBlockSave
-                  ? saveRoomBlockRows(nextBlockSave)
-                  : releaseRoomBlock(nextBlockRelease.blockId);
+                : nextRoomStatus
+                  ? saveRoomStatusManageRow(
+                      nextRoomStatus.roomName,
+                      nextRoomStatus.statusType,
+                      nextRoomStatus.statusText,
+                    )
+                  : nextBlockSave
+                    ? saveRoomBlockRows(nextBlockSave)
+                    : releaseRoomBlock(nextBlockRelease.blockId);
           savePromise
             .then(function () {
               closePolicyConfirm();
@@ -8839,12 +9082,9 @@
         }
 
         if (editReservationCancelBtn) {
-          editReservationCancelBtn.addEventListener(
-            "click",
-            function () {
-              closeEditReservationModal();
-            },
-          );
+          editReservationCancelBtn.addEventListener("click", function () {
+            closeEditReservationModal();
+          });
         }
 
         if (editContactInput) {
@@ -9021,6 +9261,10 @@
           icalRefreshBtn.addEventListener("click", function () {
             syncAirbnbCalendar();
           });
+        }
+
+        if (calendarLockBtn) {
+          calendarLockBtn.addEventListener("click", handleCalendarLockClick);
         }
 
         if (calendarListCopyBtn) {

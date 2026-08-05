@@ -14,9 +14,10 @@ export function storedContactDialCode(contact) {
   return m ? m[1] : null;
 }
 
-/** DB/저장 연락처가 대한민국(+82) 국제 형식인지 */
+/** DB/저장 연락처가 대한민국(+82) 국제 형식인지 (+852 등과 구분) */
 export function isKoreaStoredContact(contact) {
-  return storedContactDialCode(contact) === "82";
+  var s = String(contact || "").trim();
+  return /^\+82(?:[\s-]|[1-9]|$)/.test(s);
 }
 
 /** DB/저장 연락처가 국제 형식(+국가번호)인지 (+82 제외) */

@@ -12093,6 +12093,15 @@ main.content-section.confirm-page.admin-page {
   background-color: var(--grafford-mud2);
   color: var(--color-text-on-dark);
 }
+.admin-checkin-send-btn.is-direct {
+  background-color: var(--stone-green);
+  color: var(--stone-50);
+}
+.admin-checkin-send-btn.is-direct:hover,
+.admin-checkin-send-btn.is-direct:focus-visible {
+  background-color: color-mix(in srgb, var(--stone-green) 82%, var(--stone-900));
+  outline: none;
+}
 .admin-checkin-email-btn {
   background-color: var(--grafford-mud);
   color: var(--color-text-on-dark);
@@ -12723,6 +12732,12 @@ main.content-section.confirm-page.admin-page {
 .admin-calendar-detail__heading .admin-calendar-detail-title {
   margin-bottom: 0;
 }
+.admin-calendar-detail__actions {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  gap: var(--space-8);
+}
 .admin-calendar-list-btn {
   flex-shrink: 0;
   display: inline-flex;
@@ -12751,6 +12766,18 @@ main.content-section.confirm-page.admin-page {
 .admin-calendar-list-btn:focus-visible {
   background: var(--gold-500);
   border-color: var(--gold-500);
+  color: var(--stone-50);
+  outline: none;
+}
+.admin-calendar-lock-btn {
+  border-color: var(--stone-green);
+  background: var(--stone-green);
+  color: var(--stone-50);
+}
+.admin-calendar-lock-btn:hover,
+.admin-calendar-lock-btn:focus-visible {
+  background: color-mix(in srgb, var(--stone-green) 82%, var(--stone-900));
+  border-color: color-mix(in srgb, var(--stone-green) 82%, var(--stone-900));
   color: var(--stone-50);
   outline: none;
 }
