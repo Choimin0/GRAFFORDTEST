@@ -91,6 +91,10 @@ async function ensureRoomRateSchema(pool) {
   );
   await pool.query(
     `ALTER TABLE ${TABLE_NAME}
+     ADD COLUMN IF NOT EXISTS seasonal_option_name VARCHAR(64)`,
+  );
+  await pool.query(
+    `ALTER TABLE ${TABLE_NAME}
      ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()`,
   );
   await pool.query(`DROP TABLE IF EXISTS "room-rate-period"`);
@@ -163,7 +167,7 @@ async function ensureRoomRateSchema(pool) {
 
 async function listSeasonalRates(pool, surchargeEnabled, surchargeAmount) {
   var sel = await pool.query(
-    `SELECT id, room_name, period_start_date, period_end_date,
+    `SELECT id, room_name, seasonal_option_name, period_start_date, period_end_date,
             weekday_base_rate, weekend_base_rate, created_at, updated_at
      FROM ${TABLE_NAME}
      WHERE ${SEASONAL_ROW_FILTER}
@@ -175,6 +179,7 @@ async function listSeasonalRates(pool, surchargeEnabled, surchargeAmount) {
     return {
       id: Number(row.id),
       roomName: String(row.room_name || "").toUpperCase(),
+      optionName: String(row.seasonal_option_name || "").trim(),
       startDate: formatPromotionDateFromDb(row.period_start_date),
       endDate: formatPromotionDateFromDb(row.period_end_date),
       weekdayBaseRate: weekday,

@@ -12366,18 +12366,22 @@ main.content-section.confirm-page.admin-page {
 }
 .admin-app-topbar__section,
 .admin-app-topbar__meta,
+.admin-today-btn,
 .admin-logout-btn {
   color: var(--stone-400);
   font-family: var(--font-family-body-en);
   font-size: 0.62rem;
   letter-spacing: 0.32em;
 }
+.admin-today-btn,
 .admin-logout-btn {
   border: 0;
   background: transparent;
   cursor: pointer;
   padding: var(--space-8) 0;
 }
+.admin-today-btn:hover,
+.admin-today-btn:focus-visible,
 .admin-logout-btn:hover,
 .admin-logout-btn:focus-visible {
   color: var(--gold-500);
@@ -12940,7 +12944,9 @@ main.content-section.confirm-page.admin-page {
 }
 .admin-reservation-section .admin-search-row {
   display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr)) auto auto;
+  grid-template-columns:
+    minmax(0, 0.5fr) minmax(0, 1fr) minmax(0, 1.6fr) minmax(0, 1fr)
+    minmax(0, 1fr) auto auto;
   gap: var(--space-16);
   align-items: end;
   margin: 0 0 var(--space-24);
@@ -12972,16 +12978,20 @@ main.content-section.confirm-page.admin-page {
 .admin-reservation-section .admin-search-row select {
   cursor: pointer;
 }
+.admin-reservation-section .admin-search-room-label select {
+  max-width: 5.5rem;
+}
 .admin-reservation-section .admin-search-period-inputs {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  grid-template-columns: minmax(7.5rem, 1fr) auto minmax(7.5rem, 1fr);
   gap: var(--space-8);
   align-items: center;
   margin-top: var(--space-8);
 }
 .admin-reservation-section .admin-search-period-inputs input {
   margin-top: 0;
-  min-width: 0;
+  min-width: 7.5rem;
+  font-size: 0.76rem;
 }
 .admin-reservation-section .admin-search-period-sep {
   color: var(--stone-400);
@@ -13786,10 +13796,19 @@ main.content-section.confirm-page.admin-page {
 }
 .admin-search-row {
   display: grid;
-  grid-template-columns: repeat(5, minmax(140px, 1fr)) auto auto;
+  grid-template-columns:
+    minmax(70px, 0.5fr) minmax(140px, 1fr) minmax(240px, 1.6fr) minmax(140px, 1fr)
+    minmax(140px, 1fr) auto auto;
   gap: 0.55rem;
   margin-top: 1.5rem;
   align-items: end;
+}
+.admin-search-row .admin-search-room-label select {
+  max-width: 5.5rem;
+}
+.admin-search-row .admin-search-period-inputs input {
+  min-width: 7.5rem;
+  font-size: 0.76rem;
 }
 .admin-search-row .confirm-label {
   margin: 0;
@@ -14555,7 +14574,7 @@ main.content-section.confirm-page.admin-page {
 }
 .admin-seasonal-rate-row {
   display: grid;
-  grid-template-columns: 4rem minmax(0, 1.4fr) 7.5rem 7.5rem 5.5rem;
+  grid-template-columns: 4rem minmax(0, 1.2fr) minmax(0, 0.9fr) 7.5rem 7.5rem 5.5rem;
   gap: var(--space-16);
   align-items: center;
   padding: var(--space-20) var(--space-24);
@@ -14710,9 +14729,18 @@ main.content-section.confirm-page.admin-page {
   font-size: 0.78rem;
   letter-spacing: 0.04em;
 }
+.admin-seasonal-rate-name {
+  color: var(--stone-800);
+  font-size: 0.78rem;
+  letter-spacing: 0.04em;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
 .admin-seasonal-rate-form__grid {
   display: grid;
-  grid-template-columns: 7rem minmax(0, 1.6fr) minmax(0, 1fr) minmax(0, 1fr);
+  grid-template-columns: 7rem minmax(0, 1.2fr) minmax(8rem, 1fr) minmax(0, 1fr) minmax(0, 1fr);
   gap: var(--space-24);
   align-items: start;
 }

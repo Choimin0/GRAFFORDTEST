@@ -72,7 +72,6 @@
   function syncWeekendFieldMode(rootEl) {
     rootEl = rootEl || document;
     var surchargeEnabled = isSurchargeEnabled();
-    var weekendCharge = getWeekendChargeAmount();
     ["admin-seasonal-weekend-field", "admin-seasonal-edit-weekend-field"].forEach(
       function (fieldId) {
         var field = rootEl.getElementById
@@ -84,38 +83,6 @@
         field.hidden = surchargeEnabled;
       },
     );
-    ["admin-seasonal-weekend-auto", "admin-seasonal-edit-weekend-auto"].forEach(
-      function (fieldId) {
-        var field = document.getElementById(fieldId);
-        if (!field) {
-          return;
-        }
-        field.hidden = !surchargeEnabled;
-      },
-    );
-    updateComputedWeekendDisplay(
-      document.getElementById("admin-seasonal-weekday-input"),
-      document.getElementById("admin-seasonal-weekend-auto-value"),
-    );
-    updateComputedWeekendDisplay(
-      document.getElementById("admin-seasonal-edit-weekday-input"),
-      document.getElementById("admin-seasonal-edit-weekend-auto-value"),
-    );
-  }
-
-  function updateComputedWeekendDisplay(weekdayInput, displayEl) {
-    if (!displayEl) {
-      return;
-    }
-    if (!isSurchargeEnabled()) {
-      displayEl.textContent = "";
-      return;
-    }
-    var weekday = parseRateValue(weekdayInput && weekdayInput.value);
-    if (!Number.isFinite(weekday)) {
-      weekday = 0;
-    }
-    displayEl.textContent = deps.formatKRW(weekday + getWeekendChargeAmount());
   }
 
   function formatPeriodLabel(startDate, endDate) {
@@ -239,6 +206,7 @@
       "<div class='admin-seasonal-rate-row admin-seasonal-rate-row--head'>" +
       "<span>객실</span>" +
       "<span>기간</span>" +
+      "<span>옵션 이름</span>" +
       "<span class='admin-seasonal-rate-head-price'><small>평일</small><strong>요금</strong></span>" +
       "<span class='admin-seasonal-rate-head-price'><small>주말</small><strong>요금</strong></span>" +
       "<span></span>" +
@@ -254,6 +222,9 @@
           "</span>" +
           "<span class='admin-seasonal-rate-period'>" +
           deps.escapeHtml(formatPeriodLabel(row.startDate, row.endDate)) +
+          "</span>" +
+          "<span class='admin-seasonal-rate-name'>" +
+          deps.escapeHtml(row.optionName || "—") +
           "</span>" +
           "<span class='admin-seasonal-rate-price'>" +
           "<small>평일</small>" +
@@ -460,11 +431,15 @@
     calView = new Date();
     calView.setDate(1);
     var roomSel = document.getElementById("admin-seasonal-room-select");
+    var nameInput = document.getElementById("admin-seasonal-name-input");
     var weekdayInput = document.getElementById("admin-seasonal-weekday-input");
     var weekendInput = document.getElementById("admin-seasonal-weekend-input");
     var calWrap = document.getElementById("admin-seasonal-cal-wrap");
     if (roomSel) {
       roomSel.value = "G1";
+    }
+    if (nameInput) {
+      nameInput.value = "";
     }
     if (weekdayInput) {
       weekdayInput.value = "";
@@ -517,6 +492,7 @@
 
   function collectSeasonalPayload() {
     var roomSel = document.getElementById("admin-seasonal-room-select");
+    var nameInput = document.getElementById("admin-seasonal-name-input");
     var weekday = parseRateValue(
       document.getElementById("admin-seasonal-weekday-input").value,
     );
@@ -527,6 +503,7 @@
     return {
       id: editingId,
       roomName: roomSel ? roomSel.value : "",
+      optionName: nameInput ? String(nameInput.value || "").trim() : "",
       startDate: calRangeStart,
       endDate: calRangeEnd,
       weekdayBaseRate: weekday,
@@ -628,11 +605,15 @@
     }
     var modal = document.getElementById("admin-seasonal-edit-modal");
     var roomSel = document.getElementById("admin-seasonal-edit-room-select");
+    var nameInput = document.getElementById("admin-seasonal-edit-name-input");
     var weekdayInput = document.getElementById("admin-seasonal-edit-weekday-input");
     var weekendInput = document.getElementById("admin-seasonal-edit-weekend-input");
     var calWrap = document.getElementById("admin-seasonal-edit-cal-wrap");
     if (roomSel) {
       roomSel.value = row.roomName;
+    }
+    if (nameInput) {
+      nameInput.value = row.optionName || "";
     }
     if (weekdayInput) {
       weekdayInput.value = deps.formatKRW(row.weekdayBaseRate);
@@ -710,10 +691,12 @@
       document.getElementById("admin-seasonal-edit-weekday-input").value,
     );
     var weekendInput = document.getElementById("admin-seasonal-edit-weekend-input");
+    var nameInput = document.getElementById("admin-seasonal-edit-name-input");
     var payload = {
       id: editingId,
       roomName:
         document.getElementById("admin-seasonal-edit-room-select").value,
+      optionName: nameInput ? String(nameInput.value || "").trim() : "",
       startDate: calRangeStart,
       endDate: calRangeEnd,
       weekdayBaseRate: weekdayRate,
@@ -769,6 +752,7 @@
     var saveBtn = document.getElementById("admin-seasonal-save-btn");
     var periodInput = document.getElementById("admin-seasonal-period-input");
     var calWrap = document.getElementById("admin-seasonal-cal-wrap");
+    var nameInput = document.getElementById("admin-seasonal-name-input");
     var weekdayInput = document.getElementById("admin-seasonal-weekday-input");
     var weekendInput = document.getElementById("admin-seasonal-weekend-input");
     var roomSel = document.getElementById("admin-seasonal-room-select");
@@ -797,18 +781,12 @@
         }
       });
     }
-    [weekdayInput, weekendInput, roomSel].forEach(function (el) {
+    [nameInput, weekdayInput, weekendInput, roomSel].forEach(function (el) {
       if (!el || el.__boundSeasonal) {
         return;
       }
       el.__boundSeasonal = true;
-      el.addEventListener("input", function () {
-        updateComputedWeekendDisplay(
-          document.getElementById("admin-seasonal-weekday-input"),
-          document.getElementById("admin-seasonal-weekend-auto-value"),
-        );
-        updateSeasonalSaveState();
-      });
+      el.addEventListener("input", updateSeasonalSaveState);
       el.addEventListener("change", updateSeasonalSaveState);
     });
     if (calWrap) {
@@ -818,6 +796,7 @@
     var editCancel = document.getElementById("admin-seasonal-edit-cancel-btn");
     var editSave = document.getElementById("admin-seasonal-edit-save-btn");
     var editPeriod = document.getElementById("admin-seasonal-edit-period-input");
+    var editName = document.getElementById("admin-seasonal-edit-name-input");
     var editWeekday = document.getElementById("admin-seasonal-edit-weekday-input");
     var editWeekend = document.getElementById("admin-seasonal-edit-weekend-input");
     var editRoom = document.getElementById("admin-seasonal-edit-room-select");
@@ -844,18 +823,12 @@
         }
       });
     }
-    [editWeekday, editWeekend, editRoom].forEach(function (el) {
+    [editName, editWeekday, editWeekend, editRoom].forEach(function (el) {
       if (!el || el.__boundSeasonal) {
         return;
       }
       el.__boundSeasonal = true;
-      el.addEventListener("input", function () {
-        updateComputedWeekendDisplay(
-          document.getElementById("admin-seasonal-edit-weekday-input"),
-          document.getElementById("admin-seasonal-edit-weekend-auto-value"),
-        );
-        updateEditSaveState();
-      });
+      el.addEventListener("input", updateEditSaveState);
       el.addEventListener("change", updateEditSaveState);
     });
     if (editModal && !editModal.__bound) {

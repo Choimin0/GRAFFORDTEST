@@ -72,6 +72,10 @@ async function ensureRoomRateSchema(pool) {
   );
   await pool.query(
     `ALTER TABLE ${TABLE_NAME}
+     ADD COLUMN IF NOT EXISTS seasonal_option_name VARCHAR(64)`,
+  );
+  await pool.query(
+    `ALTER TABLE ${TABLE_NAME}
      ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()`,
   );
   await pool.query(`DROP TABLE IF EXISTS "room-rate-period"`);
@@ -235,6 +239,7 @@ function mapSeasonalRow(row, surchargeEnabled, surchargeAmount) {
   return {
     id: Number(row.id),
     roomName: String(row.room_name || "").toUpperCase(),
+    optionName: String(row.seasonal_option_name || "").trim(),
     startDate: formatPromotionDateFromDb(row.period_start_date),
     endDate: formatPromotionDateFromDb(row.period_end_date),
     weekdayBaseRate: weekday,
@@ -277,8 +282,13 @@ function validateSeasonalPayload(body, surchargeEnabled, surchargeAmount) {
     surchargeEnabled,
     surchargeAmount,
   );
+  var optionName = String(body.optionName || "").trim();
+  if (optionName.length > 64) {
+    return { error: "요금 옵션 이름은 64자 이내로 입력해 주세요." };
+  }
   return {
     roomName: roomName,
+    optionName: optionName,
     startDate: startDate,
     endDate: endDate,
     weekdayBaseRate: Math.floor(weekdayBaseRate),
@@ -290,7 +300,7 @@ async function listSeasonalRates(pool) {
   var surchargeEnabled = await isWeekendSurchargeEnabled(pool);
   var surchargeAmount = await getWeekendChargeAmount(pool);
   var sel = await pool.query(
-    `SELECT id, room_name, period_start_date, period_end_date,
+    `SELECT id, room_name, seasonal_option_name, period_start_date, period_end_date,
             weekday_base_rate, weekend_base_rate, created_at, updated_at
      FROM ${TABLE_NAME}
      WHERE ${SEASONAL_ROW_FILTER}
@@ -314,11 +324,12 @@ async function saveSeasonalRate(pool, body) {
   }
   await pool.query(
     `INSERT INTO ${TABLE_NAME}
-       (room_name, weekday_base_rate, weekend_base_rate,
+       (room_name, seasonal_option_name, weekday_base_rate, weekend_base_rate,
         period_start_date, period_end_date, is_enabled)
-     VALUES ($1, $2, $3, $4::date, $5::date, TRUE)`,
+     VALUES ($1, $2, $3, $4, $5::date, $6::date, TRUE)`,
     [
       payload.roomName,
+      payload.optionName || null,
       payload.weekdayBaseRate,
       payload.weekendBaseRate,
       payload.startDate,
@@ -346,16 +357,18 @@ async function updateSeasonalRate(pool, body) {
   var upd = await pool.query(
     `UPDATE ${TABLE_NAME}
      SET room_name = $2,
-         weekday_base_rate = $3,
-         weekend_base_rate = $4,
-         period_start_date = $5::date,
-         period_end_date = $6::date,
+         seasonal_option_name = $3,
+         weekday_base_rate = $4,
+         weekend_base_rate = $5,
+         period_start_date = $6::date,
+         period_end_date = $7::date,
          updated_at = NOW()
      WHERE id = $1 AND ${SEASONAL_ROW_FILTER}
      RETURNING id`,
     [
       id,
       payload.roomName,
+      payload.optionName || null,
       payload.weekdayBaseRate,
       payload.weekendBaseRate,
       payload.startDate,

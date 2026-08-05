@@ -22,6 +22,14 @@
           <span class="admin-app-topbar__section">ADMIN</span>
         </div>
         <div class="admin-app-topbar__meta">
+          <button
+            type="button"
+            class="admin-today-btn"
+            id="admin-today-btn"
+            aria-label="오늘 날짜로 이동"
+          >
+            TODAY
+          </button>
           <time id="admin-today-date" datetime=""></time>
           <button type="button" class="admin-logout-btn" id="admin-logout-btn">
             로그아웃
@@ -463,7 +471,7 @@
           class="admin-search-row"
           autocomplete="off"
         >
-          <label class="confirm-label">
+          <label class="confirm-label admin-search-room-label">
             객실명
             <select id="admin-search-room">
               <option value="">전체</option>
@@ -1518,6 +1526,15 @@
                         </div>
                       </label>
                       <label class="admin-seasonal-rate-form__field">
+                        <span>요금 옵션 이름</span>
+                        <input
+                          id="admin-seasonal-name-input"
+                          type="text"
+                          maxlength="64"
+                          placeholder="예: 여름 성수기"
+                        />
+                      </label>
+                      <label class="admin-seasonal-rate-form__field">
                         <span>평일 요금</span>
                         <input
                           id="admin-seasonal-weekday-input"
@@ -1540,16 +1557,6 @@
                           data-currency="krw"
                         />
                       </label>
-                      <div
-                        class="admin-seasonal-rate-form__field is-readonly"
-                        id="admin-seasonal-weekend-auto"
-                        hidden
-                      >
-                        <span>주말 요금 (자동)</span>
-                        <strong id="admin-seasonal-weekend-auto-value"
-                          >0원</strong
-                        >
-                      </div>
                     </div>
                     <div class="admin-seasonal-rate-form__actions">
                       <button
@@ -1764,6 +1771,15 @@
               </div>
             </label>
             <label class="admin-seasonal-rate-form__field">
+              <span>요금 옵션 이름</span>
+              <input
+                id="admin-seasonal-edit-name-input"
+                type="text"
+                maxlength="64"
+                placeholder="예: 여름 성수기"
+              />
+            </label>
+            <label class="admin-seasonal-rate-form__field">
               <span>평일 요금</span>
               <input
                 id="admin-seasonal-edit-weekday-input"
@@ -1786,14 +1802,6 @@
                 data-currency="krw"
               />
             </label>
-            <div
-              class="admin-seasonal-rate-form__field is-readonly"
-              id="admin-seasonal-edit-weekend-auto"
-              hidden
-            >
-              <span>주말 요금 (자동)</span>
-              <strong id="admin-seasonal-edit-weekend-auto-value">0원</strong>
-            </div>
           </div>
           <div class="admin-request-modal__actions">
             <button
@@ -1952,6 +1960,7 @@
         var loginTitleEl = document.getElementById("admin-login-title");
         var appTopbar = document.getElementById("admin-app-topbar");
         var todayDateEl = document.getElementById("admin-today-date");
+        var todayBtn = document.getElementById("admin-today-btn");
         var logoutBtn = document.getElementById("admin-logout-btn");
         var idInput = document.getElementById("admin-id");
         var pwInput = document.getElementById("admin-pw");
@@ -2245,6 +2254,7 @@
         var selectedCheckinDate = getTodayYmdKst();
         var selectedCalendarDate = getTodayYmdKst();
         var roomStatusWeekStart = getTodayYmdKst();
+        var lastKnownAdminToday = getTodayYmdKst();
 
         function consumeAdminLeftFlag() {
           try {
@@ -2269,9 +2279,7 @@
           latestRows = [];
           latestCalendarRows = [];
           reservationListRows = [];
-          selectedCheckinDate = getTodayYmdKst();
-          selectedCalendarDate = getTodayYmdKst();
-          roomStatusWeekStart = getTodayYmdKst();
+          syncAdminSessionToday();
           setLoggedOutView();
           if (message) {
             showMessage(message);
@@ -2516,7 +2524,7 @@
           if (siteBusinessFooterMount) {
             siteBusinessFooterMount.hidden = true;
           }
-          renderAdminTopbarDate();
+          syncAdminSessionToday();
         }
 
         function dateKey(ymd) {
@@ -2727,13 +2735,44 @@
           }
         }
 
-        function renderAdminTopbarDate() {
+        function renderAdminTopbarDate(today) {
           if (!todayDateEl) {
             return;
           }
+          var ymd = today || getTodayYmdKst();
+          todayDateEl.dateTime = ymd;
+          todayDateEl.textContent = ymd.replace(/-/g, ".");
+        }
+
+        function syncAdminSessionToday(options) {
+          options = options || {};
+          var resetSelection = options.resetSelection !== false;
           var today = getTodayYmdKst();
-          todayDateEl.dateTime = today;
-          todayDateEl.textContent = today.replace(/-/g, ".");
+          var dateChanged = today !== lastKnownAdminToday;
+          lastKnownAdminToday = today;
+
+          if (resetSelection) {
+            selectedCheckinDate = today;
+            selectedCalendarDate = today;
+            roomStatusWeekStart = today;
+            var monthParts = today.split("-");
+            calendarViewDate = new Date(
+              Number(monthParts[0]),
+              Number(monthParts[1]) - 1,
+              1,
+            );
+          }
+
+          renderAdminTopbarDate(today);
+
+          return { today: today, dateChanged: dateChanged };
+        }
+
+        function resetReservationStatusToToday() {
+          syncAdminSessionToday();
+          renderStatusCalendar();
+          renderTodayStatusPanels();
+          renderRoomStatusTable();
         }
 
         function compareYmd(a, b) {
@@ -9448,6 +9487,15 @@
           });
         }
 
+        if (todayBtn) {
+          todayBtn.addEventListener("click", function () {
+            if (loginForm && !loginForm.hidden) {
+              return;
+            }
+            resetReservationStatusToToday();
+          });
+        }
+
         window.addEventListener("pagehide", function () {
           try {
             if (loginForm && loginForm.hidden) {
@@ -9457,6 +9505,9 @@
         });
 
         window.addEventListener("pageshow", function (e) {
+          if (e.persisted) {
+            syncAdminSessionToday();
+          }
           var leftPage = consumeAdminLeftFlag();
           var restoredLoggedIn =
             e.persisted && loginForm && loginForm.hidden === true;
@@ -9466,6 +9517,28 @@
                 ? "페이지를 벗어났습니다. 다시 로그인해 주세요."
                 : "다시 로그인해 주세요.",
             );
+          }
+        });
+
+        document.addEventListener("visibilitychange", function () {
+          if (document.visibilityState !== "visible") {
+            return;
+          }
+          var isLoggedIn = loginForm && loginForm.hidden;
+          var today = getTodayYmdKst();
+          var dateChanged = today !== lastKnownAdminToday;
+          if (!isLoggedIn) {
+            syncAdminSessionToday();
+            return;
+          }
+          if (dateChanged) {
+            syncAdminSessionToday();
+            renderStatusCalendar();
+            renderTodayStatusPanels();
+            renderRoomStatusTable();
+          } else {
+            renderAdminTopbarDate(today);
+            lastKnownAdminToday = today;
           }
         });
 
