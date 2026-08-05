@@ -12940,7 +12940,7 @@ main.content-section.confirm-page.admin-page {
 }
 .admin-reservation-section .admin-search-row {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr)) auto auto;
+  grid-template-columns: repeat(5, minmax(0, 1fr)) auto auto;
   gap: var(--space-16);
   align-items: end;
   margin: 0 0 var(--space-24);
@@ -12954,17 +12954,39 @@ main.content-section.confirm-page.admin-page {
   font-size: 0.72rem;
   letter-spacing: 0.14em;
 }
-.admin-reservation-section .admin-search-row input {
+.admin-reservation-section .admin-search-row input,
+.admin-reservation-section .admin-search-row select {
   width: 100%;
   margin-top: var(--space-8);
   padding: 0.45rem 0 0.5rem;
   border-radius: 0;
+  border: 0;
   border-bottom: 1px solid var(--stone-200);
+  background: transparent;
   color: var(--stone-800);
   font-size: 0.7rem;
 }
 .admin-reservation-section .admin-search-row input::placeholder {
   color: var(--stone-200);
+}
+.admin-reservation-section .admin-search-row select {
+  cursor: pointer;
+}
+.admin-reservation-section .admin-search-period-inputs {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+  gap: var(--space-8);
+  align-items: center;
+  margin-top: var(--space-8);
+}
+.admin-reservation-section .admin-search-period-inputs input {
+  margin-top: 0;
+  min-width: 0;
+}
+.admin-reservation-section .admin-search-period-sep {
+  color: var(--stone-400);
+  font-size: 0.72rem;
+  line-height: 1;
 }
 .admin-reservation-section .admin-search-btn,
 .admin-reservation-section .admin-page-reset-btn {
@@ -13764,7 +13786,7 @@ main.content-section.confirm-page.admin-page {
 }
 .admin-search-row {
   display: grid;
-  grid-template-columns: minmax(180px, 1fr) minmax(180px, 1fr) auto auto;
+  grid-template-columns: repeat(5, minmax(140px, 1fr)) auto auto;
   gap: 0.55rem;
   margin-top: 1.5rem;
   align-items: end;
@@ -14891,6 +14913,15 @@ main.content-section.confirm-page.admin-page {
 .admin-page-btn:disabled {
   opacity: 0.45;
   cursor: not-allowed;
+}
+@media (max-width: 1200px) {
+  .admin-search-row {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+  .admin-search-row .admin-search-btn,
+  .admin-search-row .admin-page-reset-btn {
+    grid-column: span 1;
+  }
 }
 @media (max-width: 900px) {
   .admin-status-top-grid {

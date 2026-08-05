@@ -464,12 +464,38 @@
           autocomplete="off"
         >
           <label class="confirm-label">
+            객실명
+            <select id="admin-search-room">
+              <option value="">전체</option>
+              <option value="g1">G1</option>
+              <option value="g2">G2</option>
+              <option value="g3">G3</option>
+              <option value="g4">G4</option>
+            </select>
+          </label>
+          <label class="confirm-label">
             예약자명
             <input
               id="admin-search-name"
               type="text"
               placeholder="예약자명으로 검색"
             />
+          </label>
+          <label class="confirm-label admin-search-period-label">
+            투숙기간
+            <span class="admin-search-period-inputs">
+              <input
+                id="admin-search-period-start"
+                type="date"
+                aria-label="투숙기간 시작일"
+              />
+              <span class="admin-search-period-sep" aria-hidden="true">~</span>
+              <input
+                id="admin-search-period-end"
+                type="date"
+                aria-label="투숙기간 종료일"
+              />
+            </span>
           </label>
           <label class="confirm-label">
             연락처
@@ -2076,7 +2102,14 @@
         var activeCheckinResendReservationNumber = "";
         var activeCheckinResendBtn = null;
         var searchForm = document.getElementById("admin-search-form");
+        var searchRoomSelect = document.getElementById("admin-search-room");
         var searchNameInput = document.getElementById("admin-search-name");
+        var searchPeriodStartInput = document.getElementById(
+          "admin-search-period-start",
+        );
+        var searchPeriodEndInput = document.getElementById(
+          "admin-search-period-end",
+        );
         var searchContactInput = document.getElementById(
           "admin-search-contact",
         );
@@ -7119,9 +7152,58 @@
           return digits;
         }
 
+        function parseSearchDateYmd(value) {
+          var raw = String(value || "").trim();
+          if (!/^\d{4}-\d{2}-\d{2}$/.test(raw)) {
+            return "";
+          }
+          return raw;
+        }
+
+        function normalizeSearchPeriodRange(startValue, endValue) {
+          var start = parseSearchDateYmd(startValue);
+          var end = parseSearchDateYmd(endValue);
+          if (start && end && start > end) {
+            return { start: end, end: start };
+          }
+          return { start: start, end: end };
+        }
+
+        function isStayDateInSearchPeriod(dateYmd, rangeStart, rangeEnd) {
+          if (!dateYmd) {
+            return false;
+          }
+          if (rangeStart && dateYmd < rangeStart) {
+            return false;
+          }
+          if (rangeEnd && dateYmd > rangeEnd) {
+            return false;
+          }
+          return true;
+        }
+
+        function matchesStayPeriodSearch(row, rangeStart, rangeEnd) {
+          if (!rangeStart && !rangeEnd) {
+            return true;
+          }
+          var checkIn = parseSearchDateYmd(row && row.checkIn);
+          var checkOut = parseSearchDateYmd(row && row.checkOut);
+          return (
+            isStayDateInSearchPeriod(checkIn, rangeStart, rangeEnd) ||
+            isStayDateInSearchPeriod(checkOut, rangeStart, rangeEnd)
+          );
+        }
+
         function getFilteredRows(rows) {
+          var roomQuery = normalizeSearchValue(
+            searchRoomSelect && searchRoomSelect.value,
+          );
           var nameQuery = normalizeSearchValue(
             searchNameInput && searchNameInput.value,
+          );
+          var periodRange = normalizeSearchPeriodRange(
+            searchPeriodStartInput && searchPeriodStartInput.value,
+            searchPeriodEndInput && searchPeriodEndInput.value,
           );
           var contactQuery = normalizeSearchValue(
             searchContactInput && searchContactInput.value,
@@ -7129,10 +7211,18 @@
           var reservationQuery = normalizeSearchValue(
             searchReservationInput && searchReservationInput.value,
           );
-          if (!nameQuery && !contactQuery && !reservationQuery) {
+          if (
+            !roomQuery &&
+            !nameQuery &&
+            !periodRange.start &&
+            !periodRange.end &&
+            !contactQuery &&
+            !reservationQuery
+          ) {
             return (rows || []).slice();
           }
           return (rows || []).filter(function (row) {
+            var rowRoom = normalizeSearchValue(row && row.roomType);
             var rowName = normalizeSearchValue(row && row.guestName);
             var rowContact = normalizeSearchValue(row && row.contact).replace(
               /\D/g,
@@ -7141,13 +7231,19 @@
             var rowReservation = normalizeSearchValue(
               row && row.reservationNumber,
             );
+            var roomOk = !roomQuery || rowRoom === roomQuery;
             var nameOk = !nameQuery || rowName.indexOf(nameQuery) >= 0;
+            var periodOk = matchesStayPeriodSearch(
+              row,
+              periodRange.start,
+              periodRange.end,
+            );
             var contactOk =
               !contactQuery || rowContact.indexOf(contactQuery) >= 0;
             var reservationOk =
               !reservationQuery ||
               rowReservation.indexOf(reservationQuery) >= 0;
-            return nameOk && contactOk && reservationOk;
+            return roomOk && nameOk && periodOk && contactOk && reservationOk;
           });
         }
 
@@ -9022,8 +9118,17 @@
 
         if (searchResetBtn) {
           searchResetBtn.addEventListener("click", function () {
+            if (searchRoomSelect) {
+              searchRoomSelect.value = "";
+            }
             if (searchNameInput) {
               searchNameInput.value = "";
+            }
+            if (searchPeriodStartInput) {
+              searchPeriodStartInput.value = "";
+            }
+            if (searchPeriodEndInput) {
+              searchPeriodEndInput.value = "";
             }
             if (searchContactInput) {
               searchContactInput.value = "";
