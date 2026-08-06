@@ -3125,6 +3125,136 @@
             : "";
         }
 
+        /* Hue-interleaved so consecutive palette slots stay visually distinct */
+        var ROOM_WEEK_PALETTE = [
+          "var(--reserve-06)",
+          "var(--reserve-05)",
+          "var(--reserve-03)",
+          "var(--reserve-08)",
+          "var(--reserve-02)",
+          "var(--reserve-01)",
+          "var(--reserve-10)",
+          "var(--reserve-09)",
+          "var(--reserve-11)",
+          "var(--reserve-12)",
+          "var(--reserve-04)",
+          "var(--reserve-07)",
+        ];
+
+        function isWeekResVisibleOnDay(row, ymd) {
+          if (!row || !ymd) {
+            return false;
+          }
+          var ci = dateKey(row.checkIn);
+          var co = dateKey(row.checkOut);
+          if (ci < ymd && ymd < co) {
+            return true;
+          }
+          if (co === ymd && ci < ymd) {
+            return true;
+          }
+          if (ci === ymd && co > ymd) {
+            return true;
+          }
+          return false;
+        }
+
+        function weekReservationsConflict(a, b, rooms, weekDates) {
+          var keyA = getWeekResKey(a);
+          var keyB = getWeekResKey(b);
+          if (!keyA || !keyB || keyA === keyB) {
+            return false;
+          }
+          var roomA = String(a.roomType || "").toUpperCase();
+          var roomB = String(b.roomType || "").toUpperCase();
+          var idxA = rooms.indexOf(roomA);
+          var idxB = rooms.indexOf(roomB);
+          var sameRoom = roomA === roomB;
+          var adjacentRooms =
+            idxA >= 0 && idxB >= 0 && Math.abs(idxA - idxB) === 1;
+          if (!sameRoom && !adjacentRooms) {
+            return false;
+          }
+          var di;
+          for (di = 0; di < weekDates.length; di++) {
+            var day = weekDates[di];
+            var aVis = isWeekResVisibleOnDay(a, day);
+            var bVis = isWeekResVisibleOnDay(b, day);
+            if (aVis && bVis) {
+              return true;
+            }
+          }
+          if (sameRoom) {
+            for (di = 0; di < weekDates.length - 1; di++) {
+              var d0 = weekDates[di];
+              var d1 = weekDates[di + 1];
+              if (
+                (isWeekResVisibleOnDay(a, d0) &&
+                  isWeekResVisibleOnDay(b, d1)) ||
+                (isWeekResVisibleOnDay(a, d1) && isWeekResVisibleOnDay(b, d0))
+              ) {
+                return true;
+              }
+            }
+          }
+          return false;
+        }
+
+        function buildWeekReservationColorMap(rows, rooms, weekDates, weekEnd) {
+          var seen = Object.create(null);
+          var weekResList = [];
+          rows.forEach(function (row) {
+            var ci = dateKey(row.checkIn);
+            var co = dateKey(row.checkOut);
+            if (co > weekDates[0] && ci < weekEnd) {
+              var rk = getWeekResKey(row);
+              if (!seen[rk]) {
+                seen[rk] = true;
+                weekResList.push(row);
+              }
+            }
+          });
+          weekResList.sort(function (a, b) {
+            var ciA = dateKey(a.checkIn);
+            var ciB = dateKey(b.checkIn);
+            if (ciA !== ciB) {
+              return ciA < ciB ? -1 : 1;
+            }
+            var roomA = String(a.roomType || "").toUpperCase();
+            var roomB = String(b.roomType || "").toUpperCase();
+            return rooms.indexOf(roomA) - rooms.indexOf(roomB);
+          });
+          var weekColorMap = Object.create(null);
+          weekResList.forEach(function (row) {
+            var rk = getWeekResKey(row);
+            var usedColors = Object.create(null);
+            weekResList.forEach(function (other) {
+              var ok = getWeekResKey(other);
+              if (ok === rk || !weekColorMap[ok]) {
+                return;
+              }
+              if (weekReservationsConflict(row, other, rooms, weekDates)) {
+                usedColors[weekColorMap[ok]] = true;
+              }
+            });
+            var assigned = "";
+            var pi;
+            for (pi = 0; pi < ROOM_WEEK_PALETTE.length; pi++) {
+              var candidate = ROOM_WEEK_PALETTE[pi];
+              if (!usedColors[candidate]) {
+                assigned = candidate;
+                break;
+              }
+            }
+            weekColorMap[rk] =
+              assigned ||
+              ROOM_WEEK_PALETTE[
+                Object.keys(weekColorMap).length % ROOM_WEEK_PALETTE.length
+              ];
+          });
+          return weekColorMap;
+        }
+
         function getWeekResStatusForRow(row, ymd) {
           if (!row) {
             return { state: "vacant", label: "공실", row: null };
@@ -3181,13 +3311,6 @@
           var rooms = getAdminRooms();
           var rows = getReservationRows();
 
-          var ROOM_WEEK_PALETTE = [
-            "var(--gold-500)",
-            "color-mix(in srgb, var(--gold-500) 72%, var(--stone-50))",
-            "color-mix(in srgb, var(--gold-500) 54%, var(--stone-50))",
-            "color-mix(in srgb, var(--gold-500) 42%, var(--stone-50))",
-            "color-mix(in srgb, var(--stone-800) 36%, var(--stone-50))",
-          ];
           var weekDates = [];
           for (var wi = 0; wi < 7; wi++) {
             weekDates.push(addOneDay(weekStart, wi));
@@ -3199,20 +3322,12 @@
               formatMD(weekDates[0]) + " ~ " + formatMD(weekDates[6]);
           }
 
-          var weekColorMap = Object.create(null);
-          var weekColorIdx = 0;
-          rows.forEach(function (row) {
-            var ci = dateKey(row.checkIn);
-            var co = dateKey(row.checkOut);
-            if (co > weekDates[0] && ci < weekEnd) {
-              var rk = row.reservationNumber || String(row.guestName) + ci;
-              if (!weekColorMap[rk]) {
-                weekColorMap[rk] =
-                  ROOM_WEEK_PALETTE[weekColorIdx % ROOM_WEEK_PALETTE.length];
-                weekColorIdx++;
-              }
-            }
-          });
+          var weekColorMap = buildWeekReservationColorMap(
+            rows,
+            rooms,
+            weekDates,
+            weekEnd,
+          );
 
           function getWeekResColor(row) {
             return row
@@ -3226,13 +3341,19 @@
             var name =
               String(row.guestName || "").trim() ||
               (row.isExternal ? "외부 예약" : "—");
-            return (
-              name +
-              "\n" +
+            var guestLine = name;
+            if (row.guestCount != null && row.guestCount !== "") {
+              guestLine += " (" + String(row.guestCount) + "인)";
+            }
+            var periodLine =
               formatKoreanMonthDay(dateKey(row.checkIn)) +
-              "~" +
-              formatKoreanMonthDay(dateKey(row.checkOut))
-            );
+              " ~ " +
+              formatKoreanMonthDay(dateKey(row.checkOut));
+            var contact = String(row.contact || "").trim();
+            if (!contact || contact === "-") {
+              contact = "—";
+            }
+            return guestLine + "\n" + periodLine + "\n" + contact;
           }
           function setWeekCellClickData(el, room, date, row) {
             if (!el) {
