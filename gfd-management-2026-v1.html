@@ -3006,6 +3006,88 @@
           }
         }
 
+        function isWeekSpanStart(row, ymd, weekStartYmd) {
+          if (!isReservationNight(row, ymd)) {
+            return false;
+          }
+          if (dateKey(row.checkIn) === ymd) {
+            return true;
+          }
+          if (
+            compareYmd(ymd, weekStartYmd) === 0 &&
+            compareYmd(dateKey(row.checkIn), ymd) < 0
+          ) {
+            return true;
+          }
+          return false;
+        }
+
+        function getWeekSegmentRole(row, ymd, weekStartYmd, weekLastYmd) {
+          var next = addOneDay(ymd, 1);
+          var isEnd =
+            !isReservationNight(row, next) ||
+            compareYmd(ymd, weekLastYmd) >= 0;
+          return {
+            isStart: isWeekSpanStart(row, ymd, weekStartYmd),
+            isEnd: isEnd,
+          };
+        }
+
+        function formatWeekReservationTooltip(row) {
+          if (!row) {
+            return "";
+          }
+          var name =
+            String(row.guestName || "").trim() ||
+            (row.isExternal ? "외부 예약" : "—");
+          var guestLine = name;
+          if (row.guestCount != null && row.guestCount !== "") {
+            guestLine += " (" + String(row.guestCount) + "인)";
+          }
+          var periodLine =
+            formatKoreanMonthDay(dateKey(row.checkIn)) +
+            " ~ " +
+            formatKoreanMonthDay(dateKey(row.checkOut));
+          var contact = String(row.contact || "").trim();
+          if (!contact || contact === "-") {
+            contact = "—";
+          }
+          return guestLine + "\n" + periodLine + "\n" + contact;
+        }
+
+        function setWeekBarClickData(el, room, date, row) {
+          if (!el) {
+            return;
+          }
+          el.dataset.room = room;
+          el.dataset.date = date;
+          if (row) {
+            el.dataset.resKey = getWeekResKey(row);
+          }
+        }
+
+        function buildWeekRoomTrack(room, ymd, weekStartYmd, weekLastYmd) {
+          var track = document.createElement("div");
+          track.className = "admin-room-week-track";
+          var row = getReservationRowForCalendarNight(room, ymd);
+
+          if (row) {
+            var seg = getWeekSegmentRole(row, ymd, weekStartYmd, weekLastYmd);
+            var bar = document.createElement("div");
+            bar.className = "admin-room-week-bar is-occupied";
+            appendCalendarSegmentClasses(bar, seg);
+            bar.dataset.tooltip = formatWeekReservationTooltip(row);
+            setWeekBarClickData(bar, room, ymd, row);
+            track.appendChild(bar);
+            return track;
+          }
+
+          var vacantBar = document.createElement("div");
+          vacantBar.className = "admin-room-week-bar is-vacant";
+          track.appendChild(vacantBar);
+          return track;
+        }
+
         function buildCalendarRoomTrack(room, roomIndex, ymd, monthLastYmd) {
           var track = document.createElement("div");
           track.className = "admin-calendar-room-track";
@@ -3245,166 +3327,6 @@
             : "";
         }
 
-        /* 10-color palette (hue-interleaved order) */
-        var ROOM_WEEK_PALETTE = [
-          "var(--reserve-02)",
-          "var(--reserve-08)",
-          "var(--reserve-03)",
-          "var(--reserve-01)",
-          "var(--reserve-05)",
-          "var(--reserve-06)",
-          "var(--reserve-04)",
-          "var(--reserve-09)",
-          "var(--reserve-07)",
-          "var(--reserve-10)",
-        ];
-
-        function hashWeekResKey(key) {
-          var h = 0;
-          var i;
-          for (i = 0; i < key.length; i++) {
-            h = ((h << 5) - h + key.charCodeAt(i)) | 0;
-          }
-          return Math.abs(h);
-        }
-
-        function isResVisibleOnDay(row, ymd) {
-          if (!row || !ymd) {
-            return false;
-          }
-          var ci = dateKey(row.checkIn);
-          var co = dateKey(row.checkOut);
-          if (ci < ymd && ymd < co) {
-            return true;
-          }
-          if (co === ymd && ci < ymd) {
-            return true;
-          }
-          if (ci === ymd && co > ymd) {
-            return true;
-          }
-          return false;
-        }
-
-        function reservationsSpatialConflict(a, b, rooms) {
-          var keyA = getWeekResKey(a);
-          var keyB = getWeekResKey(b);
-          if (!keyA || !keyB || keyA === keyB) {
-            return false;
-          }
-          var roomA = String(a.roomType || "").toUpperCase();
-          var roomB = String(b.roomType || "").toUpperCase();
-          var idxA = rooms.indexOf(roomA);
-          var idxB = rooms.indexOf(roomB);
-          var sameRoom = roomA === roomB;
-          var adjacentRooms =
-            idxA >= 0 && idxB >= 0 && Math.abs(idxA - idxB) === 1;
-          if (!sameRoom && !adjacentRooms) {
-            return false;
-          }
-          var ciA = dateKey(a.checkIn);
-          var coA = dateKey(a.checkOut);
-          var ciB = dateKey(b.checkIn);
-          var coB = dateKey(b.checkOut);
-          var rangeStart = ciA < ciB ? ciA : ciB;
-          var rangeEnd = coA > coB ? coA : coB;
-          var day = rangeStart;
-          var guard = 0;
-          while (day <= rangeEnd && guard < 400) {
-            if (isResVisibleOnDay(a, day) && isResVisibleOnDay(b, day)) {
-              return true;
-            }
-            day = addOneDay(day, 1);
-            guard++;
-          }
-          if (sameRoom) {
-            day = rangeStart;
-            guard = 0;
-            while (day < rangeEnd && guard < 400) {
-              var nextDay = addOneDay(day, 1);
-              if (
-                (isResVisibleOnDay(a, day) && isResVisibleOnDay(b, nextDay)) ||
-                (isResVisibleOnDay(a, nextDay) && isResVisibleOnDay(b, day))
-              ) {
-                return true;
-              }
-              day = nextDay;
-              guard++;
-            }
-          }
-          return false;
-        }
-
-        var globalReservationColorMap = Object.create(null);
-
-        function buildGlobalReservationColorMap(rows, rooms) {
-          var seen = Object.create(null);
-          var allResList = [];
-          rows.forEach(function (row) {
-            var rk = getWeekResKey(row);
-            if (!rk || seen[rk]) {
-              return;
-            }
-            seen[rk] = true;
-            allResList.push(row);
-          });
-          allResList.sort(function (a, b) {
-            var ciA = dateKey(a.checkIn);
-            var ciB = dateKey(b.checkIn);
-            if (ciA !== ciB) {
-              return ciA < ciB ? -1 : 1;
-            }
-            var roomA = String(a.roomType || "").toUpperCase();
-            var roomB = String(b.roomType || "").toUpperCase();
-            return rooms.indexOf(roomA) - rooms.indexOf(roomB);
-          });
-          var colorMap = Object.create(null);
-          allResList.forEach(function (row) {
-            var rk = getWeekResKey(row);
-            var usedColors = Object.create(null);
-            allResList.forEach(function (other) {
-              var ok = getWeekResKey(other);
-              if (ok === rk || !colorMap[ok]) {
-                return;
-              }
-              if (reservationsSpatialConflict(row, other, rooms)) {
-                usedColors[colorMap[ok]] = true;
-              }
-            });
-            var assigned = "";
-            var baseIdx = hashWeekResKey(rk) % ROOM_WEEK_PALETTE.length;
-            var offset;
-            for (offset = 0; offset < ROOM_WEEK_PALETTE.length; offset++) {
-              var candidate =
-                ROOM_WEEK_PALETTE[(baseIdx + offset) % ROOM_WEEK_PALETTE.length];
-              if (!usedColors[candidate]) {
-                assigned = candidate;
-                break;
-              }
-            }
-            colorMap[rk] =
-              assigned ||
-              ROOM_WEEK_PALETTE[baseIdx % ROOM_WEEK_PALETTE.length];
-          });
-          return colorMap;
-        }
-
-        function getGlobalReservationColorMap(rows, rooms) {
-          globalReservationColorMap = buildGlobalReservationColorMap(rows, rooms);
-          return globalReservationColorMap;
-        }
-
-        function getReservationColor(row, colorMap) {
-          if (!row) {
-            return ROOM_WEEK_PALETTE[0];
-          }
-          var rk = getWeekResKey(row);
-          return (
-            (colorMap && colorMap[rk]) ||
-            ROOM_WEEK_PALETTE[hashWeekResKey(rk) % ROOM_WEEK_PALETTE.length]
-          );
-        }
-
         function getWeekResStatusForRow(row, ymd) {
           if (!row) {
             return { state: "vacant", label: "공실", row: null };
@@ -3459,55 +3381,19 @@
           var today = getTodayYmdKst();
           var weekStart = roomStatusWeekStart || today;
           var rooms = getAdminRooms();
-          var rows = getReservationRows();
 
           var weekDates = [];
           for (var wi = 0; wi < 7; wi++) {
             weekDates.push(addOneDay(weekStart, wi));
           }
-          var weekEnd = addOneDay(weekDates[6]);
 
           if (roomWeekLabelEl) {
             roomWeekLabelEl.textContent =
               formatMD(weekDates[0]) + " ~ " + formatMD(weekDates[6]);
           }
 
-          var weekColorMap = getGlobalReservationColorMap(rows, rooms);
-
-          function getWeekResColor(row) {
-            return getReservationColor(row, weekColorMap);
-          }
-          function formatWeekTooltip(row) {
-            if (!row) {
-              return "";
-            }
-            var name =
-              String(row.guestName || "").trim() ||
-              (row.isExternal ? "외부 예약" : "—");
-            var guestLine = name;
-            if (row.guestCount != null && row.guestCount !== "") {
-              guestLine += " (" + String(row.guestCount) + "인)";
-            }
-            var periodLine =
-              formatKoreanMonthDay(dateKey(row.checkIn)) +
-              " ~ " +
-              formatKoreanMonthDay(dateKey(row.checkOut));
-            var contact = String(row.contact || "").trim();
-            if (!contact || contact === "-") {
-              contact = "—";
-            }
-            return guestLine + "\n" + periodLine + "\n" + contact;
-          }
-          function setWeekCellClickData(el, room, date, row) {
-            if (!el) {
-              return;
-            }
-            el.dataset.room = room;
-            el.dataset.date = date;
-            if (row) {
-              el.dataset.resKey = getWeekResKey(row);
-            }
-          }
+          var weekStartYmd = weekDates[0];
+          var weekLastYmd = weekDates[6];
 
           var rwTable = document.createElement("table");
           rwTable.className = "admin-room-week-table";
@@ -3528,13 +3414,6 @@
 
           var rwTbody = document.createElement("tbody");
           rooms.forEach(function (room) {
-            var roomRows = rows
-              .filter(function (row) {
-                return String(row.roomType || "").toUpperCase() === room;
-              })
-              .sort(function (a, b) {
-                return (a.isExternal ? 1 : 0) - (b.isExternal ? 1 : 0);
-              });
             var tr = document.createElement("tr");
             var roomTh = document.createElement("th");
             roomTh.scope = "row";
@@ -3543,47 +3422,10 @@
 
             weekDates.forEach(function (d) {
               var td = document.createElement("td");
-              var ongoingRes = null;
-              var checkoutDayRes = null;
-              var checkinDayRes = null;
-              for (var ri = 0; ri < roomRows.length; ri++) {
-                var rci = dateKey(roomRows[ri].checkIn);
-                var rco = dateKey(roomRows[ri].checkOut);
-                if (rci < d && d < rco && !ongoingRes) {
-                  ongoingRes = roomRows[ri];
-                } else if (rco === d && rci < d && !checkoutDayRes) {
-                  checkoutDayRes = roomRows[ri];
-                } else if (rci === d && rco > d && !checkinDayRes) {
-                  checkinDayRes = roomRows[ri];
-                }
-              }
-              var isSplitDay = checkoutDayRes && checkinDayRes;
-              var activeRes =
-                ongoingRes ||
-                (!isSplitDay ? checkoutDayRes || checkinDayRes : null);
-
-              if (isSplitDay) {
-                td.className = "admin-room-week-cell is-split";
-                var leftDiv = document.createElement("div");
-                leftDiv.className = "room-week-half room-week-half-left";
-                leftDiv.style.background = getWeekResColor(checkoutDayRes);
-                leftDiv.dataset.tooltip = formatWeekTooltip(checkoutDayRes);
-                setWeekCellClickData(leftDiv, room, d, checkoutDayRes);
-                var rightDiv = document.createElement("div");
-                rightDiv.className = "room-week-half room-week-half-right";
-                rightDiv.style.background = getWeekResColor(checkinDayRes);
-                rightDiv.dataset.tooltip = formatWeekTooltip(checkinDayRes);
-                setWeekCellClickData(rightDiv, room, d, checkinDayRes);
-                td.appendChild(leftDiv);
-                td.appendChild(rightDiv);
-              } else if (activeRes) {
-                td.className = "admin-room-week-cell is-filled";
-                td.style.background = getWeekResColor(activeRes);
-                td.dataset.tooltip = formatWeekTooltip(activeRes);
-                setWeekCellClickData(td, room, d, activeRes);
-              } else {
-                td.className = "admin-room-week-cell";
-              }
+              td.className = "admin-room-week-cell";
+              td.appendChild(
+                buildWeekRoomTrack(room, d, weekStartYmd, weekLastYmd),
+              );
               tr.appendChild(td);
             });
             rwTbody.appendChild(tr);

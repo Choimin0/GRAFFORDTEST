@@ -14,18 +14,6 @@
   --stone-green: #4a522a;
   --stone-blue: #354958;
 
-  /* Weekly check-in reservation palette (10 colors) */
-  --reserve-01: #8ec2dc;
-  --reserve-02: #6b8e78;
-  --reserve-03: #4a6572;
-  --reserve-04: #34415f;
-  --reserve-05: #a76d7b;
-  --reserve-06: #85865e;
-  --reserve-07: #5c768d;
-  --reserve-08: #c1975b;
-  --reserve-09: #7e637a;
-  --reserve-10: #797268;
-
   /* Semantic colors (components use these, not raw hex) */
   --color-text-primary: var(--stone-700);
   --color-text-muted: var(--stone-400);
@@ -12155,13 +12143,14 @@ main.content-section.confirm-page.admin-page {
   width: 100%;
   border-collapse: collapse;
   table-layout: fixed;
+  --admin-room-week-cell-gutter: 2px;
+  --admin-room-week-bar-height: 1.35rem;
 }
 .admin-room-week-table th,
 .admin-room-week-table td {
   border: 1px solid rgba(58, 53, 49, 0.18);
   text-align: center;
   font-size: 0.82rem;
-  height: 2.55rem;
   padding: 0;
 }
 .admin-room-week-table thead th {
@@ -12183,35 +12172,42 @@ main.content-section.confirm-page.admin-page {
   width: 2.8rem;
 }
 .admin-room-week-cell {
+  overflow: visible;
+  padding: var(--admin-room-week-cell-gutter);
+  background: var(--stone-50);
+}
+.admin-room-week-track {
   position: relative;
+  height: var(--admin-room-week-bar-height);
 }
-.admin-room-week-cell.is-filled {
+.admin-room-week-bar {
+  box-sizing: border-box;
+  height: var(--admin-room-week-bar-height);
+  min-height: var(--admin-room-week-bar-height);
+}
+.admin-room-week-bar.is-segment-start {
+  margin-right: calc(-1 * (var(--admin-room-week-cell-gutter) + 1px));
+  width: calc(100% + var(--admin-room-week-cell-gutter) + 1px);
+}
+.admin-room-week-bar.is-segment-continue {
+  margin-right: calc(-1 * (var(--admin-room-week-cell-gutter) + 1px));
+  margin-left: calc(-1 * var(--admin-room-week-cell-gutter));
+  width: calc(100% + (2 * var(--admin-room-week-cell-gutter) + 1px));
+}
+.admin-room-week-bar.is-segment-end {
+  margin-left: calc(-1 * var(--admin-room-week-cell-gutter));
+  width: calc(100% + var(--admin-room-week-cell-gutter));
+}
+.admin-room-week-bar.is-vacant {
+  background: var(--stone-100);
+}
+.admin-room-week-bar.is-occupied {
+  background: var(--stone-500);
   cursor: pointer;
   transition: filter 0.12s;
 }
-.admin-room-week-cell.is-filled:hover {
+.admin-room-week-bar.is-occupied:hover {
   filter: brightness(0.88);
-}
-.admin-room-week-cell.is-split {
-  overflow: hidden;
-}
-.room-week-half {
-  position: absolute;
-  top: 0;
-  height: 100%;
-  width: 50%;
-  cursor: pointer;
-  transition: filter 0.12s;
-}
-.room-week-half:hover {
-  filter: brightness(0.88);
-}
-.room-week-half-left {
-  left: 0;
-  border-right: 1px solid rgba(255, 255, 255, 0.45);
-}
-.room-week-half-right {
-  right: 0;
 }
 .admin-room-week-tooltip {
   position: fixed;
@@ -12644,11 +12640,9 @@ main.content-section.confirm-page.admin-page {
   font-weight: 400;
 }
 .admin-room-week-table td {
-  height: 3rem;
-  background: var(--stone-50);
-}
-.admin-room-week-cell {
-  background: var(--stone-50);
+  min-height: calc(
+    var(--admin-room-week-bar-height) + (2 * var(--admin-room-week-cell-gutter))
+  );
 }
 .admin-calendar-wrap {
   margin-top: 0;
