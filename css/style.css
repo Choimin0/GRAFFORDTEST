@@ -12700,12 +12700,14 @@ main.content-section.confirm-page.admin-page {
 }
 .admin-calendar-cell:hover,
 .admin-calendar-cell:focus-visible,
-.admin-calendar-cell.is-selected {
+.admin-calendar-cell.is-selected,
+.admin-calendar-cell[role="button"]:hover,
+.admin-calendar-cell[role="button"]:focus-visible,
+.admin-calendar-cell[role="button"].is-selected {
   outline: none;
-  background: color-mix(in srgb, var(--gold-500) 8%, var(--stone-50));
-}
-.admin-calendar-cell.is-selected {
-  box-shadow: inset 0 0 0 1px var(--gold-500);
+  box-shadow: none;
+  border-color: var(--stone-200);
+  background: color-mix(in srgb, var(--gold-500) 18%, var(--stone-50));
 }
 .admin-calendar-day {
   align-self: flex-end;
@@ -14689,10 +14691,9 @@ main.content-section.confirm-page.admin-page {
 }
 .admin-seasonal-rate-row {
   display: grid;
-  grid-template-columns: 4rem minmax(0, 1.2fr) minmax(
-      0,
-      0.9fr
-    ) 7.5rem 7.5rem 5.5rem;
+  grid-template-columns:
+    4rem minmax(0, 1.2fr) minmax(0, 0.9fr)
+    7.5rem 7.5rem 5.5rem;
   gap: var(--space-16);
   align-items: center;
   padding: var(--space-20) var(--space-24);
@@ -14860,10 +14861,9 @@ main.content-section.confirm-page.admin-page {
 }
 .admin-seasonal-rate-form__grid {
   display: grid;
-  grid-template-columns: 7rem minmax(0, 1.2fr) minmax(8rem, 1fr) minmax(
-      0,
-      1fr
-    ) minmax(0, 1fr);
+  grid-template-columns:
+    7rem minmax(0, 1.2fr) minmax(8rem, 1fr) minmax(0, 1fr)
+    minmax(0, 1fr);
   gap: var(--space-24);
   align-items: start;
 }
