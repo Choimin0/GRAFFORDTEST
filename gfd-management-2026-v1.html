@@ -1383,6 +1383,80 @@
         </div>
       </div>
 
+      <div
+        id="admin-calendar-res-detail-modal"
+        class="admin-request-modal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="admin-calendar-res-detail-title"
+        hidden
+      >
+        <div
+          class="admin-request-modal__panel admin-edit-reservation-panel admin-calendar-res-detail-panel"
+        >
+          <div class="admin-calendar-res-detail-head">
+            <p class="admin-dashboard-eyebrow">RESERVATION DETAIL</p>
+            <div class="admin-calendar-res-detail-head__row">
+              <h2 id="admin-calendar-res-detail-title">예약 상세</h2>
+              <button
+                type="button"
+                class="admin-manual-cancel-modal__close"
+                id="admin-calendar-res-detail-close"
+                aria-label="닫기"
+              >
+                ×
+              </button>
+            </div>
+            <p id="admin-calendar-res-detail-meta"></p>
+          </div>
+          <div
+            class="admin-edit-reservation-detail admin-calendar-res-detail-body"
+            aria-label="예약 세부 정보"
+          >
+            <div class="admin-edit-reservation-detail__row">
+              <span>예약번호</span>
+              <strong id="admin-calendar-res-detail-number">—</strong>
+            </div>
+            <div class="admin-edit-reservation-detail__row">
+              <span>객실</span>
+              <strong id="admin-calendar-res-detail-room">—</strong>
+            </div>
+            <div class="admin-edit-reservation-detail__row">
+              <span>체크인</span>
+              <strong id="admin-calendar-res-detail-checkin">—</strong>
+            </div>
+            <div class="admin-edit-reservation-detail__row">
+              <span>체크아웃</span>
+              <strong id="admin-calendar-res-detail-checkout">—</strong>
+            </div>
+            <div class="admin-edit-reservation-detail__row">
+              <span>박수</span>
+              <strong id="admin-calendar-res-detail-nights">—</strong>
+            </div>
+            <div class="admin-edit-reservation-detail__row">
+              <span>인원</span>
+              <strong id="admin-calendar-res-detail-guests">—</strong>
+            </div>
+            <div class="admin-edit-reservation-detail__row">
+              <span>결제</span>
+              <strong id="admin-calendar-res-detail-payment">—</strong>
+            </div>
+            <div class="admin-edit-reservation-detail__row">
+              <span>예약자명</span>
+              <strong id="admin-calendar-res-detail-guest-name">—</strong>
+            </div>
+            <div class="admin-edit-reservation-detail__row">
+              <span>연락처</span>
+              <strong id="admin-calendar-res-detail-contact">—</strong>
+            </div>
+            <div class="admin-edit-reservation-detail__row">
+              <span>금액</span>
+              <strong id="admin-calendar-res-detail-amount">—</strong>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <section
         class="confirm-section"
         id="admin-room-manage-section"
@@ -2058,6 +2132,45 @@
         );
         var editDetailPayment = document.getElementById(
           "admin-edit-detail-payment",
+        );
+        var calendarResDetailModal = document.getElementById(
+          "admin-calendar-res-detail-modal",
+        );
+        var calendarResDetailCloseBtn = document.getElementById(
+          "admin-calendar-res-detail-close",
+        );
+        var calendarResDetailMeta = document.getElementById(
+          "admin-calendar-res-detail-meta",
+        );
+        var calendarResDetailNumber = document.getElementById(
+          "admin-calendar-res-detail-number",
+        );
+        var calendarResDetailRoom = document.getElementById(
+          "admin-calendar-res-detail-room",
+        );
+        var calendarResDetailCheckin = document.getElementById(
+          "admin-calendar-res-detail-checkin",
+        );
+        var calendarResDetailCheckout = document.getElementById(
+          "admin-calendar-res-detail-checkout",
+        );
+        var calendarResDetailNights = document.getElementById(
+          "admin-calendar-res-detail-nights",
+        );
+        var calendarResDetailGuests = document.getElementById(
+          "admin-calendar-res-detail-guests",
+        );
+        var calendarResDetailPayment = document.getElementById(
+          "admin-calendar-res-detail-payment",
+        );
+        var calendarResDetailGuestName = document.getElementById(
+          "admin-calendar-res-detail-guest-name",
+        );
+        var calendarResDetailContact = document.getElementById(
+          "admin-calendar-res-detail-contact",
+        );
+        var calendarResDetailAmount = document.getElementById(
+          "admin-calendar-res-detail-amount",
         );
         var policyConfirmModal = document.getElementById(
           "admin-policy-confirm-modal",
@@ -3111,6 +3224,28 @@
               bar.appendChild(idx);
               bar.appendChild(name);
             }
+            bar.setAttribute("role", "button");
+            bar.setAttribute("tabindex", "0");
+            bar.setAttribute(
+              "aria-label",
+              (String(row.guestName || "").trim() || "예약") +
+                " 예약 상세 보기",
+            );
+            setWeekBarClickData(bar, room, ymd, row);
+            (function (roomVal, dateVal, rowVal) {
+              function openBarDetail(ev) {
+                ev.stopPropagation();
+                openCalendarResDetailModal(roomVal, dateVal, rowVal);
+              }
+              bar.addEventListener("click", openBarDetail);
+              bar.addEventListener("keydown", function (ev) {
+                if (ev.key === "Enter" || ev.key === " ") {
+                  ev.preventDefault();
+                  ev.stopPropagation();
+                  openBarDetail(ev);
+                }
+              });
+            })(room, ymd, row);
             track.appendChild(bar);
             return track;
           }
@@ -3724,6 +3859,76 @@
           }
           if (weekResModalContent) {
             weekResModalContent.innerHTML = "";
+          }
+        }
+
+        function openCalendarResDetailModal(room, ymd, row) {
+          if (!calendarResDetailModal) {
+            return;
+          }
+          var targetRow = row;
+          if (!targetRow && room && ymd) {
+            targetRow = getReservationRowForCalendarNight(room, ymd);
+          }
+          if (!targetRow) {
+            return;
+          }
+          var nights = getStayPeriodNights(targetRow);
+          if (calendarResDetailMeta) {
+            calendarResDetailMeta.textContent =
+              (targetRow.reservationNumber || "—") +
+              " · " +
+              (targetRow.guestName || "—") +
+              " · " +
+              (targetRow.roomType || "—");
+          }
+          if (calendarResDetailNumber) {
+            calendarResDetailNumber.textContent =
+              targetRow.reservationNumber || "—";
+          }
+          if (calendarResDetailRoom) {
+            calendarResDetailRoom.textContent = targetRow.roomType || "—";
+          }
+          if (calendarResDetailCheckin) {
+            calendarResDetailCheckin.textContent = targetRow.checkIn || "—";
+          }
+          if (calendarResDetailCheckout) {
+            calendarResDetailCheckout.textContent = targetRow.checkOut || "—";
+          }
+          if (calendarResDetailNights) {
+            calendarResDetailNights.textContent = nights
+              ? nights + "박"
+              : "—";
+          }
+          if (calendarResDetailGuests) {
+            calendarResDetailGuests.textContent = targetRow.guestCount
+              ? String(targetRow.guestCount) + "명"
+              : "—";
+          }
+          if (calendarResDetailPayment) {
+            calendarResDetailPayment.textContent =
+              getEditPaymentLabel(targetRow);
+          }
+          if (calendarResDetailGuestName) {
+            calendarResDetailGuestName.textContent =
+              targetRow.guestName || "—";
+          }
+          if (calendarResDetailContact) {
+            calendarResDetailContact.textContent = formatAdminSearchContact(
+              targetRow.contact || "",
+            );
+          }
+          if (calendarResDetailAmount) {
+            calendarResDetailAmount.textContent = formatKRW(
+              getReservationPaidTotal(targetRow),
+            );
+          }
+          calendarResDetailModal.hidden = false;
+        }
+
+        function closeCalendarResDetailModal() {
+          if (calendarResDetailModal) {
+            calendarResDetailModal.hidden = true;
           }
         }
 
@@ -9414,6 +9619,21 @@
           });
         }
 
+        if (calendarResDetailCloseBtn) {
+          calendarResDetailCloseBtn.addEventListener(
+            "click",
+            closeCalendarResDetailModal,
+          );
+        }
+
+        if (calendarResDetailModal) {
+          calendarResDetailModal.addEventListener("click", function (e) {
+            if (e.target === calendarResDetailModal) {
+              closeCalendarResDetailModal();
+            }
+          });
+        }
+
         if (manualCancelModal) {
           manualCancelModal.addEventListener("click", function (e) {
             if (e.target === manualCancelModal) {
@@ -9488,6 +9708,13 @@
           }
           if (e.key === "Escape" && weekResModal && !weekResModal.hidden) {
             closeWeekResModal();
+          }
+          if (
+            e.key === "Escape" &&
+            calendarResDetailModal &&
+            !calendarResDetailModal.hidden
+          ) {
+            closeCalendarResDetailModal();
           }
         });
 

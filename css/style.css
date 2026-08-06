@@ -12767,6 +12767,11 @@ main.content-section.confirm-page.admin-page {
 }
 .admin-calendar-room-bar.is-occupied {
   color: var(--stone-50);
+  cursor: pointer;
+}
+.admin-calendar-room-bar.is-occupied:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--gold-500) 55%, transparent);
+  outline-offset: 1px;
 }
 .admin-calendar-room-bar.is-occupied .admin-calendar-room-bar__idx {
   background: color-mix(in srgb, var(--stone-50) 22%, transparent);
@@ -13562,6 +13567,37 @@ main.content-section.confirm-page.admin-page {
   display: grid;
   gap: var(--space-16);
 }
+.admin-calendar-res-detail-panel {
+  position: relative;
+}
+.admin-calendar-res-detail-head {
+  margin-bottom: var(--space-8);
+}
+.admin-calendar-res-detail-head__row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-16);
+}
+.admin-calendar-res-detail-head__row h2 {
+  flex: 1 1 auto;
+  margin: var(--space-8) 0 0;
+  color: var(--stone-800);
+  font-size: 1.25rem;
+  font-weight: 400;
+  letter-spacing: 0.08em;
+}
+.admin-calendar-res-detail-head p:last-child {
+  margin: var(--space-8) 0 var(--space-24);
+  color: var(--stone-400);
+  font-size: 0.76rem;
+  letter-spacing: 0.08em;
+}
+.admin-calendar-res-detail-body {
+  margin-bottom: 0;
+  padding-bottom: 0;
+  border-bottom: none;
+}
 .admin-request-message {
   margin: var(--space-12) 0 0;
   color: var(--stone-red);
@@ -13816,7 +13852,9 @@ main.content-section.confirm-page.admin-page {
     padding: var(--admin-calendar-cell-gutter);
   }
   .admin-calendar-day {
-    font-size: 0.85rem;
+    margin-top: 1px;
+    margin-bottom: 0;
+    font-size: 0.75rem;
   }
   .admin-calendar-room-grid {
     gap: 1px;
