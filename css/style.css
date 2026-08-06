@@ -14,19 +14,17 @@
   --stone-green: #4a522a;
   --stone-blue: #354958;
 
-  /* Weekly check-in reservation palette (9 active; 03/06/07 excluded as too vivid) */
-  --reserve-01: #4a522a; /* 올리브 (stone-green) */
-  --reserve-02: #a8583a; /* 테라코타 */
-  --reserve-03: #7a3d35; /* 딥 와인 */
-  --reserve-04: #8c6239; /* 브라운 오커 */
-  --reserve-05: #5c4020; /* 다크 캐러멜 */
-  --reserve-06: #9c4a4a; /* 브릭 레드 */
-  --reserve-07: #6b3f56; /* 머룬 플럼 */
-  --reserve-08: #7d6a2e; /* 머스타드 카키 */
-  --reserve-09: #3f4a2e; /* 딥 모스 */
-  --reserve-10: #a37450; /* 샌드 브라운 */
-  --reserve-11: #4d3a2a; /* 다크 에스프레소 */
-  --reserve-12: #4d5a4a; /* 세이지 그레이 */
+  /* Weekly check-in reservation palette (10 colors) */
+  --reserve-01: #8ec2dc;
+  --reserve-02: #6b8e78;
+  --reserve-03: #4a6572;
+  --reserve-04: #34415f;
+  --reserve-05: #a76d7b;
+  --reserve-06: #85865e;
+  --reserve-07: #5c768d;
+  --reserve-08: #c1975b;
+  --reserve-09: #7e637a;
+  --reserve-10: #797268;
 
   /* Semantic colors (components use these, not raw hex) */
   --color-text-primary: var(--stone-700);
@@ -12714,6 +12712,7 @@ main.content-section.confirm-page.admin-page {
 .admin-calendar-day {
   align-self: flex-end;
   flex: 0 0 auto;
+  margin-top: 3px;
   margin-bottom: 2px;
   padding-right: 2px;
   color: var(--stone-800);
