@@ -12669,14 +12669,16 @@ main.content-section.confirm-page.admin-page {
 }
 .admin-calendar-grid {
   gap: 0;
+  grid-auto-rows: min-content;
   border-top: 1px solid var(--stone-200);
   border-left: 1px solid var(--stone-200);
   --admin-calendar-cell-gutter: 2px;
+  --admin-calendar-bar-height: 1.35rem;
 }
 .admin-calendar-cell {
   display: flex;
   flex-direction: column;
-  min-height: 9rem;
+  align-items: stretch;
   border: 0;
   border-right: 1px solid var(--stone-200);
   border-bottom: 1px solid var(--stone-200);
@@ -12711,11 +12713,12 @@ main.content-section.confirm-page.admin-page {
 }
 .admin-calendar-day {
   align-self: flex-end;
+  flex: 0 0 auto;
   margin-bottom: 2px;
   padding-right: 2px;
   color: var(--stone-800);
   font-family: var(--font-family-body-en);
-  font-size: 0.82rem;
+  font-size: 1.1rem;
   line-height: 1;
 }
 .admin-calendar-day.is-sunday {
@@ -12726,22 +12729,22 @@ main.content-section.confirm-page.admin-page {
 }
 .admin-calendar-room-grid {
   display: flex;
-  flex: 1;
+  flex: 0 0 auto;
   flex-direction: column;
   gap: 1px;
-  min-height: 0;
 }
 .admin-calendar-room-track {
   position: relative;
-  min-height: 1.35rem;
-  flex: 1 1 0;
+  flex: 0 0 var(--admin-calendar-bar-height);
+  height: var(--admin-calendar-bar-height);
 }
 .admin-calendar-room-bar {
   display: flex;
   align-items: center;
   gap: 3px;
   box-sizing: border-box;
-  min-height: 1.35rem;
+  height: var(--admin-calendar-bar-height);
+  min-height: var(--admin-calendar-bar-height);
   padding: 0 3px 0 0;
   overflow: hidden;
   font-family: var(--font-family-body-kr);
@@ -12798,7 +12801,7 @@ main.content-section.confirm-page.admin-page {
   justify-content: center;
   min-width: 1.35rem;
   height: 100%;
-  min-height: 1.35rem;
+  min-height: var(--admin-calendar-bar-height);
   padding: 0 2px;
   font-family: var(--font-family-body-en);
   font-size: 0.58rem;
@@ -13815,20 +13818,21 @@ main.content-section.confirm-page.admin-page {
     justify-content: space-between;
   }
   .admin-calendar-cell {
-    min-height: 7.5rem;
     --admin-calendar-cell-gutter: 2px;
+    --admin-calendar-bar-height: 1.15rem;
     padding: var(--admin-calendar-cell-gutter);
+  }
+  .admin-calendar-day {
+    font-size: 1rem;
   }
   .admin-calendar-room-grid {
     gap: 1px;
   }
   .admin-calendar-room-bar {
-    min-height: 1.15rem;
     font-size: 0.56rem;
   }
   .admin-calendar-room-bar__idx {
     min-width: 1.2rem;
-    min-height: 1.15rem;
     font-size: 0.52rem;
   }
   .admin-reservation-section .admin-res-tabs {
