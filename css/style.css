@@ -13,7 +13,7 @@
   --stone-red: #8c2b21;
   --stone-green: #4a522a;
 
-  /* Weekly check-in reservation palette (hue-interleaved assignment order) */
+  /* Weekly check-in reservation palette (9 active; 03/06/07 excluded as too vivid) */
   --reserve-01: #4a522a; /* 올리브 (stone-green) */
   --reserve-02: #a8583a; /* 테라코타 */
   --reserve-03: #7a3d35; /* 딥 와인 */
@@ -12653,6 +12653,7 @@ main.content-section.confirm-page.admin-page {
 }
 .admin-calendar-wrap {
   margin-top: 0;
+  overflow: visible;
 }
 .admin-calendar-weekdays {
   margin-bottom: 0;
@@ -12669,14 +12670,18 @@ main.content-section.confirm-page.admin-page {
   gap: 0;
   border-top: 1px solid var(--stone-200);
   border-left: 1px solid var(--stone-200);
+  --admin-calendar-cell-gutter: 4px;
 }
 .admin-calendar-cell {
-  min-height: 7.25rem;
+  display: flex;
+  flex-direction: column;
+  min-height: 9rem;
   border: 0;
   border-right: 1px solid var(--stone-200);
   border-bottom: 1px solid var(--stone-200);
   background: var(--stone-50);
-  padding: var(--space-12);
+  padding: var(--admin-calendar-cell-gutter);
+  overflow: visible;
   cursor: pointer;
   transition:
     background 0.25s ease,
@@ -12702,30 +12707,101 @@ main.content-section.confirm-page.admin-page {
   box-shadow: inset 0 0 0 1px var(--gold-500);
 }
 .admin-calendar-day {
+  align-self: flex-end;
+  margin-bottom: 2px;
+  padding-right: 2px;
   color: var(--stone-800);
   font-family: var(--font-family-body-en);
   font-size: 0.82rem;
+  line-height: 1;
 }
 .admin-calendar-room-grid {
-  display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 3px;
-  margin-top: auto;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  gap: 4px;
+  min-height: 0;
 }
-.admin-calendar-room-dot {
-  display: block;
-  min-height: 1.1rem;
+.admin-calendar-room-track {
+  position: relative;
+  min-height: 1.35rem;
+  flex: 1 1 0;
+}
+.admin-calendar-room-bar {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+  box-sizing: border-box;
+  min-height: 1.35rem;
+  padding: 0 3px 0 0;
+  overflow: hidden;
+  font-family: var(--font-family-body-kr);
+  font-size: 0.62rem;
+  line-height: 1.2;
+}
+.admin-calendar-room-bar.is-segment-start {
+  margin-right: calc(-1 * (var(--admin-calendar-cell-gutter) + 1px));
+  width: calc(100% + var(--admin-calendar-cell-gutter) + 1px);
+}
+.admin-calendar-room-bar.is-segment-continue {
+  margin-right: calc(-1 * (var(--admin-calendar-cell-gutter) + 1px));
+  margin-left: calc(-1 * var(--admin-calendar-cell-gutter));
+  width: calc(100% + (2 * var(--admin-calendar-cell-gutter) + 1px));
+}
+.admin-calendar-room-bar.is-segment-end {
+  margin-left: calc(-1 * var(--admin-calendar-cell-gutter));
+  width: calc(100% + var(--admin-calendar-cell-gutter));
+}
+.admin-calendar-room-bar.is-vacant {
   background: var(--stone-100);
   color: var(--stone-400);
-  font-family: var(--font-family-body-en);
-  font-size: 0.48rem;
-  line-height: 1.1rem;
-  text-align: center;
-  letter-spacing: 0.08em;
 }
-.admin-calendar-room-dot.is-occupied {
-  background: var(--gold-500);
+.admin-calendar-room-bar.is-vacant .admin-calendar-room-bar__idx {
+  background: var(--stone-200);
+  color: var(--stone-500);
+}
+.admin-calendar-room-bar.is-occupied {
   color: var(--stone-50);
+}
+.admin-calendar-room-bar.is-occupied .admin-calendar-room-bar__idx {
+  background: color-mix(in srgb, var(--stone-50) 22%, transparent);
+  color: var(--stone-50);
+}
+.admin-calendar-room-bar.is-platform-direct {
+  background: var(--gold-500);
+}
+.admin-calendar-room-bar.is-platform-airbnb {
+  background: #e25565;
+}
+.admin-calendar-room-bar.is-platform-naver {
+  background: var(--stone-green);
+}
+.admin-calendar-room-bar.is-platform-stayfolio {
+  background: var(--stone-700);
+}
+.admin-calendar-room-bar.is-platform-phone {
+  background: #6f57a8;
+}
+.admin-calendar-room-bar__idx {
+  display: inline-flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.35rem;
+  height: 100%;
+  min-height: 1.35rem;
+  padding: 0 2px;
+  font-family: var(--font-family-body-en);
+  font-size: 0.58rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+.admin-calendar-room-bar__name {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 .admin-calendar-count {
   margin-top: var(--space-8);
@@ -13730,11 +13806,21 @@ main.content-section.confirm-page.admin-page {
     justify-content: space-between;
   }
   .admin-calendar-cell {
-    min-height: 5.8rem;
-    padding: var(--space-8);
+    min-height: 7.5rem;
+    --admin-calendar-cell-gutter: 3px;
+    padding: var(--admin-calendar-cell-gutter);
   }
   .admin-calendar-room-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 3px;
+  }
+  .admin-calendar-room-bar {
+    min-height: 1.15rem;
+    font-size: 0.56rem;
+  }
+  .admin-calendar-room-bar__idx {
+    min-width: 1.2rem;
+    min-height: 1.15rem;
+    font-size: 0.52rem;
   }
   .admin-reservation-section .admin-res-tabs {
     overflow-x: auto;

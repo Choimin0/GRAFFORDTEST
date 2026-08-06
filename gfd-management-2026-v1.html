@@ -2923,6 +2923,126 @@
           );
         }
 
+        function getCalendarBarPlatformId(row) {
+          if (!row) {
+            return "direct";
+          }
+          var platformId = resolveBookingPlatformId(row);
+          if (platformId) {
+            return platformId;
+          }
+          return "direct";
+        }
+
+        function isReservationNight(row, ymd) {
+          if (!row) {
+            return false;
+          }
+          var ci = dateKey(row.checkIn);
+          var co = dateKey(row.checkOut);
+          return !!(
+            ci &&
+            co &&
+            compareYmd(ymd, ci) >= 0 &&
+            compareYmd(ymd, co) < 0
+          );
+        }
+
+        function getDayOfWeekFromYmd(ymd) {
+          var p = String(ymd || "").split("-");
+          return new Date(
+            Number(p[0]),
+            Number(p[1]) - 1,
+            Number(p[2]),
+          ).getDay();
+        }
+
+        function getReservationRowForCalendarNight(room, ymd) {
+          if (!isRoomOccupiedOnDate(room, ymd)) {
+            return null;
+          }
+          var status = getRoomStatusForDate(room, ymd);
+          return status.row || null;
+        }
+
+        function isCalendarSpanStart(row, ymd) {
+          if (!isReservationNight(row, ymd)) {
+            return false;
+          }
+          if (dateKey(row.checkIn) === ymd) {
+            return true;
+          }
+          if (getDayOfWeekFromYmd(ymd) === 0) {
+            return true;
+          }
+          var dayPart = Number(String(ymd || "").split("-")[2]);
+          if (dayPart === 1) {
+            return compareYmd(dateKey(row.checkIn), ymd) < 0;
+          }
+          return false;
+        }
+
+        function getCalendarSegmentRole(row, ymd, monthLastYmd) {
+          var next = addOneDay(ymd, 1);
+          var isEnd =
+            !isReservationNight(row, next) ||
+            getDayOfWeekFromYmd(ymd) === 6 ||
+            compareYmd(next, monthLastYmd) > 0;
+          return {
+            isStart: isCalendarSpanStart(row, ymd),
+            isEnd: isEnd,
+          };
+        }
+
+        function appendCalendarSegmentClasses(bar, seg) {
+          if (seg.isStart && seg.isEnd) {
+            bar.className += " is-segment-single";
+          } else if (seg.isStart) {
+            bar.className += " is-segment-start";
+          } else if (seg.isEnd) {
+            bar.className += " is-segment-end";
+          } else {
+            bar.className += " is-segment-continue";
+          }
+        }
+
+        function buildCalendarRoomTrack(room, roomIndex, ymd, monthLastYmd) {
+          var track = document.createElement("div");
+          track.className = "admin-calendar-room-track";
+          var row = getReservationRowForCalendarNight(room, ymd);
+
+          if (row) {
+            var platformId = getCalendarBarPlatformId(row);
+            var seg = getCalendarSegmentRole(row, ymd, monthLastYmd);
+            var bar = document.createElement("div");
+            bar.className =
+              "admin-calendar-room-bar is-occupied is-platform-" + platformId;
+            appendCalendarSegmentClasses(bar, seg);
+            if (seg.isStart) {
+              var idx = document.createElement("span");
+              idx.className = "admin-calendar-room-bar__idx";
+              idx.textContent = String(roomIndex) + ".";
+              var name = document.createElement("span");
+              name.className = "admin-calendar-room-bar__name";
+              name.textContent =
+                String(row.guestName || "").trim() || "—";
+              bar.appendChild(idx);
+              bar.appendChild(name);
+            }
+            track.appendChild(bar);
+            return track;
+          }
+
+          var vacantBar = document.createElement("div");
+          vacantBar.className = "admin-calendar-room-bar is-vacant";
+          var vacantIdx = document.createElement("span");
+          vacantIdx.className = "admin-calendar-room-bar__idx";
+          vacantIdx.textContent = String(roomIndex) + ".";
+          vacantBar.appendChild(vacantIdx);
+          track.appendChild(vacantBar);
+          return track;
+        }
+
         function renderStatusMetrics() {
           var today = getTodayYmdKst();
           var rooms = getAdminRooms();
@@ -3125,23 +3245,29 @@
             : "";
         }
 
-        /* Hue-interleaved so consecutive palette slots stay visually distinct */
+        /* 9-color palette (excludes reserve-03/06/07); hue-interleaved order */
         var ROOM_WEEK_PALETTE = [
-          "var(--reserve-06)",
-          "var(--reserve-05)",
-          "var(--reserve-03)",
-          "var(--reserve-08)",
           "var(--reserve-02)",
-          "var(--reserve-01)",
+          "var(--reserve-08)",
           "var(--reserve-10)",
-          "var(--reserve-09)",
+          "var(--reserve-01)",
           "var(--reserve-11)",
-          "var(--reserve-12)",
+          "var(--reserve-09)",
           "var(--reserve-04)",
-          "var(--reserve-07)",
+          "var(--reserve-12)",
+          "var(--reserve-05)",
         ];
 
-        function isWeekResVisibleOnDay(row, ymd) {
+        function hashWeekResKey(key) {
+          var h = 0;
+          var i;
+          for (i = 0; i < key.length; i++) {
+            h = ((h << 5) - h + key.charCodeAt(i)) | 0;
+          }
+          return Math.abs(h);
+        }
+
+        function isResVisibleOnDay(row, ymd) {
           if (!row || !ymd) {
             return false;
           }
@@ -3159,7 +3285,7 @@
           return false;
         }
 
-        function weekReservationsConflict(a, b, rooms, weekDates) {
+        function reservationsSpatialConflict(a, b, rooms) {
           var keyA = getWeekResKey(a);
           var keyB = getWeekResKey(b);
           if (!keyA || !keyB || keyA === keyB) {
@@ -3175,46 +3301,53 @@
           if (!sameRoom && !adjacentRooms) {
             return false;
           }
-          var di;
-          for (di = 0; di < weekDates.length; di++) {
-            var day = weekDates[di];
-            var aVis = isWeekResVisibleOnDay(a, day);
-            var bVis = isWeekResVisibleOnDay(b, day);
-            if (aVis && bVis) {
+          var ciA = dateKey(a.checkIn);
+          var coA = dateKey(a.checkOut);
+          var ciB = dateKey(b.checkIn);
+          var coB = dateKey(b.checkOut);
+          var rangeStart = ciA < ciB ? ciA : ciB;
+          var rangeEnd = coA > coB ? coA : coB;
+          var day = rangeStart;
+          var guard = 0;
+          while (day <= rangeEnd && guard < 400) {
+            if (isResVisibleOnDay(a, day) && isResVisibleOnDay(b, day)) {
               return true;
             }
+            day = addOneDay(day, 1);
+            guard++;
           }
           if (sameRoom) {
-            for (di = 0; di < weekDates.length - 1; di++) {
-              var d0 = weekDates[di];
-              var d1 = weekDates[di + 1];
+            day = rangeStart;
+            guard = 0;
+            while (day < rangeEnd && guard < 400) {
+              var nextDay = addOneDay(day, 1);
               if (
-                (isWeekResVisibleOnDay(a, d0) &&
-                  isWeekResVisibleOnDay(b, d1)) ||
-                (isWeekResVisibleOnDay(a, d1) && isWeekResVisibleOnDay(b, d0))
+                (isResVisibleOnDay(a, day) && isResVisibleOnDay(b, nextDay)) ||
+                (isResVisibleOnDay(a, nextDay) && isResVisibleOnDay(b, day))
               ) {
                 return true;
               }
+              day = nextDay;
+              guard++;
             }
           }
           return false;
         }
 
-        function buildWeekReservationColorMap(rows, rooms, weekDates, weekEnd) {
+        var globalReservationColorMap = Object.create(null);
+
+        function buildGlobalReservationColorMap(rows, rooms) {
           var seen = Object.create(null);
-          var weekResList = [];
+          var allResList = [];
           rows.forEach(function (row) {
-            var ci = dateKey(row.checkIn);
-            var co = dateKey(row.checkOut);
-            if (co > weekDates[0] && ci < weekEnd) {
-              var rk = getWeekResKey(row);
-              if (!seen[rk]) {
-                seen[rk] = true;
-                weekResList.push(row);
-              }
+            var rk = getWeekResKey(row);
+            if (!rk || seen[rk]) {
+              return;
             }
+            seen[rk] = true;
+            allResList.push(row);
           });
-          weekResList.sort(function (a, b) {
+          allResList.sort(function (a, b) {
             var ciA = dateKey(a.checkIn);
             var ciB = dateKey(b.checkIn);
             if (ciA !== ciB) {
@@ -3224,35 +3357,51 @@
             var roomB = String(b.roomType || "").toUpperCase();
             return rooms.indexOf(roomA) - rooms.indexOf(roomB);
           });
-          var weekColorMap = Object.create(null);
-          weekResList.forEach(function (row) {
+          var colorMap = Object.create(null);
+          allResList.forEach(function (row) {
             var rk = getWeekResKey(row);
             var usedColors = Object.create(null);
-            weekResList.forEach(function (other) {
+            allResList.forEach(function (other) {
               var ok = getWeekResKey(other);
-              if (ok === rk || !weekColorMap[ok]) {
+              if (ok === rk || !colorMap[ok]) {
                 return;
               }
-              if (weekReservationsConflict(row, other, rooms, weekDates)) {
-                usedColors[weekColorMap[ok]] = true;
+              if (reservationsSpatialConflict(row, other, rooms)) {
+                usedColors[colorMap[ok]] = true;
               }
             });
             var assigned = "";
-            var pi;
-            for (pi = 0; pi < ROOM_WEEK_PALETTE.length; pi++) {
-              var candidate = ROOM_WEEK_PALETTE[pi];
+            var baseIdx = hashWeekResKey(rk) % ROOM_WEEK_PALETTE.length;
+            var offset;
+            for (offset = 0; offset < ROOM_WEEK_PALETTE.length; offset++) {
+              var candidate =
+                ROOM_WEEK_PALETTE[(baseIdx + offset) % ROOM_WEEK_PALETTE.length];
               if (!usedColors[candidate]) {
                 assigned = candidate;
                 break;
               }
             }
-            weekColorMap[rk] =
+            colorMap[rk] =
               assigned ||
-              ROOM_WEEK_PALETTE[
-                Object.keys(weekColorMap).length % ROOM_WEEK_PALETTE.length
-              ];
+              ROOM_WEEK_PALETTE[baseIdx % ROOM_WEEK_PALETTE.length];
           });
-          return weekColorMap;
+          return colorMap;
+        }
+
+        function getGlobalReservationColorMap(rows, rooms) {
+          globalReservationColorMap = buildGlobalReservationColorMap(rows, rooms);
+          return globalReservationColorMap;
+        }
+
+        function getReservationColor(row, colorMap) {
+          if (!row) {
+            return ROOM_WEEK_PALETTE[0];
+          }
+          var rk = getWeekResKey(row);
+          return (
+            (colorMap && colorMap[rk]) ||
+            ROOM_WEEK_PALETTE[hashWeekResKey(rk) % ROOM_WEEK_PALETTE.length]
+          );
         }
 
         function getWeekResStatusForRow(row, ymd) {
@@ -3322,17 +3471,10 @@
               formatMD(weekDates[0]) + " ~ " + formatMD(weekDates[6]);
           }
 
-          var weekColorMap = buildWeekReservationColorMap(
-            rows,
-            rooms,
-            weekDates,
-            weekEnd,
-          );
+          var weekColorMap = getGlobalReservationColorMap(rows, rooms);
 
           function getWeekResColor(row) {
-            return row
-              ? weekColorMap[getWeekResKey(row)] || "var(--stone-200)"
-              : "var(--stone-200)";
+            return getReservationColor(row, weekColorMap);
           }
           function formatWeekTooltip(row) {
             if (!row) {
@@ -3773,6 +3915,12 @@
           var first = new Date(y, m, 1);
           var startPad = first.getDay();
           var lastDay = new Date(y, m + 1, 0).getDate();
+          var monthLastYmd =
+            y +
+            "-" +
+            String(m + 1).padStart(2, "0") +
+            "-" +
+            String(lastDay).padStart(2, "0");
           calendarGrid.innerHTML = "";
 
           for (var i = 0; i < startPad; i += 1) {
@@ -3804,20 +3952,13 @@
             dayEl.textContent = String(day);
             var roomGrid = document.createElement("div");
             roomGrid.className = "admin-calendar-room-grid";
-            getAdminRooms().forEach(function (room) {
-              var dot = document.createElement("span");
-              dot.className =
-                "admin-calendar-room-dot" +
-                (isRoomOccupiedOnDate(room, key) ? " is-occupied" : "");
-              dot.textContent = room;
-              roomGrid.appendChild(dot);
+            getAdminRooms().forEach(function (room, roomIndex) {
+              roomGrid.appendChild(
+                buildCalendarRoomTrack(room, roomIndex + 1, key, monthLastYmd),
+              );
             });
-            var cntEl = document.createElement("strong");
-            cntEl.className = "admin-calendar-count";
-            cntEl.textContent = cnt > 0 ? cnt + "건" : "0건";
             cell.appendChild(dayEl);
             cell.appendChild(roomGrid);
-            cell.appendChild(cntEl);
             cell.setAttribute("role", "button");
             cell.setAttribute("tabindex", "0");
             (function (dateValue) {
