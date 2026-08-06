@@ -3948,7 +3948,13 @@
               cell.className += " is-selected";
             }
             var dayEl = document.createElement("span");
+            var dayOfWeek = dObj.getDay();
             dayEl.className = "admin-calendar-day";
+            if (dayOfWeek === 0) {
+              dayEl.className += " is-sunday";
+            } else if (dayOfWeek === 6) {
+              dayEl.className += " is-saturday";
+            }
             dayEl.textContent = String(day);
             var roomGrid = document.createElement("div");
             roomGrid.className = "admin-calendar-room-grid";
