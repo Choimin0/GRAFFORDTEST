@@ -12718,7 +12718,7 @@ main.content-section.confirm-page.admin-page {
   padding-right: 2px;
   color: var(--stone-800);
   font-family: var(--font-family-body-en);
-  font-size: 1.1rem;
+  font-size: 0.9rem;
   line-height: 1;
 }
 .admin-calendar-day.is-sunday {
@@ -13823,7 +13823,7 @@ main.content-section.confirm-page.admin-page {
     padding: var(--admin-calendar-cell-gutter);
   }
   .admin-calendar-day {
-    font-size: 1rem;
+    font-size: 0.85rem;
   }
   .admin-calendar-room-grid {
     gap: 1px;
