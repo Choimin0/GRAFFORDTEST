@@ -12670,7 +12670,7 @@ main.content-section.confirm-page.admin-page {
   gap: 0;
   border-top: 1px solid var(--stone-200);
   border-left: 1px solid var(--stone-200);
-  --admin-calendar-cell-gutter: 4px;
+  --admin-calendar-cell-gutter: 2px;
 }
 .admin-calendar-cell {
   display: flex;
@@ -12719,7 +12719,7 @@ main.content-section.confirm-page.admin-page {
   display: flex;
   flex: 1;
   flex-direction: column;
-  gap: 4px;
+  gap: 2px;
   min-height: 0;
 }
 .admin-calendar-room-track {
@@ -12787,10 +12787,10 @@ main.content-section.confirm-page.admin-page {
   flex-shrink: 0;
   align-items: center;
   justify-content: center;
-  min-width: 1.35rem;
+  min-width: 1.22rem;
   height: 100%;
   min-height: 1.35rem;
-  padding: 0 2px;
+  padding: 0 1px;
   font-family: var(--font-family-body-en);
   font-size: 0.58rem;
   font-weight: 600;
@@ -13807,18 +13807,18 @@ main.content-section.confirm-page.admin-page {
   }
   .admin-calendar-cell {
     min-height: 7.5rem;
-    --admin-calendar-cell-gutter: 3px;
+    --admin-calendar-cell-gutter: 2px;
     padding: var(--admin-calendar-cell-gutter);
   }
   .admin-calendar-room-grid {
-    gap: 3px;
+    gap: 2px;
   }
   .admin-calendar-room-bar {
     min-height: 1.15rem;
     font-size: 0.56rem;
   }
   .admin-calendar-room-bar__idx {
-    min-width: 1.2rem;
+    min-width: 1.1rem;
     min-height: 1.15rem;
     font-size: 0.52rem;
   }
