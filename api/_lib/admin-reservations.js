@@ -11,12 +11,47 @@ import {
 import {
   handleCreateManualBooking,
   filterShadowedExternalCalendarRows,
+  countStayNights,
+  validateGuestCount,
 } from "./admin-manual-booking.js";
 import { archivePastReservations } from "./booking-archive.js";
+import {
+  hasRoomBlockOverlap,
+  hasReservationOverlap,
+} from "./room-availability.js";
+import { hasActiveHoldOverlap } from "./booking-hold.js";
 
 const BOOKING_TABLE = "booking";
 const MAX_GUEST_NAME = 100;
 const MAX_CONTACT = 40;
+const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
+
+async function checkAdminReservationUpdateAvailability(
+  pool,
+  room,
+  checkIn,
+  checkOut,
+  excludeReservationNumber,
+) {
+  if (await hasRoomBlockOverlap(pool, room, checkIn, checkOut)) {
+    return { available: false, reason: "blocked" };
+  }
+  if (
+    await hasReservationOverlap(
+      pool,
+      room,
+      checkIn,
+      checkOut,
+      excludeReservationNumber,
+    )
+  ) {
+    return { available: false, reason: "occupied" };
+  }
+  if (await hasActiveHoldOverlap(pool, room, checkIn, checkOut, null)) {
+    return { available: false, reason: "held" };
+  }
+  return { available: true };
+}
 
 // collection → booking 테이블 status 필터 매핑
 const ALLOWED_COLLECTIONS = {
@@ -159,6 +194,9 @@ export async function handleAdminReservations(res, pool, body) {
       .replace(/^GRF-/i, "");
     var nextGuestName = String(body.guestName || "").trim();
     var nextContact = String(body.contact || "").trim();
+    var nextCheckIn = String(body.checkIn || body.checkin || "").trim();
+    var nextCheckOut = String(body.checkOut || body.checkout || "").trim();
+    var nextGuestCount = Math.floor(Number(body.guestCount));
     var nextTotalAmount = Number(
       String(body.totalAmount != null ? body.totalAmount : "")
         .replace(/[^\d.-]/g, ""),
@@ -189,6 +227,17 @@ export async function handleAdminReservations(res, pool, body) {
       });
       return;
     }
+    if (
+      !DATE_RE.test(nextCheckIn) ||
+      !DATE_RE.test(nextCheckOut) ||
+      nextCheckIn >= nextCheckOut
+    ) {
+      json(res, 400, {
+        ok: false,
+        error: "체크인·체크아웃 날짜를 확인해 주세요.",
+      });
+      return;
+    }
     if (!Number.isFinite(nextTotalAmount) || nextTotalAmount < 0) {
       json(res, 400, { ok: false, error: "금액을 확인해 주세요." });
       return;
@@ -198,7 +247,8 @@ export async function handleAdminReservations(res, pool, body) {
       await archivePastReservations(pool);
       await purgeExpiredBookings(pool);
       var updateSel = await pool.query(
-        `SELECT reservation_number, created_at, status
+        `SELECT reservation_number, created_at, status, room_type,
+                check_in_date, check_out_date, guest_count
          FROM ${BOOKING_TABLE}
          WHERE reservation_number = $1
          LIMIT 1`,
@@ -219,6 +269,47 @@ export async function handleAdminReservations(res, pool, body) {
         });
         return;
       }
+      var roomType = String(updateSel.rows[0].room_type || "")
+        .trim()
+        .toUpperCase();
+      var guestValidation = validateGuestCount(roomType, nextGuestCount);
+      if (!guestValidation.ok) {
+        json(res, 400, { ok: false, error: guestValidation.error });
+        return;
+      }
+      var stayNights = countStayNights(nextCheckIn, nextCheckOut);
+      if (stayNights < 1) {
+        json(res, 400, { ok: false, error: "숙박 일수를 확인해 주세요." });
+        return;
+      }
+      var prevCheckIn = toYMD(updateSel.rows[0].check_in_date);
+      var prevCheckOut = toYMD(updateSel.rows[0].check_out_date);
+      var datesChanged =
+        nextCheckIn !== prevCheckIn || nextCheckOut !== prevCheckOut;
+      if (datesChanged) {
+        var availability = await checkAdminReservationUpdateAvailability(
+          pool,
+          roomType,
+          nextCheckIn,
+          nextCheckOut,
+          updateReservationNumber,
+        );
+        if (!availability.available) {
+          var reasonMessages = {
+            blocked: "선택한 기간은 방막기로 예약할 수 없습니다.",
+            occupied: "동일 객실·기간에 다른 확정 예약이 있습니다.",
+            held: "다른 고객이 해당 기간을 예약 진행 중입니다.",
+          };
+          json(res, 409, {
+            ok: false,
+            error:
+              reasonMessages[availability.reason] ||
+              "해당 기간으로 변경할 수 없습니다.",
+            reason: availability.reason,
+          });
+          return;
+        }
+      }
       var encryptedPii = encryptBookingPii({
         guestName: nextGuestName,
         contact: nextContact,
@@ -227,19 +318,39 @@ export async function handleAdminReservations(res, pool, body) {
         `UPDATE ${BOOKING_TABLE}
          SET guest_name = $2,
              contact = $3,
-             total_amount = $4
+             total_amount = $4,
+             check_in_date = $5::date,
+             check_out_date = $6::date,
+             guest_count = $7,
+             stay_nights = $8
          WHERE reservation_number = $1
            AND status = 'confirm'
          RETURNING
            reservation_number,
            guest_name,
            contact,
-           total_amount`,
+           total_amount,
+           room_type,
+           check_in_date,
+           check_out_date,
+           guest_count,
+           stay_nights,
+           guest_request,
+           payment_method,
+           checkin_alarm_sent_count,
+           booking_locale,
+           booking_channel,
+           linked_external_uid,
+           created_at`,
         [
           updateReservationNumber,
           encryptedPii.guest_name,
           encryptedPii.contact,
           nextTotalAmount,
+          nextCheckIn,
+          nextCheckOut,
+          guestValidation.guestCount,
+          stayNights,
         ],
       );
       if (!updateUpd.rows || !updateUpd.rows.length) {
@@ -253,6 +364,10 @@ export async function handleAdminReservations(res, pool, body) {
         guestName: updated.guestName,
         contact: updated.contact,
         totalAmount: updated.totalAmount,
+        checkIn: updated.checkIn,
+        checkOut: updated.checkOut,
+        guestCount: updated.guestCount,
+        stayPeriod: updated.stayPeriod,
       });
     } catch (e) {
       json(res, 500, {

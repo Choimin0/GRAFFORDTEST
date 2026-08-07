@@ -1309,27 +1309,96 @@
               <strong id="admin-edit-detail-room">—</strong>
             </div>
             <div class="admin-edit-reservation-detail__row">
-              <span>체크인</span>
-              <strong id="admin-edit-detail-checkin">—</strong>
-            </div>
-            <div class="admin-edit-reservation-detail__row">
-              <span>체크아웃</span>
-              <strong id="admin-edit-detail-checkout">—</strong>
-            </div>
-            <div class="admin-edit-reservation-detail__row">
-              <span>박수</span>
-              <strong id="admin-edit-detail-nights">—</strong>
-            </div>
-            <div class="admin-edit-reservation-detail__row">
-              <span>인원</span>
-              <strong id="admin-edit-detail-guests">—</strong>
-            </div>
-            <div class="admin-edit-reservation-detail__row">
               <span>결제</span>
               <strong id="admin-edit-detail-payment">—</strong>
             </div>
           </div>
           <div class="admin-edit-reservation-fields">
+            <div class="admin-edit-reservation-field-group">
+              <p class="admin-edit-reservation-field-label">체크인 · 체크아웃</p>
+              <div
+                class="admin-res-entry-calendar-wrap admin-edit-res-calendar-wrap"
+                id="admin-edit-res-calendar-wrap"
+              >
+                <div
+                  class="admin-res-entry-calendar"
+                  id="admin-edit-res-calendar"
+                  role="grid"
+                >
+                  <div class="admin-res-entry-cal-header">
+                    <button
+                      type="button"
+                      class="admin-res-entry-cal-nav"
+                      id="admin-edit-res-cal-prev"
+                      aria-label="이전 달"
+                    >
+                      ‹
+                    </button>
+                    <span
+                      class="admin-res-entry-cal-month-label"
+                      id="admin-edit-res-cal-month-label"
+                    ></span>
+                    <button
+                      type="button"
+                      class="admin-res-entry-cal-nav"
+                      id="admin-edit-res-cal-next"
+                      aria-label="다음 달"
+                    >
+                      ›
+                    </button>
+                  </div>
+                  <div
+                    class="admin-res-entry-cal-weekdays"
+                    aria-hidden="true"
+                  >
+                    <span>일</span><span>월</span><span>화</span><span>수</span
+                    ><span>목</span><span>금</span><span>토</span>
+                  </div>
+                  <div
+                    class="admin-res-entry-cal-grid"
+                    id="admin-edit-res-cal-grid"
+                    role="rowgroup"
+                  ></div>
+                </div>
+              </div>
+              <p
+                class="admin-res-entry-cal-hint admin-edit-res-cal-hint"
+                id="admin-edit-res-cal-hint"
+              >
+                달력에서 체크인 날짜를 먼저 선택한 뒤, 체크아웃 날짜를 선택하세요.
+              </p>
+            </div>
+            <div class="admin-edit-reservation-field-group">
+              <p class="admin-edit-reservation-field-label">인원</p>
+              <div class="admin-res-entry-guest-counter">
+                <button
+                  type="button"
+                  class="admin-res-entry-counter-btn"
+                  id="admin-edit-res-guest-minus"
+                  aria-label="인원 감소"
+                >
+                  −
+                </button>
+                <span
+                  class="admin-res-entry-counter-value"
+                  id="admin-edit-res-guest-count"
+                  aria-live="polite"
+                  >2</span
+                >
+                <button
+                  type="button"
+                  class="admin-res-entry-counter-btn"
+                  id="admin-edit-res-guest-plus"
+                  aria-label="인원 증가"
+                >
+                  +
+                </button>
+              </div>
+              <p
+                class="admin-res-entry-guest-hint"
+                id="admin-edit-res-guest-hint"
+              ></p>
+            </div>
             <label class="admin-request-modal__label">
               연락처
               <input
@@ -1357,6 +1426,11 @@
                 inputmode="numeric"
                 autocomplete="off"
               />
+              <span
+                class="admin-res-entry-per-night admin-edit-res-quote"
+                id="admin-edit-res-quote"
+                aria-live="polite"
+              ></span>
             </label>
           </div>
           <p
@@ -2118,21 +2192,18 @@
           "admin-edit-detail-number",
         );
         var editDetailRoom = document.getElementById("admin-edit-detail-room");
-        var editDetailCheckin = document.getElementById(
-          "admin-edit-detail-checkin",
-        );
-        var editDetailCheckout = document.getElementById(
-          "admin-edit-detail-checkout",
-        );
-        var editDetailNights = document.getElementById(
-          "admin-edit-detail-nights",
-        );
-        var editDetailGuests = document.getElementById(
-          "admin-edit-detail-guests",
-        );
         var editDetailPayment = document.getElementById(
           "admin-edit-detail-payment",
         );
+        var editResCalView = new Date();
+        var editResCheckInDate = null;
+        var editResCheckOutDate = null;
+        var editResOccupiedNightSet = new Set();
+        var editResConfirmedOccupiedNightSet = new Set();
+        var editResAirbnbNightSet = new Set();
+        var editResAvailabilityRoom = "";
+        var editResGuestCount = 2;
+        var editResRoomType = "";
         var calendarResDetailModal = document.getElementById(
           "admin-calendar-res-detail-modal",
         );
@@ -2378,6 +2449,68 @@
           return false;
         }
 
+        function resetAdminSearchFilters() {
+          if (searchRoomSelect) {
+            searchRoomSelect.value = "";
+          }
+          if (searchNameInput) {
+            searchNameInput.value = "";
+          }
+          if (searchPeriodStartInput) {
+            searchPeriodStartInput.value = "";
+          }
+          if (searchPeriodEndInput) {
+            searchPeriodEndInput.value = "";
+          }
+          if (searchContactInput) {
+            searchContactInput.value = "";
+          }
+          if (searchReservationInput) {
+            searchReservationInput.value = "";
+          }
+        }
+
+        function resetAdminUnsavedState() {
+          resetReservationEntryForm();
+          closeRequestModal();
+          closeEditReservationModal(true);
+          closeManualCancelModal(true);
+          closeCheckinResendModal();
+          closePolicyConfirm();
+          closeWeekResModal();
+          closeCalendarResDetailModal();
+          resetAdminSearchFilters();
+          if (
+            window.GraffordAdminSeasonalRate &&
+            typeof window.GraffordAdminSeasonalRate.resetSession === "function"
+          ) {
+            window.GraffordAdminSeasonalRate.resetSession();
+          }
+          activeResTab = "current";
+          activeSalesTab = "monthly";
+          activeRoomManageTab = "rate";
+          activeCategory = "status";
+          currentPage = 1;
+          sortKey = "";
+          sortDirection = "";
+          pendingPolicyToggle = null;
+          pendingRateSave = null;
+          pendingRateBatchSave = null;
+          pendingRoomStatusSave = null;
+          pendingRoomBlockSave = null;
+          pendingRoomBlockRelease = null;
+          categoryButtons.forEach(function (btn) {
+            btn.classList.toggle(
+              "is-active",
+              btn.getAttribute("data-admin-category") === "status",
+            );
+          });
+          var adminPageEl = document.querySelector(".admin-page");
+          if (adminPageEl) {
+            adminPageEl.classList.remove("is-sidebar-collapsed");
+          }
+        }
+
         function forceAdminLogout(message) {
           if (isReservationListPreview) {
             return;
@@ -2391,6 +2524,7 @@
           latestRows = [];
           latestCalendarRows = [];
           reservationListRows = [];
+          resetAdminUnsavedState();
           syncAdminSessionToday();
           setLoggedOutView();
           if (message) {
@@ -2605,6 +2739,9 @@
           }
           statusSection.hidden = true;
           bankSection.hidden = true;
+          if (reservationEntrySection) {
+            reservationEntrySection.hidden = true;
+          }
           roomManageSection.hidden = true;
           salesSection.hidden = true;
           if (loginSection) {
@@ -2922,18 +3059,6 @@
             nextMap[room] = String((row && row.statusText) || "");
           });
           roomStatusByRoom = nextMap;
-        }
-
-        function getManageCellDisplay(text) {
-          var full = String(text || "").trim();
-          if (!full) {
-            return { display: "—", tooltip: "" };
-          }
-          var MAX_LEN = 14;
-          if (full.length <= MAX_LEN) {
-            return { display: full, tooltip: "" };
-          }
-          return { display: full.slice(0, MAX_LEN) + "...", tooltip: full };
         }
 
         function getAdminRooms() {
@@ -3337,7 +3462,7 @@
           table.className = "admin-checkin-table";
           var thead = document.createElement("thead");
           var headTr = document.createElement("tr");
-          ["", "예약자명", "인원수", "알림톡", "요청사항", "객실관리"].forEach(
+          ["", "예약자명", "인원수", "알림톡", "요청사항"].forEach(
             function (label, idx) {
               var th = document.createElement("th");
               th.scope = "col";
@@ -3375,7 +3500,6 @@
               appendCheckinCell(tr, "");
               appendCheckinCell(tr, "");
               appendCheckinCell(tr, "—", "admin-checkin-request-cell");
-              appendCheckinCell(tr, "—", "admin-checkin-manage-cell");
               tbody.appendChild(tr);
               return;
             }
@@ -3430,13 +3554,6 @@
               "admin-checkin-request-cell",
             );
             requestTd.dataset.tooltip = requestText;
-            var manageInfo = getManageCellDisplay(roomStatusByRoom[room] || "");
-            var manageTd = appendCheckinCell(
-              tr,
-              manageInfo.display,
-              "admin-checkin-manage-cell",
-            );
-            manageTd.dataset.tooltip = manageInfo.tooltip;
             tbody.appendChild(tr);
           });
           table.appendChild(tbody);
@@ -6886,6 +7003,456 @@
           if (editAmountInput) {
             editAmountInput.disabled = !!disabled;
           }
+          var editGuestMinus = document.getElementById(
+            "admin-edit-res-guest-minus",
+          );
+          var editGuestPlus = document.getElementById(
+            "admin-edit-res-guest-plus",
+          );
+          var editCalPrev = document.getElementById("admin-edit-res-cal-prev");
+          var editCalNext = document.getElementById("admin-edit-res-cal-next");
+          if (editGuestMinus) {
+            editGuestMinus.disabled = !!disabled;
+          }
+          if (editGuestPlus) {
+            editGuestPlus.disabled = !!disabled;
+          }
+          if (editCalPrev) {
+            editCalPrev.disabled = !!disabled;
+          }
+          if (editCalNext) {
+            editCalNext.disabled = !!disabled;
+          }
+          var editCalGrid = document.getElementById("admin-edit-res-cal-grid");
+          if (editCalGrid) {
+            editCalGrid.querySelectorAll("button").forEach(function (btn) {
+              if (!disabled) {
+                return;
+              }
+              btn.disabled = true;
+            });
+          }
+        }
+
+        function expandEditResOccupiedNights(checkIn, checkOut) {
+          var nights = [];
+          var cur = parseDateValue(checkIn);
+          var end = parseDateValue(checkOut);
+          if (!cur || !end || cur.getTime() >= end.getTime()) {
+            return nights;
+          }
+          while (cur.getTime() < end.getTime()) {
+            nights.push(formatResEntryYmd(cur));
+            cur = resEntryAddDays(cur, 1);
+          }
+          return nights;
+        }
+
+        function removeEditResStayNightsFromSets(checkIn, checkOut) {
+          expandEditResOccupiedNights(checkIn, checkOut).forEach(function (n) {
+            editResOccupiedNightSet.delete(n);
+            editResConfirmedOccupiedNightSet.delete(n);
+            editResAirbnbNightSet.delete(n);
+          });
+        }
+
+        function isEditResNightHardBlocked(ymd) {
+          return editResOccupiedNightSet.has(ymd);
+        }
+
+        function canEditResSelectCheckOut(checkIn, checkOut) {
+          if (!checkIn || !checkOut || !resEntryDateLt(checkIn, checkOut)) {
+            return false;
+          }
+          var cur = new Date(
+            checkIn.getFullYear(),
+            checkIn.getMonth(),
+            checkIn.getDate(),
+          );
+          var end = new Date(
+            checkOut.getFullYear(),
+            checkOut.getMonth(),
+            checkOut.getDate(),
+          );
+          while (resEntryDateLt(cur, end)) {
+            if (isEditResNightHardBlocked(formatResEntryYmd(cur))) {
+              return false;
+            }
+            cur = resEntryAddDays(cur, 1);
+          }
+          return true;
+        }
+
+        function updateEditResCalHint() {
+          var hintEl = document.getElementById("admin-edit-res-cal-hint");
+          if (!hintEl) {
+            return;
+          }
+          var baseHint =
+            "달력에서 체크인 날짜를 먼저 선택한 뒤, 체크아웃 날짜를 선택하세요.";
+          var legendHtml =
+            ' <span class="admin-res-entry-cal-legend"><span class="admin-res-entry-cal-legend__booked">예약 완료</span><span class="admin-res-entry-cal-legend__airbnb">Airbnb iCal</span></span>';
+          if (editResAirbnbNightSet.size > 0) {
+            hintEl.innerHTML = baseHint + legendHtml;
+            return;
+          }
+          hintEl.textContent =
+            baseHint + " 회색 표시 날짜는 이미 예약이 완료된 날짜입니다.";
+        }
+
+        function loadEditReservationAvailability(room, row) {
+          var roomKey = String(room || "")
+            .trim()
+            .toUpperCase();
+          if (!roomKey) {
+            editResOccupiedNightSet = new Set();
+            editResConfirmedOccupiedNightSet = new Set();
+            editResAirbnbNightSet = new Set();
+            editResAvailabilityRoom = "";
+            updateEditResCalHint();
+            renderEditReservationCalendar();
+            return Promise.resolve();
+          }
+          editResAvailabilityRoom = roomKey;
+          return fetch(
+            publicApiUrl() +
+              "/api/reservations?room=" +
+              encodeURIComponent(roomKey) +
+              "&availability=1",
+          )
+            .then(function (r) {
+              return r.json();
+            })
+            .then(function (data) {
+              if (
+                editResAvailabilityRoom !== roomKey ||
+                editResRoomType !== roomKey
+              ) {
+                return;
+              }
+              if (data && data.ok) {
+                editResOccupiedNightSet = new Set(data.occupiedNights || []);
+                editResConfirmedOccupiedNightSet = new Set(
+                  data.confirmedOccupiedNights || [],
+                );
+                var airbnbNights = data.airbnbIcalNights || [];
+                if (!airbnbNights.length) {
+                  var confirmedLookup = editResConfirmedOccupiedNightSet;
+                  airbnbNights = (data.occupiedNights || []).filter(
+                    function (n) {
+                      return !confirmedLookup.has(n);
+                    },
+                  );
+                }
+                editResAirbnbNightSet = new Set(airbnbNights);
+              } else {
+                editResOccupiedNightSet = new Set();
+                editResConfirmedOccupiedNightSet = new Set();
+                editResAirbnbNightSet = new Set();
+              }
+              if (row && row.checkIn && row.checkOut) {
+                removeEditResStayNightsFromSets(row.checkIn, row.checkOut);
+              }
+              updateEditResCalHint();
+              renderEditReservationCalendar();
+            })
+            .catch(function () {
+              if (editResAvailabilityRoom !== roomKey) {
+                return;
+              }
+              editResOccupiedNightSet = new Set();
+              editResConfirmedOccupiedNightSet = new Set();
+              editResAirbnbNightSet = new Set();
+              if (row && row.checkIn && row.checkOut) {
+                removeEditResStayNightsFromSets(row.checkIn, row.checkOut);
+              }
+              updateEditResCalHint();
+              renderEditReservationCalendar();
+            });
+        }
+
+        function updateEditReservationGuestControls() {
+          var limits = editResRoomType
+            ? getResEntryRoomGuestLimits(editResRoomType)
+            : null;
+          var hintEl = document.getElementById("admin-edit-res-guest-hint");
+          var plusBtn = document.getElementById("admin-edit-res-guest-plus");
+          var countEl = document.getElementById("admin-edit-res-guest-count");
+
+          if (countEl) {
+            countEl.textContent = String(editResGuestCount);
+          }
+          if (hintEl) {
+            if (limits) {
+              hintEl.textContent =
+                "기준 " +
+                limits.base +
+                "인 · 최대 " +
+                limits.max +
+                "인까지 입력 가능";
+            } else {
+              hintEl.textContent = "";
+            }
+          }
+          if (plusBtn) {
+            var atMax = limits && editResGuestCount >= limits.max;
+            plusBtn.disabled = !!atMax;
+            plusBtn.classList.toggle("is-disabled", !!atMax);
+            plusBtn.setAttribute("aria-disabled", atMax ? "true" : "false");
+          }
+          updateEditReservationQuoteDisplay();
+        }
+
+        function computeEditReservationQuote() {
+          var P = window.GraffordBookingPricing;
+          var checkIn = getEditReservationCheckInYmd();
+          var checkOut = getEditReservationCheckOutYmd();
+          if (!P || !editResRoomType || !checkIn || !checkOut || checkIn >= checkOut) {
+            return null;
+          }
+          var extraGuests = getResEntryExtraGuests(
+            editResRoomType,
+            editResGuestCount,
+          );
+          var stay = P.computeStay(
+            editResRoomType,
+            checkIn,
+            checkOut,
+            extraGuests,
+          );
+          if (!stay || !stay.nights) {
+            return null;
+          }
+          return stay;
+        }
+
+        function updateEditReservationQuoteDisplay() {
+          var quoteEl = document.getElementById("admin-edit-res-quote");
+          if (!quoteEl) {
+            return;
+          }
+          var checkIn = getEditReservationCheckInYmd();
+          var checkOut = getEditReservationCheckOutYmd();
+          if (!checkIn || !checkOut || checkIn >= checkOut || !editResRoomType) {
+            quoteEl.textContent = "";
+            return;
+          }
+          loadResEntryPricing().then(function () {
+            if (
+              !editReservationModal ||
+              editReservationModal.hidden ||
+              !activeEditReservationNumber
+            ) {
+              return;
+            }
+            var stay = computeEditReservationQuote();
+            if (!stay || !stay.nights) {
+              quoteEl.textContent = "";
+              return;
+            }
+            quoteEl.innerHTML =
+              "예약 페이지 기준 · " +
+              stay.nights +
+              "박 <span>₩" +
+              stay.discountedGrandTotal.toLocaleString() +
+              "</span>";
+          });
+        }
+
+        function syncEditReservationDates() {
+          updateEditReservationQuoteDisplay();
+        }
+
+        function renderEditReservationCalendar() {
+          var grid = document.getElementById("admin-edit-res-cal-grid");
+          var monthLabel = document.getElementById(
+            "admin-edit-res-cal-month-label",
+          );
+          if (!grid || !monthLabel) {
+            return;
+          }
+
+          var y = editResCalView.getFullYear();
+          var m = editResCalView.getMonth();
+          monthLabel.textContent = y + "년 " + (m + 1) + "월";
+
+          var today = new Date();
+          today.setHours(0, 0, 0, 0);
+          var firstDay = new Date(y, m, 1).getDay();
+          var lastDate = new Date(y, m + 1, 0).getDate();
+
+          grid.innerHTML = "";
+          grid.classList.toggle(
+            "is-selecting-checkout",
+            !!(editResCheckInDate && !editResCheckOutDate),
+          );
+
+          var i;
+          for (i = 0; i < firstDay; i++) {
+            var empty = document.createElement("span");
+            empty.className = "admin-res-entry-cal-cell is-empty";
+            empty.setAttribute("aria-hidden", "true");
+            grid.appendChild(empty);
+          }
+
+          var inCheckoutMode = !!(editResCheckInDate && !editResCheckOutDate);
+
+          for (var d = 1; d <= lastDate; d++) {
+            (function (dayNum) {
+              var cellDate = new Date(y, m, dayNum);
+              cellDate.setHours(0, 0, 0, 0);
+              var btn = document.createElement("button");
+              btn.type = "button";
+              btn.className =
+                "admin-res-entry-cal-cell admin-res-entry-cal-day";
+              btn.setAttribute("role", "gridcell");
+
+              var ymdStr = formatResEntryYmd(cellDate);
+              var isPast = cellDate.getTime() < today.getTime();
+              var isAirbnbIcal =
+                !!editResRoomType && editResAirbnbNightSet.has(ymdStr);
+              var isHardBlocked = isEditResNightHardBlocked(ymdStr);
+              var disabled = false;
+              var disabledReason = "";
+
+              if (isPast) {
+                disabled = true;
+                disabledReason = "past";
+              } else if (isHardBlocked) {
+                if (
+                  !(
+                    inCheckoutMode &&
+                    editResCheckInDate &&
+                    resEntryDateLt(editResCheckInDate, cellDate) &&
+                    canEditResSelectCheckOut(editResCheckInDate, cellDate)
+                  )
+                ) {
+                  disabled = true;
+                  disabledReason = "occupied-night";
+                }
+              }
+
+              btn.disabled = disabled;
+              btn.dataset.disabledReason = disabledReason || "enabled";
+
+              if (isPast) {
+                btn.classList.add("is-past");
+              } else if (isHardBlocked || isAirbnbIcal) {
+                btn.classList.add("is-booked");
+                if (isAirbnbIcal) {
+                  btn.classList.add("is-airbnb-ical");
+                }
+              }
+
+              if (
+                editResCheckInDate &&
+                resEntrySameDay(cellDate, editResCheckInDate)
+              ) {
+                btn.classList.add("is-checkin");
+              }
+              if (
+                editResCheckOutDate &&
+                resEntrySameDay(cellDate, editResCheckOutDate)
+              ) {
+                btn.classList.add("is-checkout");
+              }
+              if (
+                editResCheckInDate &&
+                editResCheckOutDate &&
+                resEntryDateLt(editResCheckInDate, cellDate) &&
+                resEntryDateLt(cellDate, editResCheckOutDate)
+              ) {
+                btn.classList.add("is-range");
+              }
+
+              if (
+                disabled &&
+                disabledReason === "occupied-night" &&
+                !isPast &&
+                !isAirbnbIcal
+              ) {
+                btn.classList.add("is-soldout");
+                btn.textContent = "";
+                var soldDay = document.createElement("span");
+                soldDay.className = "admin-res-entry-cal-soldout-day";
+                soldDay.textContent = String(dayNum);
+                btn.appendChild(soldDay);
+              } else {
+                btn.textContent = String(dayNum);
+              }
+
+              btn.addEventListener("click", function () {
+                if (btn.disabled || editReservationSubmitting) {
+                  return;
+                }
+                if (
+                  !editResCheckInDate ||
+                  (editResCheckInDate && editResCheckOutDate)
+                ) {
+                  editResCheckInDate = new Date(cellDate);
+                  editResCheckOutDate = null;
+                } else if (resEntrySameDay(cellDate, editResCheckInDate)) {
+                  editResCheckInDate = null;
+                  editResCheckOutDate = null;
+                } else if (resEntryDateLt(cellDate, editResCheckInDate)) {
+                  editResCheckInDate = new Date(cellDate);
+                  editResCheckOutDate = null;
+                } else if (
+                  isEditResNightHardBlocked(ymdStr) &&
+                  !canEditResSelectCheckOut(editResCheckInDate, cellDate)
+                ) {
+                  return;
+                } else {
+                  editResCheckOutDate = new Date(cellDate);
+                }
+                renderEditReservationCalendar();
+                syncEditReservationDates();
+              });
+
+              grid.appendChild(btn);
+            })(d);
+          }
+
+          updateEditResCalHint();
+        }
+
+        function resetEditReservationFormState() {
+          editResCheckInDate = null;
+          editResCheckOutDate = null;
+          editResOccupiedNightSet = new Set();
+          editResConfirmedOccupiedNightSet = new Set();
+          editResAirbnbNightSet = new Set();
+          editResAvailabilityRoom = "";
+          editResGuestCount = 2;
+          editResRoomType = "";
+          editResCalView = new Date();
+          var editQuoteEl = document.getElementById("admin-edit-res-quote");
+          if (editQuoteEl) {
+            editQuoteEl.textContent = "";
+          }
+        }
+
+        function initEditReservationDatesFromRow(row) {
+          var checkInDate = parseDateValue(row && row.checkIn);
+          var checkOutDate = parseDateValue(row && row.checkOut);
+          if (checkInDate) {
+            checkInDate.setHours(0, 0, 0, 0);
+            editResCheckInDate = checkInDate;
+            editResCalView = new Date(
+              checkInDate.getFullYear(),
+              checkInDate.getMonth(),
+              1,
+            );
+          } else {
+            editResCheckInDate = null;
+          }
+          if (checkOutDate) {
+            checkOutDate.setHours(0, 0, 0, 0);
+            editResCheckOutDate = checkOutDate;
+          } else {
+            editResCheckOutDate = null;
+          }
+          syncEditReservationDates();
         }
 
         function formatEditAmountInput(value) {
@@ -6919,6 +7486,9 @@
           guestName,
           contact,
           totalAmount,
+          checkIn,
+          checkOut,
+          guestCount,
         ) {
           [reservationListRows, latestRows, latestCalendarRows].forEach(
             function (list) {
@@ -6930,10 +7500,35 @@
                   row.guestName = guestName;
                   row.contact = contact;
                   row.totalAmount = totalAmount;
+                  if (checkIn) {
+                    row.checkIn = checkIn;
+                  }
+                  if (checkOut) {
+                    row.checkOut = checkOut;
+                  }
+                  if (guestCount != null) {
+                    row.guestCount = guestCount;
+                  }
+                  if (checkIn && checkOut) {
+                    row.stayPeriod = getStayPeriodNights({
+                      checkIn: checkIn,
+                      checkOut: checkOut,
+                    });
+                  }
                 }
               });
             },
           );
+        }
+
+        function getEditReservationCheckInYmd() {
+          return editResCheckInDate ? formatResEntryYmd(editResCheckInDate) : "";
+        }
+
+        function getEditReservationCheckOutYmd() {
+          return editResCheckOutDate
+            ? formatResEntryYmd(editResCheckOutDate)
+            : "";
         }
 
         function openEditReservationModal(reservationNumber) {
@@ -6950,10 +7545,24 @@
             return;
           }
           editReservationSubmitting = false;
+          resetEditReservationFormState();
           activeEditReservationNumber = String(
             row.reservationNumber || reservationNumber || "",
           );
-          var nights = getStayPeriodNights(row);
+          editResRoomType = String(row.roomType || "")
+            .trim()
+            .toUpperCase();
+          editResGuestCount = Math.max(
+            1,
+            Math.floor(Number(row.guestCount) || 2),
+          );
+          var guestLimits = editResRoomType
+            ? getResEntryRoomGuestLimits(editResRoomType)
+            : null;
+          if (guestLimits && editResGuestCount > guestLimits.max) {
+            editResGuestCount = guestLimits.max;
+          }
+          initEditReservationDatesFromRow(row);
           if (editReservationMeta) {
             editReservationMeta.textContent =
               (row.reservationNumber || "—") +
@@ -6967,20 +7576,6 @@
           }
           if (editDetailRoom) {
             editDetailRoom.textContent = row.roomType || "—";
-          }
-          if (editDetailCheckin) {
-            editDetailCheckin.textContent = row.checkIn || "—";
-          }
-          if (editDetailCheckout) {
-            editDetailCheckout.textContent = row.checkOut || "—";
-          }
-          if (editDetailNights) {
-            editDetailNights.textContent = nights ? nights + "박" : "—";
-          }
-          if (editDetailGuests) {
-            editDetailGuests.textContent = row.guestCount
-              ? String(row.guestCount) + "명"
-              : "—";
           }
           if (editDetailPayment) {
             editDetailPayment.textContent = getEditPaymentLabel(row);
@@ -6998,6 +7593,10 @@
               getReservationPaidTotal(row),
             );
           }
+          updateEditReservationGuestControls();
+          renderEditReservationCalendar();
+          loadEditReservationAvailability(editResRoomType, row);
+          updateEditReservationQuoteDisplay();
           setEditReservationMessage("");
           setEditReservationButtonsDisabled(false);
           editReservationModal.hidden = false;
@@ -7015,6 +7614,7 @@
             editReservationModal.hidden = true;
           }
           activeEditReservationNumber = "";
+          resetEditReservationFormState();
           setEditReservationMessage("");
           setEditReservationButtonsDisabled(false);
         }
@@ -7032,6 +7632,39 @@
           var guestName = String(editGuestNameInput.value || "").trim();
           var contact = String(editContactInput.value || "").trim();
           var totalAmount = parseEditAmountInput(editAmountInput.value);
+          var checkIn = getEditReservationCheckInYmd();
+          var checkOut = getEditReservationCheckOutYmd();
+          var guestCount = Math.floor(Number(editResGuestCount) || 0);
+          if (!checkIn || !checkOut || checkIn >= checkOut) {
+            setEditReservationMessage(
+              "체크인·체크아웃 날짜를 모두 선택해 주세요.",
+            );
+            return;
+          }
+          if (!canEditResSelectCheckOut(editResCheckInDate, editResCheckOutDate)) {
+            setEditReservationMessage(
+              "선택한 기간에 예약 불가능한 날짜가 포함되어 있습니다.",
+            );
+            return;
+          }
+          var guestLimits = editResRoomType
+            ? getResEntryRoomGuestLimits(editResRoomType)
+            : null;
+          if (
+            !Number.isFinite(guestCount) ||
+            guestCount < 1 ||
+            (guestLimits && guestCount > guestLimits.max)
+          ) {
+            setEditReservationMessage(
+              guestLimits
+                ? editResRoomType +
+                    " 객실은 최대 " +
+                    guestLimits.max +
+                    "명까지 입력할 수 있습니다."
+                : "인원을 확인해 주세요.",
+            );
+            return;
+          }
           if (!guestName) {
             setEditReservationMessage("예약자명을 입력해 주세요.");
             editGuestNameInput.focus();
@@ -7058,6 +7691,9 @@
               guestName,
               contact,
               totalAmount,
+              checkIn,
+              checkOut,
+              guestCount,
             );
             applyListView();
             closeEditReservationModal(true);
@@ -7070,6 +7706,9 @@
             guestName: guestName,
             contact: contact,
             totalAmount: totalAmount,
+            checkIn: checkIn,
+            checkOut: checkOut,
+            guestCount: guestCount,
             adminId: auth.adminId,
             adminPw: auth.adminPw,
           })
@@ -7093,6 +7732,11 @@
                 result.data.totalAmount != null
                   ? Number(result.data.totalAmount)
                   : totalAmount,
+                result.data.checkIn != null ? result.data.checkIn : checkIn,
+                result.data.checkOut != null ? result.data.checkOut : checkOut,
+                result.data.guestCount != null
+                  ? Number(result.data.guestCount)
+                  : guestCount,
               );
               applyListView();
               closeEditReservationModal(true);
@@ -9593,6 +10237,69 @@
             editAmountInput.value = formatEditAmountInput(
               editAmountInput.value,
             );
+          });
+        }
+
+        var editResCalPrevBtn = document.getElementById("admin-edit-res-cal-prev");
+        var editResCalNextBtn = document.getElementById("admin-edit-res-cal-next");
+        if (editResCalPrevBtn) {
+          editResCalPrevBtn.addEventListener("click", function () {
+            if (editReservationSubmitting) {
+              return;
+            }
+            editResCalView = new Date(
+              editResCalView.getFullYear(),
+              editResCalView.getMonth() - 1,
+              1,
+            );
+            renderEditReservationCalendar();
+          });
+        }
+        if (editResCalNextBtn) {
+          editResCalNextBtn.addEventListener("click", function () {
+            if (editReservationSubmitting) {
+              return;
+            }
+            editResCalView = new Date(
+              editResCalView.getFullYear(),
+              editResCalView.getMonth() + 1,
+              1,
+            );
+            renderEditReservationCalendar();
+          });
+        }
+
+        var editResGuestMinusBtn = document.getElementById(
+          "admin-edit-res-guest-minus",
+        );
+        var editResGuestPlusBtn = document.getElementById(
+          "admin-edit-res-guest-plus",
+        );
+        if (editResGuestMinusBtn) {
+          editResGuestMinusBtn.addEventListener("click", function () {
+            if (editReservationSubmitting) {
+              return;
+            }
+            editResGuestCount = Math.max(1, editResGuestCount - 1);
+            updateEditReservationGuestControls();
+          });
+        }
+        if (editResGuestPlusBtn) {
+          editResGuestPlusBtn.addEventListener("click", function () {
+            if (editReservationSubmitting) {
+              return;
+            }
+            var limits = editResRoomType
+              ? getResEntryRoomGuestLimits(editResRoomType)
+              : null;
+            if (limits && editResGuestCount >= limits.max) {
+              return;
+            }
+            editResGuestCount = Math.min(
+              limits ? limits.max : editResGuestCount + 1,
+              editResGuestCount + 1,
+            );
+            updateEditReservationGuestControls();
           });
         }
 

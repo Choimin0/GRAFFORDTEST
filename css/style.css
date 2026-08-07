@@ -12076,16 +12076,12 @@ main.content-section.confirm-page.admin-page {
   width: 4rem;
 }
 .admin-checkin-table thead th:nth-child(5) {
-  width: 5.5rem;
-}
-.admin-checkin-table thead th:nth-child(6) {
-  width: 5.5rem;
+  width: 11rem;
 }
 .admin-checkin-table tbody th {
   width: 5.5rem;
 }
-.admin-checkin-request-cell,
-.admin-checkin-manage-cell {
+.admin-checkin-request-cell {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -13562,7 +13558,35 @@ main.content-section.confirm-page.admin-page {
   border-color: var(--gold-500);
 }
 .admin-edit-reservation-panel {
-  width: min(100%, 520px);
+  width: min(100%, 580px);
+  max-height: min(90vh, 920px);
+  overflow-y: auto;
+}
+.admin-edit-reservation-field-group {
+  display: grid;
+  gap: var(--space-8);
+}
+.admin-edit-reservation-field-label {
+  margin: 0;
+  color: var(--stone-500);
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+.admin-edit-res-calendar-wrap {
+  margin-top: var(--space-4);
+}
+.admin-edit-res-cal-hint {
+  margin: var(--space-8) 0 0;
+}
+.admin-edit-reservation-fields .admin-res-entry-guest-counter {
+  margin-top: var(--space-4);
+}
+.admin-edit-reservation-fields .admin-res-entry-guest-hint {
+  margin: var(--space-4) 0 0;
+}
+.admin-edit-res-quote {
+  margin-top: var(--space-4);
 }
 .admin-edit-reservation-detail {
   display: grid;

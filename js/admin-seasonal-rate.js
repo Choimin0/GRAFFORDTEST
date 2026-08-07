@@ -877,6 +877,12 @@
     pendingDeleteId = null;
   }
 
+  function resetSession() {
+    closeEditModal();
+    closeSeasonalForm();
+    clearDeletePending();
+  }
+
   root.GraffordAdminSeasonalRate = {
     init: init,
     setSeasonalRates: setSeasonalRates,
@@ -884,5 +890,6 @@
     handlePolicyConfirmSave: handlePolicyConfirmSave,
     isDeletePending: isDeletePending,
     clearDeletePending: clearDeletePending,
+    resetSession: resetSession,
   };
 })(typeof window !== "undefined" ? window : this);

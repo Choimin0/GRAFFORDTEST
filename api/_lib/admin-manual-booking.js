@@ -49,7 +49,7 @@ function normalizeChannel(raw) {
     .toLowerCase();
 }
 
-function countStayNights(checkIn, checkOut) {
+export function countStayNights(checkIn, checkOut) {
   var d1 = new Date(checkIn + "T12:00:00");
   var d2 = new Date(checkOut + "T12:00:00");
   if (isNaN(d1.getTime()) || isNaN(d2.getTime()) || d2 <= d1) {
@@ -67,7 +67,7 @@ function getGuestLimits(room) {
   return ROOM_GUEST_LIMITS[room] || { base: 2, max: 2 };
 }
 
-function validateGuestCount(room, guestCount) {
+export function validateGuestCount(room, guestCount) {
   var limits = getGuestLimits(room);
   var gc = Math.floor(Number(guestCount));
   if (!Number.isFinite(gc) || gc < 1 || gc > limits.max) {
