@@ -5133,21 +5133,10 @@
             "<th>월</th><th>예약</th><th>취소</th><th>취소율</th><th>매출</th><th>점유율</th>" +
             "</tr></thead>";
           var tbody = document.createElement("tbody");
-          var maxTableRevenue = Math.max.apply(
-            null,
-            monthlyStats
-              .map(function (row) {
-                return Number(row.revenue) || 0;
-              })
-              .concat([0]),
-          );
           monthlyStats.forEach(function (row) {
             var month = Number(row.month) || 0;
             var revenue = Number(row.revenue) || 0;
-            var ratio =
-              maxTableRevenue > 0
-                ? Math.round((revenue / maxTableRevenue) * 100)
-                : 0;
+            var occupancyRate = Number(row.occupancyRate) || 0;
             var tr = document.createElement("tr");
             if (year === currentYear && month === currentMonth) {
               tr.className = "is-current";
@@ -5164,9 +5153,9 @@
               "%</td><td>" +
               formatKRW(revenue) +
               "</td><td><span class='admin-sales-table-ratio'><i style='--bar-ratio:" +
-              ratio +
+              occupancyRate +
               "%'></i></span><b>" +
-              ratio +
+              occupancyRate +
               "%</b></td>";
             tbody.appendChild(tr);
           });
@@ -8282,6 +8271,18 @@
         function sortRows(rows) {
           var copied = (rows || []).slice();
           if (!sortKey || !sortDirection) {
+            if (activeResTab === "past") {
+              copied.sort(function (a, b) {
+                var result =
+                  asYmdNumber(b && b.checkOut) -
+                  asYmdNumber(a && a.checkOut);
+                if (result === 0) {
+                  result =
+                    reservationDateNumber(b) - reservationDateNumber(a);
+                }
+                return result;
+              });
+            }
             return copied;
           }
           function getSortValue(row) {

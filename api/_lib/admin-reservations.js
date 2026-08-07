@@ -405,7 +405,9 @@ export async function handleAdminReservations(res, pool, body) {
   try {
     var orderClause = isDeleted
       ? "ORDER BY cancelled_at DESC, created_at DESC"
-      : "ORDER BY check_in_date ASC, created_at DESC";
+      : collection === "past-reservations"
+        ? "ORDER BY check_out_date DESC, created_at DESC"
+        : "ORDER BY check_in_date ASC, created_at DESC";
 
     var extraCols = isDeleted
       ? ", cancel_reason, other_reason, cancelled_at, refund_amount"

@@ -14791,6 +14791,27 @@ main.content-section.confirm-page.admin-page {
   padding-top: var(--space-16);
   padding-bottom: var(--space-16);
 }
+.admin-seasonal-rate-row.is-past {
+  color: var(--stone-400);
+}
+.admin-seasonal-rate-row.is-past .admin-seasonal-rate-room,
+.admin-seasonal-rate-row.is-past .admin-seasonal-rate-period,
+.admin-seasonal-rate-row.is-past .admin-seasonal-rate-name,
+.admin-seasonal-rate-row.is-past .admin-seasonal-rate-price strong {
+  color: var(--stone-400);
+}
+.admin-seasonal-rate-row.is-active {
+  color: var(--stone-blue);
+}
+.admin-seasonal-rate-row.is-active .admin-seasonal-rate-room,
+.admin-seasonal-rate-row.is-active .admin-seasonal-rate-period,
+.admin-seasonal-rate-row.is-active .admin-seasonal-rate-name,
+.admin-seasonal-rate-row.is-active .admin-seasonal-rate-price strong {
+  color: var(--stone-blue);
+}
+.admin-seasonal-rate-row.is-active .admin-seasonal-rate-price small {
+  color: color-mix(in srgb, var(--stone-blue) 72%, var(--stone-400));
+}
 .admin-seasonal-rate-head-price,
 .admin-seasonal-rate-price {
   display: grid;

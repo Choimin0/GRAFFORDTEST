@@ -136,6 +136,7 @@
           endDate: normalizePromotionYmd(row.endDate || row.end_date),
           weekdayBaseRate: Math.floor(Number(row.weekdayBaseRate || row.weekday_base_rate || 0)),
           weekendBaseRate: Math.floor(Number(row.weekendBaseRate || row.weekend_base_rate || 0)),
+          optionName: String(row.optionName || row.seasonal_option_name || "").trim(),
           createdAt: String(row.createdAt || row.created_at || ""),
           updatedAt: String(row.updatedAt || row.updated_at || ""),
         };
@@ -187,6 +188,7 @@
         weekday: weekday,
         weekend: weekend,
         source: "seasonal",
+        optionName: seasonal.optionName || "",
       };
     }
     var weekday = ROOM_WEEKDAY_BASE.hasOwnProperty(room)

@@ -356,23 +356,105 @@ async function getAnnualSalesData(pool, year) {
     ORDER BY year
   `;
 
-  const [monthlyResult, annualResult] = await Promise.all([
+  const occupancyQuery = `
+    WITH year_bounds AS (
+      SELECT
+        MAKE_DATE($1::int, 1, 1) AS year_start,
+        MAKE_DATE($1::int + 1, 1, 1) AS next_year_start
+    ),
+    months AS (
+      SELECT
+        month_num,
+        MAKE_DATE($1::int, month_num, 1) AS month_start,
+        (MAKE_DATE($1::int, month_num, 1) + INTERVAL '1 month')::date AS next_month_start
+      FROM generate_series(1, 12) AS month_num
+    ),
+    all_res AS (
+      SELECT check_in_date, check_out_date
+      FROM ${BOOKING_TABLE}, year_bounds
+      WHERE status IN ('confirm', 'completed')
+        AND check_out_date > year_start
+        AND check_in_date < next_year_start
+    ),
+    month_days AS (
+      SELECT
+        m.month_num AS month,
+        d.day::date AS day
+      FROM months m
+      CROSS JOIN LATERAL generate_series(
+        m.month_start,
+        m.next_month_start - INTERVAL '1 day',
+        INTERVAL '1 day'
+      ) AS d(day)
+    ),
+    daily_occupancy AS (
+      SELECT
+        md.month,
+        md.day,
+        COUNT(*) FILTER (
+          WHERE all_res.check_in_date <= md.day
+            AND all_res.check_out_date > md.day
+        )::int AS occupied_rooms
+      FROM month_days md
+      LEFT JOIN all_res
+        ON all_res.check_in_date <= md.day
+       AND all_res.check_out_date > md.day
+      GROUP BY md.month, md.day
+    )
+    SELECT
+      month,
+      SUM(occupied_rooms)::int AS occupied_room_nights,
+      COUNT(*)::int AS days_in_month
+    FROM daily_occupancy
+    GROUP BY month
+    ORDER BY month
+  `;
+
+  const [monthlyResult, annualResult, occupancyResult] = await Promise.all([
     pool.query(monthlyQuery, [selectedYear]),
     pool.query(annualQuery),
+    pool.query(occupancyQuery, [selectedYear]),
   ]);
+
+  var occupancyByMonth = {};
+  (occupancyResult.rows || []).forEach(function (row) {
+    var m = Number(row.month);
+    if (m >= 1 && m <= 12) {
+      var daysInMonth = Number(row.days_in_month) || 0;
+      var occupiedRoomNights = Number(row.occupied_room_nights) || 0;
+      var maxRoomNights = daysInMonth * 4;
+      occupancyByMonth[m] = {
+        occupiedRoomNights: occupiedRoomNights,
+        maxRoomNights: maxRoomNights,
+        occupancyRate:
+          maxRoomNights > 0
+            ? Math.round((occupiedRoomNights / maxRoomNights) * 100)
+            : 0,
+      };
+    }
+  });
 
   // 12개월 배열 (1월~12월), 없으면 0
   var monthlyRevenue = Array(12).fill(0);
   var monthlyStats = Array(12)
     .fill(null)
     .map(function (_, index) {
+      var month = index + 1;
+      var occupancy = occupancyByMonth[month] || {
+        occupiedRoomNights: 0,
+        maxRoomNights: 0,
+        occupancyRate: 0,
+      };
       return {
-        month: index + 1,
+        month: month,
         reservationCount: 0,
         cancelCount: 0,
         cancelRate: 0,
         revenue: 0,
         cancelRevenue: 0,
+        occupiedRoomNights: occupancy.occupiedRoomNights,
+        maxRoomNights: occupancy.maxRoomNights,
+        occupancyRate: occupancy.occupancyRate,
       };
     });
   (monthlyResult.rows || []).forEach(function (row) {
@@ -381,6 +463,11 @@ async function getAnnualSalesData(pool, year) {
       var reservationCount = Number(row.reservation_count) || 0;
       var cancelCount = Number(row.cancel_count) || 0;
       var revenue = Number(row.revenue) || 0;
+      var occupancy = occupancyByMonth[m] || {
+        occupiedRoomNights: 0,
+        maxRoomNights: 0,
+        occupancyRate: 0,
+      };
       monthlyRevenue[m - 1] = revenue;
       monthlyStats[m - 1] = {
         month: m,
@@ -392,6 +479,9 @@ async function getAnnualSalesData(pool, year) {
             : 0,
         revenue: revenue,
         cancelRevenue: Number(row.cancel_revenue) || 0,
+        occupiedRoomNights: occupancy.occupiedRoomNights,
+        maxRoomNights: occupancy.maxRoomNights,
+        occupancyRate: occupancy.occupancyRate,
       };
     }
   });

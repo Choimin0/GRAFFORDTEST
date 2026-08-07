@@ -96,6 +96,23 @@
     return dot(startDate) + " - " + dot(endDate);
   }
 
+  function getSeasonalPeriodStatus(startDate, endDate) {
+    var today =
+      typeof deps.getTodayYmdKst === "function" ? deps.getTodayYmdKst() : "";
+    var start = String(startDate || "");
+    var end = String(endDate || "");
+    if (!today || !/^\d{4}-\d{2}-\d{2}$/.test(start) || !/^\d{4}-\d{2}-\d{2}$/.test(end)) {
+      return "";
+    }
+    if (end < today) {
+      return "past";
+    }
+    if (start <= today && today <= end) {
+      return "active";
+    }
+    return "";
+  }
+
   function parseRateValue(raw) {
     return Number(String(raw || "").replace(/[^\d]/g, ""));
   }
@@ -139,7 +156,8 @@
         if (effective && effective.source === "seasonal") {
           weekday = effective.weekday;
           weekend = effective.weekend;
-          source = "기간별 요금";
+          var optionName = String(effective.optionName || "").trim();
+          source = optionName || "기간별 요금";
         }
       }
       return (
@@ -213,8 +231,15 @@
       "</div>";
     var rows = sortSeasonalRates(seasonalRates)
       .map(function (row) {
+        var periodStatus = getSeasonalPeriodStatus(row.startDate, row.endDate);
+        var rowClass =
+          "admin-seasonal-rate-row" +
+          (periodStatus === "past" ? " is-past" : "") +
+          (periodStatus === "active" ? " is-active" : "");
         return (
-          "<div class='admin-seasonal-rate-row' data-seasonal-id='" +
+          "<div class='" +
+          rowClass +
+          "' data-seasonal-id='" +
           String(row.id) +
           "'>" +
           "<span class='admin-seasonal-rate-room'>" +
