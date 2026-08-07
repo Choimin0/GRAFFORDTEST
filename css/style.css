@@ -14,6 +14,14 @@
   --stone-green: #4a522a;
   --stone-blue: #354958;
 
+  /* Weekly check-in bar tones (stone-500/600/700 × 100%/80%) */
+  --week-bar-stone-500: var(--stone-500);
+  --week-bar-stone-500-80: color-mix(in srgb, var(--stone-500) 80%, transparent);
+  --week-bar-stone-600: var(--stone-600);
+  --week-bar-stone-600-80: color-mix(in srgb, var(--stone-600) 80%, transparent);
+  --week-bar-stone-700: var(--stone-700);
+  --week-bar-stone-700-80: color-mix(in srgb, var(--stone-700) 80%, transparent);
+
   /* Semantic colors (components use these, not raw hex) */
   --color-text-primary: var(--stone-700);
   --color-text-muted: var(--stone-400);
@@ -12202,9 +12210,26 @@ main.content-section.confirm-page.admin-page {
   background: var(--stone-100);
 }
 .admin-room-week-bar.is-occupied {
-  background: var(--stone-500);
   cursor: pointer;
   transition: filter 0.12s;
+}
+.admin-room-week-bar.is-occupied.is-week-tone-500 {
+  background: var(--week-bar-stone-500);
+}
+.admin-room-week-bar.is-occupied.is-week-tone-500-80 {
+  background: var(--week-bar-stone-500-80);
+}
+.admin-room-week-bar.is-occupied.is-week-tone-600 {
+  background: var(--week-bar-stone-600);
+}
+.admin-room-week-bar.is-occupied.is-week-tone-600-80 {
+  background: var(--week-bar-stone-600-80);
+}
+.admin-room-week-bar.is-occupied.is-week-tone-700 {
+  background: var(--week-bar-stone-700);
+}
+.admin-room-week-bar.is-occupied.is-week-tone-700-80 {
+  background: var(--week-bar-stone-700-80);
 }
 .admin-room-week-bar.is-occupied:hover {
   filter: brightness(0.88);

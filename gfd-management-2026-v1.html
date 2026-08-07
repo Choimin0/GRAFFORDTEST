@@ -3179,6 +3179,34 @@
           }
         }
 
+        var ROOM_WEEK_BAR_TONES = [
+          "is-week-tone-500",
+          "is-week-tone-500-80",
+          "is-week-tone-600",
+          "is-week-tone-600-80",
+          "is-week-tone-700",
+          "is-week-tone-700-80",
+        ];
+
+        function hashWeekResKey(key) {
+          var h = 0;
+          var i;
+          for (i = 0; i < key.length; i++) {
+            h = ((h << 5) - h + key.charCodeAt(i)) | 0;
+          }
+          return Math.abs(h);
+        }
+
+        function getWeekBarToneClass(row) {
+          if (!row) {
+            return ROOM_WEEK_BAR_TONES[0];
+          }
+          var resKey = getWeekResKey(row);
+          return ROOM_WEEK_BAR_TONES[
+            hashWeekResKey(resKey) % ROOM_WEEK_BAR_TONES.length
+          ];
+        }
+
         function buildWeekRoomTrack(room, ymd, weekStartYmd, weekLastYmd) {
           var track = document.createElement("div");
           track.className = "admin-room-week-track";
@@ -3187,7 +3215,8 @@
           if (row) {
             var seg = getWeekSegmentRole(row, ymd, weekStartYmd, weekLastYmd);
             var bar = document.createElement("div");
-            bar.className = "admin-room-week-bar is-occupied";
+            bar.className =
+              "admin-room-week-bar is-occupied " + getWeekBarToneClass(row);
             appendCalendarSegmentClasses(bar, seg);
             bar.dataset.tooltip = formatWeekReservationTooltip(row);
             setWeekBarClickData(bar, room, ymd, row);
@@ -5321,11 +5350,14 @@
           if (!stay || !stay.nights) {
             return null;
           }
-          var roomFee = stay.grandTotal - stay.consecutiveSale;
-          if (roomFee < 0) {
-            roomFee = 0;
-          }
-          return Math.floor(roomFee * (1 - RES_ENTRY_FRIEND_DISCOUNT_RATE));
+          // 프로모션과 동일 순서: 객실료(baseTotal) 기준 % → 인원추가 가산 → 연박할인 차감
+          var friendDiscount = Math.floor(
+            stay.baseTotal * RES_ENTRY_FRIEND_DISCOUNT_RATE,
+          );
+          return Math.max(
+            0,
+            stay.grandTotal - stay.consecutiveSale - friendDiscount,
+          );
         }
 
         function updateResEntryAmountControls() {
