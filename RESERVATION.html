@@ -1317,9 +1317,7 @@
               }
               if (!hasBooking && hasStay) {
                 if (isEnScope) {
-                  return (
-                    "Promotion for stays " + stayStart + " – " + stayEnd
-                  );
+                  return "Promotion for stays " + stayStart + " – " + stayEnd;
                 }
                 return stayStart + " ~ " + stayEnd + "까지 프로모션 진행중";
               }
@@ -1347,9 +1345,7 @@
                 if (hasStay) {
                   enParts.push(stayStart + " – " + stayEnd);
                 }
-                return (
-                  enParts.join(" ") + " stay dates eligible for promotion"
-                );
+                return enParts.join(" ") + " stay dates eligible for promotion";
               }
               return (
                 "[" +
@@ -1360,7 +1356,7 @@
                 stayStart +
                 " ~ " +
                 stayEnd +
-                " 투숙 시 프로모션 할인중"
+                " 투숙 시 프로모션 할인"
               );
             }
 
@@ -1374,30 +1370,17 @@
               var bookingEnd = formatPromotionMd(bookingEndYmd);
               var stayStart = formatPromotionMd(stayStartYmd);
               var stayEnd = formatPromotionMd(stayEndYmd);
-              var hasBooking = !!(bookingStart && bookingEnd);
               var hasStay = !!(stayStart && stayEnd);
-              if (hasBooking && !hasStay) {
-                return bookingStart + " ~ " + bookingEnd;
+              var hasBooking = !!(bookingStart && bookingEnd);
+              var periodStart = hasStay ? stayStart : bookingStart;
+              var periodEnd = hasStay ? stayEnd : bookingEnd;
+              if (!periodStart || !periodEnd) {
+                return "";
               }
-              if (!hasBooking && hasStay) {
-                return stayStart + " ~ " + stayEnd;
+              if (isEnScope) {
+                return periodStart + " – " + periodEnd + " for stays";
               }
-              if (
-                hasBooking &&
-                hasStay &&
-                bookingStartYmd === stayStartYmd &&
-                bookingEndYmd === stayEndYmd
-              ) {
-                return bookingStart + " ~ " + bookingEnd;
-              }
-              var parts = [];
-              if (hasBooking) {
-                parts.push("[" + bookingStart + " ~ " + bookingEnd + "]");
-              }
-              if (hasStay) {
-                parts.push(stayStart + " ~ " + stayEnd);
-              }
-              return parts.join(" ");
+              return periodStart + " ~ " + periodEnd + " 투숙 시";
             }
 
             function isPromotionInPeriodClient(todayYmd, startYmd, endYmd) {
@@ -1649,18 +1632,18 @@
                     sessionStorage.setItem(
                       "graffordPromotionMeta",
                       JSON.stringify({
-                        promotionBookingPeriod:
-                          result.data.promotionBookingPeriod ||
+                        promotionBookingPeriod: result.data
+                          .promotionBookingPeriod ||
                           result.data.promotionPeriod || {
                             startDate: "",
                             endDate: "",
                           },
-                        promotionStayPeriod: result.data.promotionStayPeriod || {
+                        promotionStayPeriod: result.data
+                          .promotionStayPeriod || {
                           startDate: "",
                           endDate: "",
                         },
-                        promotionPeriod:
-                          result.data.promotionBookingPeriod ||
+                        promotionPeriod: result.data.promotionBookingPeriod ||
                           result.data.promotionPeriod || {
                             startDate: "",
                             endDate: "",
@@ -1869,8 +1852,7 @@
                 promotionStayPeriodStart && promotionStayPeriodEnd
               );
               var hasAnyPeriod = hasBookingPeriod || hasStayPeriod;
-              var promoInPeriodForStay =
-                promotionEnabled && !hasAnyPeriod;
+              var promoInPeriodForStay = promotionEnabled && !hasAnyPeriod;
               if (
                 checkIn &&
                 checkOut &&
