@@ -118,6 +118,30 @@
   }
 
 
+  function pickActiveSeasonalRate(room, today) {
+    if (!today) {
+      return null;
+    }
+    var matches = seasonalRates.filter(function (row) {
+      return (
+        String(row.roomName || "").toUpperCase() === room &&
+        row.startDate <= today &&
+        today <= row.endDate
+      );
+    });
+    if (!matches.length) {
+      return null;
+    }
+    return matches.slice().sort(function (a, b) {
+      var ua = String(a.updatedAt || a.createdAt || "");
+      var ub = String(b.updatedAt || b.createdAt || "");
+      if (ua !== ub) {
+        return ub.localeCompare(ua);
+      }
+      return Number(b.id || 0) - Number(a.id || 0);
+    })[0];
+  }
+
   function renderActiveCriteria() {
     var el = document.getElementById("admin-room-rate-active-criteria");
     if (!el) {
@@ -135,7 +159,6 @@
       typeof deps.getTodayYmdKst === "function"
         ? deps.getTodayYmdKst()
         : "";
-    var P = root.GraffordBookingPricing;
     var rows = typeof deps.roomRateRows === "function" ? deps.roomRateRows() : [];
     var roomBits = ROOMS.map(function (room) {
       var row = rows.filter(function (r) {
@@ -151,14 +174,15 @@
             )
           : weekday + weekendCharge;
       var source = "기본 요금";
-      if (P && typeof P.getEffectiveRatesForDate === "function" && today) {
-        var effective = P.getEffectiveRatesForDate(room, today);
-        if (effective && effective.source === "seasonal") {
-          weekday = effective.weekday;
-          weekend = effective.weekend;
-          var optionName = String(effective.optionName || "").trim();
-          source = optionName || "기간별 요금";
-        }
+      var activeSeasonal = pickActiveSeasonalRate(room, today);
+      if (activeSeasonal) {
+        weekday = Number(activeSeasonal.weekdayBaseRate || 0);
+        weekend = resolveWeekendRate(
+          activeSeasonal.weekdayBaseRate,
+          activeSeasonal.weekendBaseRate,
+        );
+        source =
+          String(activeSeasonal.optionName || "").trim() || "기간별 요금";
       }
       return (
         "<div class='admin-room-rate-active-item'>" +
@@ -595,13 +619,14 @@
     }
   }
 
-  function deleteSeasonalRate() {
-    var id = pendingDeleteId;
+  function deleteSeasonalRate(id) {
+    var deleteId =
+      id != null && id !== "" ? Number(id) : pendingDeleteId;
     pendingDeleteId = null;
-    if (!id) {
+    if (!Number.isFinite(deleteId) || deleteId <= 0) {
       return Promise.resolve();
     }
-    return postSeasonal("seasonal-delete", { id: id })
+    return postSeasonal("seasonal-delete", { id: deleteId })
       .then(function (result) {
         if (!result.ok || !result.data.ok) {
           throw new Error(result.data.error || "삭제 실패");
@@ -616,7 +641,7 @@
 
   function openEditModal(id) {
     var row = seasonalRates.filter(function (r) {
-      return r.id === id;
+      return Number(r.id) === Number(id);
     })[0];
     if (!row) {
       return;
@@ -887,9 +912,7 @@
 
   function handlePolicyConfirmSave() {
     if (pendingDeleteId) {
-      var id = pendingDeleteId;
-      pendingDeleteId = null;
-      return deleteSeasonalRate();
+      return deleteSeasonalRate(pendingDeleteId);
     }
     return Promise.resolve();
   }
