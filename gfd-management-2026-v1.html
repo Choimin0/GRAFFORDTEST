@@ -5226,7 +5226,6 @@
         /** Stayfolio 중개 수수료율 — 변경 시 이 값만 수정 0.11 = 11%*/
         var RES_ENTRY_STAYFOLIO_FEE_RATE = 0.11;
         var resEntryPricingPromise = null;
-        var resEntryStayfolioFeeTimer = null;
         var resEntryState = {
           platform: "",
           bookingChannel: "",
@@ -5371,14 +5370,15 @@
           updateReservationEntrySummary();
         }
 
-        function scheduleResEntryStayfolioFeeApply() {
-          if (resEntryStayfolioFeeTimer) {
-            window.clearTimeout(resEntryStayfolioFeeTimer);
+        function commitResEntryStayfolioFeeFromInput() {
+          if (
+            resEntryState.friendDiscount ||
+            !isResEntryStayfolioChannel() ||
+            resEntryState.stayfolioAmountIsNet
+          ) {
+            return;
           }
-          resEntryStayfolioFeeTimer = window.setTimeout(function () {
-            resEntryStayfolioFeeTimer = null;
-            applyResEntryStayfolioFeeFromInput({ force: true });
-          }, 400);
+          applyResEntryStayfolioFeeFromInput({ force: true });
         }
 
         function handleResEntryAmountInput() {
@@ -5398,7 +5398,6 @@
               resEntryState.amountEntered = gross > 0;
               resEntryState.amount = computeResEntryStayfolioNetAmount(gross);
             }
-            scheduleResEntryStayfolioFeeApply();
             updateResEntryPerNightDisplay();
             updateReservationEntrySummary();
             return;
@@ -6157,10 +6156,6 @@
             friendDiscount: false,
             stayfolioAmountIsNet: false,
           };
-          if (resEntryStayfolioFeeTimer) {
-            window.clearTimeout(resEntryStayfolioFeeTimer);
-            resEntryStayfolioFeeTimer = null;
-          }
           resEntrySubmitting = false;
           resEntryCheckInDate = null;
           resEntryCheckOutDate = null;
@@ -6428,20 +6423,14 @@
                 handleResEntryAmountInput();
                 syncReservationEntryDates();
               });
-              totalAmountInput.addEventListener("blur", function () {
-                if (resEntryState.friendDiscount) {
+              totalAmountInput.addEventListener("keydown", function (e) {
+                if (e.key !== "Enter") {
                   return;
                 }
-                if (
-                  isResEntryStayfolioChannel() &&
-                  !resEntryState.stayfolioAmountIsNet
-                ) {
-                  if (resEntryStayfolioFeeTimer) {
-                    window.clearTimeout(resEntryStayfolioFeeTimer);
-                    resEntryStayfolioFeeTimer = null;
-                  }
-                  applyResEntryStayfolioFeeFromInput({ force: true });
-                }
+                commitResEntryStayfolioFeeFromInput();
+              });
+              totalAmountInput.addEventListener("blur", function () {
+                commitResEntryStayfolioFeeFromInput();
               });
             }
             if (memoInput) {
@@ -6489,16 +6478,7 @@
                   );
                   return;
                 }
-                if (
-                  isResEntryStayfolioChannel() &&
-                  !resEntryState.stayfolioAmountIsNet
-                ) {
-                  if (resEntryStayfolioFeeTimer) {
-                    window.clearTimeout(resEntryStayfolioFeeTimer);
-                    resEntryStayfolioFeeTimer = null;
-                  }
-                  applyResEntryStayfolioFeeFromInput({ force: true });
-                }
+                commitResEntryStayfolioFeeFromInput();
 
                 var auth = getAuthPayload();
                 var memoInput = document.getElementById("admin-res-entry-memo");
