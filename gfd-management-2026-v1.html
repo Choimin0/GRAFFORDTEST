@@ -1315,7 +1315,9 @@
           </div>
           <div class="admin-edit-reservation-fields">
             <div class="admin-edit-reservation-field-group">
-              <p class="admin-edit-reservation-field-label">체크인 · 체크아웃</p>
+              <p class="admin-edit-reservation-field-label">
+                체크인 · 체크아웃
+              </p>
               <div
                 class="admin-res-entry-calendar-wrap admin-edit-res-calendar-wrap"
                 id="admin-edit-res-calendar-wrap"
@@ -1347,10 +1349,7 @@
                       ›
                     </button>
                   </div>
-                  <div
-                    class="admin-res-entry-cal-weekdays"
-                    aria-hidden="true"
-                  >
+                  <div class="admin-res-entry-cal-weekdays" aria-hidden="true">
                     <span>일</span><span>월</span><span>화</span><span>수</span
                     ><span>목</span><span>금</span><span>토</span>
                   </div>
@@ -1365,7 +1364,8 @@
                 class="admin-res-entry-cal-hint admin-edit-res-cal-hint"
                 id="admin-edit-res-cal-hint"
               >
-                달력에서 체크인 날짜를 먼저 선택한 뒤, 체크아웃 날짜를 선택하세요.
+                달력에서 체크인 날짜를 먼저 선택한 뒤, 체크아웃 날짜를
+                선택하세요.
               </p>
             </div>
             <div class="admin-edit-reservation-field-group">
@@ -1775,6 +1775,34 @@
             </div>
             <p id="admin-manual-cancel-meta"></p>
           </div>
+          <label
+            class="admin-request-modal__label admin-manual-cancel-refund-field"
+            for="admin-manual-cancel-refund-percent"
+          >
+            환불 비율
+            <select id="admin-manual-cancel-refund-percent"></select>
+          </label>
+          <label
+            class="admin-request-modal__label admin-manual-cancel-refund-custom-field"
+            for="admin-manual-cancel-refund-custom"
+            id="admin-manual-cancel-refund-custom-wrap"
+            hidden
+          >
+            직접 입력 (%)
+            <input
+              id="admin-manual-cancel-refund-custom"
+              type="number"
+              min="0"
+              max="100"
+              step="1"
+              inputmode="numeric"
+              placeholder="0~100"
+            />
+          </label>
+          <p
+            id="admin-manual-cancel-refund-preview"
+            class="admin-manual-cancel-refund-preview"
+          ></p>
           <p
             id="admin-manual-cancel-message"
             class="admin-request-message"
@@ -2270,6 +2298,18 @@
         var manualCancelYesBtn = document.getElementById(
           "admin-manual-cancel-yes",
         );
+        var manualCancelRefundSelect = document.getElementById(
+          "admin-manual-cancel-refund-percent",
+        );
+        var manualCancelRefundCustomWrap = document.getElementById(
+          "admin-manual-cancel-refund-custom-wrap",
+        );
+        var manualCancelRefundCustomInput = document.getElementById(
+          "admin-manual-cancel-refund-custom",
+        );
+        var manualCancelRefundPreview = document.getElementById(
+          "admin-manual-cancel-refund-preview",
+        );
         var checkinResendModal = document.getElementById(
           "admin-checkin-resend-modal",
         );
@@ -2288,7 +2328,13 @@
         );
         var weekResCloseBtn = document.getElementById("admin-week-res-close");
         var activeManualCancelReservationNumber = "";
+        var activeManualCancelPaidTotal = 0;
+        var activeManualCancelRequiresPgRefund = false;
         var manualCancelSubmitting = false;
+        var manualCancelRefundCustomValue = "custom";
+        var manualCancelRefundPercents = [
+          100, 90, 80, 70, 60, 50, 40, 30, 20, 10, 0,
+        ];
         var activeCheckinResendReservationNumber = "";
         var activeCheckinResendBtn = null;
         var searchForm = document.getElementById("admin-search-form");
@@ -2386,7 +2432,7 @@
           promotion: {
             eyebrow: "PROMOTION",
             label: "프로모션 할인",
-            desc: "전체 평일 객실료 기준으로 적용되는 할인율입니다.",
+            desc: "전체 주중/주말 객실료 기준으로 적용되는 할인율입니다.",
             unit: "%",
           },
           "extra-guest-charge": {
@@ -3263,8 +3309,7 @@
         function getWeekSegmentRole(row, ymd, weekStartYmd, weekLastYmd) {
           var next = addOneDay(ymd, 1);
           var isEnd =
-            !isReservationNight(row, next) ||
-            compareYmd(ymd, weekLastYmd) >= 0;
+            !isReservationNight(row, next) || compareYmd(ymd, weekLastYmd) >= 0;
           return {
             isStart: isWeekSpanStart(row, ymd, weekStartYmd),
             isEnd: isEnd,
@@ -3373,8 +3418,7 @@
               idx.textContent = String(roomIndex) + ".";
               var name = document.createElement("span");
               name.className = "admin-calendar-room-bar__name";
-              name.textContent =
-                String(row.guestName || "").trim() || "—";
+              name.textContent = String(row.guestName || "").trim() || "—";
               bar.appendChild(idx);
               bar.appendChild(name);
             }
@@ -4042,9 +4086,7 @@
             calendarResDetailCheckout.textContent = targetRow.checkOut || "—";
           }
           if (calendarResDetailNights) {
-            calendarResDetailNights.textContent = nights
-              ? nights + "박"
-              : "—";
+            calendarResDetailNights.textContent = nights ? nights + "박" : "—";
           }
           if (calendarResDetailGuests) {
             calendarResDetailGuests.textContent = targetRow.guestCount
@@ -4056,8 +4098,7 @@
               getEditPaymentLabel(targetRow);
           }
           if (calendarResDetailGuestName) {
-            calendarResDetailGuestName.textContent =
-              targetRow.guestName || "—";
+            calendarResDetailGuestName.textContent = targetRow.guestName || "—";
           }
           if (calendarResDetailContact) {
             calendarResDetailContact.textContent = formatAdminSearchContact(
@@ -6794,6 +6835,20 @@
           );
         }
 
+        function requiresManualCancelPgRefund(row) {
+          if (isExternalManualReservation(row)) {
+            return false;
+          }
+          var method = String((row && row.paymentMethod) || "")
+            .trim()
+            .toLowerCase();
+          return !(
+            method === "bank" ||
+            method === "무통장입금" ||
+            method === "bank_transfer"
+          );
+        }
+
         function getReservationStatusLabel(row) {
           if (activeResTab === "deleted" || (row && row.deletedAt)) {
             return "취소완료";
@@ -7200,7 +7255,13 @@
           var P = window.GraffordBookingPricing;
           var checkIn = getEditReservationCheckInYmd();
           var checkOut = getEditReservationCheckOutYmd();
-          if (!P || !editResRoomType || !checkIn || !checkOut || checkIn >= checkOut) {
+          if (
+            !P ||
+            !editResRoomType ||
+            !checkIn ||
+            !checkOut ||
+            checkIn >= checkOut
+          ) {
             return null;
           }
           var extraGuests = getResEntryExtraGuests(
@@ -7226,7 +7287,12 @@
           }
           var checkIn = getEditReservationCheckInYmd();
           var checkOut = getEditReservationCheckOutYmd();
-          if (!checkIn || !checkOut || checkIn >= checkOut || !editResRoomType) {
+          if (
+            !checkIn ||
+            !checkOut ||
+            checkIn >= checkOut ||
+            !editResRoomType
+          ) {
             quoteEl.textContent = "";
             return;
           }
@@ -7515,7 +7581,9 @@
         }
 
         function getEditReservationCheckInYmd() {
-          return editResCheckInDate ? formatResEntryYmd(editResCheckInDate) : "";
+          return editResCheckInDate
+            ? formatResEntryYmd(editResCheckInDate)
+            : "";
         }
 
         function getEditReservationCheckOutYmd() {
@@ -7634,7 +7702,9 @@
             );
             return;
           }
-          if (!canEditResSelectCheckOut(editResCheckInDate, editResCheckOutDate)) {
+          if (
+            !canEditResSelectCheckOut(editResCheckInDate, editResCheckOutDate)
+          ) {
             setEditReservationMessage(
               "선택한 기간에 예약 불가능한 날짜가 포함되어 있습니다.",
             );
@@ -7762,6 +7832,149 @@
           if (manualCancelCloseBtn) {
             manualCancelCloseBtn.disabled = !!disabled;
           }
+          if (manualCancelRefundSelect) {
+            manualCancelRefundSelect.disabled = !!disabled;
+          }
+          if (manualCancelRefundCustomInput) {
+            manualCancelRefundCustomInput.disabled = !!disabled;
+          }
+        }
+
+        function setManualCancelRefundCustomVisible(visible) {
+          if (manualCancelRefundCustomWrap) {
+            manualCancelRefundCustomWrap.hidden = !visible;
+          }
+        }
+
+        function normalizeManualCancelRefundPercent(value) {
+          var num = Number(value);
+          if (!Number.isFinite(num)) {
+            return null;
+          }
+          return Math.min(100, Math.max(0, Math.round(num)));
+        }
+
+        function populateManualCancelRefundSelect(defaultPercent) {
+          if (!manualCancelRefundSelect) {
+            return;
+          }
+          var normalizedDefault = normalizeManualCancelRefundPercent(
+            defaultPercent,
+          );
+          var target =
+            normalizedDefault != null &&
+            manualCancelRefundPercents.indexOf(normalizedDefault) !== -1
+              ? normalizedDefault
+              : normalizedDefault != null
+                ? normalizedDefault
+                : 100;
+          var useCustom =
+            normalizedDefault != null &&
+            manualCancelRefundPercents.indexOf(normalizedDefault) === -1;
+
+          manualCancelRefundSelect.innerHTML = "";
+          manualCancelRefundPercents.forEach(function (percent) {
+            var option = document.createElement("option");
+            option.value = String(percent);
+            option.textContent = percent + "%";
+            if (!useCustom && percent === target) {
+              option.selected = true;
+            }
+            manualCancelRefundSelect.appendChild(option);
+          });
+
+          var customOption = document.createElement("option");
+          customOption.value = manualCancelRefundCustomValue;
+          customOption.textContent = "직접입력";
+          if (useCustom) {
+            customOption.selected = true;
+          }
+          manualCancelRefundSelect.appendChild(customOption);
+
+          if (manualCancelRefundCustomInput) {
+            manualCancelRefundCustomInput.value = useCustom
+              ? String(target)
+              : "";
+          }
+          setManualCancelRefundCustomVisible(useCustom);
+        }
+
+        function isManualCancelRefundCustomMode() {
+          return (
+            !!manualCancelRefundSelect &&
+            manualCancelRefundSelect.value === manualCancelRefundCustomValue
+          );
+        }
+
+        function getSelectedManualCancelRefundPercent() {
+          if (!manualCancelRefundSelect) {
+            return 100;
+          }
+          if (isManualCancelRefundCustomMode()) {
+            return normalizeManualCancelRefundPercent(
+              manualCancelRefundCustomInput && manualCancelRefundCustomInput.value,
+            );
+          }
+          return normalizeManualCancelRefundPercent(
+            manualCancelRefundSelect.value,
+          );
+        }
+
+        function onManualCancelRefundSelectChange() {
+          var isCustom = isManualCancelRefundCustomMode();
+          setManualCancelRefundCustomVisible(isCustom);
+          if (isCustom && manualCancelRefundCustomInput) {
+            manualCancelRefundCustomInput.focus();
+          }
+          updateManualCancelRefundPreview();
+        }
+
+        function computeManualCancelAmounts(paidTotal, refundPercent) {
+          var paid = Math.max(0, Math.floor(Number(paidTotal) || 0));
+          var percent =
+            normalizeManualCancelRefundPercent(refundPercent);
+          if (percent == null) {
+            percent = 0;
+          }
+          var refundAmount = Math.min(
+            paid,
+            Math.max(0, Math.round((paid * percent) / 100)),
+          );
+          var retainedAmount = Math.max(0, paid - refundAmount);
+          return {
+            refundAmount: refundAmount,
+            retainedAmount: retainedAmount,
+            refundPercent: percent,
+          };
+        }
+
+        function updateManualCancelRefundPreview() {
+          if (!manualCancelRefundPreview) {
+            return;
+          }
+          var refundPercent = getSelectedManualCancelRefundPercent();
+          if (refundPercent == null) {
+            manualCancelRefundPreview.textContent =
+              "0~100 사이의 환불 비율을 입력해 주세요.";
+            return;
+          }
+          var amounts = computeManualCancelAmounts(
+            activeManualCancelPaidTotal,
+            refundPercent,
+          );
+          var refundLabel = activeManualCancelRequiresPgRefund
+            ? "환불 예정"
+            : "환불 기록";
+          var previewText =
+            refundLabel +
+            " " +
+            formatKRW(amounts.refundAmount) +
+            " · 매출 반영 " +
+            formatKRW(amounts.retainedAmount);
+          if (!activeManualCancelRequiresPgRefund) {
+            previewText += " (실제 환불 처리 없음)";
+          }
+          manualCancelRefundPreview.textContent = previewText;
         }
 
         function openManualCancelModal(reservationNumber) {
@@ -7772,6 +7985,8 @@
           var isExternalManual = isExternalManualReservation(row);
           manualCancelSubmitting = false;
           activeManualCancelReservationNumber = String(reservationNumber || "");
+          activeManualCancelPaidTotal = getReservationPaidTotal(row);
+          activeManualCancelRequiresPgRefund = requiresManualCancelPgRefund(row);
           var titleEl = document.getElementById("admin-manual-cancel-title");
           if (titleEl) {
             titleEl.textContent = isExternalManual
@@ -7779,14 +7994,17 @@
               : "관리자 직접 취소를 진행하시겠습니까?";
           }
           if (manualCancelMeta) {
-            manualCancelMeta.textContent = isExternalManual
-              ? (row.reservationNumber || "—") + " · " + (row.guestName || "—")
-              : (row.reservationNumber || "—") +
-                " · " +
-                (row.guestName || "—") +
-                " · " +
-                formatKRW(getReservationPaidTotal(row));
+            var metaParts = [
+              row.reservationNumber || "—",
+              row.guestName || "—",
+            ];
+            if (activeManualCancelPaidTotal > 0) {
+              metaParts.push(formatKRW(activeManualCancelPaidTotal));
+            }
+            manualCancelMeta.textContent = metaParts.join(" · ");
           }
+          populateManualCancelRefundSelect(isExternalManual ? 0 : 100);
+          updateManualCancelRefundPreview();
           setManualCancelMessage("");
           setManualCancelButtonsDisabled(false);
           if (manualCancelModal.style.pointerEvents === "none") {
@@ -7810,6 +8028,12 @@
             }, 0);
           }
           activeManualCancelReservationNumber = "";
+          activeManualCancelPaidTotal = 0;
+          activeManualCancelRequiresPgRefund = false;
+          setManualCancelRefundCustomVisible(false);
+          if (manualCancelRefundCustomInput) {
+            manualCancelRefundCustomInput.value = "";
+          }
           setManualCancelMessage("");
           setManualCancelButtonsDisabled(false);
         }
@@ -7822,13 +8046,31 @@
           var auth = getAuthPayload();
           var row = findReservationByNumber(reservationNumber) || {};
           var isExternalManual = isExternalManualReservation(row);
+          var refundPercent = getSelectedManualCancelRefundPercent();
+          if (refundPercent == null) {
+            setManualCancelMessage("0~100 사이의 환불 비율을 입력해 주세요.");
+            return;
+          }
+          var cancelAmounts = computeManualCancelAmounts(
+            activeManualCancelPaidTotal,
+            refundPercent,
+          );
           manualCancelSubmitting = true;
           setManualCancelButtonsDisabled(true);
-          setManualCancelMessage(
-            isExternalManual
-              ? "취소 처리 중입니다."
-              : "100% 환불 및 취소 처리 중입니다.",
-          );
+          if (!activeManualCancelRequiresPgRefund) {
+            setManualCancelMessage("취소 처리 중입니다.");
+          } else if (refundPercent <= 0) {
+            setManualCancelMessage("취소 처리 중입니다.");
+          } else if (refundPercent >= 100) {
+            setManualCancelMessage("100% 환불 및 취소 처리 중입니다.");
+          } else {
+            setManualCancelMessage(
+              refundPercent +
+                "% 환불(" +
+                formatKRW(cancelAmounts.refundAmount) +
+                ") 및 취소 처리 중입니다.",
+            );
+          }
           if (isReservationListPreview) {
             reservationListRows = (reservationListRows || []).filter(
               function (row) {
@@ -7852,6 +8094,7 @@
           }
           adminPost("payment-cancel", {
             reservationNumber: reservationNumber,
+            refundPercent: refundPercent,
             adminId: auth.adminId,
             adminPw: auth.adminPw,
           })
@@ -8278,11 +8521,9 @@
             if (activeResTab === "past") {
               copied.sort(function (a, b) {
                 var result =
-                  asYmdNumber(b && b.checkOut) -
-                  asYmdNumber(a && a.checkOut);
+                  asYmdNumber(b && b.checkOut) - asYmdNumber(a && a.checkOut);
                 if (result === 0) {
-                  result =
-                    reservationDateNumber(b) - reservationDateNumber(a);
+                  result = reservationDateNumber(b) - reservationDateNumber(a);
                 }
                 return result;
               });
@@ -10310,8 +10551,12 @@
           });
         }
 
-        var editResCalPrevBtn = document.getElementById("admin-edit-res-cal-prev");
-        var editResCalNextBtn = document.getElementById("admin-edit-res-cal-next");
+        var editResCalPrevBtn = document.getElementById(
+          "admin-edit-res-cal-prev",
+        );
+        var editResCalNextBtn = document.getElementById(
+          "admin-edit-res-cal-next",
+        );
         if (editResCalPrevBtn) {
           editResCalPrevBtn.addEventListener("click", function () {
             if (editReservationSubmitting) {
@@ -10398,6 +10643,20 @@
               closeManualCancelModal();
             }
           });
+        }
+
+        if (manualCancelRefundSelect) {
+          manualCancelRefundSelect.addEventListener(
+            "change",
+            onManualCancelRefundSelectChange,
+          );
+        }
+
+        if (manualCancelRefundCustomInput) {
+          manualCancelRefundCustomInput.addEventListener(
+            "input",
+            updateManualCancelRefundPreview,
+          );
         }
 
         if (checkinResendNoBtn) {

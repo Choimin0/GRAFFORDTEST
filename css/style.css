@@ -14506,6 +14506,51 @@ main.content-section.confirm-page.admin-page {
   font-size: 0.76rem;
   letter-spacing: 0.08em;
 }
+.admin-manual-cancel-refund-field {
+  margin: var(--space-16) 0 0;
+}
+.admin-manual-cancel-refund-field select {
+  width: 100%;
+  border: 1px solid var(--stone-200);
+  background: transparent;
+  color: var(--stone-800);
+  padding: var(--space-12);
+  font-family: var(--font-family-body-kr);
+  font-size: 0.88rem;
+  line-height: 1.4;
+  box-sizing: border-box;
+}
+.admin-manual-cancel-refund-field select:focus,
+.admin-manual-cancel-refund-field select:focus-visible {
+  outline: none;
+  border-color: var(--gold-500);
+}
+.admin-manual-cancel-refund-custom-field {
+  margin: var(--space-8) 0 0;
+}
+.admin-manual-cancel-refund-custom-field input {
+  width: 100%;
+  border: 1px solid var(--stone-200);
+  background: transparent;
+  color: var(--stone-800);
+  padding: var(--space-12);
+  font-family: var(--font-family-body-kr);
+  font-size: 0.88rem;
+  line-height: 1.4;
+  box-sizing: border-box;
+}
+.admin-manual-cancel-refund-custom-field input:focus,
+.admin-manual-cancel-refund-custom-field input:focus-visible {
+  outline: none;
+  border-color: var(--gold-500);
+}
+.admin-manual-cancel-refund-preview {
+  margin: var(--space-8) 0 0;
+  color: var(--stone-500);
+  font-size: 0.76rem;
+  letter-spacing: 0.06em;
+  line-height: 1.6;
+}
 .admin-manual-cancel-confirm-btn.btn.reserve-btn {
   min-width: 5rem;
   margin: 0;

@@ -92,7 +92,10 @@ async function getMonthlySalesData(pool, month) {
   const cancelQuery = `
     SELECT
       COUNT(*)::int AS cancel_count,
-      COALESCE(SUM(total_amount), 0)::bigint AS cancel_revenue
+      COALESCE(
+        SUM(GREATEST(total_amount - COALESCE(refund_amount, 0), 0)),
+        0
+      )::bigint AS cancel_revenue
     FROM ${BOOKING_TABLE}
     WHERE status = 'cancelled'
       AND (COALESCE(cancelled_at, created_at) AT TIME ZONE 'Asia/Seoul')::date >= $1::date
@@ -326,7 +329,10 @@ async function getAnnualSalesData(pool, year) {
       SELECT
         EXTRACT(MONTH FROM (COALESCE(cancelled_at, created_at) AT TIME ZONE 'Asia/Seoul'))::int AS month,
         COUNT(*)::int AS cancel_count,
-        COALESCE(SUM(total_amount), 0)::bigint AS cancel_revenue
+        COALESCE(
+          SUM(GREATEST(total_amount - COALESCE(refund_amount, 0), 0)),
+          0
+        )::bigint AS cancel_revenue
       FROM ${BOOKING_TABLE}, year_bounds
       WHERE status = 'cancelled'
         AND (COALESCE(cancelled_at, created_at) AT TIME ZONE 'Asia/Seoul')::date >= year_start

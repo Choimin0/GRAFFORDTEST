@@ -1,5 +1,5 @@
 /**
- * 관리자 직접 취소(천재지변 등): PG 100% 환불 후 예약 취소.
+ * 관리자 직접 취소(천재지변 등): 선택한 환불 비율만큼 PG 환불 후 예약 취소.
  */
 import { decryptBookingPiiResponse } from "./pii-crypto.js";
 import {
@@ -99,10 +99,40 @@ function extractPgTxIdFromPayment(payment) {
   return null;
 }
 
+function parseAdminRefundPercent(body, isExternalManual) {
+  if (body.refundPercent == null || body.refundPercent === "") {
+    return isExternalManual ? 0 : 100;
+  }
+  var value = Number(body.refundPercent);
+  if (!Number.isFinite(value) || value < 0 || value > 100) {
+    return null;
+  }
+  return Math.round(value);
+}
+
+function computeAdminRefundAmount(paidAmount, refundPercent) {
+  var paid = Number.isFinite(Number(paidAmount))
+    ? Math.max(0, Math.floor(Number(paidAmount)))
+    : 0;
+  var percent = Number.isFinite(Number(refundPercent))
+    ? Math.min(100, Math.max(0, Math.round(Number(refundPercent))))
+    : 0;
+  var refundAmount = Math.min(
+    paid,
+    Math.max(0, Math.round((paid * percent) / 100)),
+  );
+  return refundAmount;
+}
+
 /**
- * PortOne v2 전액 취소. paymentId = 결제 시 merchant paymentId(예약번호).
+ * PortOne v2 결제 취소. refundAmount < totalAmount 이면 부분 취소.
  */
-async function requestPortoneFullCancellation(paymentId, cancelReason) {
+async function requestPortoneCancellation(
+  paymentId,
+  cancelReason,
+  refundAmount,
+  totalAmount,
+) {
   var apiSecret = (process.env.PORTONE_API_SECRET || "").trim();
   if (!apiSecret) {
     return {
@@ -111,17 +141,32 @@ async function requestPortoneFullCancellation(paymentId, cancelReason) {
     };
   }
 
+  var isPartial =
+    Number.isFinite(refundAmount) &&
+    Number.isFinite(totalAmount) &&
+    refundAmount > 0 &&
+    refundAmount < totalAmount;
+
   var cancelBody = { reason: cancelReason || "관리자 직접 취소" };
+  if (isPartial) {
+    cancelBody.amount = refundAmount;
+    cancelBody.currentCancellableAmount = totalAmount;
+  }
+
   var cancelUrl =
     "https://api.portone.io/payments/" +
     encodeURIComponent(paymentId) +
     "/cancel";
 
   console.log(
-    "[admin-payment-cancel] PortOne 전액 취소 →",
+    "[admin-payment-cancel] PortOne 취소 →",
     cancelUrl,
     "| paymentId:",
     paymentId,
+    "| 부분취소:",
+    isPartial,
+    "| body:",
+    JSON.stringify(cancelBody),
   );
 
   try {
@@ -219,13 +264,22 @@ export async function handleAdminPaymentCancel(res, pool, body) {
       .trim();
     var isBankTransfer = isBankTransferMethod(paymentMethodDb);
     var isExternalManual = isExternalManualPaymentMethod(paymentMethodDb);
+    var refundPercent = parseAdminRefundPercent(body, isExternalManual);
+    if (refundPercent == null) {
+      client.release();
+      json(res, 400, {
+        ok: false,
+        error: "refundPercent는 0~100 사이 정수여야 합니다.",
+      });
+      return;
+    }
     var paidResolution = await resolvePaidAmountForBooking({
       row: row,
       reservationNumber: reservationNumber,
       isBankTransfer: isBankTransfer,
     });
     var paidAmountNum = paidResolution.paidAmount;
-    var refundAmount = isExternalManual ? 0 : paidAmountNum;
+    var refundAmount = computeAdminRefundAmount(paidAmountNum, refundPercent);
 
     console.log(
       "[admin-payment-cancel] 예약번호:",
@@ -240,7 +294,9 @@ export async function handleAdminPaymentCancel(res, pool, body) {
       paidResolution.source,
       "| dbTotalAmount:",
       row.total_amount,
-      "| refundAmount(100%):",
+      "| refundPercent:",
+      refundPercent,
+      "| refundAmount:",
       refundAmount,
     );
 
@@ -280,9 +336,11 @@ export async function handleAdminPaymentCancel(res, pool, body) {
         }
       }
 
-      var portoneResult = await requestPortoneFullCancellation(
+      var portoneResult = await requestPortoneCancellation(
         reservationNumber,
         "관리자 직접 취소(천재지변)",
+        refundAmount,
+        paidAmountNum,
       );
       if (!portoneResult.ok) {
         var portoneErrStr = portoneResult.error || "";
@@ -296,7 +354,7 @@ export async function handleAdminPaymentCancel(res, pool, body) {
           json(res, 502, {
             ok: false,
             error:
-              "결제 취소(100% 환불)에 실패했습니다.\n" + portoneResult.error,
+              "결제 취소(환불)에 실패했습니다.\n" + portoneResult.error,
             pgError: portoneResult.error,
           });
           return;
@@ -375,6 +433,8 @@ export async function handleAdminPaymentCancel(res, pool, body) {
       reservationNumber: reservationNumber,
       guestName: cancelledPii.guestName,
       refundAmount: refundAmount,
+      refundPercent: refundPercent,
+      retainedAmount: Math.max(0, paidAmountNum - refundAmount),
       totalAmount: paidAmountNum,
       paidAmountSource: paidResolution.source,
       cancelReason: CANCEL_REASON_MANUAL,
