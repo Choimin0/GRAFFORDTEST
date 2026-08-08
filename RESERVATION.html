@@ -1042,6 +1042,8 @@
             var promotionInPeriod = true;
             var promotionPeriodStart = "";
             var promotionPeriodEnd = "";
+            var promotionStayPeriodStart = "";
+            var promotionStayPeriodEnd = "";
             var promotionPercentRaw = 0;
             var consecutiveCardEl = scope.querySelector(
               ".js-res-consecutive-card",
@@ -1285,25 +1287,117 @@
               return parts.m + "/" + parts.d;
             }
 
-            function formatPromotionPeriodDesc(startYmd, endYmd) {
-              var start = formatPromotionMd(startYmd);
-              var end = formatPromotionMd(endYmd);
-              if (!start || !end) {
+            function formatPromotionPeriodDesc(
+              bookingStartYmd,
+              bookingEndYmd,
+              stayStartYmd,
+              stayEndYmd,
+            ) {
+              var bookingStart = formatPromotionMd(bookingStartYmd);
+              var bookingEnd = formatPromotionMd(bookingEndYmd);
+              var stayStart = formatPromotionMd(stayStartYmd);
+              var stayEnd = formatPromotionMd(stayEndYmd);
+              var hasBooking = !!(bookingStart && bookingEnd);
+              var hasStay = !!(stayStart && stayEnd);
+              if (!hasBooking && !hasStay) {
                 return "";
+              }
+              if (hasBooking && !hasStay) {
+                if (isEnScope) {
+                  return (
+                    "Promotion running through " +
+                    bookingStart +
+                    " – " +
+                    bookingEnd
+                  );
+                }
+                return (
+                  bookingStart + " ~ " + bookingEnd + "까지 프로모션 진행중"
+                );
+              }
+              if (!hasBooking && hasStay) {
+                if (isEnScope) {
+                  return (
+                    "Promotion for stays " + stayStart + " – " + stayEnd
+                  );
+                }
+                return stayStart + " ~ " + stayEnd + "까지 프로모션 진행중";
+              }
+              if (
+                bookingStartYmd === stayStartYmd &&
+                bookingEndYmd === stayEndYmd
+              ) {
+                if (isEnScope) {
+                  return (
+                    "Promotion running through " +
+                    bookingStart +
+                    " – " +
+                    bookingEnd
+                  );
+                }
+                return (
+                  bookingStart + " ~ " + bookingEnd + "까지 프로모션 진행중"
+                );
               }
               if (isEnScope) {
-                return "Promotion running through " + start + " – " + end;
+                var enParts = [];
+                if (hasBooking) {
+                  enParts.push("[" + bookingStart + " – " + bookingEnd + "]");
+                }
+                if (hasStay) {
+                  enParts.push(stayStart + " – " + stayEnd);
+                }
+                return (
+                  enParts.join(" ") + " stay dates eligible for promotion"
+                );
               }
-              return start + " ~ " + end + "까지 프로모션 진행중";
+              return (
+                "[" +
+                bookingStart +
+                " ~ " +
+                bookingEnd +
+                "] " +
+                stayStart +
+                " ~ " +
+                stayEnd +
+                " 투숙 시 프로모션 할인중"
+              );
             }
 
-            function formatPromotionPillPeriod(startYmd, endYmd) {
-              var start = formatPromotionMd(startYmd);
-              var end = formatPromotionMd(endYmd);
-              if (!start || !end) {
-                return "";
+            function formatPromotionPillPeriod(
+              bookingStartYmd,
+              bookingEndYmd,
+              stayStartYmd,
+              stayEndYmd,
+            ) {
+              var bookingStart = formatPromotionMd(bookingStartYmd);
+              var bookingEnd = formatPromotionMd(bookingEndYmd);
+              var stayStart = formatPromotionMd(stayStartYmd);
+              var stayEnd = formatPromotionMd(stayEndYmd);
+              var hasBooking = !!(bookingStart && bookingEnd);
+              var hasStay = !!(stayStart && stayEnd);
+              if (hasBooking && !hasStay) {
+                return bookingStart + " ~ " + bookingEnd;
               }
-              return start + " ~ " + end;
+              if (!hasBooking && hasStay) {
+                return stayStart + " ~ " + stayEnd;
+              }
+              if (
+                hasBooking &&
+                hasStay &&
+                bookingStartYmd === stayStartYmd &&
+                bookingEndYmd === stayEndYmd
+              ) {
+                return bookingStart + " ~ " + bookingEnd;
+              }
+              var parts = [];
+              if (hasBooking) {
+                parts.push("[" + bookingStart + " ~ " + bookingEnd + "]");
+              }
+              if (hasStay) {
+                parts.push(stayStart + " ~ " + stayEnd);
+              }
+              return parts.join(" ");
             }
 
             function isPromotionInPeriodClient(todayYmd, startYmd, endYmd) {
@@ -1344,13 +1438,25 @@
               );
               promotionPeriodStart = "";
               promotionPeriodEnd = "";
+              promotionStayPeriodStart = "";
+              promotionStayPeriodEnd = "";
               if (promoMeta && typeof promoMeta === "object") {
-                if (promoMeta.promotionPeriod) {
+                var bookingPeriod =
+                  promoMeta.promotionBookingPeriod || promoMeta.promotionPeriod;
+                if (bookingPeriod) {
                   promotionPeriodStart = normalizePromotionYmd(
-                    promoMeta.promotionPeriod.startDate || "",
+                    bookingPeriod.startDate || "",
                   );
                   promotionPeriodEnd = normalizePromotionYmd(
-                    promoMeta.promotionPeriod.endDate || "",
+                    bookingPeriod.endDate || "",
+                  );
+                }
+                if (promoMeta.promotionStayPeriod) {
+                  promotionStayPeriodStart = normalizePromotionYmd(
+                    promoMeta.promotionStayPeriod.startDate || "",
+                  );
+                  promotionStayPeriodEnd = normalizePromotionYmd(
+                    promoMeta.promotionStayPeriod.endDate || "",
                   );
                 }
                 if (promoMeta.promotionInPeriod === false) {
@@ -1431,6 +1537,14 @@
               ) {
                 P.setCharges(charges, {
                   promotionEnabled: promotionEnabled,
+                  promotionBookingPeriod: {
+                    startDate: promotionPeriodStart,
+                    endDate: promotionPeriodEnd,
+                  },
+                  promotionStayPeriod: {
+                    startDate: promotionStayPeriodStart,
+                    endDate: promotionStayPeriodEnd,
+                  },
                   promotionPeriod: {
                     startDate: promotionPeriodStart,
                     endDate: promotionPeriodEnd,
@@ -1535,10 +1649,22 @@
                     sessionStorage.setItem(
                       "graffordPromotionMeta",
                       JSON.stringify({
-                        promotionPeriod: result.data.promotionPeriod || {
+                        promotionBookingPeriod:
+                          result.data.promotionBookingPeriod ||
+                          result.data.promotionPeriod || {
+                            startDate: "",
+                            endDate: "",
+                          },
+                        promotionStayPeriod: result.data.promotionStayPeriod || {
                           startDate: "",
                           endDate: "",
                         },
+                        promotionPeriod:
+                          result.data.promotionBookingPeriod ||
+                          result.data.promotionPeriod || {
+                            startDate: "",
+                            endDate: "",
+                          },
                         promotionInPeriod:
                           result.data.promotionInPeriod !== false,
                         promotionEnabled: resolvePromotionEnabled(
@@ -1564,7 +1690,13 @@
                       extractChargesFromRatesMap(result.data.rates),
                     result.data.chargeEnabled,
                     {
-                      promotionPeriod: result.data.promotionPeriod,
+                      promotionBookingPeriod:
+                        result.data.promotionBookingPeriod ||
+                        result.data.promotionPeriod,
+                      promotionStayPeriod: result.data.promotionStayPeriod,
+                      promotionPeriod:
+                        result.data.promotionBookingPeriod ||
+                        result.data.promotionPeriod,
                       promotionInPeriod: result.data.promotionInPeriod,
                       promotionEnabled: resolvePromotionEnabled(
                         result.data.chargeEnabled,
@@ -1730,28 +1862,31 @@
                     Math.floor(Number(pricing.PROMOTION_PERCENT || 0)),
                   )
                 : 0;
-              var promoInPeriodForStay = promotionInPeriod;
+              var hasBookingPeriod = !!(
+                promotionPeriodStart && promotionPeriodEnd
+              );
+              var hasStayPeriod = !!(
+                promotionStayPeriodStart && promotionStayPeriodEnd
+              );
+              var hasAnyPeriod = hasBookingPeriod || hasStayPeriod;
+              var promoInPeriodForStay =
+                promotionEnabled && !hasAnyPeriod;
               if (
                 checkIn &&
                 checkOut &&
                 pricing &&
-                typeof pricing.isStayInPromotionPeriod === "function" &&
-                (promotionPeriodStart || promotionPeriodEnd)
+                typeof pricing.isPromotionActiveForStay === "function"
               ) {
-                promoInPeriodForStay = pricing.isStayInPromotionPeriod(
+                promoInPeriodForStay = pricing.isPromotionActiveForStay(
                   formatYMD(checkIn),
                   formatYMD(checkOut),
-                  promotionPeriodStart,
-                  promotionPeriodEnd,
                 );
-              } else if (!promotionPeriodStart && !promotionPeriodEnd) {
-                promoInPeriodForStay = promotionEnabled;
+              } else if (hasAnyPeriod) {
+                promoInPeriodForStay = false;
               }
               var promoActiveNow =
                 promotionEnabled && promoInPeriodForStay && pctApplied > 0;
-              var hasPromotionPeriod = !!(
-                promotionPeriodStart && promotionPeriodEnd
-              );
+              var hasPromotionPeriod = hasAnyPeriod;
               var shouldShowPromotionCard = promotionEnabled && pctDisplay > 0;
               var shouldShowPromotionPill =
                 shouldShowPromotionCard && hasPromotionPeriod;
@@ -1766,6 +1901,8 @@
                 var periodText = formatPromotionPeriodDesc(
                   promotionPeriodStart,
                   promotionPeriodEnd,
+                  promotionStayPeriodStart,
+                  promotionStayPeriodEnd,
                 );
                 promoDescEl.textContent =
                   periodText ||
@@ -1779,6 +1916,8 @@
                   var pillPeriodText = formatPromotionPillPeriod(
                     promotionPeriodStart,
                     promotionPeriodEnd,
+                    promotionStayPeriodStart,
+                    promotionStayPeriodEnd,
                   );
                   promoPillEl.textContent =
                     pillPeriodText || (isEnScope ? "Applied" : "적용 중");

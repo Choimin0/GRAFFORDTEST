@@ -895,15 +895,29 @@
                 sessionStorage.getItem("graffordPromotionMeta") || "null",
               );
             } catch (_pm) {}
-            var promotionPeriod = null;
-            if (ratePayload && ratePayload.promotionPeriod) {
-              promotionPeriod = ratePayload.promotionPeriod;
-            } else if (promoMeta && promoMeta.promotionPeriod) {
-              promotionPeriod = promoMeta.promotionPeriod;
+            var promotionBookingPeriod = null;
+            var promotionStayPeriod = null;
+            if (ratePayload) {
+              promotionBookingPeriod =
+                ratePayload.promotionBookingPeriod ||
+                ratePayload.promotionPeriod ||
+                null;
+              promotionStayPeriod = ratePayload.promotionStayPeriod || null;
+            }
+            if (!promotionBookingPeriod && promoMeta) {
+              promotionBookingPeriod =
+                promoMeta.promotionBookingPeriod ||
+                promoMeta.promotionPeriod ||
+                null;
+            }
+            if (!promotionStayPeriod && promoMeta) {
+              promotionStayPeriod = promoMeta.promotionStayPeriod || null;
             }
             P.setCharges(charges, {
               promotionEnabled: !!(enabled && enabled.promotion === true),
-              promotionPeriod: promotionPeriod,
+              promotionBookingPeriod: promotionBookingPeriod,
+              promotionStayPeriod: promotionStayPeriod,
+              promotionPeriod: promotionBookingPeriod,
               promotionInPeriod:
                 ratePayload && ratePayload.promotionInPeriod === false
                   ? false
@@ -1116,10 +1130,22 @@
                   sessionStorage.setItem(
                     "graffordPromotionMeta",
                     JSON.stringify({
-                      promotionPeriod: rateData.promotionPeriod || {
+                      promotionBookingPeriod:
+                        rateData.promotionBookingPeriod ||
+                        rateData.promotionPeriod || {
+                          startDate: "",
+                          endDate: "",
+                        },
+                      promotionStayPeriod: rateData.promotionStayPeriod || {
                         startDate: "",
                         endDate: "",
                       },
+                      promotionPeriod:
+                        rateData.promotionBookingPeriod ||
+                        rateData.promotionPeriod || {
+                          startDate: "",
+                          endDate: "",
+                        },
                       promotionInPeriod: rateData.promotionInPeriod !== false,
                     }),
                   );

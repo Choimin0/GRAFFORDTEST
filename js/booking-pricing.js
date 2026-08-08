@@ -24,6 +24,8 @@
   var PROMOTION_ENABLED = false;
   var PROMOTION_PERIOD_START = "";
   var PROMOTION_PERIOD_END = "";
+  var PROMOTION_STAY_PERIOD_START = "";
+  var PROMOTION_STAY_PERIOD_END = "";
   var PROMOTION_LEGACY_IN_PERIOD = true;
   /** 기간별 요금 옵션 (겹치면 createdAt 최신 우선) */
   var SEASONAL_RATES = [];
@@ -91,9 +93,18 @@
       PROMOTION_PERCENT = 0;
     }
     var period = opts.promotionPeriod;
-    if (period && typeof period === "object") {
-      PROMOTION_PERIOD_START = normalizePromotionYmd(period.startDate);
-      PROMOTION_PERIOD_END = normalizePromotionYmd(period.endDate);
+    var bookingPeriod = opts.promotionBookingPeriod || period;
+    if (bookingPeriod && typeof bookingPeriod === "object") {
+      PROMOTION_PERIOD_START = normalizePromotionYmd(bookingPeriod.startDate);
+      PROMOTION_PERIOD_END = normalizePromotionYmd(bookingPeriod.endDate);
+    }
+    var stayPeriod = opts.promotionStayPeriod;
+    if (stayPeriod && typeof stayPeriod === "object") {
+      PROMOTION_STAY_PERIOD_START = normalizePromotionYmd(stayPeriod.startDate);
+      PROMOTION_STAY_PERIOD_END = normalizePromotionYmd(stayPeriod.endDate);
+    } else {
+      PROMOTION_STAY_PERIOD_START = "";
+      PROMOTION_STAY_PERIOD_END = "";
     }
     PROMOTION_LEGACY_IN_PERIOD = opts.promotionInPeriod !== false;
     // 외부 코드에서 읽는 공개 상수도 동기화
@@ -259,7 +270,23 @@
     if (!PROMOTION_ENABLED || PROMOTION_PERCENT <= 0) {
       return false;
     }
-    if (PROMOTION_PERIOD_START || PROMOTION_PERIOD_END) {
+    var hasBooking = !!(PROMOTION_PERIOD_START || PROMOTION_PERIOD_END);
+    var hasStay = !!(
+      PROMOTION_STAY_PERIOD_START || PROMOTION_STAY_PERIOD_END
+    );
+
+    if (hasBooking && hasStay) {
+      if (!PROMOTION_LEGACY_IN_PERIOD) {
+        return false;
+      }
+      return isStayInPromotionPeriod(
+        checkInStr,
+        checkOutStr,
+        PROMOTION_STAY_PERIOD_START,
+        PROMOTION_STAY_PERIOD_END,
+      );
+    }
+    if (hasBooking && !hasStay) {
       return isStayInPromotionPeriod(
         checkInStr,
         checkOutStr,
@@ -267,7 +294,15 @@
         PROMOTION_PERIOD_END,
       );
     }
-    return PROMOTION_LEGACY_IN_PERIOD;
+    if (!hasBooking && hasStay) {
+      return isStayInPromotionPeriod(
+        checkInStr,
+        checkOutStr,
+        PROMOTION_STAY_PERIOD_START,
+        PROMOTION_STAY_PERIOD_END,
+      );
+    }
+    return true;
   }
 
   /** 체크인 날짜부터 체크아웃 전날까지 각 박의 Date 목록 */

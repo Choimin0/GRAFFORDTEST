@@ -899,18 +899,31 @@
               var ch = rateData.charges || rateData;
               if (ch && typeof P.setCharges === "function") {
                 var enabled = rateData.chargeEnabled || null;
-                var promoPeriod = rateData.promotionPeriod || null;
+                var promoBookingPeriod =
+                  rateData.promotionBookingPeriod ||
+                  rateData.promotionPeriod ||
+                  null;
+                var promoStayPeriod = rateData.promotionStayPeriod || null;
                 try {
                   var promoMeta = JSON.parse(
                     sessionStorage.getItem("graffordPromotionMeta") || "null",
                   );
-                  if (promoMeta && promoMeta.promotionPeriod) {
-                    promoPeriod = promoMeta.promotionPeriod;
+                  if (promoMeta) {
+                    if (promoMeta.promotionBookingPeriod) {
+                      promoBookingPeriod = promoMeta.promotionBookingPeriod;
+                    } else if (promoMeta.promotionPeriod) {
+                      promoBookingPeriod = promoMeta.promotionPeriod;
+                    }
+                    if (promoMeta.promotionStayPeriod) {
+                      promoStayPeriod = promoMeta.promotionStayPeriod;
+                    }
                   }
                 } catch (_pm) {}
                 P.setCharges(ch, {
                   promotionEnabled: !!(enabled && enabled.promotion === true),
-                  promotionPeriod: promoPeriod,
+                  promotionBookingPeriod: promoBookingPeriod,
+                  promotionStayPeriod: promoStayPeriod,
+                  promotionPeriod: promoBookingPeriod,
                   promotionInPeriod: rateData.promotionInPeriod !== false,
                   weekendChargeEnabled: !!(
                     enabled && enabled.weekendCharge !== false
@@ -2394,18 +2407,31 @@
               var ch = rateData.charges || rateData;
               if (ch && typeof P.setCharges === "function") {
                 var enabled = rateData.chargeEnabled || null;
-                var promoPeriod = rateData.promotionPeriod || null;
+                var promoBookingPeriod =
+                  rateData.promotionBookingPeriod ||
+                  rateData.promotionPeriod ||
+                  null;
+                var promoStayPeriod = rateData.promotionStayPeriod || null;
                 try {
                   var promoMeta = JSON.parse(
                     sessionStorage.getItem("graffordPromotionMeta") || "null",
                   );
-                  if (promoMeta && promoMeta.promotionPeriod) {
-                    promoPeriod = promoMeta.promotionPeriod;
+                  if (promoMeta) {
+                    if (promoMeta.promotionBookingPeriod) {
+                      promoBookingPeriod = promoMeta.promotionBookingPeriod;
+                    } else if (promoMeta.promotionPeriod) {
+                      promoBookingPeriod = promoMeta.promotionPeriod;
+                    }
+                    if (promoMeta.promotionStayPeriod) {
+                      promoStayPeriod = promoMeta.promotionStayPeriod;
+                    }
                   }
                 } catch (_pm) {}
                 P.setCharges(ch, {
                   promotionEnabled: !!(enabled && enabled.promotion === true),
-                  promotionPeriod: promoPeriod,
+                  promotionBookingPeriod: promoBookingPeriod,
+                  promotionStayPeriod: promoStayPeriod,
+                  promotionPeriod: promoBookingPeriod,
                   promotionInPeriod: rateData.promotionInPeriod !== false,
                   weekendChargeEnabled: !!(
                     enabled && enabled.weekendCharge !== false

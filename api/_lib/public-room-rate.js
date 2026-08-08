@@ -77,7 +77,9 @@ async function ensureRoomRateSchema(pool) {
   await pool.query(
     `ALTER TABLE ${TABLE_NAME}
      ADD COLUMN IF NOT EXISTS promotion_start_date DATE,
-     ADD COLUMN IF NOT EXISTS promotion_end_date DATE`,
+     ADD COLUMN IF NOT EXISTS promotion_end_date DATE,
+     ADD COLUMN IF NOT EXISTS promotion_stay_start_date DATE,
+     ADD COLUMN IF NOT EXISTS promotion_stay_end_date DATE`,
   );
   await pool.query(
     `ALTER TABLE ${TABLE_NAME}
@@ -224,7 +226,8 @@ export async function handlePublicRoomRate(req, res, pool) {
     await ensureRoomRateSchema(pool);
     var sel = await pool.query(
       `SELECT room_name, weekday_base_rate, weekend_base_rate, is_enabled,
-              promotion_start_date, promotion_end_date
+              promotion_start_date, promotion_end_date,
+              promotion_stay_start_date, promotion_stay_end_date
        FROM ${TABLE_NAME}
        WHERE ${BASE_ROW_FILTER}
        ORDER BY room_name ASC`,
@@ -243,7 +246,8 @@ export async function handlePublicRoomRate(req, res, pool) {
       promotion: true,
       extraGuestCharge: true,
     };
-    var promotionPeriod = { startDate: "", endDate: "" };
+    var promotionBookingPeriod = { startDate: "", endDate: "" };
+    var promotionStayPeriod = { startDate: "", endDate: "" };
     var promotionInPeriod = true;
     var promotionPercent = 0;
     var chargeKeyMap = {
@@ -265,10 +269,22 @@ export async function handlePublicRoomRate(req, res, pool) {
         charges[key] = enabled ? n : 0;
         if (row.room_name === "promotion") {
           promotionPercent = Math.max(0, Math.min(100, Math.floor(n)));
-          var start = formatPromotionDateFromDb(row.promotion_start_date);
-          var end = formatPromotionDateFromDb(row.promotion_end_date);
-          promotionPeriod = { startDate: start, endDate: end };
-          promotionInPeriod = isPromotionInPeriod(todayYmd, start, end);
+          var bookingStart = formatPromotionDateFromDb(row.promotion_start_date);
+          var bookingEnd = formatPromotionDateFromDb(row.promotion_end_date);
+          var stayStart = formatPromotionDateFromDb(
+            row.promotion_stay_start_date,
+          );
+          var stayEnd = formatPromotionDateFromDb(row.promotion_stay_end_date);
+          promotionBookingPeriod = {
+            startDate: bookingStart,
+            endDate: bookingEnd,
+          };
+          promotionStayPeriod = { startDate: stayStart, endDate: stayEnd };
+          promotionInPeriod = isPromotionInPeriod(
+            todayYmd,
+            bookingStart,
+            bookingEnd,
+          );
         }
       } else if (/^G[1-4]$/.test(row.room_name)) {
         rates[row.room_name] = n;
@@ -300,7 +316,10 @@ export async function handlePublicRoomRate(req, res, pool) {
       weekendBaseRates: weekendBaseRates,
       charges: charges,
       chargeEnabled: chargeEnabled,
-      promotionPeriod: promotionPeriod,
+      promotionBookingPeriod: promotionBookingPeriod,
+      promotionStayPeriod: promotionStayPeriod,
+      /** @deprecated promotionBookingPeriod 사용 */
+      promotionPeriod: promotionBookingPeriod,
       promotionInPeriod: promotionInPeriod,
       promotionPercent: promotionPercent,
       seasonalRates: seasonalRates,

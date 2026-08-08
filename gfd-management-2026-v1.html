@@ -5401,7 +5401,11 @@
                   promotionEnabled: !!(
                     data.chargeEnabled && data.chargeEnabled.promotion
                   ),
-                  promotionPeriod: data.promotionPeriod || null,
+                  promotionBookingPeriod:
+                    data.promotionBookingPeriod || data.promotionPeriod || null,
+                  promotionStayPeriod: data.promotionStayPeriod || null,
+                  promotionPeriod:
+                    data.promotionBookingPeriod || data.promotionPeriod || null,
                   promotionInPeriod: data.promotionInPeriod !== false,
                   weekendChargeEnabled: !!(
                     data.chargeEnabled &&
@@ -8719,31 +8723,64 @@
                 }
                 var promoDates = null;
                 if (roomName === "promotion") {
-                  var startInput = tbody.querySelector(
-                    ".admin-promo-start-date[data-room-name='promotion']",
+                  var bookingStartInput = tbody.querySelector(
+                    ".admin-promo-booking-start-date[data-room-name='promotion']",
                   );
-                  var endInput = tbody.querySelector(
-                    ".admin-promo-end-date[data-room-name='promotion']",
+                  var bookingEndInput = tbody.querySelector(
+                    ".admin-promo-booking-end-date[data-room-name='promotion']",
                   );
-                  var startVal = startInput
-                    ? String(startInput.value || "").slice(0, 10)
+                  var stayStartInput = tbody.querySelector(
+                    ".admin-promo-stay-start-date[data-room-name='promotion']",
+                  );
+                  var stayEndInput = tbody.querySelector(
+                    ".admin-promo-stay-end-date[data-room-name='promotion']",
+                  );
+                  var bookingStartVal = bookingStartInput
+                    ? String(bookingStartInput.value || "").slice(0, 10)
                     : "";
-                  var endVal = endInput
-                    ? String(endInput.value || "").slice(0, 10)
+                  var bookingEndVal = bookingEndInput
+                    ? String(bookingEndInput.value || "").slice(0, 10)
                     : "";
-                  if (startVal || endVal) {
-                    if (!startVal || !endVal) {
+                  var stayStartVal = stayStartInput
+                    ? String(stayStartInput.value || "").slice(0, 10)
+                    : "";
+                  var stayEndVal = stayEndInput
+                    ? String(stayEndInput.value || "").slice(0, 10)
+                    : "";
+                  if (bookingStartVal || bookingEndVal) {
+                    if (!bookingStartVal || !bookingEndVal) {
                       showMessage(
-                        "프로모션 적용 기간의 시작일과 종료일을 모두 입력해 주세요.",
+                        "프로모션 예약 기간의 시작일과 종료일을 모두 입력해 주세요.",
                       );
                       return;
                     }
-                    if (startVal > endVal) {
-                      showMessage("프로모션 종료일은 시작일 이후여야 합니다.");
+                    if (bookingStartVal > bookingEndVal) {
+                      showMessage(
+                        "프로모션 예약 기간 종료일은 시작일 이후여야 합니다.",
+                      );
                       return;
                     }
                   }
-                  promoDates = { startDate: startVal, endDate: endVal };
+                  if (stayStartVal || stayEndVal) {
+                    if (!stayStartVal || !stayEndVal) {
+                      showMessage(
+                        "프로모션 투숙 기간의 시작일과 종료일을 모두 입력해 주세요.",
+                      );
+                      return;
+                    }
+                    if (stayStartVal > stayEndVal) {
+                      showMessage(
+                        "프로모션 투숙 기간 종료일은 시작일 이후여야 합니다.",
+                      );
+                      return;
+                    }
+                  }
+                  promoDates = {
+                    bookingStartDate: bookingStartVal,
+                    bookingEndDate: bookingEndVal,
+                    stayStartDate: stayStartVal,
+                    stayEndDate: stayEndVal,
+                  };
                 }
                 openRateSaveConfirm(roomName, val, promoDates);
               });
@@ -8936,9 +8973,21 @@
                 ? null
                 : weekendBaseRate,
             promotionStartDate:
-              promoDates && promoDates.startDate ? promoDates.startDate : "",
+              promoDates && promoDates.bookingStartDate
+                ? promoDates.bookingStartDate
+                : "",
             promotionEndDate:
-              promoDates && promoDates.endDate ? promoDates.endDate : "",
+              promoDates && promoDates.bookingEndDate
+                ? promoDates.bookingEndDate
+                : "",
+            promotionStayStartDate:
+              promoDates && promoDates.stayStartDate
+                ? promoDates.stayStartDate
+                : "",
+            promotionStayEndDate:
+              promoDates && promoDates.stayEndDate
+                ? promoDates.stayEndDate
+                : "",
           };
           setPolicyConfirmTitle("변경 사항을 저장하시겠습니까?");
           setPolicyConfirmSaveLabel("저장");
@@ -9092,6 +9141,8 @@
                     nextRate.weekdayBaseRate,
                     nextRate.promotionStartDate,
                     nextRate.promotionEndDate,
+                    nextRate.promotionStayStartDate,
+                    nextRate.promotionStayEndDate,
                     nextRate.weekendBaseRate,
                   )
                 : nextRoomStatus
@@ -9207,16 +9258,28 @@
               if (row.roomName === "promotion") {
                 promoPeriodHtml =
                   "<fieldset class='admin-room-block-fieldset admin-room-policy-period'>" +
-                  "<legend>적용 기간</legend>" +
+                  "<legend>예약 기간</legend>" +
                   "<div class='admin-room-block-date-grid'>" +
-                  "<label><span>시작일</span><input class='admin-promo-start-date' data-room-name='promotion' type='date' value='" +
+                  "<label><span>시작일</span><input class='admin-promo-booking-start-date' data-room-name='promotion' type='date' value='" +
                   escapeHtml(row.promotionStartDate || "") +
                   "' /></label>" +
-                  "<label><span>종료일</span><input class='admin-promo-end-date' data-room-name='promotion' type='date' value='" +
+                  "<label><span>종료일</span><input class='admin-promo-booking-end-date' data-room-name='promotion' type='date' value='" +
                   escapeHtml(row.promotionEndDate || "") +
                   "' /></label>" +
                   "</div>" +
-                  "<p class='admin-room-policy-period-note'>비우면 기간 제한 없이 토글 ON 시 항상 적용됩니다.</p>" +
+                  "<p class='admin-room-policy-period-note'>예약을 완료해야 하는 기간입니다. 비우면 제한 없습니다.</p>" +
+                  "</fieldset>" +
+                  "<fieldset class='admin-room-block-fieldset admin-room-policy-period'>" +
+                  "<legend>투숙 기간</legend>" +
+                  "<div class='admin-room-block-date-grid'>" +
+                  "<label><span>시작일</span><input class='admin-promo-stay-start-date' data-room-name='promotion' type='date' value='" +
+                  escapeHtml(row.promotionStayStartDate || "") +
+                  "' /></label>" +
+                  "<label><span>종료일</span><input class='admin-promo-stay-end-date' data-room-name='promotion' type='date' value='" +
+                  escapeHtml(row.promotionStayEndDate || "") +
+                  "' /></label>" +
+                  "</div>" +
+                  "<p class='admin-room-policy-period-note'>투숙일이 포함되어야 하는 기간입니다. 비우면 제한 없습니다.</p>" +
                   "</fieldset>";
               }
               var card = document.createElement("article");
@@ -9350,6 +9413,8 @@
               isEnabled: true,
               promotionStartDate: "",
               promotionEndDate: "",
+              promotionStayStartDate: "",
+              promotionStayEndDate: "",
             };
           });
         }
@@ -9626,6 +9691,8 @@
           weekdayBaseRate,
           promotionStartDate,
           promotionEndDate,
+          promotionStayStartDate,
+          promotionStayEndDate,
           weekendBaseRate,
         ) {
           var auth = getAuthPayload();
@@ -9645,6 +9712,8 @@
           if (roomName === "promotion") {
             payload.promotionStartDate = promotionStartDate || "";
             payload.promotionEndDate = promotionEndDate || "";
+            payload.promotionStayStartDate = promotionStayStartDate || "";
+            payload.promotionStayEndDate = promotionStayEndDate || "";
           }
           return adminPost("room-rate", payload)
             .then(function (r) {

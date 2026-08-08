@@ -58,7 +58,9 @@ async function ensureRoomRateSchema(pool) {
   await pool.query(
     `ALTER TABLE ${TABLE_NAME}
      ADD COLUMN IF NOT EXISTS promotion_start_date DATE,
-     ADD COLUMN IF NOT EXISTS promotion_end_date DATE`,
+     ADD COLUMN IF NOT EXISTS promotion_end_date DATE,
+     ADD COLUMN IF NOT EXISTS promotion_stay_start_date DATE,
+     ADD COLUMN IF NOT EXISTS promotion_stay_end_date DATE`,
   );
   await pool.query(
     `ALTER TABLE ${TABLE_NAME}
@@ -219,6 +221,8 @@ function mapRoomRateRow(row, surchargeEnabled, surchargeAmount) {
     var promoFields = mapPromotionRowFields(row);
     out.promotionStartDate = promoFields.promotionStartDate;
     out.promotionEndDate = promoFields.promotionEndDate;
+    out.promotionStayStartDate = promoFields.promotionStayStartDate;
+    out.promotionStayEndDate = promoFields.promotionStayEndDate;
   }
   return out;
 }
@@ -436,7 +440,31 @@ function mapPromotionRowFields(row) {
   return {
     promotionStartDate: formatPromotionDateFromDb(row.promotion_start_date),
     promotionEndDate: formatPromotionDateFromDb(row.promotion_end_date),
+    promotionStayStartDate: formatPromotionDateFromDb(
+      row.promotion_stay_start_date,
+    ),
+    promotionStayEndDate: formatPromotionDateFromDb(row.promotion_stay_end_date),
   };
+}
+
+function validatePromotionDatePair(startRaw, endRaw, label) {
+  if (startRaw || endRaw) {
+    if (!startRaw || !endRaw) {
+      return {
+        ok: false,
+        error:
+          label +
+          "의 시작일과 종료일을 모두 입력해 주세요.",
+      };
+    }
+    if (startRaw > endRaw) {
+      return {
+        ok: false,
+        error: label + " 종료일은 시작일 이후여야 합니다.",
+      };
+    }
+  }
+  return { ok: true, start: startRaw || null, end: endRaw || null };
 }
 
 export async function handleAdminRoomRate(res, pool, body) {
@@ -572,27 +600,31 @@ export async function handleAdminRoomRate(res, pool, body) {
     }
     var promoStart = null;
     var promoEnd = null;
+    var promoStayStart = null;
+    var promoStayEnd = null;
     if (roomName === "promotion") {
-      var startRaw = normalizePromotionDate(body.promotionStartDate);
-      var endRaw = normalizePromotionDate(body.promotionEndDate);
-      if (startRaw || endRaw) {
-        if (!startRaw || !endRaw) {
-          json(res, 400, {
-            ok: false,
-            error: "프로모션 적용 기간의 시작일과 종료일을 모두 입력해 주세요.",
-          });
-          return;
-        }
-        if (startRaw > endRaw) {
-          json(res, 400, {
-            ok: false,
-            error: "프로모션 종료일은 시작일 이후여야 합니다.",
-          });
-          return;
-        }
-        promoStart = startRaw;
-        promoEnd = endRaw;
+      var bookingDates = validatePromotionDatePair(
+        normalizePromotionDate(body.promotionStartDate),
+        normalizePromotionDate(body.promotionEndDate),
+        "프로모션 예약 기간",
+      );
+      if (!bookingDates.ok) {
+        json(res, 400, { ok: false, error: bookingDates.error });
+        return;
       }
+      var stayDates = validatePromotionDatePair(
+        normalizePromotionDate(body.promotionStayStartDate),
+        normalizePromotionDate(body.promotionStayEndDate),
+        "프로모션 투숙 기간",
+      );
+      if (!stayDates.ok) {
+        json(res, 400, { ok: false, error: stayDates.error });
+        return;
+      }
+      promoStart = bookingDates.start;
+      promoEnd = bookingDates.end;
+      promoStayStart = stayDates.start;
+      promoStayEnd = stayDates.end;
     }
     try {
       if (roomName === "promotion") {
@@ -601,9 +633,18 @@ export async function handleAdminRoomRate(res, pool, body) {
            SET weekday_base_rate = $2,
                promotion_start_date = $3::date,
                promotion_end_date = $4::date,
+               promotion_stay_start_date = $5::date,
+               promotion_stay_end_date = $6::date,
                updated_at = NOW()
            WHERE room_name = $1 AND ${BASE_ROW_FILTER}`,
-          [roomName, Math.floor(weekdayBaseRate), promoStart, promoEnd],
+          [
+            roomName,
+            Math.floor(weekdayBaseRate),
+            promoStart,
+            promoEnd,
+            promoStayStart,
+            promoStayEnd,
+          ],
         );
       } else {
         await saveRoomRateRow(
@@ -655,7 +696,8 @@ export async function handleAdminRoomRate(res, pool, body) {
   try {
     var sel = await pool.query(
       `SELECT room_name, weekday_base_rate, weekend_base_rate, is_enabled,
-              promotion_start_date, promotion_end_date
+              promotion_start_date, promotion_end_date,
+              promotion_stay_start_date, promotion_stay_end_date
        FROM ${TABLE_NAME}
        WHERE ${BASE_ROW_FILTER}
        ORDER BY room_name ASC`,
