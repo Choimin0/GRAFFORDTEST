@@ -481,7 +481,7 @@
               <option value="g4">G4</option>
             </select>
           </label>
-          <label class="confirm-label">
+          <label class="confirm-label admin-search-name-label">
             예약자명
             <input
               id="admin-search-name"
@@ -513,13 +513,24 @@
               placeholder="연락처로 검색"
             />
           </label>
-          <label class="confirm-label">
+          <label class="confirm-label admin-search-reservation-label">
             예약번호
             <input
               id="admin-search-reservation"
               type="text"
               placeholder="예약번호로 검색"
             />
+          </label>
+          <label class="confirm-label admin-search-payment-label">
+            결제수단
+            <select id="admin-search-payment">
+              <option value="">전체</option>
+              <option value="airbnb">에어비앤비</option>
+              <option value="stayfolio">스테이폴리오</option>
+              <option value="direct">홈페이지</option>
+              <option value="phone">유선문의</option>
+              <option value="naver">네이버</option>
+            </select>
           </label>
           <button type="submit" class="btn reserve-btn admin-search-btn">
             검색
@@ -2352,6 +2363,9 @@
         var searchReservationInput = document.getElementById(
           "admin-search-reservation",
         );
+        var searchPaymentSelect = document.getElementById(
+          "admin-search-payment",
+        );
         var searchResetBtn = document.getElementById("admin-search-reset");
         var paginationEl = document.getElementById("admin-pagination");
         var paginationSummaryEl = document.getElementById(
@@ -2450,8 +2464,8 @@
         var selectedSalesYear = Number(selectedSalesMonth.slice(0, 4)) || 2026;
         var currentPage = 1;
         var PAGE_SIZE = 20;
-        var sortKey = "";
-        var sortDirection = "";
+        var sortKey = "room";
+        var sortDirection = "asc";
         var reservationTabCounts = { current: 0, past: 0, deleted: 0 };
         var activeRequestReservationNumber = "";
         var activeEditReservationNumber = "";
@@ -2514,6 +2528,9 @@
           if (searchReservationInput) {
             searchReservationInput.value = "";
           }
+          if (searchPaymentSelect) {
+            searchPaymentSelect.value = "";
+          }
         }
 
         function resetAdminUnsavedState() {
@@ -2537,8 +2554,7 @@
           activeRoomManageTab = "rate";
           activeCategory = "status";
           currentPage = 1;
-          sortKey = "";
-          sortDirection = "";
+          applyCurrentTabDefaultSort();
           pendingPolicyToggle = null;
           pendingRateSave = null;
           pendingRateBatchSave = null;
@@ -6397,6 +6413,15 @@
               guestPhoneInput.addEventListener("input", function () {
                 updateReservationEntrySummary();
               });
+              guestPhoneInput.addEventListener("blur", function () {
+                var normalized = normalizeManualReservationContact(
+                  guestPhoneInput.value,
+                );
+                if (normalized && normalized !== guestPhoneInput.value) {
+                  guestPhoneInput.value = normalized;
+                  updateReservationEntrySummary();
+                }
+              });
             }
             if (totalAmountInput) {
               totalAmountInput.addEventListener("input", function () {
@@ -6491,7 +6516,7 @@
                   checkOut: resEntryState.checkout,
                   guestName: guestName,
                   contact: guestPhoneInput
-                    ? String(guestPhoneInput.value || "").trim()
+                    ? normalizeManualReservationContact(guestPhoneInput.value)
                     : "",
                   guestCount: resEntryState.guests,
                   totalAmount: resEntryState.amount,
@@ -6676,6 +6701,28 @@
           return /^\+82(?:[\s-]|[1-9]|$)/.test(s);
         }
 
+        /** 수기 예약 등록용: +82 → 010 국내 형식, 그 외 +국가번호는 그대로 */
+        function normalizeManualReservationContact(contact) {
+          var raw = String(contact || "").trim();
+          if (!raw) {
+            return "";
+          }
+          if (isKoreaInternationalContact(raw)) {
+            var national = normalizeContactDigits(raw).replace(/^82/, "");
+            if (!national) {
+              return raw;
+            }
+            if (national.charAt(0) !== "0") {
+              national = "0" + national;
+            }
+            return national;
+          }
+          if (raw.indexOf("+") === 0) {
+            return raw;
+          }
+          return raw;
+        }
+
         function isEnglishBookingForCheckin(row) {
           var contactRaw = String((row && row.contact) || "").trim();
           if (isKoreaInternationalContact(contactRaw)) {
@@ -6722,6 +6769,40 @@
             .trim()
             .toLowerCase();
           return !channel || channel === "direct";
+        }
+
+        function resolveReservationPaymentPlatformFilterId(row) {
+          if (!row) {
+            return "";
+          }
+          if (isExternalManualReservation(row)) {
+            return resolveBookingPlatformId(row) || "";
+          }
+          if (isDirectWebsiteBooking(row)) {
+            return "direct";
+          }
+          if (row.isExternal) {
+            var source = String(row.externalSource || "")
+              .trim()
+              .toLowerCase();
+            if (source === "airbnb" || source === "ical") {
+              return "airbnb";
+            }
+          }
+          var channel = String(row.bookingChannel || "")
+            .trim()
+            .toLowerCase();
+          if (
+            channel &&
+            channel !== "direct" &&
+            BOOKING_PLATFORM_LABELS[channel]
+          ) {
+            return channel;
+          }
+          if (!row.isExternal) {
+            return "direct";
+          }
+          return "";
         }
 
         function formatBookingPlatformLabel(platformId) {
@@ -8384,6 +8465,76 @@
           return Number(safe);
         }
 
+        var ADMIN_ROOM_SORT_ORDER = ["G1", "G2", "G3", "G4"];
+
+        function getRoomSortIndex(row) {
+          var room = String((row && row.roomType) || "").toUpperCase();
+          var idx = ADMIN_ROOM_SORT_ORDER.indexOf(room);
+          return idx >= 0 ? idx : ADMIN_ROOM_SORT_ORDER.length;
+        }
+
+        function isBeforeNoonKst(at) {
+          var hourStr = new Intl.DateTimeFormat("en-GB", {
+            timeZone: "Asia/Seoul",
+            hour: "2-digit",
+            hour12: false,
+          }).format(at || new Date());
+          return Number(hourStr) < 12;
+        }
+
+        function applyCurrentTabDefaultSort() {
+          if (activeResTab === "current") {
+            sortKey = "room";
+            sortDirection = "asc";
+            return;
+          }
+          sortKey = "";
+          sortDirection = "";
+        }
+
+        function usesUpcomingDefaultSort() {
+          return (
+            activeResTab === "current" &&
+            (!sortKey ||
+              !sortDirection ||
+              (sortKey === "room" && sortDirection === "asc"))
+          );
+        }
+
+        function sortUpcomingRowsDefault(a, b) {
+          var today = getTodayYmdKst();
+          var aCheckoutToday = dateKey(a && a.checkOut) === today;
+          var bCheckoutToday = dateKey(b && b.checkOut) === today;
+          if (aCheckoutToday !== bCheckoutToday) {
+            return aCheckoutToday ? -1 : 1;
+          }
+          if (aCheckoutToday && bCheckoutToday) {
+            return getRoomSortIndex(a) - getRoomSortIndex(b);
+          }
+          var checkinDiff =
+            asYmdNumber(a && a.checkIn) - asYmdNumber(b && b.checkIn);
+          if (checkinDiff !== 0) {
+            return checkinDiff;
+          }
+          return getRoomSortIndex(a) - getRoomSortIndex(b);
+        }
+
+        function getUpcomingReservationHighlightClass(row) {
+          if (activeResTab !== "current") {
+            return "";
+          }
+          var today = getTodayYmdKst();
+          var checkIn = dateKey(row && row.checkIn);
+          var checkOut = dateKey(row && row.checkOut);
+          if (checkOut === today && isBeforeNoonKst()) {
+            return "is-checkout-today";
+          }
+          if (checkIn === today) {
+            return "is-checkin-today";
+          }
+          return "";
+        }
+
         function reservationDateNumber(row) {
           var raw = String((row && row.reservationNumber) || "").slice(0, 8);
           if (!/^\d{8}$/.test(raw)) {
@@ -8479,13 +8630,17 @@
           var reservationQuery = normalizeSearchValue(
             searchReservationInput && searchReservationInput.value,
           );
+          var paymentQuery = normalizeSearchValue(
+            searchPaymentSelect && searchPaymentSelect.value,
+          );
           if (
             !roomQuery &&
             !nameQuery &&
             !periodRange.start &&
             !periodRange.end &&
             !contactQuery &&
-            !reservationQuery
+            !reservationQuery &&
+            !paymentQuery
           ) {
             return (rows || []).slice();
           }
@@ -8499,6 +8654,9 @@
             var rowReservation = normalizeSearchValue(
               row && row.reservationNumber,
             );
+            var rowPayment = normalizeSearchValue(
+              resolveReservationPaymentPlatformFilterId(row),
+            );
             var roomOk = !roomQuery || rowRoom === roomQuery;
             var nameOk = !nameQuery || rowName.indexOf(nameQuery) >= 0;
             var periodOk = matchesStayPeriodSearch(
@@ -8511,12 +8669,24 @@
             var reservationOk =
               !reservationQuery ||
               rowReservation.indexOf(reservationQuery) >= 0;
-            return roomOk && nameOk && periodOk && contactOk && reservationOk;
+            var paymentOk = !paymentQuery || rowPayment === paymentQuery;
+            return (
+              roomOk &&
+              nameOk &&
+              periodOk &&
+              contactOk &&
+              reservationOk &&
+              paymentOk
+            );
           });
         }
 
         function sortRows(rows) {
           var copied = (rows || []).slice();
+          if (usesUpcomingDefaultSort()) {
+            copied.sort(sortUpcomingRowsDefault);
+            return copied;
+          }
           if (!sortKey || !sortDirection) {
             if (activeResTab === "past") {
               copied.sort(function (a, b) {
@@ -8615,6 +8785,10 @@
           }
           rows.forEach(function (row) {
             var tr = document.createElement("tr");
+            var highlightClass = getUpcomingReservationHighlightClass(row);
+            if (highlightClass) {
+              tr.className = highlightClass;
+            }
             var nights = getStayPeriodNights(row);
             var isExternalManual = isExternalManualReservation(row);
             var paymentCellHtml;
@@ -10157,8 +10331,7 @@
           });
           updateReservationCancelHead();
           updateReservationAmountHead();
-          sortKey = "";
-          sortDirection = "";
+          applyCurrentTabDefaultSort();
           loadReservationList(tab).catch(function (err) {
             showMessage(
               (err && err.message) || "목록 조회 중 오류가 발생했습니다.",
@@ -10347,7 +10520,7 @@
 
         if (sortSelect) {
           sortSelect.addEventListener("change", function () {
-            sortKey = sortSelect.value || "checkin";
+            sortKey = sortSelect.value || "room";
             sortDirection = "asc";
             if (tableSection.hidden) {
               return;
@@ -10478,6 +10651,9 @@
             }
             if (searchReservationInput) {
               searchReservationInput.value = "";
+            }
+            if (searchPaymentSelect) {
+              searchPaymentSelect.value = "";
             }
             if (!tableSection.hidden) {
               applyListView(true);

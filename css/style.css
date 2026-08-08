@@ -13071,8 +13071,8 @@ main.content-section.confirm-page.admin-page {
 .admin-reservation-section .admin-search-row {
   display: grid;
   grid-template-columns:
-    minmax(0, 0.5fr) minmax(0, 1fr) minmax(0, 1.6fr) minmax(0, 1fr)
-    minmax(0, 1fr) auto auto;
+    minmax(0, 0.5fr) minmax(0, 0.67fr) minmax(0, 1.6fr) minmax(0, 1fr)
+    minmax(0, 0.67fr) minmax(0, 0.55fr) auto auto;
   gap: var(--space-16);
   align-items: end;
   margin: 0 0 var(--space-24);
@@ -13106,6 +13106,9 @@ main.content-section.confirm-page.admin-page {
 }
 .admin-reservation-section .admin-search-room-label select {
   max-width: 5.5rem;
+}
+.admin-reservation-section .admin-search-payment-label select {
+  max-width: 7rem;
 }
 .admin-reservation-section .admin-search-period-inputs {
   display: grid;
@@ -13261,6 +13264,20 @@ main.content-section.confirm-page.admin-page {
 .admin-reservation-table tbody tr:hover .admin-sort-hover-cell {
   background: color-mix(in srgb, var(--gold-500) 8%, var(--stone-50));
   color: var(--gold-500);
+}
+.admin-reservation-table tbody tr.is-checkout-today .admin-sort-hover-cell {
+  color: var(--stone-red);
+}
+.admin-reservation-table tbody tr.is-checkin-today .admin-sort-hover-cell {
+  color: var(--stone-blue);
+}
+.admin-reservation-table tbody tr.is-checkout-today:hover .admin-sort-hover-cell {
+  background: color-mix(in srgb, var(--stone-red) 8%, var(--stone-50));
+  color: var(--stone-red);
+}
+.admin-reservation-table tbody tr.is-checkin-today:hover .admin-sort-hover-cell {
+  background: color-mix(in srgb, var(--stone-blue) 8%, var(--stone-50));
+  color: var(--stone-blue);
 }
 .admin-reservation-payment,
 .admin-reservation-cancel-badge {
@@ -13995,17 +14012,20 @@ main.content-section.confirm-page.admin-page {
 .admin-search-row {
   display: grid;
   grid-template-columns:
-    minmax(70px, 0.5fr) minmax(140px, 1fr) minmax(240px, 1.6fr) minmax(
+    minmax(70px, 0.5fr) minmax(94px, 0.67fr) minmax(240px, 1.6fr) minmax(
       140px,
       1fr
     )
-    minmax(140px, 1fr) auto auto;
+    minmax(94px, 0.67fr) minmax(70px, 0.55fr) auto auto;
   gap: 0.55rem;
   margin-top: 1.5rem;
   align-items: end;
 }
 .admin-search-row .admin-search-room-label select {
   max-width: 5.5rem;
+}
+.admin-search-row .admin-search-payment-label select {
+  max-width: 7rem;
 }
 .admin-search-row .admin-search-period-inputs input {
   min-width: 7.5rem;

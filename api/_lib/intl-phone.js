@@ -47,3 +47,25 @@ export function contactsMatchIntl(storedContact, providedContact) {
   }
   return a === b;
 }
+
+/** 수기 예약 등록용: +82 → 010 국내 형식, 그 외 +국가번호는 그대로 */
+export function normalizeManualReservationContact(contact) {
+  var raw = String(contact || "").trim();
+  if (!raw) {
+    return "";
+  }
+  if (isKoreaStoredContact(raw)) {
+    var national = contactDigitsForMatch(raw).replace(/^82/, "");
+    if (!national) {
+      return raw;
+    }
+    if (national.charAt(0) !== "0") {
+      national = "0" + national;
+    }
+    return national;
+  }
+  if (raw.startsWith("+")) {
+    return raw;
+  }
+  return raw;
+}

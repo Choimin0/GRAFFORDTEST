@@ -8,6 +8,7 @@ import {
 import { hasActiveHoldOverlap } from "./booking-hold.js";
 import { getTodayYmdKst } from "./promotion-period.js";
 import { getInitialBookingStatusForCheckout } from "./booking-archive.js";
+import { normalizeManualReservationContact } from "./intl-phone.js";
 
 const BOOKING_TABLE = "booking";
 const EXTERNAL_BOOKING_TABLE = "external_booking";
@@ -184,7 +185,10 @@ export async function handleCreateManualBooking(res, pool, body) {
   var checkIn = String(body.checkIn || body.checkin || "").trim();
   var checkOut = String(body.checkOut || body.checkout || "").trim();
   var guestName = String(body.guestName || "").trim();
-  var contact = String(body.contact || body.phone || "").trim() || "-";
+  var contactRaw = String(body.contact || body.phone || "").trim();
+  var contact = contactRaw
+    ? normalizeManualReservationContact(contactRaw)
+    : "-";
   var guestRequest = String(body.guestRequest || body.memo || "")
     .trim()
     .slice(0, MAX_GUEST_REQUEST);
