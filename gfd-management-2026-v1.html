@@ -1544,7 +1544,12 @@
             class="admin-calendar-res-pricing"
             hidden
           >
-            <p class="admin-calendar-res-pricing__title">금액 산정 내역</p>
+            <p
+              id="admin-calendar-res-detail-pricing-title"
+              class="admin-calendar-res-pricing__title"
+            >
+              금액 산정 내역
+            </p>
             <div
               id="admin-calendar-res-detail-pricing"
               class="admin-calendar-res-pricing__body"
@@ -2307,6 +2312,9 @@
         );
         var calendarResDetailPricingNote = document.getElementById(
           "admin-calendar-res-detail-pricing-note",
+        );
+        var calendarResDetailPricingTitle = document.getElementById(
+          "admin-calendar-res-detail-pricing-title",
         );
         var policyConfirmModal = document.getElementById(
           "admin-policy-confirm-modal",
@@ -4101,6 +4109,9 @@
           if (calendarResDetailPricingBody) {
             calendarResDetailPricingBody.innerHTML = "";
           }
+          if (calendarResDetailPricingTitle) {
+            calendarResDetailPricingTitle.textContent = "금액 산정 내역";
+          }
           if (calendarResDetailPricingNote) {
             calendarResDetailPricingNote.hidden = true;
             calendarResDetailPricingNote.textContent = "";
@@ -4130,6 +4141,17 @@
           return P.computeStay(room, checkIn, checkOut, extraGuests);
         }
 
+        function getCalendarResDetailStoredBreakdown(row) {
+          if (!row || !row.pricingBreakdown || typeof row.pricingBreakdown !== "object") {
+            return null;
+          }
+          var breakdown = row.pricingBreakdown;
+          if (!breakdown.nights || !breakdown.discountedGrandTotal) {
+            return null;
+          }
+          return breakdown;
+        }
+
         function buildCalendarResDetailPricingHtml(quote, room) {
           if (!quote || !quote.nights) {
             return "";
@@ -4157,7 +4179,7 @@
                 formatKRW(
                   quote.weekdayRatePerNight != null
                     ? quote.weekdayRatePerNight
-                    : quote.baseNightly,
+                    : quote.baseNightly || 0,
                 ) +
                 " × " +
                 quote.weekdayNights +
@@ -4170,7 +4192,7 @@
             pricingRow(
               room +
                 " (주말) " +
-                formatKRW(quote.weekendRatePerNight) +
+                formatKRW(quote.weekendRatePerNight || 0) +
                 " × " +
                 quote.weekendNights +
                 "박",
@@ -4178,18 +4200,19 @@
               false,
             );
           }
-          if (quote.extraGuestTotal > 0 && P) {
-            pricingRow(
-              "인원 추가 " +
-                formatKRW(P.EXTRA_PER_PERSON_PER_NIGHT) +
-                " × " +
-                quote.extraGuests +
-                "명 × " +
-                quote.nights +
-                "박",
-              quote.extraGuestTotal,
-              false,
-            );
+          if (quote.extraGuestTotal > 0) {
+            var extraLabel = "인원 추가";
+            if (P && P.EXTRA_PER_PERSON_PER_NIGHT) {
+              extraLabel +=
+                " " + formatKRW(P.EXTRA_PER_PERSON_PER_NIGHT);
+            }
+            extraLabel +=
+              " × " +
+              quote.extraGuests +
+              "명 × " +
+              quote.nights +
+              "박";
+            pricingRow(extraLabel, quote.extraGuestTotal, false);
           }
           if ((quote.consecutiveSale || 0) > 0) {
             pricingRow(
@@ -4209,6 +4232,45 @@
           return rows.join("");
         }
 
+        function renderCalendarResDetailPricing(row, quote, options) {
+          options = options || {};
+          if (!calendarResDetailPricingWrap || !calendarResDetailPricingBody) {
+            return;
+          }
+          if (!quote || !quote.nights) {
+            resetCalendarResDetailPricing();
+            return;
+          }
+          calendarResDetailPricingWrap.hidden = false;
+          if (calendarResDetailPricingTitle) {
+            calendarResDetailPricingTitle.textContent = options.stored
+              ? "예약 시점 금액 산정 내역"
+              : "금액 산정 내역 (현재 요금 기준)";
+          }
+          var room = String(
+            (row && row.roomType) || quote.room || "",
+          ).toUpperCase();
+          calendarResDetailPricingBody.innerHTML =
+            buildCalendarResDetailPricingHtml(quote, room);
+          if (calendarResDetailPricingNote) {
+            calendarResDetailPricingNote.hidden = true;
+            calendarResDetailPricingNote.textContent = "";
+            if (!options.stored && row) {
+              var paid = getReservationPaidTotal(row);
+              var computed = quote.discountedGrandTotal;
+              if (paid !== computed) {
+                calendarResDetailPricingNote.textContent =
+                  "※ 실제 결제 금액(" +
+                  formatKRW(paid) +
+                  ")과 현재 요금 설정 기준 산출액(" +
+                  formatKRW(computed) +
+                  ")이 다릅니다. 예약 시점의 요금·프로모션이 반영되지 않을 수 있습니다.";
+                calendarResDetailPricingNote.hidden = false;
+              }
+            }
+          }
+        }
+
         function updateCalendarResDetailPricing(row) {
           if (!calendarResDetailPricingWrap || !calendarResDetailPricingBody) {
             return;
@@ -4217,9 +4279,21 @@
             resetCalendarResDetailPricing();
             return;
           }
+
+          var storedBreakdown = getCalendarResDetailStoredBreakdown(row);
+          if (storedBreakdown) {
+            renderCalendarResDetailPricing(row, storedBreakdown, {
+              stored: true,
+            });
+            return;
+          }
+
           calendarResDetailPricingWrap.hidden = false;
           calendarResDetailPricingBody.innerHTML =
             "<p class='admin-calendar-res-pricing__loading'>요금 산정 내역을 불러오는 중…</p>";
+          if (calendarResDetailPricingTitle) {
+            calendarResDetailPricingTitle.textContent = "금액 산정 내역";
+          }
           if (calendarResDetailPricingNote) {
             calendarResDetailPricingNote.hidden = true;
             calendarResDetailPricingNote.textContent = "";
@@ -4233,26 +4307,7 @@
               return;
             }
             var quote = computeCalendarResDetailQuote(row);
-            if (!quote || !quote.nights) {
-              resetCalendarResDetailPricing();
-              return;
-            }
-            var room = String(row.roomType || "").toUpperCase();
-            calendarResDetailPricingBody.innerHTML =
-              buildCalendarResDetailPricingHtml(quote, room);
-            if (calendarResDetailPricingNote) {
-              var paid = getReservationPaidTotal(row);
-              var computed = quote.discountedGrandTotal;
-              if (paid !== computed) {
-                calendarResDetailPricingNote.textContent =
-                  "※ 실제 결제 금액(" +
-                  formatKRW(paid) +
-                  ")과 현재 요금 설정 기준 산출액(" +
-                  formatKRW(computed) +
-                  ")이 다릅니다. 예약 시점의 요금·프로모션이 반영되지 않을 수 있습니다.";
-                calendarResDetailPricingNote.hidden = false;
-              }
-            }
+            renderCalendarResDetailPricing(row, quote, { stored: false });
           });
         }
 

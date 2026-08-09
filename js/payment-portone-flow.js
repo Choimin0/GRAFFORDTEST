@@ -461,6 +461,7 @@
     var contact = opts.contact;
     var email = opts.email;
     var guestRequest = opts.guestRequest;
+    var pricingBreakdown = opts.pricingBreakdown || null;
     var paymentSettledKey = opts.paymentSettledKey;
     var processingMsg = opts.processingMsg || null;
     var messages = opts.messages || {};
@@ -588,6 +589,7 @@
           pgTid: verifiedPgTid,
           bookingToken: bookingToken,
           bookingLocale: bookingLocale,
+          pricingBreakdown: pricingBreakdown,
         }),
       });
       saveData = await saveRes.json();

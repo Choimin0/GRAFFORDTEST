@@ -20,6 +20,7 @@ import {
   hasReservationOverlap,
 } from "./room-availability.js";
 import { hasActiveHoldOverlap } from "./booking-hold.js";
+import { parsePricingBreakdownFromDb } from "./pricing-breakdown.js";
 
 const BOOKING_TABLE = "booking";
 const MAX_GUEST_NAME = 100;
@@ -121,6 +122,7 @@ function mapRow(row, isDeleted) {
     bookingLocale: row.booking_locale || "kr",
     bookingChannel: row.booking_channel || "direct",
     linkedExternalUid: row.linked_external_uid || "",
+    pricingBreakdown: parsePricingBreakdownFromDb(row.pricing_breakdown),
   };
   if (isDeleted) {
     base.cancelReason = row.cancel_reason || "";
@@ -323,7 +325,8 @@ export async function handleAdminReservations(res, pool, body) {
              check_in_date = $5::date,
              check_out_date = $6::date,
              guest_count = $7,
-             stay_nights = $8
+             stay_nights = $8,
+             pricing_breakdown = NULL
          WHERE reservation_number = $1
            AND status = 'confirm'
          RETURNING
@@ -426,6 +429,7 @@ export async function handleAdminReservations(res, pool, body) {
         guest_count,
         extra_guests,
         total_amount,
+        pricing_breakdown,
         stay_nights,
         guest_request,
         payment_method,
@@ -453,6 +457,7 @@ export async function handleAdminReservations(res, pool, body) {
         `SELECT
           reservation_number, guest_name, contact, email, room_type,
           check_in_date, check_out_date, guest_count, extra_guests, total_amount,
+          pricing_breakdown,
           stay_nights, guest_request, payment_method, bank_confirmed,
           checkin_alarm_sent_count,
           booking_locale,
@@ -489,6 +494,7 @@ export async function handleAdminReservations(res, pool, body) {
           bookingLocale: row.booking_locale || "kr",
           bookingChannel: row.booking_channel || "direct",
           linkedExternalUid: row.linked_external_uid || "",
+          pricingBreakdown: parsePricingBreakdownFromDb(row.pricing_breakdown),
         };
       });
       var externalCalendarRows = await getExternalBookingCalendarRows(pool);

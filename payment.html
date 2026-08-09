@@ -696,6 +696,14 @@
           var pageLoadingText = document.getElementById("page-loading-text");
 
           var quote = null;
+          var pricingBreakdown = null;
+
+          function syncPricingBreakdownFromQuote() {
+            pricingBreakdown =
+              P && quote && typeof P.toPricingBreakdown === "function"
+                ? P.toPricingBreakdown(quote)
+                : null;
+          }
           var finalAmount = 0;
 
           function showPageLoading(msg) {
@@ -1206,6 +1214,7 @@
             quote = P
               ? P.computeStay(room, checkIn, checkOut, extraGuests)
               : null;
+            syncPricingBreakdownFromQuote();
             var savedAmt = Number(saved.totalAmount || 0);
             finalAmount =
               savedAmt > 0
@@ -1285,6 +1294,7 @@
               contact: contact,
               email: email,
               guestRequest: guestRequest,
+              pricingBreakdown: pricingBreakdown,
               paymentSettledKey: paymentSettledKey,
               processingMsg: processingMsg,
               messages: {
@@ -2204,6 +2214,14 @@
           var pageLoadingText = document.getElementById("page-loading-text");
 
           var quote = null;
+          var pricingBreakdown = null;
+
+          function syncPricingBreakdownFromQuote() {
+            pricingBreakdown =
+              P && quote && typeof P.toPricingBreakdown === "function"
+                ? P.toPricingBreakdown(quote)
+                : null;
+          }
           var finalAmount = 0;
 
           function showPageLoading(msg) {
@@ -2734,6 +2752,7 @@
             quote = P
               ? P.computeStay(room, checkIn, checkOut, extraGuests)
               : null;
+            syncPricingBreakdownFromQuote();
             var savedAmt = Number(saved.totalAmount || 0);
             finalAmount =
               savedAmt > 0
@@ -2821,6 +2840,7 @@
               contact: contact,
               email: email,
               guestRequest: guestRequest,
+              pricingBreakdown: pricingBreakdown,
               paymentSettledKey: paymentSettledKey,
               processingMsg: processingMsg,
               messages: {

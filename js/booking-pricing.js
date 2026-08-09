@@ -486,6 +486,32 @@
     };
   }
 
+  /** 예약 저장용 산정 내역 스냅샷 */
+  function toPricingBreakdown(quote) {
+    if (!quote || !quote.nights) {
+      return null;
+    }
+    return {
+      version: 1,
+      room: quote.room,
+      nights: quote.nights,
+      extraGuests: quote.extraGuests,
+      weekdayNights: quote.weekdayNights,
+      weekendNights: quote.weekendNights,
+      weekdaySubtotal: quote.weekdaySubtotal,
+      weekendSubtotal: quote.weekendSubtotal,
+      weekdayRatePerNight: quote.weekdayRatePerNight,
+      weekendRatePerNight: quote.weekendRatePerNight,
+      baseTotal: quote.baseTotal,
+      extraGuestTotal: quote.extraGuestTotal,
+      grandTotal: quote.grandTotal,
+      consecutiveSale: quote.consecutiveSale || 0,
+      promotionPercent: quote.promotionPercent || 0,
+      promotionDiscount: quote.promotionDiscount || 0,
+      discountedGrandTotal: quote.discountedGrandTotal,
+    };
+  }
+
   root.GraffordBookingPricing = {
     ROOM_WEEKDAY_BASE: ROOM_WEEKDAY_BASE,
     ROOM_WEEKEND_BASE: ROOM_WEEKEND_BASE,
@@ -508,6 +534,7 @@
     getWeekendRatePerNight: getWeekendRatePerNight,
     clampExtra: clampExtra,
     computeStay: computeStay,
+    toPricingBreakdown: toPricingBreakdown,
     isStayInPromotionPeriod: isStayInPromotionPeriod,
     isPromotionActiveForStay: isPromotionActiveForStay,
     setRoomWeekdayBase: setRoomWeekdayBase,

@@ -27,6 +27,11 @@ import {
 import { checkRoomAvailability } from "./_lib/room-availability.js";
 import { getTodayYmdKst } from "./_lib/promotion-period.js";
 import {
+  normalizePricingBreakdown,
+  validatePricingBreakdownForBooking,
+  serializePricingBreakdown,
+} from "./_lib/pricing-breakdown.js";
+import {
   archivePastReservations,
   getInitialBookingStatusForCheckout,
 } from "./_lib/booking-archive.js";
@@ -894,6 +899,7 @@ export default async function handler(req, res) {
   var pgTid = body.pgTid ? String(body.pgTid).trim().slice(0, 255) : null;
   var bookingToken = String(body.bookingToken || "").trim();
   var bookingLocale = normalizeBookingLocale(body.bookingLocale);
+  var pricingBreakdownRaw = body.pricingBreakdown;
 
   if (!bookingToken) {
     json(res, 400, {
@@ -1015,6 +1021,34 @@ export default async function handler(req, res) {
   var sn = Math.floor(stayNights);
   var eg = Math.floor(extraGuests);
   var ta = Math.floor(totalAmount);
+
+  var normalizedBreakdown = normalizePricingBreakdown(pricingBreakdownRaw);
+  if (pricingBreakdownRaw != null && !normalizedBreakdown) {
+    console.error("[reservations POST] Invalid pricingBreakdown");
+    json(res, 400, { ok: false, error: "Invalid pricingBreakdown" });
+    return;
+  }
+  var breakdownCheck = validatePricingBreakdownForBooking(normalizedBreakdown, {
+    roomType: roomType,
+    stayNights: sn,
+    extraGuests: eg,
+    totalAmount: ta,
+  });
+  if (!breakdownCheck.ok) {
+    console.error(
+      "[reservations POST] pricingBreakdown validation failed:",
+      breakdownCheck.error,
+    );
+    json(res, 400, {
+      ok: false,
+      error: breakdownCheck.error || "Invalid pricingBreakdown",
+    });
+    return;
+  }
+  var pricingBreakdownToStore = breakdownCheck.breakdown
+    ? serializePricingBreakdown(breakdownCheck.breakdown)
+    : null;
+
   var insertStatus = getInitialBookingStatusForCheckout(checkOut);
 
   var encPii = encryptBookingPii({
@@ -1037,6 +1071,7 @@ export default async function handler(req, res) {
       stay_nights,
       extra_guests,
       total_amount,
+      pricing_breakdown,
       guest_request,
       payment_method,
       bank_confirmed,
@@ -1044,7 +1079,7 @@ export default async function handler(req, res) {
       pg_pay_provider,
       booking_locale
     ) VALUES (
-      $1, $2, $3, $4, $5, $6, $7::date, $8::date, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18
+      $1, $2, $3, $4, $5, $6, $7::date, $8::date, $9, $10, $11, $12, $13::jsonb, $14, $15, $16, $17, $18, $19
     )
     RETURNING id, reservation_number, created_at
   `;
@@ -1062,6 +1097,7 @@ export default async function handler(req, res) {
     sn,
     eg,
     ta,
+    pricingBreakdownToStore ? JSON.stringify(pricingBreakdownToStore) : null,
     guestRequest,
     paymentMethod,
     true,
