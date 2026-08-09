@@ -6597,7 +6597,9 @@ main.content-section:has(> .site-footer.site-business-footer) {
 
 /* 할인 적용 현황 (달력 아래) */
 .js-res-promo-card[hidden],
-.js-res-promo-pill[hidden] {
+.js-res-promo-pill[hidden],
+.js-res-consecutive-card[hidden],
+.js-res-consecutive-badge[hidden] {
   display: none !important;
 }
 

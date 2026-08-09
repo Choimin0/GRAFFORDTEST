@@ -1045,6 +1045,7 @@
             var promotionStayPeriodStart = "";
             var promotionStayPeriodEnd = "";
             var promotionPercentRaw = 0;
+            var consecutiveSaleEnabled = false;
             var consecutiveCardEl = scope.querySelector(
               ".js-res-consecutive-card",
             );
@@ -1414,6 +1415,21 @@
               return false;
             }
 
+            function resolveConsecutiveEnabled(chargeEnabled, charges) {
+              if (chargeEnabled && typeof chargeEnabled === "object") {
+                if (chargeEnabled.consecutiveSale === true) {
+                  return true;
+                }
+                if (chargeEnabled.consecutiveSale === false) {
+                  return false;
+                }
+              }
+              if (charges && typeof charges === "object") {
+                return Number(charges.consecutiveSale || 0) > 0;
+              }
+              return false;
+            }
+
             function applyPromotionMeta(charges, chargeEnabled, promoMeta) {
               promotionEnabled = resolvePromotionEnabled(
                 chargeEnabled,
@@ -1492,6 +1508,10 @@
               seasonalRates,
             ) {
               applyPromotionMeta(charges, chargeEnabled, promoMeta);
+              consecutiveSaleEnabled = resolveConsecutiveEnabled(
+                chargeEnabled,
+                charges,
+              );
               if (!P) {
                 updateDiscountCards();
                 return;
@@ -1536,6 +1556,7 @@
                   weekendChargeEnabled: !!(
                     chargeEnabled && chargeEnabled.weekendCharge !== false
                   ),
+                  consecutiveSaleEnabled: consecutiveSaleEnabled,
                 });
               }
               updateDiscountCards();
@@ -1544,6 +1565,7 @@
             function loadRoomRatesForNewBooking() {
               promotionEnabled = false;
               promotionPercentRaw = 0;
+              consecutiveSaleEnabled = false;
               updateDiscountCards();
               try {
                 var cachedMap = JSON.parse(
@@ -1870,8 +1892,7 @@
                 promotionEnabled && promoInPeriodForStay && pctApplied > 0;
               var hasPromotionPeriod = hasAnyPeriod;
               var shouldShowPromotionCard = promotionEnabled && pctDisplay > 0;
-              var shouldShowPromotionPill =
-                shouldShowPromotionCard && hasPromotionPeriod;
+              var shouldShowPromotionPill = shouldShowPromotionCard;
               if (promoCardEl) {
                 promoCardEl.hidden = !shouldShowPromotionCard;
                 promoCardEl.classList.toggle(
@@ -1940,7 +1961,7 @@
                     Math.floor(Number(pricing.CONSECUTIVE_SALE_PER_NIGHT || 0)),
                   )
                 : 0;
-              var consecutiveEnabled = perNight > 0;
+              var consecutiveEnabled = consecutiveSaleEnabled && perNight > 0;
               if (consecutiveCardEl) {
                 consecutiveCardEl.hidden = !consecutiveEnabled;
                 consecutiveCardEl.classList.toggle(

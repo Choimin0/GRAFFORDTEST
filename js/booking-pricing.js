@@ -20,6 +20,8 @@
   // API 로드 전 기본은 OFF — ON이면 금·토에 +추가요금이 붙으므로 안전하게 시작
   var WEEKEND_SURCHARGE_ENABLED = false;
   var CONSECUTIVE_SALE_PER_NIGHT = 20000;    // 기본값 (DB에서 덮어씀)
+  // API 로드 전 기본은 OFF — ON이면 2박 이상 연박할인이 적용되므로 안전하게 시작
+  var CONSECUTIVE_SALE_ENABLED = false;
   var PROMOTION_PERCENT = 0;                  // 기본 프로모션 할인율 (%)
   var PROMOTION_ENABLED = false;
   var PROMOTION_PERIOD_START = "";
@@ -64,6 +66,7 @@
     }
     opts = opts || {};
     WEEKEND_SURCHARGE_ENABLED = opts.weekendChargeEnabled !== false;
+    CONSECUTIVE_SALE_ENABLED = opts.consecutiveSaleEnabled !== false;
     var wc = Number(
       charges.weekendCharge !== undefined
         ? charges.weekendCharge
@@ -115,6 +118,8 @@
         WEEKEND_SURCHARGE_ENABLED;
       root.GraffordBookingPricing.CONSECUTIVE_SALE_PER_NIGHT =
         CONSECUTIVE_SALE_PER_NIGHT;
+      root.GraffordBookingPricing.CONSECUTIVE_SALE_ENABLED =
+        CONSECUTIVE_SALE_ENABLED;
       root.GraffordBookingPricing.PROMOTION_PERCENT = PROMOTION_PERCENT;
     }
     var eg = Number(
@@ -436,7 +441,9 @@
     var extraGuestTotal = extraGuests * EXTRA_PER_PERSON_PER_NIGHT * nights;
     var grandTotal = baseTotal + extraGuestTotal;
     var consecutiveSale =
-      nights >= 2 ? (nights - 1) * CONSECUTIVE_SALE_PER_NIGHT : 0;
+      CONSECUTIVE_SALE_ENABLED && nights >= 2
+        ? (nights - 1) * CONSECUTIVE_SALE_PER_NIGHT
+        : 0;
     // 프로모션: 객실 박요금 합(주중·주말) 기준 % — 투숙일이 프로모션 기간과 겹칠 때만
     var effectivePromoPercent = isPromotionActiveForStay(checkInStr, checkOutStr)
       ? PROMOTION_PERCENT
@@ -481,6 +488,7 @@
     WEEKEND_SURCHARGE_PER_NIGHT: WEEKEND_SURCHARGE_PER_NIGHT,
     WEEKEND_SURCHARGE_ENABLED: WEEKEND_SURCHARGE_ENABLED,
     CONSECUTIVE_SALE_PER_NIGHT: CONSECUTIVE_SALE_PER_NIGHT,
+    CONSECUTIVE_SALE_ENABLED: CONSECUTIVE_SALE_ENABLED,
     PROMOTION_PERCENT: PROMOTION_PERCENT,
     parseYMD: parseYMD,
     countNights: countNights,
