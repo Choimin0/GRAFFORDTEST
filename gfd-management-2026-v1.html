@@ -1539,6 +1539,23 @@
               <strong id="admin-calendar-res-detail-amount">—</strong>
             </div>
           </div>
+          <div
+            id="admin-calendar-res-detail-pricing-wrap"
+            class="admin-calendar-res-pricing"
+            hidden
+          >
+            <p class="admin-calendar-res-pricing__title">금액 산정 내역</p>
+            <div
+              id="admin-calendar-res-detail-pricing"
+              class="admin-calendar-res-pricing__body"
+              aria-label="홈페이지 예약 금액 산정 내역"
+            ></div>
+            <p
+              id="admin-calendar-res-detail-pricing-note"
+              class="admin-calendar-res-pricing__note"
+              hidden
+            ></p>
+          </div>
         </div>
       </div>
 
@@ -2281,6 +2298,15 @@
         );
         var calendarResDetailAmount = document.getElementById(
           "admin-calendar-res-detail-amount",
+        );
+        var calendarResDetailPricingWrap = document.getElementById(
+          "admin-calendar-res-detail-pricing-wrap",
+        );
+        var calendarResDetailPricingBody = document.getElementById(
+          "admin-calendar-res-detail-pricing",
+        );
+        var calendarResDetailPricingNote = document.getElementById(
+          "admin-calendar-res-detail-pricing-note",
         );
         var policyConfirmModal = document.getElementById(
           "admin-policy-confirm-modal",
@@ -4068,6 +4094,168 @@
           }
         }
 
+        function resetCalendarResDetailPricing() {
+          if (calendarResDetailPricingWrap) {
+            calendarResDetailPricingWrap.hidden = true;
+          }
+          if (calendarResDetailPricingBody) {
+            calendarResDetailPricingBody.innerHTML = "";
+          }
+          if (calendarResDetailPricingNote) {
+            calendarResDetailPricingNote.hidden = true;
+            calendarResDetailPricingNote.textContent = "";
+          }
+        }
+
+        function computeCalendarResDetailQuote(row) {
+          var P = window.GraffordBookingPricing;
+          if (!P || !row || !isDirectWebsiteBooking(row)) {
+            return null;
+          }
+          var room = String(row.roomType || "").toUpperCase();
+          var checkIn = dateKey(row.checkIn);
+          var checkOut = dateKey(row.checkOut);
+          if (!room || !checkIn || !checkOut || checkIn >= checkOut) {
+            return null;
+          }
+          var extraGuests;
+          if (
+            row.extraGuests != null &&
+            Number.isFinite(Number(row.extraGuests))
+          ) {
+            extraGuests = P.clampExtra(room, Number(row.extraGuests));
+          } else {
+            extraGuests = getResEntryExtraGuests(room, row.guestCount);
+          }
+          return P.computeStay(room, checkIn, checkOut, extraGuests);
+        }
+
+        function buildCalendarResDetailPricingHtml(quote, room) {
+          if (!quote || !quote.nights) {
+            return "";
+          }
+          var P = window.GraffordBookingPricing;
+          var rows = [];
+          function pricingRow(label, amount, isDiscount) {
+            var value = Number(amount || 0);
+            var showNeg = isDiscount && value > 0;
+            rows.push(
+              '<div class="admin-calendar-res-pricing__row">' +
+                '<span class="admin-calendar-res-pricing__label">' +
+                escapeHtml(label) +
+                "</span>" +
+                '<span class="admin-calendar-res-pricing__amount">' +
+                (showNeg ? "- " : "") +
+                escapeHtml(formatKRW(showNeg ? value : value)) +
+                "</span></div>",
+            );
+          }
+          if (quote.weekdayNights > 0) {
+            pricingRow(
+              room +
+                " (주중) " +
+                formatKRW(
+                  quote.weekdayRatePerNight != null
+                    ? quote.weekdayRatePerNight
+                    : quote.baseNightly,
+                ) +
+                " × " +
+                quote.weekdayNights +
+                "박",
+              quote.weekdaySubtotal,
+              false,
+            );
+          }
+          if (quote.weekendNights > 0) {
+            pricingRow(
+              room +
+                " (주말) " +
+                formatKRW(quote.weekendRatePerNight) +
+                " × " +
+                quote.weekendNights +
+                "박",
+              quote.weekendSubtotal,
+              false,
+            );
+          }
+          if (quote.extraGuestTotal > 0 && P) {
+            pricingRow(
+              "인원 추가 " +
+                formatKRW(P.EXTRA_PER_PERSON_PER_NIGHT) +
+                " × " +
+                quote.extraGuests +
+                "명 × " +
+                quote.nights +
+                "박",
+              quote.extraGuestTotal,
+              false,
+            );
+          }
+          if ((quote.consecutiveSale || 0) > 0) {
+            pricingRow(
+              "연박 할인 (" + quote.nights + "박 일정)",
+              quote.consecutiveSale,
+              true,
+            );
+          }
+          if ((quote.promotionDiscount || 0) > 0) {
+            pricingRow(
+              "프로모션 할인 (" + (quote.promotionPercent || 0) + "%)",
+              quote.promotionDiscount,
+              true,
+            );
+          }
+          pricingRow("합계", quote.discountedGrandTotal, false);
+          return rows.join("");
+        }
+
+        function updateCalendarResDetailPricing(row) {
+          if (!calendarResDetailPricingWrap || !calendarResDetailPricingBody) {
+            return;
+          }
+          if (!isDirectWebsiteBooking(row)) {
+            resetCalendarResDetailPricing();
+            return;
+          }
+          calendarResDetailPricingWrap.hidden = false;
+          calendarResDetailPricingBody.innerHTML =
+            "<p class='admin-calendar-res-pricing__loading'>요금 산정 내역을 불러오는 중…</p>";
+          if (calendarResDetailPricingNote) {
+            calendarResDetailPricingNote.hidden = true;
+            calendarResDetailPricingNote.textContent = "";
+          }
+          loadResEntryPricing().then(function () {
+            if (
+              !calendarResDetailModal ||
+              calendarResDetailModal.hidden ||
+              !row
+            ) {
+              return;
+            }
+            var quote = computeCalendarResDetailQuote(row);
+            if (!quote || !quote.nights) {
+              resetCalendarResDetailPricing();
+              return;
+            }
+            var room = String(row.roomType || "").toUpperCase();
+            calendarResDetailPricingBody.innerHTML =
+              buildCalendarResDetailPricingHtml(quote, room);
+            if (calendarResDetailPricingNote) {
+              var paid = getReservationPaidTotal(row);
+              var computed = quote.discountedGrandTotal;
+              if (paid !== computed) {
+                calendarResDetailPricingNote.textContent =
+                  "※ 실제 결제 금액(" +
+                  formatKRW(paid) +
+                  ")과 현재 요금 설정 기준 산출액(" +
+                  formatKRW(computed) +
+                  ")이 다릅니다. 예약 시점의 요금·프로모션이 반영되지 않을 수 있습니다.";
+                calendarResDetailPricingNote.hidden = false;
+              }
+            }
+          });
+        }
+
         function openCalendarResDetailModal(room, ymd, row) {
           if (!calendarResDetailModal) {
             return;
@@ -4126,6 +4314,7 @@
               getReservationPaidTotal(targetRow),
             );
           }
+          updateCalendarResDetailPricing(targetRow);
           calendarResDetailModal.hidden = false;
         }
 
@@ -4133,6 +4322,7 @@
           if (calendarResDetailModal) {
             calendarResDetailModal.hidden = true;
           }
+          resetCalendarResDetailPricing();
         }
 
         function renderCalendarDetail(ymd) {
@@ -5466,6 +5656,10 @@
                   weekendChargeEnabled: !!(
                     data.chargeEnabled &&
                     data.chargeEnabled.weekendCharge !== false
+                  ),
+                  consecutiveSaleEnabled: !!(
+                    data.chargeEnabled &&
+                    data.chargeEnabled.consecutiveSale !== false
                   ),
                 });
               }

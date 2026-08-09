@@ -108,6 +108,7 @@ function mapRow(row, isDeleted) {
     checkIn: toYMD(row.check_in_date),
     checkOut: toYMD(row.check_out_date),
     guestCount: row.guest_count,
+    extraGuests: row.extra_guests != null ? Number(row.extra_guests) : null,
     totalAmount: row.total_amount != null ? Number(row.total_amount) : 0,
     stayPeriod: row.stay_nights != null ? Number(row.stay_nights) : null,
     guestRequest: row.guest_request || "",
@@ -423,6 +424,7 @@ export async function handleAdminReservations(res, pool, body) {
         check_in_date,
         check_out_date,
         guest_count,
+        extra_guests,
         total_amount,
         stay_nights,
         guest_request,
@@ -450,7 +452,7 @@ export async function handleAdminReservations(res, pool, body) {
       var calSel = await pool.query(
         `SELECT
           reservation_number, guest_name, contact, email, room_type,
-          check_in_date, check_out_date, guest_count, total_amount,
+          check_in_date, check_out_date, guest_count, extra_guests, total_amount,
           stay_nights, guest_request, payment_method, bank_confirmed,
           checkin_alarm_sent_count,
           booking_locale,
@@ -472,6 +474,7 @@ export async function handleAdminReservations(res, pool, body) {
           checkIn: toYMD(row.check_in_date),
           checkOut: toYMD(row.check_out_date),
           guestCount: row.guest_count,
+          extraGuests: row.extra_guests != null ? Number(row.extra_guests) : null,
           totalAmount: row.total_amount != null ? Number(row.total_amount) : 0,
           stayPeriod: row.stay_nights != null ? Number(row.stay_nights) : null,
           guestRequest: row.guest_request || "",

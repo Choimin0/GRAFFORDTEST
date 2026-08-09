@@ -13666,6 +13666,58 @@ main.content-section.confirm-page.admin-page {
   padding-bottom: 0;
   border-bottom: none;
 }
+.admin-calendar-res-pricing {
+  margin-top: var(--space-24);
+  padding-top: var(--space-20);
+  border-top: 1px solid color-mix(in srgb, var(--stone-800) 8%, transparent);
+}
+.admin-calendar-res-pricing__title {
+  margin: 0 0 var(--space-12);
+  color: var(--stone-500);
+  font-size: 0.72rem;
+  font-weight: 500;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.admin-calendar-res-pricing__body {
+  display: grid;
+  gap: 0;
+}
+.admin-calendar-res-pricing__row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: var(--space-16);
+  padding: 0.55rem 0;
+  border-bottom: 1px solid color-mix(in srgb, var(--stone-800) 6%, transparent);
+  font-size: 0.82rem;
+}
+.admin-calendar-res-pricing__row:last-child {
+  margin-top: var(--space-4);
+  border-bottom: none;
+  font-weight: 500;
+}
+.admin-calendar-res-pricing__label {
+  color: var(--stone-600);
+  text-align: left;
+  line-height: 1.45;
+}
+.admin-calendar-res-pricing__amount {
+  color: var(--stone-800);
+  white-space: nowrap;
+  text-align: right;
+}
+.admin-calendar-res-pricing__loading {
+  margin: 0;
+  color: var(--stone-400);
+  font-size: 0.82rem;
+}
+.admin-calendar-res-pricing__note {
+  margin: var(--space-12) 0 0;
+  color: var(--stone-500);
+  font-size: 0.74rem;
+  line-height: 1.55;
+}
 .admin-request-message {
   margin: var(--space-12) 0 0;
   color: var(--stone-red);
