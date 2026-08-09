@@ -27,6 +27,9 @@
   var pendingDeleteId = null;
   var PENCIL_ICON =
     '<svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d="M3 17.25V21h3.75L17.81 9.94l-3.75-3.75L3 17.25zm2.92 2.08H5v-.92l9.06-9.06.92.92L5.92 19.33zM20.71 7.04a1.003 1.003 0 0 0 0-1.42l-2.34-2.34a1.003 1.003 0 0 0-1.42 0l-1.83 1.83 3.75 3.75 1.84-1.82z"/></svg>';
+  var DRAG_HANDLE_ICON =
+    '<svg width="14" height="14" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path fill="currentColor" d="M4 6h16v1.5H4V6zm0 4.25h16v1.5H4v-1.5zm0 4.25h16v1.5H4V14.5z"/></svg>';
+  var seasonalDragState = null;
 
   var deps = {
     adminPost: null,
@@ -132,14 +135,26 @@
     if (!matches.length) {
       return null;
     }
-    return matches.slice().sort(function (a, b) {
-      var ua = String(a.updatedAt || a.createdAt || "");
-      var ub = String(b.updatedAt || b.createdAt || "");
-      if (ua !== ub) {
-        return ub.localeCompare(ua);
-      }
-      return Number(b.id || 0) - Number(a.id || 0);
-    })[0];
+    return matches.slice().sort(compareSeasonalPriority)[0];
+  }
+
+  function compareSeasonalPriority(a, b) {
+    var pa = Number(a.priority || 0);
+    var pb = Number(b.priority || 0);
+    var aHasPriority = pa > 0;
+    var bHasPriority = pb > 0;
+    if (aHasPriority && bHasPriority && pa !== pb) {
+      return pa - pb;
+    }
+    if (aHasPriority !== bHasPriority) {
+      return aHasPriority ? -1 : 1;
+    }
+    var ua = String(a.updatedAt || a.createdAt || "");
+    var ub = String(b.updatedAt || b.createdAt || "");
+    if (ua !== ub) {
+      return ub.localeCompare(ua);
+    }
+    return Number(b.id || 0) - Number(a.id || 0);
   }
 
   function renderActiveCriteria() {
@@ -225,13 +240,82 @@
       if (roomA !== roomB) {
         return (roomA < 0 ? 99 : roomA) - (roomB < 0 ? 99 : roomB);
       }
-      var ua = String(a.updatedAt || a.createdAt || "");
-      var ub = String(b.updatedAt || b.createdAt || "");
-      if (ua !== ub) {
-        return ub.localeCompare(ua);
-      }
-      return Number(b.id || 0) - Number(a.id || 0);
+      return compareSeasonalPriority(a, b);
     });
+  }
+
+  function groupSeasonalRatesByRoom(rows) {
+    var grouped = {};
+    ROOMS.forEach(function (room) {
+      grouped[room] = [];
+    });
+    sortSeasonalRates(rows).forEach(function (row) {
+      var room = String(row.roomName || "").toUpperCase();
+      if (grouped[room]) {
+        grouped[room].push(row);
+      }
+    });
+    return grouped;
+  }
+
+  function renderSeasonalRowHtml(row, options) {
+    options = options || {};
+    var periodStatus = getSeasonalPeriodStatus(row.startDate, row.endDate);
+    var rowClass =
+      "admin-seasonal-rate-row" +
+      (periodStatus === "past" ? " is-past" : "") +
+      (periodStatus === "active" ? " is-active" : "") +
+      (options.roomDivider ? " admin-seasonal-rate-row--room-divider" : "");
+    return (
+      "<div class='" +
+      rowClass +
+      "' data-seasonal-id='" +
+      String(row.id) +
+      "' data-seasonal-room='" +
+      deps.escapeHtml(String(row.roomName || "").toUpperCase()) +
+      "'>" +
+      "<span class='admin-seasonal-rate-drag-cell'>" +
+      "<button type='button' class='admin-seasonal-rate-drag-handle' data-seasonal-drag-handle='" +
+      String(row.id) +
+      "' aria-label='순서 변경'>" +
+      DRAG_HANDLE_ICON +
+      "</button>" +
+      "</span>" +
+      "<span class='admin-seasonal-rate-room'>" +
+      deps.escapeHtml(row.roomName) +
+      "</span>" +
+      "<span class='admin-seasonal-rate-period'>" +
+      deps.escapeHtml(formatPeriodLabel(row.startDate, row.endDate)) +
+      "</span>" +
+      "<span class='admin-seasonal-rate-name'>" +
+      deps.escapeHtml(row.optionName || "—") +
+      "</span>" +
+      "<span class='admin-seasonal-rate-price'>" +
+      "<small>평일</small>" +
+      "<strong>" +
+      deps.formatKRW(row.weekdayBaseRate) +
+      "</strong>" +
+      "</span>" +
+      "<span class='admin-seasonal-rate-price'>" +
+      "<small>주말</small>" +
+      "<strong>" +
+      deps.formatKRW(
+        resolveWeekendRate(row.weekdayBaseRate, row.weekendBaseRate),
+      ) +
+      "</strong>" +
+      "</span>" +
+      "<span class='admin-seasonal-rate-actions'>" +
+      "<button type='button' class='admin-seasonal-rate-edit-btn' data-seasonal-edit='" +
+      String(row.id) +
+      "' aria-label='수정'>" +
+      PENCIL_ICON +
+      "</button>" +
+      "<button type='button' class='admin-seasonal-rate-delete-btn' data-seasonal-delete='" +
+      String(row.id) +
+      "' aria-label='삭제'>×</button>" +
+      "</span>" +
+      "</div>"
+    );
   }
 
   function renderSeasonalList() {
@@ -246,6 +330,7 @@
     }
     var header =
       "<div class='admin-seasonal-rate-row admin-seasonal-rate-row--head'>" +
+      "<span class='admin-seasonal-rate-drag-head' aria-hidden='true'></span>" +
       "<span>객실</span>" +
       "<span>기간</span>" +
       "<span>옵션 이름</span>" +
@@ -253,57 +338,24 @@
       "<span class='admin-seasonal-rate-head-price'><small>주말</small><strong>요금</strong></span>" +
       "<span></span>" +
       "</div>";
-    var rows = sortSeasonalRates(seasonalRates)
-      .map(function (row) {
-        var periodStatus = getSeasonalPeriodStatus(row.startDate, row.endDate);
-        var rowClass =
-          "admin-seasonal-rate-row" +
-          (periodStatus === "past" ? " is-past" : "") +
-          (periodStatus === "active" ? " is-active" : "");
-        return (
-          "<div class='" +
-          rowClass +
-          "' data-seasonal-id='" +
-          String(row.id) +
-          "'>" +
-          "<span class='admin-seasonal-rate-room'>" +
-          deps.escapeHtml(row.roomName) +
-          "</span>" +
-          "<span class='admin-seasonal-rate-period'>" +
-          deps.escapeHtml(formatPeriodLabel(row.startDate, row.endDate)) +
-          "</span>" +
-          "<span class='admin-seasonal-rate-name'>" +
-          deps.escapeHtml(row.optionName || "—") +
-          "</span>" +
-          "<span class='admin-seasonal-rate-price'>" +
-          "<small>평일</small>" +
-          "<strong>" +
-          deps.formatKRW(row.weekdayBaseRate) +
-          "</strong>" +
-          "</span>" +
-          "<span class='admin-seasonal-rate-price'>" +
-          "<small>주말</small>" +
-          "<strong>" +
-          deps.formatKRW(
-            resolveWeekendRate(row.weekdayBaseRate, row.weekendBaseRate),
-          ) +
-          "</strong>" +
-          "</span>" +
-          "<span class='admin-seasonal-rate-actions'>" +
-          "<button type='button' class='admin-seasonal-rate-edit-btn' data-seasonal-edit='" +
-          String(row.id) +
-          "' aria-label='수정'>" +
-          PENCIL_ICON +
-          "</button>" +
-          "<button type='button' class='admin-seasonal-rate-delete-btn' data-seasonal-delete='" +
-          String(row.id) +
-          "' aria-label='삭제'>×</button>" +
-          "</span>" +
-          "</div>"
+    var grouped = groupSeasonalRatesByRoom(seasonalRates);
+    var rowBits = [];
+    var isFirstRoomGroup = true;
+    ROOMS.forEach(function (room) {
+      var roomRows = grouped[room] || [];
+      if (!roomRows.length) {
+        return;
+      }
+      roomRows.forEach(function (row, idx) {
+        rowBits.push(
+          renderSeasonalRowHtml(row, {
+            roomDivider: !isFirstRoomGroup && idx === 0,
+          }),
         );
-      })
-      .join("");
-    listEl.innerHTML = header + rows;
+      });
+      isFirstRoomGroup = false;
+    });
+    listEl.innerHTML = header + rowBits.join("");
     listEl.querySelectorAll("[data-seasonal-edit]").forEach(function (btn) {
       btn.addEventListener("click", function () {
         openEditModal(Number(btn.getAttribute("data-seasonal-edit")));
@@ -313,6 +365,161 @@
       btn.addEventListener("click", function () {
         openDeleteConfirm(Number(btn.getAttribute("data-seasonal-delete")));
       });
+    });
+    bindSeasonalDragReorder(listEl);
+  }
+
+  function getSeasonalPointerY(e) {
+    if (e.touches && e.touches.length) {
+      return e.touches[0].clientY;
+    }
+    if (e.changedTouches && e.changedTouches.length) {
+      return e.changedTouches[0].clientY;
+    }
+    return e.clientY;
+  }
+
+  function getRoomSeasonalRows(listEl, roomName) {
+    return Array.prototype.slice.call(
+      listEl.querySelectorAll(
+        "[data-seasonal-id][data-seasonal-room='" + roomName + "']",
+      ),
+    );
+  }
+
+  function syncSeasonalPrioritiesFromDom(listEl, roomName) {
+    var orderedIds = getRoomSeasonalRows(listEl, roomName).map(function (rowEl) {
+      return Number(rowEl.getAttribute("data-seasonal-id"));
+    });
+    orderedIds.forEach(function (id, idx) {
+      seasonalRates.forEach(function (row) {
+        if (Number(row.id) === id) {
+          row.priority = idx + 1;
+        }
+      });
+    });
+    return orderedIds;
+  }
+
+  function saveSeasonalOrder(roomName, listEl) {
+    var orderedIds = syncSeasonalPrioritiesFromDom(listEl, roomName);
+    if (!orderedIds.length) {
+      return Promise.resolve();
+    }
+    return postSeasonal("seasonal-reorder", {
+      roomName: roomName,
+      orderedIds: orderedIds,
+    })
+      .then(function (result) {
+        if (!result.ok || !result.data.ok) {
+          throw new Error(result.data.error || "순서 저장 실패");
+        }
+        reloadSeasonalRatesFromResponse(result.data);
+      })
+      .catch(function (err) {
+        renderSeasonalList();
+        deps.showMessage((err && err.message) || "순서 저장 실패");
+      });
+  }
+
+  function onSeasonalDragMove(e) {
+    if (!seasonalDragState) {
+      return;
+    }
+    if (e.cancelable) {
+      e.preventDefault();
+    }
+    var listEl = seasonalDragState.listEl;
+    var draggedRow = seasonalDragState.row;
+    var roomName = seasonalDragState.roomName;
+    var y = getSeasonalPointerY(e);
+    var roomRows = getRoomSeasonalRows(listEl, roomName);
+    var i;
+    for (i = 0; i < roomRows.length; i += 1) {
+      var rowEl = roomRows[i];
+      if (rowEl === draggedRow) {
+        continue;
+      }
+      var rect = rowEl.getBoundingClientRect();
+      if (y < rect.top + rect.height / 2) {
+        if (draggedRow.nextElementSibling !== rowEl) {
+          listEl.insertBefore(draggedRow, rowEl);
+        }
+        return;
+      }
+    }
+    var lastRow = roomRows[roomRows.length - 1];
+    if (lastRow && lastRow !== draggedRow) {
+      listEl.insertBefore(draggedRow, lastRow.nextSibling);
+    }
+  }
+
+  function finishSeasonalDrag() {
+    if (!seasonalDragState) {
+      return;
+    }
+    var state = seasonalDragState;
+    var currentOrder = getRoomSeasonalRows(state.listEl, state.roomName).map(
+      function (rowEl) {
+        return Number(rowEl.getAttribute("data-seasonal-id"));
+      },
+    );
+    var changed = currentOrder.join(",") !== state.startOrder.join(",");
+    seasonalDragState = null;
+    state.row.classList.remove("is-dragging");
+    document.body.classList.remove("admin-seasonal-rate-is-dragging");
+    document.removeEventListener("mousemove", onSeasonalDragMove);
+    document.removeEventListener("mouseup", finishSeasonalDrag);
+    document.removeEventListener("touchmove", onSeasonalDragMove);
+    document.removeEventListener("touchend", finishSeasonalDrag);
+    document.removeEventListener("touchcancel", finishSeasonalDrag);
+    if (changed) {
+      saveSeasonalOrder(state.roomName, state.listEl);
+    }
+  }
+
+  function startSeasonalDrag(e) {
+    if (seasonalDragState) {
+      return;
+    }
+    var handle = e.currentTarget;
+    var row = handle.closest("[data-seasonal-id]");
+    var listEl = document.getElementById("admin-seasonal-rate-list");
+    if (!row || !listEl) {
+      return;
+    }
+    e.preventDefault();
+    seasonalDragState = {
+      row: row,
+      roomName: row.getAttribute("data-seasonal-room") || "",
+      listEl: listEl,
+      startOrder: getRoomSeasonalRows(
+        listEl,
+        row.getAttribute("data-seasonal-room") || "",
+      ).map(function (rowEl) {
+        return Number(rowEl.getAttribute("data-seasonal-id"));
+      }),
+    };
+    row.classList.add("is-dragging");
+    document.body.classList.add("admin-seasonal-rate-is-dragging");
+    document.addEventListener("mousemove", onSeasonalDragMove);
+    document.addEventListener("mouseup", finishSeasonalDrag);
+    document.addEventListener("touchmove", onSeasonalDragMove, { passive: false });
+    document.addEventListener("touchend", finishSeasonalDrag);
+    document.addEventListener("touchcancel", finishSeasonalDrag);
+  }
+
+  function bindSeasonalDragReorder(listEl) {
+    if (!listEl) {
+      return;
+    }
+    listEl.querySelectorAll("[data-seasonal-drag-handle]").forEach(function (btn) {
+      if (btn.__seasonalDragBound) {
+        return;
+      }
+      btn.__seasonalDragBound = true;
+      btn.addEventListener("mousedown", startSeasonalDrag);
+      btn.addEventListener("touchstart", startSeasonalDrag, { passive: false });
     });
   }
 

@@ -14843,12 +14843,19 @@ main.content-section.confirm-page.admin-page {
 .admin-seasonal-rate-row {
   display: grid;
   grid-template-columns:
-    4rem minmax(0, 1.2fr) minmax(0, 0.9fr)
+    2rem 4rem minmax(0, 1.2fr) minmax(0, 0.9fr)
     7.5rem 7.5rem 5.5rem;
   gap: var(--space-16);
   align-items: center;
   padding: var(--space-20) var(--space-24);
   border-bottom: 1px solid var(--stone-200);
+}
+.admin-seasonal-rate-row--room-divider {
+  border-top: 2.5px solid var(--stone-200);
+}
+.admin-seasonal-rate-row.is-dragging {
+  background: color-mix(in srgb, var(--gold-500) 6%, var(--stone-50));
+  opacity: 0.92;
 }
 .admin-seasonal-rate-row--head {
   background: var(--stone-100);
@@ -15010,6 +15017,37 @@ main.content-section.confirm-page.admin-page {
   color: var(--stone-400);
   font-size: 0.78rem;
   letter-spacing: 0.06em;
+}
+.admin-seasonal-rate-drag-head {
+  display: block;
+}
+.admin-seasonal-rate-drag-cell {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.admin-seasonal-rate-drag-handle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.75rem;
+  height: 1.75rem;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--stone-400);
+  cursor: grab;
+  touch-action: none;
+  transition: color 0.2s ease;
+}
+.admin-seasonal-rate-drag-handle:hover,
+.admin-seasonal-rate-drag-handle:focus-visible {
+  color: var(--gold-500);
+  outline: none;
+}
+.admin-seasonal-rate-drag-handle:active,
+.admin-seasonal-rate-is-dragging .admin-seasonal-rate-drag-handle {
+  cursor: grabbing;
 }
 .admin-seasonal-rate-room {
   color: var(--gold-500);

@@ -29,7 +29,7 @@
   var PROMOTION_STAY_PERIOD_START = "";
   var PROMOTION_STAY_PERIOD_END = "";
   var PROMOTION_LEGACY_IN_PERIOD = true;
-  /** 기간별 요금 옵션 (겹치면 createdAt 최신 우선) */
+  /** 기간별 요금 옵션 (겹치면 목록 우선순위, 동순위·미설정 시 최근 수정 우선) */
   var SEASONAL_RATES = [];
   /** 객실별 기준 인원 */
   var BASE_GUESTS = { G1: 2, G2: 2, G3: 2, G4: 4 };
@@ -153,6 +153,7 @@
           weekdayBaseRate: Math.floor(Number(row.weekdayBaseRate || row.weekday_base_rate || 0)),
           weekendBaseRate: Math.floor(Number(row.weekendBaseRate || row.weekend_base_rate || 0)),
           optionName: String(row.optionName || row.seasonal_option_name || "").trim(),
+          priority: Number(row.priority || row.seasonal_priority || 0),
           createdAt: String(row.createdAt || row.created_at || ""),
           updatedAt: String(row.updatedAt || row.updated_at || ""),
         };
@@ -181,6 +182,16 @@
       return null;
     }
     matches.sort(function (a, b) {
+      var pa = Number(a.priority || 0);
+      var pb = Number(b.priority || 0);
+      var aHasPriority = pa > 0;
+      var bHasPriority = pb > 0;
+      if (aHasPriority && bHasPriority && pa !== pb) {
+        return pa - pb;
+      }
+      if (aHasPriority !== bHasPriority) {
+        return aHasPriority ? -1 : 1;
+      }
       var ua = String(a.updatedAt || a.createdAt || "");
       var ub = String(b.updatedAt || b.createdAt || "");
       if (ua !== ub) {

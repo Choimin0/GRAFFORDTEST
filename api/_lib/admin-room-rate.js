@@ -80,6 +80,10 @@ async function ensureRoomRateSchema(pool) {
     `ALTER TABLE ${TABLE_NAME}
      ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()`,
   );
+  await pool.query(
+    `ALTER TABLE ${TABLE_NAME}
+     ADD COLUMN IF NOT EXISTS seasonal_priority INTEGER`,
+  );
   await pool.query(`DROP TABLE IF EXISTS "room-rate-period"`);
   await pool.query(
     `DO $$
@@ -248,6 +252,7 @@ function mapSeasonalRow(row, surchargeEnabled, surchargeAmount) {
     endDate: formatPromotionDateFromDb(row.period_end_date),
     weekdayBaseRate: weekday,
     weekendBaseRate: weekend,
+    priority: Number(row.seasonal_priority || 0),
     createdAt: row.created_at ? new Date(row.created_at).toISOString() : "",
     updatedAt: row.updated_at ? new Date(row.updated_at).toISOString() : "",
   };
@@ -300,15 +305,56 @@ function validateSeasonalPayload(body, surchargeEnabled, surchargeAmount) {
   };
 }
 
+async function compactSeasonalPriorities(pool, roomName) {
+  var sel = await pool.query(
+    `SELECT id
+     FROM ${TABLE_NAME}
+     WHERE room_name = $1 AND ${SEASONAL_ROW_FILTER}
+     ORDER BY COALESCE(seasonal_priority, 2147483647) ASC, id ASC`,
+    [roomName],
+  );
+  var rows = sel.rows || [];
+  for (var i = 0; i < rows.length; i += 1) {
+    await pool.query(
+      `UPDATE ${TABLE_NAME}
+       SET seasonal_priority = $2
+       WHERE id = $1`,
+      [rows[i].id, i + 1],
+    );
+  }
+}
+
+async function bumpSeasonalPrioritiesExcept(pool, roomName, excludeId) {
+  await pool.query(
+    `UPDATE ${TABLE_NAME}
+     SET seasonal_priority = COALESCE(seasonal_priority, 0) + 1
+     WHERE room_name = $1
+       AND id != $2
+       AND ${SEASONAL_ROW_FILTER}`,
+    [roomName, excludeId],
+  );
+}
+
+async function bumpAllSeasonalPrioritiesInRoom(pool, roomName) {
+  await pool.query(
+    `UPDATE ${TABLE_NAME}
+     SET seasonal_priority = COALESCE(seasonal_priority, 0) + 1
+     WHERE room_name = $1 AND ${SEASONAL_ROW_FILTER}`,
+    [roomName],
+  );
+}
+
 async function listSeasonalRates(pool) {
   var surchargeEnabled = await isWeekendSurchargeEnabled(pool);
   var surchargeAmount = await getWeekendChargeAmount(pool);
   var sel = await pool.query(
     `SELECT id, room_name, seasonal_option_name, period_start_date, period_end_date,
-            weekday_base_rate, weekend_base_rate, created_at, updated_at
+            weekday_base_rate, weekend_base_rate, seasonal_priority, created_at, updated_at
      FROM ${TABLE_NAME}
      WHERE ${SEASONAL_ROW_FILTER}
-     ORDER BY updated_at DESC, id DESC`,
+     ORDER BY room_name ASC,
+              COALESCE(seasonal_priority, 2147483647) ASC,
+              id ASC`,
   );
   return (sel.rows || []).map(function (row) {
     return mapSeasonalRow(row, surchargeEnabled, surchargeAmount);
@@ -326,11 +372,12 @@ async function saveSeasonalRate(pool, body) {
   if (payload.error) {
     return payload;
   }
+  await bumpAllSeasonalPrioritiesInRoom(pool, payload.roomName);
   await pool.query(
     `INSERT INTO ${TABLE_NAME}
        (room_name, seasonal_option_name, weekday_base_rate, weekend_base_rate,
-        period_start_date, period_end_date, is_enabled)
-     VALUES ($1, $2, $3, $4, $5::date, $6::date, TRUE)`,
+        period_start_date, period_end_date, seasonal_priority, is_enabled)
+     VALUES ($1, $2, $3, $4, $5::date, $6::date, 1, TRUE)`,
     [
       payload.roomName,
       payload.optionName || null,
@@ -358,6 +405,19 @@ async function updateSeasonalRate(pool, body) {
   if (payload.error) {
     return payload;
   }
+  var existingSel = await pool.query(
+    `SELECT room_name
+     FROM ${TABLE_NAME}
+     WHERE id = $1 AND ${SEASONAL_ROW_FILTER}
+     LIMIT 1`,
+    [id],
+  );
+  var existingRow = existingSel.rows && existingSel.rows[0];
+  if (!existingRow) {
+    return { error: "요금 옵션을 찾을 수 없습니다." };
+  }
+  var previousRoom = normalizeRoomName(existingRow.room_name || "");
+  var targetRoom = payload.roomName;
   var upd = await pool.query(
     `UPDATE ${TABLE_NAME}
      SET room_name = $2,
@@ -382,6 +442,72 @@ async function updateSeasonalRate(pool, body) {
   if (!upd.rows || !upd.rows.length) {
     return { error: "요금 옵션을 찾을 수 없습니다." };
   }
+  if (previousRoom !== targetRoom) {
+    await compactSeasonalPriorities(pool, previousRoom);
+    await bumpAllSeasonalPrioritiesInRoom(pool, targetRoom);
+  } else {
+    await bumpSeasonalPrioritiesExcept(pool, targetRoom, id);
+  }
+  await pool.query(
+    `UPDATE ${TABLE_NAME}
+     SET seasonal_priority = 1,
+         updated_at = NOW()
+     WHERE id = $1 AND ${SEASONAL_ROW_FILTER}`,
+    [id],
+  );
+  return { ok: true };
+}
+
+async function reorderSeasonalRates(pool, body) {
+  var roomName = normalizeRoomName(body.roomName || "");
+  if (!/^G[1-4]$/.test(roomName)) {
+    return { error: "유효하지 않은 객실명입니다." };
+  }
+  var orderedIds = Array.isArray(body.orderedIds) ? body.orderedIds : [];
+  if (!orderedIds.length) {
+    return { error: "변경할 요금 옵션 순서가 없습니다." };
+  }
+  var normalizedIds = orderedIds
+    .map(function (id) {
+      return Number(id);
+    })
+    .filter(function (id) {
+      return Number.isFinite(id) && id > 0;
+    });
+  if (!normalizedIds.length || normalizedIds.length !== orderedIds.length) {
+    return { error: "유효하지 않은 요금 옵션 순서입니다." };
+  }
+  var sel = await pool.query(
+    `SELECT id
+     FROM ${TABLE_NAME}
+     WHERE room_name = $1 AND ${SEASONAL_ROW_FILTER}
+     ORDER BY COALESCE(seasonal_priority, 2147483647) ASC, id ASC`,
+    [roomName],
+  );
+  var existingIds = (sel.rows || []).map(function (row) {
+    return Number(row.id);
+  });
+  if (existingIds.length !== normalizedIds.length) {
+    return { error: "요금 옵션 목록이 변경되어 순서를 저장할 수 없습니다." };
+  }
+  var existingSet = {};
+  existingIds.forEach(function (id) {
+    existingSet[id] = true;
+  });
+  for (var i = 0; i < normalizedIds.length; i += 1) {
+    if (!existingSet[normalizedIds[i]]) {
+      return { error: "요금 옵션 목록이 변경되어 순서를 저장할 수 없습니다." };
+    }
+  }
+  for (var pi = 0; pi < normalizedIds.length; pi += 1) {
+    await pool.query(
+      `UPDATE ${TABLE_NAME}
+       SET seasonal_priority = $2,
+           updated_at = NOW()
+       WHERE id = $1 AND room_name = $3 AND ${SEASONAL_ROW_FILTER}`,
+      [normalizedIds[pi], pi + 1, roomName],
+    );
+  }
   return { ok: true };
 }
 
@@ -393,11 +519,15 @@ async function deleteSeasonalRate(pool, id) {
   var del = await pool.query(
     `DELETE FROM ${TABLE_NAME}
      WHERE id = $1 AND ${SEASONAL_ROW_FILTER}
-     RETURNING id`,
+     RETURNING id, room_name`,
     [periodId],
   );
   if (!del.rows || !del.rows.length) {
     return { error: "요금 옵션을 찾을 수 없습니다." };
+  }
+  var deletedRow = del.rows[0];
+  if (deletedRow && deletedRow.room_name) {
+    await compactSeasonalPriorities(pool, normalizeRoomName(deletedRow.room_name));
   }
   return { ok: true };
 }
@@ -523,6 +653,22 @@ export async function handleAdminRoomRate(res, pool, body) {
       json(res, 500, {
         ok: false,
         error: String((e && e.message) || e || "seasonal delete failed"),
+      });
+      return;
+    }
+  }
+
+  if (action === "seasonal-reorder") {
+    try {
+      var reorderResult = await reorderSeasonalRates(pool, body);
+      if (reorderResult.error) {
+        json(res, 400, { ok: false, error: reorderResult.error });
+        return;
+      }
+    } catch (e) {
+      json(res, 500, {
+        ok: false,
+        error: String((e && e.message) || e || "seasonal reorder failed"),
       });
       return;
     }

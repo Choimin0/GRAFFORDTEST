@@ -99,6 +99,10 @@ async function ensureRoomRateSchema(pool) {
     `ALTER TABLE ${TABLE_NAME}
      ADD COLUMN IF NOT EXISTS created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()`,
   );
+  await pool.query(
+    `ALTER TABLE ${TABLE_NAME}
+     ADD COLUMN IF NOT EXISTS seasonal_priority INTEGER`,
+  );
   await pool.query(`DROP TABLE IF EXISTS "room-rate-period"`);
   await pool.query(
     `DO $$
@@ -170,10 +174,12 @@ async function ensureRoomRateSchema(pool) {
 async function listSeasonalRates(pool, surchargeEnabled, surchargeAmount) {
   var sel = await pool.query(
     `SELECT id, room_name, seasonal_option_name, period_start_date, period_end_date,
-            weekday_base_rate, weekend_base_rate, created_at, updated_at
+            weekday_base_rate, weekend_base_rate, seasonal_priority, created_at, updated_at
      FROM ${TABLE_NAME}
      WHERE ${SEASONAL_ROW_FILTER}
-     ORDER BY updated_at DESC, id DESC`,
+     ORDER BY room_name ASC,
+              COALESCE(seasonal_priority, 2147483647) ASC,
+              id ASC`,
   );
   return (sel.rows || []).map(function (row) {
     var weekday = Number(row.weekday_base_rate || 0);
@@ -195,6 +201,7 @@ async function listSeasonalRates(pool, surchargeEnabled, surchargeAmount) {
         surchargeEnabled,
         surchargeAmount,
       ),
+      priority: Number(row.seasonal_priority || 0),
       createdAt: row.created_at ? new Date(row.created_at).toISOString() : "",
       updatedAt: row.updated_at ? new Date(row.updated_at).toISOString() : "",
     };
