@@ -50,8 +50,7 @@ async function sendPaymentConfig(res) {
   var storeId = process.env.STORE_ID || "";
   var channelKey = process.env.CHANNEL_KEY || "";
   var paypalTestKey = String(process.env.PAYPAL_TEST_KEY || "").trim();
-  var paypalLiveKey = String(process.env.PAYPAL_CHANNEL_KEY || "").trim();
-  var paypalChannelKey = paypalTestKey || paypalLiveKey;
+  var paypalChannelKey = paypalTestKey;
   var impCode = String(
     process.env.PORTONE_IMP_CODE ||
       process.env.IMP_CODE ||

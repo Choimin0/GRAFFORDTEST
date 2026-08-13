@@ -2861,7 +2861,10 @@
                 fxEl.hidden = false;
                 fxEl.textContent =
                   "Charged in USD via PayPal: " +
-                  GPM.formatUsdFromCents(paypalUsdCents);
+                  GPM.formatUsdFromCents(paypalUsdCents) +
+                  (paymentConfig.paypalSandbox
+                    ? " (sandbox)"
+                    : "");
               }
             }
 
@@ -3141,7 +3144,9 @@
 
             if (!config.storeId || !activeChannelKey) {
               showError(
-                "PayPal is not configured yet. Please contact support.",
+                config && config.paypalSandbox === false
+                  ? "PayPal sandbox is not configured. Add PAYPAL_TEST_KEY to Vercel environment variables and redeploy."
+                  : "PayPal is not configured yet. Please contact support.",
               );
               return;
             }
@@ -3225,9 +3230,17 @@
                 if (!mapped || mapped.code) {
                   hidePageLoading();
                   resetPaymentGuard();
-                  showError(
-                    (mapped && mapped.message) || "Payment was cancelled",
-                  );
+                  var failMsg =
+                    (mapped && mapped.message) || "Payment was cancelled";
+                  if (/security header is not valid/i.test(failMsg)) {
+                    failMsg =
+                      "PayPal sandbox rejected the API credentials on this PortOne channel (error 10002).\n" +
+                      "In PortOne Console → the PAYPAL_TEST_KEY channel:\n" +
+                      "1) Mode must be Test (not Live).\n" +
+                      "2) API Username / Password / Signature must come from developer.paypal.com → Sandbox → Business (DEFAULT) → API Credentials.\n" +
+                      "Do not paste live paypal.com keys or REST Client ID/Secret.";
+                  }
+                  showError(failMsg);
                   return;
                 }
                 if (portoneFlowEn) {
