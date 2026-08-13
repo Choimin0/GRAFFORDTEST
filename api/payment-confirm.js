@@ -49,7 +49,9 @@ async function sendPaymentConfig(res) {
 
   var storeId = process.env.STORE_ID || "";
   var channelKey = process.env.CHANNEL_KEY || "";
-  var paypalChannelKey = String(process.env.PAYPAL_CHANNEL_KEY || "").trim();
+  var paypalTestKey = String(process.env.PAYPAL_TEST_KEY || "").trim();
+  var paypalLiveKey = String(process.env.PAYPAL_CHANNEL_KEY || "").trim();
+  var paypalChannelKey = paypalTestKey || paypalLiveKey;
   var impCode = String(
     process.env.PORTONE_IMP_CODE ||
       process.env.IMP_CODE ||
@@ -76,6 +78,7 @@ async function sendPaymentConfig(res) {
       storeId: storeId,
       channelKey: channelKey,
       paypalChannelKey: paypalChannelKey || null,
+      paypalSandbox: !!paypalTestKey,
       impCode: impCode || null,
       krwPerUsd: krwPerUsd,
       enabledMethods: resolveEnabledPaymentMethods(),
