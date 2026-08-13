@@ -252,5 +252,8 @@
     },
   };
 
+  if (document.body) {
+    applyLanguage(getSavedLanguage());
+  }
   document.addEventListener("DOMContentLoaded", initLanguageSwitch);
 })();

@@ -33,7 +33,7 @@
     </script>
     <script src="js/nav-hero.js" defer></script>
     <script src="js/mobile-nav.js" defer></script>
-    <script src="js/site-language.js" defer></script>
+    <script src="js/site-language.js?v=2" defer></script>
     <!-- PortOne v2 Browser SDK -->
     <script src="https://cdn.portone.io/v2/browser-sdk.js"></script>
     <script src="js/payment-portone-flow.js?v=6"></script>
@@ -666,10 +666,19 @@
       <script src="js/payment-methods.js?v=8"></script>
       <script>
         document.addEventListener("DOMContentLoaded", function () {
-          var siteLang =
-            (document.body &&
-              document.body.getAttribute("data-site-language")) ||
-            "kr";
+          var siteLang = "kr";
+          try {
+            if (localStorage.getItem("graffordPreferredLanguage") === "en") {
+              siteLang = "en";
+            }
+          } catch (_lang) {}
+          if (
+            siteLang !== "en" &&
+            document.body &&
+            document.body.getAttribute("data-site-language") === "en"
+          ) {
+            siteLang = "en";
+          }
           if (siteLang === "en") {
             return;
           }
@@ -2201,10 +2210,29 @@
       <script src="js/payment-methods.js?v=8"></script>
       <script>
         document.addEventListener("DOMContentLoaded", function () {
-          var siteLang =
-            (document.body &&
-              document.body.getAttribute("data-site-language")) ||
-            "kr";
+          var siteLang = "kr";
+          try {
+            if (localStorage.getItem("graffordPreferredLanguage") === "en") {
+              siteLang = "en";
+            }
+          } catch (_lang) {}
+          if (
+            siteLang !== "en" &&
+            document.body &&
+            document.body.getAttribute("data-site-language") === "en"
+          ) {
+            siteLang = "en";
+          }
+          try {
+            if (siteLang !== "en") {
+              var savedLocale = JSON.parse(
+                sessionStorage.getItem("graffordPaymentData") || "null",
+              );
+              if (savedLocale && savedLocale.bookingLocale === "en") {
+                siteLang = "en";
+              }
+            }
+          } catch (_bl) {}
           if (siteLang !== "en") {
             return;
           }
