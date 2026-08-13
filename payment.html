@@ -39,7 +39,7 @@
     <script src="js/nav-hero.js" defer></script>
     <script src="js/mobile-nav.js" defer></script>
     <script src="js/site-language.js?v=2" defer></script>
-    <!-- PortOne v2 Browser SDK (국문 KG이니시스) + V1 SDK (영문 PayPal Express Checkout) -->
+    <!-- PortOne v2 Browser SDK (KG이니시스) + V1 SDK (PayPal Express Checkout, 영문 미사용·코드 유지) -->
     <script src="https://cdn.portone.io/v2/browser-sdk.js"></script>
     <script src="https://cdn.iamport.kr/v1/iamport.js"></script>
     <script src="js/payment-portone-flow.js?v=7"></script>
@@ -1900,13 +1900,12 @@
                 <div class="payment-side-card payment-side-card--payrow">
                   <span class="payment-side-payrow__k">PAYMENT</span>
                   <span class="payment-side-payrow__v" id="pay-en-side-method"
-                    >PayPal</span
+                    >Credit card</span
                   >
                   <button
                     type="button"
                     id="pay-en-method-drawer-open"
                     class="payment-side-payrow__change"
-                    hidden
                   >
                     Change
                   </button>
@@ -1924,7 +1923,7 @@
                     id="payment-submit-btn-en"
                     class="btn reserve-btn confirm-pay-submit reserveinfo-submit-btn payment-submit-cta"
                   >
-                    Continue to PayPal
+                    Pay now
                   </button>
                   <div
                     id="paypal-button-wrap-en"
@@ -2331,11 +2330,23 @@
               ? P.computeGuestCount(room, extraGuests)
               : 2 + extraGuests;
           }
-          /* English checkout uses PayPal only (KG Inicis is KR-only). */
+          /* English checkout uses KG Inicis (same as Korean).
+             Set true to restore PayPal Express Checkout without deleting its code. */
+          var ENGLISH_CHECKOUT_USE_PAYPAL = false;
           var GPM = window.GraffordPaymentMethods;
           var paymentConfig = null;
           var paypalUsdCents = 0;
-          var payMethod = "paypal";
+          var payMethod;
+          if (ENGLISH_CHECKOUT_USE_PAYPAL) {
+            payMethod = "paypal";
+          } else {
+            payMethod = GPM
+              ? GPM.normalizeMethodId(saved.payMethod || "card")
+              : "card";
+            if (payMethod === "paypal") {
+              payMethod = "card";
+            }
+          }
           saved.payMethod = payMethod;
           try {
             sessionStorage.setItem(
@@ -2696,10 +2707,12 @@
             setText("pay-en-payment-method", pmLabel);
             setText("pay-en-side-method", pmLabel);
             if (submitBtn) {
-              submitBtn.textContent = "Continue to PayPal →";
+              submitBtn.textContent = ENGLISH_CHECKOUT_USE_PAYPAL
+                ? "Continue to PayPal →"
+                : "Pay now →";
             }
             if (drawerEnOpen) {
-              drawerEnOpen.hidden = true;
+              drawerEnOpen.hidden = !!ENGLISH_CHECKOUT_USE_PAYPAL;
             }
           }
 
@@ -2803,9 +2816,24 @@
               var cfgRes = await fetch("/api/payment-confirm");
               if (cfgRes.ok) {
                 paymentConfig = applyPaymentConfig(await cfgRes.json());
-                payMethod = "paypal";
-                saved.payMethod = payMethod;
-                persistSavedEn();
+                if (ENGLISH_CHECKOUT_USE_PAYPAL) {
+                  payMethod = "paypal";
+                  saved.payMethod = payMethod;
+                  persistSavedEn();
+                } else if (GPM && paymentConfig) {
+                  var methodCheckEn = GPM.validateMethodForCheckout(
+                    payMethod,
+                    paymentConfig,
+                  );
+                  if (methodCheckEn.methodId === "paypal") {
+                    methodCheckEn.methodId = "card";
+                  }
+                  if (methodCheckEn.methodId !== payMethod) {
+                    payMethod = methodCheckEn.methodId;
+                    saved.payMethod = payMethod;
+                    persistSavedEn();
+                  }
+                }
               }
             } catch (_cfg) {}
             syncPaymentDrawerEn();
@@ -2851,18 +2879,20 @@
             );
             setText("pay-en-side-order", orderNo);
             setText("pay-en-side-total", formatKrwEn(finalAmount));
-            if (GPM && paymentConfig && paymentConfig.krwPerUsd) {
+            var fxEl = document.getElementById("pay-en-paypal-fx");
+            if (ENGLISH_CHECKOUT_USE_PAYPAL && GPM && paymentConfig && paymentConfig.krwPerUsd) {
               paypalUsdCents = GPM.krwToUsdCents(
                 finalAmount,
                 paymentConfig.krwPerUsd,
               );
-              var fxEl = document.getElementById("pay-en-paypal-fx");
               if (fxEl && paypalUsdCents) {
                 fxEl.hidden = false;
                 fxEl.textContent =
                   "Charged in USD via PayPal: " +
                   GPM.formatUsdFromCents(paypalUsdCents);
               }
+            } else if (fxEl) {
+              fxEl.hidden = true;
             }
 
             refreshPaymentMethodUiEn();
@@ -2899,7 +2929,10 @@
               GPM: GPM,
               orderNo: orderNo,
               finalAmount: finalAmount,
-              expectedAmount: paypalUsdCents || finalAmount,
+              expectedAmount:
+                ENGLISH_CHECKOUT_USE_PAYPAL && paypalUsdCents
+                  ? paypalUsdCents
+                  : finalAmount,
               payMethod: payMethod,
               saved: saved,
               preSavedCancelToken: preSavedCancelToken,
@@ -3122,144 +3155,291 @@
               return;
             }
             config = applyPaymentConfig(config);
-            payMethod = "paypal";
-            saved.payMethod = payMethod;
-            persistSavedEn();
-            refreshPaymentMethodUiEn();
+
+            if (ENGLISH_CHECKOUT_USE_PAYPAL) {
+              payMethod = "paypal";
+              saved.payMethod = payMethod;
+              persistSavedEn();
+              refreshPaymentMethodUiEn();
+
+              var checkoutMethodPaypal = GPM
+                ? GPM.validateMethodForCheckout(payMethod, config)
+                : { ok: false, errorEn: "PayPal is not available." };
+              if (!checkoutMethodPaypal.ok) {
+                showError(
+                  checkoutMethodPaypal.errorEn || checkoutMethodPaypal.errorKr,
+                );
+                return;
+              }
+
+              var paypalChannelKey = GPM
+                ? GPM.resolveActiveChannelKey(payMethod, config)
+                : config.paypalChannelKey;
+
+              if (!config.storeId || !paypalChannelKey) {
+                showError(
+                  "PayPal is not configured yet. Please contact support.",
+                );
+                return;
+              }
+
+              paypalUsdCents = GPM
+                ? GPM.krwToUsdCents(finalAmount, config.krwPerUsd)
+                : 0;
+              if (!paypalUsdCents) {
+                showError(
+                  "Unable to convert the amount to USD. Please try again.",
+                );
+                return;
+              }
+
+              if (processingMsg) processingMsg.hidden = true;
+
+              var orderNamePaypal =
+                "GRAFFORD Stay Reservation (" +
+                (ROOM_LABELS[room] || room) +
+                ")";
+              var portoneFlowPaypal = window.GraffordPortoneFlow;
+              var paypalRedirectUrl = buildPortoneRedirectUrlEn();
+              var paypalCtx = {
+                orderNo: orderNo,
+                orderName: orderNamePaypal,
+                totalAmount: paypalUsdCents,
+                usdAmountCents: paypalUsdCents,
+                checkIn: checkIn,
+                checkOut: checkOut,
+                customer: {
+                  fullName: guestName || undefined,
+                  phoneNumber: contact || undefined,
+                  email: email || undefined,
+                },
+                locale: "EN_US",
+                redirectUrl: paypalRedirectUrl,
+                noticeUrls: [portoneWebhookApiUrl()],
+              };
+              var paypalWrap = document.getElementById("paypal-button-wrap-en");
+              if (paypalWrap) paypalWrap.hidden = true;
+              if (submitBtn) submitBtn.hidden = false;
+
+              var imp = window.IMP;
+              var canUseExpressV1 =
+                config.impCode &&
+                imp &&
+                typeof imp.request_pay === "function" &&
+                GPM.buildPaypalExpressCheckoutParams;
+
+              if (canUseExpressV1) {
+                try {
+                  if (!window.__graffordImpInited) {
+                    imp.init(config.impCode);
+                    window.__graffordImpInited = true;
+                  }
+                } catch (initErr) {
+                  showError(
+                    "PayPal could not start. Check PORTONE_IMP_CODE (PortOne Console → Payment integration → Merchant ID, e.g. imp00000000).\n" +
+                      (initErr && initErr.message
+                        ? initErr.message
+                        : String(initErr)),
+                  );
+                  return;
+                }
+
+                var v1Params = GPM.buildPaypalExpressCheckoutParams(
+                  paypalCtx,
+                  config,
+                );
+                showPageLoading("Opening PayPal...");
+                imp.request_pay(v1Params, function (rsp) {
+                  var mapped = portoneFlowPaypal
+                    ? portoneFlowPaypal.mapIamportCallbackToPortoneResult(rsp)
+                    : {
+                        paymentId: rsp && rsp.merchant_uid,
+                        txId: rsp && rsp.imp_uid,
+                        code:
+                          rsp && rsp.success === false
+                            ? rsp.error_code || "FAILED"
+                            : undefined,
+                        message: rsp && rsp.error_msg,
+                      };
+                  if (!mapped || mapped.code) {
+                    hidePageLoading();
+                    resetPaymentGuard();
+                    var failMsg =
+                      (mapped && mapped.message) || "Payment was cancelled";
+                    if (/security header is not valid/i.test(failMsg)) {
+                      failMsg =
+                        "PayPal rejected the API credentials on this PortOne channel (error 10002).\n" +
+                        "In PortOne Console → the live PayPal Express Checkout channel:\n" +
+                        "1) Mode must be Live (실 연동).\n" +
+                        "2) API Username / Password / Signature must come from paypal.com → Account settings → API access → NVP/SOAP (Classic).\n" +
+                        "Do not paste sandbox keys or REST Client ID/Secret.";
+                    }
+                    showError(failMsg);
+                    return;
+                  }
+                  if (portoneFlowPaypal) {
+                    portoneFlowPaypal.finalizePortoneCheckout(
+                      buildPortoneFinalizeOptionsEn(mapped),
+                    );
+                  }
+                });
+                return;
+              }
+
+              var portonePaypal = window.PortOne;
+              if (
+                !portonePaypal ||
+                typeof portonePaypal.requestPayment !== "function"
+              ) {
+                showError(
+                  "PayPal Express Checkout needs the PortOne merchant ID.\nAdd PORTONE_IMP_CODE (PortOne Console → Payment integration → Merchant ID, e.g. imp00000000) to .env and Vercel, then retry.",
+                );
+                return;
+              }
+
+              var paypalPortoneParams = GPM.buildPortoneParams(
+                payMethod,
+                paypalCtx,
+                config,
+              );
+              if (
+                portoneFlowPaypal &&
+                portoneFlowPaypal.enhancePortoneRequestParams
+              ) {
+                paypalPortoneParams =
+                  portoneFlowPaypal.enhancePortoneRequestParams(
+                    paypalPortoneParams,
+                  );
+              }
+
+              var paypalResponse;
+              try {
+                paypalResponse =
+                  await portonePaypal.requestPayment(paypalPortoneParams);
+              } catch (e) {
+                var rawErr = e && e.message ? e.message : String(e);
+                showError(
+                  /PG_PROVIDER_PAYPAL|not supported|지원하지/.test(rawErr)
+                    ? "PayPal Express Checkout needs the PortOne V1 merchant ID.\nAdd PORTONE_IMP_CODE (PortOne Console → Payment integration → Merchant ID, e.g. imp00000000) to .env and Vercel, then retry.\n(" +
+                        rawErr +
+                        ")"
+                    : "An error occurred while opening PayPal.\nError: " +
+                        rawErr,
+                );
+                return;
+              }
+
+              if (
+                portoneFlowPaypal &&
+                portoneFlowPaypal.isRedirectDeferredResponse(
+                  paypalResponse,
+                  paypalPortoneParams,
+                )
+              ) {
+                showPageLoading(
+                  "Opening PayPal. You will return here after payment...",
+                );
+                return;
+              }
+
+              if (!paypalResponse || paypalResponse.code) {
+                showError(
+                  (paypalResponse &&
+                    (paypalResponse.message || paypalResponse.pgMessage)) ||
+                    "Payment was cancelled",
+                );
+                return;
+              }
+
+              if (portoneFlowPaypal) {
+                await portoneFlowPaypal.finalizePortoneCheckout(
+                  buildPortoneFinalizeOptionsEn(paypalResponse),
+                );
+              }
+              return;
+            }
 
             var checkoutMethod = GPM
               ? GPM.validateMethodForCheckout(payMethod, config)
-              : { ok: false, errorEn: "PayPal is not available." };
+              : { ok: true, methodId: "card" };
             if (!checkoutMethod.ok) {
               showError(checkoutMethod.errorEn || checkoutMethod.errorKr);
               return;
             }
+            payMethod = checkoutMethod.methodId;
+            if (payMethod === "paypal") {
+              payMethod = "card";
+            }
+            saved.payMethod = payMethod;
+            persistSavedEn();
+            refreshPaymentMethodUiEn();
 
             var activeChannelKey = GPM
               ? GPM.resolveActiveChannelKey(payMethod, config)
-              : config.paypalChannelKey;
+              : config.channelKey;
 
             if (!config.storeId || !activeChannelKey) {
               showError(
-                "PayPal is not configured yet. Please contact support.",
-              );
-              return;
-            }
-
-            paypalUsdCents = GPM
-              ? GPM.krwToUsdCents(finalAmount, config.krwPerUsd)
-              : 0;
-            if (!paypalUsdCents) {
-              showError(
-                "Unable to convert the amount to USD. Please try again.",
+                GPM && GPM.isEasyPayMethodId(payMethod)
+                  ? paymentMethodLabelEn(payMethod) +
+                      " is not configured yet. Please pay with a credit card."
+                  : "Payment is not configured correctly. Please contact support.",
               );
               return;
             }
 
             if (processingMsg) processingMsg.hidden = true;
 
-            var orderNameEn =
-              "GRAFFORD Stay Reservation (" + (ROOM_LABELS[room] || room) + ")";
-            var portoneFlowEn = window.GraffordPortoneFlow;
-            var portoneRedirectUrl = buildPortoneRedirectUrlEn();
-            var paypalCtx = {
-              orderNo: orderNo,
-              orderName: orderNameEn,
-              totalAmount: paypalUsdCents,
-              usdAmountCents: paypalUsdCents,
-              checkIn: checkIn,
-              checkOut: checkOut,
-              customer: {
-                fullName: guestName || undefined,
-                phoneNumber: contact || undefined,
-                email: email || undefined,
-              },
-              locale: "EN_US",
-              redirectUrl: portoneRedirectUrl,
-              noticeUrls: [portoneWebhookApiUrl()],
-            };
-            var paypalWrap = document.getElementById("paypal-button-wrap-en");
-            if (paypalWrap) paypalWrap.hidden = true;
-            if (submitBtn) submitBtn.hidden = false;
-
-            var imp = window.IMP;
-            var canUseExpressV1 =
-              config.impCode &&
-              imp &&
-              typeof imp.request_pay === "function" &&
-              GPM.buildPaypalExpressCheckoutParams;
-
-            if (canUseExpressV1) {
-              try {
-                if (!window.__graffordImpInited) {
-                  imp.init(config.impCode);
-                  window.__graffordImpInited = true;
-                }
-              } catch (initErr) {
-                showError(
-                  "PayPal could not start. Check PORTONE_IMP_CODE (PortOne Console → Payment integration → Merchant ID, e.g. imp00000000).\n" +
-                    (initErr && initErr.message
-                      ? initErr.message
-                      : String(initErr)),
-                );
-                return;
-              }
-
-              var v1Params = GPM.buildPaypalExpressCheckoutParams(
-                paypalCtx,
-                config,
-              );
-              showPageLoading("Opening PayPal...");
-              imp.request_pay(v1Params, function (rsp) {
-                var mapped = portoneFlowEn
-                  ? portoneFlowEn.mapIamportCallbackToPortoneResult(rsp)
-                  : {
-                      paymentId: rsp && rsp.merchant_uid,
-                      txId: rsp && rsp.imp_uid,
-                      code:
-                        rsp && rsp.success === false
-                          ? rsp.error_code || "FAILED"
-                          : undefined,
-                      message: rsp && rsp.error_msg,
-                    };
-                if (!mapped || mapped.code) {
-                  hidePageLoading();
-                  resetPaymentGuard();
-                  var failMsg =
-                    (mapped && mapped.message) || "Payment was cancelled";
-                  if (/security header is not valid/i.test(failMsg)) {
-                    failMsg =
-                      "PayPal rejected the API credentials on this PortOne channel (error 10002).\n" +
-                      "In PortOne Console → the live PayPal Express Checkout channel:\n" +
-                      "1) Mode must be Live (실 연동).\n" +
-                      "2) API Username / Password / Signature must come from paypal.com → Account settings → API access → NVP/SOAP (Classic).\n" +
-                      "Do not paste sandbox keys or REST Client ID/Secret.";
-                  }
-                  showError(failMsg);
-                  return;
-                }
-                if (portoneFlowEn) {
-                  portoneFlowEn.finalizePortoneCheckout(
-                    buildPortoneFinalizeOptionsEn(mapped),
-                  );
-                }
-              });
-              return;
-            }
-
             var portone = window.PortOne;
             if (!portone || typeof portone.requestPayment !== "function") {
               showError(
-                "PayPal Express Checkout needs the PortOne merchant ID.\nAdd PORTONE_IMP_CODE (PortOne Console → Payment integration → Merchant ID, e.g. imp00000000) to .env and Vercel, then retry.",
+                "Payment module could not be loaded. Please refresh and try again.",
               );
               return;
             }
 
-            var portoneParams = GPM.buildPortoneParams(
-              payMethod,
-              paypalCtx,
-              config,
-            );
+            var orderNameEn =
+              "GRAFFORD Stay Reservation (" + (ROOM_LABELS[room] || room) + ")";
+            var portoneRedirectUrl = buildPortoneRedirectUrlEn();
+            var portoneFlowEn = window.GraffordPortoneFlow;
+            var portoneParams = GPM
+              ? GPM.buildPortoneParams(
+                  payMethod,
+                  {
+                    orderNo: orderNo,
+                    orderName: orderNameEn,
+                    totalAmount: finalAmount,
+                    checkOut: checkOut,
+                    customer: {
+                      fullName: guestName || undefined,
+                      phoneNumber: contact || undefined,
+                      email: email || undefined,
+                    },
+                    locale: "EN_US",
+                    redirectUrl: portoneRedirectUrl,
+                    confirmUrl: portoneWebhookApiUrl(),
+                    noticeUrls: [portoneWebhookApiUrl()],
+                  },
+                  config,
+                )
+              : {
+                  storeId: config.storeId,
+                  channelKey: activeChannelKey,
+                  paymentId: orderNo,
+                  orderName: orderNameEn,
+                  totalAmount: finalAmount,
+                  currency: "KRW",
+                  payMethod: "CARD",
+                  customer: {
+                    fullName: guestName || undefined,
+                    phoneNumber: contact || undefined,
+                    email: email || undefined,
+                  },
+                  locale: "EN_US",
+                  redirectUrl: portoneRedirectUrl,
+                  confirmUrl: portoneWebhookApiUrl(),
+                  noticeUrls: [portoneWebhookApiUrl()],
+                };
             if (portoneFlowEn && portoneFlowEn.enhancePortoneRequestParams) {
               portoneParams = portoneFlowEn.enhancePortoneRequestParams(
                 portoneParams,
@@ -3270,13 +3450,9 @@
             try {
               response = await portone.requestPayment(portoneParams);
             } catch (e) {
-              var rawErr = e && e.message ? e.message : String(e);
               showError(
-                /PG_PROVIDER_PAYPAL|not supported|지원하지/.test(rawErr)
-                  ? "PayPal Express Checkout needs the PortOne V1 merchant ID.\nAdd PORTONE_IMP_CODE (PortOne Console → Payment integration → Merchant ID, e.g. imp00000000) to .env and Vercel, then retry.\n(" +
-                      rawErr +
-                      ")"
-                  : "An error occurred while opening PayPal.\nError: " + rawErr,
+                "An error occurred while opening the payment window.\nError: " +
+                  (e && e.message ? e.message : String(e)),
               );
               return;
             }
@@ -3289,16 +3465,13 @@
               )
             ) {
               showPageLoading(
-                "Opening PayPal. You will return here after payment...",
+                "Opening the payment window. You will return here after payment...",
               );
               return;
             }
 
             if (!response || response.code) {
-              showError(
-                (response && (response.message || response.pgMessage)) ||
-                  "Payment was cancelled",
-              );
+              showError("Payment was cancelled");
               return;
             }
 
