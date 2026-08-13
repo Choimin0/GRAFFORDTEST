@@ -9,7 +9,7 @@
   var ALLOWED_PATH_RE =
     /(?:^|\/)(?:confirm|payment)\.html(?:[?#].*)?$/i;
   var PORTONE_GATEWAY_HOST_RE =
-    /(?:^|\.)((?:inicis|portone|iamport|kcp|nicepay|tosspayments|kakaopay)\.)/i;
+    /(?:^|\.)((?:inicis|portone|iamport|kcp|nicepay|tosspayments|kakaopay|paypal)\.)/i;
   var allowCheckoutNavigationFn = null;
   var disallowCheckoutNavigationFn = null;
   var allowNavigateToPaymentFn = null;

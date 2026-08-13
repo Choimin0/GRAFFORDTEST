@@ -18,7 +18,7 @@ export function extractPortonePaidAmount(payment) {
   if (!Number.isFinite(actualAmount) || actualAmount < 0) {
     return null;
   }
-  return Math.floor(actualAmount);
+  return actualAmount;
 }
 
 export function extractPgTxIdFromPayment(payment) {

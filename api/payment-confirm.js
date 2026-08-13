@@ -17,17 +17,39 @@ import {
 } from "./_lib/portone-client.js";
 import {
   extractPaymentMethodFromPortonePayment,
+  normalizePaymentMethodId,
   resolveEnabledPaymentMethods,
   resolveVerifiedPaymentMethod,
 } from "./_lib/payment-methods.js";
+import { fetchKrwPerUsd } from "./_lib/fx-krw-usd.js";
 
-function sendPaymentConfig(res) {
+function normalizeUsdActualToExpected(actualAmount, expectedAmount) {
+  if (actualAmount == null || expectedAmount == null) {
+    return actualAmount;
+  }
+  var actual = Number(actualAmount);
+  var expected = Number(expectedAmount);
+  if (!Number.isFinite(actual) || !Number.isFinite(expected)) {
+    return actualAmount;
+  }
+  if (actual === expected) {
+    return actual;
+  }
+  var actualAsCents = Math.round(actual * 100);
+  if (actualAsCents === expected) {
+    return actualAsCents;
+  }
+  return actual;
+}
+
+async function sendPaymentConfig(res) {
   res.setHeader("Content-Type", "application/json");
   res.setHeader("Cache-Control", "no-store");
   res.setHeader("Access-Control-Allow-Origin", "*");
 
   var storeId = process.env.STORE_ID || "";
   var channelKey = process.env.CHANNEL_KEY || "";
+  var paypalChannelKey = String(process.env.PAYPAL_CHANNEL_KEY || "").trim();
 
   if (!storeId || !channelKey) {
     res.statusCode = 500;
@@ -40,11 +62,15 @@ function sendPaymentConfig(res) {
     return;
   }
 
+  var krwPerUsd = await fetchKrwPerUsd();
+
   res.statusCode = 200;
   res.end(
     JSON.stringify({
       storeId: storeId,
       channelKey: channelKey,
+      paypalChannelKey: paypalChannelKey || null,
+      krwPerUsd: krwPerUsd,
       enabledMethods: resolveEnabledPaymentMethods(),
     }),
   );
@@ -61,7 +87,7 @@ export default async function handler(req, res) {
   }
 
   if (req.method === "GET") {
-    sendPaymentConfig(res);
+    await sendPaymentConfig(res);
     return;
   }
 
@@ -165,8 +191,9 @@ export default async function handler(req, res) {
       }
     }
 
+    var requestedMethodId = normalizePaymentMethodId(requestedPaymentMethod);
     var paymentLookup = await fetchPortonePaymentUntilPaid(paymentId, {
-      maxAttempts: 15,
+      maxAttempts: requestedMethodId === "paypal" ? 30 : 15,
       delayMs: 1000,
     });
     if (!paymentLookup.ok) {
@@ -204,6 +231,12 @@ export default async function handler(req, res) {
     }
 
     var actualAmount = extractPortonePaidAmount(payment);
+    var paidCurrency = String(payment.currency || "")
+      .toUpperCase()
+      .replace(/^CURRENCY_/, "");
+    if (paidCurrency === "USD" || requestedMethodId === "paypal") {
+      actualAmount = normalizeUsdActualToExpected(actualAmount, expectedAmount);
+    }
     if (
       expectedAmount !== null &&
       actualAmount !== null &&

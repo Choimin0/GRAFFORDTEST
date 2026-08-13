@@ -53,6 +53,15 @@
       descKr: "토스페이 간편결제",
       descEn: "Pay with Toss Pay",
     },
+    paypal: {
+      id: "paypal",
+      category: "paypal",
+      portonePayMethod: null,
+      labelKr: "페이팔",
+      labelEn: "PayPal",
+      descKr: "해외 카드·페이팔 결제",
+      descEn: "Pay with PayPal or an international card",
+    },
   };
 
   function normalizeMethodId(raw) {
@@ -62,8 +71,28 @@
     if (id === "kakaopay") return "kakao";
     if (id === "tosspay") return "toss";
     if (id === "samsungpay") return "samsung";
+    if (id === "paypal") return "paypal";
     if (METHODS[id]) return id;
     return "card";
+  }
+
+  function isPaypalMethodId(methodId) {
+    return normalizeMethodId(methodId) === "paypal";
+  }
+
+  function krwToUsdCents(krwAmount, krwPerUsd) {
+    var krw = Number(krwAmount);
+    var rate = Number(krwPerUsd);
+    if (!Number.isFinite(krw) || krw <= 0 || !Number.isFinite(rate) || rate <= 0) {
+      return 0;
+    }
+    return Math.max(1, Math.round((krw / rate) * 100));
+  }
+
+  function formatUsdFromCents(cents) {
+    var n = Number(cents);
+    if (!Number.isFinite(n) || n <= 0) return "";
+    return "$" + (n / 100).toFixed(2);
   }
 
   function isEasyPayMethodId(methodId) {
@@ -123,7 +152,10 @@
     return !!(enabled.samsung || enabled.naver || enabled.kakao || enabled.toss);
   }
 
-  function resolveActiveChannelKey(_methodId, config) {
+  function resolveActiveChannelKey(methodId, config) {
+    if (normalizeMethodId(methodId) === "paypal") {
+      return (config && config.paypalChannelKey) || "";
+    }
     return (config && config.channelKey) || "";
   }
 
@@ -139,12 +171,103 @@
     ];
   }
 
+  function splitGuestName(fullName) {
+    var parts = String(fullName || "")
+      .trim()
+      .split(/\s+/);
+    if (!parts[0]) {
+      return { first: "Guest", last: "Guest" };
+    }
+    if (parts.length === 1) {
+      return { first: parts[0], last: "Guest" };
+    }
+    return { first: parts[0], last: parts.slice(1).join(" ") };
+  }
+
+  function buildPaypalStcData(ctx) {
+    var names = splitGuestName(ctx.customer && ctx.customer.fullName);
+    var checkIn = String(ctx.checkIn || "").trim();
+    var checkOut = String(ctx.checkOut || "").trim();
+    var rows = [
+      { key: "sender_account_id", value: String(ctx.orderNo || "") },
+      { key: "sender_first_name", value: names.first },
+      { key: "sender_last_name", value: names.last },
+      { key: "ota_type", value: "hotel" },
+      { key: "ota_start_country", value: "KR" },
+      { key: "ota_start_city", value: "Seogwipo" },
+      { key: "ota_start_zip_code", value: "63629" },
+      { key: "ota_service_guest_t_f", value: "0" },
+    ];
+    if (ctx.customer && ctx.customer.email) {
+      rows.push({ key: "sender_email", value: String(ctx.customer.email) });
+    }
+    if (ctx.customer && ctx.customer.phoneNumber) {
+      rows.push({
+        key: "sender_phone",
+        value: String(ctx.customer.phoneNumber),
+      });
+    }
+    if (checkIn) {
+      rows.push({ key: "ota_service_start_date", value: checkIn });
+    }
+    if (checkOut) {
+      rows.push({ key: "ota_service_end_date", value: checkOut });
+    }
+    return rows;
+  }
+
   /**
-   * PortOne requestPayment 파라미터 생성.
-   * card → KG이니시스 통합결제창(CARD), 간편결제 → EASY_PAY + easyPayProvider
+   * PortOne requestPayment / loadPaymentUI 파라미터 생성.
+   * card → KG이니시스 통합결제창(CARD), 간편결제 → EASY_PAY
+   * paypal → PayPal SPB (USD, loadPaymentUI)
    */
   function buildPortoneParams(methodId, ctx, config) {
     var id = normalizeMethodId(methodId);
+    if (id === "paypal") {
+      var usdCents =
+        ctx.usdAmountCents != null
+          ? Number(ctx.usdAmountCents)
+          : Number(ctx.totalAmount);
+      var names = splitGuestName(ctx.customer && ctx.customer.fullName);
+      var customer = Object.assign({}, ctx.customer || {}, {
+        firstName: names.first,
+        lastName: names.last,
+      });
+      if (!customer.fullName && names.first) {
+        customer.fullName =
+          names.last && names.last !== "Guest"
+            ? names.first + " " + names.last
+            : names.first;
+      }
+      var paypalParams = {
+        uiType: "PAYPAL_SPB",
+        storeId: config.storeId,
+        channelKey: resolveActiveChannelKey(id, config),
+        paymentId: ctx.orderNo,
+        orderName: ctx.orderName,
+        totalAmount: usdCents,
+        currency: "USD",
+        customer: customer,
+        locale: ctx.locale || "EN_US",
+        confirmUrl: ctx.confirmUrl,
+        noticeUrls: ctx.noticeUrls,
+        products: [
+          {
+            id: ctx.orderNo,
+            name: ctx.orderName,
+            amount: usdCents,
+            quantity: 1,
+          },
+        ],
+        bypass: {
+          paypal_v2: {
+            additional_data: buildPaypalStcData(ctx),
+          },
+        },
+      };
+      return paypalParams;
+    }
+
     var meta = METHODS[id] || METHODS.card;
     var channelKey = resolveActiveChannelKey(id, config);
     var params = {
@@ -185,6 +308,9 @@
       return { methodId: requested, pgPayProvider: null };
     }
     var verified = normalizeMethodId(verifyData.paymentMethod);
+    if (requested === "paypal" && (!verified || verified === "card")) {
+      verified = "paypal";
+    }
     return {
       methodId: verified || requested,
       pgPayProvider: verifyData.pgPayProvider || null,
@@ -230,6 +356,16 @@
     if (id === "card" && enabled.card) {
       return { ok: true, methodId: id };
     }
+    if (id === "paypal") {
+      if (config && config.paypalChannelKey) {
+        return { ok: true, methodId: "paypal" };
+      }
+      return {
+        ok: false,
+        errorKr: "페이팔 결제를 아직 이용할 수 없습니다.",
+        errorEn: "PayPal is not configured yet. Please contact support.",
+      };
+    }
     if (isEasyPayMethodId(id) && enabled[id]) {
       return { ok: true, methodId: id };
     }
@@ -251,6 +387,9 @@
     METHODS: METHODS,
     normalizeMethodId: normalizeMethodId,
     isEasyPayMethodId: isEasyPayMethodId,
+    isPaypalMethodId: isPaypalMethodId,
+    krwToUsdCents: krwToUsdCents,
+    formatUsdFromCents: formatUsdFromCents,
     getLabel: getLabel,
     getEnabledMethods: getEnabledMethods,
     resolvePagePaymentOptions: resolvePagePaymentOptions,

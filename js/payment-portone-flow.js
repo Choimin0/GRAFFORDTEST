@@ -66,7 +66,7 @@
   }
 
   var PORTONE_GATEWAY_HOST_RE =
-    /(?:^|\.)((?:inicis|portone|iamport|kcp|nicepay|tosspayments|kakaopay)\.)/i;
+    /(?:^|\.)((?:inicis|portone|iamport|kcp|nicepay|tosspayments|kakaopay|paypal)\.)/i;
 
   function isPortoneGatewayUrl(url) {
     try {
@@ -446,6 +446,8 @@
     var GPM = opts.GPM || null;
     var orderNo = opts.orderNo;
     var finalAmount = opts.finalAmount;
+    var expectedAmount =
+      opts.expectedAmount != null ? opts.expectedAmount : finalAmount;
     var payMethod = opts.payMethod;
     var saved = opts.saved || {};
     var preSavedCancelToken = opts.preSavedCancelToken || "";
@@ -499,7 +501,7 @@
       var verifyOutcome = await verifyPortonePaymentWithRetry(
         {
           paymentId: response.paymentId,
-          expectedAmount: finalAmount,
+          expectedAmount: expectedAmount,
           paymentToken: response.paymentToken || null,
           txId: response.txId || null,
           requestedPaymentMethod: payMethod,

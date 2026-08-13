@@ -1,7 +1,7 @@
 /**
  * 결제수단 레지스트리 (KG이니시스 / PortOne v2)
  *
- * payment_method (DB): card | samsung | naver | kakao | toss | bank
+ * payment_method (DB): card | samsung | naver | kakao | toss | paypal | bank
  * pg_pay_provider (DB): PortOne easyPayProvider 원문 (SAMSUNGPAY, NAVERPAY, …)
  */
 
@@ -11,6 +11,7 @@ export const PAYMENT_METHOD_IDS = [
   "naver",
   "kakao",
   "toss",
+  "paypal",
   "bank",
 ];
 
@@ -21,6 +22,8 @@ const PROVIDER_TO_METHOD = {
   NAVERPAY: "naver",
   KAKAOPAY: "kakao",
   TOSSPAY: "toss",
+  PAYPAL: "paypal",
+  PAYPAL_V2: "paypal",
 };
 
 const METHOD_TO_PROVIDER = {
@@ -42,6 +45,7 @@ export function normalizePaymentMethodId(raw) {
     .toLowerCase();
   if (id === "kakaopay") return "kakao";
   if (id === "tosspay") return "toss";
+  if (id === "paypal") return "paypal";
   if (id === "samsungpay") return "samsung";
   if (ALLOWED_PAY.has(id)) return id;
   return "";
@@ -64,6 +68,7 @@ export function resolvePaymentMethodLabel(methodId, locale) {
   if (id === "naver") return en ? "Naver Pay" : "네이버페이";
   if (id === "kakao") return en ? "Kakao Pay" : "카카오페이";
   if (id === "toss") return en ? "Toss Pay" : "토스페이";
+  if (id === "paypal") return en ? "PayPal" : "페이팔";
   if (id === "bank") return en ? "Bank transfer" : "무통장입금";
   return en ? "Unknown" : "결제수단 미확인";
 }
@@ -114,6 +119,13 @@ export function extractPaymentMethodFromPortonePayment(payment) {
     if (methodType === "PaymentMethodCard") {
       return { methodId: "card", pgPayProvider: null };
     }
+    if (
+      methodType === "PaymentMethodPaypal" ||
+      methodType === "PaymentMethodPayPal" ||
+      methodType === "PaymentMethodPayPalV2"
+    ) {
+      return { methodId: "paypal", pgPayProvider: "PAYPAL" };
+    }
   }
 
   var easyPay = payment.easyPay;
@@ -140,6 +152,18 @@ export function extractPaymentMethodFromPortonePayment(payment) {
       };
     }
   }
+  if (payMethod.indexOf("PAYPAL") >= 0) {
+    return { methodId: "paypal", pgPayProvider: "PAYPAL" };
+  }
+
+  var pgProvider = String(
+    payment.pgProvider ||
+      (payment.channel && payment.channel.pgProvider) ||
+      "",
+  ).toUpperCase();
+  if (pgProvider === "PAYPAL" || pgProvider === "PAYPAL_V2") {
+    return { methodId: "paypal", pgPayProvider: pgProvider };
+  }
 
   return { methodId: "card", pgPayProvider: null };
 }
@@ -152,6 +176,9 @@ export function resolveVerifiedPaymentMethod(verified, requestedMethodId) {
   var methodId = normalizePaymentMethodId(verified.methodId);
   if (!methodId) {
     methodId = requested;
+  }
+  if (requested === "paypal" && methodId === "card") {
+    methodId = "paypal";
   }
   return {
     methodId: methodId,

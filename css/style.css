@@ -8571,8 +8571,20 @@ main.content-section.confirm-page.payment-page > #payment-error-area-en {
   color: var(--stone-800);
 }
 
-.payment-side-actions {
-  margin: 0;
+.payment-paypal-box {
+  width: 100%;
+}
+
+.payment-paypal-box .portone-ui-container {
+  min-height: 48px;
+}
+
+.payment-paypal-fx-note {
+  margin: 0.4rem 0 0;
+  font-size: 0.72rem;
+  line-height: 1.4;
+  color: var(--stone-500);
+  text-align: right;
 }
 
 .payment-submit-cta {
