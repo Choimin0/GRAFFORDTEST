@@ -2861,10 +2861,7 @@
                 fxEl.hidden = false;
                 fxEl.textContent =
                   "Charged in USD via PayPal: " +
-                  GPM.formatUsdFromCents(paypalUsdCents) +
-                  (paymentConfig.paypalSandbox
-                    ? " (sandbox)"
-                    : "");
+                  GPM.formatUsdFromCents(paypalUsdCents);
               }
             }
 
@@ -3144,9 +3141,7 @@
 
             if (!config.storeId || !activeChannelKey) {
               showError(
-                config && config.paypalSandbox === false
-                  ? "PayPal sandbox is not configured. Add PAYPAL_TEST_KEY to Vercel environment variables and redeploy."
-                  : "PayPal is not configured yet. Please contact support.",
+                "PayPal is not configured yet. Please contact support.",
               );
               return;
             }
@@ -3234,11 +3229,11 @@
                     (mapped && mapped.message) || "Payment was cancelled";
                   if (/security header is not valid/i.test(failMsg)) {
                     failMsg =
-                      "PayPal sandbox rejected the API credentials on this PortOne channel (error 10002).\n" +
-                      "In PortOne Console → the PAYPAL_TEST_KEY channel:\n" +
-                      "1) Mode must be Test (not Live).\n" +
-                      "2) API Username / Password / Signature must come from developer.paypal.com → Sandbox → Business (DEFAULT) → API Credentials.\n" +
-                      "Do not paste live paypal.com keys or REST Client ID/Secret.";
+                      "PayPal rejected the API credentials on this PortOne channel (error 10002).\n" +
+                      "In PortOne Console → the live PayPal Express Checkout channel:\n" +
+                      "1) Mode must be Live (실 연동).\n" +
+                      "2) API Username / Password / Signature must come from paypal.com → Account settings → API access → NVP/SOAP (Classic).\n" +
+                      "Do not paste sandbox keys or REST Client ID/Secret.";
                   }
                   showError(failMsg);
                   return;

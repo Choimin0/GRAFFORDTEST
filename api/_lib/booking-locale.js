@@ -29,8 +29,9 @@ export function resolveEffectiveBookingLocale(bookingLocale, contact) {
 }
 
 /**
- * 카카오 알림톡 발송 대상 여부.
+ * 게스트 카카오 알림톡 발송 대상 여부.
  * 영문 예약(booking_locale=en) 또는 + 접두 국제 연락처(+82 제외)는 제외.
+ * 예약 확정 관리자 알림톡은 이와 무관하게 발송한다.
  */
 export function shouldSendAlimtalk(bookingLocale, contact) {
   return resolveEffectiveBookingLocale(bookingLocale, contact) !== "en";

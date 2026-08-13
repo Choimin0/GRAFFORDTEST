@@ -156,7 +156,8 @@ export async function handlePublicAlimtalkNotify(req, res, pool) {
       return true;
     }
     var pii = decryptBookingPiiResponse(row);
-    if (!shouldSendAlimtalk(row.booking_locale, pii.contact)) {
+    var skipGuest = !shouldSendAlimtalk(row.booking_locale, pii.contact);
+    if (skipGuest && type !== "reserve-complete") {
       json(res, 200, {
         ok: true,
         skipped: true,
@@ -193,14 +194,18 @@ export async function handlePublicAlimtalkNotify(req, res, pool) {
       return true;
     }
 
-    var sendResult = await sendBookingAlimtalk(type, {
-      guestName: pii.guestName,
-      contact: pii.contact,
-      reservationNumber: reservationNumber,
-      roomType: row.room_type,
-      checkIn: rowDateToYMD(row.check_in_date) || body.checkIn || "",
-      checkOut: rowDateToYMD(row.check_out_date) || body.checkOut || "",
-    });
+    var sendResult = await sendBookingAlimtalk(
+      type,
+      {
+        guestName: pii.guestName,
+        contact: pii.contact,
+        reservationNumber: reservationNumber,
+        roomType: row.room_type,
+        checkIn: rowDateToYMD(row.check_in_date) || body.checkIn || "",
+        checkOut: rowDateToYMD(row.check_out_date) || body.checkOut || "",
+      },
+      { skipGuest: skipGuest },
+    );
 
     if (sendResult.skipped) {
       json(res, 200, {
@@ -218,7 +223,12 @@ export async function handlePublicAlimtalkNotify(req, res, pool) {
       return true;
     }
 
-    json(res, 200, { ok: true, sent: true });
+    json(res, 200, {
+      ok: true,
+      sent: true,
+      guestSkipped: !!sendResult.guestSkipped,
+      adminSent: sendResult.adminSent === true,
+    });
   } catch (e) {
     console.error("alimtalk-notify handler", e);
     json(res, 500, {

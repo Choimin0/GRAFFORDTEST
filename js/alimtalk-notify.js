@@ -52,17 +52,21 @@
     return String(bookingLocale || "").toLowerCase() === "en" ? "en" : "kr";
   }
 
-  function shouldSkipAlimtalk(payload) {
+  function shouldSkipAlimtalk(type, payload) {
     if (!payload) {
       return false;
     }
     if (payload.skipAlimtalk === true) {
       return true;
     }
-    return (
+    var isEn =
       resolveEffectiveBookingLocale(payload.bookingLocale, payload.contact) ===
-      "en"
-    );
+      "en";
+    if (!isEn) {
+      return false;
+    }
+    // 영문 예약 확정은 서버에서 관리자 알림톡만 발송하므로 API는 호출한다.
+    return type !== "reserve-complete";
   }
 
   function requestAlimtalk(type, payload) {
@@ -70,7 +74,7 @@
     if (!orderNo) {
       return Promise.resolve({ ok: false, skipped: true });
     }
-    if (shouldSkipAlimtalk(payload)) {
+    if (shouldSkipAlimtalk(type, payload)) {
       return Promise.resolve({ ok: true, skipped: true, reason: "english_booking" });
     }
     var key = storageKey(type, orderNo);

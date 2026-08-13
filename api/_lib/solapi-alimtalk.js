@@ -195,8 +195,12 @@ async function sendAlimtalkToPhone(messageService, config, templateId, variables
  *   checkIn: string,
  *   checkOut: string,
  * }} payload
+ * @param {{ skipGuest?: boolean }} [options]
+ *   skipGuest: 게스트에게는 보내지 않고, reserve-complete/cancel-complete 관리자 알림만 발송
  */
-export async function sendBookingAlimtalk(type, payload) {
+export async function sendBookingAlimtalk(type, payload, options) {
+  options = options || {};
+  var skipGuest = options.skipGuest === true;
   var config = getSolapiConfig();
   var templateId =
     type === "cancel-complete"
@@ -211,7 +215,7 @@ export async function sendBookingAlimtalk(type, payload) {
   }
 
   var to = normalizePhone(payload && payload.contact);
-  if (!isValidKrMobile(to)) {
+  if (!skipGuest && !isValidKrMobile(to)) {
     return { ok: false, skipped: true, error: "Invalid contact number" };
   }
 
@@ -225,20 +229,27 @@ export async function sendBookingAlimtalk(type, payload) {
   }
 
   var messageService = getMessageService(config);
-  var guestResult = await sendAlimtalkToPhone(
-    messageService,
-    config,
-    templateId,
-    variables,
-    to,
-  );
+  var guestResult = { ok: true, skipped: true, reason: "guest_skipped" };
+  if (!skipGuest) {
+    guestResult = await sendAlimtalkToPhone(
+      messageService,
+      config,
+      templateId,
+      variables,
+      to,
+    );
+  }
 
   if (!shouldNotifyAdmin(type)) {
     return guestResult;
   }
 
   var adminPhone = config.adminPhone;
-  if (!adminPhone || !isValidKrMobile(adminPhone) || adminPhone === to) {
+  if (
+    !adminPhone ||
+    !isValidKrMobile(adminPhone) ||
+    (!skipGuest && adminPhone === to)
+  ) {
     return guestResult;
   }
 
@@ -255,17 +266,29 @@ export async function sendBookingAlimtalk(type, payload) {
       type,
       adminResult.error,
     );
+    if (skipGuest) {
+      return {
+        ok: false,
+        skipped: false,
+        guestSkipped: true,
+        adminSent: false,
+        error: adminResult.error || "관리자 알림톡 발송에 실패했습니다.",
+      };
+    }
   }
 
   return Object.assign({}, guestResult, {
+    ok: skipGuest ? adminResult.ok === true : guestResult.ok,
+    skipped: skipGuest ? false : guestResult.skipped,
+    guestSkipped: skipGuest === true,
     adminSent: adminResult.ok === true,
     adminError: adminResult.ok ? null : adminResult.error || null,
   });
 }
 
 /** API 응답을 막지 않도록 백그라운드 발송 (관리자 취소 등) */
-export function queueBookingAlimtalk(type, payload) {
-  sendBookingAlimtalk(type, payload).catch(function (err) {
+export function queueBookingAlimtalk(type, payload, options) {
+  sendBookingAlimtalk(type, payload, options).catch(function (err) {
     console.error("queueBookingAlimtalk", type, err);
   });
 }
