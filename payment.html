@@ -14,11 +14,16 @@
           if (sessionStorage.getItem("graffordCheckoutBlocked") === "1") {
             var hasPortoneReturn = false;
             try {
-              if (new URLSearchParams(location.search || "").get("paymentId")) {
+              var qs = new URLSearchParams(location.search || "");
+              if (qs.get("paymentId") || qs.get("merchant_uid") || qs.get("imp_uid")) {
                 hasPortoneReturn = true;
               } else {
                 var hash = String(location.hash || "");
-                if (hash.indexOf("paymentId=") >= 0) {
+                if (
+                  hash.indexOf("paymentId=") >= 0 ||
+                  hash.indexOf("merchant_uid=") >= 0 ||
+                  hash.indexOf("imp_uid=") >= 0
+                ) {
                   hasPortoneReturn = true;
                 }
               }
@@ -34,11 +39,12 @@
     <script src="js/nav-hero.js" defer></script>
     <script src="js/mobile-nav.js" defer></script>
     <script src="js/site-language.js?v=2" defer></script>
-    <!-- PortOne v2 Browser SDK -->
+    <!-- PortOne v2 Browser SDK (국문 KG이니시스) + V1 SDK (영문 PayPal Express Checkout) -->
     <script src="https://cdn.portone.io/v2/browser-sdk.js"></script>
-    <script src="js/payment-portone-flow.js?v=6"></script>
+    <script src="https://cdn.iamport.kr/v1/iamport.js"></script>
+    <script src="js/payment-portone-flow.js?v=7"></script>
     <script src="js/booking-token-client.js?v=5"></script>
-    <script src="js/booking-checkout-guard.js?v=16"></script>
+    <script src="js/booking-checkout-guard.js?v=17"></script>
     <!--
       KG이니시스(PortOne) 결제수단 노출 설정
       true → 결제수단 drawer에 표시 · false → 숨김
@@ -663,7 +669,7 @@
       </div>
 
       <script src="js/booking-pricing.js?v=7"></script>
-      <script src="js/payment-methods.js?v=8"></script>
+      <script src="js/payment-methods.js?v=9"></script>
       <script>
         document.addEventListener("DOMContentLoaded", function () {
           var siteLang = "kr";
@@ -2207,7 +2213,7 @@
       </div>
 
       <script src="js/booking-pricing.js?v=7"></script>
-      <script src="js/payment-methods.js?v=8"></script>
+      <script src="js/payment-methods.js?v=9"></script>
       <script>
         document.addEventListener("DOMContentLoaded", function () {
           var siteLang = "kr";
@@ -3152,69 +3158,145 @@
 
             if (processingMsg) processingMsg.hidden = true;
 
+            var orderNameEn =
+              "GRAFFORD Stay Reservation (" + (ROOM_LABELS[room] || room) + ")";
+            var portoneFlowEn = window.GraffordPortoneFlow;
+            var portoneRedirectUrl = buildPortoneRedirectUrlEn();
+            var paypalCtx = {
+              orderNo: orderNo,
+              orderName: orderNameEn,
+              totalAmount: paypalUsdCents,
+              usdAmountCents: paypalUsdCents,
+              checkIn: checkIn,
+              checkOut: checkOut,
+              customer: {
+                fullName: guestName || undefined,
+                phoneNumber: contact || undefined,
+                email: email || undefined,
+              },
+              locale: "EN_US",
+              redirectUrl: portoneRedirectUrl,
+              noticeUrls: [portoneWebhookApiUrl()],
+            };
+            var paypalWrap = document.getElementById("paypal-button-wrap-en");
+            if (paypalWrap) paypalWrap.hidden = true;
+            if (submitBtn) submitBtn.hidden = false;
+
+            var imp = window.IMP;
+            var canUseExpressV1 =
+              config.impCode &&
+              imp &&
+              typeof imp.request_pay === "function" &&
+              GPM.buildPaypalExpressCheckoutParams;
+
+            if (canUseExpressV1) {
+              try {
+                if (!window.__graffordImpInited) {
+                  imp.init(config.impCode);
+                  window.__graffordImpInited = true;
+                }
+              } catch (initErr) {
+                showError(
+                  "PayPal could not start. Check PORTONE_IMP_CODE (PortOne Console → Payment integration → Merchant ID, e.g. imp00000000).\n" +
+                    (initErr && initErr.message
+                      ? initErr.message
+                      : String(initErr)),
+                );
+                return;
+              }
+
+              var v1Params = GPM.buildPaypalExpressCheckoutParams(
+                paypalCtx,
+                config,
+              );
+              showPageLoading("Opening PayPal...");
+              imp.request_pay(v1Params, function (rsp) {
+                var mapped = portoneFlowEn
+                  ? portoneFlowEn.mapIamportCallbackToPortoneResult(rsp)
+                  : {
+                      paymentId: rsp && rsp.merchant_uid,
+                      txId: rsp && rsp.imp_uid,
+                      code:
+                        rsp && rsp.success === false
+                          ? rsp.error_code || "FAILED"
+                          : undefined,
+                      message: rsp && rsp.error_msg,
+                    };
+                if (!mapped || mapped.code) {
+                  hidePageLoading();
+                  resetPaymentGuard();
+                  showError(
+                    (mapped && mapped.message) || "Payment was cancelled",
+                  );
+                  return;
+                }
+                if (portoneFlowEn) {
+                  portoneFlowEn.finalizePortoneCheckout(
+                    buildPortoneFinalizeOptionsEn(mapped),
+                  );
+                }
+              });
+              return;
+            }
+
             var portone = window.PortOne;
-            if (!portone || typeof portone.loadPaymentUI !== "function") {
+            if (!portone || typeof portone.requestPayment !== "function") {
               showError(
-                "PayPal could not be loaded. Please refresh the page and try again.",
+                "PayPal Express Checkout needs the PortOne merchant ID.\nAdd PORTONE_IMP_CODE (PortOne Console → Payment integration → Merchant ID, e.g. imp00000000) to .env and Vercel, then retry.",
               );
               return;
             }
 
-            var orderNameEn =
-              "GRAFFORD Stay Reservation (" + (ROOM_LABELS[room] || room) + ")";
-            var portoneFlowEn = window.GraffordPortoneFlow;
             var portoneParams = GPM.buildPortoneParams(
               payMethod,
-              {
-                orderNo: orderNo,
-                orderName: orderNameEn,
-                totalAmount: paypalUsdCents,
-                usdAmountCents: paypalUsdCents,
-                checkIn: checkIn,
-                checkOut: checkOut,
-                customer: {
-                  fullName: guestName || undefined,
-                  phoneNumber: contact || undefined,
-                  email: email || undefined,
-                },
-                locale: "EN_US",
-                confirmUrl: portoneWebhookApiUrl(),
-                noticeUrls: [portoneWebhookApiUrl()],
-              },
+              paypalCtx,
               config,
             );
-
-            var paypalWrap = document.getElementById("paypal-button-wrap-en");
-            var paypalContainer = document.getElementById(
-              "paypal-button-container-en",
-            );
-            if (paypalContainer) {
-              paypalContainer.innerHTML = "";
+            if (portoneFlowEn && portoneFlowEn.enhancePortoneRequestParams) {
+              portoneParams = portoneFlowEn.enhancePortoneRequestParams(
+                portoneParams,
+              );
             }
-            if (submitBtn) submitBtn.hidden = true;
-            if (paypalWrap) paypalWrap.hidden = false;
 
+            var response;
             try {
-              await portone.loadPaymentUI(portoneParams, {
-                onPaymentSuccess: function (response) {
-                  if (portoneFlowEn) {
-                    portoneFlowEn.finalizePortoneCheckout(
-                      buildPortoneFinalizeOptionsEn(response),
-                    );
-                  }
-                },
-                onPaymentFail: function (error) {
-                  var failMsg =
-                    (error && (error.message || error.pgMessage)) ||
-                    "Payment was cancelled";
-                  showError(failMsg);
-                },
-              });
-              hidePageLoading();
+              response = await portone.requestPayment(portoneParams);
             } catch (e) {
+              var rawErr = e && e.message ? e.message : String(e);
               showError(
-                "An error occurred while opening PayPal.\nError: " +
-                  (e && e.message ? e.message : String(e)),
+                /PG_PROVIDER_PAYPAL|not supported|지원하지/.test(rawErr)
+                  ? "PayPal Express Checkout needs the PortOne V1 merchant ID.\nAdd PORTONE_IMP_CODE (PortOne Console → Payment integration → Merchant ID, e.g. imp00000000) to .env and Vercel, then retry.\n(" +
+                      rawErr +
+                      ")"
+                  : "An error occurred while opening PayPal.\nError: " + rawErr,
+              );
+              return;
+            }
+
+            if (
+              portoneFlowEn &&
+              portoneFlowEn.isRedirectDeferredResponse(
+                response,
+                portoneParams,
+              )
+            ) {
+              showPageLoading(
+                "Opening PayPal. You will return here after payment...",
+              );
+              return;
+            }
+
+            if (!response || response.code) {
+              showError(
+                (response && (response.message || response.pgMessage)) ||
+                  "Payment was cancelled",
+              );
+              return;
+            }
+
+            if (portoneFlowEn) {
+              await portoneFlowEn.finalizePortoneCheckout(
+                buildPortoneFinalizeOptionsEn(response),
               );
             }
           }

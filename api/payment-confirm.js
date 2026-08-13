@@ -50,6 +50,12 @@ async function sendPaymentConfig(res) {
   var storeId = process.env.STORE_ID || "";
   var channelKey = process.env.CHANNEL_KEY || "";
   var paypalChannelKey = String(process.env.PAYPAL_CHANNEL_KEY || "").trim();
+  var impCode = String(
+    process.env.PORTONE_IMP_CODE ||
+      process.env.IMP_CODE ||
+      process.env.PORTONE_USER_CODE ||
+      "",
+  ).trim();
 
   if (!storeId || !channelKey) {
     res.statusCode = 500;
@@ -70,6 +76,7 @@ async function sendPaymentConfig(res) {
       storeId: storeId,
       channelKey: channelKey,
       paypalChannelKey: paypalChannelKey || null,
+      impCode: impCode || null,
       krwPerUsd: krwPerUsd,
       enabledMethods: resolveEnabledPaymentMethods(),
     }),

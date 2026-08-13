@@ -95,6 +95,12 @@
     return "$" + (n / 100).toFixed(2);
   }
 
+  function usdCentsToDollars(cents) {
+    var n = Number(cents);
+    if (!Number.isFinite(n) || n <= 0) return 0;
+    return Math.round(n) / 100;
+  }
+
   function isEasyPayMethodId(methodId) {
     var meta = METHODS[normalizeMethodId(methodId)];
     return meta && meta.category === "easy_pay";
@@ -184,42 +190,59 @@
     return { first: parts[0], last: parts.slice(1).join(" ") };
   }
 
-  function buildPaypalStcData(ctx) {
+  function paypalCustomerFromCtx(ctx) {
     var names = splitGuestName(ctx.customer && ctx.customer.fullName);
-    var checkIn = String(ctx.checkIn || "").trim();
-    var checkOut = String(ctx.checkOut || "").trim();
-    var rows = [
-      { key: "sender_account_id", value: String(ctx.orderNo || "") },
-      { key: "sender_first_name", value: names.first },
-      { key: "sender_last_name", value: names.last },
-      { key: "ota_type", value: "hotel" },
-      { key: "ota_start_country", value: "KR" },
-      { key: "ota_start_city", value: "Seogwipo" },
-      { key: "ota_start_zip_code", value: "63629" },
-      { key: "ota_service_guest_t_f", value: "0" },
-    ];
-    if (ctx.customer && ctx.customer.email) {
-      rows.push({ key: "sender_email", value: String(ctx.customer.email) });
+    var customer = Object.assign({}, ctx.customer || {}, {
+      firstName: names.first,
+      lastName: names.last,
+    });
+    if (!customer.fullName && names.first) {
+      customer.fullName =
+        names.last && names.last !== "Guest"
+          ? names.first + " " + names.last
+          : names.first;
     }
-    if (ctx.customer && ctx.customer.phoneNumber) {
-      rows.push({
-        key: "sender_phone",
-        value: String(ctx.customer.phoneNumber),
-      });
-    }
-    if (checkIn) {
-      rows.push({ key: "ota_service_start_date", value: checkIn });
-    }
-    if (checkOut) {
-      rows.push({ key: "ota_service_end_date", value: checkOut });
-    }
-    return rows;
+    return customer;
   }
 
   /**
-   * PortOne requestPayment / loadPaymentUI 파라미터 생성.
+   * PayPal Express Checkout (PortOne V1 IMP.request_pay).
+   * amount는 달러 소수(14.20). PC/모바일 모두 m_redirect_url 필수.
+   */
+  function buildPaypalExpressCheckoutParams(ctx, config) {
+    var usdCents =
+      ctx.usdAmountCents != null
+        ? Number(ctx.usdAmountCents)
+        : Number(ctx.totalAmount);
+    var customer = paypalCustomerFromCtx(ctx);
+    var noticeUrl = "";
+    if (Array.isArray(ctx.noticeUrls) && ctx.noticeUrls.length) {
+      noticeUrl = ctx.noticeUrls[0];
+    } else if (typeof ctx.noticeUrls === "string") {
+      noticeUrl = ctx.noticeUrls;
+    }
+    var params = {
+      channelKey: resolveActiveChannelKey("paypal", config),
+      pay_method: "card",
+      merchant_uid: ctx.orderNo,
+      name: ctx.orderName,
+      amount: usdCentsToDollars(usdCents),
+      currency: "USD",
+      buyer_name: customer.fullName || undefined,
+      buyer_email: customer.email || undefined,
+      buyer_tel: customer.phoneNumber || undefined,
+      m_redirect_url: ctx.redirectUrl,
+    };
+    if (noticeUrl) {
+      params.notice_url = noticeUrl;
+    }
+    return params;
+  }
+
+  /**
+   * PortOne requestPayment 파라미터 생성.
    * card → KG이니시스 통합결제창(CARD), 간편결제 → EASY_PAY
-   * paypal → PayPal SPB (USD, loadPaymentUI)
+   * paypal → Express Checkout (USD). SPB loadPaymentUI는 이 채널에서 불가.
    */
   function buildPortoneParams(methodId, ctx, config) {
     var id = normalizeMethodId(methodId);
@@ -228,43 +251,23 @@
         ctx.usdAmountCents != null
           ? Number(ctx.usdAmountCents)
           : Number(ctx.totalAmount);
-      var names = splitGuestName(ctx.customer && ctx.customer.fullName);
-      var customer = Object.assign({}, ctx.customer || {}, {
-        firstName: names.first,
-        lastName: names.last,
-      });
-      if (!customer.fullName && names.first) {
-        customer.fullName =
-          names.last && names.last !== "Guest"
-            ? names.first + " " + names.last
-            : names.first;
-      }
+      var customer = paypalCustomerFromCtx(ctx);
       var paypalParams = {
-        uiType: "PAYPAL_SPB",
         storeId: config.storeId,
         channelKey: resolveActiveChannelKey(id, config),
         paymentId: ctx.orderNo,
         orderName: ctx.orderName,
         totalAmount: usdCents,
         currency: "USD",
+        payMethod: "CARD",
         customer: customer,
         locale: ctx.locale || "EN_US",
-        confirmUrl: ctx.confirmUrl,
+        redirectUrl: ctx.redirectUrl,
         noticeUrls: ctx.noticeUrls,
-        products: [
-          {
-            id: ctx.orderNo,
-            name: ctx.orderName,
-            amount: usdCents,
-            quantity: 1,
-          },
-        ],
-        bypass: {
-          paypal_v2: {
-            additional_data: buildPaypalStcData(ctx),
-          },
-        },
       };
+      if (paypalParams.redirectUrl) {
+        paypalParams.forceRedirect = true;
+      }
       return paypalParams;
     }
 
@@ -390,6 +393,8 @@
     isPaypalMethodId: isPaypalMethodId,
     krwToUsdCents: krwToUsdCents,
     formatUsdFromCents: formatUsdFromCents,
+    usdCentsToDollars: usdCentsToDollars,
+    buildPaypalExpressCheckoutParams: buildPaypalExpressCheckoutParams,
     getLabel: getLabel,
     getEnabledMethods: getEnabledMethods,
     resolvePagePaymentOptions: resolvePagePaymentOptions,

@@ -2,20 +2,37 @@
  * PortOne v2 결제 완료 처리 (PC 반환값 + 모바일 redirectUrl 복귀 공통)
  */
 (function (global) {
+  function isFalseFlag(value) {
+    var raw = String(value == null ? "" : value)
+      .trim()
+      .toLowerCase();
+    return raw === "false" || raw === "0" || raw === "fail" || raw === "failed";
+  }
+
   function parsePortoneSearchParams(searchLike) {
     var result = {};
     try {
       var search = new URLSearchParams(searchLike || "");
-      var paymentId = String(search.get("paymentId") || "").trim();
+      var paymentId = String(
+        search.get("paymentId") || search.get("merchant_uid") || "",
+      ).trim();
       if (!paymentId) {
         return null;
       }
+      var failed =
+        isFalseFlag(search.get("imp_success")) ||
+        isFalseFlag(search.get("success"));
+      var code = search.get("code") || undefined;
+      if (failed && !code) {
+        code = search.get("error_code") || "FAILED";
+      }
       result = {
         paymentId: paymentId,
-        code: search.get("code") || undefined,
-        message: search.get("message") || undefined,
+        code: code,
+        message:
+          search.get("message") || search.get("error_msg") || undefined,
         paymentToken: search.get("paymentToken") || null,
-        txId: search.get("txId") || null,
+        txId: search.get("txId") || search.get("imp_uid") || null,
         pgCode: search.get("pgCode") || null,
         pgMessage: search.get("pgMessage") || null,
       };
@@ -23,6 +40,33 @@
       return null;
     }
     return result;
+  }
+
+  function mapIamportCallbackToPortoneResult(rsp) {
+    if (!rsp || typeof rsp !== "object") {
+      return {
+        paymentId: "",
+        code: "FAILED",
+        message: "Payment was cancelled",
+      };
+    }
+    var paymentId = String(rsp.merchant_uid || rsp.paymentId || "").trim();
+    var failed =
+      rsp.success === false ||
+      isFalseFlag(rsp.success) ||
+      (!!rsp.error_code && !rsp.imp_uid);
+    if (failed) {
+      return {
+        paymentId: paymentId,
+        code: rsp.error_code || rsp.code || "FAILED",
+        message: rsp.error_msg || rsp.message || "Payment was cancelled",
+        txId: rsp.imp_uid || rsp.txId || null,
+      };
+    }
+    return {
+      paymentId: paymentId,
+      txId: rsp.imp_uid || rsp.txId || null,
+    };
   }
 
   function parsePortoneRedirectFromLocation(loc) {
@@ -54,9 +98,14 @@
     loc = loc || global.location;
     var hadSearch =
       loc.search &&
-      /(?:^|[?&])(?:paymentId|code)=/.test(loc.search);
+      /(?:^|[?&])(?:paymentId|merchant_uid|imp_uid|code|imp_success)=/.test(
+        loc.search,
+      );
     var hadHash =
-      loc.hash && /(?:^|[#&?])(?:paymentId|code)=/.test(loc.hash);
+      loc.hash &&
+      /(?:^|[#&?])(?:paymentId|merchant_uid|imp_uid|code|imp_success)=/.test(
+        loc.hash,
+      );
     if (!hadSearch && !hadHash) {
       return;
     }
@@ -66,7 +115,7 @@
   }
 
   var PORTONE_GATEWAY_HOST_RE =
-    /(?:^|\.)((?:inicis|portone|iamport|kcp|nicepay|tosspayments|kakaopay|paypal)\.)/i;
+    /(?:^|\.)((?:inicis|portone|iamport|kcp|nicepay|tosspayments|kakaopay|paypal|paypalobjects)\.)/i;
 
   function isPortoneGatewayUrl(url) {
     try {
@@ -696,6 +745,7 @@
     isPaymentFinalizeInProgress: isPaymentFinalizeInProgress,
     preparePaymentDeparture: preparePaymentDeparture,
     finalizePortoneCheckout: finalizePortoneCheckout,
+    mapIamportCallbackToPortoneResult: mapIamportCallbackToPortoneResult,
     resolvePortoneRedirectResult: resolvePortoneRedirectResult,
     persistPortoneRedirectResult: persistPortoneRedirectResult,
     loadPersistedPortoneRedirectResult: loadPersistedPortoneRedirectResult,
