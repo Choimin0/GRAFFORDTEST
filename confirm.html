@@ -18,8 +18,8 @@
         } catch (_e) {}
       })();
     </script>
-    <script src="js/booking-token-client.js?v=6"></script>
-    <script src="js/booking-checkout-guard.js?v=15"></script>
+    <script src="js/booking-token-client.js?v=7"></script>
+    <script src="js/booking-checkout-guard.js?v=18"></script>
     <script src="js/nav-hero.js" defer></script>
     <script src="js/mobile-nav.js" defer></script>
     <script src="js/site-language.js" defer></script>
@@ -793,27 +793,39 @@
               return;
             }
 
-            window.__graffordConfirmCheckoutSessionReady = Promise.resolve(null);
+            window.__graffordConfirmLeaveUi = {
+              show: showLeaveOverlay,
+              hide: hideLeaveOverlay,
+              getElements: getLeaveElements,
+            };
 
-            if (window.GraffordCheckoutGuard) {
-              var els = getLeaveElements();
-              window.__graffordConfirmCheckoutGuard =
-                window.GraffordCheckoutGuard.init({
-                  page: "confirm",
-                  inPaymentFlow: inPaymentFlow,
-                  sessionReady: window.__graffordConfirmCheckoutSessionReady,
-                  ttlElementIds: ["booking-ttl-kr", "booking-ttl-en"],
-                  showLeaveOverlay: showLeaveOverlay,
-                  hideLeaveOverlay: hideLeaveOverlay,
-                  leaveConfirmButtons: [els.confirmBtn, els.confirmBtnEn],
-                  leaveCancelButtons: [els.cancelBtn, els.cancelBtnEn],
-                  onExpired: function () {
-                    if (window.GraffordBookingToken) {
-                      window.GraffordBookingToken.showExpiredModal();
-                    }
-                  },
-                });
-            }
+            (function startConfirmCheckoutSessionEarly() {
+              if (window.__graffordConfirmCheckoutSessionStarted) {
+                return;
+              }
+              try {
+                var draft = JSON.parse(
+                  sessionStorage.getItem("graffordConfirmDraft") || "null",
+                );
+                if (
+                  !draft ||
+                  !draft.checkIn ||
+                  !draft.checkOut ||
+                  !draft.room ||
+                  !window.GraffordBookingToken
+                ) {
+                  return;
+                }
+                window.__graffordConfirmCheckoutSessionStarted = true;
+                window.__graffordConfirmCheckoutSessionReady =
+                  window.GraffordBookingToken.prepareCheckoutSession(
+                    String(draft.room).toUpperCase(),
+                    draft.checkIn,
+                    draft.checkOut,
+                    { reset: cameFromReservation && !cameFromPayment },
+                  );
+              } catch (_earlySession) {}
+            })();
 
             function wireLeaveOverlayDismiss() {
               var els = getLeaveElements();
@@ -975,8 +987,10 @@
             window.GraffordBookingToken &&
             checkIn &&
             checkOut &&
-            roomRaw
+            roomRaw &&
+            !window.__graffordConfirmCheckoutSessionStarted
           ) {
+            window.__graffordConfirmCheckoutSessionStarted = true;
             window.__graffordConfirmCheckoutSessionReady =
               window.GraffordBookingToken.prepareCheckoutSession(
                 roomRaw,
@@ -984,6 +998,41 @@
                 checkOut,
                 { reset: cameFromReservation && !cameFromPayment },
               );
+          }
+
+          if (
+            window.GraffordCheckoutGuard &&
+            !window.__graffordConfirmCheckoutGuard
+          ) {
+            var leaveUi = window.__graffordConfirmLeaveUi || {};
+            var leaveEls =
+              typeof leaveUi.getElements === "function"
+                ? leaveUi.getElements()
+                : {};
+            window.__graffordConfirmCheckoutGuard =
+              window.GraffordCheckoutGuard.init({
+                page: "confirm",
+                sessionReady:
+                  window.__graffordConfirmCheckoutSessionReady ||
+                  Promise.resolve(null),
+                ttlElementIds: ["booking-ttl-kr", "booking-ttl-en"],
+                showLeaveOverlay:
+                  leaveUi.show ||
+                  function () {},
+                hideLeaveOverlay:
+                  leaveUi.hide ||
+                  function () {},
+                leaveConfirmButtons: [
+                  leaveEls.confirmBtn,
+                  leaveEls.confirmBtnEn,
+                ],
+                leaveCancelButtons: [leaveEls.cancelBtn, leaveEls.cancelBtnEn],
+                onExpired: function () {
+                  if (window.GraffordBookingToken) {
+                    window.GraffordBookingToken.showExpiredModal();
+                  }
+                },
+              });
           }
 
           if (

@@ -430,7 +430,7 @@
   /**
    * forceRedirect 이후에도 페이지가 그대로면 결제창이 열리지 않은 것으로 보고 가드를 해제합니다.
    */
-  function armRedirectWatchdog(onStuck, waitMs) {
+  function armRedirectWatchdog(onStuck, waitMs, orderNo) {
     var fired = false;
     var timer = global.setTimeout(function () {
       if (fired) {
@@ -440,6 +440,11 @@
         return;
       }
       fired = true;
+      clearPortoneDepartureStarted();
+      clearPaymentDeparture(orderNo);
+      if (global.GraffordCheckoutGuard) {
+        global.GraffordCheckoutGuard.clearCheckoutNavigationAllowance();
+      }
       if (typeof onStuck === "function") {
         onStuck();
       }
@@ -493,6 +498,35 @@
     } catch (_e) {}
   }
 
+  var PORTONE_DEPARTURE_AT_KEY = "graffordPortoneDepartingAt";
+
+  function markPortoneDepartureStarted(orderNo) {
+    try {
+      sessionStorage.setItem(PORTONE_DEPARTURE_AT_KEY, String(Date.now()));
+      sessionStorage.setItem(
+        "graffordPortoneDepartingOrder",
+        String(orderNo || "").trim(),
+      );
+    } catch (_e) {}
+  }
+
+  function clearPortoneDepartureStarted() {
+    try {
+      sessionStorage.removeItem(PORTONE_DEPARTURE_AT_KEY);
+      sessionStorage.removeItem("graffordPortoneDepartingOrder");
+    } catch (_e) {}
+  }
+
+  function isPortoneDepartureRecent(maxAgeMs) {
+    try {
+      var at = Number(sessionStorage.getItem(PORTONE_DEPARTURE_AT_KEY) || "0");
+      var limit = maxAgeMs != null ? maxAgeMs : 15000;
+      return at > 0 && Date.now() - at < limit;
+    } catch (_e) {
+      return false;
+    }
+  }
+
   function preparePaymentDeparture(orderNo) {
     clearLegacyPgHistoryBarrier();
     try {
@@ -508,9 +542,49 @@
       sessionStorage.setItem("graffordPortoneHistoryPendingClean", "1");
     } catch (_e) {}
     installPortoneGatewayBackGuard();
-    if (global.GraffordCheckoutGuard) {
-      global.GraffordCheckoutGuard.allowCheckoutNavigation();
+  }
+
+  /**
+   * 모바일 Safari/Naver 등에서 user gesture를 유지하려면 requestPayment를
+   * 클릭 핸들러 동기 구간에서 먼저 호출한 뒤 preparePaymentDeparture를 실행합니다.
+   */
+  function launchPortonePayment(portone, params, orderNo, handlers) {
+    handlers = handlers || {};
+    if (!portone || typeof portone.requestPayment !== "function") {
+      if (typeof handlers.onError === "function") {
+        handlers.onError(new Error("PortOne SDK unavailable"));
+      }
+      return null;
     }
+    var enhanced = enhancePortoneRequestParams(params);
+    var promise;
+    try {
+      promise = portone.requestPayment(enhanced);
+    } catch (syncErr) {
+      clearPortoneDepartureStarted();
+      if (typeof handlers.onError === "function") {
+        handlers.onError(syncErr);
+      }
+      return null;
+    }
+    markPortoneDepartureStarted(orderNo);
+    preparePaymentDeparture(orderNo);
+    if (promise && typeof promise.then === "function") {
+      promise
+        .then(function (response) {
+          if (typeof handlers.onSuccess === "function") {
+            handlers.onSuccess(response, enhanced);
+          }
+        })
+        .catch(function (err) {
+          clearPortoneDepartureStarted();
+          clearPaymentDeparture(orderNo);
+          if (typeof handlers.onError === "function") {
+            handlers.onError(err);
+          }
+        });
+    }
+    return promise;
   }
 
   async function finalizePortoneCheckout(opts) {
@@ -791,6 +865,10 @@
     isRedirectDeferredResponse: isRedirectDeferredResponse,
     isPaymentFinalizeInProgress: isPaymentFinalizeInProgress,
     preparePaymentDeparture: preparePaymentDeparture,
+    launchPortonePayment: launchPortonePayment,
+    markPortoneDepartureStarted: markPortoneDepartureStarted,
+    clearPortoneDepartureStarted: clearPortoneDepartureStarted,
+    isPortoneDepartureRecent: isPortoneDepartureRecent,
     finalizePortoneCheckout: finalizePortoneCheckout,
     mapIamportCallbackToPortoneResult: mapIamportCallbackToPortoneResult,
     resolvePortoneRedirectResult: resolvePortoneRedirectResult,

@@ -42,9 +42,9 @@
     <!-- PortOne v2 Browser SDK (KG이니시스) + V1 SDK (PayPal Express Checkout, 영문 미사용·코드 유지) -->
     <script src="https://cdn.portone.io/v2/browser-sdk.js"></script>
     <script src="https://cdn.iamport.kr/v1/iamport.js"></script>
-    <script src="js/payment-portone-flow.js?v=8"></script>
-    <script src="js/booking-token-client.js?v=6"></script>
-    <script src="js/booking-checkout-guard.js?v=17"></script>
+    <script src="js/payment-portone-flow.js?v=9"></script>
+    <script src="js/booking-token-client.js?v=7"></script>
+    <script src="js/booking-checkout-guard.js?v=18"></script>
     <!--
       KG이니시스(PortOne) 결제수단 노출 설정
       true → 결제수단 drawer에 표시 · false → 숨김
@@ -809,6 +809,18 @@
               sessionStorage.removeItem("graffordInPaymentFlow");
             } catch (_e) {}
             if (
+              window.GraffordPortoneFlow &&
+              window.GraffordPortoneFlow.clearPaymentDeparture
+            ) {
+              window.GraffordPortoneFlow.clearPaymentDeparture(orderNo);
+            }
+            if (
+              window.GraffordPortoneFlow &&
+              window.GraffordPortoneFlow.clearPortoneDepartureStarted
+            ) {
+              window.GraffordPortoneFlow.clearPortoneDepartureStarted();
+            }
+            if (
               window.GraffordCheckoutGuard &&
               window.GraffordCheckoutGuard.disallowCheckoutNavigation
             ) {
@@ -1530,13 +1542,20 @@
                 "결제창으로 이동합니다. 결제 완료 후 자동으로 돌아옵니다...",
               );
               if (portoneFlow.armRedirectWatchdog) {
-                portoneFlow.armRedirectWatchdog(function () {
-                  showError(
-                    "결제창을 열지 못했습니다. 잠시 후 다시 시도해 주세요.",
-                  );
-                }, 6000);
+                portoneFlow.armRedirectWatchdog(
+                  function () {
+                    showError(
+                      "결제창을 열지 못했습니다. 잠시 후 다시 시도해 주세요.",
+                    );
+                  },
+                  6000,
+                  orderNo,
+                );
               }
               return;
+            }
+            if (portoneFlow && portoneFlow.clearPortoneDepartureStarted) {
+              portoneFlow.clearPortoneDepartureStarted();
             }
             if (!response || response.code) {
               showError("결제가 취소되었습니다");
@@ -1625,9 +1644,6 @@
               return;
             }
 
-            markPaymentProcessing();
-            if (processingMsg) processingMsg.hidden = true;
-
             var orderName =
               "GRAFFORD 숙박 예약 (" + (ROOM_LABELS[room] || room) + ")";
             var portoneRedirectUrl = buildPortoneRedirectUrl();
@@ -1674,6 +1690,30 @@
               portoneParams = portoneFlow.enhancePortoneRequestParams(
                 portoneParams,
               );
+            }
+
+            paymentInProgress = true;
+            if (submitBtn) submitBtn.disabled = true;
+            if (processingMsg) processingMsg.hidden = true;
+
+            if (portoneFlow && portoneFlow.launchPortonePayment) {
+              portoneFlow.launchPortonePayment(
+                portone,
+                portoneParams,
+                orderNo,
+                {
+                  onSuccess: function (response) {
+                    finishPortonePaymentResponse(response, portoneParams);
+                  },
+                  onError: function (e) {
+                    showError(
+                      "결제창 실행 중 오류가 발생했습니다.\n오류 상세: " +
+                        (e && e.message ? e.message : String(e)),
+                    );
+                  },
+                },
+              );
+              return;
             }
 
             portone

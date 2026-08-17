@@ -239,6 +239,50 @@
     return false;
   }
 
+  function clearAllPaymentProcessingFlags() {
+    try {
+      var keys = Object.keys(sessionStorage);
+      for (var i = 0; i < keys.length; i++) {
+        if (keys[i].indexOf("graffordPaymentProcessing:") === 0) {
+          sessionStorage.removeItem(keys[i]);
+        }
+      }
+      sessionStorage.removeItem("graffordInPaymentFlow");
+    } catch (_e) {}
+    if (
+      root.GraffordPortoneFlow &&
+      root.GraffordPortoneFlow.clearPortoneDepartureStarted
+    ) {
+      root.GraffordPortoneFlow.clearPortoneDepartureStarted();
+    }
+  }
+
+  function isLikelyPortonePaymentDeparture() {
+    if (
+      root.GraffordPortoneFlow &&
+      root.GraffordPortoneFlow.isPortoneDepartureRecent
+    ) {
+      return root.GraffordPortoneFlow.isPortoneDepartureRecent(15000);
+    }
+    return false;
+  }
+
+  function shouldSkipHoldReleaseOnPageExit(page) {
+    if (isLikelyPortonePaymentDeparture()) {
+      return true;
+    }
+    if (isPaymentNavigationAllowed() && page === "confirm") {
+      return true;
+    }
+    if (isPaymentInProgress()) {
+      return false;
+    }
+    if (isCheckoutNavigationAllowed()) {
+      return false;
+    }
+    return false;
+  }
+
   function hasPortoneRedirectReturn() {
     if (
       root.GraffordPortoneFlow &&
@@ -417,8 +461,11 @@
             }
           };
     function onExpired() {
-      if (isPaymentInProgress()) {
+      if (isLikelyPortonePaymentDeparture()) {
         return;
+      }
+      if (isPaymentInProgress()) {
+        clearAllPaymentProcessingFlags();
       }
       onExpiredOption();
     }
@@ -538,6 +585,7 @@
     }
 
     function returnToConfirmFromPayment() {
+      clearAllPaymentProcessingFlags();
       markPaymentForwardBlocked();
       clearCheckoutNavigationAllowance();
       allowCheckoutNavigation();
@@ -922,16 +970,17 @@
       root.addEventListener("beforeunload", beforeUnloadHandler);
 
     root.addEventListener("pagehide", function () {
-      if (isPaymentInProgress()) {
+      if (leaveConfirmed) {
         return;
       }
-      if (
-        !hasActiveCheckoutSession() ||
-        leaveConfirmed ||
-        isCheckoutNavigationAllowed() ||
-        isPaymentNavigationAllowed()
-      ) {
+      if (!hasActiveCheckoutSession()) {
         return;
+      }
+      if (shouldSkipHoldReleaseOnPageExit(page)) {
+        return;
+      }
+      if (isPaymentInProgress()) {
+        clearAllPaymentProcessingFlags();
       }
       abandonCheckoutOnPageExit();
     });
@@ -974,6 +1023,7 @@
     clearPaymentForwardBlock: clearPaymentForwardBlock,
     markPaymentForwardBlocked: markPaymentForwardBlocked,
     isPaymentInProgress: isPaymentInProgress,
+    clearAllPaymentProcessingFlags: clearAllPaymentProcessingFlags,
     hasPortoneRedirectReturn: hasPortoneRedirectReturn,
   };
 
