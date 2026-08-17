@@ -6,6 +6,9 @@
   var SESSION_EXP_KEY = "graffordBookingSessionExp";
   var HOLD_ID_KEY = "graffordBookingHoldId";
   var CHECKOUT_BLOCKED_KEY = "graffordCheckoutBlocked";
+  var VALIDATE_CACHE_KEY = "graffordLastBookingValidateAt";
+  var VALIDATE_FETCH_TIMEOUT_MS = 15000;
+  var validateInflightByKey = Object.create(null);
 
   function apiBase() {
     if (typeof root !== "undefined" && root.__GRAFFORD_API_BASE__) {
@@ -16,6 +19,58 @@
 
   function bookingTokenApiUrl() {
     return apiBase() + "/api/booking-token";
+  }
+
+  function markBookingValidated() {
+    try {
+      sessionStorage.setItem(VALIDATE_CACHE_KEY, String(Date.now()));
+    } catch (_e) {}
+  }
+
+  function isBookingRecentlyValidated(maxAgeMs) {
+    try {
+      var at = Number(sessionStorage.getItem(VALIDATE_CACHE_KEY) || "0");
+      var limit = maxAgeMs != null ? maxAgeMs : 180000;
+      return at > 0 && Date.now() - at < limit;
+    } catch (_e) {
+      return false;
+    }
+  }
+
+  function validateRequestKey(payload) {
+    return [
+      String(payload.bookingToken || readStoredToken() || "").trim(),
+      String(payload.room || "")
+        .trim()
+        .toUpperCase(),
+      String(payload.checkIn || "").trim(),
+      String(payload.checkOut || "").trim(),
+      String(payload.reservationNumber || payload.orderNo || "").trim(),
+    ].join("|");
+  }
+
+  async function fetchJsonWithTimeout(url, options, timeoutMs) {
+    var controller = new AbortController();
+    var timer = setTimeout(function () {
+      controller.abort();
+    }, timeoutMs || VALIDATE_FETCH_TIMEOUT_MS);
+    try {
+      var res = await fetch(
+        url,
+        Object.assign({}, options || {}, { signal: controller.signal }),
+      );
+      var data = await res.json();
+      return { res: res, data: data };
+    } catch (e) {
+      if (e && e.name === "AbortError") {
+        throw new Error(
+          "요청 시간이 초과되었습니다. 네트워크 연결을 확인한 뒤 다시 시도해 주세요.",
+        );
+      }
+      throw e;
+    } finally {
+      clearTimeout(timer);
+    }
   }
 
   function readStoredToken() {
@@ -279,29 +334,56 @@
   }
 
   async function validateBookingToken(payload) {
+    var cacheKey = validateRequestKey(payload || {});
+    if (validateInflightByKey[cacheKey]) {
+      return validateInflightByKey[cacheKey];
+    }
+
     var bookingToken = payload.bookingToken || readStoredToken() || "";
-    var res = await fetch(bookingTokenApiUrl(), {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        action: "validate",
-        bookingToken: bookingToken,
-        room: payload.room,
-        checkIn: payload.checkIn,
-        checkOut: payload.checkOut,
-        reservationNumber: payload.reservationNumber || payload.orderNo || "",
-      }),
-    });
-    var data = await res.json();
-    return {
-      ok: !!(res.ok && data.ok),
-      status: res.status,
-      data: data,
-      unavailable: !!(data && data.unavailable),
-      alreadyBooked: !!(data && data.alreadyBooked),
-      tokenValid: data && data.tokenValid !== false,
-      expired: !!(data && (data.expired || data.error === "booking_token_expired")),
-    };
+    var task = (async function () {
+      var outcome = await fetchJsonWithTimeout(
+        bookingTokenApiUrl(),
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            action: "validate",
+            bookingToken: bookingToken,
+            room: payload.room,
+            checkIn: payload.checkIn,
+            checkOut: payload.checkOut,
+            reservationNumber:
+              payload.reservationNumber || payload.orderNo || "",
+          }),
+        },
+        VALIDATE_FETCH_TIMEOUT_MS,
+      );
+      var res = outcome.res;
+      var data = outcome.data;
+      var result = {
+        ok: !!(res.ok && data.ok),
+        status: res.status,
+        data: data,
+        unavailable: !!(data && data.unavailable),
+        alreadyBooked: !!(data && data.alreadyBooked),
+        tokenValid: data && data.tokenValid !== false,
+        expired: !!(
+          data &&
+          (data.expired || data.error === "booking_token_expired")
+        ),
+      };
+      if (result.ok) {
+        markBookingValidated();
+      }
+      return result;
+    })();
+
+    validateInflightByKey[cacheKey] = task;
+    try {
+      return await task;
+    } finally {
+      delete validateInflightByKey[cacheKey];
+    }
   }
 
   function clearCheckoutSession() {
@@ -548,6 +630,8 @@
     releaseBookingHold: releaseBookingHold,
     releaseBookingHoldKeepalive: releaseBookingHoldKeepalive,
     validateBookingToken: validateBookingToken,
+    markBookingValidated: markBookingValidated,
+    isBookingRecentlyValidated: isBookingRecentlyValidated,
     showUnavailableModal: showUnavailableModal,
     showExpiredModal: showExpiredModal,
     showPaymentExpiredModal: showPaymentExpiredModal,

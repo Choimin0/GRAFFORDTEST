@@ -43,7 +43,7 @@
     <script src="https://cdn.portone.io/v2/browser-sdk.js"></script>
     <script src="https://cdn.iamport.kr/v1/iamport.js"></script>
     <script src="js/payment-portone-flow.js?v=8"></script>
-    <script src="js/booking-token-client.js?v=5"></script>
+    <script src="js/booking-token-client.js?v=6"></script>
     <script src="js/booking-checkout-guard.js?v=17"></script>
     <!--
       KG이니시스(PortOne) 결제수단 노출 설정
@@ -797,6 +797,10 @@
           }
           var paymentInProgress = false;
           var paymentSettledKey = "graffordPaymentSettled:" + orderNo;
+          var checkoutValidation = null;
+          var checkoutValidationReady = false;
+          var checkoutValidationFailed = false;
+          if (submitBtn) submitBtn.disabled = true;
 
           function resetPaymentGuard() {
             paymentInProgress = false;
@@ -855,12 +859,36 @@
             }
           } catch (_ss) {}
 
-          async function resumeIfAlreadyBooked() {
+          async function ensureCheckoutValidation() {
+            if (checkoutValidationReady) {
+              return checkoutValidation;
+            }
             if (!window.GraffordBookingToken || !bookingToken) {
-              return;
+              checkoutValidation = {
+                ok: false,
+                data: { error: "예약 토큰이 없습니다." },
+              };
+              checkoutValidationReady = true;
+              checkoutValidationFailed = true;
+              return checkoutValidation;
+            }
+            if (
+              typeof window.GraffordBookingToken.isBookingRecentlyValidated ===
+                "function" &&
+              window.GraffordBookingToken.isBookingRecentlyValidated(180000)
+            ) {
+              checkoutValidation = {
+                ok: true,
+                status: 200,
+                data: { ok: true },
+                tokenValid: true,
+              };
+              checkoutValidationReady = true;
+              checkoutValidationFailed = false;
+              return checkoutValidation;
             }
             try {
-              var validation =
+              checkoutValidation =
                 await window.GraffordBookingToken.validateBookingToken({
                   bookingToken: bookingToken,
                   room: room,
@@ -868,14 +896,59 @@
                   checkOut: checkOut,
                   reservationNumber: orderNo,
                 });
-              if (validation.alreadyBooked) {
+              checkoutValidationReady = true;
+              checkoutValidationFailed = !checkoutValidation.ok;
+              if (checkoutValidation.alreadyBooked) {
                 sessionStorage.setItem(paymentSettledKey, "1");
                 window.location.replace("reserve-complete.html");
               }
-            } catch (_e) {}
+              return checkoutValidation;
+            } catch (e) {
+              checkoutValidation = {
+                ok: false,
+                data: {
+                  error:
+                    (e && e.message ? e.message : String(e)) ||
+                    "예약 가능 여부 확인 중 오류",
+                },
+              };
+              checkoutValidationReady = true;
+              checkoutValidationFailed = true;
+              return checkoutValidation;
+            }
           }
 
-          resumeIfAlreadyBooked();
+          function applyCheckoutValidationResult(validation) {
+            if (!validation) {
+              showError(
+                "예약 가능 여부를 확인하지 못했습니다. 예약 확인 페이지부터 다시 진행해 주세요.",
+              );
+              return false;
+            }
+            if (validation.expired) {
+              resetPaymentGuard();
+              window.GraffordBookingToken.showPaymentExpiredModal();
+              return false;
+            }
+            if (validation.unavailable) {
+              resetPaymentGuard();
+              window.GraffordBookingToken.showUnavailableModal();
+              return false;
+            }
+            if (validation.alreadyBooked) {
+              sessionStorage.setItem(paymentSettledKey, "1");
+              window.location.replace("reserve-complete.html");
+              return false;
+            }
+            if (!validation.ok) {
+              showError(
+                (validation.data && validation.data.error) ||
+                  "예약 가능 여부를 확인하지 못했습니다. 예약 확인 페이지부터 다시 진행해 주세요.",
+              );
+              return false;
+            }
+            return true;
+          }
 
           function reservationsApiUrl() {
             if (typeof window !== "undefined" && window.__GRAFFORD_API_BASE__) {
@@ -1232,6 +1305,16 @@
               }
             } catch (_cfg) {}
             syncPaymentDrawerKr();
+            if (
+              !window.GraffordBookingToken ||
+              typeof window.GraffordBookingToken.isBookingRecentlyValidated !==
+                "function" ||
+              !window.GraffordBookingToken.isBookingRecentlyValidated(180000)
+            ) {
+              showPageLoading("예약 가능 여부를 확인하는 중입니다...");
+            }
+            await ensureCheckoutValidation();
+            hidePageLoading();
 
             quote = P
               ? P.computeStay(room, checkIn, checkOut, extraGuests)
@@ -1268,18 +1351,24 @@
             setText("pay-kr-side-total", formatKrw(finalAmount));
 
             refreshPaymentMethodUiKr();
+            if (submitBtn) {
+              submitBtn.disabled = checkoutValidationFailed;
+            }
           }
 
           function showError(msg) {
             hidePageLoading();
             if (processingMsg) processingMsg.hidden = true;
             resetPaymentGuard();
+            var text = msg || "결제 중 오류가 발생했습니다.";
             if (window.GraffordPaymentModal) {
               window.GraffordPaymentModal.open({
-                message: msg || "결제 중 오류가 발생했습니다.",
+                message: text,
                 confirmLabel: "확인",
               });
+              return;
             }
+            window.alert(text);
           }
 
           function buildPortoneRedirectUrl() {
@@ -1431,12 +1520,41 @@
             handlePortoneRedirectReturn();
           });
 
-          async function startPayment() {
+          function finishPortonePaymentResponse(response, portoneParams) {
+            var portoneFlow = window.GraffordPortoneFlow;
+            if (
+              portoneFlow &&
+              portoneFlow.isRedirectDeferredResponse(response, portoneParams)
+            ) {
+              showPageLoading(
+                "결제창으로 이동합니다. 결제 완료 후 자동으로 돌아옵니다...",
+              );
+              if (portoneFlow.armRedirectWatchdog) {
+                portoneFlow.armRedirectWatchdog(function () {
+                  showError(
+                    "결제창을 열지 못했습니다. 잠시 후 다시 시도해 주세요.",
+                  );
+                }, 6000);
+              }
+              return;
+            }
+            if (!response || response.code) {
+              showError("결제가 취소되었습니다");
+              return;
+            }
+            if (portoneFlow) {
+              portoneFlow
+                .finalizePortoneCheckout(buildPortoneFinalizeOptions(response))
+                .catch(function () {
+                  showError("결제 확인 중 오류가 발생했습니다.");
+                });
+            }
+          }
+
+          function startPayment() {
             if (paymentInProgress) {
               return;
             }
-            markPaymentProcessing();
-            if (processingMsg) processingMsg.hidden = false;
 
             if (!window.GraffordBookingToken) {
               showError(
@@ -1458,67 +1576,23 @@
               return;
             }
 
-            try {
-              showPageLoading("예약 가능 여부를 확인하는 중입니다...");
-              var validation =
-                await window.GraffordBookingToken.validateBookingToken({
-                  bookingToken: bookingToken,
-                  room: room,
-                  checkIn: checkIn,
-                  checkOut: checkOut,
-                  reservationNumber: orderNo,
-                });
-              hidePageLoading();
-              if (validation.expired) {
-                resetPaymentGuard();
-                window.GraffordBookingToken.showPaymentExpiredModal();
-                return;
-              }
-              if (validation.unavailable) {
-                resetPaymentGuard();
-                window.GraffordBookingToken.showUnavailableModal();
-                return;
-              }
-              if (validation.alreadyBooked) {
-                sessionStorage.setItem(paymentSettledKey, "1");
-                window.location.replace("reserve-complete.html");
-                return;
-              }
-              if (!validation.ok) {
-                showError(
-                  (validation.data && validation.data.error) ||
-                    "예약 가능 여부를 확인하지 못했습니다. 예약 확인 페이지부터 다시 진행해 주세요.",
-                );
-                return;
-              }
-            } catch (e) {
-              hidePageLoading();
+            if (!checkoutValidationReady) {
               showError(
-                "예약 가능 여부 확인 중 오류가 발생했습니다.\n(" +
-                  (e && e.message ? e.message : "네트워크 오류") +
-                  ")",
+                "결제 준비가 완료되지 않았습니다. 잠시 후 다시 시도해 주세요.",
               );
+              return;
+            }
+            if (!applyCheckoutValidationResult(checkoutValidation)) {
               return;
             }
 
-            var config = paymentConfig;
-            try {
-              if (!config) {
-                var cfgRes = await fetch("/api/payment-confirm");
-                if (!cfgRes.ok) throw new Error("설정 조회 실패");
-                config = applyPaymentConfig(await cfgRes.json());
-                paymentConfig = config;
-                syncPaymentDrawerKr();
-              }
-            } catch (e) {
+            if (!paymentConfig || !paymentConfig.storeId) {
               showError(
-                "결제 설정을 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.\n(" +
-                  (e && e.message ? e.message : "네트워크 오류") +
-                  ")",
+                "결제 설정을 불러오지 못했습니다. 페이지를 새로고침 후 다시 시도해 주세요.",
               );
               return;
             }
-            config = applyPaymentConfig(config);
+            var config = applyPaymentConfig(paymentConfig);
 
             var checkoutMethod = GPM
               ? GPM.validateMethodForCheckout(payMethod, config)
@@ -1533,7 +1607,7 @@
               ? GPM.resolveActiveChannelKey(payMethod, config)
               : config.channelKey;
 
-            if (!config.storeId || !activeChannelKey) {
+            if (!activeChannelKey) {
               showError(
                 GPM && GPM.isEasyPayMethodId(payMethod)
                   ? paymentMethodLabel(payMethod) +
@@ -1543,8 +1617,6 @@
               return;
             }
 
-            if (processingMsg) processingMsg.hidden = true;
-
             var portone = window.PortOne;
             if (!portone || typeof portone.requestPayment !== "function") {
               showError(
@@ -1552,6 +1624,9 @@
               );
               return;
             }
+
+            markPaymentProcessing();
+            if (processingMsg) processingMsg.hidden = true;
 
             var orderName =
               "GRAFFORD 숙박 예약 (" + (ROOM_LABELS[room] || room) + ")";
@@ -1601,44 +1676,17 @@
               );
             }
 
-            var response;
-            try {
-              response = await portone.requestPayment(portoneParams);
-            } catch (e) {
-              showError(
-                "결제창 실행 중 오류가 발생했습니다.\n오류 상세: " +
-                  (e && e.message ? e.message : String(e)),
-              );
-              return;
-            }
-
-            if (
-              portoneFlow &&
-              portoneFlow.isRedirectDeferredResponse(response, portoneParams)
-            ) {
-              showPageLoading(
-                "결제창으로 이동합니다. 결제 완료 후 자동으로 돌아옵니다...",
-              );
-              if (portoneFlow.armRedirectWatchdog) {
-                portoneFlow.armRedirectWatchdog(function () {
-                  showError(
-                    "결제창을 열지 못했습니다. 잠시 후 다시 시도해 주세요.",
-                  );
-                }, 6000);
-              }
-              return;
-            }
-
-            if (!response || response.code) {
-              showError("결제가 취소되었습니다");
-              return;
-            }
-
-            if (portoneFlow) {
-              await portoneFlow.finalizePortoneCheckout(
-                buildPortoneFinalizeOptions(response),
-              );
-            }
+            portone
+              .requestPayment(portoneParams)
+              .then(function (response) {
+                finishPortonePaymentResponse(response, portoneParams);
+              })
+              .catch(function (e) {
+                showError(
+                  "결제창 실행 중 오류가 발생했습니다.\n오류 상세: " +
+                    (e && e.message ? e.message : String(e)),
+                );
+              });
           }
 
           if (submitBtn) {
@@ -2370,6 +2418,10 @@
           }
           var paymentInProgress = false;
           var paymentSettledKey = "graffordPaymentSettled:" + orderNo;
+          var checkoutValidation = null;
+          var checkoutValidationReady = false;
+          var checkoutValidationFailed = false;
+          if (submitBtn) submitBtn.disabled = true;
 
           function resetPaymentGuard() {
             paymentInProgress = false;
@@ -2435,12 +2487,36 @@
             }
           } catch (_ss) {}
 
-          async function resumeIfAlreadyBooked() {
+          async function ensureCheckoutValidation() {
+            if (checkoutValidationReady) {
+              return checkoutValidation;
+            }
             if (!window.GraffordBookingToken || !bookingToken) {
-              return;
+              checkoutValidation = {
+                ok: false,
+                data: { error: "Booking token is missing." },
+              };
+              checkoutValidationReady = true;
+              checkoutValidationFailed = true;
+              return checkoutValidation;
+            }
+            if (
+              typeof window.GraffordBookingToken.isBookingRecentlyValidated ===
+                "function" &&
+              window.GraffordBookingToken.isBookingRecentlyValidated(180000)
+            ) {
+              checkoutValidation = {
+                ok: true,
+                status: 200,
+                data: { ok: true },
+                tokenValid: true,
+              };
+              checkoutValidationReady = true;
+              checkoutValidationFailed = false;
+              return checkoutValidation;
             }
             try {
-              var validation =
+              checkoutValidation =
                 await window.GraffordBookingToken.validateBookingToken({
                   bookingToken: bookingToken,
                   room: room,
@@ -2448,14 +2524,61 @@
                   checkOut: checkOut,
                   reservationNumber: orderNo,
                 });
-              if (validation.alreadyBooked) {
+              checkoutValidationReady = true;
+              checkoutValidationFailed = !checkoutValidation.ok;
+              if (checkoutValidation.alreadyBooked) {
                 sessionStorage.setItem(paymentSettledKey, "1");
                 window.location.replace("reserve-complete.html");
               }
-            } catch (_e) {}
+              return checkoutValidation;
+            } catch (e) {
+              checkoutValidation = {
+                ok: false,
+                data: {
+                  error:
+                    (e && e.message ? e.message : String(e)) ||
+                    "Unable to verify room availability",
+                },
+              };
+              checkoutValidationReady = true;
+              checkoutValidationFailed = true;
+              return checkoutValidation;
+            }
           }
 
-          resumeIfAlreadyBooked();
+          function applyCheckoutValidationResult(validation) {
+            if (!validation) {
+              showError(
+                "Unable to verify room availability. Please restart from the confirmation page.",
+              );
+              return false;
+            }
+            if (validation.expired) {
+              resetPaymentGuard();
+              window.GraffordBookingToken.showPaymentExpiredModal();
+              return false;
+            }
+            if (validation.unavailable) {
+              resetPaymentGuard();
+              window.GraffordBookingToken.showUnavailableModal({
+                redirectTo: "RESERVATION.html",
+              });
+              return false;
+            }
+            if (validation.alreadyBooked) {
+              sessionStorage.setItem(paymentSettledKey, "1");
+              window.location.replace("reserve-complete.html");
+              return false;
+            }
+            if (!validation.ok) {
+              showError(
+                (validation.data && validation.data.error) ||
+                  "Unable to verify room availability. Please restart from the confirmation page.",
+              );
+              return false;
+            }
+            return true;
+          }
 
           function reservationsApiUrl() {
             if (typeof window !== "undefined" && window.__GRAFFORD_API_BASE__) {
@@ -2844,6 +2967,16 @@
               }
             } catch (_cfg) {}
             syncPaymentDrawerEn();
+            if (
+              !window.GraffordBookingToken ||
+              typeof window.GraffordBookingToken.isBookingRecentlyValidated !==
+                "function" ||
+              !window.GraffordBookingToken.isBookingRecentlyValidated(180000)
+            ) {
+              showPageLoading("Checking room availability...");
+            }
+            await ensureCheckoutValidation();
+            hidePageLoading();
 
             quote = P
               ? P.computeStay(room, checkIn, checkOut, extraGuests)
@@ -2903,18 +3036,24 @@
             }
 
             refreshPaymentMethodUiEn();
+            if (submitBtn) {
+              submitBtn.disabled = checkoutValidationFailed;
+            }
           }
 
           function showError(msg) {
             hidePageLoading();
             if (processingMsg) processingMsg.hidden = true;
             resetPaymentGuard();
+            var text = msg || "A payment error occurred.";
             if (window.GraffordPaymentModal) {
               window.GraffordPaymentModal.open({
-                message: msg || "A payment error occurred.",
+                message: text,
                 confirmLabel: "OK",
               });
+              return;
             }
+            window.alert(text);
           }
 
           function buildPortoneRedirectUrlEn() {
@@ -3076,8 +3215,6 @@
             if (paymentInProgress) {
               return;
             }
-            markPaymentProcessing();
-            if (processingMsg) processingMsg.hidden = false;
 
             if (!window.GraffordBookingToken) {
               showError(
@@ -3099,50 +3236,18 @@
               return;
             }
 
-            try {
-              showPageLoading("Checking room availability...");
-              var validation =
-                await window.GraffordBookingToken.validateBookingToken({
-                  bookingToken: bookingToken,
-                  room: room,
-                  checkIn: checkIn,
-                  checkOut: checkOut,
-                  reservationNumber: orderNo,
-                });
-              hidePageLoading();
-              if (validation.expired) {
-                resetPaymentGuard();
-                window.GraffordBookingToken.showPaymentExpiredModal();
-                return;
-              }
-              if (validation.unavailable) {
-                resetPaymentGuard();
-                window.GraffordBookingToken.showUnavailableModal({
-                  redirectTo: "RESERVATION.html",
-                });
-                return;
-              }
-              if (validation.alreadyBooked) {
-                sessionStorage.setItem(paymentSettledKey, "1");
-                window.location.replace("reserve-complete.html");
-                return;
-              }
-              if (!validation.ok) {
-                showError(
-                  (validation.data && validation.data.error) ||
-                    "Unable to verify room availability. Please restart from the confirmation page.",
-                );
-                return;
-              }
-            } catch (e) {
-              hidePageLoading();
+            if (!checkoutValidationReady) {
               showError(
-                "An error occurred while checking availability.\n(" +
-                  (e && e.message ? e.message : "Network error") +
-                  ")",
+                "Payment is not ready yet. Please wait a moment and try again.",
               );
               return;
             }
+            if (!applyCheckoutValidationResult(checkoutValidation)) {
+              return;
+            }
+
+            markPaymentProcessing();
+            if (processingMsg) processingMsg.hidden = false;
 
             var config = paymentConfig;
             try {
