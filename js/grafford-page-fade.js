@@ -49,6 +49,12 @@
 
     function finish() {
       el.classList.add("grafford-page-fade-done");
+      function hideOverlay() {
+        el.setAttribute("hidden", "");
+        el.setAttribute("aria-hidden", "true");
+      }
+      el.addEventListener("transitionend", hideOverlay, { once: true });
+      window.setTimeout(hideOverlay, 1200);
     }
 
     var reduce =

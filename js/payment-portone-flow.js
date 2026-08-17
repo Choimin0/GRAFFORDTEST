@@ -383,10 +383,21 @@
 
   function isMobileLikeEnvironment() {
     try {
-      if (global.matchMedia && global.matchMedia("(max-width: 767px)").matches) {
+      if (
+        global.matchMedia &&
+        global.matchMedia("(max-width: 899px)").matches
+      ) {
         return true;
       }
     } catch (_e) {}
+    try {
+      if (
+        global.matchMedia &&
+        global.matchMedia("(pointer: coarse)").matches
+      ) {
+        return true;
+      }
+    } catch (_e2) {}
     var ua = String(
       (global.navigator && global.navigator.userAgent) || "",
     ).toLowerCase();
@@ -397,13 +408,48 @@
 
   /**
    * redirectUrl 사용 시 PC·모바일 모두 동일한 리다이렉트 복귀 흐름을 쓰도록 보강합니다.
+   * 모바일은 KG이니시스 기본값(IFRAME/POPUP)이면 결제 UI가 안 뜨므로 REDIRECTION을 강제합니다.
+   * DevTools 좁은 화면은 UA가 PC라 windowType.pc를 쓰므로, 모바일형 환경에서는 pc도 REDIRECTION입니다.
    */
   function enhancePortoneRequestParams(params) {
     var next = Object.assign({}, params || {});
     if (next.redirectUrl) {
       next.forceRedirect = true;
     }
+    var windowType = Object.assign({}, next.windowType || {});
+    if (!windowType.mobile) {
+      windowType.mobile = "REDIRECTION";
+    }
+    if (isMobileLikeEnvironment() && !windowType.pc) {
+      windowType.pc = "REDIRECTION";
+    }
+    next.windowType = windowType;
     return next;
+  }
+
+  /**
+   * forceRedirect 이후에도 페이지가 그대로면 결제창이 열리지 않은 것으로 보고 가드를 해제합니다.
+   */
+  function armRedirectWatchdog(onStuck, waitMs) {
+    var fired = false;
+    var timer = global.setTimeout(function () {
+      if (fired) {
+        return;
+      }
+      if (global.document && global.document.visibilityState === "hidden") {
+        return;
+      }
+      fired = true;
+      if (typeof onStuck === "function") {
+        onStuck();
+      }
+    }, waitMs || 8000);
+    function cancel() {
+      fired = true;
+      global.clearTimeout(timer);
+    }
+    global.addEventListener("pagehide", cancel, { once: true });
+    return cancel;
   }
 
   /**
@@ -741,6 +787,7 @@
     buildPortoneRedirectUrl: buildPortoneRedirectUrl,
     isMobileLikeEnvironment: isMobileLikeEnvironment,
     enhancePortoneRequestParams: enhancePortoneRequestParams,
+    armRedirectWatchdog: armRedirectWatchdog,
     isRedirectDeferredResponse: isRedirectDeferredResponse,
     isPaymentFinalizeInProgress: isPaymentFinalizeInProgress,
     preparePaymentDeparture: preparePaymentDeparture,

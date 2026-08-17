@@ -268,6 +268,10 @@
       if (paypalParams.redirectUrl) {
         paypalParams.forceRedirect = true;
       }
+      paypalParams.windowType = Object.assign(
+        { mobile: "REDIRECTION" },
+        paypalParams.windowType || {},
+      );
       return paypalParams;
     }
 
@@ -291,6 +295,7 @@
     if (params.redirectUrl) {
       params.forceRedirect = true;
     }
+    params.windowType = Object.assign({ mobile: "REDIRECTION" }, params.windowType || {});
 
     if (meta.category === "easy_pay" && meta.easyPayProvider) {
       params.easyPay = { easyPayProvider: meta.easyPayProvider };

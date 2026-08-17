@@ -42,7 +42,7 @@
     <!-- PortOne v2 Browser SDK (KG이니시스) + V1 SDK (PayPal Express Checkout, 영문 미사용·코드 유지) -->
     <script src="https://cdn.portone.io/v2/browser-sdk.js"></script>
     <script src="https://cdn.iamport.kr/v1/iamport.js"></script>
-    <script src="js/payment-portone-flow.js?v=7"></script>
+    <script src="js/payment-portone-flow.js?v=8"></script>
     <script src="js/booking-token-client.js?v=5"></script>
     <script src="js/booking-checkout-guard.js?v=17"></script>
     <!--
@@ -669,7 +669,7 @@
       </div>
 
       <script src="js/booking-pricing.js?v=7"></script>
-      <script src="js/payment-methods.js?v=9"></script>
+      <script src="js/payment-methods.js?v=10"></script>
       <script>
         document.addEventListener("DOMContentLoaded", function () {
           var siteLang = "kr";
@@ -1619,6 +1619,13 @@
               showPageLoading(
                 "결제창으로 이동합니다. 결제 완료 후 자동으로 돌아옵니다...",
               );
+              if (portoneFlow.armRedirectWatchdog) {
+                portoneFlow.armRedirectWatchdog(function () {
+                  showError(
+                    "결제창을 열지 못했습니다. 잠시 후 다시 시도해 주세요.",
+                  );
+                }, 6000);
+              }
               return;
             }
 
@@ -2212,7 +2219,7 @@
       </div>
 
       <script src="js/booking-pricing.js?v=7"></script>
-      <script src="js/payment-methods.js?v=9"></script>
+      <script src="js/payment-methods.js?v=10"></script>
       <script>
         document.addEventListener("DOMContentLoaded", function () {
           var siteLang = "kr";
@@ -3467,6 +3474,13 @@
               showPageLoading(
                 "Opening the payment window. You will return here after payment...",
               );
+              if (portoneFlowEn.armRedirectWatchdog) {
+                portoneFlowEn.armRedirectWatchdog(function () {
+                  showError(
+                    "The payment window did not open. Please try again.",
+                  );
+                }, 6000);
+              }
               return;
             }
 
