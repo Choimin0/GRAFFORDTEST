@@ -384,6 +384,14 @@
             notFoundOverlayEn.classList.remove("is-visible");
         }
 
+        function resolveStoredRefundAmount(data) {
+          if (data == null || data.refundAmount == null || data.refundAmount === "") {
+            return "";
+          }
+          var n = Number(data.refundAmount);
+          return Number.isFinite(n) ? String(n) : "";
+        }
+
         function goToDeleteComplete(data) {
           sessionStorage.setItem(
             "graffordDeleteCompleteData",
@@ -399,12 +407,11 @@
               totalAmount: String(resolveStoredTotalAmount(data)),
               paymentMethod: data.payMethod || "",
               reservedAt: data.createdAt || "",
-              cancelledAt: data.cancelledAt || new Date().toISOString(),
+              cancelledAt: data.cancelledAt || "",
               cancelReason: data.cancelReason || "",
-              refundAmount:
-                typeof data.refundAmount === "number"
-                  ? String(data.refundAmount)
-                  : "",
+              cancelReasonCode: data.cancelReasonCode || data.cancelReason || "",
+              cancelReasonDetail: data.cancelReasonDetail || "",
+              refundAmount: resolveStoredRefundAmount(data),
               bookingLocale: data.bookingLocale || "kr",
               cancelAlarmSentCount: Number(data.cancelAlarmSentCount) || 0,
             }),
@@ -485,8 +492,13 @@
                     ).toLowerCase();
                     var isNotPaidAuto = dr === "not paid";
                     var refundNum = null;
-                    if (isNotPaidAuto) {
-                      refundNum = Number(row.totalAmount || 0);
+                    if (
+                      row.refundAmount != null &&
+                      Number.isFinite(Number(row.refundAmount))
+                    ) {
+                      refundNum = Number(row.refundAmount);
+                    } else if (isNotPaidAuto) {
+                      refundNum = 0;
                     }
                     goToDeleteComplete({
                       orderNo: row.reservationNumber,
@@ -499,11 +511,15 @@
                       totalAmount: row.totalAmount || 0,
                       payMethod: row.paymentMethod || "",
                       createdAt: row.createdAt || "",
-                      cancelledAt: new Date().toISOString(),
+                      cancelledAt:
+                        row.cancelledAtIso || row.cancelledAt || "",
                       cancelReason:
                         row.cancelReason ||
                         result.data.deleteReason ||
                         (isNotPaidAuto ? "미입금 자동 취소" : ""),
+                      cancelReasonCode:
+                        row.cancelReason || result.data.deleteReason || "",
+                      cancelReasonDetail: row.otherReason || "",
                       refundAmount: refundNum,
                       bookingLocale: row.bookingLocale || "kr",
                       cancelAlarmSentCount:

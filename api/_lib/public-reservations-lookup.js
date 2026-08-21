@@ -219,7 +219,8 @@ export async function handlePublicReservationsLookup(req, res, pool) {
         id, reservation_number, guest_name, contact, room_type,
         check_in_date, check_out_date, guest_count, stay_nights,
         extra_guests, total_amount, guest_request, payment_method,
-        bank_confirmed, created_at, status, cancel_reason, booking_locale,
+        bank_confirmed, created_at, status, cancel_reason, other_reason,
+        cancelled_at, refund_amount, booking_locale,
         refunded_count, cancel_alarm_sent_count
       FROM ${BOOKING_TABLE}
       WHERE reservation_number = $1
@@ -310,6 +311,13 @@ export async function handlePublicReservationsLookup(req, res, pool) {
           ? new Date(row.created_at).toISOString()
           : null,
         cancelReason: row.cancel_reason || "",
+        otherReason: row.other_reason || "",
+        cancelledAt: formatDateTimeKst(row.cancelled_at),
+        cancelledAtIso: row.cancelled_at
+          ? new Date(row.cancelled_at).toISOString()
+          : null,
+        refundAmount:
+          row.refund_amount != null ? Number(row.refund_amount) : null,
         bookingLocale: resolveEffectiveBookingLocale(
           row.booking_locale,
           pii.contact,

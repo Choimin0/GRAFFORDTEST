@@ -304,9 +304,10 @@
           var cancelReasonDetail = String(
             (saved && saved.cancelReasonDetail) || "",
           ).trim();
-          var refundAmountRaw = String(
-            (saved && saved.refundAmount) || "",
-          ).trim();
+          var refundAmountRaw =
+            saved && saved.refundAmount != null && saved.refundAmount !== ""
+              ? String(saved.refundAmount).trim()
+              : "";
 
           function formatKRW(n) {
             return Number(n || 0).toLocaleString("ko-KR") + "원";
@@ -442,8 +443,8 @@
           }
 
           var refundAmount = Number(refundAmountRaw);
-          if (!isFinite(refundAmount)) {
-            refundAmount = paidAmount;
+          if (refundAmountRaw === "" || !isFinite(refundAmount) || refundAmount < 0) {
+            refundAmount = 0;
           }
 
           function formatRefundKRW(n) {
