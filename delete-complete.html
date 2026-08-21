@@ -556,7 +556,10 @@
           setText("done-refund-amount-en", formatRefundKRWEn(refundAmount));
 
           var rawOrderNo = String((saved && saved.orderNo) || "").trim();
+          var cancelAlarmSentCount =
+            Number((saved && saved.cancelAlarmSentCount) || 0) || 0;
           if (
+            cancelAlarmSentCount < 1 &&
             window.GraffordAlimtalkNotify &&
             rawOrderNo &&
             name &&

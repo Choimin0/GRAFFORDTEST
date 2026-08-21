@@ -1,5 +1,6 @@
 /**
- * reserve-complete / delete-complete 페이지에서 1회만 알림톡 발송을 요청합니다.
+ * reserve-complete / delete-complete 페이지에서 알림톡 발송을 요청합니다.
+ * 예약 취소 알림톡은 서버 DB 발송 횟수(cancel_alarm_sent_count)가 1회 이상이면 재발송하지 않습니다.
  * 실제 발송은 서버(/api/alimtalk-notify)에서 DB 검증 후 처리합니다.
  */
 (function (global) {
@@ -76,6 +77,16 @@
     }
     if (shouldSkipAlimtalk(type, payload)) {
       return Promise.resolve({ ok: true, skipped: true, reason: "english_booking" });
+    }
+    if (
+      type === "cancel-complete" &&
+      (Number(payload && payload.cancelAlarmSentCount) || 0) >= 1
+    ) {
+      return Promise.resolve({
+        ok: true,
+        skipped: true,
+        reason: "already_sent",
+      });
     }
     var key = storageKey(type, orderNo);
     try {

@@ -7,7 +7,11 @@ import {
   resolvePaidAmountForBooking,
 } from "./refund-amount.js";
 import { shouldSendAlimtalk } from "./booking-locale.js";
-import { queueBookingAlimtalk } from "./solapi-alimtalk.js";
+import { sendBookingAlimtalk } from "./solapi-alimtalk.js";
+import {
+  claimFirstCancelAlarmSend,
+  releaseCancelAlarmSendClaim,
+} from "./cancel-alarm-sent-count.js";
 import { exportCancellationToBigQuery } from "./bigquery-export.js";
 import { json } from "./admin-common.js";
 import { applyBookingRetentionToRow } from "./booking-retention.js";
@@ -415,14 +419,28 @@ export async function handleAdminPaymentCancel(res, pool, body) {
       !isExternalManual &&
       shouldSendAlimtalk(row.booking_locale, cancelledPii.contact)
     ) {
-      queueBookingAlimtalk("cancel-complete", {
-        guestName: cancelledPii.guestName,
-        contact: cancelledPii.contact,
-        reservationNumber: reservationNumber,
-        roomType: row.room_type,
-        checkIn: normalizeCheckInYmd(row.check_in_date) || "",
-        checkOut: normalizeCheckInYmd(row.check_out_date) || "",
-      });
+      claimFirstCancelAlarmSend(pool, reservationNumber)
+        .then(function (claimed) {
+          if (!claimed) {
+            return null;
+          }
+          return sendBookingAlimtalk("cancel-complete", {
+            guestName: cancelledPii.guestName,
+            contact: cancelledPii.contact,
+            reservationNumber: reservationNumber,
+            roomType: row.room_type,
+            checkIn: normalizeCheckInYmd(row.check_in_date) || "",
+            checkOut: normalizeCheckInYmd(row.check_out_date) || "",
+          }).then(function (sendResult) {
+            if (sendResult && sendResult.ok && !sendResult.skipped) {
+              return sendResult;
+            }
+            return releaseCancelAlarmSendClaim(pool, reservationNumber);
+          });
+        })
+        .catch(function (err) {
+          console.error("admin-payment-cancel alimtalk", err);
+        });
     }
 
     json(res, 200, {

@@ -12,6 +12,11 @@ import {
   sendBookingAlimtalk,
 } from "./solapi-alimtalk.js";
 import { applyBookingRetentionToRow } from "./booking-retention.js";
+import {
+  claimFirstCancelAlarmSend,
+  readCancelAlarmSentCount,
+  releaseCancelAlarmSendClaim,
+} from "./cancel-alarm-sent-count.js";
 
 const BOOKING_TABLE = "booking";
 
@@ -138,7 +143,7 @@ export async function handlePublicAlimtalkNotify(req, res, pool) {
 
   try {
     var sel = await pool.query(
-      `SELECT guest_name, contact, room_type, check_in_date, check_out_date, status, booking_locale, created_at
+      `SELECT guest_name, contact, room_type, check_in_date, check_out_date, status, booking_locale, created_at, cancel_alarm_sent_count
        FROM ${BOOKING_TABLE}
        WHERE reservation_number = $1
        LIMIT 1`,
@@ -194,6 +199,34 @@ export async function handlePublicAlimtalkNotify(req, res, pool) {
       return true;
     }
 
+    var cancelAlarmSentCount = readCancelAlarmSentCount(row);
+    if (type === "cancel-complete" && cancelAlarmSentCount >= 1) {
+      json(res, 200, {
+        ok: true,
+        skipped: true,
+        reason: "already_sent",
+        cancelAlarmSentCount: cancelAlarmSentCount,
+      });
+      return true;
+    }
+
+    var claimedCancelSlot = false;
+    if (type === "cancel-complete") {
+      claimedCancelSlot = await claimFirstCancelAlarmSend(
+        pool,
+        reservationNumber,
+      );
+      if (!claimedCancelSlot) {
+        json(res, 200, {
+          ok: true,
+          skipped: true,
+          reason: "already_sent",
+          cancelAlarmSentCount: Math.max(cancelAlarmSentCount, 1),
+        });
+        return true;
+      }
+    }
+
     var sendResult = await sendBookingAlimtalk(
       type,
       {
@@ -206,6 +239,19 @@ export async function handlePublicAlimtalkNotify(req, res, pool) {
       },
       { skipGuest: skipGuest },
     );
+
+    if (sendResult.skipped || !sendResult.ok) {
+      if (claimedCancelSlot) {
+        try {
+          await releaseCancelAlarmSendClaim(pool, reservationNumber);
+        } catch (releaseErr) {
+          console.error(
+            "alimtalk-notify release cancel claim",
+            releaseErr,
+          );
+        }
+      }
+    }
 
     if (sendResult.skipped) {
       json(res, 200, {
@@ -228,6 +274,7 @@ export async function handlePublicAlimtalkNotify(req, res, pool) {
       sent: true,
       guestSkipped: !!sendResult.guestSkipped,
       adminSent: sendResult.adminSent === true,
+      cancelAlarmSentCount: type === "cancel-complete" ? 1 : undefined,
     });
   } catch (e) {
     console.error("alimtalk-notify handler", e);

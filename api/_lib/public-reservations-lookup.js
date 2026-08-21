@@ -220,7 +220,7 @@ export async function handlePublicReservationsLookup(req, res, pool) {
         check_in_date, check_out_date, guest_count, stay_nights,
         extra_guests, total_amount, guest_request, payment_method,
         bank_confirmed, created_at, status, cancel_reason, booking_locale,
-        refunded_count
+        refunded_count, cancel_alarm_sent_count
       FROM ${BOOKING_TABLE}
       WHERE reservation_number = $1
       LIMIT 1`,
@@ -315,6 +315,10 @@ export async function handlePublicReservationsLookup(req, res, pool) {
           pii.contact,
         ),
         refundedCount: refundedCount,
+        cancelAlarmSentCount:
+          row.cancel_alarm_sent_count != null
+            ? Number(row.cancel_alarm_sent_count) || 0
+            : 0,
       },
     });
   } catch (e) {

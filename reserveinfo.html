@@ -406,6 +406,7 @@
                   ? String(data.refundAmount)
                   : "",
               bookingLocale: data.bookingLocale || "kr",
+              cancelAlarmSentCount: Number(data.cancelAlarmSentCount) || 0,
             }),
           );
           window.location.href = "delete-complete.html";
@@ -505,6 +506,8 @@
                         (isNotPaidAuto ? "미입금 자동 취소" : ""),
                       refundAmount: refundNum,
                       bookingLocale: row.bookingLocale || "kr",
+                      cancelAlarmSentCount:
+                        Number(row.cancelAlarmSentCount) || 0,
                     });
                     return;
                   }
