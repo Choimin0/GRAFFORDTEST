@@ -109,6 +109,7 @@ async function getMonthlySalesData(pool, month) {
         ($1::date + INTERVAL '1 month')::date AS next_month_start
     ),
     all_res AS (
+      -- Occupancy counts confirmed/completed bookings only. Room blocks are excluded.
       SELECT check_in_date, check_out_date
       FROM ${BOOKING_TABLE}, month_bounds
       WHERE status IN ('confirm', 'completed')
@@ -376,6 +377,7 @@ async function getAnnualSalesData(pool, year) {
       FROM generate_series(1, 12) AS month_num
     ),
     all_res AS (
+      -- Occupancy counts confirmed/completed bookings only. Room blocks are excluded.
       SELECT check_in_date, check_out_date
       FROM ${BOOKING_TABLE}, year_bounds
       WHERE status IN ('confirm', 'completed')

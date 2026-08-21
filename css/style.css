@@ -12872,6 +12872,10 @@ main.content-section.confirm-page.admin-page {
 .admin-calendar-room-bar.is-platform-phone {
   background: #6f57a8;
 }
+.admin-calendar-room-bar.is-platform-block {
+  background: var(--stone-blue);
+  cursor: pointer;
+}
 .admin-calendar-room-bar__idx {
   display: inline-flex;
   flex-shrink: 0;
@@ -12991,6 +12995,9 @@ main.content-section.confirm-page.admin-page {
   border-style: dashed;
   background: color-mix(in srgb, var(--stone-100) 48%, var(--stone-50));
 }
+.admin-calendar-detail-item.is-blocked {
+  border-color: color-mix(in srgb, var(--stone-blue) 35%, var(--stone-200));
+}
 .admin-calendar-detail-item__head {
   display: flex;
   align-items: center;
@@ -13030,6 +13037,11 @@ main.content-section.confirm-page.admin-page {
   border-color: var(--stone-200);
   background: transparent;
   color: var(--stone-400);
+}
+.admin-room-state-badge--blocked {
+  background: var(--stone-blue);
+  color: var(--stone-50);
+  font-weight: 400;
 }
 .admin-room-state-badges {
   display: inline-flex;
@@ -14699,7 +14711,7 @@ main.content-section.confirm-page.admin-page {
 }
 .admin-room-block-layout {
   display: grid;
-  grid-template-columns: minmax(280px, 420px) minmax(0, 1fr);
+  grid-template-columns: minmax(280px, 480px) minmax(0, 1fr);
   gap: var(--space-24);
   align-items: start;
 }
@@ -14785,6 +14797,43 @@ main.content-section.confirm-page.admin-page {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: var(--space-24);
+}
+.admin-room-block-date-summary {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-16);
+}
+.admin-room-block-date-summary div {
+  display: grid;
+  gap: var(--space-8);
+}
+.admin-room-block-date-summary span {
+  color: var(--stone-400);
+  font-size: 0.68rem;
+  font-weight: 400;
+  letter-spacing: 0.14em;
+}
+.admin-room-block-date-summary strong {
+  color: var(--stone-800);
+  font-family: var(--font-family-body-kr);
+  font-size: 0.82rem;
+  font-weight: 400;
+}
+.admin-room-block-calendar.admin-res-entry-calendar-wrap {
+  margin-top: 0;
+}
+.admin-room-block-calendar .admin-res-entry-cal-grid.is-selecting-checkout
+  .admin-res-entry-cal-day.is-booked:not(:disabled):not(.is-checkin):not(.is-checkout) {
+  opacity: 1;
+  color: var(--stone-400);
+}
+.admin-room-block-calendar .admin-res-entry-cal-day.is-soldout:not(.is-checkin):not(.is-checkout) {
+  color: var(--stone-400);
+}
+.admin-room-block-calendar .admin-res-entry-cal-day.is-checkin,
+.admin-room-block-calendar .admin-res-entry-cal-day.is-checkout {
+  opacity: 1;
+  color: var(--stone-50);
 }
 .admin-room-block-date-grid label,
 .admin-room-block-label {
@@ -15356,6 +15405,9 @@ main.content-section.confirm-page.admin-page {
     padding-top: 0;
   }
   .admin-room-block-layout {
+    grid-template-columns: 1fr;
+  }
+  .admin-room-block-date-summary {
     grid-template-columns: 1fr;
   }
 }

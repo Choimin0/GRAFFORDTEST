@@ -2462,6 +2462,11 @@
         var roomStatusManageRows = [];
         var roomBlockRows = [];
         var selectedBlockRooms = [];
+        var selectedBlockStartDate = "";
+        var selectedBlockEndDate = "";
+        var blockCalViewDate = null;
+        var blockOccupiedNightSet = new Set();
+        var blockAvailabilityKey = "";
         var roomRateRows = [];
         var roomChargeRows = [];
         var CHARGE_LABELS = {
@@ -3250,11 +3255,72 @@
 
         function isRoomOccupiedOnDate(room, ymd) {
           var status = getRoomStatusForDate(room, ymd);
+          // Dashboard occupancy uses real reservations only; room blocks are excluded.
           return (
             status.state === "checkin" ||
             status.state === "stay" ||
             status.state === "split"
           );
+        }
+
+        function toCalendarBlockRow(block) {
+          if (!block) {
+            return null;
+          }
+          return {
+            isBlock: true,
+            checkIn: dateKey(block.startDate || block.checkIn),
+            checkOut: dateKey(block.endDate || block.checkOut),
+            guestName: "예약막기",
+            roomType: block.roomName || block.roomType || "",
+            reservationNumber: block.id || "",
+            reason: block.reason || "",
+            memo: block.memo || "",
+          };
+        }
+
+        function getRoomBlockRowForCalendarNight(room, ymd) {
+          var roomName = String(room || "").toUpperCase();
+          var match = null;
+          (roomBlockRows || []).forEach(function (block) {
+            if (match) {
+              return;
+            }
+            if (String((block && block.roomName) || "").toUpperCase() !== roomName) {
+              return;
+            }
+            var row = toCalendarBlockRow(block);
+            if (isReservationNight(row, ymd)) {
+              match = row;
+            }
+          });
+          return match;
+        }
+
+        function isDisplayedBlockNight(room, ymd, blockRow) {
+          return (
+            isReservationNight(blockRow, ymd) &&
+            !getReservationRowForCalendarNight(room, ymd)
+          );
+        }
+
+        function getBlockCalendarSegmentRole(room, blockRow, ymd, monthLastYmd) {
+          var next = addOneDay(ymd, 1);
+          var prev = addOneDay(ymd, -1);
+          var isEnd =
+            !isDisplayedBlockNight(room, next, blockRow) ||
+            getDayOfWeekFromYmd(ymd) === 6 ||
+            compareYmd(next, monthLastYmd) > 0;
+          var isStart =
+            isDisplayedBlockNight(room, ymd, blockRow) &&
+            (dateKey(blockRow.checkIn) === ymd ||
+              getDayOfWeekFromYmd(ymd) === 0 ||
+              Number(String(ymd || "").split("-")[2]) === 1 ||
+              !isDisplayedBlockNight(room, prev, blockRow));
+          return {
+            isStart: isStart,
+            isEnd: isEnd,
+          };
         }
 
         function getCalendarBarPlatformId(row) {
@@ -3495,6 +3561,50 @@
               });
             })(room, ymd, row);
             track.appendChild(bar);
+            return track;
+          }
+
+          var blockRow = getRoomBlockRowForCalendarNight(room, ymd);
+          if (blockRow) {
+            var blockSeg = getBlockCalendarSegmentRole(
+              room,
+              blockRow,
+              ymd,
+              monthLastYmd,
+            );
+            var blockBar = document.createElement("div");
+            blockBar.className =
+              "admin-calendar-room-bar is-occupied is-platform-block";
+            appendCalendarSegmentClasses(blockBar, blockSeg);
+            if (blockSeg.isStart) {
+              var blockIdx = document.createElement("span");
+              blockIdx.className = "admin-calendar-room-bar__idx";
+              blockIdx.textContent = String(roomIndex) + ".";
+              var blockName = document.createElement("span");
+              blockName.className = "admin-calendar-room-bar__name";
+              blockName.textContent = "예약막기";
+              blockBar.appendChild(blockIdx);
+              blockBar.appendChild(blockName);
+            }
+            blockBar.setAttribute("role", "button");
+            blockBar.setAttribute("tabindex", "0");
+            blockBar.setAttribute("aria-label", "예약막기 상세 보기");
+            (function (dateVal) {
+              function openBlockDetail(ev) {
+                ev.stopPropagation();
+                renderCalendarDetail(dateVal);
+                renderStatusCalendar();
+              }
+              blockBar.addEventListener("click", openBlockDetail);
+              blockBar.addEventListener("keydown", function (ev) {
+                if (ev.key === "Enter" || ev.key === " ") {
+                  ev.preventDefault();
+                  ev.stopPropagation();
+                  openBlockDetail(ev);
+                }
+              });
+            })(ymd);
+            track.appendChild(blockBar);
             return track;
           }
 
@@ -3991,7 +4101,7 @@
           );
         }
 
-        function buildCalendarDetailStatusBadgesHtml(status) {
+        function buildCalendarDetailStatusBadgesHtml(status, extraBlocked) {
           if (status.state === "split") {
             var checkoutLabel = status.checkoutRow.isExternal
               ? "에어비앤비"
@@ -4003,6 +4113,17 @@
               "<span class='admin-room-state-badges'>" +
               buildRoomStateBadgeHtml("checkout", checkoutLabel) +
               buildRoomStateBadgeHtml("checkin", checkinLabel) +
+              (extraBlocked
+                ? buildRoomStateBadgeHtml("blocked", "방막기")
+                : "") +
+              "</span>"
+            );
+          }
+          if (extraBlocked && status.state !== "blocked") {
+            return (
+              "<span class='admin-room-state-badges'>" +
+              buildRoomStateBadgeHtml(status.state, status.label) +
+              buildRoomStateBadgeHtml("blocked", "방막기") +
               "</span>"
             );
           }
@@ -4046,8 +4167,48 @@
           );
         }
 
-        function buildCalendarDetailCard(room, status) {
+        function buildCalendarBlockDetailHtml(row) {
+          if (!row) {
+            return "";
+          }
+          return (
+            "<dl class='admin-calendar-detail-kv'>" +
+            "<div><dt>구분</dt><dd>방막기</dd></div>" +
+            "<div><dt>기간</dt><dd>" +
+            escapeHtml(formatReservationSchedule(row)) +
+            "</dd></div>" +
+            "<div><dt>사유</dt><dd>" +
+            escapeHtml(row.reason || "—") +
+            "</dd></div>" +
+            "<div><dt>메모</dt><dd>" +
+            escapeHtml(row.memo || "—") +
+            "</dd></div>" +
+            "</dl>"
+          );
+        }
+
+        function resolveCalendarDetailStatus(room, ymd) {
+          var status = getRoomStatusForDate(room, ymd);
+          if (status.state === "vacant" || status.state === "checkout") {
+            var blockRow = getRoomBlockRowForCalendarNight(room, ymd);
+            if (blockRow && status.state === "vacant") {
+              return {
+                state: "blocked",
+                label: "방막기",
+                row: blockRow,
+                isSimultaneousTurnover: false,
+              };
+            }
+          }
+          return status;
+        }
+
+        function buildCalendarDetailCard(room, status, ymd) {
           var row = status.row;
+          var targetYmd = ymd || selectedCalendarDate || getTodayYmdKst();
+          var extraBlocked =
+            status.state !== "blocked" &&
+            !!getRoomBlockRowForCalendarNight(room, targetYmd);
           var card = document.createElement("article");
           card.className = "admin-calendar-detail-item is-" + status.state;
           card.innerHTML =
@@ -4055,7 +4216,7 @@
             "<strong>" +
             room +
             "</strong>" +
-            buildCalendarDetailStatusBadgesHtml(status) +
+            buildCalendarDetailStatusBadgesHtml(status, extraBlocked) +
             "</div>";
           if (status.state === "split") {
             card.innerHTML +=
@@ -4069,8 +4230,24 @@
               buildCalendarReservationDetailHtml(status.checkinRow) +
               "</div>" +
               "</div>";
+            if (extraBlocked) {
+              card.innerHTML +=
+                "<p class='admin-calendar-detail-split__label'>방막기</p>" +
+                buildCalendarBlockDetailHtml(
+                  getRoomBlockRowForCalendarNight(room, targetYmd),
+                );
+            }
+          } else if (status.state === "blocked") {
+            card.innerHTML += buildCalendarBlockDetailHtml(row);
           } else if (row) {
             card.innerHTML += buildCalendarReservationDetailHtml(row);
+            if (extraBlocked) {
+              card.innerHTML +=
+                "<p class='admin-calendar-detail-split__label'>방막기</p>" +
+                buildCalendarBlockDetailHtml(
+                  getRoomBlockRowForCalendarNight(room, targetYmd),
+                );
+            }
           }
           return card;
         }
@@ -4088,7 +4265,7 @@
           }
           weekResModalContent.innerHTML = "";
           weekResModalContent.appendChild(
-            buildCalendarDetailCard(room, status),
+            buildCalendarDetailCard(room, status, ymd),
           );
           weekResModal.hidden = false;
         }
@@ -4390,9 +4567,9 @@
             formatDateLabel(selectedCalendarDate);
           calendarDetailList.innerHTML = "";
           getAdminRooms().forEach(function (room) {
-            var status = getRoomStatusForDate(room, selectedCalendarDate);
+            var status = resolveCalendarDetailStatus(room, selectedCalendarDate);
             calendarDetailList.appendChild(
-              buildCalendarDetailCard(room, status),
+              buildCalendarDetailCard(room, status, selectedCalendarDate),
             );
           });
         }
@@ -10102,7 +10279,6 @@
           if (!roomManageBlockPanel) {
             return;
           }
-          var today = getTodayYmdKst();
           roomManageBlockPanel.innerHTML =
             "<div class='admin-room-block-layout'>" +
             "<section class='admin-room-block-card admin-room-block-form-card'>" +
@@ -10118,13 +10294,24 @@
             "</fieldset>" +
             "<fieldset class='admin-room-block-fieldset'>" +
             "<legend>막기 기간 <span>*</span></legend>" +
-            "<div class='admin-room-block-date-grid'>" +
-            "<label><span>시작일</span><input id='admin-block-start-date' type='date' min='" +
-            today +
-            "' /></label>" +
-            "<label><span>종료일</span><input id='admin-block-end-date' type='date' min='" +
-            today +
-            "' /></label>" +
+            "<div class='admin-room-block-date-summary'>" +
+            "<div><span>시작일</span><strong id='admin-block-start-display'>—</strong></div>" +
+            "<div><span>종료일</span><strong id='admin-block-end-display'>—</strong></div>" +
+            "<div><span>기간</span><strong id='admin-block-nights-display'>—</strong></div>" +
+            "</div>" +
+            "<div class='admin-res-entry-calendar-wrap admin-room-block-calendar'>" +
+            "<div class='admin-res-entry-calendar' aria-label='방막기 시작일·종료일 선택'>" +
+            "<div class='admin-res-entry-cal-header'>" +
+            "<button type='button' class='admin-res-entry-cal-nav' id='admin-block-cal-prev' aria-label='이전 달'>‹</button>" +
+            "<span class='admin-res-entry-cal-month-label' id='admin-block-cal-month-label'></span>" +
+            "<button type='button' class='admin-res-entry-cal-nav' id='admin-block-cal-next' aria-label='다음 달'>›</button>" +
+            "</div>" +
+            "<div class='admin-res-entry-cal-weekdays' aria-hidden='true'>" +
+            "<span>일</span><span>월</span><span>화</span><span>수</span><span>목</span><span>금</span><span>토</span>" +
+            "</div>" +
+            "<div class='admin-res-entry-cal-grid' id='admin-block-cal-grid' role='grid'></div>" +
+            "</div>" +
+            "<p class='admin-res-entry-cal-hint' id='admin-block-cal-hint'></p>" +
             "</div>" +
             "</fieldset>" +
             "<label class='admin-room-block-label'><span class='admin-room-block-label-title'>사유 <i>*</i></span><select id='admin-block-reason'><option value=''>사유를 선택하세요</option><option value='수리·점검'>수리·점검</option><option value='청소·정비'>청소·정비</option><option value='장기 미판매'>장기 미판매</option><option value='행사·촬영'>행사·촬영</option><option value='오너 직접 사용'>오너 직접 사용</option><option value='기타'>기타</option></select></label>" +
@@ -10162,15 +10349,34 @@
               }
               renderBlockRoomButtons();
               validateBlockForm();
+              loadBlockAvailability();
             });
             roomGrid.appendChild(btn);
           });
 
-          var startInput = roomManageBlockPanel.querySelector(
-            "#admin-block-start-date",
+          var startDisplay = roomManageBlockPanel.querySelector(
+            "#admin-block-start-display",
           );
-          var endInput = roomManageBlockPanel.querySelector(
-            "#admin-block-end-date",
+          var endDisplay = roomManageBlockPanel.querySelector(
+            "#admin-block-end-display",
+          );
+          var nightsDisplay = roomManageBlockPanel.querySelector(
+            "#admin-block-nights-display",
+          );
+          var calGrid = roomManageBlockPanel.querySelector(
+            "#admin-block-cal-grid",
+          );
+          var calMonthLabel = roomManageBlockPanel.querySelector(
+            "#admin-block-cal-month-label",
+          );
+          var calPrevBtn = roomManageBlockPanel.querySelector(
+            "#admin-block-cal-prev",
+          );
+          var calNextBtn = roomManageBlockPanel.querySelector(
+            "#admin-block-cal-next",
+          );
+          var calHint = roomManageBlockPanel.querySelector(
+            "#admin-block-cal-hint",
           );
           var reasonSelect = roomManageBlockPanel.querySelector(
             "#admin-block-reason",
@@ -10184,6 +10390,238 @@
           var countEl =
             roomManageBlockPanel.querySelector("#admin-block-count");
 
+          function parseBlockYmdDate(ymd) {
+            var p = String(ymd || "").split("-");
+            if (p.length !== 3) {
+              return null;
+            }
+            var d = new Date(Number(p[0]), Number(p[1]) - 1, Number(p[2]));
+            d.setHours(0, 0, 0, 0);
+            return isNaN(d.getTime()) ? null : d;
+          }
+
+          function ensureBlockCalView() {
+            if (blockCalViewDate) {
+              return;
+            }
+            var seed =
+              selectedBlockStartDate ||
+              selectedBlockEndDate ||
+              getTodayYmdKst();
+            var seedDate = parseBlockYmdDate(seed) || new Date();
+            blockCalViewDate = new Date(
+              seedDate.getFullYear(),
+              seedDate.getMonth(),
+              1,
+            );
+          }
+
+          function updateBlockCalHint() {
+            if (!calHint) {
+              return;
+            }
+            var legendHtml =
+              ' <span class="admin-res-entry-cal-legend"><span class="admin-res-entry-cal-legend__booked">예약 완료</span></span>';
+            var baseHint =
+              "달력에서 시작일을 먼저 선택한 뒤, 종료일을 선택하세요.";
+            if (!selectedBlockRooms.length) {
+              calHint.textContent =
+                baseHint +
+                " 객실을 선택하면 이미 예약된 날짜가 회색으로 표시됩니다. 회색 날짜도 방막기 기간에 포함할 수 있습니다.";
+              return;
+            }
+            calHint.innerHTML =
+              baseHint +
+              " 회색 날짜는 이미 예약되었거나 방막기된 날짜입니다. 시작일·종료일에 포함해도 방막기를 설정할 수 있습니다." +
+              legendHtml;
+          }
+
+          function updateBlockDateSummary() {
+            if (startDisplay) {
+              startDisplay.textContent = selectedBlockStartDate
+                ? formatResEntryDate(selectedBlockStartDate)
+                : "—";
+            }
+            if (endDisplay) {
+              endDisplay.textContent = selectedBlockEndDate
+                ? formatResEntryDate(selectedBlockEndDate)
+                : "—";
+            }
+            if (nightsDisplay) {
+              if (selectedBlockStartDate && selectedBlockEndDate) {
+                var nights = diffNights(
+                  selectedBlockStartDate,
+                  selectedBlockEndDate,
+                );
+                nightsDisplay.textContent = nights > 0 ? nights + "박" : "—";
+              } else {
+                nightsDisplay.textContent = "—";
+              }
+            }
+          }
+
+          function renderBlockCalendar() {
+            if (!calGrid || !calMonthLabel) {
+              return;
+            }
+            ensureBlockCalView();
+            var y = blockCalViewDate.getFullYear();
+            var m = blockCalViewDate.getMonth();
+            calMonthLabel.textContent = y + "년 " + (m + 1) + "월";
+
+            var today = new Date();
+            today.setHours(0, 0, 0, 0);
+            var firstDay = new Date(y, m, 1).getDay();
+            var lastDate = new Date(y, m + 1, 0).getDate();
+            var startDate = parseBlockYmdDate(selectedBlockStartDate);
+            var endDate = parseBlockYmdDate(selectedBlockEndDate);
+
+            calGrid.innerHTML = "";
+            calGrid.classList.toggle(
+              "is-selecting-checkout",
+              !!(selectedBlockStartDate && !selectedBlockEndDate),
+            );
+
+            var i;
+            for (i = 0; i < firstDay; i++) {
+              var empty = document.createElement("span");
+              empty.className = "admin-res-entry-cal-cell is-empty";
+              empty.setAttribute("aria-hidden", "true");
+              calGrid.appendChild(empty);
+            }
+
+            for (var d = 1; d <= lastDate; d++) {
+              (function (dayNum) {
+                var cellDate = new Date(y, m, dayNum);
+                cellDate.setHours(0, 0, 0, 0);
+                var btn = document.createElement("button");
+                btn.type = "button";
+                btn.className =
+                  "admin-res-entry-cal-cell admin-res-entry-cal-day";
+                btn.setAttribute("role", "gridcell");
+
+                var ymdStr = formatResEntryYmd(cellDate);
+                var isPast = cellDate.getTime() < today.getTime();
+                var isSoldout = blockOccupiedNightSet.has(ymdStr);
+                var disabled = isPast;
+
+                btn.disabled = disabled;
+                btn.dataset.disabledReason = disabled ? "past" : "enabled";
+
+                if (isPast) {
+                  btn.classList.add("is-past");
+                } else if (isSoldout) {
+                  btn.classList.add("is-booked", "is-soldout");
+                }
+
+                if (startDate && resEntrySameDay(cellDate, startDate)) {
+                  btn.classList.add("is-checkin");
+                }
+                if (endDate && resEntrySameDay(cellDate, endDate)) {
+                  btn.classList.add("is-checkout");
+                }
+                if (
+                  startDate &&
+                  endDate &&
+                  resEntryDateLt(startDate, cellDate) &&
+                  resEntryDateLt(cellDate, endDate)
+                ) {
+                  btn.classList.add("is-range");
+                }
+
+                if (isSoldout && !isPast) {
+                  btn.textContent = "";
+                  var soldDay = document.createElement("span");
+                  soldDay.className = "admin-res-entry-cal-soldout-day";
+                  soldDay.textContent = String(dayNum);
+                  btn.appendChild(soldDay);
+                } else {
+                  btn.textContent = String(dayNum);
+                }
+
+                btn.addEventListener("click", function () {
+                  if (btn.disabled) {
+                    return;
+                  }
+                  if (
+                    !selectedBlockStartDate ||
+                    (selectedBlockStartDate && selectedBlockEndDate)
+                  ) {
+                    selectedBlockStartDate = ymdStr;
+                    selectedBlockEndDate = "";
+                  } else if (
+                    startDate &&
+                    resEntrySameDay(cellDate, startDate)
+                  ) {
+                    selectedBlockStartDate = "";
+                    selectedBlockEndDate = "";
+                  } else if (startDate && resEntryDateLt(cellDate, startDate)) {
+                    selectedBlockStartDate = ymdStr;
+                    selectedBlockEndDate = "";
+                  } else {
+                    selectedBlockEndDate = ymdStr;
+                  }
+                  updateBlockDateSummary();
+                  renderBlockCalendar();
+                  validateBlockForm();
+                });
+
+                calGrid.appendChild(btn);
+              })(d);
+            }
+
+            updateBlockCalHint();
+          }
+
+          function loadBlockAvailability() {
+            var rooms = selectedBlockRooms.slice();
+            if (!rooms.length) {
+              blockOccupiedNightSet = new Set();
+              blockAvailabilityKey = "";
+              renderBlockCalendar();
+              return Promise.resolve();
+            }
+            var key = rooms
+              .slice()
+              .sort()
+              .join(",");
+            blockAvailabilityKey = key;
+            return Promise.all(
+              rooms.map(function (room) {
+                return fetch(
+                  publicApiUrl() +
+                    "/api/reservations?room=" +
+                    encodeURIComponent(room) +
+                    "&availability=1",
+                ).then(function (r) {
+                  return r.json();
+                });
+              }),
+            )
+              .then(function (results) {
+                if (blockAvailabilityKey !== key) {
+                  return;
+                }
+                var occupied = new Set();
+                results.forEach(function (data) {
+                  if (data && data.ok) {
+                    (data.occupiedNights || []).forEach(function (n) {
+                      occupied.add(n);
+                    });
+                  }
+                });
+                blockOccupiedNightSet = occupied;
+                renderBlockCalendar();
+              })
+              .catch(function () {
+                if (blockAvailabilityKey !== key) {
+                  return;
+                }
+                blockOccupiedNightSet = new Set();
+                renderBlockCalendar();
+              });
+          }
+
           function renderBlockRoomButtons() {
             roomManageBlockPanel
               .querySelectorAll(".admin-room-block-room-btn")
@@ -10196,8 +10634,8 @@
           }
 
           function validateBlockForm() {
-            var start = startInput ? startInput.value : "";
-            var end = endInput ? endInput.value : "";
+            var start = selectedBlockStartDate || "";
+            var end = selectedBlockEndDate || "";
             var reason = reasonSelect ? reasonSelect.value : "";
             var isValid =
               selectedBlockRooms.length > 0 &&
@@ -10207,9 +10645,6 @@
               reason;
             if (submitBtn) {
               submitBtn.disabled = !isValid;
-            }
-            if (endInput && start) {
-              endInput.min = start;
             }
           }
 
@@ -10298,24 +10733,45 @@
                     : [];
                 renderBlockRoomButtons();
                 validateBlockForm();
+                loadBlockAvailability();
               });
             });
-          [startInput, endInput, reasonSelect, memoInput].forEach(
-            function (el) {
-              if (el) {
-                el.addEventListener("input", validateBlockForm);
-                el.addEventListener("change", validateBlockForm);
-              }
-            },
-          );
+          [reasonSelect, memoInput].forEach(function (el) {
+            if (el) {
+              el.addEventListener("input", validateBlockForm);
+              el.addEventListener("change", validateBlockForm);
+            }
+          });
+          if (calPrevBtn) {
+            calPrevBtn.addEventListener("click", function () {
+              ensureBlockCalView();
+              blockCalViewDate = new Date(
+                blockCalViewDate.getFullYear(),
+                blockCalViewDate.getMonth() - 1,
+                1,
+              );
+              renderBlockCalendar();
+            });
+          }
+          if (calNextBtn) {
+            calNextBtn.addEventListener("click", function () {
+              ensureBlockCalView();
+              blockCalViewDate = new Date(
+                blockCalViewDate.getFullYear(),
+                blockCalViewDate.getMonth() + 1,
+                1,
+              );
+              renderBlockCalendar();
+            });
+          }
           if (submitBtn) {
             submitBtn.addEventListener("click", function () {
               validateBlockForm();
               if (submitBtn.disabled) return;
               openRoomBlockSaveConfirm({
                 rooms: selectedBlockRooms.slice(),
-                startDate: startInput.value,
-                endDate: endInput.value,
+                startDate: selectedBlockStartDate,
+                endDate: selectedBlockEndDate,
                 reason: reasonSelect.value,
                 memo: memoInput ? memoInput.value : "",
               });
@@ -10331,7 +10787,9 @@
               });
             });
           renderBlockRoomButtons();
+          updateBlockDateSummary();
           validateBlockForm();
+          loadBlockAvailability();
         }
 
         function saveRoomRateRow(
@@ -10526,7 +10984,11 @@
                 throw new Error(result.data.error || "방막기 적용 실패");
               }
               roomBlockRows = result.data.blockRows || [];
+              selectedBlockStartDate = "";
+              selectedBlockEndDate = "";
               renderRoomBlockPanel();
+              renderStatusCalendar();
+              renderTodayStatusPanels();
               showMessage("방막기가 적용되었습니다.");
             });
         }
@@ -10550,6 +11012,8 @@
               }
               roomBlockRows = result.data.blockRows || [];
               renderRoomBlockPanel();
+              renderStatusCalendar();
+              renderTodayStatusPanels();
               showMessage("방막기가 해제되었습니다.");
             });
         }
