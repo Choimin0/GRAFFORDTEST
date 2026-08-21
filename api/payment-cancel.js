@@ -22,6 +22,8 @@ import {
 } from "./_lib/refund-amount.js";
 import { exportCancellationToBigQuery } from "./_lib/bigquery-export.js";
 import { applyBookingRetentionToRow } from "./_lib/booking-retention.js";
+import { isGuestSelfCancelClosed } from "./_lib/booking-archive.js";
+import { computeCancellationFeePercent } from "./_lib/cancellation-fee.js";
 const { Pool } = pg;
 
 const BOOKING_TABLE = "booking";
@@ -133,8 +135,6 @@ function formatDateTimeKst(v) {
   }).format(d);
 }
 
-var FREE_CANCEL_WINDOW_MS = 24 * 60 * 60 * 1000;
-
 function formatYmdKst(d) {
   return new Intl.DateTimeFormat("en-CA", {
     timeZone: "Asia/Seoul",
@@ -142,18 +142,6 @@ function formatYmdKst(d) {
     month: "2-digit",
     day: "2-digit",
   }).format(d);
-}
-
-function ymdAddDays(ymd, deltaDays) {
-  var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(ymd || ""));
-  if (!m) return null;
-  var d = new Date(
-    Date.UTC(Number(m[1]), Number(m[2]) - 1, Number(m[3]) + deltaDays),
-  );
-  var y = d.getUTCFullYear();
-  var mo = String(d.getUTCMonth() + 1).padStart(2, "0");
-  var da = String(d.getUTCDate()).padStart(2, "0");
-  return y + "-" + mo + "-" + da;
 }
 
 /** check_in_date (DATE / string / Date) → YYYY-MM-DD */
@@ -181,51 +169,12 @@ function normalizeCheckInYmd(v) {
   return formatYmdKst(d);
 }
 
-function remainDaysUntilCheckInKst(checkInYmd) {
-  if (!checkInYmd) return 0;
-  var todayYmd = formatYmdKst(new Date());
-  var a = Date.UTC(
-    Number(todayYmd.slice(0, 4)),
-    Number(todayYmd.slice(5, 7)) - 1,
-    Number(todayYmd.slice(8, 10)),
-  );
-  var b = Date.UTC(
-    Number(checkInYmd.slice(0, 4)),
-    Number(checkInYmd.slice(5, 7)) - 1,
-    Number(checkInYmd.slice(8, 10)),
-  );
-  return Math.floor((b - a) / 86400000);
-}
-
-function policyCancellationFeePercent(remainDays) {
-  if (remainDays >= 15) return 0;
-  if (remainDays >= 12) return 20;
-  if (remainDays >= 9) return 30;
-  if (remainDays >= 7) return 40;
-  if (remainDays >= 5) return 50;
-  return 100;
-}
-
-/**
- * 취소 시 부과되는 위약금 비율(%). 0이면 전액 환불.
- * — 예약 완료(created_at) 후 24시간 이내 + 체크인 당일·전날 예약이 아니면 0%.
- * — 체크인 당일 또는 전날에 예약한 경우에는 24시간 이내라도 날짜별 규정만 적용.
- */
-function computeCancellationFeePercent(row) {
-  var checkInYmd = normalizeCheckInYmd(row.check_in_date);
-  if (!checkInYmd) return 100;
-  var remain = remainDaysUntilCheckInKst(checkInYmd);
-  var policyPct = policyCancellationFeePercent(remain);
-  var created = row.created_at ? new Date(row.created_at) : null;
-  if (!created || isNaN(created.getTime())) return policyPct;
-  var bookingYmdKst = formatYmdKst(created);
-  var dayBefore = ymdAddDays(checkInYmd, -1);
-  var isLastMinuteBooking =
-    bookingYmdKst === checkInYmd ||
-    (dayBefore != null && bookingYmdKst === dayBefore);
-  var within24h = Date.now() - created.getTime() <= FREE_CANCEL_WINDOW_MS;
-  if (!isLastMinuteBooking && within24h) return 0;
-  return policyPct;
+function computeCancellationFeePercentForRow(row, at) {
+  return computeCancellationFeePercent({
+    checkInYmd: normalizeCheckInYmd(row && row.check_in_date),
+    createdAt: row && row.created_at,
+    at: at,
+  });
 }
 
 function normalizeLookupName(s) {
@@ -548,6 +497,16 @@ export default async function handler(req, res) {
       return;
     }
 
+    if (isGuestSelfCancelClosed(normalizeCheckInYmd(row.check_in_date))) {
+      client.release();
+      json(res, 403, {
+        ok: false,
+        error:
+          "체크인 당일부터는 온라인 취소가 불가합니다. 숙소로 문의해 주세요.",
+      });
+      return;
+    }
+
     var pgTid = row.pg_tid ? String(row.pg_tid).trim() : null;
     // payment_method: "bank" / "무통장입금" 이면 PG 취소 불필요; 그 외(card 등)는 PortOne 취소
     var paymentMethodDb = String(row.payment_method || "")
@@ -564,7 +523,7 @@ export default async function handler(req, res) {
       isBankTransfer: isBankTransfer,
     });
     var paidAmountNum = paidResolution.paidAmount;
-    var feePercent = computeCancellationFeePercent(row);
+    var feePercent = computeCancellationFeePercentForRow(row);
     // 클라이언트 refundAmount는 참고만 — 최종 결제액 기준으로 서버 재산출(조작 방지)
     var safeRefundAmount = computeRefundAmount(paidAmountNum, feePercent);
 

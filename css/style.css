@@ -11197,8 +11197,26 @@ main.content-section.confirm-page.reserve-check-main {
 .reserve-check-footer__actions {
   display: flex;
   flex-wrap: wrap;
+  align-items: center;
   gap: var(--space-8);
   justify-content: flex-end;
+}
+
+.reserve-check-footer-stay-done {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.65rem;
+  margin: 0;
+  padding: 0 var(--space-8) 0 0;
+  font-size: 0.88rem;
+  font-weight: 400;
+  letter-spacing: 0.02em;
+  color: var(--stone-500);
+}
+
+.reserve-check-footer-stay-done[hidden],
+.reserve-check-footer-btn[hidden] {
+  display: none;
 }
 
 .reserve-check-footer-btn {

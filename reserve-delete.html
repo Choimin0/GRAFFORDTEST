@@ -199,6 +199,14 @@
                   — 천재 지변 또는 기상 악화로 인한 비행기·배 결항 시, 관련 서류
                   제출 시 100% 환불됩니다.
                 </div>
+                <div class="payment-callout payment-callout--green">
+                  <strong class="payment-callout__strong"
+                    >24시간 내 무료 취소</strong
+                  >
+                  — 결제 완료 시점으로부터 24시간 이내이고, 체크인 날짜 0시
+                  이전이면 위약금 없이 전액 환불됩니다. 체크인 날짜 0시가 지나면
+                  24시간 이내라도 날짜별 환불 규정이 적용됩니다.
+                </div>
               </section>
 
               <div class="reserve-delete-refund-info-box">
@@ -535,6 +543,7 @@
             0;
 
           var FREE_CANCEL_WINDOW_MS = 24 * 60 * 60 * 1000;
+          var KST_OFFSET_MS = 9 * 60 * 60 * 1000;
 
           function formatYmdKst(d) {
             return new Intl.DateTimeFormat("en-CA", {
@@ -543,22 +552,6 @@
               month: "2-digit",
               day: "2-digit",
             }).format(d);
-          }
-
-          function ymdAddDays(ymd, deltaDays) {
-            var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(ymd || ""));
-            if (!m) return null;
-            var d = new Date(
-              Date.UTC(
-                Number(m[1]),
-                Number(m[2]) - 1,
-                Number(m[3]) + deltaDays,
-              ),
-            );
-            var y = d.getUTCFullYear();
-            var mo = String(d.getUTCMonth() + 1).padStart(2, "0");
-            var da = String(d.getUTCDate()).padStart(2, "0");
-            return y + "-" + mo + "-" + da;
           }
 
           function normalizeCheckInYmdLocal(s) {
@@ -590,6 +583,50 @@
             if (remainDays >= 7) return 40;
             if (remainDays >= 5) return 50;
             return 100;
+          }
+
+          function isBeforeCheckInDateKst(checkInYmd) {
+            if (!checkInYmd) return false;
+            return formatYmdKst(new Date()) < checkInYmd;
+          }
+
+          function fullRefundDeadlineMs(created, checkInYmd) {
+            if (!created || isNaN(created.getTime())) {
+              return null;
+            }
+            var plus24 = created.getTime() + FREE_CANCEL_WINDOW_MS;
+            var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(checkInYmd || ""));
+            if (!m) {
+              return plus24;
+            }
+            var checkInStartMs =
+              Date.UTC(Number(m[1]), Number(m[2]) - 1, Number(m[3]), 0, 0, 0) -
+              KST_OFFSET_MS;
+            return Math.min(plus24, checkInStartMs);
+          }
+
+          function formatDeadlineKo(ms) {
+            return new Intl.DateTimeFormat("ko-KR", {
+              timeZone: "Asia/Seoul",
+              year: "numeric",
+              month: "long",
+              day: "numeric",
+              hour: "2-digit",
+              minute: "2-digit",
+              hour12: false,
+            }).format(new Date(ms));
+          }
+
+          function formatDeadlineEn(ms) {
+            return new Intl.DateTimeFormat("en-US", {
+              timeZone: "Asia/Seoul",
+              year: "numeric",
+              month: "long",
+              day: "numeric",
+              hour: "2-digit",
+              minute: "2-digit",
+              hour12: false,
+            }).format(new Date(ms));
           }
 
           var refundAmount = 0;
@@ -638,16 +675,8 @@
               bookingTime &&
               !isNaN(bookingTime.getTime()) &&
               Date.now() - bookingTime.getTime() <= FREE_CANCEL_WINDOW_MS;
-            var bookingYmdKst =
-              bookingTime && !isNaN(bookingTime.getTime())
-                ? formatYmdKst(bookingTime)
-                : "";
-            var dayBefore = checkInYmd ? ymdAddDays(checkInYmd, -1) : null;
-            var isLastMinuteBooking =
-              !!checkInYmd &&
-              (bookingYmdKst === checkInYmd ||
-                (dayBefore != null && bookingYmdKst === dayBefore));
-            var freeByGrace = !!within24h && !isLastMinuteBooking;
+            var beforeCheckInDate = isBeforeCheckInDateKst(checkInYmd);
+            var freeByGrace = !!within24h && beforeCheckInDate;
             refundCharge = freeByGrace ? 0 : policyCharge;
             refundAmount = Math.max(
               0,
@@ -656,18 +685,35 @@
 
             var refundTextKr = formatKRW(refundAmount);
             var refundTextEn = formatKRWEn(refundAmount);
+            var deadlineMs =
+              bookingTime && !isNaN(bookingTime.getTime())
+                ? fullRefundDeadlineMs(bookingTime, checkInYmd)
+                : null;
+            var deadlineKr =
+              deadlineMs != null ? formatDeadlineKo(deadlineMs) : "";
+            var deadlineEn =
+              deadlineMs != null ? formatDeadlineEn(deadlineMs) : "";
 
             var summaryKr;
             var summaryEn;
-            if (freeByGrace && policyCharge > 0) {
+            if (freeByGrace) {
               summaryKr =
-                "예약 완료 시점 기준 " +
-                refundEmphasisKr("24시간 이내 취소") +
-                "로, 위약금 없이 " +
+                "결제 완료 후 " +
+                refundEmphasisKr("24시간 이내") +
+                "이고 체크인 날짜 0시 이전이므로, 위약금 없이 " +
                 refundEmphasisKr("전액 환불") +
                 "이 적용됩니다.";
+              if (deadlineKr) {
+                summaryKr +=
+                  " 이 조건은 " +
+                  refundEmphasisKr(deadlineKr) +
+                  " 전까지 유지됩니다.";
+              }
               summaryEn =
-                "A full refund applies with no penalty because you are cancelling within 24 hours of completing your reservation.";
+                "A full refund applies with no penalty because you are cancelling within 24 hours of payment and before midnight on the check-in date.";
+              if (deadlineEn) {
+                summaryEn += " This window ends before " + deadlineEn + ".";
+              }
             } else if (refundCharge === 0) {
               summaryKr =
                 "입실일까지 남은 날짜 " +
@@ -692,11 +738,11 @@
                 " day(s) until check-in, a cancellation fee of " +
                 refundCharge +
                 "% applies.";
-              if (isLastMinuteBooking && within24h) {
+              if (within24h && !beforeCheckInDate) {
                 summaryKr +=
-                  " (체크인 당일·전날 예약은 예약 완료 후 24시간 이내라도 날짜별 규정이 적용됩니다.)";
+                  " (체크인 날짜 0시가 지나면 결제 후 24시간 이내라도 날짜별 규정이 적용됩니다.)";
                 summaryEn +=
-                  " (Bookings made on the check-in date or the day before follow the date-based policy even within 24 hours.)";
+                  " (After midnight on the check-in date, the date-based policy applies even within 24 hours of payment.)";
               }
             }
 
@@ -1263,6 +1309,14 @@
                   <strong class="payment-callout__strong">Special terms</strong>
                   — For flight or ferry cancellations due to force majeure or
                   severe weather, submit supporting documents for a 100% refund.
+                </div>
+                <div class="payment-callout payment-callout--green">
+                  <strong class="payment-callout__strong"
+                    >Free cancellation within 24 hours</strong
+                  >
+                  — A full refund applies if you cancel within 24 hours of
+                  payment and before midnight on the check-in date. After that
+                  midnight, the date-based policy applies even within 24 hours.
                 </div>
               </section>
 

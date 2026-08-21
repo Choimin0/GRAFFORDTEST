@@ -355,6 +355,7 @@
               cancelToken: data.cancelToken || "",
               bookingCreatedAtIso: data.bookingCreatedAtIso || "",
               bookingLocale: data.bookingLocale || "kr",
+              refundedCount: Number(data.refundedCount) || 0,
             }),
           );
           window.location.href = "reserve-check.html";
@@ -523,6 +524,7 @@
                     cancelToken: result.data.cancelToken || "",
                     bookingCreatedAtIso: row.createdAtIso || "",
                     bookingLocale: row.bookingLocale || "kr",
+                    refundedCount: Number(row.refundedCount) || 0,
                   });
                   return;
                 }

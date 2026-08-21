@@ -8,7 +8,10 @@ import {
   purgeExpiredBookings,
 } from "./booking-retention.js";
 import { resolveEffectiveBookingLocale } from "./booking-locale.js";
-import { archivePastReservations } from "./booking-archive.js";
+import {
+  archivePastReservations,
+  isGuestSelfCancelClosed,
+} from "./booking-archive.js";
 
 const LEGACY_TO_ROOM = { A: "G1", B: "G2", C: "G3", D: "G4" };
 const DEFAULT_CANCEL_TOKEN_TTL_MS = 10 * 60 * 1000;
@@ -216,7 +219,8 @@ export async function handlePublicReservationsLookup(req, res, pool) {
         id, reservation_number, guest_name, contact, room_type,
         check_in_date, check_out_date, guest_count, stay_nights,
         extra_guests, total_amount, guest_request, payment_method,
-        bank_confirmed, created_at, status, cancel_reason, booking_locale
+        bank_confirmed, created_at, status, cancel_reason, booking_locale,
+        refunded_count
       FROM ${BOOKING_TABLE}
       WHERE reservation_number = $1
       LIMIT 1`,
@@ -240,6 +244,11 @@ export async function handlePublicReservationsLookup(req, res, pool) {
 
     var pii = decryptBookingPiiResponse(row);
     var isCancelled = row.status === "cancelled";
+    var refundedCount =
+      row.refunded_count != null ? Number(row.refunded_count) : 0;
+    if (!Number.isFinite(refundedCount)) {
+      refundedCount = 0;
+    }
 
     if (!isCancelled) {
       json(res, 200, {
@@ -268,8 +277,11 @@ export async function handlePublicReservationsLookup(req, res, pool) {
             row.booking_locale,
             pii.contact,
           ),
+          refundedCount: refundedCount,
         },
-        cancelToken: issueCancelToken(row.reservation_number, pii.guestName),
+        cancelToken: isGuestSelfCancelClosed(toYMD(row.check_in_date))
+          ? ""
+          : issueCancelToken(row.reservation_number, pii.guestName),
       });
       return true;
     }
@@ -302,6 +314,7 @@ export async function handlePublicReservationsLookup(req, res, pool) {
           row.booking_locale,
           pii.contact,
         ),
+        refundedCount: refundedCount,
       },
     });
   } catch (e) {

@@ -284,6 +284,11 @@
               >
             </div>
             <div class="reserve-check-footer__actions">
+              <p
+                class="reserve-check-footer-stay-done"
+                id="reserve-check-footer-status-kr"
+                hidden
+              ></p>
               <a
                 href="reserve-delete.html"
                 id="complete-link-cancel"
@@ -347,6 +352,8 @@
           var payMethod = (saved && saved.payMethod) || "";
           var cancelToken = (saved && saved.cancelToken) || "";
           var bookingCreatedAtIso = (saved && saved.bookingCreatedAtIso) || "";
+          var refundedCount =
+            parseInt(String((saved && saved.refundedCount) || "0"), 10) || 0;
           var orderTextEl = document.getElementById("check-order-no-text");
           var orderDisplayKr = orderNo || "번호를 확인할 수 없습니다.";
           if (orderTextEl) {
@@ -577,41 +584,160 @@
             });
           }
 
-          var cancelPayloadCheck = {
-            orderNo: orderNo || "",
-            name: guestName || "",
-            contact: contact || "",
-            email: email || "",
-            room: room || "",
-            checkIn: checkIn || "",
-            checkOut: checkOut || "",
-            amount: String(paidAmount || 0),
-            totalAmount: String(paidAmount || 0),
-            extraGuests: String(extraGuests || "0"),
-            payMethod: payMethod || "",
-            request: guestRequest || "",
-            cancelToken: cancelToken || "",
-            bookingCreatedAtIso: bookingCreatedAtIso || "",
-            bookingLocale: bookingLocale || "kr",
-          };
-          var cancelPayloadCheckStr = JSON.stringify(cancelPayloadCheck);
-          var cancelLink = document.getElementById("complete-link-cancel");
-          if (cancelLink) {
-            sessionStorage.setItem(
-              "graffordCancelPayload",
-              cancelPayloadCheckStr,
-            );
-            cancelLink.href = "reserve-delete.html";
+          function formatYmdKst(d) {
+            return new Intl.DateTimeFormat("en-CA", {
+              timeZone: "Asia/Seoul",
+              year: "numeric",
+              month: "2-digit",
+              day: "2-digit",
+            }).format(d);
           }
+
+          function normalizeYmd(value) {
+            var s = String(value || "")
+              .trim()
+              .slice(0, 10);
+            return /^\d{4}-\d{2}-\d{2}$/.test(s) ? s : "";
+          }
+
+          function lookupApiUrl() {
+            var base = "";
+            if (typeof window !== "undefined" && window.__GRAFFORD_API_BASE__) {
+              base = String(window.__GRAFFORD_API_BASE__).replace(/\/$/, "");
+            }
+            return base + "/api/reservations-lookup";
+          }
+
+          function parseRefundedCount(value) {
+            var n = Number(value);
+            return Number.isFinite(n) ? n : 0;
+          }
+
+          var statusKr = document.getElementById(
+            "reserve-check-footer-status-kr",
+          );
+          var statusEn = document.getElementById(
+            "reserve-check-footer-status-en",
+          );
+          var cancelLink = document.getElementById("complete-link-cancel");
           var cancelLinkEnChk = document.getElementById(
             "complete-link-cancel-en-check",
           );
-          if (cancelLinkEnChk) {
-            sessionStorage.setItem(
-              "graffordCancelPayload",
-              cancelPayloadCheckStr,
-            );
-            cancelLinkEnChk.href = "reserve-delete.html";
+
+          function applyFooterState(nextRefundedCount) {
+            var todayYmd = formatYmdKst(new Date());
+            var checkInYmd = normalizeYmd(checkIn);
+            var checkOutYmd = normalizeYmd(checkOut);
+            var hasRefund = parseRefundedCount(nextRefundedCount) !== 0;
+            var inStay =
+              !!checkInYmd &&
+              !!checkOutYmd &&
+              todayYmd >= checkInYmd &&
+              todayYmd <= checkOutYmd;
+            var afterStay = !!checkOutYmd && todayYmd > checkOutYmd;
+            var mode = "cancel";
+            var statusTextKr = "";
+            var statusTextEn = "";
+
+            if (inStay) {
+              mode = "stay";
+              statusTextKr = "오늘은 투숙일입니다";
+              statusTextEn = "Today is your stay period";
+            } else if (afterStay) {
+              mode = "done";
+              statusTextKr = "투숙이 완료되었습니다";
+              statusTextEn = "Your stay has been completed";
+            } else if (hasRefund) {
+              mode = "refunded";
+              statusTextKr = "환불이 완료된 예약입니다";
+              statusTextEn = "This reservation has already been refunded";
+            }
+
+            var showStatus = mode !== "cancel";
+            var showCancel = mode === "cancel";
+
+            if (statusKr) {
+              statusKr.textContent = statusTextKr;
+              statusKr.hidden = !showStatus;
+            }
+            if (statusEn) {
+              statusEn.textContent = statusTextEn;
+              statusEn.hidden = !showStatus;
+            }
+            if (cancelLink) {
+              cancelLink.hidden = !showCancel;
+            }
+            if (cancelLinkEnChk) {
+              cancelLinkEnChk.hidden = !showCancel;
+            }
+
+            if (!showCancel) {
+              return;
+            }
+
+            var cancelPayloadCheck = {
+              orderNo: orderNo || "",
+              name: guestName || "",
+              contact: contact || "",
+              email: email || "",
+              room: room || "",
+              checkIn: checkIn || "",
+              checkOut: checkOut || "",
+              amount: String(paidAmount || 0),
+              totalAmount: String(paidAmount || 0),
+              extraGuests: String(extraGuests || "0"),
+              payMethod: payMethod || "",
+              request: guestRequest || "",
+              cancelToken: cancelToken || "",
+              bookingCreatedAtIso: bookingCreatedAtIso || "",
+              bookingLocale: bookingLocale || "kr",
+            };
+            var cancelPayloadCheckStr = JSON.stringify(cancelPayloadCheck);
+            if (cancelLink) {
+              sessionStorage.setItem(
+                "graffordCancelPayload",
+                cancelPayloadCheckStr,
+              );
+              cancelLink.href = "reserve-delete.html";
+            }
+            if (cancelLinkEnChk) {
+              sessionStorage.setItem(
+                "graffordCancelPayload",
+                cancelPayloadCheckStr,
+              );
+              cancelLinkEnChk.href = "reserve-delete.html";
+            }
+          }
+
+          applyFooterState(refundedCount);
+
+          if (orderNo && guestName) {
+            fetch(lookupApiUrl(), {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                guestName: guestName,
+                reservationNumber: orderNo,
+              }),
+            })
+              .then(function (resp) {
+                return resp.json();
+              })
+              .then(function (data) {
+                var row = data && data.ok && data.row ? data.row : null;
+                var nextCount = refundedCount;
+                if (row && row.refundedCount != null) {
+                  nextCount = parseRefundedCount(row.refundedCount);
+                }
+                if (data && data.deleted === true && nextCount === 0) {
+                  nextCount = 1;
+                }
+                if (row && row.createdAtIso) {
+                  bookingCreatedAtIso = row.createdAtIso;
+                }
+                applyFooterState(nextCount);
+              })
+              .catch(function () {});
           }
         });
       </script>
@@ -877,6 +1003,11 @@
               >
             </div>
             <div class="reserve-check-footer__actions">
+              <p
+                class="reserve-check-footer-stay-done"
+                id="reserve-check-footer-status-en"
+                hidden
+              ></p>
               <a
                 href="reserve-delete.html"
                 id="complete-link-cancel-en-check"

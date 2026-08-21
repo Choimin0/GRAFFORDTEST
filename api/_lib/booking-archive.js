@@ -39,6 +39,15 @@ export function getInitialBookingStatusForCheckout(checkOutYmd, at = new Date())
   return shouldTreatCheckoutAsPast(checkOutYmd, at) ? "completed" : "confirm";
 }
 
+/** 체크인 당일부터 투숙객 직접 취소(환불) 불가. 관리자 취소는 별도 API. */
+export function isGuestSelfCancelClosed(checkInYmd, at = new Date()) {
+  var checkIn = String(checkInYmd || "").slice(0, 10);
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(checkIn)) {
+    return false;
+  }
+  return getTodayYmdKst(at) >= checkIn;
+}
+
 export async function archivePastReservations(pool) {
   // 체크아웃일이 KST 기준 오늘 이전이면 'completed'로 전환.
   // 체크아웃일 = 오늘이면 KST 12시 이후에만 'completed'로 전환.
