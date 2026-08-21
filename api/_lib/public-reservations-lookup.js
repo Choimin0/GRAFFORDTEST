@@ -87,6 +87,33 @@ function formatDateTimeKst(v) {
   }).format(d);
 }
 
+function formatYmdKst(v) {
+  if (v == null || v === "") {
+    return "";
+  }
+  var d = new Date(v);
+  if (isNaN(d.getTime())) {
+    return "";
+  }
+  return new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Asia/Seoul",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(d);
+}
+
+function isoFromDb(v) {
+  if (v == null || v === "") {
+    return null;
+  }
+  var d = new Date(v);
+  if (isNaN(d.getTime())) {
+    return null;
+  }
+  return d.toISOString();
+}
+
 function readBody(req) {
   return new Promise(function (resolve, reject) {
     var chunks = [];
@@ -271,9 +298,8 @@ export async function handlePublicReservationsLookup(req, res, pool) {
           paymentMethod: row.payment_method || null,
           bankConfirmed: row.bank_confirmed === true,
           createdAt: formatDateTimeKst(row.created_at),
-          createdAtIso: row.created_at
-            ? new Date(row.created_at).toISOString()
-            : null,
+          createdAtIso: isoFromDb(row.created_at),
+          createdAtYmd: formatYmdKst(row.created_at),
           bookingLocale: resolveEffectiveBookingLocale(
             row.booking_locale,
             pii.contact,
@@ -307,15 +333,13 @@ export async function handlePublicReservationsLookup(req, res, pool) {
         paymentMethod: row.payment_method || null,
         bankConfirmed: row.bank_confirmed === true,
         createdAt: formatDateTimeKst(row.created_at),
-        createdAtIso: row.created_at
-          ? new Date(row.created_at).toISOString()
-          : null,
+        createdAtIso: isoFromDb(row.created_at),
+        createdAtYmd: formatYmdKst(row.created_at),
         cancelReason: row.cancel_reason || "",
         otherReason: row.other_reason || "",
         cancelledAt: formatDateTimeKst(row.cancelled_at),
-        cancelledAtIso: row.cancelled_at
-          ? new Date(row.cancelled_at).toISOString()
-          : null,
+        cancelledAtIso: isoFromDb(row.cancelled_at),
+        cancelledAtYmd: formatYmdKst(row.cancelled_at),
         refundAmount:
           row.refund_amount != null ? Number(row.refund_amount) : null,
         bookingLocale: resolveEffectiveBookingLocale(

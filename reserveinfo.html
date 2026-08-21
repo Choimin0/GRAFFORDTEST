@@ -510,9 +510,16 @@
                       extraGuests: row.extraGuests || 0,
                       totalAmount: row.totalAmount || 0,
                       payMethod: row.paymentMethod || "",
-                      createdAt: row.createdAt || "",
+                      createdAt:
+                        row.createdAtYmd ||
+                        row.createdAtIso ||
+                        row.createdAt ||
+                        "",
                       cancelledAt:
-                        row.cancelledAtIso || row.cancelledAt || "",
+                        row.cancelledAtYmd ||
+                        row.cancelledAtIso ||
+                        row.cancelledAt ||
+                        "",
                       cancelReason:
                         row.cancelReason ||
                         result.data.deleteReason ||

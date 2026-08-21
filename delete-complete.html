@@ -329,9 +329,19 @@
             if (/^\d{4}-\d{2}-\d{2}$/.test(ymd)) {
               return ymd.replace(/-/g, ".");
             }
-            var d = new Date(v);
+            var dotted = /^(\d{4})\.\s*(\d{1,2})\.\s*(\d{1,2})/.exec(ymd);
+            if (dotted) {
+              return (
+                dotted[1] +
+                "." +
+                dotted[2].padStart(2, "0") +
+                "." +
+                dotted[3].padStart(2, "0")
+              );
+            }
+            var d = new Date(ymd);
             if (isNaN(d.getTime())) {
-              return v;
+              return "—";
             }
             return new Intl.DateTimeFormat("ko-KR", {
               timeZone: "Asia/Seoul",
@@ -442,9 +452,25 @@
             return String(rawReason || "").trim() || "—";
           }
 
-          var refundAmount = Number(refundAmountRaw);
-          if (refundAmountRaw === "" || !isFinite(refundAmount) || refundAmount < 0) {
-            refundAmount = 0;
+          function parseRefundAmount(raw) {
+            if (raw == null || raw === "") {
+              return 0;
+            }
+            var n = Number(raw);
+            if (!isFinite(n) || n < 0) {
+              return 0;
+            }
+            return n;
+          }
+
+          var refundAmount = parseRefundAmount(refundAmountRaw);
+
+          function lookupApiUrl() {
+            var base = "";
+            if (typeof window !== "undefined" && window.__GRAFFORD_API_BASE__) {
+              base = String(window.__GRAFFORD_API_BASE__).replace(/\/$/, "");
+            }
+            return base + "/api/reservations-lookup";
           }
 
           function formatRefundKRW(n) {
@@ -463,13 +489,6 @@
             }
           }
 
-          var roomLabel = ROOM_LABEL[room] || room || "—";
-          var scheduleText =
-            formatDateIsoSeoul(checkIn) + " - " + formatDateIsoSeoul(checkOut);
-          var reserveCancelDateText =
-            formatDateOnly(reservedAt) + " / " + formatDateOnly(cancelledAt);
-          var methodKey = paymentMethod.toLowerCase();
-
           function refundSummaryKr(n) {
             if (!Number.isFinite(n) || n <= 0) {
               return "환불 없음";
@@ -482,7 +501,7 @@
             }
             return "Refund of " + Number(n).toLocaleString("en-US") + " KRW";
           }
-          function refundDetailKr(n, key) {
+          function refundDetailKr(n) {
             if (!Number.isFinite(n) || n <= 0) {
               return "환불 금액이 없습니다.";
             }
@@ -492,7 +511,7 @@
               ")"
             );
           }
-          function refundDetailEn(n, key) {
+          function refundDetailEn(n) {
             if (!Number.isFinite(n) || n <= 0) {
               return "There is no refund amount for this cancellation.";
             }
@@ -503,68 +522,158 @@
             );
           }
 
-          setText("band-booking-no-kr", orderNo || "—");
-          setText("band-room-kr", roomLabel || "—");
-          setText("band-booking-no-en", orderNo || "—");
-          setText("band-room-en", roomLabel || "—");
-          setText("delete-refund-summary-kr", refundSummaryKr(refundAmount));
-          setText("delete-refund-summary-en", refundSummaryEn(refundAmount));
-          setText(
-            "delete-refund-detail-kr",
-            refundDetailKr(refundAmount, methodKey),
-          );
-          setText(
-            "delete-refund-detail-en",
-            refundDetailEn(refundAmount, methodKey),
-          );
+          function persistSaved() {
+            if (!saved || typeof saved !== "object") {
+              saved = {};
+            }
+            saved.orderNo = orderNo;
+            saved.room = room;
+            saved.checkIn = checkIn;
+            saved.checkOut = checkOut;
+            saved.name = name;
+            saved.contact = contact;
+            saved.bookingLocale = bookingLocale;
+            saved.amount = String(paidAmount || 0);
+            saved.totalAmount = String(paidAmount || 0);
+            saved.paymentMethod = paymentMethod;
+            saved.reservedAt = reservedAt;
+            saved.cancelledAt = cancelledAt;
+            saved.cancelReason = cancelReason;
+            saved.cancelReasonCode = cancelReasonCode;
+            saved.cancelReasonDetail = cancelReasonDetail;
+            saved.refundAmount = String(refundAmount);
+            try {
+              sessionStorage.setItem(
+                "graffordDeleteCompleteData",
+                JSON.stringify(saved),
+              );
+            } catch (e) {}
+          }
 
-          // Korean
-          setText("done-order", orderNo);
-          setText("done-room", roomLabel);
-          setText("done-schedule", scheduleText);
-          setText("done-name", name);
-          setText("done-contact", contact);
-          setText("done-amount", formatKRW(paidAmount));
-          setText("done-pay-method", paymentLabel(paymentMethod));
-          setText("done-reserve-cancel-date", reserveCancelDateText);
-          setText(
-            "done-cancel-reason",
-            cancelReasonLabel(
-              cancelReason,
-              cancelReasonCode,
-              cancelReasonDetail,
-            ),
-          );
-          setText("done-refund-amount", formatRefundKRW(refundAmount));
+          function renderCancellationView() {
+            var roomLabel = ROOM_LABEL[room] || room || "—";
+            var scheduleText =
+              formatDateIsoSeoul(checkIn) + " - " + formatDateIsoSeoul(checkOut);
+            var reserveCancelDateText =
+              formatDateOnly(reservedAt) + " / " + formatDateOnly(cancelledAt);
 
-          // English
-          setText("done-order-en", orderNo);
-          setText("done-room-en", roomLabel);
-          setText("done-schedule-en", scheduleText);
-          setText("done-name-en", name);
-          setText("done-contact-en", contact);
-          setText("done-amount-en", formatKRWEn(paidAmount));
-          setText("done-pay-method-en", paymentLabelEn(paymentMethod));
-          setText("done-reserve-cancel-date-en", reserveCancelDateText);
-          setText(
-            "done-cancel-reason-en",
-            cancelReasonLabelEn(
-              cancelReason,
-              cancelReasonCode,
-              cancelReasonDetail,
-            ),
-          );
-          setText("done-refund-amount-en", formatRefundKRWEn(refundAmount));
+            setText("band-booking-no-kr", orderNo || "—");
+            setText("band-room-kr", roomLabel || "—");
+            setText("band-booking-no-en", orderNo || "—");
+            setText("band-room-en", roomLabel || "—");
+            setText("delete-refund-summary-kr", refundSummaryKr(refundAmount));
+            setText("delete-refund-summary-en", refundSummaryEn(refundAmount));
+            setText("delete-refund-detail-kr", refundDetailKr(refundAmount));
+            setText("delete-refund-detail-en", refundDetailEn(refundAmount));
 
-          var rawOrderNo = String((saved && saved.orderNo) || "").trim();
+            setText("done-order", orderNo);
+            setText("done-room", roomLabel);
+            setText("done-schedule", scheduleText);
+            setText("done-name", name);
+            setText("done-contact", contact);
+            setText("done-amount", formatKRW(paidAmount));
+            setText("done-pay-method", paymentLabel(paymentMethod));
+            setText("done-reserve-cancel-date", reserveCancelDateText);
+            setText(
+              "done-cancel-reason",
+              cancelReasonLabel(
+                cancelReason,
+                cancelReasonCode,
+                cancelReasonDetail,
+              ),
+            );
+            setText("done-refund-amount", formatRefundKRW(refundAmount));
+
+            setText("done-order-en", orderNo);
+            setText("done-room-en", roomLabel);
+            setText("done-schedule-en", scheduleText);
+            setText("done-name-en", name);
+            setText("done-contact-en", contact);
+            setText("done-amount-en", formatKRWEn(paidAmount));
+            setText("done-pay-method-en", paymentLabelEn(paymentMethod));
+            setText("done-reserve-cancel-date-en", reserveCancelDateText);
+            setText(
+              "done-cancel-reason-en",
+              cancelReasonLabelEn(
+                cancelReason,
+                cancelReasonCode,
+                cancelReasonDetail,
+              ),
+            );
+            setText("done-refund-amount-en", formatRefundKRWEn(refundAmount));
+          }
+
+          function applyDbRow(row) {
+            if (!row) {
+              return;
+            }
+            if (row.refundAmount != null && row.refundAmount !== "") {
+              refundAmount = parseRefundAmount(row.refundAmount);
+            }
+            if (row.totalAmount != null && Number(row.totalAmount) > 0) {
+              paidAmount = Number(row.totalAmount);
+            }
+            reservedAt =
+              row.createdAtYmd ||
+              row.createdAtIso ||
+              row.createdAt ||
+              reservedAt;
+            cancelledAt =
+              row.cancelledAtYmd ||
+              row.cancelledAtIso ||
+              row.cancelledAt ||
+              cancelledAt;
+            if (row.paymentMethod) {
+              paymentMethod = String(row.paymentMethod).trim();
+            }
+            if (row.cancelReason) {
+              cancelReason = String(row.cancelReason).trim();
+              cancelReasonCode = cancelReason;
+            }
+            if (row.otherReason) {
+              cancelReasonDetail = String(row.otherReason).trim();
+            }
+            persistSaved();
+            renderCancellationView();
+          }
+
+          renderCancellationView();
+
+          var rawOrderNo = String((saved && saved.orderNo) || orderNo || "").trim();
+          if (rawOrderNo === "—") {
+            rawOrderNo = "";
+          }
+          var lookupName = String(name || "").trim();
+          if (lookupName === "—") {
+            lookupName = "";
+          }
+          if (rawOrderNo && lookupName) {
+            fetch(lookupApiUrl(), {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({
+                guestName: lookupName,
+                reservationNumber: rawOrderNo,
+              }),
+            })
+              .then(function (resp) {
+                return resp.json();
+              })
+              .then(function (data) {
+                if (data && data.ok && data.deleted === true && data.row) {
+                  applyDbRow(data.row);
+                }
+              })
+              .catch(function () {});
+          }
+
           var cancelAlarmSentCount =
             Number((saved && saved.cancelAlarmSentCount) || 0) || 0;
           if (
             cancelAlarmSentCount < 1 &&
             window.GraffordAlimtalkNotify &&
             rawOrderNo &&
-            name &&
-            name !== "—" &&
+            lookupName &&
             contact &&
             contact !== "—"
           ) {

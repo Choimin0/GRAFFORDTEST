@@ -27,6 +27,10 @@
       "source": "/(.*)\\.html",
       "headers": [
         {
+          "key": "Cache-Control",
+          "value": "no-store, must-revalidate"
+        },
+        {
           "key": "Content-Security-Policy",
           "value": "default-src 'self'; script-src 'self' 'unsafe-inline' https://cdn.iamport.kr https://pay.portone.io https://cdn.portone.io https://service.iamport.kr https://www.paypal.com https://www.sandbox.paypal.com https://www.paypalobjects.com https://static.cloudflareinsights.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; connect-src 'self' https://api.portone.io https://cdn.iamport.kr https://payment.portone.io https://service.iamport.kr https://*.iamport.co https://www.paypal.com https://www.sandbox.paypal.com https://*.paypal.com https://*.paypalobjects.com https://*.inicis.com https://*.kcp.co.kr https://*.nicepay.co.kr https://*.tosspayments.com https://*.kakaopay.com; frame-src https://pay.portone.io https://payment.portone.io https://cdn.iamport.kr https://service.iamport.kr https://*.iamport.co https://www.paypal.com https://www.sandbox.paypal.com https://*.paypal.com https://www.paypalobjects.com https://*.inicis.com https://*.kcp.co.kr https://*.nicepay.co.kr https://*.tosspayments.com https://*.kakaopay.com; form-action 'self' https://www.paypal.com https://www.sandbox.paypal.com https://*.paypal.com https://service.iamport.kr https://*.iamport.co https://pay.portone.io https://payment.portone.io https://cdn.iamport.kr https://*.inicis.com https://*.kcp.co.kr https://*.nicepay.co.kr https://*.tosspayments.com https://*.kakaopay.com; font-src 'self' data:; object-src 'none'; base-uri 'self';"
         }

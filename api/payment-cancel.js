@@ -606,7 +606,7 @@ export default async function handler(req, res) {
          WHERE reservation_number = $1
            AND guest_name = $2
            AND status IN ('confirm', 'completed')
-         RETURNING reservation_number`,
+         RETURNING reservation_number, created_at, cancelled_at`,
         [
           reservationNumber,
           row.guest_name,
@@ -624,7 +624,11 @@ export default async function handler(req, res) {
       client.release();
     }
 
-    var cancelledAt = new Date();
+    var updRow = updResult.rows[0] || {};
+    var createdAt = updRow.created_at || row.created_at;
+    var cancelledAt = updRow.cancelled_at
+      ? new Date(updRow.cancelled_at)
+      : new Date();
     try {
       var bqResult = await exportCancellationToBigQuery({
         reservationId: reservationNumber,
@@ -633,7 +637,7 @@ export default async function handler(req, res) {
         refundAmount: safeRefundAmount,
         cancelReason: cancelReason,
         otherReason: otherReason,
-        createdAt: row.created_at,
+        createdAt: createdAt,
         checkIn: normalizeCheckInYmd(row.check_in_date),
         checkOut: normalizeCheckInYmd(row.check_out_date),
         cancelledAt: cancelledAt,
@@ -649,7 +653,12 @@ export default async function handler(req, res) {
       ok: true,
       pgCancelled: pgCancelled,
       pgTid: pgTid,
+      createdAt: formatDateTimeKst(createdAt),
+      createdAtIso: createdAt ? new Date(createdAt).toISOString() : null,
+      createdAtYmd: createdAt ? formatYmdKst(new Date(createdAt)) : "",
       cancelledAt: formatDateTimeKst(cancelledAt),
+      cancelledAtIso: cancelledAt ? cancelledAt.toISOString() : null,
+      cancelledAtYmd: cancelledAt ? formatYmdKst(cancelledAt) : "",
       reservationNumber: reservationNumber,
       refundAmount: safeRefundAmount, // 실제 환불 처리된 금액
       totalAmount: paidAmountNum, // 최종 결제 금액(환불 수수료 기준)
