@@ -42,9 +42,9 @@
     <!-- PortOne v2 Browser SDK (KG이니시스) + V1 SDK (PayPal Express Checkout, 영문 미사용·코드 유지) -->
     <script src="https://cdn.portone.io/v2/browser-sdk.js"></script>
     <script src="https://cdn.iamport.kr/v1/iamport.js"></script>
-    <script src="js/payment-portone-flow.js?v=9"></script>
+    <script src="js/payment-portone-flow.js?v=10"></script>
     <script src="js/booking-token-client.js?v=8"></script>
-    <script src="js/booking-checkout-guard.js?v=19"></script>
+    <script src="js/booking-checkout-guard.js?v=20"></script>
     <!--
       KG이니시스(PortOne) 결제수단 노출 설정
       true → 결제수단 drawer에 표시 · false → 숨김
@@ -706,6 +706,14 @@
           } catch (e) {
             saved = null;
           }
+          if (
+            (!saved || !saved.orderNo) &&
+            window.GraffordPortoneFlow &&
+            typeof window.GraffordPortoneFlow.restorePaymentDataBackup ===
+              "function"
+          ) {
+            saved = window.GraffordPortoneFlow.restorePaymentDataBackup();
+          }
 
           function applyPaymentConfig(raw) {
             var gpm = window.GraffordPaymentMethods;
@@ -761,6 +769,54 @@
           }
 
           if (!saved || !saved.orderNo) {
+            var redirectResultKr =
+              window.GraffordPortoneFlow &&
+              window.GraffordPortoneFlow.parsePortoneRedirectFromLocation
+                ? window.GraffordPortoneFlow.parsePortoneRedirectFromLocation()
+                : null;
+            if (
+              redirectResultKr &&
+              redirectResultKr.paymentId &&
+              !redirectResultKr.code
+            ) {
+              showPageLoading("결제 확인 중입니다...");
+              fetch("/api/payment-confirm", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  paymentId: redirectResultKr.paymentId,
+                }),
+              })
+                .then(function (res) {
+                  return res.json();
+                })
+                .then(function (data) {
+                  if (data && data.ok) {
+                    try {
+                      sessionStorage.setItem(
+                        "graffordReserveCompleteData",
+                        JSON.stringify({
+                          orderNo: redirectResultKr.paymentId,
+                        }),
+                      );
+                    } catch (_e) {}
+                    if (window.GraffordCheckoutGuard) {
+                      window.GraffordCheckoutGuard.allowCheckoutNavigation();
+                    }
+                    window.location.replace("reserve-complete.html");
+                    return;
+                  }
+                  hidePageLoading();
+                  hideLoading();
+                  if (noDataEl) noDataEl.hidden = false;
+                })
+                .catch(function () {
+                  hidePageLoading();
+                  hideLoading();
+                  if (noDataEl) noDataEl.hidden = false;
+                });
+              return;
+            }
             hideLoading();
             if (noDataEl) noDataEl.hidden = false;
             return;
@@ -803,6 +859,7 @@
           if (!bookingToken && window.GraffordBookingToken) {
             bookingToken = window.GraffordBookingToken.readStoredToken();
           }
+          var checkoutDraftReady = false;
           function persistPaidCheckoutDraft() {
             if (
               !window.GraffordBookingToken ||
@@ -830,12 +887,32 @@
                 bookingLocale: bookingLocale,
                 pricingBreakdown: pricingBreakdown,
               })
+              .then(function (result) {
+                if (result && result.ok) {
+                  checkoutDraftReady = true;
+                  if (
+                    submitBtn &&
+                    !paymentInProgress &&
+                    !checkoutValidationFailed
+                  ) {
+                    submitBtn.disabled = false;
+                  }
+                }
+                return result;
+              })
               .catch(function (err) {
                 console.warn("[payment] checkout draft save failed", err);
                 return null;
               });
           }
           persistPaidCheckoutDraft();
+          if (
+            window.GraffordPortoneFlow &&
+            typeof window.GraffordPortoneFlow.persistPaymentDataBackup ===
+              "function"
+          ) {
+            window.GraffordPortoneFlow.persistPaymentDataBackup();
+          }
           var paymentInProgress = false;
           var paymentSettledKey = "graffordPaymentSettled:" + orderNo;
           var checkoutValidation = null;
@@ -1230,6 +1307,13 @@
                 JSON.stringify(saved),
               );
             } catch (e0) {}
+            if (
+              window.GraffordPortoneFlow &&
+              typeof window.GraffordPortoneFlow.persistPaymentDataBackup ===
+                "function"
+            ) {
+              window.GraffordPortoneFlow.persistPaymentDataBackup();
+            }
           }
 
           function refreshPaymentMethodUiKr() {
@@ -1406,7 +1490,8 @@
 
             refreshPaymentMethodUiKr();
             if (submitBtn) {
-              submitBtn.disabled = checkoutValidationFailed;
+              submitBtn.disabled =
+                checkoutValidationFailed || !checkoutDraftReady;
             }
           }
 
@@ -1590,7 +1675,7 @@
                       "결제창을 열지 못했습니다. 잠시 후 다시 시도해 주세요.",
                     );
                   },
-                  6000,
+                  null,
                   orderNo,
                 );
               }
@@ -1612,17 +1697,17 @@
             }
           }
 
-          async function startPayment() {
+          function startPayment() {
             if (paymentInProgress) {
               return;
             }
-            var draftSave = await persistPaidCheckoutDraft();
-            if (!draftSave || !draftSave.ok) {
+            if (!checkoutDraftReady) {
               showError(
                 "예약 정보를 서버에 저장하지 못했습니다. 잠시 후 다시 시도해 주세요.",
               );
               return;
             }
+            persistPaidCheckoutDraft();
 
             if (!window.GraffordBookingToken) {
               showError(
@@ -2403,6 +2488,14 @@
           } catch (e) {
             saved = null;
           }
+          if (
+            (!saved || !saved.orderNo) &&
+            window.GraffordPortoneFlow &&
+            typeof window.GraffordPortoneFlow.restorePaymentDataBackup ===
+              "function"
+          ) {
+            saved = window.GraffordPortoneFlow.restorePaymentDataBackup();
+          }
 
           function applyPaymentConfig(raw) {
             var gpm = window.GraffordPaymentMethods;
@@ -2460,6 +2553,54 @@
           }
 
           if (!saved || !saved.orderNo) {
+            var redirectResultEn =
+              window.GraffordPortoneFlow &&
+              window.GraffordPortoneFlow.parsePortoneRedirectFromLocation
+                ? window.GraffordPortoneFlow.parsePortoneRedirectFromLocation()
+                : null;
+            if (
+              redirectResultEn &&
+              redirectResultEn.paymentId &&
+              !redirectResultEn.code
+            ) {
+              showPageLoading("Confirming payment...");
+              fetch("/api/payment-confirm", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                  paymentId: redirectResultEn.paymentId,
+                }),
+              })
+                .then(function (res) {
+                  return res.json();
+                })
+                .then(function (data) {
+                  if (data && data.ok) {
+                    try {
+                      sessionStorage.setItem(
+                        "graffordReserveCompleteData",
+                        JSON.stringify({
+                          orderNo: redirectResultEn.paymentId,
+                        }),
+                      );
+                    } catch (_e) {}
+                    if (window.GraffordCheckoutGuard) {
+                      window.GraffordCheckoutGuard.allowCheckoutNavigation();
+                    }
+                    window.location.replace("reserve-complete.html");
+                    return;
+                  }
+                  hidePageLoading();
+                  hideLoading();
+                  if (noDataEl) noDataEl.hidden = false;
+                })
+                .catch(function () {
+                  hidePageLoading();
+                  hideLoading();
+                  if (noDataEl) noDataEl.hidden = false;
+                });
+              return;
+            }
             hideLoading();
             if (noDataEl) noDataEl.hidden = false;
             return;
@@ -2513,6 +2654,7 @@
           if (!bookingToken && window.GraffordBookingToken) {
             bookingToken = window.GraffordBookingToken.readStoredToken();
           }
+          var checkoutDraftReadyEn = false;
           function persistPaidCheckoutDraftEn() {
             if (
               !window.GraffordBookingToken ||
@@ -2540,12 +2682,32 @@
                 bookingLocale: bookingLocale || "en",
                 pricingBreakdown: pricingBreakdown,
               })
+              .then(function (result) {
+                if (result && result.ok) {
+                  checkoutDraftReadyEn = true;
+                  if (
+                    submitBtn &&
+                    !paymentInProgress &&
+                    !checkoutValidationFailed
+                  ) {
+                    submitBtn.disabled = false;
+                  }
+                }
+                return result;
+              })
               .catch(function (err) {
                 console.warn("[payment] checkout draft save failed", err);
                 return null;
               });
           }
           persistPaidCheckoutDraftEn();
+          if (
+            window.GraffordPortoneFlow &&
+            typeof window.GraffordPortoneFlow.persistPaymentDataBackup ===
+              "function"
+          ) {
+            window.GraffordPortoneFlow.persistPaymentDataBackup();
+          }
           var paymentInProgress = false;
           var paymentSettledKey = "graffordPaymentSettled:" + orderNo;
           var checkoutValidation = null;
@@ -2960,6 +3122,13 @@
                 JSON.stringify(saved),
               );
             } catch (e0) {}
+            if (
+              window.GraffordPortoneFlow &&
+              typeof window.GraffordPortoneFlow.persistPaymentDataBackup ===
+                "function"
+            ) {
+              window.GraffordPortoneFlow.persistPaymentDataBackup();
+            }
           }
 
           function refreshPaymentMethodUiEn() {
@@ -3168,7 +3337,8 @@
 
             refreshPaymentMethodUiEn();
             if (submitBtn) {
-              submitBtn.disabled = checkoutValidationFailed;
+              submitBtn.disabled =
+                checkoutValidationFailed || !checkoutDraftReadyEn;
             }
           }
 
@@ -3346,13 +3516,13 @@
             if (paymentInProgress) {
               return;
             }
-            var draftSaveEn = await persistPaidCheckoutDraftEn();
-            if (!draftSaveEn || !draftSaveEn.ok) {
+            if (!checkoutDraftReadyEn) {
               showError(
                 "We could not save your reservation details. Please try again in a moment.",
               );
               return;
             }
+            persistPaidCheckoutDraftEn();
 
             if (!window.GraffordBookingToken) {
               showError(
@@ -3718,11 +3888,15 @@
                 "Opening the payment window. You will return here after payment...",
               );
               if (portoneFlowEn.armRedirectWatchdog) {
-                portoneFlowEn.armRedirectWatchdog(function () {
-                  showError(
-                    "The payment window did not open. Please try again.",
-                  );
-                }, 6000);
+                portoneFlowEn.armRedirectWatchdog(
+                  function () {
+                    showError(
+                      "The payment window did not open. Please try again.",
+                    );
+                  },
+                  null,
+                  orderNo,
+                );
               }
               return;
             }

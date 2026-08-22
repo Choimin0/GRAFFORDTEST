@@ -16,6 +16,7 @@ import { exportCancellationToBigQuery } from "./bigquery-export.js";
 import { json } from "./admin-common.js";
 import { applyBookingRetentionToRow } from "./booking-retention.js";
 import { isExternalManualPaymentMethod } from "./admin-manual-booking.js";
+import { cancelRoomChangeChildren } from "./booking-room-change.js";
 
 const BOOKING_TABLE = "booking";
 const CANCEL_REASON_MANUAL = "MANUAL";
@@ -389,6 +390,15 @@ export async function handleAdminPaymentCancel(res, pool, body) {
       client.release();
       json(res, 404, { ok: false, error: "예약 취소 처리에 실패했습니다." });
       return;
+    }
+
+    try {
+      await cancelRoomChangeChildren(client, reservationNumber, {
+        cancelReason: CANCEL_REASON_MANUAL,
+        refundedCount: 1,
+      });
+    } catch (childErr) {
+      console.error("[admin-payment-cancel] room-change child cancel", childErr);
     }
 
     client.release();

@@ -430,6 +430,10 @@
   /**
    * forceRedirect 이후에도 페이지가 그대로면 결제창이 열리지 않은 것으로 보고 가드를 해제합니다.
    */
+  function defaultRedirectWatchdogMs() {
+    return isMobileLikeEnvironment() ? 20000 : 8000;
+  }
+
   function armRedirectWatchdog(onStuck, waitMs, orderNo) {
     var fired = false;
     var timer = global.setTimeout(function () {
@@ -440,15 +444,10 @@
         return;
       }
       fired = true;
-      clearPortoneDepartureStarted();
-      clearPaymentDeparture(orderNo);
-      if (global.GraffordCheckoutGuard) {
-        global.GraffordCheckoutGuard.clearCheckoutNavigationAllowance();
-      }
       if (typeof onStuck === "function") {
         onStuck();
       }
-    }, waitMs || 8000);
+    }, waitMs || defaultRedirectWatchdogMs());
     function cancel() {
       fired = true;
       global.clearTimeout(timer);
@@ -527,6 +526,44 @@
     }
   }
 
+  var PAYMENT_DATA_BACKUP_KEY = "graffordPaymentDataBackup";
+
+  function persistPaymentDataBackup() {
+    try {
+      var raw = sessionStorage.getItem("graffordPaymentData");
+      if (raw) {
+        global.localStorage.setItem(PAYMENT_DATA_BACKUP_KEY, raw);
+      }
+    } catch (_e) {}
+  }
+
+  function restorePaymentDataBackup() {
+    try {
+      var existing = sessionStorage.getItem("graffordPaymentData");
+      if (existing) {
+        return JSON.parse(existing);
+      }
+    } catch (_e) {}
+    try {
+      var backup = global.localStorage.getItem(PAYMENT_DATA_BACKUP_KEY);
+      if (!backup) {
+        return null;
+      }
+      var parsed = JSON.parse(backup);
+      if (parsed && parsed.orderNo) {
+        sessionStorage.setItem("graffordPaymentData", backup);
+        return parsed;
+      }
+    } catch (_e2) {}
+    return null;
+  }
+
+  function clearPaymentDataBackup() {
+    try {
+      global.localStorage.removeItem(PAYMENT_DATA_BACKUP_KEY);
+    } catch (_e) {}
+  }
+
   function preparePaymentDeparture(orderNo) {
     clearLegacyPgHistoryBarrier();
     try {
@@ -541,12 +578,14 @@
       );
       sessionStorage.setItem("graffordPortoneHistoryPendingClean", "1");
     } catch (_e) {}
+    persistPaymentDataBackup();
     installPortoneGatewayBackGuard();
   }
 
   /**
-   * 모바일 Safari/Naver 등에서 user gesture를 유지하려면 requestPayment를
-   * 클릭 핸들러 동기 구간에서 먼저 호출한 뒤 preparePaymentDeparture를 실행합니다.
+   * sessionStorage 플래그는 동기라 user gesture를 깨지 않습니다.
+   * 모바일 REDIRECTION은 requestPayment 직후 pagehide가 뜨므로
+   * 플래그를 먼저 남겨 hold/세션이 풀리지 않게 합니다.
    */
   function launchPortonePayment(portone, params, orderNo, handlers) {
     handlers = handlers || {};
@@ -557,18 +596,19 @@
       return null;
     }
     var enhanced = enhancePortoneRequestParams(params);
+    markPortoneDepartureStarted(orderNo);
+    preparePaymentDeparture(orderNo);
     var promise;
     try {
       promise = portone.requestPayment(enhanced);
     } catch (syncErr) {
       clearPortoneDepartureStarted();
+      clearPaymentDeparture(orderNo);
       if (typeof handlers.onError === "function") {
         handlers.onError(syncErr);
       }
       return null;
     }
-    markPortoneDepartureStarted(orderNo);
-    preparePaymentDeparture(orderNo);
     if (promise && typeof promise.then === "function") {
       promise
         .then(function (response) {
@@ -803,6 +843,7 @@
     clearPaymentFinalizeInProgress(orderNo);
     clearPersistedPortoneRedirectResult(orderNo);
     clearPaymentDeparture(orderNo);
+    clearPaymentDataBackup();
     clearLegacyPgHistoryBarrier();
 
     var bookingCreatedAtIso = (saveData && saveData.createdAtIso) || "";
@@ -866,6 +907,10 @@
     isPaymentFinalizeInProgress: isPaymentFinalizeInProgress,
     preparePaymentDeparture: preparePaymentDeparture,
     launchPortonePayment: launchPortonePayment,
+    persistPaymentDataBackup: persistPaymentDataBackup,
+    restorePaymentDataBackup: restorePaymentDataBackup,
+    clearPaymentDataBackup: clearPaymentDataBackup,
+    defaultRedirectWatchdogMs: defaultRedirectWatchdogMs,
     markPortoneDepartureStarted: markPortoneDepartureStarted,
     clearPortoneDepartureStarted: clearPortoneDepartureStarted,
     isPortoneDepartureRecent: isPortoneDepartureRecent,

@@ -84,6 +84,7 @@ async function getMonthlySalesData(pool, month) {
       room_type
     FROM ${BOOKING_TABLE}
     WHERE status IN ('confirm', 'completed')
+      AND COALESCE(stay_role, 'primary') <> 'room_change'
       AND check_in_date >= $1::date
       AND check_in_date < ($1::date + INTERVAL '1 month')::date
     GROUP BY booking_channel, room_type
@@ -98,6 +99,7 @@ async function getMonthlySalesData(pool, month) {
       )::bigint AS cancel_revenue
     FROM ${BOOKING_TABLE}
     WHERE status = 'cancelled'
+      AND COALESCE(stay_role, 'primary') <> 'room_change'
       AND (COALESCE(cancelled_at, created_at) AT TIME ZONE 'Asia/Seoul')::date >= $1::date
       AND (COALESCE(cancelled_at, created_at) AT TIME ZONE 'Asia/Seoul')::date < ($1::date + INTERVAL '1 month')::date
   `;
@@ -154,6 +156,7 @@ async function getMonthlySalesData(pool, month) {
       SELECT check_in_date::date AS day, SUM(total_amount)::bigint AS revenue
       FROM ${BOOKING_TABLE}, month_bounds
       WHERE status IN ('confirm', 'completed')
+        AND COALESCE(stay_role, 'primary') <> 'room_change'
         AND check_in_date >= month_start
         AND check_in_date < next_month_start
       GROUP BY check_in_date::date
@@ -322,6 +325,7 @@ async function getAnnualSalesData(pool, year) {
         COALESCE(SUM(total_amount), 0)::bigint AS revenue
       FROM ${BOOKING_TABLE}, year_bounds
       WHERE status IN ('confirm', 'completed')
+        AND COALESCE(stay_role, 'primary') <> 'room_change'
         AND check_in_date >= year_start
         AND check_in_date < next_year_start
       GROUP BY month
@@ -336,6 +340,7 @@ async function getAnnualSalesData(pool, year) {
         )::bigint AS cancel_revenue
       FROM ${BOOKING_TABLE}, year_bounds
       WHERE status = 'cancelled'
+        AND COALESCE(stay_role, 'primary') <> 'room_change'
         AND (COALESCE(cancelled_at, created_at) AT TIME ZONE 'Asia/Seoul')::date >= year_start
         AND (COALESCE(cancelled_at, created_at) AT TIME ZONE 'Asia/Seoul')::date < next_year_start
       GROUP BY month
@@ -358,6 +363,7 @@ async function getAnnualSalesData(pool, year) {
       COALESCE(SUM(total_amount), 0)::bigint AS revenue
     FROM ${BOOKING_TABLE}
     WHERE status IN ('confirm', 'completed')
+      AND COALESCE(stay_role, 'primary') <> 'room_change'
       AND EXTRACT(YEAR FROM check_in_date) >= 2026
     GROUP BY year
     ORDER BY year

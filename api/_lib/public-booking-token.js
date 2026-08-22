@@ -185,10 +185,19 @@ export async function handlePublicBookingToken(req, res, pool) {
       }),
       bookingToken,
     );
+    if (!bindDraft || !bindDraft.ok) {
+      json(res, bindDraft && bindDraft.missingTable ? 503 : 400, {
+        ok: false,
+        error:
+          (bindDraft && bindDraft.error) ||
+          "Failed to save checkout draft",
+      });
+      return true;
+    }
     json(res, 200, {
       ok: true,
       holdId: bindHoldId,
-      draftSaved: !!(bindDraft && bindDraft.ok),
+      draftSaved: true,
     });
     return true;
   }

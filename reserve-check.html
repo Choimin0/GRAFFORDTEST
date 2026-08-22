@@ -177,6 +177,21 @@
                     —
                   </dd>
                 </dl>
+                <dl
+                  class="reserve-delete-dl reserve-check-dl reserve-check-room-change"
+                  id="reserve-check-room-change-kr"
+                  hidden
+                >
+                  <dt>투숙 기간</dt>
+                  <dd id="complete-stay-period-kr">—</dd>
+                  <dt>객실 변동 일정</dt>
+                  <dd>
+                    <ul
+                      class="reserve-check-stay-segments"
+                      id="complete-stay-segments-kr"
+                    ></ul>
+                  </dd>
+                </dl>
               </section>
 
               <hr class="reserve-check-rule" />
@@ -348,6 +363,11 @@
           var guestRequest = (saved && saved.guestRequest) || "";
           var guestCount = (saved && saved.guestCount) || "";
           var extraGuests = (saved && saved.extraGuests) || "0";
+          var staySegments =
+            saved && Array.isArray(saved.staySegments)
+              ? saved.staySegments
+              : [];
+          var hasRoomChange = saved && saved.hasRoomChange === true;
           var totalAmount = (saved && saved.totalAmount) || "0";
           var payMethod = (saved && saved.payMethod) || "";
           var cancelToken = (saved && saved.cancelToken) || "";
@@ -451,6 +471,104 @@
           // Korean targets
           setText("complete-checkin-line-kr", checkInKrLine);
           setText("complete-checkout-line-kr", checkOutKrLine);
+          function formatStayRangeKr(start, end) {
+            var a = parseYmdLocal(start);
+            var b = parseYmdLocal(end);
+            if (!a || !b) {
+              return (start || "—") + " – " + (end || "—");
+            }
+            function fmt(d) {
+              return (
+                d.getFullYear() +
+                "." +
+                String(d.getMonth() + 1).padStart(2, "0") +
+                "." +
+                String(d.getDate()).padStart(2, "0")
+              );
+            }
+            return fmt(a) + " – " + fmt(b);
+          }
+          function formatStayRangeEn(start, end) {
+            var a = parseYmdLocal(start);
+            var b = parseYmdLocal(end);
+            if (!a || !b) {
+              return (start || "—") + " – " + (end || "—");
+            }
+            function fmt(d) {
+              return d.toLocaleDateString("en-US", {
+                year: "numeric",
+                month: "short",
+                day: "numeric",
+              });
+            }
+            return fmt(a) + " – " + fmt(b);
+          }
+          function nightsBetween(start, end) {
+            var a = parseYmdLocal(start);
+            var b = parseYmdLocal(end);
+            if (!a || !b) {
+              return 0;
+            }
+            return Math.round((b.getTime() - a.getTime()) / 86400000);
+          }
+          function renderStaySegments(listId, items, lang) {
+            var list = document.getElementById(listId);
+            if (!list) {
+              return;
+            }
+            list.innerHTML = "";
+            (items || []).forEach(function (seg) {
+              var li = document.createElement("li");
+              var range = document.createElement("span");
+              range.textContent =
+                lang === "en"
+                  ? formatStayRangeEn(seg.checkIn, seg.checkOut)
+                  : formatStayRangeKr(seg.checkIn, seg.checkOut);
+              li.appendChild(range);
+              li.appendChild(
+                document.createTextNode(
+                  ROOM_LABEL[String(seg.room || "").toUpperCase()] ||
+                    seg.room ||
+                    "—",
+                ),
+              );
+              list.appendChild(li);
+            });
+          }
+          var roomChangeKr = document.getElementById(
+            "reserve-check-room-change-kr",
+          );
+          var roomChangeEn = document.getElementById(
+            "reserve-check-room-change-en",
+          );
+          if (hasRoomChange && staySegments.length) {
+            var stayNightsCount = nightsBetween(checkIn, checkOut);
+            setText(
+              "complete-stay-period-kr",
+              formatStayRangeKr(checkIn, checkOut) +
+                (stayNightsCount ? " (" + stayNightsCount + "박)" : ""),
+            );
+            setText(
+              "complete-stay-period-en",
+              formatStayRangeEn(checkIn, checkOut) +
+                (stayNightsCount ? " (" + stayNightsCount + " nights)" : ""),
+            );
+            renderStaySegments("complete-stay-segments-kr", staySegments, "kr");
+            renderStaySegments("complete-stay-segments-en", staySegments, "en");
+            if (roomChangeKr) {
+              roomChangeKr.hidden = false;
+            }
+            if (roomChangeEn) {
+              roomChangeEn.hidden = false;
+            }
+          } else {
+            if (roomChangeKr) {
+              roomChangeKr.hidden = true;
+            }
+            if (roomChangeEn) {
+              roomChangeEn.hidden = true;
+            }
+          }
           setText("complete-total-amount", amountTextKr);
           setText("complete-guest-name", guestName || "—");
           setText("complete-contact", contact || "—");
@@ -883,6 +1001,21 @@
                     class="reserve-check-amount-highlight"
                   >
                     —
+                  </dd>
+                </dl>
+                <dl
+                  class="reserve-delete-dl reserve-check-dl reserve-check-room-change"
+                  id="reserve-check-room-change-en"
+                  hidden
+                >
+                  <dt>Stay period</dt>
+                  <dd id="complete-stay-period-en">—</dd>
+                  <dt>Room schedule</dt>
+                  <dd>
+                    <ul
+                      class="reserve-check-stay-segments"
+                      id="complete-stay-segments-en"
+                    ></ul>
                   </dd>
                 </dl>
               </section>

@@ -24,6 +24,7 @@ import { exportCancellationToBigQuery } from "./_lib/bigquery-export.js";
 import { applyBookingRetentionToRow } from "./_lib/booking-retention.js";
 import { isGuestSelfCancelClosed } from "./_lib/booking-archive.js";
 import { computeCancellationFeePercent } from "./_lib/cancellation-fee.js";
+import { cancelRoomChangeChildren } from "./_lib/booking-room-change.js";
 const { Pool } = pg;
 
 const BOOKING_TABLE = "booking";
@@ -619,6 +620,15 @@ export default async function handler(req, res) {
       if (!updResult.rows || !updResult.rows.length) {
         json(res, 404, { ok: false, error: "삭제할 예약을 찾을 수 없습니다." });
         return;
+      }
+      try {
+        await cancelRoomChangeChildren(client, reservationNumber, {
+          cancelReason: cancelReason || "guest",
+          otherReason: otherReason,
+          refundedCount: 1,
+        });
+      } catch (childErr) {
+        console.error("[payment-cancel] room-change child cancel", childErr);
       }
     } finally {
       client.release();

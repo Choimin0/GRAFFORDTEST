@@ -31,6 +31,7 @@ import {
   serializePricingBreakdown,
 } from "./_lib/pricing-breakdown.js";
 import { archivePastReservations } from "./_lib/booking-archive.js";
+import { cancelRoomChangeChildren } from "./_lib/booking-room-change.js";
 import { exportReservationToBigQuery, exportCancellationToBigQuery } from "./_lib/bigquery-export.js";
 import {
   buildIcalCalendar,
@@ -848,6 +849,15 @@ export default async function handler(req, res) {
       if (!upd.rows || !upd.rows.length) {
         json(res, 404, { ok: false, error: "삭제할 예약을 찾을 수 없습니다." });
         return;
+      }
+      try {
+        await cancelRoomChangeChildren(pool, delReservationNumber, {
+          cancelReason: cancelReason || "guest",
+          otherReason: otherReason,
+          refundedCount: 1,
+        });
+      } catch (childErr) {
+        console.error("[reservations DELETE] room-change child cancel", childErr);
       }
       var delRow = delRowCandidate;
       var cancelledAt = new Date();

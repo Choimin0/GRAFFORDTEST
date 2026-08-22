@@ -21,6 +21,16 @@ import {
 } from "./room-availability.js";
 import { hasActiveHoldOverlap } from "./booking-hold.js";
 import { parsePricingBreakdownFromDb } from "./pricing-breakdown.js";
+import {
+  attachStaySegmentsToRows,
+  guestDisplayCheckIn,
+  guestDisplayCheckOut,
+  guestDisplayRoomType,
+  isRoomChangeChildRow,
+  isRoomChangeItinerary,
+  normalizeStaySegments,
+  persistRoomChangeOccupancy,
+} from "./booking-room-change.js";
 
 const BOOKING_TABLE = "booking";
 const MAX_GUEST_NAME = 100;
@@ -98,20 +108,53 @@ function formatDateTimeKst(v) {
   }).format(d);
 }
 
-function mapRow(row, isDeleted) {
+const ROOM_CHANGE_SELECT_COLS = `
+        parent_reservation_number,
+        stay_role,
+        contract_check_in,
+        contract_check_out,
+        original_room_type`;
+
+function mapRow(row, isDeleted, options) {
+  var useOccupancy = options && options.useOccupancyDates === true;
   var pii = decryptBookingPiiResponse(row);
+  var occupancyCheckIn = toYMD(row.check_in_date);
+  var occupancyCheckOut = toYMD(row.check_out_date);
+  var displayCheckIn = useOccupancy
+    ? occupancyCheckIn
+    : guestDisplayCheckIn(row) || occupancyCheckIn;
+  var displayCheckOut = useOccupancy
+    ? occupancyCheckOut
+    : guestDisplayCheckOut(row) || occupancyCheckOut;
+  var originalRoom = guestDisplayRoomType(row) || row.room_type;
+  var displayRoom = useOccupancy ? row.room_type : originalRoom || row.room_type;
+  var staySegments = row.staySegments || null;
+  var hasRoomChange = staySegments
+    ? isRoomChangeItinerary(staySegments, originalRoom || row.room_type)
+    : !!(row.contract_check_out || isRoomChangeChildRow(row));
+  var stayPeriod = row.stay_nights != null ? Number(row.stay_nights) : null;
+  if (useOccupancy && occupancyCheckIn && occupancyCheckOut) {
+    stayPeriod =
+      countStayNights(occupancyCheckIn, occupancyCheckOut) || stayPeriod;
+  } else if (displayCheckIn && displayCheckOut) {
+    stayPeriod = countStayNights(displayCheckIn, displayCheckOut) || stayPeriod;
+  }
   var base = {
     reservationNumber: row.reservation_number,
     guestName: pii.guestName,
     contact: pii.contact,
     email: pii.email || "",
-    roomType: row.room_type,
-    checkIn: toYMD(row.check_in_date),
-    checkOut: toYMD(row.check_out_date),
+    roomType: displayRoom,
+    checkIn: displayCheckIn,
+    checkOut: displayCheckOut,
+    occupancyCheckIn: occupancyCheckIn,
+    occupancyCheckOut: occupancyCheckOut,
+    occupancyRoomType: row.room_type,
+    originalRoomType: originalRoom || row.room_type,
     guestCount: row.guest_count,
     extraGuests: row.extra_guests != null ? Number(row.extra_guests) : null,
     totalAmount: row.total_amount != null ? Number(row.total_amount) : 0,
-    stayPeriod: row.stay_nights != null ? Number(row.stay_nights) : null,
+    stayPeriod: stayPeriod,
     guestRequest: row.guest_request || "",
     paymentMethod: row.payment_method || "",
     createdAt: formatDateTimeKst(row.created_at),
@@ -123,6 +166,10 @@ function mapRow(row, isDeleted) {
     bookingChannel: row.booking_channel || "direct",
     linkedExternalUid: row.linked_external_uid || "",
     pricingBreakdown: parsePricingBreakdownFromDb(row.pricing_breakdown),
+    staySegments: staySegments,
+    hasRoomChange: hasRoomChange,
+    parentReservationNumber: row.parent_reservation_number || "",
+    stayRole: row.stay_role || "primary",
   };
   if (isDeleted) {
     base.cancelReason = row.cancel_reason || "";
@@ -251,7 +298,9 @@ export async function handleAdminReservations(res, pool, body) {
       await purgeExpiredBookings(pool);
       var updateSel = await pool.query(
         `SELECT reservation_number, created_at, status, room_type,
-                check_in_date, check_out_date, guest_count
+                check_in_date, check_out_date, guest_count,
+                guest_name, contact, email, booking_locale,
+                ${ROOM_CHANGE_SELECT_COLS}
          FROM ${BOOKING_TABLE}
          WHERE reservation_number = $1
          LIMIT 1`,
@@ -272,6 +321,13 @@ export async function handleAdminReservations(res, pool, body) {
         });
         return;
       }
+      if (isRoomChangeChildRow(updateSel.rows[0])) {
+        json(res, 400, {
+          ok: false,
+          error: "룸체인지 구간은 원예약에서만 수정할 수 있습니다.",
+        });
+        return;
+      }
       var roomType = String(updateSel.rows[0].room_type || "")
         .trim()
         .toUpperCase();
@@ -285,83 +341,187 @@ export async function handleAdminReservations(res, pool, body) {
         json(res, 400, { ok: false, error: "숙박 일수를 확인해 주세요." });
         return;
       }
-      var prevCheckIn = toYMD(updateSel.rows[0].check_in_date);
-      var prevCheckOut = toYMD(updateSel.rows[0].check_out_date);
-      var datesChanged =
-        nextCheckIn !== prevCheckIn || nextCheckOut !== prevCheckOut;
-      if (datesChanged) {
-        var availability = await checkAdminReservationUpdateAvailability(
-          pool,
-          roomType,
-          nextCheckIn,
-          nextCheckOut,
-          updateReservationNumber,
+      var staySegments = normalizeStaySegments(body.staySegments);
+      var hasExistingRoomChange = !!(
+        updateSel.rows[0].contract_check_out ||
+        updateSel.rows[0].original_room_type
+      );
+      if (staySegments && staySegments.length) {
+        var firstRoomValidation = validateGuestCount(
+          staySegments[0].room,
+          nextGuestCount,
         );
-        if (!availability.available) {
-          var reasonMessages = {
-            blocked: "선택한 기간은 방막기로 예약할 수 없습니다.",
-            occupied: "동일 객실·기간에 다른 확정 예약이 있습니다.",
-            held: "다른 고객이 해당 기간을 예약 진행 중입니다.",
-          };
-          json(res, 409, {
+        if (!firstRoomValidation.ok) {
+          json(res, 400, { ok: false, error: firstRoomValidation.error });
+          return;
+        }
+        guestValidation = firstRoomValidation;
+      } else if (hasExistingRoomChange) {
+        var existingContractIn = guestDisplayCheckIn(updateSel.rows[0]);
+        var existingContractOut = guestDisplayCheckOut(updateSel.rows[0]);
+        if (
+          nextCheckIn !== existingContractIn ||
+          nextCheckOut !== existingContractOut
+        ) {
+          json(res, 400, {
             ok: false,
-            error:
-              reasonMessages[availability.reason] ||
-              "해당 기간으로 변경할 수 없습니다.",
-            reason: availability.reason,
+            error: "룸체인지 예약은 객실 일정과 함께 저장해 주세요.",
           });
           return;
+        }
+      } else {
+        var prevCheckIn = toYMD(updateSel.rows[0].check_in_date);
+        var prevCheckOut = toYMD(updateSel.rows[0].check_out_date);
+        var datesChanged =
+          nextCheckIn !== prevCheckIn || nextCheckOut !== prevCheckOut;
+        if (datesChanged) {
+          var availability = await checkAdminReservationUpdateAvailability(
+            pool,
+            roomType,
+            nextCheckIn,
+            nextCheckOut,
+            updateReservationNumber,
+          );
+          if (!availability.available) {
+            var reasonMessages = {
+              blocked: "선택한 기간은 방막기로 예약할 수 없습니다.",
+              occupied: "동일 객실·기간에 다른 확정 예약이 있습니다.",
+              held: "다른 고객이 해당 기간을 예약 진행 중입니다.",
+            };
+            json(res, 409, {
+              ok: false,
+              error:
+                reasonMessages[availability.reason] ||
+                "해당 기간으로 변경할 수 없습니다.",
+              reason: availability.reason,
+            });
+            return;
+          }
         }
       }
       var encryptedPii = encryptBookingPii({
         guestName: nextGuestName,
         contact: nextContact,
       });
-      var updateUpd = await pool.query(
-        `UPDATE ${BOOKING_TABLE}
-         SET guest_name = $2,
-             contact = $3,
-             total_amount = $4,
-             check_in_date = $5::date,
-             check_out_date = $6::date,
-             guest_count = $7,
-             stay_nights = $8,
-             pricing_breakdown = NULL
-         WHERE reservation_number = $1
-           AND status = 'confirm'
-         RETURNING
-           reservation_number,
-           guest_name,
-           contact,
-           total_amount,
-           room_type,
-           check_in_date,
-           check_out_date,
-           guest_count,
-           stay_nights,
-           guest_request,
-           payment_method,
-           checkin_alarm_sent_count,
-           booking_locale,
-           booking_channel,
-           linked_external_uid,
-           created_at`,
-        [
-          updateReservationNumber,
-          encryptedPii.guest_name,
-          encryptedPii.contact,
-          nextTotalAmount,
-          nextCheckIn,
-          nextCheckOut,
-          guestValidation.guestCount,
-          stayNights,
-        ],
-      );
-      if (!updateUpd.rows || !updateUpd.rows.length) {
-        json(res, 404, { ok: false, error: "대상 예약을 찾을 수 없습니다." });
-        return;
+      var client = await pool.connect();
+      var updated;
+      try {
+        await client.query("BEGIN");
+        var updateUpd = await client.query(
+          `UPDATE ${BOOKING_TABLE}
+           SET guest_name = $2,
+               contact = $3,
+               total_amount = $4,
+               guest_count = $5,
+               extra_guests = $6,
+               pricing_breakdown = NULL
+           WHERE reservation_number = $1
+             AND status = 'confirm'
+           RETURNING
+             reservation_number,
+             guest_name,
+             contact,
+             email,
+             total_amount,
+             room_type,
+             check_in_date,
+             check_out_date,
+             guest_count,
+             extra_guests,
+             stay_nights,
+             guest_request,
+             payment_method,
+             checkin_alarm_sent_count,
+             booking_locale,
+             booking_channel,
+             linked_external_uid,
+             created_at,
+             ${ROOM_CHANGE_SELECT_COLS}`,
+          [
+            updateReservationNumber,
+            encryptedPii.guest_name,
+            encryptedPii.contact,
+            nextTotalAmount,
+            guestValidation.guestCount,
+            guestValidation.extraGuests,
+          ],
+        );
+        if (!updateUpd.rows || !updateUpd.rows.length) {
+          await client.query("ROLLBACK");
+          json(res, 404, { ok: false, error: "대상 예약을 찾을 수 없습니다." });
+          return;
+        }
+        var primaryAfterPii = updateUpd.rows[0];
+        if (staySegments && staySegments.length) {
+          var persistResult = await persistRoomChangeOccupancy(
+            client,
+            primaryAfterPii,
+            {
+              contractCheckIn: nextCheckIn,
+              contractCheckOut: nextCheckOut,
+              segments: staySegments,
+              guestCount: guestValidation.guestCount,
+            },
+          );
+          if (!persistResult.ok) {
+            await client.query("ROLLBACK");
+            json(res, persistResult.reason ? 409 : 400, {
+              ok: false,
+              error: persistResult.error,
+              reason: persistResult.reason,
+            });
+            return;
+          }
+        } else if (!hasExistingRoomChange) {
+          await client.query(
+            `UPDATE ${BOOKING_TABLE}
+             SET check_in_date = $2::date,
+                 check_out_date = $3::date,
+                 stay_nights = $4
+             WHERE reservation_number = $1
+               AND status = 'confirm'`,
+            [updateReservationNumber, nextCheckIn, nextCheckOut, stayNights],
+          );
+        }
+        var finalSel = await client.query(
+          `SELECT
+             reservation_number,
+             guest_name,
+             contact,
+             email,
+             total_amount,
+             room_type,
+             check_in_date,
+             check_out_date,
+             guest_count,
+             extra_guests,
+             stay_nights,
+             guest_request,
+             payment_method,
+             checkin_alarm_sent_count,
+             booking_locale,
+             booking_channel,
+             linked_external_uid,
+             created_at,
+             ${ROOM_CHANGE_SELECT_COLS}
+           FROM ${BOOKING_TABLE}
+           WHERE reservation_number = $1
+           LIMIT 1`,
+          [updateReservationNumber],
+        );
+        await attachStaySegmentsToRows(client, finalSel.rows || []);
+        updated = mapRow(finalSel.rows[0], false);
+        await client.query("COMMIT");
+      } catch (txErr) {
+        try {
+          await client.query("ROLLBACK");
+        } catch (rollbackErr) {
+          /* ignore */
+        }
+        throw txErr;
+      } finally {
+        client.release();
       }
-      var updated = mapRow(updateUpd.rows[0], false);
       json(res, 200, {
         ok: true,
         reservationNumber: updated.reservationNumber,
@@ -372,6 +532,9 @@ export async function handleAdminReservations(res, pool, body) {
         checkOut: updated.checkOut,
         guestCount: updated.guestCount,
         stayPeriod: updated.stayPeriod,
+        staySegments: updated.staySegments || [],
+        hasRoomChange: updated.hasRoomChange === true,
+        originalRoomType: updated.originalRoomType,
       });
     } catch (e) {
       json(res, 500, {
@@ -437,14 +600,18 @@ export async function handleAdminReservations(res, pool, body) {
         booking_locale,
         booking_channel,
         linked_external_uid,
-        created_at
+        created_at,
+        ${ROOM_CHANGE_SELECT_COLS}
         ${extraCols}
       FROM ${BOOKING_TABLE}
       WHERE status = $1
+        AND COALESCE(parent_reservation_number, '') = ''
+        AND COALESCE(stay_role, 'primary') <> 'room_change'
       ${orderClause}`,
       [statusFilter],
     );
 
+    await attachStaySegmentsToRows(pool, sel.rows || []);
     var rows = (sel.rows || []).map(function (row) {
       return mapRow(row, isDeleted);
     });
@@ -463,39 +630,37 @@ export async function handleAdminReservations(res, pool, body) {
           booking_locale,
           booking_channel,
           linked_external_uid,
-          created_at, (status = 'completed') AS is_past
+          created_at, (status = 'completed') AS is_past,
+          ${ROOM_CHANGE_SELECT_COLS}
         FROM ${BOOKING_TABLE}
         WHERE status IN ('confirm', 'completed')
         ORDER BY check_in_date ASC, created_at DESC`,
       );
+      var primaryCalRows = (calSel.rows || []).filter(function (row) {
+        return !isRoomChangeChildRow(row);
+      });
+      await attachStaySegmentsToRows(pool, primaryCalRows);
+      var segmentByParent = {};
+      primaryCalRows.forEach(function (row) {
+        segmentByParent[row.reservation_number] = row.staySegments || [];
+      });
       var bookingCalendarRows = (calSel.rows || []).map(function (row) {
-        var calPii = decryptBookingPiiResponse(row);
-        return {
-          reservationNumber: row.reservation_number,
-          guestName: calPii.guestName,
-          contact: calPii.contact,
-          email: calPii.email || "",
-          roomType: row.room_type,
-          checkIn: toYMD(row.check_in_date),
-          checkOut: toYMD(row.check_out_date),
-          guestCount: row.guest_count,
-          extraGuests: row.extra_guests != null ? Number(row.extra_guests) : null,
-          totalAmount: row.total_amount != null ? Number(row.total_amount) : 0,
-          stayPeriod: row.stay_nights != null ? Number(row.stay_nights) : null,
-          guestRequest: row.guest_request || "",
-          paymentMethod: row.payment_method || "",
-          bankConfirmed: row.bank_confirmed === true,
-          createdAt: formatDateTimeKst(row.created_at),
-          isPast: row.is_past === true,
-          checkinAlarmSentCount:
-            row.checkin_alarm_sent_count != null
-              ? Number(row.checkin_alarm_sent_count)
-              : 0,
-          bookingLocale: row.booking_locale || "kr",
-          bookingChannel: row.booking_channel || "direct",
-          linkedExternalUid: row.linked_external_uid || "",
-          pricingBreakdown: parsePricingBreakdownFromDb(row.pricing_breakdown),
-        };
+        if (!isRoomChangeChildRow(row)) {
+          var mapped = mapRow(row, false, { useOccupancyDates: true });
+          mapped.isPast = row.is_past === true;
+          mapped.bankConfirmed = row.bank_confirmed === true;
+          return mapped;
+        }
+        var parentSegs = segmentByParent[row.parent_reservation_number] || [];
+        var mappedChild = mapRow(
+          Object.assign({}, row, { staySegments: parentSegs }),
+          false,
+          { useOccupancyDates: true },
+        );
+        mappedChild.isPast = row.is_past === true;
+        mappedChild.bankConfirmed = row.bank_confirmed === true;
+        mappedChild.hasRoomChange = true;
+        return mappedChild;
       });
       var externalCalendarRows = await getExternalBookingCalendarRows(pool);
       result.calendarRows = bookingCalendarRows.concat(

@@ -19,7 +19,7 @@
       })();
     </script>
     <script src="js/booking-token-client.js?v=8"></script>
-    <script src="js/booking-checkout-guard.js?v=19"></script>
+    <script src="js/booking-checkout-guard.js?v=20"></script>
     <script src="js/nav-hero.js" defer></script>
     <script src="js/mobile-nav.js" defer></script>
     <script src="js/site-language.js" defer></script>
@@ -1985,6 +1985,12 @@
                     bookingToken: bookingToken,
                   }),
                 );
+                try {
+                  localStorage.setItem(
+                    "graffordPaymentDataBackup",
+                    sessionStorage.getItem("graffordPaymentData"),
+                  );
+                } catch (_backup) {}
                 if (window.GraffordCheckoutGuard) {
                   if (window.GraffordCheckoutGuard.allowNavigateToPayment) {
                     window.GraffordCheckoutGuard.allowNavigateToPayment();
@@ -2339,6 +2345,12 @@
                       bookingToken: bookingToken,
                     }),
                   );
+                  try {
+                    localStorage.setItem(
+                      "graffordPaymentDataBackup",
+                      sessionStorage.getItem("graffordPaymentData"),
+                    );
+                  } catch (_backupEn) {}
                   if (window.GraffordCheckoutGuard) {
                     if (window.GraffordCheckoutGuard.allowNavigateToPayment) {
                       window.GraffordCheckoutGuard.allowNavigateToPayment();

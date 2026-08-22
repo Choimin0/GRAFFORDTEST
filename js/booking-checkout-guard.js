@@ -224,7 +224,18 @@
     }
   }
 
+  function isPaymentFlowActive() {
+    try {
+      return sessionStorage.getItem("graffordInPaymentFlow") === "1";
+    } catch (_e) {
+      return false;
+    }
+  }
+
   function isPaymentInProgress() {
+    if (isPaymentFlowActive()) {
+      return true;
+    }
     try {
       var keys = Object.keys(sessionStorage);
       for (var i = 0; i < keys.length; i++) {
@@ -271,7 +282,7 @@
     if (isLikelyPortonePaymentDeparture()) {
       return true;
     }
-    if (isPaymentInProgress()) {
+    if (isPaymentInProgress() || isPaymentFlowActive()) {
       return true;
     }
     if (isPaymentNavigationAllowed() && page === "confirm") {
@@ -1021,6 +1032,7 @@
     clearPaymentForwardBlock: clearPaymentForwardBlock,
     markPaymentForwardBlocked: markPaymentForwardBlocked,
     isPaymentInProgress: isPaymentInProgress,
+    isPaymentFlowActive: isPaymentFlowActive,
     clearAllPaymentProcessingFlags: clearAllPaymentProcessingFlags,
     hasPortoneRedirectReturn: hasPortoneRedirectReturn,
   };

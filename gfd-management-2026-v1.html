@@ -1380,6 +1380,27 @@
               </p>
             </div>
             <div class="admin-edit-reservation-field-group">
+              <p class="admin-edit-reservation-field-label">룸체인지</p>
+              <p
+                class="admin-edit-room-change-hint"
+                id="admin-edit-room-change-hint"
+              >
+                같은 투숙 기간을 여러 객실로 나눌 수 있습니다. 구간을 이어
+                붙이면 위의 체크인·체크아웃과 같아야 합니다.
+              </p>
+              <div
+                id="admin-edit-room-change-list"
+                class="admin-edit-room-change-list"
+              ></div>
+              <button
+                type="button"
+                class="admin-edit-room-change-add"
+                id="admin-edit-room-change-add"
+              >
+                구간 추가
+              </button>
+            </div>
+            <div class="admin-edit-reservation-field-group">
               <p class="admin-edit-reservation-field-label">인원</p>
               <div class="admin-res-entry-guest-counter">
                 <button
@@ -1505,6 +1526,14 @@
             <div class="admin-edit-reservation-detail__row">
               <span>객실</span>
               <strong id="admin-calendar-res-detail-room">—</strong>
+            </div>
+            <div
+              class="admin-edit-reservation-detail__row"
+              id="admin-calendar-res-detail-room-change-row"
+              hidden
+            >
+              <span>객실 변동</span>
+              <strong id="admin-calendar-res-detail-room-change">—</strong>
             </div>
             <div class="admin-edit-reservation-detail__row">
               <span>체크인</span>
@@ -2265,6 +2294,13 @@
         var editResAvailabilityRoom = "";
         var editResGuestCount = 2;
         var editResRoomType = "";
+        var editRoomChangeSegments = [];
+        var calendarResDetailRoomChangeRow = document.getElementById(
+          "admin-calendar-res-detail-room-change-row",
+        );
+        var calendarResDetailRoomChange = document.getElementById(
+          "admin-calendar-res-detail-room-change",
+        );
         var calendarResDetailModal = document.getElementById(
           "admin-calendar-res-detail-modal",
         );
@@ -4545,6 +4581,46 @@
             calendarResDetailAmount.textContent = formatKRW(
               getReservationPaidTotal(targetRow),
             );
+          }
+          var roomChangeSegs = targetRow.staySegments || [];
+          if (targetRow.parentReservationNumber) {
+            var parentRow = (latestCalendarRows || []).find(function (row) {
+              return (
+                String((row && row.reservationNumber) || "") ===
+                String(targetRow.parentReservationNumber)
+              );
+            });
+            if (parentRow) {
+              if (calendarResDetailNumber) {
+                calendarResDetailNumber.textContent =
+                  parentRow.reservationNumber || "—";
+              }
+              if (calendarResDetailAmount) {
+                calendarResDetailAmount.textContent = formatKRW(
+                  getReservationPaidTotal(parentRow),
+                );
+              }
+              roomChangeSegs = parentRow.staySegments || roomChangeSegs;
+            }
+          }
+          if (calendarResDetailRoomChangeRow && calendarResDetailRoomChange) {
+            if (targetRow.hasRoomChange && roomChangeSegs.length) {
+              calendarResDetailRoomChange.textContent = roomChangeSegs
+                .map(function (seg) {
+                  return (
+                    (seg.checkIn || "") +
+                    "–" +
+                    (seg.checkOut || "") +
+                    " " +
+                    (seg.room || "")
+                  );
+                })
+                .join(" / ");
+              calendarResDetailRoomChangeRow.hidden = false;
+            } else {
+              calendarResDetailRoomChange.textContent = "—";
+              calendarResDetailRoomChangeRow.hidden = true;
+            }
           }
           updateCalendarResDetailPricing(targetRow);
           calendarResDetailModal.hidden = false;
@@ -7689,8 +7765,25 @@
                 editResConfirmedOccupiedNightSet = new Set();
                 editResAirbnbNightSet = new Set();
               }
-              if (row && row.checkIn && row.checkOut) {
-                removeEditResStayNightsFromSets(row.checkIn, row.checkOut);
+              if (row && row.staySegments && row.staySegments.length) {
+                row.staySegments.forEach(function (seg) {
+                  if (
+                    String((seg && seg.room) || "").toUpperCase() === roomKey &&
+                    seg.checkIn &&
+                    seg.checkOut
+                  ) {
+                    removeEditResStayNightsFromSets(seg.checkIn, seg.checkOut);
+                  }
+                });
+              } else if (
+                row &&
+                (row.occupancyCheckIn || row.checkIn) &&
+                (row.occupancyCheckOut || row.checkOut)
+              ) {
+                removeEditResStayNightsFromSets(
+                  row.occupancyCheckIn || row.checkIn,
+                  row.occupancyCheckOut || row.checkOut,
+                );
               }
               updateEditResCalHint();
               renderEditReservationCalendar();
@@ -7702,8 +7795,25 @@
               editResOccupiedNightSet = new Set();
               editResConfirmedOccupiedNightSet = new Set();
               editResAirbnbNightSet = new Set();
-              if (row && row.checkIn && row.checkOut) {
-                removeEditResStayNightsFromSets(row.checkIn, row.checkOut);
+              if (row && row.staySegments && row.staySegments.length) {
+                row.staySegments.forEach(function (seg) {
+                  if (
+                    String((seg && seg.room) || "").toUpperCase() === roomKey &&
+                    seg.checkIn &&
+                    seg.checkOut
+                  ) {
+                    removeEditResStayNightsFromSets(seg.checkIn, seg.checkOut);
+                  }
+                });
+              } else if (
+                row &&
+                (row.occupancyCheckIn || row.checkIn) &&
+                (row.occupancyCheckOut || row.checkOut)
+              ) {
+                removeEditResStayNightsFromSets(
+                  row.occupancyCheckIn || row.checkIn,
+                  row.occupancyCheckOut || row.checkOut,
+                );
               }
               updateEditResCalHint();
               renderEditReservationCalendar();
@@ -7966,6 +8076,126 @@
           updateEditResCalHint();
         }
 
+        function defaultEditRoomChangeSegment() {
+          return {
+            room: editResRoomType || "G1",
+            checkIn: getEditReservationCheckInYmd(),
+            checkOut: getEditReservationCheckOutYmd(),
+          };
+        }
+
+        function normalizeEditRoomChangeSegments(raw) {
+          if (!Array.isArray(raw) || !raw.length) {
+            return [defaultEditRoomChangeSegment()];
+          }
+          return raw.map(function (item) {
+            return {
+              room: String((item && (item.room || item.roomType)) || "")
+                .trim()
+                .toUpperCase(),
+              checkIn: String((item && (item.checkIn || item.check_in)) || "")
+                .trim()
+                .slice(0, 10),
+              checkOut: String((item && (item.checkOut || item.check_out)) || "")
+                .trim()
+                .slice(0, 10),
+            };
+          });
+        }
+
+        function collectEditRoomChangeSegments() {
+          var list = document.getElementById("admin-edit-room-change-list");
+          if (!list) {
+            return editRoomChangeSegments.slice();
+          }
+          var rows = list.querySelectorAll(".admin-edit-room-change-row");
+          var segs = [];
+          rows.forEach(function (row) {
+            var roomSel = row.querySelector("select");
+            var dates = row.querySelectorAll('input[type="date"]');
+            segs.push({
+              room: String((roomSel && roomSel.value) || "")
+                .trim()
+                .toUpperCase(),
+              checkIn: String((dates[0] && dates[0].value) || "").trim(),
+              checkOut: String((dates[1] && dates[1].value) || "").trim(),
+            });
+          });
+          if (!segs.length) {
+            segs = [defaultEditRoomChangeSegment()];
+          }
+          if (segs.length === 1) {
+            segs[0].checkIn = getEditReservationCheckInYmd() || segs[0].checkIn;
+            segs[0].checkOut =
+              getEditReservationCheckOutYmd() || segs[0].checkOut;
+            if (!segs[0].room) {
+              segs[0].room = editResRoomType || "G1";
+            }
+          }
+          return segs;
+        }
+
+        function isEditRoomChangeActive(segments) {
+          var segs = segments || collectEditRoomChangeSegments();
+          if (segs.length > 1) {
+            return true;
+          }
+          var original = String(editResRoomType || "").toUpperCase();
+          return !!(
+            segs[0] &&
+            segs[0].room &&
+            original &&
+            segs[0].room !== original
+          );
+        }
+
+        function renderEditRoomChangeList() {
+          var list = document.getElementById("admin-edit-room-change-list");
+          if (!list) {
+            return;
+          }
+          var segs = editRoomChangeSegments.length
+            ? editRoomChangeSegments
+            : [defaultEditRoomChangeSegment()];
+          list.innerHTML = segs
+            .map(function (seg, idx) {
+              var roomOpts = ["G1", "G2", "G3", "G4"]
+                .map(function (room) {
+                  return (
+                    "<option value='" +
+                    room +
+                    "'" +
+                    (seg.room === room ? " selected" : "") +
+                    ">" +
+                    room +
+                    "</option>"
+                  );
+                })
+                .join("");
+              var removeBtn =
+                segs.length > 1
+                  ? "<button type='button' class='admin-edit-room-change-remove' data-room-change-remove='" +
+                    idx +
+                    "'>삭제</button>"
+                  : "<span></span>";
+              return (
+                "<div class='admin-edit-room-change-row'>" +
+                "<select aria-label='객실'>" +
+                roomOpts +
+                "</select>" +
+                "<input type='date' aria-label='구간 체크인' value='" +
+                escapeHtml(seg.checkIn || "") +
+                "' />" +
+                "<input type='date' aria-label='구간 체크아웃' value='" +
+                escapeHtml(seg.checkOut || "") +
+                "' />" +
+                removeBtn +
+                "</div>"
+              );
+            })
+            .join("");
+        }
+
         function resetEditReservationFormState() {
           editResCheckInDate = null;
           editResCheckOutDate = null;
@@ -7975,6 +8205,7 @@
           editResAvailabilityRoom = "";
           editResGuestCount = 2;
           editResRoomType = "";
+          editRoomChangeSegments = [];
           editResCalView = new Date();
           var editQuoteEl = document.getElementById("admin-edit-res-quote");
           if (editQuoteEl) {
@@ -8146,6 +8377,18 @@
             );
           }
           updateEditReservationGuestControls();
+          editRoomChangeSegments = normalizeEditRoomChangeSegments(
+            row.staySegments && row.staySegments.length
+              ? row.staySegments
+              : [
+                  {
+                    room: editResRoomType,
+                    checkIn: row.checkIn,
+                    checkOut: row.checkOut,
+                  },
+                ],
+          );
+          renderEditRoomChangeList();
           renderEditReservationCalendar();
           loadEditReservationAvailability(editResRoomType, row);
           updateEditReservationQuoteDisplay();
@@ -8193,7 +8436,9 @@
             );
             return;
           }
+          var staySegments = collectEditRoomChangeSegments();
           if (
+            !isEditRoomChangeActive(staySegments) &&
             !canEditResSelectCheckOut(editResCheckInDate, editResCheckOutDate)
           ) {
             setEditReservationMessage(
@@ -8263,6 +8508,7 @@
             checkIn: checkIn,
             checkOut: checkOut,
             guestCount: guestCount,
+            staySegments: staySegments,
             adminId: auth.adminId,
             adminPw: auth.adminPw,
           })
@@ -8277,24 +8523,13 @@
                   result.data.error || "예약 수정에 실패했습니다.",
                 );
               }
-              updateReservationFieldsLocal(
-                result.data.reservationNumber || reservationNumber,
-                result.data.guestName != null
-                  ? result.data.guestName
-                  : guestName,
-                result.data.contact != null ? result.data.contact : contact,
-                result.data.totalAmount != null
-                  ? Number(result.data.totalAmount)
-                  : totalAmount,
-                result.data.checkIn != null ? result.data.checkIn : checkIn,
-                result.data.checkOut != null ? result.data.checkOut : checkOut,
-                result.data.guestCount != null
-                  ? Number(result.data.guestCount)
-                  : guestCount,
-              );
-              applyListView();
               closeEditReservationModal(true);
               showMessage("예약 정보가 수정되었습니다.");
+              return loadReservationList(activeResTab || "current").catch(
+                function () {
+                  showMessage("예약 정보가 수정되었습니다. 목록을 새로고침해 주세요.");
+                },
+              );
             })
             .catch(function (err) {
               editReservationSubmitting = false;
@@ -9260,6 +9495,9 @@
               "</td>" +
               "<td class='admin-sort-hover-cell'>" +
               escapeHtml(row.roomType || "—") +
+              (row.hasRoomChange
+                ? "<span class='admin-res-room-change-badge'>룸체인지</span>"
+                : "") +
               "</td>" +
               "<td class='admin-sort-hover-cell'>" +
               escapeHtml(row.contact || "—") +
@@ -11393,6 +11631,50 @@
 
         if (requestCancelBtn) {
           requestCancelBtn.addEventListener("click", closeRequestModal);
+        }
+
+        var editRoomChangeAddBtn = document.getElementById(
+          "admin-edit-room-change-add",
+        );
+        if (editRoomChangeAddBtn) {
+          editRoomChangeAddBtn.addEventListener("click", function () {
+            if (editReservationSubmitting) {
+              return;
+            }
+            editRoomChangeSegments = collectEditRoomChangeSegments();
+            var last = editRoomChangeSegments[editRoomChangeSegments.length - 1];
+            editRoomChangeSegments.push({
+              room: "G1",
+              checkIn: (last && last.checkOut) || getEditReservationCheckInYmd(),
+              checkOut: getEditReservationCheckOutYmd() || "",
+            });
+            renderEditRoomChangeList();
+          });
+        }
+        var editRoomChangeList = document.getElementById(
+          "admin-edit-room-change-list",
+        );
+        if (editRoomChangeList) {
+          editRoomChangeList.addEventListener("click", function (e) {
+            var removeBtn =
+              e.target &&
+              e.target.closest &&
+              e.target.closest("[data-room-change-remove]");
+            if (!removeBtn || editReservationSubmitting) {
+              return;
+            }
+            var idx = Number(removeBtn.getAttribute("data-room-change-remove"));
+            editRoomChangeSegments = collectEditRoomChangeSegments();
+            if (
+              Number.isFinite(idx) &&
+              idx >= 0 &&
+              idx < editRoomChangeSegments.length &&
+              editRoomChangeSegments.length > 1
+            ) {
+              editRoomChangeSegments.splice(idx, 1);
+              renderEditRoomChangeList();
+            }
+          });
         }
 
         if (editReservationSaveBtn) {

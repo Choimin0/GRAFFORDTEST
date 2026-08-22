@@ -51,16 +51,34 @@ export function isGuestSelfCancelClosed(checkInYmd, at = new Date()) {
 export async function archivePastReservations(pool) {
   // 체크아웃일이 KST 기준 오늘 이전이면 'completed'로 전환.
   // 체크아웃일 = 오늘이면 KST 12시 이후에만 'completed'로 전환.
-  await pool.query(
+  var archiveSql =
     `UPDATE ${BOOKING_TABLE}
      SET status = 'completed'
      WHERE status = 'confirm'
        AND (
-         check_out_date < (NOW() AT TIME ZONE 'Asia/Seoul')::date
+         COALESCE(contract_check_out, check_out_date) < (NOW() AT TIME ZONE 'Asia/Seoul')::date
          OR (
-           check_out_date = (NOW() AT TIME ZONE 'Asia/Seoul')::date
+           COALESCE(contract_check_out, check_out_date) = (NOW() AT TIME ZONE 'Asia/Seoul')::date
            AND EXTRACT(HOUR FROM (NOW() AT TIME ZONE 'Asia/Seoul')) >= 12
          )
-       )`,
-  );
+       )`;
+  try {
+    await pool.query(archiveSql);
+  } catch (e) {
+    if (!e || e.code !== "42703") {
+      throw e;
+    }
+    await pool.query(
+      `UPDATE ${BOOKING_TABLE}
+       SET status = 'completed'
+       WHERE status = 'confirm'
+         AND (
+           check_out_date < (NOW() AT TIME ZONE 'Asia/Seoul')::date
+           OR (
+             check_out_date = (NOW() AT TIME ZONE 'Asia/Seoul')::date
+             AND EXTRACT(HOUR FROM (NOW() AT TIME ZONE 'Asia/Seoul')) >= 12
+           )
+         )`,
+    );
+  }
 }

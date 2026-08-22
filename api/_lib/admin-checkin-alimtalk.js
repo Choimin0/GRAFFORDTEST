@@ -6,6 +6,7 @@ import { json } from "./admin-common.js";
 import { shouldSendAlimtalk } from "./booking-locale.js";
 import { sendBookingAlimtalk } from "./solapi-alimtalk.js";
 import { applyBookingRetentionToRow } from "./booking-retention.js";
+import { isRoomChangeChildRow } from "./booking-room-change.js";
 
 const BOOKING_TABLE = "booking";
 
@@ -44,7 +45,8 @@ export async function handleAdminCheckinAlimtalk(res, pool, body) {
   }
 
   var sel = await pool.query(
-    `SELECT guest_name, contact, room_type, check_in_date, check_out_date, status, booking_locale, created_at
+    `SELECT guest_name, contact, room_type, check_in_date, check_out_date,
+            status, booking_locale, created_at, stay_role, parent_reservation_number
      FROM ${BOOKING_TABLE}
      WHERE reservation_number = $1
      LIMIT 1`,
@@ -59,6 +61,13 @@ export async function handleAdminCheckinAlimtalk(res, pool, body) {
   var row = await applyBookingRetentionToRow(pool, sel.rows[0]);
   if (!row) {
     json(res, 404, { ok: false, error: "예약을 찾을 수 없습니다." });
+    return;
+  }
+  if (isRoomChangeChildRow(row)) {
+    json(res, 400, {
+      ok: false,
+      error: "룸체인지 구간에는 입실 안내 알림톡을 보낼 수 없습니다. 원예약에서 발송해 주세요.",
+    });
     return;
   }
   var status = String(row.status || "").toLowerCase();

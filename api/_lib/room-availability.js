@@ -94,14 +94,19 @@ export async function hasReservationOverlap(
   var legacyRoom = ROOM_TO_LEGACY[room] || "";
   var params = [[room, legacyRoom], checkIn, checkOut];
   var excludeSql = "";
+  var excludeSqlLegacy = "";
   if (excludeReservationNumber) {
     params.push(String(excludeReservationNumber).trim());
-    excludeSql = " AND reservation_number <> $" + params.length;
+    var excludeIdx = params.length;
+    excludeSql =
+      " AND reservation_number <> $" +
+      excludeIdx +
+      " AND COALESCE(parent_reservation_number, '') <> $" +
+      excludeIdx;
+    excludeSqlLegacy = " AND reservation_number <> $" + excludeIdx;
   }
-  var result = await pool.query(
-    `SELECT reservation_number
-     FROM ${BOOKING_TABLE}
-     WHERE (
+  var overlapWhere =
+    `WHERE (
          status = 'confirm'
          OR (
            status = 'pending'
@@ -115,11 +120,30 @@ export async function hasReservationOverlap(
        )
        AND room_type = ANY($1::text[])
        AND check_in_date < $3::date
-       AND check_out_date > $2::date
+       AND check_out_date > $2::date`;
+  var result;
+  try {
+    result = await pool.query(
+      `SELECT reservation_number
+       FROM ${BOOKING_TABLE}
+       ${overlapWhere}
        ${excludeSql}
-     LIMIT 1`,
-    params,
-  );
+       LIMIT 1`,
+      params,
+    );
+  } catch (e) {
+    if (!e || e.code !== "42703") {
+      throw e;
+    }
+    result = await pool.query(
+      `SELECT reservation_number
+       FROM ${BOOKING_TABLE}
+       ${overlapWhere}
+       ${excludeSqlLegacy}
+       LIMIT 1`,
+      params,
+    );
+  }
   return !!(result.rows && result.rows.length);
 }
 

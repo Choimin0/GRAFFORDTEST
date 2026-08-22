@@ -12,6 +12,14 @@ import {
   archivePastReservations,
   isGuestSelfCancelClosed,
 } from "./booking-archive.js";
+import {
+  guestDisplayCheckIn,
+  guestDisplayCheckOut,
+  guestDisplayRoomType,
+  isRoomChangeChildRow,
+  isRoomChangeItinerary,
+  loadStaySegmentsForPrimary,
+} from "./booking-room-change.js";
 
 const LEGACY_TO_ROOM = { A: "G1", B: "G2", C: "G3", D: "G4" };
 const DEFAULT_CANCEL_TOKEN_TTL_MS = 10 * 60 * 1000;
@@ -241,20 +249,42 @@ export async function handlePublicReservationsLookup(req, res, pool) {
     await archivePastReservations(pool);
     await purgeExpiredBookings(pool);
 
-    var sel = await pool.query(
+    var lookupSql =
       `SELECT
         id, reservation_number, guest_name, contact, room_type,
         check_in_date, check_out_date, guest_count, stay_nights,
         extra_guests, total_amount, guest_request, payment_method,
         bank_confirmed, created_at, status, cancel_reason, other_reason,
         cancelled_at, refund_amount, booking_locale,
-        refunded_count, cancel_alarm_sent_count
+        refunded_count, cancel_alarm_sent_count,
+        parent_reservation_number, stay_role,
+        contract_check_in, contract_check_out, original_room_type
       FROM ${BOOKING_TABLE}
       WHERE reservation_number = $1
         AND status <> 'pending'
-      LIMIT 1`,
-      [normOrder],
-    );
+      LIMIT 1`;
+    var sel;
+    try {
+      sel = await pool.query(lookupSql, [normOrder]);
+    } catch (lookupErr) {
+      if (!lookupErr || lookupErr.code !== "42703") {
+        throw lookupErr;
+      }
+      sel = await pool.query(
+        `SELECT
+          id, reservation_number, guest_name, contact, room_type,
+          check_in_date, check_out_date, guest_count, stay_nights,
+          extra_guests, total_amount, guest_request, payment_method,
+          bank_confirmed, created_at, status, cancel_reason, other_reason,
+          cancelled_at, refund_amount, booking_locale,
+          refunded_count, cancel_alarm_sent_count
+        FROM ${BOOKING_TABLE}
+        WHERE reservation_number = $1
+          AND status <> 'pending'
+        LIMIT 1`,
+        [normOrder],
+      );
+    }
 
     if (!sel.rows || !sel.rows.length) {
       json(res, 404, { ok: false, error: "Not found" });
@@ -271,6 +301,11 @@ export async function handlePublicReservationsLookup(req, res, pool) {
       return true;
     }
 
+    if (isRoomChangeChildRow(row)) {
+      json(res, 404, { ok: false, error: "Not found" });
+      return true;
+    }
+
     var pii = decryptBookingPiiResponse(row);
     var isCancelled = row.status === "cancelled";
     var refundedCount =
@@ -278,6 +313,25 @@ export async function handlePublicReservationsLookup(req, res, pool) {
     if (!Number.isFinite(refundedCount)) {
       refundedCount = 0;
     }
+    var staySegments = [];
+    try {
+      staySegments = await loadStaySegmentsForPrimary(pool, row);
+    } catch (segErr) {
+      staySegments = [
+        {
+          room: normalizeRoomType(row.room_type) || row.room_type,
+          checkIn: toYMD(row.check_in_date),
+          checkOut: toYMD(row.check_out_date),
+        },
+      ];
+    }
+    var displayRoom =
+      guestDisplayRoomType(row) ||
+      normalizeRoomType(row.room_type) ||
+      row.room_type;
+    var displayCheckIn = guestDisplayCheckIn(row) || toYMD(row.check_in_date);
+    var displayCheckOut = guestDisplayCheckOut(row) || toYMD(row.check_out_date);
+    var hasRoomChange = isRoomChangeItinerary(staySegments, displayRoom);
 
     if (!isCancelled) {
       json(res, 200, {
@@ -288,9 +342,9 @@ export async function handlePublicReservationsLookup(req, res, pool) {
           reservationNumber: row.reservation_number,
           guestName: pii.guestName,
           contact: pii.contact,
-          roomType: normalizeRoomType(row.room_type) || row.room_type,
-          checkIn: toYMD(row.check_in_date),
-          checkOut: toYMD(row.check_out_date),
+          roomType: displayRoom,
+          checkIn: displayCheckIn,
+          checkOut: displayCheckOut,
           guestCount: row.guest_count,
           stayNights: row.stay_nights != null ? Number(row.stay_nights) : null,
           extraGuests: row.extra_guests != null ? Number(row.extra_guests) : null,
@@ -306,8 +360,11 @@ export async function handlePublicReservationsLookup(req, res, pool) {
             pii.contact,
           ),
           refundedCount: refundedCount,
+          staySegments: hasRoomChange ? staySegments : [],
+          hasRoomChange: hasRoomChange,
+          originalRoomType: displayRoom,
         },
-        cancelToken: isGuestSelfCancelClosed(toYMD(row.check_in_date))
+        cancelToken: isGuestSelfCancelClosed(displayCheckIn)
           ? ""
           : issueCancelToken(row.reservation_number, pii.guestName),
       });
@@ -323,9 +380,9 @@ export async function handlePublicReservationsLookup(req, res, pool) {
         reservationNumber: row.reservation_number,
         guestName: pii.guestName,
         contact: pii.contact,
-        roomType: normalizeRoomType(row.room_type) || row.room_type,
-        checkIn: toYMD(row.check_in_date),
-        checkOut: toYMD(row.check_out_date),
+        roomType: displayRoom,
+        checkIn: displayCheckIn,
+        checkOut: displayCheckOut,
         guestCount: row.guest_count != null ? Number(row.guest_count) : null,
         stayNights: row.stay_nights != null ? Number(row.stay_nights) : null,
         extraGuests: row.extra_guests != null ? Number(row.extra_guests) : null,
@@ -352,6 +409,9 @@ export async function handlePublicReservationsLookup(req, res, pool) {
           row.cancel_alarm_sent_count != null
             ? Number(row.cancel_alarm_sent_count) || 0
             : 0,
+        staySegments: hasRoomChange ? staySegments : [],
+        hasRoomChange: hasRoomChange,
+        originalRoomType: displayRoom,
       },
     });
   } catch (e) {

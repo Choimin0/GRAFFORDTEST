@@ -356,6 +356,10 @@
               bookingCreatedAtIso: data.bookingCreatedAtIso || "",
               bookingLocale: data.bookingLocale || "kr",
               refundedCount: Number(data.refundedCount) || 0,
+              staySegments: Array.isArray(data.staySegments)
+                ? data.staySegments
+                : [],
+              hasRoomChange: data.hasRoomChange === true,
             }),
           );
           window.location.href = "reserve-check.html";
@@ -536,7 +540,7 @@
                   }
                   goToReserveComplete({
                     orderNo: row.reservationNumber,
-                    room: row.roomType,
+                    room: row.originalRoomType || row.roomType,
                     checkIn: row.checkIn,
                     checkOut: row.checkOut,
                     guestName: row.guestName,
@@ -551,6 +555,8 @@
                     bookingCreatedAtIso: row.createdAtIso || "",
                     bookingLocale: row.bookingLocale || "kr",
                     refundedCount: Number(row.refundedCount) || 0,
+                    staySegments: row.staySegments || [],
+                    hasRoomChange: row.hasRoomChange === true,
                   });
                   return;
                 }

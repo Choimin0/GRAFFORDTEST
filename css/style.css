@@ -11062,6 +11062,33 @@ main.content-section.confirm-page.reserve-check-main {
   color: var(--gold-500) !important;
 }
 
+.reserve-check-room-change {
+  margin-top: var(--space-16);
+}
+
+.reserve-check-room-change[hidden] {
+  display: none;
+}
+
+.reserve-check-stay-segments {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 0.35rem;
+}
+
+.reserve-check-stay-segments li {
+  display: grid;
+  grid-template-columns: minmax(7.5rem, auto) 1fr;
+  gap: 0.75rem;
+  color: var(--stone-700);
+}
+
+.reserve-check-stay-segments li span {
+  color: var(--stone-400);
+}
+
 .reserve-check-stay-guide {
   margin-top: var(--space-48);
   padding-top: var(--space-8);
@@ -13646,9 +13673,70 @@ main.content-section.confirm-page.admin-page {
   border-color: var(--gold-500);
 }
 .admin-edit-reservation-panel {
-  width: min(100%, 580px);
+  width: min(100%, 640px);
   max-height: min(90vh, 920px);
   overflow-y: auto;
+}
+.admin-edit-room-change-hint {
+  margin: 0;
+  color: var(--stone-400);
+  font-size: 0.78rem;
+  line-height: 1.5;
+}
+.admin-edit-room-change-list {
+  display: grid;
+  gap: var(--space-8);
+}
+.admin-edit-room-change-row {
+  display: grid;
+  grid-template-columns: 4.5rem minmax(0, 1fr) minmax(0, 1fr) auto;
+  gap: var(--space-8);
+  align-items: center;
+}
+.admin-edit-room-change-row select,
+.admin-edit-room-change-row input[type="date"] {
+  width: 100%;
+  box-sizing: border-box;
+  min-height: 2.25rem;
+  padding: 0.35rem 0.45rem;
+  border: 1px solid var(--stone-200);
+  background: var(--stone-50);
+  color: var(--stone-800);
+  font-size: 0.8rem;
+}
+.admin-edit-room-change-remove {
+  border: 0;
+  background: transparent;
+  color: var(--stone-400);
+  font-size: 0.75rem;
+  letter-spacing: 0.04em;
+  cursor: pointer;
+  padding: 0.25rem 0.15rem;
+}
+.admin-edit-room-change-remove:hover {
+  color: var(--stone-700);
+}
+.admin-edit-room-change-add {
+  justify-self: start;
+  border: 1px solid var(--stone-200);
+  background: transparent;
+  color: var(--stone-600);
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 0.4rem 0.7rem;
+  cursor: pointer;
+}
+.admin-res-room-change-badge {
+  display: inline-block;
+  margin-left: 0.4rem;
+  padding: 0.08rem 0.35rem;
+  border: 1px solid var(--stone-300);
+  color: var(--stone-500);
+  font-size: 0.62rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  vertical-align: middle;
 }
 .admin-edit-reservation-field-group {
   display: grid;
