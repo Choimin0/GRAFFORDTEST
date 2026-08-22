@@ -145,7 +145,8 @@ export async function getBookingHoldByReservationNumber(pool, reservationNumber)
     return null;
   }
   var result = await pool.query(
-    `SELECT hold_id, room_type, check_in_date, check_out_date, reservation_number
+    `SELECT hold_id, room_type, check_in_date, check_out_date, reservation_number,
+            (EXTRACT(EPOCH FROM expires_at) * 1000)::bigint AS expires_at_ms
      FROM ${BOOKING_HOLD_TABLE}
      WHERE reservation_number = $1
        AND expires_at > NOW()

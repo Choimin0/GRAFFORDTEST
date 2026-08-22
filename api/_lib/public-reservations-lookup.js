@@ -251,6 +251,7 @@ export async function handlePublicReservationsLookup(req, res, pool) {
         refunded_count, cancel_alarm_sent_count
       FROM ${BOOKING_TABLE}
       WHERE reservation_number = $1
+        AND status <> 'pending'
       LIMIT 1`,
       [normOrder],
     );

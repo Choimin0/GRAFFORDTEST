@@ -12,7 +12,6 @@ import pg from "pg";
 import crypto from "node:crypto";
 import {
   decryptBookingPiiResponse,
-  encryptBookingPii,
   guestNamesMatch,
 } from "./_lib/pii-crypto.js";
 import {
@@ -31,10 +30,7 @@ import {
   validatePricingBreakdownForBooking,
   serializePricingBreakdown,
 } from "./_lib/pricing-breakdown.js";
-import {
-  archivePastReservations,
-  getInitialBookingStatusForCheckout,
-} from "./_lib/booking-archive.js";
+import { archivePastReservations } from "./_lib/booking-archive.js";
 import { exportReservationToBigQuery, exportCancellationToBigQuery } from "./_lib/bigquery-export.js";
 import {
   buildIcalCalendar,
@@ -61,6 +57,16 @@ import { handlePublicRoomRate } from "./_lib/public-room-rate.js";
 import { handlePublicBookingToken } from "./_lib/public-booking-token.js";
 import { handlePublicReservationsLookup } from "./_lib/public-reservations-lookup.js";
 import { handlePublicAlimtalkNotify } from "./_lib/public-alimtalk-notify.js";
+import {
+  notifyReserveCompleteAlimtalk,
+  upsertConfirmedCheckoutBooking,
+} from "./_lib/commit-paid-booking.js";
+import { cleanupExpiredCheckoutDrafts } from "./_lib/booking-checkout-draft.js";
+import {
+  extractPgTxIdFromPayment,
+  extractPortonePaidAmount,
+  fetchPortonePayment,
+} from "./_lib/portone-client.js";
 
 const { Pool } = pg;
 
@@ -554,11 +560,23 @@ export default async function handler(req, res) {
       try {
         await cleanupExpiredBookingHolds(pool);
         await purgeExpiredBookings(pool);
+        await cleanupExpiredCheckoutDrafts(pool);
         var roomForCalLegacy = ROOM_TO_LEGACY[roomForCal] || "";
         var calRows = await pool.query(
           `SELECT check_in_date, check_out_date
            FROM ${BOOKING_TABLE}
-           WHERE status = 'confirm'
+           WHERE (
+               status = 'confirm'
+               OR (
+                 status = 'pending'
+                 AND EXISTS (
+                   SELECT 1
+                   FROM booking_hold h
+                   WHERE h.reservation_number = ${BOOKING_TABLE}.reservation_number
+                     AND h.expires_at > NOW()
+                 )
+               )
+             )
              AND room_type = ANY($1::text[])
              AND check_out_date IS NOT NULL
            ORDER BY check_in_date`,
@@ -1049,65 +1067,81 @@ export default async function handler(req, res) {
     ? serializePricingBreakdown(breakdownCheck.breakdown)
     : null;
 
-  var insertStatus = getInitialBookingStatusForCheckout(checkOut);
-
-  var encPii = encryptBookingPii({
-    guestName: guestName,
-    contact: contact,
-    email: email || null,
-  });
-
-  var insertSql = `
-    INSERT INTO ${BOOKING_TABLE} (
-      reservation_number,
-      status,
-      guest_name,
-      contact,
-      email,
-      room_type,
-      check_in_date,
-      check_out_date,
-      guest_count,
-      stay_nights,
-      extra_guests,
-      total_amount,
-      pricing_breakdown,
-      guest_request,
-      payment_method,
-      bank_confirmed,
-      pg_tid,
-      pg_pay_provider,
-      booking_locale
-    ) VALUES (
-      $1, $2, $3, $4, $5, $6, $7::date, $8::date, $9, $10, $11, $12, $13::jsonb, $14, $15, $16, $17, $18, $19
-    )
-    RETURNING id, reservation_number, created_at
-  `;
-
-  var params = [
-    reservationNumber,
-    insertStatus,
-    encPii.guest_name,
-    encPii.contact,
-    encPii.email || null,
-    roomType,
-    checkIn,
-    checkOut,
-    gc,
-    sn,
-    eg,
-    ta,
-    pricingBreakdownToStore ? JSON.stringify(pricingBreakdownToStore) : null,
-    guestRequest,
-    paymentMethod,
-    true,
-    pgTid || null,
-    pgPayProvider || null,
-    bookingLocale,
-  ];
-
   try {
     await archivePastReservations(pool);
+    var existingSel = await pool.query(
+      `SELECT created_at, guest_name, bank_confirmed, payment_method, status
+       FROM ${BOOKING_TABLE}
+       WHERE reservation_number = $1
+       LIMIT 1`,
+      [reservationNumber],
+    );
+    if (existingSel.rows && existingSel.rows.length) {
+      var existingStatus = String(existingSel.rows[0].status || "");
+      if (existingStatus === "cancelled") {
+        json(res, 409, {
+          ok: false,
+          error: "이미 취소된 예약번호입니다.",
+        });
+        return;
+      }
+      if (existingStatus === "confirm" || existingStatus === "completed") {
+        var existingCandidate = Object.assign({}, existingSel.rows[0], {
+          reservation_number: reservationNumber,
+        });
+        var existingKept = await applyBookingRetentionToRow(
+          pool,
+          existingCandidate,
+        );
+        if (
+          existingKept &&
+          guestNamesMatch(
+            existingKept.guest_name,
+            guestName,
+            normalizeLookupName,
+          )
+        ) {
+          json(res, 409, {
+            ok: true,
+            duplicate: true,
+            createdAtIso: new Date(existingKept.created_at).toISOString(),
+            cancelToken: issueCancelToken(reservationNumber, guestName),
+            bankConfirmed: existingKept.bank_confirmed === true,
+          });
+          return;
+        }
+        json(res, 409, { ok: false, error: "Duplicate reservation number" });
+        return;
+      }
+    }
+    if (paymentMethod !== "bank") {
+      var paidLookup = await fetchPortonePayment(reservationNumber);
+      if (
+        !paidLookup.ok ||
+        !paidLookup.data ||
+        paidLookup.data.status !== "PAID"
+      ) {
+        json(res, 409, {
+          ok: false,
+          error: "결제가 완료되지 않아 예약을 확정할 수 없습니다.",
+          code: "payment_not_paid",
+        });
+        return;
+      }
+      var paidAmount = extractPortonePaidAmount(paidLookup.data);
+      if (paidAmount != null && Number(paidAmount) !== ta) {
+        json(res, 400, {
+          ok: false,
+          error: "결제 금액이 일치하지 않습니다.",
+          expected: ta,
+          actual: paidAmount,
+        });
+        return;
+      }
+      if (!pgTid) {
+        pgTid = extractPgTxIdFromPayment(paidLookup.data);
+      }
+    }
     var availability = await checkRoomAvailability(
       pool,
       roomType,
@@ -1137,8 +1171,31 @@ export default async function handler(req, res) {
       });
       return;
     }
-    var result = await pool.query(insertSql, params);
-    var row = result && result.rows && result.rows[0];
+    var row = await upsertConfirmedCheckoutBooking(
+      pool,
+      {
+        reservationNumber: reservationNumber,
+        roomType: roomType,
+        checkIn: checkIn,
+        checkOut: checkOut,
+        guestName: guestName,
+        contact: contact,
+        email: email,
+        guestRequest: guestRequest,
+        stayNights: sn,
+        extraGuests: eg,
+        guestCount: gc,
+        totalAmount: ta,
+        paymentMethod: paymentMethod,
+        bookingLocale: bookingLocale,
+        pricingBreakdown: pricingBreakdownToStore || normalizedBreakdown,
+      },
+      {
+        paymentMethod: paymentMethod,
+        pgTid: pgTid || null,
+        pgPayProvider: pgPayProvider,
+      },
+    );
     if (!row) {
       json(res, 500, { ok: false, error: "Insert did not return a row" });
       return;
@@ -1161,6 +1218,19 @@ export default async function handler(req, res) {
       }
     } catch (bqErr) {
       console.error("[reservations POST] BigQuery export", bqErr);
+    }
+    try {
+      await notifyReserveCompleteAlimtalk(pool, {
+        reservationNumber: reservationNumber,
+        guestName: guestName,
+        contact: contact,
+        roomType: roomType,
+        checkIn: checkIn,
+        checkOut: checkOut,
+        bookingLocale: bookingLocale,
+      });
+    } catch (alimtalkErr) {
+      console.error("[reservations POST] reserve alimtalk", alimtalkErr);
     }
     json(res, 201, {
       ok: true,

@@ -14,6 +14,7 @@ import {
   findConfirmedReservation,
 } from "./room-availability.js";
 import { validateBookingWindow } from "./booking-window.js";
+import { saveCheckoutDraftFromRequest } from "./commit-paid-booking.js";
 
 function json(res, status, body) {
   res.statusCode = status;
@@ -173,7 +174,65 @@ export async function handlePublicBookingToken(req, res, pool) {
       });
       return true;
     }
-    json(res, 200, { ok: true, holdId: bindHoldId });
+    var bindDraft = await saveCheckoutDraftFromRequest(
+      pool,
+      Object.assign({}, body, {
+        reservationNumber: reservationNumber,
+        room: room,
+        checkIn: checkIn,
+        checkOut: checkOut,
+        holdId: bindHoldId,
+      }),
+      bookingToken,
+    );
+    json(res, 200, {
+      ok: true,
+      holdId: bindHoldId,
+      draftSaved: !!(bindDraft && bindDraft.ok),
+    });
+    return true;
+  }
+
+  if (action === "save-draft") {
+    if (!bookingToken || !reservationNumber) {
+      json(res, 400, {
+        ok: false,
+        error: "bookingToken and reservationNumber are required",
+      });
+      return true;
+    }
+    var draftVerify = verifyBookingToken(bookingToken, {
+      room: room,
+      checkIn: checkIn,
+      checkOut: checkOut,
+      reservationNumber: reservationNumber,
+    });
+    if (!draftVerify.ok) {
+      json(res, 401, {
+        ok: false,
+        error: draftVerify.error,
+        tokenValid: false,
+      });
+      return true;
+    }
+    var savedDraft = await saveCheckoutDraftFromRequest(
+      pool,
+      Object.assign({}, body, {
+        reservationNumber: reservationNumber,
+        room: room,
+        checkIn: checkIn,
+        checkOut: checkOut,
+      }),
+      bookingToken,
+    );
+    if (!savedDraft.ok) {
+      json(res, savedDraft.missingTable ? 503 : 400, {
+        ok: false,
+        error: savedDraft.error || "Failed to save checkout draft",
+      });
+      return true;
+    }
+    json(res, 200, { ok: true, draftSaved: true });
     return true;
   }
 

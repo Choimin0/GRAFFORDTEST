@@ -18,8 +18,8 @@
         } catch (_e) {}
       })();
     </script>
-    <script src="js/booking-token-client.js?v=7"></script>
-    <script src="js/booking-checkout-guard.js?v=18"></script>
+    <script src="js/booking-token-client.js?v=8"></script>
+    <script src="js/booking-checkout-guard.js?v=19"></script>
     <script src="js/nav-hero.js" defer></script>
     <script src="js/mobile-nav.js" defer></script>
     <script src="js/site-language.js" defer></script>
@@ -1901,6 +1901,18 @@
               checkIn: checkIn,
               checkOut: checkOut,
               reservationNumber: orderNumber,
+              guestName: guestName,
+              contact: contact,
+              email: emailVal,
+              guestRequest: guestRequestInput
+                ? guestRequestInput.value.trim()
+                : "",
+              stayNights: nights,
+              extraGuests: extraGuests,
+              guestCount: guestCount,
+              totalAmount: totalAmount,
+              paymentMethod: paymentMethod,
+              bookingLocale: "kr",
             })
               .then(function (bookingToken) {
                 return window.GraffordBookingToken.validateBookingToken({
@@ -2257,6 +2269,18 @@
                 checkIn: checkInEn,
                 checkOut: checkOutEn,
                 reservationNumber: orderNumberEn,
+                guestName: guestNameEn,
+                contact: contactEn,
+                email: emailValEn,
+                guestRequest: guestRequestInputEn
+                  ? guestRequestInputEn.value.trim()
+                  : "",
+                stayNights: nightsEn,
+                extraGuests: extraGuestsEn,
+                guestCount: guestCountEn,
+                totalAmount: totalAmountEn,
+                paymentMethod: payInputEn.value,
+                bookingLocale: "en",
               })
                 .then(function (bookingToken) {
                   return window.GraffordBookingToken.validateBookingToken({

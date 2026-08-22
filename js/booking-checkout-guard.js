@@ -271,11 +271,11 @@
     if (isLikelyPortonePaymentDeparture()) {
       return true;
     }
-    if (isPaymentNavigationAllowed() && page === "confirm") {
+    if (isPaymentInProgress()) {
       return true;
     }
-    if (isPaymentInProgress()) {
-      return false;
+    if (isPaymentNavigationAllowed() && page === "confirm") {
+      return true;
     }
     if (isCheckoutNavigationAllowed()) {
       return false;
@@ -979,9 +979,6 @@
       if (shouldSkipHoldReleaseOnPageExit(page)) {
         return;
       }
-      if (isPaymentInProgress()) {
-        clearAllPaymentProcessingFlags();
-      }
       abandonCheckoutOnPageExit();
     });
     }
@@ -1010,6 +1007,7 @@
     clearCheckoutBackSeal: clearCheckoutBackSeal,
     maybeActivateCheckoutBackSealOnPage: maybeActivateCheckoutBackSealOnPage,
     isPageReload: isPageReload,
+    shouldSkipHoldReleaseOnPageExit: shouldSkipHoldReleaseOnPageExit,
     abandonCheckoutOnReload: abandonCheckoutOnReload,
     markCheckoutActive: markCheckoutActive,
     isCheckoutActive: isCheckoutActive,

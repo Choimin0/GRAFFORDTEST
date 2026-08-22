@@ -43,8 +43,8 @@
     <script src="https://cdn.portone.io/v2/browser-sdk.js"></script>
     <script src="https://cdn.iamport.kr/v1/iamport.js"></script>
     <script src="js/payment-portone-flow.js?v=9"></script>
-    <script src="js/booking-token-client.js?v=7"></script>
-    <script src="js/booking-checkout-guard.js?v=18"></script>
+    <script src="js/booking-token-client.js?v=8"></script>
+    <script src="js/booking-checkout-guard.js?v=19"></script>
     <!--
       KG이니시스(PortOne) 결제수단 노출 설정
       true → 결제수단 drawer에 표시 · false → 숨김
@@ -803,6 +803,39 @@
           if (!bookingToken && window.GraffordBookingToken) {
             bookingToken = window.GraffordBookingToken.readStoredToken();
           }
+          function persistPaidCheckoutDraft() {
+            if (
+              !window.GraffordBookingToken ||
+              typeof window.GraffordBookingToken.saveCheckoutDraft !==
+                "function"
+            ) {
+              return Promise.resolve(null);
+            }
+            return window.GraffordBookingToken
+              .saveCheckoutDraft({
+                bookingToken: bookingToken,
+                room: room,
+                checkIn: checkIn,
+                checkOut: checkOut,
+                reservationNumber: orderNo,
+                guestName: guestName,
+                contact: contact,
+                email: email,
+                guestRequest: guestRequest,
+                stayNights: stayNights,
+                extraGuests: extraGuests,
+                guestCount: guestCount,
+                totalAmount: finalAmount || Number(saved.totalAmount || 0),
+                paymentMethod: payMethod,
+                bookingLocale: bookingLocale,
+                pricingBreakdown: pricingBreakdown,
+              })
+              .catch(function (err) {
+                console.warn("[payment] checkout draft save failed", err);
+                return null;
+              });
+          }
+          persistPaidCheckoutDraft();
           var paymentInProgress = false;
           var paymentSettledKey = "graffordPaymentSettled:" + orderNo;
           var checkoutValidation = null;
@@ -1347,6 +1380,7 @@
                 : quote && quote.discountedGrandTotal
                   ? quote.discountedGrandTotal
                   : 0;
+            persistPaidCheckoutDraft();
 
             hideLoading();
             if (layoutKr) layoutKr.hidden = false;
@@ -1578,8 +1612,15 @@
             }
           }
 
-          function startPayment() {
+          async function startPayment() {
             if (paymentInProgress) {
+              return;
+            }
+            var draftSave = await persistPaidCheckoutDraft();
+            if (!draftSave || !draftSave.ok) {
+              showError(
+                "예약 정보를 서버에 저장하지 못했습니다. 잠시 후 다시 시도해 주세요.",
+              );
               return;
             }
 
@@ -2472,6 +2513,39 @@
           if (!bookingToken && window.GraffordBookingToken) {
             bookingToken = window.GraffordBookingToken.readStoredToken();
           }
+          function persistPaidCheckoutDraftEn() {
+            if (
+              !window.GraffordBookingToken ||
+              typeof window.GraffordBookingToken.saveCheckoutDraft !==
+                "function"
+            ) {
+              return Promise.resolve(null);
+            }
+            return window.GraffordBookingToken
+              .saveCheckoutDraft({
+                bookingToken: bookingToken,
+                room: room,
+                checkIn: checkIn,
+                checkOut: checkOut,
+                reservationNumber: orderNo,
+                guestName: guestName,
+                contact: contact,
+                email: email,
+                guestRequest: guestRequest,
+                stayNights: stayNights,
+                extraGuests: extraGuests,
+                guestCount: guestCount,
+                totalAmount: finalAmount || Number(saved.totalAmount || 0),
+                paymentMethod: payMethod,
+                bookingLocale: bookingLocale || "en",
+                pricingBreakdown: pricingBreakdown,
+              })
+              .catch(function (err) {
+                console.warn("[payment] checkout draft save failed", err);
+                return null;
+              });
+          }
+          persistPaidCheckoutDraftEn();
           var paymentInProgress = false;
           var paymentSettledKey = "graffordPaymentSettled:" + orderNo;
           var checkoutValidation = null;
@@ -3045,6 +3119,7 @@
                 : quote && quote.discountedGrandTotal
                   ? quote.discountedGrandTotal
                   : 0;
+            persistPaidCheckoutDraftEn();
 
             hideLoading();
             if (layoutEn) layoutEn.hidden = false;
@@ -3269,6 +3344,13 @@
 
           async function startPayment() {
             if (paymentInProgress) {
+              return;
+            }
+            var draftSaveEn = await persistPaidCheckoutDraftEn();
+            if (!draftSaveEn || !draftSaveEn.ok) {
+              showError(
+                "We could not save your reservation details. Please try again in a moment.",
+              );
               return;
             }
 

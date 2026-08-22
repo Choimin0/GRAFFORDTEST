@@ -6,6 +6,7 @@ import {
   applyBookingRetentionToRow,
   purgeExpiredBookings,
 } from "./booking-retention.js";
+import { cleanupExpiredCheckoutDrafts } from "./booking-checkout-draft.js";
 
 const ALLOWED_ROOMS = new Set(["G1", "G2", "G3", "G4"]);
 const LEGACY_TO_ROOM = { A: "G1", B: "G2", C: "G3", D: "G4" };
@@ -100,7 +101,18 @@ export async function hasReservationOverlap(
   var result = await pool.query(
     `SELECT reservation_number
      FROM ${BOOKING_TABLE}
-     WHERE status = 'confirm'
+     WHERE (
+         status = 'confirm'
+         OR (
+           status = 'pending'
+           AND EXISTS (
+             SELECT 1
+             FROM booking_hold h
+             WHERE h.reservation_number = ${BOOKING_TABLE}.reservation_number
+               AND h.expires_at > NOW()
+           )
+         )
+       )
        AND room_type = ANY($1::text[])
        AND check_in_date < $3::date
        AND check_out_date > $2::date
@@ -120,6 +132,7 @@ export async function checkRoomAvailability(
   excludeHoldId,
 ) {
   await purgeExpiredBookings(pool);
+  await cleanupExpiredCheckoutDrafts(pool);
   var room = normalizeRoomType(roomName);
   if (!ALLOWED_ROOMS.has(room)) {
     return { available: false, reason: "invalid_room" };

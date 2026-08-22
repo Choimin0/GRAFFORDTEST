@@ -22,6 +22,38 @@ import {
   resolveVerifiedPaymentMethod,
 } from "./_lib/payment-methods.js";
 import { fetchKrwPerUsd } from "./_lib/fx-krw-usd.js";
+import pg from "pg";
+import { commitPaidBooking } from "./_lib/commit-paid-booking.js";
+
+const { Pool } = pg;
+
+function getDatabaseUrl() {
+  return String(
+    process.env.POSTGRES_URL ||
+      process.env.POSTGRES_PRISMA_URL ||
+      process.env.POSTGRES_URL_NON_POOLING ||
+      process.env.DATABASE_URL ||
+      "",
+  ).trim();
+}
+
+var poolSingleton = null;
+
+function getPool() {
+  var databaseUrl = getDatabaseUrl();
+  if (!databaseUrl) {
+    return null;
+  }
+  if (!poolSingleton) {
+    poolSingleton = new Pool({
+      connectionString: databaseUrl,
+      max: 1,
+      connectionTimeoutMillis: 20000,
+      idleTimeoutMillis: 15000,
+    });
+  }
+  return poolSingleton;
+}
 
 function normalizeUsdActualToExpected(actualAmount, expectedAmount) {
   if (actualAmount == null || expectedAmount == null) {
@@ -285,6 +317,28 @@ export default async function handler(req, res) {
       (payment.transactions && payment.transactions.length) || 0,
     );
 
+    var reservationCommitted = false;
+    var pool = getPool();
+    if (pool) {
+      try {
+        var commitResult = await commitPaidBooking(pool, {
+          paymentId: paymentId,
+          payment: payment,
+        });
+        reservationCommitted = !!(commitResult && commitResult.ok);
+        if (!commitResult.ok) {
+          console.error(
+            "[payment-confirm] paid commit failed",
+            paymentId,
+            commitResult.reason,
+            commitResult.error || "",
+          );
+        }
+      } catch (commitErr) {
+        console.error("[payment-confirm] paid commit error", paymentId, commitErr);
+      }
+    }
+
     res.statusCode = 200;
     res.end(
       JSON.stringify({
@@ -294,6 +348,7 @@ export default async function handler(req, res) {
         pgTid: pgTid,
         paymentMethod: verifiedMethod.methodId,
         pgPayProvider: verifiedMethod.pgPayProvider,
+        reservationCommitted: reservationCommitted,
       }),
     );
   } catch (e) {

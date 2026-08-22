@@ -17,6 +17,11 @@ import {
   readCancelAlarmSentCount,
   releaseCancelAlarmSendClaim,
 } from "./cancel-alarm-sent-count.js";
+import {
+  claimFirstReserveAlarmSend,
+  readReserveAlarmSentCount,
+  releaseReserveAlarmSendClaim,
+} from "./reserve-alarm-sent-count.js";
 
 const BOOKING_TABLE = "booking";
 
@@ -143,7 +148,7 @@ export async function handlePublicAlimtalkNotify(req, res, pool) {
 
   try {
     var sel = await pool.query(
-      `SELECT guest_name, contact, room_type, check_in_date, check_out_date, status, booking_locale, created_at, cancel_alarm_sent_count
+      `SELECT guest_name, contact, room_type, check_in_date, check_out_date, status, booking_locale, created_at, cancel_alarm_sent_count, reserve_alarm_sent_count
        FROM ${BOOKING_TABLE}
        WHERE reservation_number = $1
        LIMIT 1`,
@@ -200,6 +205,7 @@ export async function handlePublicAlimtalkNotify(req, res, pool) {
     }
 
     var cancelAlarmSentCount = readCancelAlarmSentCount(row);
+    var reserveAlarmSentCount = readReserveAlarmSentCount(row);
     if (type === "cancel-complete" && cancelAlarmSentCount >= 1) {
       json(res, 200, {
         ok: true,
@@ -209,8 +215,33 @@ export async function handlePublicAlimtalkNotify(req, res, pool) {
       });
       return true;
     }
+    if (type === "reserve-complete" && reserveAlarmSentCount >= 1) {
+      json(res, 200, {
+        ok: true,
+        skipped: true,
+        reason: "already_sent",
+        reserveAlarmSentCount: reserveAlarmSentCount,
+      });
+      return true;
+    }
 
     var claimedCancelSlot = false;
+    var claimedReserveSlot = false;
+    if (type === "reserve-complete") {
+      claimedReserveSlot = await claimFirstReserveAlarmSend(
+        pool,
+        reservationNumber,
+      );
+      if (!claimedReserveSlot) {
+        json(res, 200, {
+          ok: true,
+          skipped: true,
+          reason: "already_sent",
+          reserveAlarmSentCount: Math.max(reserveAlarmSentCount, 1),
+        });
+        return true;
+      }
+    }
     if (type === "cancel-complete") {
       claimedCancelSlot = await claimFirstCancelAlarmSend(
         pool,
@@ -251,6 +282,16 @@ export async function handlePublicAlimtalkNotify(req, res, pool) {
           );
         }
       }
+      if (claimedReserveSlot) {
+        try {
+          await releaseReserveAlarmSendClaim(pool, reservationNumber);
+        } catch (releaseErr) {
+          console.error(
+            "alimtalk-notify release reserve claim",
+            releaseErr,
+          );
+        }
+      }
     }
 
     if (sendResult.skipped) {
@@ -275,6 +316,7 @@ export async function handlePublicAlimtalkNotify(req, res, pool) {
       guestSkipped: !!sendResult.guestSkipped,
       adminSent: sendResult.adminSent === true,
       cancelAlarmSentCount: type === "cancel-complete" ? 1 : undefined,
+      reserveAlarmSentCount: type === "reserve-complete" ? 1 : undefined,
     });
   } catch (e) {
     console.error("alimtalk-notify handler", e);

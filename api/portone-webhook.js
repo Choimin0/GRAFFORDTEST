@@ -10,6 +10,8 @@ import pg from "pg";
 import { getBookingHoldByReservationNumber } from "./_lib/booking-hold.js";
 import { checkRoomAvailability, findConfirmedReservation } from "./_lib/room-availability.js";
 import { fetchPortonePayment } from "./_lib/portone-client.js";
+import { commitPaidBooking } from "./_lib/commit-paid-booking.js";
+import { getCheckoutDraft } from "./_lib/booking-checkout-draft.js";
 
 /**
  * PortOne v2 웹훅 HMAC-SHA256 서명 검증 (Svix 호환 포맷).
@@ -210,7 +212,8 @@ async function handleTransactionConfirm(pool, fields) {
   }
 
   var hold = await getBookingHoldByReservationNumber(pool, paymentId);
-  if (!hold) {
+  var pending = hold ? null : await getCheckoutDraft(pool, paymentId);
+  if (!hold && !pending) {
     console.warn("[portone-webhook] confirm rejected: hold not found", paymentId);
     return {
       ok: false,
@@ -220,15 +223,16 @@ async function handleTransactionConfirm(pool, fields) {
     };
   }
 
-  var checkIn = rowDateToYMD(hold.check_in_date);
-  var checkOut = rowDateToYMD(hold.check_out_date);
+  var roomType = hold ? hold.room_type : pending.roomType;
+  var checkIn = hold ? rowDateToYMD(hold.check_in_date) : pending.checkIn;
+  var checkOut = hold ? rowDateToYMD(hold.check_out_date) : pending.checkOut;
   var availability = await checkRoomAvailability(
     pool,
-    hold.room_type,
+    roomType,
     checkIn,
     checkOut,
     paymentId,
-    hold.hold_id,
+    hold ? hold.hold_id : "",
   );
 
   if (!availability.available) {
@@ -248,7 +252,7 @@ async function handleTransactionConfirm(pool, fields) {
   console.log(
     "[portone-webhook] confirm approved",
     paymentId,
-    hold.room_type,
+    roomType,
     checkIn,
     checkOut,
     "amount:",
@@ -339,6 +343,9 @@ export default async function handler(req, res) {
           paymentId,
           lookup.error,
         );
+        res.statusCode = 500;
+        res.end();
+        return;
       } else {
         console.log(
           "[portone-webhook] payment event",
@@ -348,9 +355,36 @@ export default async function handler(req, res) {
           "type:",
           payload.type || payload.status || "",
         );
+        if (lookup.data && lookup.data.status === "PAID") {
+          var commitResult = await commitPaidBooking(pool, {
+            paymentId: paymentId,
+            payment: lookup.data,
+          });
+          if (!commitResult.ok) {
+            console.error(
+              "[portone-webhook] paid commit failed",
+              paymentId,
+              commitResult.reason,
+              commitResult.error || "",
+            );
+            if (
+              commitResult.reason === "draft_missing" ||
+              commitResult.reason === "insert_failed" ||
+              commitResult.reason === "db_error" ||
+              commitResult.reason === "payment_lookup_failed"
+            ) {
+              res.statusCode = 500;
+              res.end();
+              return;
+            }
+          }
+        }
       }
     } catch (e) {
       console.error("[portone-webhook] payment sync error", e);
+      res.statusCode = 500;
+      res.end();
+      return;
     }
   } else {
     console.log("[portone-webhook] received event without paymentId", payload.type || "");

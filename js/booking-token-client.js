@@ -276,25 +276,67 @@
     return token;
   }
 
+  function checkoutDraftFields(payload) {
+    payload = payload || {};
+    return {
+      guestName: payload.guestName || "",
+      contact: payload.contact || "",
+      email: payload.email || "",
+      guestRequest: payload.guestRequest || "",
+      stayNights: payload.stayNights,
+      extraGuests: payload.extraGuests,
+      guestCount: payload.guestCount,
+      totalAmount: payload.totalAmount,
+      paymentMethod: payload.paymentMethod || payload.payMethod || "",
+      bookingLocale: payload.bookingLocale || "kr",
+      pricingBreakdown: payload.pricingBreakdown || null,
+    };
+  }
+
   async function bindBookingToken(payload) {
     var bookingToken = payload.bookingToken || readStoredToken() || "";
     if (!bookingToken) {
       throw new Error("booking token missing");
     }
-    var result = await postBookingTokenAction({
-      action: "bind",
-      bookingToken: bookingToken,
-      room: payload.room,
-      checkIn: payload.checkIn,
-      checkOut: payload.checkOut,
-      reservationNumber: payload.reservationNumber || payload.orderNo || "",
-    });
+    var result = await postBookingTokenAction(
+      Object.assign(
+        {
+          action: "bind",
+          bookingToken: bookingToken,
+          room: payload.room,
+          checkIn: payload.checkIn,
+          checkOut: payload.checkOut,
+          reservationNumber: payload.reservationNumber || payload.orderNo || "",
+        },
+        checkoutDraftFields(payload),
+      ),
+    );
     if (!result.ok) {
       throw new Error(
         (result.data && result.data.error) || "예약 토큰 연결에 실패했습니다.",
       );
     }
     return bookingToken;
+  }
+
+  async function saveCheckoutDraft(payload) {
+    var bookingToken = payload.bookingToken || readStoredToken() || "";
+    if (!bookingToken) {
+      return { ok: false, error: "booking token missing" };
+    }
+    return postBookingTokenAction(
+      Object.assign(
+        {
+          action: "save-draft",
+          bookingToken: bookingToken,
+          room: payload.room,
+          checkIn: payload.checkIn,
+          checkOut: payload.checkOut,
+          reservationNumber: payload.reservationNumber || payload.orderNo || "",
+        },
+        checkoutDraftFields(payload),
+      ),
+    );
   }
 
   async function releaseBookingHold(token) {
@@ -627,6 +669,7 @@
     prepareCheckoutSession: prepareCheckoutSession,
     ensureBookingToken: ensureBookingToken,
     bindBookingToken: bindBookingToken,
+    saveCheckoutDraft: saveCheckoutDraft,
     releaseBookingHold: releaseBookingHold,
     releaseBookingHoldKeepalive: releaseBookingHoldKeepalive,
     validateBookingToken: validateBookingToken,
