@@ -359,6 +359,34 @@ export async function getCheckoutDraft(pool, reservationNumber, options) {
   };
 }
 
+export async function getCheckoutDraftStay(pool, reservationNumber) {
+  var norm = normalizeReservationNumber(reservationNumber);
+  if (!norm) {
+    return null;
+  }
+  var result = await pool.query(
+    `SELECT room_type,
+            check_in_date::text AS check_in,
+            check_out_date::text AS check_out
+     FROM ${BOOKING_TABLE}
+     WHERE reservation_number = $1
+       AND status = $2
+     LIMIT 1`,
+    [norm, PENDING_STATUS],
+  );
+  if (!result.rows || !result.rows.length) {
+    return null;
+  }
+  var row = result.rows[0];
+  return {
+    roomType: String(row.room_type || "")
+      .trim()
+      .toUpperCase(),
+    checkIn: String(row.check_in || "").slice(0, 10),
+    checkOut: String(row.check_out || "").slice(0, 10),
+  };
+}
+
 export async function deleteCheckoutDraft(pool, reservationNumber) {
   var norm = normalizeReservationNumber(reservationNumber);
   if (!norm) {

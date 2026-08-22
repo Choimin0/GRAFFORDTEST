@@ -154,9 +154,14 @@ export async function checkRoomAvailability(
   checkOut,
   excludeReservationNumber,
   excludeHoldId,
+  options,
 ) {
-  await purgeExpiredBookings(pool);
-  await cleanupExpiredCheckoutDrafts(pool);
+  options = options || {};
+  var fast = options.fast === true;
+  if (!fast) {
+    await purgeExpiredBookings(pool);
+    await cleanupExpiredCheckoutDrafts(pool);
+  }
   var room = normalizeRoomType(roomName);
   if (!ALLOWED_ROOMS.has(room)) {
     return { available: false, reason: "invalid_room" };
@@ -186,11 +191,22 @@ export async function checkRoomAvailability(
   ) {
     return { available: false, reason: "occupied" };
   }
-  if (await hasExternalBookingOverlap(pool, room, checkIn, checkOut)) {
+  if (
+    await hasExternalBookingOverlap(pool, room, checkIn, checkOut, {
+      liveFetch: !fast,
+    })
+  ) {
     return { available: false, reason: "external" };
   }
   if (
-    await hasActiveHoldOverlap(pool, room, checkIn, checkOut, excludeHoldId)
+    await hasActiveHoldOverlap(
+      pool,
+      room,
+      checkIn,
+      checkOut,
+      excludeHoldId,
+      { skipCleanup: fast },
+    )
   ) {
     return { available: false, reason: "held" };
   }

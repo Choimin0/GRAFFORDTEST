@@ -13677,6 +13677,30 @@ main.content-section.confirm-page.admin-page {
   max-height: min(90vh, 920px);
   overflow-y: auto;
 }
+.admin-edit-room-change-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-8);
+  cursor: pointer;
+  color: var(--stone-600);
+  font-size: 0.78rem;
+  letter-spacing: 0.08em;
+  user-select: none;
+}
+.admin-edit-room-change-toggle input {
+  width: 0.9rem;
+  height: 0.9rem;
+  margin: 0;
+  cursor: pointer;
+  accent-color: var(--stone-green);
+}
+.admin-edit-room-change-fields {
+  display: grid;
+  gap: var(--space-8);
+}
+.admin-edit-room-change-fields[hidden] {
+  display: none;
+}
 .admin-edit-room-change-hint {
   margin: 0;
   color: var(--stone-400);
@@ -13727,16 +13751,13 @@ main.content-section.confirm-page.admin-page {
   padding: 0.4rem 0.7rem;
   cursor: pointer;
 }
-.admin-res-room-change-badge {
-  display: inline-block;
-  margin-left: 0.4rem;
-  padding: 0.08rem 0.35rem;
-  border: 1px solid var(--stone-300);
-  color: var(--stone-500);
-  font-size: 0.62rem;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  vertical-align: middle;
+.admin-table td.admin-res-room-change-cell,
+.admin-reservation-table tbody tr:hover td.admin-res-room-change-cell,
+.admin-reservation-table tbody tr.is-checkout-today td.admin-res-room-change-cell,
+.admin-reservation-table tbody tr.is-checkin-today td.admin-res-room-change-cell,
+.admin-reservation-table tbody tr.is-checkout-today:hover td.admin-res-room-change-cell,
+.admin-reservation-table tbody tr.is-checkin-today:hover td.admin-res-room-change-cell {
+  color: var(--stone-green);
 }
 .admin-edit-reservation-field-group {
   display: grid;

@@ -1380,25 +1380,40 @@
               </p>
             </div>
             <div class="admin-edit-reservation-field-group">
-              <p class="admin-edit-reservation-field-label">룸체인지</p>
-              <p
-                class="admin-edit-room-change-hint"
-                id="admin-edit-room-change-hint"
+              <label
+                class="admin-edit-room-change-toggle"
+                for="admin-edit-room-change-enabled"
               >
-                같은 투숙 기간을 여러 객실로 나눌 수 있습니다. 구간을 이어
-                붙이면 위의 체크인·체크아웃과 같아야 합니다.
-              </p>
+                <input
+                  type="checkbox"
+                  id="admin-edit-room-change-enabled"
+                />
+                <span>룸체인지</span>
+              </label>
               <div
-                id="admin-edit-room-change-list"
-                class="admin-edit-room-change-list"
-              ></div>
-              <button
-                type="button"
-                class="admin-edit-room-change-add"
-                id="admin-edit-room-change-add"
+                id="admin-edit-room-change-fields"
+                class="admin-edit-room-change-fields"
+                hidden
               >
-                구간 추가
-              </button>
+                <p
+                  class="admin-edit-room-change-hint"
+                  id="admin-edit-room-change-hint"
+                >
+                  같은 투숙 기간을 여러 객실로 나눌 수 있습니다. 구간을 이어
+                  붙이면 위의 체크인·체크아웃과 같아야 합니다.
+                </p>
+                <div
+                  id="admin-edit-room-change-list"
+                  class="admin-edit-room-change-list"
+                ></div>
+                <button
+                  type="button"
+                  class="admin-edit-room-change-add"
+                  id="admin-edit-room-change-add"
+                >
+                  구간 추가
+                </button>
+              </div>
             </div>
             <div class="admin-edit-reservation-field-group">
               <p class="admin-edit-reservation-field-label">인원</p>
@@ -8104,6 +8119,9 @@
         }
 
         function collectEditRoomChangeSegments() {
+          if (!isEditRoomChangeChecked()) {
+            return [defaultEditRoomChangeSegment()];
+          }
           var list = document.getElementById("admin-edit-room-change-list");
           if (!list) {
             return editRoomChangeSegments.slice();
@@ -8135,7 +8153,32 @@
           return segs;
         }
 
+        function isEditRoomChangeChecked() {
+          var box = document.getElementById("admin-edit-room-change-enabled");
+          return !!(box && box.checked);
+        }
+
+        function setEditRoomChangeEnabled(enabled) {
+          var box = document.getElementById("admin-edit-room-change-enabled");
+          var fields = document.getElementById("admin-edit-room-change-fields");
+          if (box) {
+            box.checked = !!enabled;
+          }
+          if (fields) {
+            fields.hidden = !enabled;
+          }
+          if (enabled) {
+            if (!editRoomChangeSegments.length) {
+              editRoomChangeSegments = [defaultEditRoomChangeSegment()];
+            }
+            renderEditRoomChangeList();
+          }
+        }
+
         function isEditRoomChangeActive(segments) {
+          if (!isEditRoomChangeChecked()) {
+            return false;
+          }
           var segs = segments || collectEditRoomChangeSegments();
           if (segs.length > 1) {
             return true;
@@ -8206,6 +8249,7 @@
           editResGuestCount = 2;
           editResRoomType = "";
           editRoomChangeSegments = [];
+          setEditRoomChangeEnabled(false);
           editResCalView = new Date();
           var editQuoteEl = document.getElementById("admin-edit-res-quote");
           if (editQuoteEl) {
@@ -8388,7 +8432,7 @@
                   },
                 ],
           );
-          renderEditRoomChangeList();
+          setEditRoomChangeEnabled(row.hasRoomChange === true);
           renderEditReservationCalendar();
           loadEditReservationAvailability(editResRoomType, row);
           updateEditReservationQuoteDisplay();
@@ -9493,11 +9537,10 @@
               "<td class='admin-sort-hover-cell'>" +
               escapeHtml(row.reservationNumber || "—") +
               "</td>" +
-              "<td class='admin-sort-hover-cell'>" +
+              "<td class='admin-sort-hover-cell" +
+              (row.hasRoomChange ? " admin-res-room-change-cell" : "") +
+              "'>" +
               escapeHtml(row.roomType || "—") +
-              (row.hasRoomChange
-                ? "<span class='admin-res-room-change-badge'>룸체인지</span>"
-                : "") +
               "</td>" +
               "<td class='admin-sort-hover-cell'>" +
               escapeHtml(row.contact || "—") +
@@ -11633,6 +11676,18 @@
           requestCancelBtn.addEventListener("click", closeRequestModal);
         }
 
+        var editRoomChangeEnabled = document.getElementById(
+          "admin-edit-room-change-enabled",
+        );
+        if (editRoomChangeEnabled) {
+          editRoomChangeEnabled.addEventListener("change", function () {
+            if (editReservationSubmitting) {
+              editRoomChangeEnabled.checked = !editRoomChangeEnabled.checked;
+              return;
+            }
+            setEditRoomChangeEnabled(editRoomChangeEnabled.checked);
+          });
+        }
         var editRoomChangeAddBtn = document.getElementById(
           "admin-edit-room-change-add",
         );

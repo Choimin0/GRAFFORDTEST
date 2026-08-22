@@ -138,8 +138,10 @@ export async function releaseBookingHold(pool, holdId) {
   return true;
 }
 
-export async function getBookingHoldByReservationNumber(pool, reservationNumber) {
-  await cleanupExpiredBookingHolds(pool);
+export async function getBookingHoldByReservationNumber(pool, reservationNumber, options) {
+  if (!(options && options.skipCleanup)) {
+    await cleanupExpiredBookingHolds(pool);
+  }
   var norm = String(reservationNumber || "").trim();
   if (!norm) {
     return null;
@@ -163,8 +165,11 @@ export async function hasActiveHoldOverlap(
   checkIn,
   checkOut,
   excludeHoldId,
+  options,
 ) {
-  await cleanupExpiredBookingHolds(pool);
+  if (!(options && options.skipCleanup)) {
+    await cleanupExpiredBookingHolds(pool);
+  }
   var params = [roomName, checkIn, checkOut];
   var excludeSql = "";
   if (excludeHoldId) {

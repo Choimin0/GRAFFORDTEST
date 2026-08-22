@@ -11,7 +11,7 @@ import { getBookingHoldByReservationNumber } from "./_lib/booking-hold.js";
 import { checkRoomAvailability, findConfirmedReservation } from "./_lib/room-availability.js";
 import { fetchPortonePayment } from "./_lib/portone-client.js";
 import { commitPaidBooking } from "./_lib/commit-paid-booking.js";
-import { getCheckoutDraft } from "./_lib/booking-checkout-draft.js";
+import { getCheckoutDraftStay } from "./_lib/booking-checkout-draft.js";
 
 /**
  * PortOne v2 웹훅 HMAC-SHA256 서명 검증 (Svix 호환 포맷).
@@ -143,19 +143,33 @@ function parseWebhookPayload(rawBody) {
   }
 }
 
-function extractConfirmFields(payload) {
+export function extractConfirmFields(payload) {
   if (!payload || typeof payload !== "object") {
     return null;
   }
 
-  if (payload.type === "Transaction.Confirm" && payload.data) {
+  var eventType = String(payload.type || "").trim();
+  if (eventType && eventType !== "Transaction.Confirm") {
+    return null;
+  }
+
+  if (eventType === "Transaction.Confirm") {
+    var data = payload.data && typeof payload.data === "object" ? payload.data : {};
     return {
-      paymentId: String(payload.data.paymentId || "").trim(),
-      transactionId: String(payload.data.transactionId || "").trim(),
+      paymentId: String(
+        data.paymentId || payload.paymentId || payload.payment_id || "",
+      ).trim(),
+      transactionId: String(
+        data.transactionId || payload.transactionId || payload.tx_id || "",
+      ).trim(),
       totalAmount:
-        payload.data.totalAmount != null
-          ? Number(payload.data.totalAmount)
-          : null,
+        data.totalAmount != null
+          ? Number(data.totalAmount)
+          : payload.totalAmount != null
+            ? Number(payload.totalAmount)
+            : payload.total_amount != null
+              ? Number(payload.total_amount)
+              : null,
     };
   }
 
@@ -196,7 +210,7 @@ function extractPaymentId(payload) {
   return String(payload.payment_id || payload.paymentId || "").trim();
 }
 
-async function handleTransactionConfirm(pool, fields) {
+export async function handleTransactionConfirm(pool, fields) {
   var paymentId = fields.paymentId;
   if (!paymentId) {
     return {
@@ -211,8 +225,10 @@ async function handleTransactionConfirm(pool, fields) {
     return { ok: true };
   }
 
-  var hold = await getBookingHoldByReservationNumber(pool, paymentId);
-  var pending = hold ? null : await getCheckoutDraft(pool, paymentId);
+  var hold = await getBookingHoldByReservationNumber(pool, paymentId, {
+    skipCleanup: true,
+  });
+  var pending = hold ? null : await getCheckoutDraftStay(pool, paymentId);
   if (!hold && !pending) {
     console.warn("[portone-webhook] confirm rejected: hold not found", paymentId);
     return {
@@ -233,6 +249,7 @@ async function handleTransactionConfirm(pool, fields) {
     checkOut,
     paymentId,
     hold ? hold.hold_id : "",
+    { fast: true },
   );
 
   if (!availability.available) {

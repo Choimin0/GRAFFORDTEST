@@ -579,13 +579,24 @@ export async function getAirbnbIcalOccupiedNights(pool, room) {
   return Object.keys(merged).sort();
 }
 
-export async function hasExternalBookingOverlap(pool, roomName, checkIn, checkOut) {
+export async function hasExternalBookingOverlap(pool, roomName, checkIn, checkOut, options) {
   if (isIcalImportDisabled()) {
     return false;
   }
   var room = normalizeRoomType(roomName);
   if (!ALLOWED_ROOMS.has(room)) {
     return false;
+  }
+
+  options = options || {};
+  if (options.liveFetch === false) {
+    var storedNights = await getExternalBookingOccupiedNights(pool, room);
+    if (!storedNights.length) {
+      return false;
+    }
+    return expandOccupiedNights(checkIn, checkOut).some(function (n) {
+      return storedNights.indexOf(n) >= 0;
+    });
   }
 
   var fetched = await fetchExternalOccupiedNights(room, { useCache: false });
