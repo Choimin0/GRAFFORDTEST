@@ -120,7 +120,7 @@ try {
   });
   var confirmMs = Date.now() - t0;
   assert("confirm approves pending without hold", confirm.ok === true, confirm);
-  assert("confirm under 1.5s", confirmMs < 1500, confirmMs + "ms");
+  assert("confirm under 500ms", confirmMs < 500, confirmMs + "ms");
 
   var livePending = await handleTransactionConfirm(client, {
     paymentId: "20260822-W5M9WA",

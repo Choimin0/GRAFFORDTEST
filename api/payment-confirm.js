@@ -12,7 +12,9 @@
 import {
   confirmPortonePayment,
   extractPgTxIdFromPayment,
+  extractPortoneFailureMessage,
   extractPortonePaidAmount,
+  fetchPortonePayment,
   fetchPortonePaymentUntilPaid,
 } from "./_lib/portone-client.js";
 import {
@@ -196,6 +198,39 @@ export default async function handler(req, res) {
     return;
   }
 
+  if (body.statusOnly === true || body.statusOnly === "true") {
+    var statusLookup = await fetchPortonePayment(paymentId);
+    if (!statusLookup.ok) {
+      res.statusCode = 400;
+      res.end(
+        JSON.stringify({
+          ok: false,
+          error: statusLookup.error,
+          status: statusLookup.status || null,
+        }),
+      );
+      return;
+    }
+    var statusPayment = statusLookup.data || {};
+    var statusFailure = extractPortoneFailureMessage(statusPayment);
+    res.statusCode = 200;
+    res.end(
+      JSON.stringify({
+        ok: statusPayment.status === "PAID",
+        status: statusPayment.status || null,
+        error:
+          statusPayment.status === "PAID"
+            ? null
+            : statusFailure ||
+              "결제가 완료되지 않았습니다. (status: " +
+                (statusPayment.status || "UNKNOWN") +
+                ")",
+        failureReason: statusFailure || null,
+      }),
+    );
+    return;
+  }
+
   try {
     if (paymentToken) {
       var confirmResult = await confirmPortonePayment({
@@ -258,12 +293,16 @@ export default async function handler(req, res) {
     var payment = paymentLookup.data;
 
     if (payment.status !== "PAID") {
+      var failureReason = extractPortoneFailureMessage(payment);
       res.statusCode = 400;
       res.end(
         JSON.stringify({
           ok: false,
-          error: "결제가 완료되지 않았습니다. (status: " + payment.status + ")",
+          error:
+            failureReason ||
+            "결제가 완료되지 않았습니다. (status: " + payment.status + ")",
           status: payment.status,
+          failureReason: failureReason || null,
         }),
       );
       return;

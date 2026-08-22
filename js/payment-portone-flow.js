@@ -361,6 +361,39 @@
     return loadPersistedPortoneRedirectResult(orderNo);
   }
 
+  async function lookupPortonePaymentStatus(orderNo, expectedAmount) {
+    var verifyRes = await fetch("/api/payment-confirm", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        paymentId: orderNo,
+        expectedAmount: expectedAmount,
+        statusOnly: true,
+      }),
+    });
+    var verifyData = await verifyRes.json();
+    return verifyData || {};
+  }
+
+  function shouldRecoverSilentPortoneReturn(orderNo) {
+    if (hasPortoneRedirectParams()) {
+      return false;
+    }
+    try {
+      if (
+        sessionStorage.getItem(
+          "graffordPaymentProcessing:" + String(orderNo || "").trim(),
+        ) === "1"
+      ) {
+        return true;
+      }
+    } catch (_e) {}
+    if (isPortoneDepartureRecent(30 * 60 * 1000)) {
+      return true;
+    }
+    return isBackForwardNavigation();
+  }
+
   async function verifyPortonePaymentWithRetry(body, showPageLoading, messages) {
     if (showPageLoading) {
       showPageLoading(
@@ -907,6 +940,9 @@
     isPaymentFinalizeInProgress: isPaymentFinalizeInProgress,
     preparePaymentDeparture: preparePaymentDeparture,
     launchPortonePayment: launchPortonePayment,
+    lookupPortonePaymentStatus: lookupPortonePaymentStatus,
+    shouldRecoverSilentPortoneReturn: shouldRecoverSilentPortoneReturn,
+    isBackForwardNavigation: isBackForwardNavigation,
     persistPaymentDataBackup: persistPaymentDataBackup,
     restorePaymentDataBackup: restorePaymentDataBackup,
     clearPaymentDataBackup: clearPaymentDataBackup,

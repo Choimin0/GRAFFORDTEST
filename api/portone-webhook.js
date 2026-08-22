@@ -2,16 +2,14 @@
  * POST /api/portone-webhook
  *
  * PortOne v2 결제 웹훅·컨펌(confirm) 수신.
- * - Transaction.Confirm: 결제 승인 직전 객실 가용 여부 확인 후 200 응답
+ * - Transaction.Confirm: pending/confirm 예약 또는 유효 hold만 확인하고 즉시 200
+ *   (가용성·iCal 조회는 하지 않음 — PortOne confirm timeout 방지)
  * - 기타 결제 상태 웹훅: PortOne API로 재검증 후 200 응답
  */
 import crypto from "node:crypto";
 import pg from "pg";
-import { getBookingHoldByReservationNumber } from "./_lib/booking-hold.js";
-import { checkRoomAvailability, findConfirmedReservation } from "./_lib/room-availability.js";
 import { fetchPortonePayment } from "./_lib/portone-client.js";
 import { commitPaidBooking } from "./_lib/commit-paid-booking.js";
-import { getCheckoutDraftStay } from "./_lib/booking-checkout-draft.js";
 
 /**
  * PortOne v2 웹훅 HMAC-SHA256 서명 검증 (Svix 호환 포맷).
@@ -92,22 +90,6 @@ function getPool() {
     });
   }
   return poolSingleton;
-}
-
-function rowDateToYMD(v) {
-  if (v == null || v === "") {
-    return "";
-  }
-  if (typeof v === "string") {
-    return v.slice(0, 10);
-  }
-  if (v instanceof Date && !isNaN(v.getTime())) {
-    var y = v.getUTCFullYear();
-    var m = String(v.getUTCMonth() + 1).padStart(2, "0");
-    var day = String(v.getUTCDate()).padStart(2, "0");
-    return y + "-" + m + "-" + day;
-  }
-  return "";
 }
 
 async function readRawBody(req) {
@@ -211,7 +193,7 @@ function extractPaymentId(payload) {
 }
 
 export async function handleTransactionConfirm(pool, fields) {
-  var paymentId = fields.paymentId;
+  var paymentId = String((fields && fields.paymentId) || "").trim();
   if (!paymentId) {
     return {
       ok: false,
@@ -220,62 +202,40 @@ export async function handleTransactionConfirm(pool, fields) {
     };
   }
 
-  var existing = await findConfirmedReservation(pool, paymentId);
-  if (existing) {
-    return { ok: true };
-  }
-
-  var hold = await getBookingHoldByReservationNumber(pool, paymentId, {
-    skipCleanup: true,
-  });
-  var pending = hold ? null : await getCheckoutDraftStay(pool, paymentId);
-  if (!hold && !pending) {
-    console.warn("[portone-webhook] confirm rejected: hold not found", paymentId);
-    return {
-      ok: false,
-      statusCode: 409,
-      errorMessage:
-        "예약 세션이 만료되었습니다. 예약 확인 페이지부터 다시 진행해 주세요.",
-    };
-  }
-
-  var roomType = hold ? hold.room_type : pending.roomType;
-  var checkIn = hold ? rowDateToYMD(hold.check_in_date) : pending.checkIn;
-  var checkOut = hold ? rowDateToYMD(hold.check_out_date) : pending.checkOut;
-  var availability = await checkRoomAvailability(
-    pool,
-    roomType,
-    checkIn,
-    checkOut,
-    paymentId,
-    hold ? hold.hold_id : "",
-    { fast: true },
-  );
-
-  if (!availability.available) {
-    console.warn(
-      "[portone-webhook] confirm rejected: unavailable",
-      paymentId,
-      availability.reason,
+  try {
+    var found = await pool.query(
+      `SELECT 1 AS ok
+       FROM booking
+       WHERE reservation_number = $1
+         AND status IN ('confirm', 'completed', 'pending')
+       UNION ALL
+       SELECT 1 AS ok
+       FROM booking_hold
+       WHERE reservation_number = $1
+         AND expires_at > NOW()
+       LIMIT 1`,
+      [paymentId],
     );
+    if (found.rows && found.rows.length) {
+      console.log("[portone-webhook] confirm approved", paymentId);
+      return { ok: true };
+    }
+  } catch (e) {
+    console.error("[portone-webhook] confirm lookup", paymentId, e);
     return {
       ok: false,
-      statusCode: 409,
-      errorMessage:
-        "선택하신 기간에 예약이 불가합니다. 다른 날짜 또는 객실을 선택해 주세요.",
+      statusCode: 500,
+      errorMessage: "예약 확인 중 오류가 발생했습니다.",
     };
   }
 
-  console.log(
-    "[portone-webhook] confirm approved",
-    paymentId,
-    roomType,
-    checkIn,
-    checkOut,
-    "amount:",
-    fields.totalAmount,
-  );
-  return { ok: true };
+  console.warn("[portone-webhook] confirm rejected: hold not found", paymentId);
+  return {
+    ok: false,
+    statusCode: 409,
+    errorMessage:
+      "예약 세션이 만료되었습니다. 예약 확인 페이지부터 다시 진행해 주세요.",
+  };
 }
 
 export default async function handler(req, res) {

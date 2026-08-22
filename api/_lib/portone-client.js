@@ -21,6 +21,16 @@ export function extractPortonePaidAmount(payment) {
   return actualAmount;
 }
 
+export function extractPortoneFailureMessage(payment) {
+  var failure = payment && payment.failure;
+  if (!failure || typeof failure !== "object") {
+    return "";
+  }
+  return String(
+    failure.pgMessage || failure.reason || failure.message || "",
+  ).trim();
+}
+
 export function extractPgTxIdFromPayment(payment) {
   if (!payment) return null;
   var pgTid = null;
@@ -83,17 +93,21 @@ export async function fetchPortonePaymentUntilPaid(paymentId, options) {
       return lastLookup;
     }
     if (FAILURE_PAYMENT_STATUSES[status]) {
+      var failMsg = extractPortoneFailureMessage(lastLookup.data);
       return {
         ok: false,
-        error: "결제가 완료되지 않았습니다. (status: " + status + ")",
+        error:
+          failMsg || "결제가 완료되지 않았습니다. (status: " + status + ")",
         status: status,
         data: lastLookup.data,
       };
     }
     if (!PENDING_PAYMENT_STATUSES[status] && status) {
+      var otherMsg = extractPortoneFailureMessage(lastLookup.data);
       return {
         ok: false,
-        error: "결제가 완료되지 않았습니다. (status: " + status + ")",
+        error:
+          otherMsg || "결제가 완료되지 않았습니다. (status: " + status + ")",
         status: status,
         data: lastLookup.data,
       };
