@@ -13239,6 +13239,8 @@ main.content-section.confirm-page.admin-page {
   background: var(--stone-50);
 }
 .admin-reservation-table {
+  --admin-res-hl-red: color-mix(in srgb, var(--stone-red) 52%, #e22618);
+  --admin-res-hl-blue: color-mix(in srgb, var(--stone-blue) 38%, #187fc4);
   width: 100%;
   border-collapse: collapse;
   table-layout: fixed;
@@ -13363,19 +13365,30 @@ main.content-section.confirm-page.admin-page {
   background: color-mix(in srgb, var(--gold-500) 8%, var(--stone-50));
   color: var(--gold-500);
 }
-.admin-reservation-table tbody tr.is-checkout-today .admin-sort-hover-cell {
-  color: var(--stone-red);
+.admin-reservation-table tbody tr.is-checkout-today .admin-sort-hover-cell,
+.admin-reservation-table tbody tr.is-room-change .admin-sort-hover-cell {
+  color: var(--admin-res-hl-red);
 }
 .admin-reservation-table tbody tr.is-checkin-today .admin-sort-hover-cell {
-  color: var(--stone-blue);
+  color: var(--admin-res-hl-blue);
 }
-.admin-reservation-table tbody tr.is-checkout-today:hover .admin-sort-hover-cell {
-  background: color-mix(in srgb, var(--stone-red) 8%, var(--stone-50));
-  color: var(--stone-red);
+.admin-reservation-table tbody tr.is-checkout-today:hover .admin-sort-hover-cell,
+.admin-reservation-table tbody tr.is-room-change:hover .admin-sort-hover-cell {
+  background: color-mix(in srgb, var(--admin-res-hl-red) 10%, var(--stone-50));
+  color: var(--admin-res-hl-red);
 }
 .admin-reservation-table tbody tr.is-checkin-today:hover .admin-sort-hover-cell {
-  background: color-mix(in srgb, var(--stone-blue) 8%, var(--stone-50));
-  color: var(--stone-blue);
+  background: color-mix(in srgb, var(--admin-res-hl-blue) 10%, var(--stone-50));
+  color: var(--admin-res-hl-blue);
+}
+.admin-reservation-table tbody tr.is-room-change.is-checkin-today .admin-sort-hover-cell,
+.admin-reservation-table tbody tr.is-room-change.is-checkout-today .admin-sort-hover-cell {
+  color: var(--admin-res-hl-red);
+}
+.admin-reservation-table tbody tr.is-room-change.is-checkin-today:hover .admin-sort-hover-cell,
+.admin-reservation-table tbody tr.is-room-change.is-checkout-today:hover .admin-sort-hover-cell {
+  background: color-mix(in srgb, var(--admin-res-hl-red) 10%, var(--stone-50));
+  color: var(--admin-res-hl-red);
 }
 .admin-reservation-payment,
 .admin-reservation-cancel-badge {
@@ -13750,14 +13763,6 @@ main.content-section.confirm-page.admin-page {
   text-transform: uppercase;
   padding: 0.4rem 0.7rem;
   cursor: pointer;
-}
-.admin-table td.admin-res-room-change-cell,
-.admin-reservation-table tbody tr:hover td.admin-res-room-change-cell,
-.admin-reservation-table tbody tr.is-checkout-today td.admin-res-room-change-cell,
-.admin-reservation-table tbody tr.is-checkin-today td.admin-res-room-change-cell,
-.admin-reservation-table tbody tr.is-checkout-today:hover td.admin-res-room-change-cell,
-.admin-reservation-table tbody tr.is-checkin-today:hover td.admin-res-room-change-cell {
-  color: color-mix(in srgb, var(--stone-red) 78%, var(--stone-900));
 }
 .admin-edit-reservation-field-group {
   display: grid;

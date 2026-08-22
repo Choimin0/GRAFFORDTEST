@@ -9474,9 +9474,16 @@
           }
           rows.forEach(function (row) {
             var tr = document.createElement("tr");
+            var rowClasses = [];
             var highlightClass = getUpcomingReservationHighlightClass(row);
             if (highlightClass) {
-              tr.className = highlightClass;
+              rowClasses.push(highlightClass);
+            }
+            if (row.hasRoomChange) {
+              rowClasses.push("is-room-change");
+            }
+            if (rowClasses.length) {
+              tr.className = rowClasses.join(" ");
             }
             var nights = getStayPeriodNights(row);
             var isExternalManual = isExternalManualReservation(row);
@@ -9537,9 +9544,7 @@
               "<td class='admin-sort-hover-cell'>" +
               escapeHtml(row.reservationNumber || "—") +
               "</td>" +
-              "<td class='admin-sort-hover-cell" +
-              (row.hasRoomChange ? " admin-res-room-change-cell" : "") +
-              "'>" +
+              "<td class='admin-sort-hover-cell'>" +
               escapeHtml(row.roomType || "—") +
               "</td>" +
               "<td class='admin-sort-hover-cell'>" +
