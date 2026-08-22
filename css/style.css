@@ -13757,7 +13757,7 @@ main.content-section.confirm-page.admin-page {
 .admin-reservation-table tbody tr.is-checkin-today td.admin-res-room-change-cell,
 .admin-reservation-table tbody tr.is-checkout-today:hover td.admin-res-room-change-cell,
 .admin-reservation-table tbody tr.is-checkin-today:hover td.admin-res-room-change-cell {
-  color: var(--stone-green);
+  color: color-mix(in srgb, var(--stone-red) 78%, var(--stone-900));
 }
 .admin-edit-reservation-field-group {
   display: grid;
