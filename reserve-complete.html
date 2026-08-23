@@ -13,6 +13,45 @@
     <script src="js/site-language.js" defer></script>
     <script src="js/alimtalk-notify.js" defer></script>
     <script src="js/booking-pricing.js?v=5"></script>
+    <style>
+      .page-loading-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.55);
+        z-index: 9999;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        pointer-events: all;
+      }
+      .page-loading-overlay[hidden] {
+        display: none;
+      }
+      .page-loading-overlay__box {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 0.75rem;
+        color: #fff;
+      }
+      .page-loading-overlay__spinner {
+        width: 48px;
+        height: 48px;
+        border: 3px solid rgba(255, 255, 255, 0.35);
+        border-top-color: #fff;
+        border-radius: 50%;
+        animation: grafford-complete-spin 0.8s linear infinite;
+      }
+      .page-loading-overlay__text {
+        margin: 0;
+        font-size: 0.95rem;
+      }
+      @keyframes grafford-complete-spin {
+        to {
+          transform: rotate(360deg);
+        }
+      }
+    </style>
   </head>
   <body class="reserve-check-page">
     <div id="grafford-react-fade-root"></div>
@@ -373,16 +412,136 @@
             G3: "G3",
             G4: "G4",
           };
-          var saved = null;
-          try {
-            saved = JSON.parse(
-              sessionStorage.getItem("graffordReserveCompleteData") || "null",
-            );
-          } catch (e) {
-            saved = null;
+
+          function paymentConfirmApiUrl() {
+            var base = "";
+            if (typeof window !== "undefined" && window.__GRAFFORD_API_BASE__) {
+              base = String(window.__GRAFFORD_API_BASE__).replace(/\/$/, "");
+            }
+            return base + "/api/payment-confirm";
           }
+
+          function readJsonStorage(key) {
+            try {
+              var raw = sessionStorage.getItem(key) || "null";
+              return JSON.parse(raw);
+            } catch (_e) {
+              return null;
+            }
+          }
+
+          function readPaymentDataFallback() {
+            var fromSession = readJsonStorage("graffordPaymentData");
+            if (fromSession && fromSession.orderNo) {
+              return fromSession;
+            }
+            try {
+              var backup = localStorage.getItem("graffordPaymentDataBackup");
+              if (!backup) {
+                return null;
+              }
+              var parsed = JSON.parse(backup);
+              return parsed && parsed.orderNo ? parsed : null;
+            } catch (_e) {
+              return null;
+            }
+          }
+
+          function isCompletePayloadReady(data) {
+            if (!data) {
+              return false;
+            }
+            return !!(
+              data.orderNo &&
+              data.room &&
+              data.checkIn &&
+              data.checkOut &&
+              data.guestName
+            );
+          }
+
+          function mergeCompletePayload() {
+            var merged = {};
+            function isBlank(key, value) {
+              if (value == null) {
+                return true;
+              }
+              var text = String(value).trim();
+              if (text === "") {
+                return true;
+              }
+              if (key === "totalAmount" && text === "0") {
+                return true;
+              }
+              return false;
+            }
+            for (var i = 0; i < arguments.length; i++) {
+              var part = arguments[i];
+              if (!part) {
+                continue;
+              }
+              Object.keys(part).forEach(function (key) {
+                if (isBlank(key, merged[key]) && !isBlank(key, part[key])) {
+                  merged[key] = part[key];
+                }
+              });
+            }
+            return merged;
+          }
+
+          function persistCompletePayload(data) {
+            if (!data || !data.orderNo) {
+              return;
+            }
+            try {
+              sessionStorage.setItem(
+                "graffordReserveCompleteData",
+                JSON.stringify(data),
+              );
+            } catch (_e) {}
+          }
+
+          function showCompleteLoading(msg) {
+            var overlay = document.getElementById("page-loading-overlay");
+            var text = document.getElementById("page-loading-text");
+            if (text) {
+              text.textContent = msg || "예약 정보를 불러오는 중입니다...";
+            }
+            if (overlay) {
+              overlay.hidden = false;
+            }
+          }
+
+          function hideCompleteLoading() {
+            var overlay = document.getElementById("page-loading-overlay");
+            if (overlay) {
+              overlay.hidden = true;
+            }
+          }
+
+          function fetchPaidReservation(orderNo) {
+            return fetch(paymentConfirmApiUrl(), {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ paymentId: orderNo }),
+            }).then(function (res) {
+              return res
+                .json()
+                .catch(function () {
+                  return null;
+                })
+                .then(function (data) {
+                  if (!data || !data.ok || !data.reservation) {
+                    return null;
+                  }
+                  return data.reservation;
+                });
+            });
+          }
+
+          function renderCompletePage(saved) {
           var orderNo = (saved && saved.orderNo) || "";
-          var room = ((saved && saved.room) || "G1").toUpperCase();
+          var room = ((saved && saved.room) || "").toUpperCase();
           var checkIn = (saved && saved.checkIn) || "";
           var checkOut = (saved && saved.checkOut) || "";
           var guestName = (saved && saved.guestName) || "";
@@ -654,6 +813,35 @@
               bookingLocale: bookingLocale,
             });
           }
+          }
+
+          (async function hydrateAndRenderCompletePage() {
+            var saved = readJsonStorage("graffordReserveCompleteData");
+            var fallback = readPaymentDataFallback();
+            saved = mergeCompletePayload(saved, fallback);
+            if (!isCompletePayloadReady(saved)) {
+              var orderNo =
+                (saved && saved.orderNo) ||
+                (fallback && fallback.orderNo) ||
+                "";
+              if (orderNo) {
+                showCompleteLoading("예약 정보를 불러오는 중입니다...");
+                try {
+                  var reservation = await fetchPaidReservation(orderNo);
+                  saved = mergeCompletePayload(saved, fallback, reservation, {
+                    orderNo: orderNo,
+                  });
+                } catch (_hydrateErr) {
+                  saved = mergeCompletePayload(saved, fallback, {
+                    orderNo: orderNo,
+                  });
+                }
+                hideCompleteLoading();
+              }
+            }
+            persistCompletePayload(saved);
+            renderCompletePage(saved || {});
+          })();
         });
       </script>
       <script defer src="js/grafford-page-fade.js"></script>
@@ -947,6 +1135,14 @@
         </div>
         <footer class="site-footer site-business-footer" hidden></footer>
       </main>
+    </div>
+    <div id="page-loading-overlay" class="page-loading-overlay" hidden>
+      <div class="page-loading-overlay__box" role="status" aria-live="polite">
+        <div class="page-loading-overlay__spinner" aria-hidden="true"></div>
+        <p id="page-loading-text" class="page-loading-overlay__text">
+          예약 정보를 불러오는 중입니다...
+        </p>
+      </div>
     </div>
   </body>
 </html>

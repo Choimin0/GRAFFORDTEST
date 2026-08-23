@@ -660,6 +660,117 @@
     return promise;
   }
 
+  var RESERVE_COMPLETE_DATA_KEY = "graffordReserveCompleteData";
+
+  function completeValueIsEmpty(key, value) {
+    if (value == null) {
+      return true;
+    }
+    var text = String(value).trim();
+    if (text === "") {
+      return true;
+    }
+    if (key === "totalAmount" && text === "0") {
+      return true;
+    }
+    return false;
+  }
+
+  function buildReserveCompletePayload(source) {
+    source = source || {};
+    return {
+      orderNo: String(
+        source.orderNo || source.reservationNumber || source.paymentId || "",
+      ).trim(),
+      room: String(source.room || source.roomType || "")
+        .trim()
+        .toUpperCase(),
+      checkIn: String(source.checkIn || "").slice(0, 10),
+      checkOut: String(source.checkOut || "").slice(0, 10),
+      guestName: String(source.guestName || ""),
+      contact: String(source.contact || ""),
+      email: String(source.email || ""),
+      guestRequest: String(source.guestRequest || ""),
+      guestCount: String(source.guestCount != null ? source.guestCount : ""),
+      extraGuests: String(source.extraGuests != null ? source.extraGuests : "0"),
+      totalAmount: String(source.totalAmount != null ? source.totalAmount : "0"),
+      payMethod: String(source.payMethod || source.paymentMethod || ""),
+      cancelToken: String(source.cancelToken || ""),
+      bookingCreatedAtIso: String(
+        source.bookingCreatedAtIso || source.createdAtIso || "",
+      ),
+      bookingLocale: String(source.bookingLocale || "kr"),
+    };
+  }
+
+  function mergeReserveCompletePayload() {
+    var merged = {};
+    for (var i = 0; i < arguments.length; i++) {
+      var part = arguments[i];
+      if (!part) {
+        continue;
+      }
+      var built = buildReserveCompletePayload(part);
+      Object.keys(built).forEach(function (key) {
+        if (
+          completeValueIsEmpty(key, merged[key]) &&
+          !completeValueIsEmpty(key, built[key])
+        ) {
+          merged[key] = built[key];
+        } else if (merged[key] == null) {
+          merged[key] = built[key];
+        }
+      });
+    }
+    return buildReserveCompletePayload(merged);
+  }
+
+  function isReserveCompletePayloadReady(payload) {
+    if (!payload) {
+      return false;
+    }
+    var next = buildReserveCompletePayload(payload);
+    return !!(
+      next.orderNo &&
+      next.room &&
+      next.checkIn &&
+      next.checkOut &&
+      next.guestName
+    );
+  }
+
+  function persistReserveCompleteData(payload) {
+    var next = buildReserveCompletePayload(payload);
+    try {
+      sessionStorage.setItem(RESERVE_COMPLETE_DATA_KEY, JSON.stringify(next));
+    } catch (_e) {}
+    return next;
+  }
+
+  function readReserveCompleteData() {
+    try {
+      var raw = sessionStorage.getItem(RESERVE_COMPLETE_DATA_KEY);
+      if (!raw) {
+        return null;
+      }
+      var parsed = JSON.parse(raw);
+      if (!parsed || !parsed.orderNo) {
+        return null;
+      }
+      return buildReserveCompletePayload(parsed);
+    } catch (_e) {
+      return null;
+    }
+  }
+
+  function goToReserveComplete(payload) {
+    persistReserveCompleteData(payload);
+    if (global.GraffordCheckoutGuard) {
+      global.GraffordCheckoutGuard.allowCheckoutNavigation();
+    }
+    global.location.replace("reserve-complete.html");
+  }
+
   async function finalizePortoneCheckout(opts) {
     var response = opts.response || {};
     var showError =
@@ -713,10 +824,24 @@
     if (paymentSettledKey) {
       try {
         if (sessionStorage.getItem(paymentSettledKey) === "1") {
-          if (global.GraffordCheckoutGuard) {
-            global.GraffordCheckoutGuard.allowCheckoutNavigation();
-          }
-          global.location.replace("reserve-complete.html");
+          goToReserveComplete(
+            buildReserveCompletePayload({
+              orderNo: orderNo,
+              room: room,
+              checkIn: checkIn,
+              checkOut: checkOut,
+              guestName: guestName,
+              contact: contact,
+              email: email,
+              guestRequest: guestRequest,
+              guestCount: guestCount,
+              extraGuests: extraGuests,
+              totalAmount: finalAmount,
+              payMethod: payMethod,
+              cancelToken: preSavedCancelToken,
+              bookingLocale: bookingLocale,
+            }),
+          );
           return true;
         }
       } catch (_settled) {}
@@ -737,6 +862,7 @@
     var verifiedPgTid = null;
     var verifiedPayMethod = payMethod;
     var verifiedPgPayProvider = null;
+    var verifiedReservation = null;
 
     try {
       showPageLoading(messages.verifying || "결제 확인 중입니다...");
@@ -778,6 +904,9 @@
         return false;
       }
       verifiedPgTid = verifyData.pgTid || null;
+      if (verifyData && verifyData.reservation) {
+        verifiedReservation = verifyData.reservation;
+      }
       if (GPM) {
         var verified = GPM.resolveVerifiedMethod(verifyData, payMethod);
         verifiedPayMethod = verified.methodId;
@@ -892,10 +1021,10 @@
       global.GraffordCheckoutGuard.activateCheckoutBackSeal();
     }
 
-    try {
-      sessionStorage.setItem(
-        "graffordReserveCompleteData",
-        JSON.stringify({
+    showPageLoading(messages.redirecting || "완료 화면으로 이동하는 중입니다...");
+    goToReserveComplete(
+      mergeReserveCompletePayload(
+        {
           orderNo: orderNo,
           room: room,
           checkIn: checkIn,
@@ -904,23 +1033,17 @@
           contact: contact,
           email: email,
           guestRequest: guestRequest,
-          guestCount: String(guestCount),
-          extraGuests: String(extraGuests),
-          totalAmount: String(finalAmount),
+          guestCount: guestCount,
+          extraGuests: extraGuests,
+          totalAmount: finalAmount,
           payMethod: payMethod,
           cancelToken: fetchedCancelToken,
           bookingCreatedAtIso: bookingCreatedAtIso,
           bookingLocale: bookingLocale,
-        }),
-      );
-    } catch (_sd) {}
-
-    if (global.GraffordCheckoutGuard) {
-      global.GraffordCheckoutGuard.allowCheckoutNavigation();
-    }
-
-    showPageLoading(messages.redirecting || "완료 화면으로 이동하는 중입니다...");
-    global.location.href = "reserve-complete.html";
+        },
+        verifiedReservation,
+      ),
+    );
     return true;
   }
 
@@ -946,6 +1069,12 @@
     persistPaymentDataBackup: persistPaymentDataBackup,
     restorePaymentDataBackup: restorePaymentDataBackup,
     clearPaymentDataBackup: clearPaymentDataBackup,
+    buildReserveCompletePayload: buildReserveCompletePayload,
+    mergeReserveCompletePayload: mergeReserveCompletePayload,
+    isReserveCompletePayloadReady: isReserveCompletePayloadReady,
+    persistReserveCompleteData: persistReserveCompleteData,
+    readReserveCompleteData: readReserveCompleteData,
+    goToReserveComplete: goToReserveComplete,
     defaultRedirectWatchdogMs: defaultRedirectWatchdogMs,
     markPortoneDepartureStarted: markPortoneDepartureStarted,
     clearPortoneDepartureStarted: clearPortoneDepartureStarted,

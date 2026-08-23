@@ -178,6 +178,18 @@ try {
   });
   assert("commit without browser POST", first.ok === true && first.inserted === true, first);
   assert(
+    "commit returns complete-page reservation view",
+    !!(
+      first.reservation &&
+      first.reservation.orderNo === TEST_RESV &&
+      first.reservation.room === "G1" &&
+      first.reservation.checkIn === "2027-03-01" &&
+      first.reservation.checkOut === "2027-03-02" &&
+      first.reservation.guestName === "점검게스트"
+    ),
+    first.reservation,
+  );
+  assert(
     "draft dates preserved after hold release",
     !!(
       draftAfterHoldRelease &&

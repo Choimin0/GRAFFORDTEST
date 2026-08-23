@@ -85,7 +85,8 @@ export async function findBookingByNumber(pool, reservationNumber) {
   }
   var result = await pool.query(
     `SELECT reservation_number, status, room_type, check_in_date, check_out_date,
-            guest_name, contact, email, booking_locale, created_at,
+            guest_name, contact, email, guest_request, guest_count, extra_guests,
+            stay_nights, total_amount, payment_method, booking_locale, created_at,
             reserve_alarm_sent_count
      FROM ${BOOKING_TABLE}
      WHERE reservation_number = $1
@@ -93,6 +94,100 @@ export async function findBookingByNumber(pool, reservationNumber) {
     [norm],
   );
   return (result.rows && result.rows[0]) || null;
+}
+
+function isoFromCreatedAt(v) {
+  if (v == null || v === "") {
+    return "";
+  }
+  var d = v instanceof Date ? v : new Date(v);
+  if (isNaN(d.getTime())) {
+    return "";
+  }
+  return d.toISOString();
+}
+
+/**
+ * 예약완료 페이지가 바로 렌더할 수 있는 camelCase 뷰.
+ * DB row(암호문 PII)와 checkout draft(평문) 모두 받습니다.
+ */
+export function buildReserveCompleteView(source, extras) {
+  extras = extras || {};
+  if (!source) {
+    return null;
+  }
+  var orderNo = String(
+    extras.orderNo ||
+      extras.reservationNumber ||
+      source.reservationNumber ||
+      source.reservation_number ||
+      "",
+  ).trim();
+  if (!orderNo) {
+    return null;
+  }
+  var pii = decryptBookingPiiResponse({
+    guest_name:
+      source.guest_name != null ? source.guest_name : source.guestName,
+    contact: source.contact,
+    email: source.email,
+  });
+  var createdAtIso = isoFromCreatedAt(
+    extras.createdAt || source.created_at || source.createdAt || "",
+  );
+  var guestCount =
+    source.guestCount != null
+      ? source.guestCount
+      : source.guest_count != null
+        ? source.guest_count
+        : extras.guestCount;
+  var extraGuests =
+    source.extraGuests != null
+      ? source.extraGuests
+      : source.extra_guests != null
+        ? source.extra_guests
+        : extras.extraGuests;
+  var totalAmount =
+    source.totalAmount != null
+      ? source.totalAmount
+      : source.total_amount != null
+        ? source.total_amount
+        : extras.totalAmount;
+  return {
+    orderNo: orderNo,
+    room: String(
+      source.roomType || source.room_type || extras.room || "",
+    )
+      .trim()
+      .toUpperCase(),
+    checkIn: rowDateToYMD(
+      source.checkIn || source.check_in_date || extras.checkIn,
+    ),
+    checkOut: rowDateToYMD(
+      source.checkOut || source.check_out_date || extras.checkOut,
+    ),
+    guestName: pii.guestName || extras.guestName || "",
+    contact: pii.contact || extras.contact || "",
+    email: pii.email || extras.email || "",
+    guestRequest: String(
+      source.guestRequest || source.guest_request || extras.guestRequest || "",
+    ),
+    guestCount: guestCount != null && guestCount !== "" ? guestCount : "",
+    extraGuests: extraGuests != null && extraGuests !== "" ? extraGuests : 0,
+    totalAmount: totalAmount != null && totalAmount !== "" ? totalAmount : 0,
+    payMethod:
+      source.paymentMethod ||
+      source.payment_method ||
+      extras.payMethod ||
+      extras.paymentMethod ||
+      "",
+    bookingCreatedAtIso: createdAtIso,
+    bookingLocale:
+      source.bookingLocale ||
+      source.booking_locale ||
+      extras.bookingLocale ||
+      "kr",
+  };
 }
 
 export async function notifyReserveCompleteAlimtalk(pool, payload, options) {
@@ -409,6 +504,7 @@ export async function commitPaidBooking(pool, options) {
       ok: true,
       alreadyCommitted: true,
       reservationNumber: existing.reservation_number,
+      reservation: buildReserveCompleteView(existing),
       alimtalk: notifyExisting,
     };
   }
@@ -475,6 +571,7 @@ export async function commitPaidBooking(pool, options) {
           ok: true,
           alreadyCommitted: true,
           reservationNumber: paymentId,
+          reservation: buildReserveCompleteView(dup),
           alimtalk: notifyDup,
         };
       }
@@ -548,6 +645,10 @@ export async function commitPaidBooking(pool, options) {
     inserted: true,
     reservationNumber: inserted.reservation_number,
     createdAt: inserted.created_at,
+    reservation: buildReserveCompleteView(draft, {
+      orderNo: inserted.reservation_number,
+      createdAt: inserted.created_at,
+    }),
     alimtalk: alimtalk,
   };
 }

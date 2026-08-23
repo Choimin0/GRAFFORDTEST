@@ -42,7 +42,7 @@
     <!-- PortOne v2 Browser SDK (KG이니시스) + V1 SDK (PayPal Express Checkout, 영문 미사용·코드 유지) -->
     <script src="https://cdn.portone.io/v2/browser-sdk.js"></script>
     <script src="https://cdn.iamport.kr/v1/iamport.js"></script>
-    <script src="js/payment-portone-flow.js?v=12"></script>
+    <script src="js/payment-portone-flow.js?v=13"></script>
     <script src="js/booking-token-client.js?v=8"></script>
     <script src="js/booking-checkout-guard.js?v=20"></script>
     <!--
@@ -792,12 +792,24 @@
                 })
                 .then(function (data) {
                   if (data && data.ok) {
+                    var flow = window.GraffordPortoneFlow;
+                    var payload =
+                      data.reservation && flow && flow.buildReserveCompletePayload
+                        ? flow.mergeReserveCompletePayload
+                          ? flow.mergeReserveCompletePayload(
+                              { orderNo: redirectResultKr.paymentId },
+                              data.reservation,
+                            )
+                          : flow.buildReserveCompletePayload(data.reservation)
+                        : { orderNo: redirectResultKr.paymentId };
+                    if (flow && flow.goToReserveComplete) {
+                      flow.goToReserveComplete(payload);
+                      return;
+                    }
                     try {
                       sessionStorage.setItem(
                         "graffordReserveCompleteData",
-                        JSON.stringify({
-                          orderNo: redirectResultKr.paymentId,
-                        }),
+                        JSON.stringify(payload),
                       );
                     } catch (_e) {}
                     if (window.GraffordCheckoutGuard) {
@@ -966,9 +978,54 @@
             if (submitBtn) submitBtn.disabled = true;
           }
 
+          function goToReserveCompleteFromSaved(reservation) {
+            var flow = window.GraffordPortoneFlow;
+            var fromSaved = {
+              orderNo: orderNo,
+              room: room,
+              checkIn: checkIn,
+              checkOut: checkOut,
+              guestName: guestName,
+              contact: contact,
+              email: email,
+              guestRequest: guestRequest,
+              guestCount: guestCount,
+              extraGuests: extraGuests,
+              totalAmount: finalAmount || Number(saved.totalAmount || 0),
+              payMethod: payMethod,
+              cancelToken:
+                preSavedCancelToken || (saved && saved.cancelToken) || "",
+              bookingLocale: bookingLocale,
+            };
+            var payload = fromSaved;
+            if (flow && flow.mergeReserveCompletePayload) {
+              payload = flow.mergeReserveCompletePayload(
+                fromSaved,
+                reservation || {},
+              );
+            }
+            try {
+              sessionStorage.setItem(paymentSettledKey, "1");
+            } catch (_e) {}
+            if (flow && flow.goToReserveComplete) {
+              flow.goToReserveComplete(payload);
+              return;
+            }
+            try {
+              sessionStorage.setItem(
+                "graffordReserveCompleteData",
+                JSON.stringify(payload),
+              );
+            } catch (_e2) {}
+            if (window.GraffordCheckoutGuard) {
+              window.GraffordCheckoutGuard.allowCheckoutNavigation();
+            }
+            window.location.replace("reserve-complete.html");
+          }
+
           try {
             if (sessionStorage.getItem(paymentSettledKey) === "1") {
-              window.location.replace("reserve-complete.html");
+              goToReserveCompleteFromSaved();
               return;
             }
             if (
@@ -1029,8 +1086,7 @@
               checkoutValidationReady = true;
               checkoutValidationFailed = !checkoutValidation.ok;
               if (checkoutValidation.alreadyBooked) {
-                sessionStorage.setItem(paymentSettledKey, "1");
-                window.location.replace("reserve-complete.html");
+                goToReserveCompleteFromSaved();
               }
               return checkoutValidation;
             } catch (e) {
@@ -1066,8 +1122,7 @@
               return false;
             }
             if (validation.alreadyBooked) {
-              sessionStorage.setItem(paymentSettledKey, "1");
-              window.location.replace("reserve-complete.html");
+              goToReserveCompleteFromSaved();
               return false;
             }
             if (!validation.ok) {
@@ -2646,12 +2701,24 @@
                 })
                 .then(function (data) {
                   if (data && data.ok) {
+                    var flow = window.GraffordPortoneFlow;
+                    var payload =
+                      data.reservation && flow && flow.buildReserveCompletePayload
+                        ? flow.mergeReserveCompletePayload
+                          ? flow.mergeReserveCompletePayload(
+                              { orderNo: redirectResultEn.paymentId },
+                              data.reservation,
+                            )
+                          : flow.buildReserveCompletePayload(data.reservation)
+                        : { orderNo: redirectResultEn.paymentId };
+                    if (flow && flow.goToReserveComplete) {
+                      flow.goToReserveComplete(payload);
+                      return;
+                    }
                     try {
                       sessionStorage.setItem(
                         "graffordReserveCompleteData",
-                        JSON.stringify({
-                          orderNo: redirectResultEn.paymentId,
-                        }),
+                        JSON.stringify(payload),
                       );
                     } catch (_e) {}
                     if (window.GraffordCheckoutGuard) {
@@ -2807,6 +2874,51 @@
             if (paypalWrapReset) paypalWrapReset.hidden = true;
           }
 
+          function goToReserveCompleteFromSaved(reservation) {
+            var flow = window.GraffordPortoneFlow;
+            var fromSaved = {
+              orderNo: orderNo,
+              room: room,
+              checkIn: checkIn,
+              checkOut: checkOut,
+              guestName: guestName,
+              contact: contact,
+              email: email,
+              guestRequest: guestRequest,
+              guestCount: guestCount,
+              extraGuests: extraGuests,
+              totalAmount: finalAmount || Number(saved.totalAmount || 0),
+              payMethod: payMethod,
+              cancelToken:
+                preSavedCancelToken || (saved && saved.cancelToken) || "",
+              bookingLocale: bookingLocale,
+            };
+            var payload = fromSaved;
+            if (flow && flow.mergeReserveCompletePayload) {
+              payload = flow.mergeReserveCompletePayload(
+                fromSaved,
+                reservation || {},
+              );
+            }
+            try {
+              sessionStorage.setItem(paymentSettledKey, "1");
+            } catch (_e) {}
+            if (flow && flow.goToReserveComplete) {
+              flow.goToReserveComplete(payload);
+              return;
+            }
+            try {
+              sessionStorage.setItem(
+                "graffordReserveCompleteData",
+                JSON.stringify(payload),
+              );
+            } catch (_e2) {}
+            if (window.GraffordCheckoutGuard) {
+              window.GraffordCheckoutGuard.allowCheckoutNavigation();
+            }
+            window.location.replace("reserve-complete.html");
+          }
+
           function markPaymentProcessing() {
             paymentInProgress = true;
             if (
@@ -2828,7 +2940,7 @@
 
           try {
             if (sessionStorage.getItem(paymentSettledKey) === "1") {
-              window.location.replace("reserve-complete.html");
+              goToReserveCompleteFromSaved();
               return;
             }
             if (
@@ -2889,8 +3001,7 @@
               checkoutValidationReady = true;
               checkoutValidationFailed = !checkoutValidation.ok;
               if (checkoutValidation.alreadyBooked) {
-                sessionStorage.setItem(paymentSettledKey, "1");
-                window.location.replace("reserve-complete.html");
+                goToReserveCompleteFromSaved();
               }
               return checkoutValidation;
             } catch (e) {
@@ -2928,8 +3039,7 @@
               return false;
             }
             if (validation.alreadyBooked) {
-              sessionStorage.setItem(paymentSettledKey, "1");
-              window.location.replace("reserve-complete.html");
+              goToReserveCompleteFromSaved();
               return false;
             }
             if (!validation.ok) {

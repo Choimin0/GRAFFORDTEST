@@ -25,7 +25,11 @@ import {
 } from "./_lib/payment-methods.js";
 import { fetchKrwPerUsd } from "./_lib/fx-krw-usd.js";
 import pg from "pg";
-import { commitPaidBooking } from "./_lib/commit-paid-booking.js";
+import {
+  buildReserveCompleteView,
+  commitPaidBooking,
+  findBookingByNumber,
+} from "./_lib/commit-paid-booking.js";
 
 const { Pool } = pg;
 
@@ -357,6 +361,7 @@ export default async function handler(req, res) {
     );
 
     var reservationCommitted = false;
+    var reservation = null;
     var pool = getPool();
     if (pool) {
       try {
@@ -365,6 +370,9 @@ export default async function handler(req, res) {
           payment: payment,
         });
         reservationCommitted = !!(commitResult && commitResult.ok);
+        if (commitResult && commitResult.reservation) {
+          reservation = commitResult.reservation;
+        }
         if (!commitResult.ok) {
           console.error(
             "[payment-confirm] paid commit failed",
@@ -375,6 +383,23 @@ export default async function handler(req, res) {
         }
       } catch (commitErr) {
         console.error("[payment-confirm] paid commit error", paymentId, commitErr);
+      }
+      if (!reservation) {
+        try {
+          var booked = await findBookingByNumber(pool, paymentId);
+          if (
+            booked &&
+            (booked.status === "confirm" || booked.status === "completed")
+          ) {
+            reservation = buildReserveCompleteView(booked);
+          }
+        } catch (lookupErr) {
+          console.error(
+            "[payment-confirm] reservation lookup error",
+            paymentId,
+            lookupErr,
+          );
+        }
       }
     }
 
@@ -388,6 +413,7 @@ export default async function handler(req, res) {
         paymentMethod: verifiedMethod.methodId,
         pgPayProvider: verifiedMethod.pgPayProvider,
         reservationCommitted: reservationCommitted,
+        reservation: reservation,
       }),
     );
   } catch (e) {
