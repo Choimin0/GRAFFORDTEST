@@ -1,11 +1,15 @@
 import {
+  checkInYmdForCancellationFee,
   computeCancellationFeePercent,
+  explainCancellationFee,
   fullRefundDeadlineMs,
   isBeforeCheckInDateKst,
   isFullRefundByGrace,
+  normalizeCheckInYmd,
   policyCancellationFeePercent,
   remainDaysUntilCheckInKst,
 } from "./cancellation-fee.js";
+import { computeRefundAmount } from "./refund-amount.js";
 
 var failed = 0;
 
@@ -24,11 +28,9 @@ function kst(isoLocal) {
 
 var checkIn = "2026-08-24";
 
-assertEqual(
-  "policy 15 days",
-  policyCancellationFeePercent(15),
-  0,
-);
+assertEqual("policy 15 days", policyCancellationFeePercent(15), 0);
+assertEqual("policy 16 days", policyCancellationFeePercent(16), 0);
+assertEqual("policy 30 days", policyCancellationFeePercent(30), 0);
 assertEqual("policy 14 days", policyCancellationFeePercent(14), 20);
 assertEqual("policy 12 days", policyCancellationFeePercent(12), 20);
 assertEqual("policy 11 days", policyCancellationFeePercent(11), 30);
@@ -196,6 +198,76 @@ assertEqual(
   "deadline is payment+24h when that is earlier",
   deadlineEarly,
   paidEarly.getTime() + 24 * 60 * 60 * 1000,
+);
+
+assertEqual(
+  "ISO datetime check-in still counts as calendar date",
+  remainDaysUntilCheckInKst("2026-08-24T15:00:00.000Z", kst("2026-08-09T12:00:00")),
+  15,
+);
+assertEqual(
+  "KST midnight Date is not shifted back a day",
+  remainDaysUntilCheckInKst(
+    new Date("2026-08-23T15:00:00.000Z"),
+    kst("2026-08-09T12:00:00"),
+  ),
+  15,
+);
+assertEqual(
+  "ISO check-in 15 days out is 0% fee (100% refund)",
+  computeCancellationFeePercent({
+    checkInYmd: "2026-08-24T00:00:00.000Z",
+    createdAt: kst("2026-08-01T12:00:00"),
+    at: kst("2026-08-09T12:00:00"),
+  }),
+  0,
+);
+
+assertEqual(
+  "contract check-in wins over occupancy date",
+  checkInYmdForCancellationFee({
+    contract_check_in: "2026-09-20",
+    check_in_date: "2026-08-26",
+  }),
+  "2026-09-20",
+);
+assertEqual(
+  "occupancy date used when contract missing",
+  checkInYmdForCancellationFee({ check_in_date: "2026-08-26" }),
+  "2026-08-26",
+);
+assertEqual(
+  "room-change occupancy soon still 100% refund if contract is 15+ days out",
+  computeCancellationFeePercent({
+    checkInYmd: checkInYmdForCancellationFee({
+      contract_check_in: "2026-09-20",
+      check_in_date: "2026-08-26",
+    }),
+    createdAt: kst("2026-08-01T12:00:00"),
+    at: kst("2026-08-24T12:00:00"),
+  }),
+  0,
+);
+
+assertEqual("normalize ISO prefix", normalizeCheckInYmd("2026-08-24T15:00:00.000Z"), "2026-08-24");
+assertEqual("normalize empty", normalizeCheckInYmd(""), null);
+
+var missingExplain = explainCancellationFee({
+  checkInYmd: null,
+  createdAt: kst("2026-08-23T22:00:00"),
+  at: kst("2026-08-23T23:00:00"),
+});
+assertEqual("missing check-in reason", missingExplain.reason, "missing_check_in");
+assertEqual("missing check-in fee", missingExplain.feePercent, 100);
+
+assertEqual("refund amount fee 0 = full", computeRefundAmount(111000, 0), 111000);
+assertEqual("refund amount fee 20 = 80%", computeRefundAmount(111000, 20), 88800);
+assertEqual("refund amount fee 50 = 50%", computeRefundAmount(111000, 50), 55500);
+assertEqual("refund amount fee 100 = 0", computeRefundAmount(111000, 100), 0);
+assertEqual(
+  "환불율 100을 위약금으로 넣으면 0원 환불(혼동 방지)",
+  computeRefundAmount(111000, 100),
+  0,
 );
 
 if (failed) {

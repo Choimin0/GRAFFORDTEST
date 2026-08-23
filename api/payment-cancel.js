@@ -23,7 +23,11 @@ import {
 import { exportCancellationToBigQuery } from "./_lib/bigquery-export.js";
 import { applyBookingRetentionToRow } from "./_lib/booking-retention.js";
 import { isGuestSelfCancelClosed } from "./_lib/booking-archive.js";
-import { computeCancellationFeePercent } from "./_lib/cancellation-fee.js";
+import {
+  checkInYmdForCancellationFee,
+  explainCancellationFee,
+  normalizeCheckInYmd,
+} from "./_lib/cancellation-fee.js";
 import { cancelRoomChangeChildren } from "./_lib/booking-room-change.js";
 const { Pool } = pg;
 
@@ -145,34 +149,9 @@ function formatYmdKst(d) {
   }).format(d);
 }
 
-/** check_in_date (DATE / string / Date) → YYYY-MM-DD */
-function normalizeCheckInYmd(v) {
-  if (v == null || v === "") return null;
-  if (typeof v === "string") {
-    var s = v.trim();
-    var mm = /^(\d{4}-\d{2}-\d{2})/.exec(s);
-    if (mm) return mm[1];
-  }
-  var d = new Date(v);
-  if (isNaN(d.getTime())) return null;
-  // DATE 컬럼이 Date로 오면 UTC 자정 → getUTC*로 달력일 보존
-  if (
-    d.getUTCHours() === 0 &&
-    d.getUTCMinutes() === 0 &&
-    d.getUTCSeconds() === 0 &&
-    d.getUTCMilliseconds() === 0
-  ) {
-    var y = d.getUTCFullYear();
-    var mo = String(d.getUTCMonth() + 1).padStart(2, "0");
-    var da = String(d.getUTCDate()).padStart(2, "0");
-    return y + "-" + mo + "-" + da;
-  }
-  return formatYmdKst(d);
-}
-
-function computeCancellationFeePercentForRow(row, at) {
-  return computeCancellationFeePercent({
-    checkInYmd: normalizeCheckInYmd(row && row.check_in_date),
+function explainCancellationFeeForRow(row, at) {
+  return explainCancellationFee({
+    checkInYmd: checkInYmdForCancellationFee(row),
     createdAt: row && row.created_at,
     at: at,
   });
@@ -498,7 +477,7 @@ export default async function handler(req, res) {
       return;
     }
 
-    if (isGuestSelfCancelClosed(normalizeCheckInYmd(row.check_in_date))) {
+    if (isGuestSelfCancelClosed(checkInYmdForCancellationFee(row))) {
       client.release();
       json(res, 403, {
         ok: false,
@@ -524,7 +503,8 @@ export default async function handler(req, res) {
       isBankTransfer: isBankTransfer,
     });
     var paidAmountNum = paidResolution.paidAmount;
-    var feePercent = computeCancellationFeePercentForRow(row);
+    var feeExplain = explainCancellationFeeForRow(row);
+    var feePercent = feeExplain.feePercent;
     // 클라이언트 refundAmount는 참고만 — 최종 결제액 기준으로 서버 재산출(조작 방지)
     var safeRefundAmount = computeRefundAmount(paidAmountNum, feePercent);
 
@@ -543,6 +523,14 @@ export default async function handler(req, res) {
       paidResolution.source,
       "| dbTotalAmount:",
       row.total_amount,
+      "| checkInYmd:",
+      feeExplain.checkInYmd,
+      "| remainDays:",
+      feeExplain.remainDays,
+      "| feeReason:",
+      feeExplain.reason,
+      "| policyPct:",
+      feeExplain.policyPct,
       "| cancellationFeePercent:",
       feePercent,
       "| safeRefundAmount:",

@@ -5,14 +5,53 @@
  * 1) 취소 시각이 체크인 날짜 서울 0시 이전
  * 2) 결제(created_at) 후 24시간 이내
  * 하나라도 아니면 입실까지 남은 일수 기준 날짜별 규정.
+ *
+ * 날짜별 규정은 화면의 "환불율"이 아니라 위약금(수수료) % 입니다.
+ * 15일 전 100% 환불 → 위약금 0, 12일 전 80% 환불 → 위약금 20, …
  */
 import { getTodayYmdKst } from "./promotion-period.js";
 
 export const FREE_CANCEL_WINDOW_MS = 24 * 60 * 60 * 1000;
 var KST_OFFSET_MS = 9 * 60 * 60 * 1000;
+var YMD_RE = /^(\d{4}-\d{2}-\d{2})/;
+
+/** DATE / ISO / Date → YYYY-MM-DD. 파싱 실패 시 null. */
+export function normalizeCheckInYmd(v) {
+  if (v == null || v === "") return null;
+  if (typeof v === "string") {
+    var s = v.trim();
+    var mm = YMD_RE.exec(s);
+    if (mm) return mm[1];
+  }
+  var d = v instanceof Date ? v : new Date(v);
+  if (!d || isNaN(d.getTime())) return null;
+  // DATE 컬럼이 Date로 오면 UTC 자정 → getUTC*로 달력일 보존
+  if (
+    d.getUTCHours() === 0 &&
+    d.getUTCMinutes() === 0 &&
+    d.getUTCSeconds() === 0 &&
+    d.getUTCMilliseconds() === 0
+  ) {
+    var y = d.getUTCFullYear();
+    var mo = String(d.getUTCMonth() + 1).padStart(2, "0");
+    var da = String(d.getUTCDate()).padStart(2, "0");
+    return y + "-" + mo + "-" + da;
+  }
+  return getTodayYmdKst(d);
+}
+
+/** 게스트 기준 체크인: 객실변경 시 contract_check_in, 아니면 check_in_date. */
+export function checkInYmdForCancellationFee(row) {
+  if (!row) return null;
+  return (
+    normalizeCheckInYmd(row.contract_check_in || row.contractCheckIn) ||
+    normalizeCheckInYmd(row.check_in_date || row.checkIn)
+  );
+}
 
 export function remainDaysUntilCheckInKst(checkInYmd, at = new Date()) {
-  if (!checkInYmd) return 0;
+  var ymd = normalizeCheckInYmd(checkInYmd);
+  if (!ymd) return 0;
   var todayYmd = getTodayYmdKst(at);
   var a = Date.UTC(
     Number(todayYmd.slice(0, 4)),
@@ -20,25 +59,28 @@ export function remainDaysUntilCheckInKst(checkInYmd, at = new Date()) {
     Number(todayYmd.slice(8, 10)),
   );
   var b = Date.UTC(
-    Number(checkInYmd.slice(0, 4)),
-    Number(checkInYmd.slice(5, 7)) - 1,
-    Number(checkInYmd.slice(8, 10)),
+    Number(ymd.slice(0, 4)),
+    Number(ymd.slice(5, 7)) - 1,
+    Number(ymd.slice(8, 10)),
   );
-  return Math.floor((b - a) / 86400000);
+  var days = Math.floor((b - a) / 86400000);
+  return Number.isFinite(days) ? days : 0;
 }
 
 export function policyCancellationFeePercent(remainDays) {
-  if (remainDays >= 15) return 0;
-  if (remainDays >= 12) return 20;
-  if (remainDays >= 9) return 30;
-  if (remainDays >= 7) return 40;
-  if (remainDays >= 5) return 50;
+  var days = Number(remainDays);
+  if (!Number.isFinite(days)) return 100;
+  if (days >= 15) return 0;
+  if (days >= 12) return 20;
+  if (days >= 9) return 30;
+  if (days >= 7) return 40;
+  if (days >= 5) return 50;
   return 100;
 }
 
 export function isBeforeCheckInDateKst(checkInYmd, at = new Date()) {
-  var ymd = String(checkInYmd || "").slice(0, 10);
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(ymd)) {
+  var ymd = normalizeCheckInYmd(checkInYmd);
+  if (!ymd) {
     return false;
   }
   return getTodayYmdKst(at) < ymd;
@@ -73,8 +115,8 @@ export function fullRefundDeadlineMs(createdAt, checkInYmd) {
     return null;
   }
   var plus24 = created.getTime() + FREE_CANCEL_WINDOW_MS;
-  var ymd = String(checkInYmd || "").slice(0, 10);
-  var m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(ymd);
+  var ymd = normalizeCheckInYmd(checkInYmd);
+  var m = ymd ? /^(\d{4})-(\d{2})-(\d{2})$/.exec(ymd) : null;
   if (!m) {
     return plus24;
   }
@@ -85,19 +127,42 @@ export function fullRefundDeadlineMs(createdAt, checkInYmd) {
 }
 
 /**
+ * @param {{ checkInYmd?: string|Date|null, createdAt?: Date|string|null, at?: Date }} options
+ */
+export function explainCancellationFee(options) {
+  var checkInYmd = normalizeCheckInYmd(
+    options && options.checkInYmd != null ? options.checkInYmd : null,
+  );
+  var createdAt =
+    options && options.createdAt != null ? options.createdAt : null;
+  var at = options && options.at ? options.at : new Date();
+  if (!checkInYmd) {
+    return {
+      feePercent: 100,
+      remainDays: 0,
+      checkInYmd: null,
+      grace: false,
+      policyPct: 100,
+      reason: "missing_check_in",
+    };
+  }
+  var remainDays = remainDaysUntilCheckInKst(checkInYmd, at);
+  var policyPct = policyCancellationFeePercent(remainDays);
+  var grace = isFullRefundByGrace(checkInYmd, createdAt, at);
+  return {
+    feePercent: grace ? 0 : policyPct,
+    remainDays: remainDays,
+    checkInYmd: checkInYmd,
+    grace: grace,
+    policyPct: policyPct,
+    reason: grace ? "grace_24h" : "policy",
+  };
+}
+
+/**
  * @param {{ checkInYmd: string|null, createdAt: Date|string|null, at?: Date }} options
  * @returns {number} 위약금 비율(%). 0이면 전액 환불.
  */
 export function computeCancellationFeePercent(options) {
-  var checkInYmd = options && options.checkInYmd ? options.checkInYmd : null;
-  var createdAt = options && options.createdAt != null ? options.createdAt : null;
-  var at = options && options.at ? options.at : new Date();
-  if (!checkInYmd) return 100;
-  var policyPct = policyCancellationFeePercent(
-    remainDaysUntilCheckInKst(checkInYmd, at),
-  );
-  if (isFullRefundByGrace(checkInYmd, createdAt, at)) {
-    return 0;
-  }
-  return policyPct;
+  return explainCancellationFee(options).feePercent;
 }

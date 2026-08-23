@@ -556,12 +556,13 @@
 
           function normalizeCheckInYmdLocal(s) {
             var t = String(s || "").trim();
-            if (!/^\d{4}-\d{2}-\d{2}$/.test(t)) return null;
-            return t.slice(0, 10);
+            var mm = /^(\d{4}-\d{2}-\d{2})/.exec(t);
+            return mm ? mm[1] : null;
           }
 
           function remainDaysUntilCheckInKst(checkInYmd) {
-            if (!checkInYmd) return 0;
+            var ymd = normalizeCheckInYmdLocal(checkInYmd);
+            if (!ymd) return 0;
             var todayYmd = formatYmdKst(new Date());
             var a = Date.UTC(
               Number(todayYmd.slice(0, 4)),
@@ -569,19 +570,22 @@
               Number(todayYmd.slice(8, 10)),
             );
             var b = Date.UTC(
-              Number(checkInYmd.slice(0, 4)),
-              Number(checkInYmd.slice(5, 7)) - 1,
-              Number(checkInYmd.slice(8, 10)),
+              Number(ymd.slice(0, 4)),
+              Number(ymd.slice(5, 7)) - 1,
+              Number(ymd.slice(8, 10)),
             );
-            return Math.floor((b - a) / 86400000);
+            var days = Math.floor((b - a) / 86400000);
+            return Number.isFinite(days) ? days : 0;
           }
 
           function policyCancellationFeePercent(remainDays) {
-            if (remainDays >= 15) return 0;
-            if (remainDays >= 12) return 20;
-            if (remainDays >= 9) return 30;
-            if (remainDays >= 7) return 40;
-            if (remainDays >= 5) return 50;
+            var days = Number(remainDays);
+            if (!Number.isFinite(days)) return 100;
+            if (days >= 15) return 0;
+            if (days >= 12) return 20;
+            if (days >= 9) return 30;
+            if (days >= 7) return 40;
+            if (days >= 5) return 50;
             return 100;
           }
 
@@ -646,6 +650,22 @@
             return (
               '<span class="reserve-delete-refund-emphasis">' + text + "</span>"
             );
+          }
+
+          function applyLookupRowToCancelPage(row) {
+            if (!row) return;
+            var nextCheckIn = normalizeCheckInYmdLocal(row.checkIn);
+            var nextCheckOut = normalizeCheckInYmdLocal(row.checkOut);
+            if (nextCheckIn) {
+              checkIn = nextCheckIn;
+            }
+            if (nextCheckOut) {
+              checkOut = nextCheckOut;
+            }
+            applyPaidAmountFromLookup(row);
+            var scheduleTextNext = (checkIn || "—") + " ~ " + (checkOut || "—");
+            setText("cancel-schedule", scheduleTextNext);
+            setText("cancel-schedule-en", scheduleTextNext);
           }
 
           function applyPaidAmountFromLookup(row) {
@@ -868,7 +888,7 @@
                 if (row && row.createdAtYmd) {
                   resolvedCreatedAtYmd = String(row.createdAtYmd);
                 }
-                applyPaidAmountFromLookup(row);
+                applyLookupRowToCancelPage(row);
                 finishRefundUiSetup(iso);
               })
               .catch(function () {

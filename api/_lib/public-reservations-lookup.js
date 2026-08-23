@@ -20,6 +20,7 @@ import {
   isRoomChangeItinerary,
   loadStaySegmentsForPrimary,
 } from "./booking-room-change.js";
+import { normalizeCheckInYmd } from "./cancellation-fee.js";
 
 const LEGACY_TO_ROOM = { A: "G1", B: "G2", C: "G3", D: "G4" };
 const DEFAULT_CANCEL_TOKEN_TTL_MS = 10 * 60 * 1000;
@@ -59,20 +60,7 @@ function normalizeRoomType(raw) {
 }
 
 function toYMD(v) {
-  if (v == null || v === "") {
-    return "";
-  }
-  if (typeof v === "string") {
-    return v.slice(0, 10);
-  }
-  var d = new Date(v);
-  if (isNaN(d.getTime())) {
-    return "";
-  }
-  var y = d.getUTCFullYear();
-  var m = String(d.getUTCMonth() + 1).padStart(2, "0");
-  var day = String(d.getUTCDate()).padStart(2, "0");
-  return y + "-" + m + "-" + day;
+  return normalizeCheckInYmd(v) || "";
 }
 
 function formatDateTimeKst(v) {

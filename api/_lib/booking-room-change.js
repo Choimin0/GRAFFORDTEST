@@ -7,6 +7,7 @@ import { hasActiveHoldOverlap } from "./booking-hold.js";
 import { countStayNights, validateGuestCount } from "./admin-manual-booking.js";
 import { getInitialBookingStatusForCheckout } from "./booking-archive.js";
 import { getTodayYmdKst } from "./promotion-period.js";
+import { normalizeCheckInYmd } from "./cancellation-fee.js";
 
 const BOOKING_TABLE = "booking";
 const ALLOWED_ROOMS = new Set(["G1", "G2", "G3", "G4"]);
@@ -19,20 +20,7 @@ const ROOM_CHANGE_PAYMENT_METHOD = "room-change";
 export const ROOM_CHANGE_STAY_ROLE = STAY_ROLE_ROOM_CHANGE;
 
 function toYMD(v) {
-  if (v == null || v === "") {
-    return "";
-  }
-  if (typeof v === "string") {
-    return v.slice(0, 10);
-  }
-  var d = new Date(v);
-  if (isNaN(d.getTime())) {
-    return "";
-  }
-  var y = d.getUTCFullYear();
-  var m = String(d.getUTCMonth() + 1).padStart(2, "0");
-  var day = String(d.getUTCDate()).padStart(2, "0");
-  return y + "-" + m + "-" + day;
+  return normalizeCheckInYmd(v) || "";
 }
 
 export function normalizeRoomType(raw) {
