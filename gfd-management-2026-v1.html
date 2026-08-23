@@ -4068,21 +4068,35 @@
 
         function buildSelectedDateLockText(ymd) {
           var targetYmd = ymd || selectedCalendarDate || getTodayYmdKst();
-          var lines = [formatKoreanMonthDay(targetYmd)];
+          var checkoutLines = [];
+          var checkinLines = [];
           getAdminRooms().forEach(function (room) {
-            var checkinRow = getRoomReservationPartsForDate(
-              room,
-              targetYmd,
-            ).checkinRow;
-            if (!checkinRow) {
-              return;
+            var parts = getRoomReservationPartsForDate(room, targetYmd);
+            var checkoutLast4 = extractContactLast4(
+              parts.checkoutRow && parts.checkoutRow.contact,
+            );
+            if (checkoutLast4) {
+              checkoutLines.push(room + " " + checkoutLast4);
             }
-            var last4 = extractContactLast4(checkinRow.contact);
-            if (!last4) {
-              return;
+            var checkinLast4 = extractContactLast4(
+              parts.checkinRow && parts.checkinRow.contact,
+            );
+            if (checkinLast4) {
+              checkinLines.push(room + " " + checkinLast4);
             }
-            lines.push(room + " " + last4);
           });
+          var lines = [formatKoreanMonthDay(targetYmd)];
+          if (checkoutLines.length) {
+            lines.push("체크아웃");
+            Array.prototype.push.apply(lines, checkoutLines);
+          }
+          if (checkinLines.length) {
+            if (checkoutLines.length) {
+              lines.push("");
+            }
+            lines.push("체크인");
+            Array.prototype.push.apply(lines, checkinLines);
+          }
           return lines.join("\n");
         }
 
