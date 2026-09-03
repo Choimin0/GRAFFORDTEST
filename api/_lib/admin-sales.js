@@ -76,6 +76,7 @@ function normalizeMonthKey(value) {
 async function getMonthlySalesData(pool, month) {
   var monthKey = normalizeMonthKey(month);
   var monthStart = monthKey + "-01";
+  // Revenue and reservation counts are attributed to check_out_date.
   const statsQuery = `
     SELECT
       COUNT(*)::int                          AS reservation_count,
@@ -85,8 +86,8 @@ async function getMonthlySalesData(pool, month) {
     FROM ${BOOKING_TABLE}
     WHERE status IN ('confirm', 'completed')
       AND COALESCE(stay_role, 'primary') <> 'room_change'
-      AND check_in_date >= $1::date
-      AND check_in_date < ($1::date + INTERVAL '1 month')::date
+      AND check_out_date >= $1::date
+      AND check_out_date < ($1::date + INTERVAL '1 month')::date
     GROUP BY booking_channel, room_type
   `;
 
@@ -153,13 +154,13 @@ async function getMonthlySalesData(pool, month) {
       )::date AS day
     ),
     sales AS (
-      SELECT check_in_date::date AS day, SUM(total_amount)::bigint AS revenue
+      SELECT check_out_date::date AS day, SUM(total_amount)::bigint AS revenue
       FROM ${BOOKING_TABLE}, month_bounds
       WHERE status IN ('confirm', 'completed')
         AND COALESCE(stay_role, 'primary') <> 'room_change'
-        AND check_in_date >= month_start
-        AND check_in_date < next_month_start
-      GROUP BY check_in_date::date
+        AND check_out_date >= month_start
+        AND check_out_date < next_month_start
+      GROUP BY check_out_date::date
     ),
     daily_sales AS (
       SELECT
@@ -309,6 +310,7 @@ async function getAnnualSalesData(pool, year) {
   if (!Number.isFinite(selectedYear) || selectedYear < 1900 || selectedYear > 9999) {
     selectedYear = Number(getTodayYmdKst().slice(0, 4));
   }
+  // Revenue and reservation counts are attributed to check_out_date.
   const monthlyQuery = `
     WITH year_bounds AS (
       SELECT
@@ -320,14 +322,14 @@ async function getAnnualSalesData(pool, year) {
     ),
     confirmed AS (
       SELECT
-        EXTRACT(MONTH FROM check_in_date)::int AS month,
+        EXTRACT(MONTH FROM check_out_date)::int AS month,
         COUNT(*)::int AS reservation_count,
         COALESCE(SUM(total_amount), 0)::bigint AS revenue
       FROM ${BOOKING_TABLE}, year_bounds
       WHERE status IN ('confirm', 'completed')
         AND COALESCE(stay_role, 'primary') <> 'room_change'
-        AND check_in_date >= year_start
-        AND check_in_date < next_year_start
+        AND check_out_date >= year_start
+        AND check_out_date < next_year_start
       GROUP BY month
     ),
     cancelled AS (
@@ -359,12 +361,12 @@ async function getAnnualSalesData(pool, year) {
 
   const annualQuery = `
     SELECT
-      EXTRACT(YEAR FROM check_in_date)::int AS year,
+      EXTRACT(YEAR FROM check_out_date)::int AS year,
       COALESCE(SUM(total_amount), 0)::bigint AS revenue
     FROM ${BOOKING_TABLE}
     WHERE status IN ('confirm', 'completed')
       AND COALESCE(stay_role, 'primary') <> 'room_change'
-      AND EXTRACT(YEAR FROM check_in_date) >= 2026
+      AND EXTRACT(YEAR FROM check_out_date) >= 2026
     GROUP BY year
     ORDER BY year
   `;

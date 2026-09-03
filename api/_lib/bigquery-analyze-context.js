@@ -127,11 +127,11 @@ export async function fetchAnalyzeContext() {
     " GROUP BY room ORDER BY room";
 
   var monthlySql =
-    "SELECT FORMAT_DATE('%Y-%m', SAFE.PARSE_DATE('%Y-%m-%d', check_in)) AS month, " +
+    "SELECT FORMAT_DATE('%Y-%m', SAFE.PARSE_DATE('%Y-%m-%d', check_out)) AS month, " +
     "COUNT(*) AS reservation_count, SUM(SAFE_CAST(amount AS INT64)) AS total_revenue " +
     "FROM " +
     reserveTable +
-    " WHERE SAFE.PARSE_DATE('%Y-%m-%d', check_in) >= DATE_SUB(CURRENT_DATE('Asia/Seoul'), INTERVAL 12 MONTH) " +
+    " WHERE SAFE.PARSE_DATE('%Y-%m-%d', check_out) >= DATE_SUB(CURRENT_DATE('Asia/Seoul'), INTERVAL 12 MONTH) " +
     "GROUP BY month ORDER BY month";
 
   var cancelSummarySql =
