@@ -33,38 +33,10 @@
         typeof global.GraffordPaymentMethods.applyInicisCenterCdBypass === "function") {
       return global.GraffordPaymentMethods.applyInicisCenterCdBypass(existingBypass);
     }
-    var bypass =
-      existingBypass && typeof existingBypass === "object"
-        ? Object.assign({}, existingBypass)
-        : {};
-    var inicis =
-      bypass.inicis_v2 && typeof bypass.inicis_v2 === "object"
-        ? Object.assign({}, bypass.inicis_v2)
-        : {};
-    var acceptmethod = Array.isArray(inicis.acceptmethod)
-      ? inicis.acceptmethod.slice()
-      : [];
-    if (
-      !acceptmethod.some(function (item) {
-        return /centercd\s*\(\s*y\s*\)/i.test(String(item));
-      })
-    ) {
-      acceptmethod.push("centerCd(Y)");
+    if (!existingBypass || typeof existingBypass !== "object") {
+      return undefined;
     }
-    var reserved = Array.isArray(inicis.P_RESERVED)
-      ? inicis.P_RESERVED.slice()
-      : [];
-    if (
-      !reserved.some(function (item) {
-        return /centercd\s*=\s*y/i.test(String(item));
-      })
-    ) {
-      reserved.push("centerCd=Y");
-    }
-    inicis.acceptmethod = acceptmethod;
-    inicis.P_RESERVED = reserved;
-    bypass.inicis_v2 = inicis;
-    return bypass;
+    return existingBypass;
   }
 
   function parsePortoneSearchParams(searchLike) {
@@ -524,7 +496,12 @@
       String(next.currency || "").toUpperCase() === "USD" ||
       String(next.payMethod || "").toUpperCase() === "PAYPAL";
     if (!isPaypal) {
-      next.bypass = applyInicisCenterCdBypass(next.bypass);
+      var sanitizedBypass = applyInicisCenterCdBypass(next.bypass);
+      if (sanitizedBypass) {
+        next.bypass = sanitizedBypass;
+      } else {
+        delete next.bypass;
+      }
     }
     return next;
   }
@@ -550,10 +527,24 @@
     var next = Object.assign({}, base || {}, extra || {});
     var left = (base && base.inicis_v2) || {};
     var right = (extra && extra.inicis_v2) || {};
-    next.inicis_v2 = Object.assign({}, left, right, {
-      acceptmethod: unionStringList(left.acceptmethod, right.acceptmethod),
-      P_RESERVED: unionStringList(left.P_RESERVED, right.P_RESERVED),
-    });
+    var mergedInicis = Object.assign({}, left, right);
+    var acceptmethod = unionStringList(left.acceptmethod, right.acceptmethod);
+    var reserved = unionStringList(left.P_RESERVED, right.P_RESERVED);
+    if (acceptmethod.length) {
+      mergedInicis.acceptmethod = acceptmethod;
+    } else {
+      delete mergedInicis.acceptmethod;
+    }
+    if (reserved.length) {
+      mergedInicis.P_RESERVED = reserved;
+    } else {
+      delete mergedInicis.P_RESERVED;
+    }
+    if (Object.keys(mergedInicis).length) {
+      next.inicis_v2 = mergedInicis;
+    } else {
+      delete next.inicis_v2;
+    }
     return next;
   }
 
@@ -593,6 +584,12 @@
     }
     if (verifyData.bypass) {
       next.bypass = mergeInicisBypass(next.bypass, verifyData.bypass);
+    }
+    var sanitizedBypass = applyInicisCenterCdBypass(next.bypass);
+    if (sanitizedBypass) {
+      next.bypass = sanitizedBypass;
+    } else {
+      delete next.bypass;
     }
     return next;
   }

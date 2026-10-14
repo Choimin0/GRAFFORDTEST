@@ -81,15 +81,26 @@ assert(
 );
 
 var bypass = buildInicisCenterCdBypass({
-  inicis_v2: { acceptmethod: ["below1000"], P_RESERVED: ["below1000=Y"] },
+  inicis_v2: {
+    acceptmethod: ["centerCd(Y)", "below1000"],
+    P_RESERVED: ["centerCd=Y", "below1000=Y"],
+    P_CHKFAKE: "not-allowed",
+  },
 });
 assert(
-  "pc centerCd option",
-  bypass.inicis_v2.acceptmethod.indexOf("centerCd(Y)") !== -1,
+  "strip unsupported acceptmethod",
+  bypass.inicis_v2.acceptmethod.join(",") === "below1000",
 );
 assert(
-  "mobile centerCd option",
-  bypass.inicis_v2.P_RESERVED.indexOf("centerCd=Y") !== -1,
+  "strip unsupported P_RESERVED",
+  bypass.inicis_v2.P_RESERVED.join(",") === "below1000=Y",
+);
+assert("strip P_CHKFAKE", bypass.inicis_v2.P_CHKFAKE == null);
+assert(
+  "empty bypass omitted",
+  buildInicisCenterCdBypass({
+    inicis_v2: { acceptmethod: ["centerCd(Y)"] },
+  }) == null,
 );
 
 var untrusted = assertNoUntrustedInicisApprovalFetch({

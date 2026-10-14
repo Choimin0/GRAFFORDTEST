@@ -80,11 +80,15 @@ var payload = createInicisIntegrityPayload({
 assert("payload amount stays decimal", payload.amount === 250000 && payload.amountText === "250000");
 assert("payload signed", payload.signed === true);
 
-var bypass = buildInicisIntegrityBypass({}, payload);
-assert("pc use_chkfake", bypass.inicis_v2.use_chkfake === "Y");
-assert("mobile amt_hash", bypass.inicis_v2.P_RESERVED.indexOf("amt_hash=Y") !== -1);
-assert("P_CHKFAKE present", !!bypass.inicis_v2.P_CHKFAKE);
-assert("centerCd kept", bypass.inicis_v2.acceptmethod.indexOf("centerCd(Y)") !== -1);
+var bypass = buildInicisIntegrityBypass(
+  {
+    inicis_v2: { acceptmethod: ["below1000"] },
+  },
+  payload,
+);
+assert("keep portone-safe option", bypass.inicis_v2.acceptmethod[0] === "below1000");
+assert("do not send use_chkfake to portone", bypass.inicis_v2.use_chkfake == null);
+assert("do not send P_CHKFAKE to portone", bypass.inicis_v2.P_CHKFAKE == null);
 
 var unsigned = createInicisIntegrityPayload({
   oid: "20261014-ABC123",
@@ -94,10 +98,7 @@ var unsigned = createInicisIntegrityPayload({
 });
 assert("unsigned without keys", unsigned.ok && unsigned.signed === false);
 var unsignedBypass = buildInicisIntegrityBypass({}, unsigned);
-assert(
-  "do not enable amt_hash without hash",
-  unsignedBypass.inicis_v2.P_RESERVED.indexOf("amt_hash=Y") === -1,
-);
+assert("empty portone bypass", !unsignedBypass.inicis_v2);
 
 if (failed) {
   process.exit(1);

@@ -212,38 +212,92 @@ export function assertNoUntrustedInicisApprovalFetch(source) {
   return { ok: true, ignored: true };
 }
 
+var PORTONE_INICIS_KEYS = {
+  logo_url: true,
+  logo_2nd: true,
+  parentemail: true,
+  Ini_SSGPAY_MDN: true,
+  acceptmethod: true,
+  P_CARD_OPTION: true,
+  P_MNAME: true,
+  P_RESERVED: true,
+};
+
+function isPortoneAcceptmethod(value) {
+  var text = String(value || "");
+  if (
+    text === "below1000" ||
+    text === "ocb" ||
+    text === "paypopup" ||
+    text === "hidebar" ||
+    text === "noeasypay"
+  ) {
+    return true;
+  }
+  return (
+    /^SKIN\(#[0-9A-Fa-f]{6}\)$/.test(text) ||
+    /^slimquota\(.+\)$/.test(text) ||
+    /^mallpoint\(.+\)$/.test(text)
+  );
+}
+
+function isPortoneReserved(value) {
+  var text = String(value || "");
+  return (
+    text === "below1000=Y" ||
+    text === "noeasypay=Y" ||
+    text === "global_visa3d=Y" ||
+    text === "apprun_check=Y"
+  );
+}
+
+/**
+ * PortOne v2 SDK가 허용하는 inicis_v2 필드만 남깁니다.
+ * centerCd(Y), amt_hash, P_CHKFAKE, signature 등은 SDK 스키마에 없어
+ * requestPayment가 거절됩니다. IDC/해시 검증은 PortOne·서버 금액 대조로 처리합니다.
+ */
+export function sanitizePortoneInicisBypass(existingBypass) {
+  if (!existingBypass || typeof existingBypass !== "object") {
+    return undefined;
+  }
+  var next = Object.assign({}, existingBypass);
+  var inicis = next.inicis_v2;
+  if (!inicis || typeof inicis !== "object") {
+    if (!Object.keys(next).length) {
+      return undefined;
+    }
+    return next;
+  }
+  var cleaned = {};
+  Object.keys(inicis).forEach(function (key) {
+    if (!PORTONE_INICIS_KEYS[key]) {
+      return;
+    }
+    cleaned[key] = inicis[key];
+  });
+  if (Array.isArray(cleaned.acceptmethod)) {
+    cleaned.acceptmethod = cleaned.acceptmethod.filter(isPortoneAcceptmethod);
+    if (!cleaned.acceptmethod.length) {
+      delete cleaned.acceptmethod;
+    }
+  }
+  if (Array.isArray(cleaned.P_RESERVED)) {
+    cleaned.P_RESERVED = cleaned.P_RESERVED.filter(isPortoneReserved);
+    if (!cleaned.P_RESERVED.length) {
+      delete cleaned.P_RESERVED;
+    }
+  }
+  if (!Object.keys(cleaned).length) {
+    delete next.inicis_v2;
+  } else {
+    next.inicis_v2 = cleaned;
+  }
+  if (!Object.keys(next).length) {
+    return undefined;
+  }
+  return next;
+}
+
 export function buildInicisCenterCdBypass(existingBypass) {
-  var bypass =
-    existingBypass && typeof existingBypass === "object"
-      ? Object.assign({}, existingBypass)
-      : {};
-  var inicis =
-    bypass.inicis_v2 && typeof bypass.inicis_v2 === "object"
-      ? Object.assign({}, bypass.inicis_v2)
-      : {};
-
-  var acceptmethod = Array.isArray(inicis.acceptmethod)
-    ? inicis.acceptmethod.slice()
-    : [];
-  var hasCenterCd = acceptmethod.some(function (item) {
-    return /centercd\s*\(\s*y\s*\)/i.test(String(item));
-  });
-  if (!hasCenterCd) {
-    acceptmethod.push("centerCd(Y)");
-  }
-
-  var reserved = Array.isArray(inicis.P_RESERVED)
-    ? inicis.P_RESERVED.slice()
-    : [];
-  var hasReservedCenterCd = reserved.some(function (item) {
-    return /centercd\s*=\s*y/i.test(String(item));
-  });
-  if (!hasReservedCenterCd) {
-    reserved.push("centerCd=Y");
-  }
-
-  inicis.acceptmethod = acceptmethod;
-  inicis.P_RESERVED = reserved;
-  bypass.inicis_v2 = inicis;
-  return bypass;
+  return sanitizePortoneInicisBypass(existingBypass);
 }

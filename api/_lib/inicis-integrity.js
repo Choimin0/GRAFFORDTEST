@@ -141,38 +141,6 @@ export function createInicisIntegrityPayload(options) {
 }
 
 export function buildInicisIntegrityBypass(existingBypass, integrity) {
-  var bypass = buildInicisCenterCdBypass(existingBypass);
-  if (!integrity || !integrity.ok) {
-    return bypass;
-  }
-  var inicis =
-    bypass.inicis_v2 && typeof bypass.inicis_v2 === "object"
-      ? Object.assign({}, bypass.inicis_v2)
-      : {};
-
-  if (integrity.pc) {
-    inicis.use_chkfake = "Y";
-    inicis.timestamp = integrity.pc.timestamp;
-    inicis.signature = integrity.pc.signature;
-    inicis.verification = integrity.pc.verification;
-    inicis.mKey = integrity.pc.mKey;
-  }
-
-  if (integrity.mobile) {
-    inicis.P_TIMESTAMP = integrity.mobile.P_TIMESTAMP;
-    inicis.P_CHKFAKE = integrity.mobile.P_CHKFAKE;
-    var reserved = Array.isArray(inicis.P_RESERVED)
-      ? inicis.P_RESERVED.slice()
-      : [];
-    var hasAmtHash = reserved.some(function (item) {
-      return /amt_hash\s*=\s*y/i.test(String(item));
-    });
-    if (!hasAmtHash) {
-      reserved.push("amt_hash=Y");
-    }
-    inicis.P_RESERVED = reserved;
-  }
-
-  bypass.inicis_v2 = inicis;
-  return bypass;
+  void integrity;
+  return buildInicisCenterCdBypass(existingBypass) || {};
 }
