@@ -158,6 +158,39 @@
     return !!(enabled.samsung || enabled.naver || enabled.kakao || enabled.toss);
   }
 
+  function applyInicisCenterCdBypass(existingBypass) {
+    var bypass =
+      existingBypass && typeof existingBypass === "object"
+        ? Object.assign({}, existingBypass)
+        : {};
+    var inicis =
+      bypass.inicis_v2 && typeof bypass.inicis_v2 === "object"
+        ? Object.assign({}, bypass.inicis_v2)
+        : {};
+    var acceptmethod = Array.isArray(inicis.acceptmethod)
+      ? inicis.acceptmethod.slice()
+      : [];
+    var hasCenterCd = acceptmethod.some(function (item) {
+      return /centercd\s*\(\s*y\s*\)/i.test(String(item));
+    });
+    if (!hasCenterCd) {
+      acceptmethod.push("centerCd(Y)");
+    }
+    var reserved = Array.isArray(inicis.P_RESERVED)
+      ? inicis.P_RESERVED.slice()
+      : [];
+    var hasReservedCenterCd = reserved.some(function (item) {
+      return /centercd\s*=\s*y/i.test(String(item));
+    });
+    if (!hasReservedCenterCd) {
+      reserved.push("centerCd=Y");
+    }
+    inicis.acceptmethod = acceptmethod;
+    inicis.P_RESERVED = reserved;
+    bypass.inicis_v2 = inicis;
+    return bypass;
+  }
+
   function resolveActiveChannelKey(methodId, config) {
     if (normalizeMethodId(methodId) === "paypal") {
       return (config && config.paypalChannelKey) || "";
@@ -296,6 +329,7 @@
       params.forceRedirect = true;
     }
     params.windowType = Object.assign({ mobile: "REDIRECTION" }, params.windowType || {});
+    params.bypass = applyInicisCenterCdBypass(params.bypass);
 
     if (meta.category === "easy_pay" && meta.easyPayProvider) {
       params.easyPay = { easyPayProvider: meta.easyPayProvider };
@@ -406,6 +440,7 @@
     mergePaymentConfig: mergePaymentConfig,
     hasEnabledEasyPay: hasEnabledEasyPay,
     resolveActiveChannelKey: resolveActiveChannelKey,
+    applyInicisCenterCdBypass: applyInicisCenterCdBypass,
     buildPortoneParams: buildPortoneParams,
     resolveVerifiedMethod: resolveVerifiedMethod,
     syncDrawerVisibility: syncDrawerVisibility,

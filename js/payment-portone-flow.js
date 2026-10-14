@@ -9,10 +9,73 @@
     return raw === "false" || raw === "0" || raw === "fail" || raw === "failed";
   }
 
+  var INICIS_CALLBACK_URL_KEYS = [
+    "authUrl",
+    "P_REQ_URL",
+    "netCancelUrl",
+    "P_NEXT_URL",
+  ];
+
+  function hasInicisApprovalUrlParams(searchLike) {
+    try {
+      var search = new URLSearchParams(searchLike || "");
+      for (var i = 0; i < INICIS_CALLBACK_URL_KEYS.length; i++) {
+        if (String(search.get(INICIS_CALLBACK_URL_KEYS[i]) || "").trim()) {
+          return true;
+        }
+      }
+    } catch (_e) {}
+    return false;
+  }
+
+  function applyInicisCenterCdBypass(existingBypass) {
+    if (global.GraffordPaymentMethods &&
+        typeof global.GraffordPaymentMethods.applyInicisCenterCdBypass === "function") {
+      return global.GraffordPaymentMethods.applyInicisCenterCdBypass(existingBypass);
+    }
+    var bypass =
+      existingBypass && typeof existingBypass === "object"
+        ? Object.assign({}, existingBypass)
+        : {};
+    var inicis =
+      bypass.inicis_v2 && typeof bypass.inicis_v2 === "object"
+        ? Object.assign({}, bypass.inicis_v2)
+        : {};
+    var acceptmethod = Array.isArray(inicis.acceptmethod)
+      ? inicis.acceptmethod.slice()
+      : [];
+    if (
+      !acceptmethod.some(function (item) {
+        return /centercd\s*\(\s*y\s*\)/i.test(String(item));
+      })
+    ) {
+      acceptmethod.push("centerCd(Y)");
+    }
+    var reserved = Array.isArray(inicis.P_RESERVED)
+      ? inicis.P_RESERVED.slice()
+      : [];
+    if (
+      !reserved.some(function (item) {
+        return /centercd\s*=\s*y/i.test(String(item));
+      })
+    ) {
+      reserved.push("centerCd=Y");
+    }
+    inicis.acceptmethod = acceptmethod;
+    inicis.P_RESERVED = reserved;
+    bypass.inicis_v2 = inicis;
+    return bypass;
+  }
+
   function parsePortoneSearchParams(searchLike) {
     var result = {};
     try {
       var search = new URLSearchParams(searchLike || "");
+      if (hasInicisApprovalUrlParams(search)) {
+        INICIS_CALLBACK_URL_KEYS.forEach(function (key) {
+          search.delete(key);
+        });
+      }
       var paymentId = String(
         search.get("paymentId") || search.get("merchant_uid") || "",
       ).trim();
@@ -457,6 +520,80 @@
       windowType.pc = "REDIRECTION";
     }
     next.windowType = windowType;
+    var isPaypal =
+      String(next.currency || "").toUpperCase() === "USD" ||
+      String(next.payMethod || "").toUpperCase() === "PAYPAL";
+    if (!isPaypal) {
+      next.bypass = applyInicisCenterCdBypass(next.bypass);
+    }
+    return next;
+  }
+
+  function unionStringList(left, right) {
+    var out = [];
+    function add(list) {
+      if (!Array.isArray(list)) {
+        return;
+      }
+      list.forEach(function (item) {
+        if (out.indexOf(item) === -1) {
+          out.push(item);
+        }
+      });
+    }
+    add(left);
+    add(right);
+    return out;
+  }
+
+  function mergeInicisBypass(base, extra) {
+    var next = Object.assign({}, base || {}, extra || {});
+    var left = (base && base.inicis_v2) || {};
+    var right = (extra && extra.inicis_v2) || {};
+    next.inicis_v2 = Object.assign({}, left, right, {
+      acceptmethod: unionStringList(left.acceptmethod, right.acceptmethod),
+      P_RESERVED: unionStringList(left.P_RESERVED, right.P_RESERVED),
+    });
+    return next;
+  }
+
+  function isPaypalPortoneParams(params) {
+    return (
+      String((params && params.currency) || "").toUpperCase() === "USD" ||
+      String((params && params.payMethod) || "").toUpperCase() === "PAYPAL"
+    );
+  }
+
+  async function attachInicisIntegrity(params, orderNo) {
+    var next = Object.assign({}, params || {});
+    if (isPaypalPortoneParams(next)) {
+      return next;
+    }
+    var verifyRes = await fetch("/api/payment-confirm", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        prepareIntegrity: true,
+        paymentId: orderNo || next.paymentId,
+        expectedAmount: next.totalAmount,
+      }),
+    });
+    var verifyData = {};
+    try {
+      verifyData = await verifyRes.json();
+    } catch (_e) {}
+    if (!verifyRes.ok || !verifyData.ok) {
+      throw new Error(
+        verifyData.error ||
+          "결제 금액 위변조 검증 준비에 실패했습니다. 잠시 후 다시 시도해 주세요.",
+      );
+    }
+    if (verifyData.amount != null) {
+      next.totalAmount = Number(verifyData.amount);
+    }
+    if (verifyData.bypass) {
+      next.bypass = mergeInicisBypass(next.bypass, verifyData.bypass);
+    }
     return next;
   }
 
@@ -631,33 +768,30 @@
     var enhanced = enhancePortoneRequestParams(params);
     markPortoneDepartureStarted(orderNo);
     preparePaymentDeparture(orderNo);
-    var promise;
-    try {
-      promise = portone.requestPayment(enhanced);
-    } catch (syncErr) {
-      clearPortoneDepartureStarted();
-      clearPaymentDeparture(orderNo);
-      if (typeof handlers.onError === "function") {
-        handlers.onError(syncErr);
-      }
-      return null;
-    }
-    if (promise && typeof promise.then === "function") {
-      promise
-        .then(function (response) {
-          if (typeof handlers.onSuccess === "function") {
-            handlers.onSuccess(response, enhanced);
-          }
-        })
-        .catch(function (err) {
-          clearPortoneDepartureStarted();
-          clearPaymentDeparture(orderNo);
-          if (typeof handlers.onError === "function") {
-            handlers.onError(err);
-          }
-        });
-    }
-    return promise;
+    var chain = attachInicisIntegrity(enhanced, orderNo)
+      .then(function (finalParams) {
+        var promise = portone.requestPayment(finalParams);
+        if (promise && typeof promise.then === "function") {
+          return promise.then(function (response) {
+            if (typeof handlers.onSuccess === "function") {
+              handlers.onSuccess(response, finalParams);
+            }
+            return response;
+          });
+        }
+        if (typeof handlers.onSuccess === "function") {
+          handlers.onSuccess(promise, finalParams);
+        }
+        return promise;
+      })
+      .catch(function (err) {
+        clearPortoneDepartureStarted();
+        clearPaymentDeparture(orderNo);
+        if (typeof handlers.onError === "function") {
+          handlers.onError(err);
+        }
+      });
+    return chain;
   }
 
   var RESERVE_COMPLETE_DATA_KEY = "graffordReserveCompleteData";
@@ -1058,6 +1192,7 @@
     buildPortoneRedirectUrl: buildPortoneRedirectUrl,
     isMobileLikeEnvironment: isMobileLikeEnvironment,
     enhancePortoneRequestParams: enhancePortoneRequestParams,
+    attachInicisIntegrity: attachInicisIntegrity,
     armRedirectWatchdog: armRedirectWatchdog,
     isRedirectDeferredResponse: isRedirectDeferredResponse,
     isPaymentFinalizeInProgress: isPaymentFinalizeInProgress,

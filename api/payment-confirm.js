@@ -5,6 +5,7 @@
  * POST Body: {
  *   paymentId: string,
  *   expectedAmount: number,
+ *   prepareIntegrity?: boolean, // 이니시스 금액·주문번호 해시 준비
  *   paymentToken?: string,  // 수동 승인 채널
  *   txId?: string
  * }
@@ -17,6 +18,13 @@ import {
   fetchPortonePayment,
   fetchPortonePaymentUntilPaid,
 } from "./_lib/portone-client.js";
+import { assertNoUntrustedInicisApprovalFetch } from "./_lib/inicis-idc-whitelist.js";
+import {
+  buildInicisIntegrityBypass,
+  createInicisIntegrityPayload,
+  formatInicisDecimalAmount,
+} from "./_lib/inicis-integrity.js";
+import { getCheckoutDraft } from "./_lib/booking-checkout-draft.js";
 import {
   extractPaymentMethodFromPortonePayment,
   normalizePaymentMethodId,
@@ -59,6 +67,60 @@ function getPool() {
     });
   }
   return poolSingleton;
+}
+
+async function resolveLockedKrwAmount(paymentId, clientExpected, options) {
+  options = options || {};
+  var requireDraft = options.requireDraft !== false;
+  var amountText = formatInicisDecimalAmount(clientExpected);
+  var pool = getPool();
+  if (!pool) {
+    if (!amountText) {
+      return { ok: false, error: "결제금액이 올바르지 않습니다." };
+    }
+    return { ok: true, amount: Number(amountText), source: "client" };
+  }
+  try {
+    var draft = await getCheckoutDraft(pool, paymentId, { allowExpired: true });
+    var storedAmount =
+      draft && draft.totalAmount != null ? draft.totalAmount : null;
+    if (storedAmount == null) {
+      var booked = await findBookingByNumber(pool, paymentId);
+      if (booked && booked.total_amount != null) {
+        storedAmount = booked.total_amount;
+      }
+    }
+    if (storedAmount == null) {
+      if (requireDraft || !amountText) {
+        return {
+          ok: false,
+          error:
+            "서버에 저장된 결제금액이 없습니다. 결제 페이지부터 다시 진행해 주세요.",
+        };
+      }
+      return { ok: true, amount: Number(amountText), source: "client" };
+    }
+    var lockedText = formatInicisDecimalAmount(storedAmount);
+    if (!lockedText) {
+      return { ok: false, error: "저장된 결제금액이 올바르지 않습니다." };
+    }
+    var locked = Number(lockedText);
+    if (amountText && Number(amountText) !== locked) {
+      return {
+        ok: false,
+        error: "결제 금액이 서버에 저장된 금액과 일치하지 않습니다.",
+        expected: locked,
+        actual: Number(amountText),
+      };
+    }
+    return { ok: true, amount: locked, source: "draft" };
+  } catch (e) {
+    console.error("[payment-confirm] draft amount lookup", paymentId, e);
+    return {
+      ok: false,
+      error: "결제금액 확인 중 오류가 발생했습니다.",
+    };
+  }
 }
 
 function normalizeUsdActualToExpected(actualAmount, expectedAmount) {
@@ -202,6 +264,59 @@ export default async function handler(req, res) {
     return;
   }
 
+  if (body.prepareIntegrity === true || body.prepareIntegrity === "true") {
+    var prepared = await resolveLockedKrwAmount(paymentId, expectedAmount, {
+      requireDraft: true,
+    });
+    if (!prepared.ok) {
+      res.statusCode = 400;
+      res.end(
+        JSON.stringify({
+          ok: false,
+          error: prepared.error,
+          expected: prepared.expected,
+          actual: prepared.actual,
+        }),
+      );
+      return;
+    }
+    var integrity = createInicisIntegrityPayload({
+      oid: paymentId,
+      amount: prepared.amount,
+    });
+    if (!integrity.ok) {
+      res.statusCode = 400;
+      res.end(JSON.stringify({ ok: false, error: integrity.error }));
+      return;
+    }
+    res.statusCode = 200;
+    res.end(
+      JSON.stringify({
+        ok: true,
+        paymentId: paymentId,
+        amount: integrity.amount,
+        amountText: integrity.amountText,
+        signed: integrity.signed,
+        bypass: buildInicisIntegrityBypass({}, integrity),
+      }),
+    );
+    return;
+  }
+
+  var inicisUrlGuard = assertNoUntrustedInicisApprovalFetch(body);
+  if (!inicisUrlGuard.ok) {
+    res.statusCode = 400;
+    res.end(
+      JSON.stringify({
+        ok: false,
+        error:
+          inicisUrlGuard.error ||
+          "이니시스 승인 URL 화이트리스트 검증에 실패했습니다.",
+      }),
+    );
+    return;
+  }
+
   if (body.statusOnly === true || body.statusOnly === "true") {
     var statusLookup = await fetchPortonePayment(paymentId);
     if (!statusLookup.ok) {
@@ -318,6 +433,23 @@ export default async function handler(req, res) {
       .replace(/^CURRENCY_/, "");
     if (paidCurrency === "USD" || requestedMethodId === "paypal") {
       actualAmount = normalizeUsdActualToExpected(actualAmount, expectedAmount);
+    } else {
+      var lockedKrw = await resolveLockedKrwAmount(paymentId, expectedAmount, {
+        requireDraft: false,
+      });
+      if (!lockedKrw.ok) {
+        res.statusCode = 400;
+        res.end(
+          JSON.stringify({
+            ok: false,
+            error: lockedKrw.error || "결제 금액이 일치하지 않습니다.",
+            expected: lockedKrw.expected,
+            actual: lockedKrw.actual,
+          }),
+        );
+        return;
+      }
+      expectedAmount = lockedKrw.amount;
     }
     if (
       expectedAmount !== null &&
