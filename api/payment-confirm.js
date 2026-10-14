@@ -72,7 +72,10 @@ function getPool() {
 async function resolveLockedKrwAmount(paymentId, clientExpected, options) {
   options = options || {};
   var requireDraft = options.requireDraft !== false;
-  var amountText = formatInicisDecimalAmount(clientExpected);
+  var amountText = "";
+  if (clientExpected != null && Number(clientExpected) > 0) {
+    amountText = formatInicisDecimalAmount(clientExpected);
+  }
   var pool = getPool();
   if (!pool) {
     if (!amountText) {
@@ -106,12 +109,23 @@ async function resolveLockedKrwAmount(paymentId, clientExpected, options) {
     }
     var locked = Number(lockedText);
     if (amountText && Number(amountText) !== locked) {
-      return {
-        ok: false,
-        error: "결제 금액이 서버에 저장된 금액과 일치하지 않습니다.",
-        expected: locked,
-        actual: Number(amountText),
-      };
+      if (options.ignoreClientMismatch) {
+        console.warn(
+          "[payment-confirm] client amount ignored; using stored amount",
+          paymentId,
+          "client:",
+          amountText,
+          "stored:",
+          locked,
+        );
+      } else {
+        return {
+          ok: false,
+          error: "결제 금액이 서버에 저장된 금액과 일치하지 않습니다.",
+          expected: locked,
+          actual: Number(amountText),
+        };
+      }
     }
     return { ok: true, amount: locked, source: "draft" };
   } catch (e) {
@@ -121,6 +135,24 @@ async function resolveLockedKrwAmount(paymentId, clientExpected, options) {
       error: "결제금액 확인 중 오류가 발생했습니다.",
     };
   }
+}
+
+async function lookupCommittedReservation(pool, paymentId) {
+  if (!pool || !paymentId) {
+    return null;
+  }
+  try {
+    var booked = await findBookingByNumber(pool, paymentId);
+    if (
+      booked &&
+      (booked.status === "confirm" || booked.status === "completed")
+    ) {
+      return buildReserveCompleteView(booked);
+    }
+  } catch (e) {
+    console.error("[payment-confirm] committed reservation lookup", paymentId, e);
+  }
+  return null;
 }
 
 function normalizeUsdActualToExpected(actualAmount, expectedAmount) {
@@ -436,8 +468,23 @@ export default async function handler(req, res) {
     } else {
       var lockedKrw = await resolveLockedKrwAmount(paymentId, expectedAmount, {
         requireDraft: false,
+        ignoreClientMismatch: true,
       });
       if (!lockedKrw.ok) {
+        var lockedExisting = await lookupCommittedReservation(getPool(), paymentId);
+        if (lockedExisting) {
+          res.statusCode = 200;
+          res.end(
+            JSON.stringify({
+              ok: true,
+              paymentId: paymentId,
+              status: payment.status,
+              reservationCommitted: true,
+              reservation: lockedExisting,
+            }),
+          );
+          return;
+        }
         res.statusCode = 400;
         res.end(
           JSON.stringify({
@@ -456,6 +503,23 @@ export default async function handler(req, res) {
       actualAmount !== null &&
       Number(actualAmount) !== Number(expectedAmount)
     ) {
+      var mismatchedExisting = await lookupCommittedReservation(
+        getPool(),
+        paymentId,
+      );
+      if (mismatchedExisting) {
+        res.statusCode = 200;
+        res.end(
+          JSON.stringify({
+            ok: true,
+            paymentId: paymentId,
+            status: payment.status,
+            reservationCommitted: true,
+            reservation: mismatchedExisting,
+          }),
+        );
+        return;
+      }
       res.statusCode = 400;
       res.end(
         JSON.stringify({
@@ -517,21 +581,7 @@ export default async function handler(req, res) {
         console.error("[payment-confirm] paid commit error", paymentId, commitErr);
       }
       if (!reservation) {
-        try {
-          var booked = await findBookingByNumber(pool, paymentId);
-          if (
-            booked &&
-            (booked.status === "confirm" || booked.status === "completed")
-          ) {
-            reservation = buildReserveCompleteView(booked);
-          }
-        } catch (lookupErr) {
-          console.error(
-            "[payment-confirm] reservation lookup error",
-            paymentId,
-            lookupErr,
-          );
-        }
+        reservation = await lookupCommittedReservation(pool, paymentId);
       }
     }
 

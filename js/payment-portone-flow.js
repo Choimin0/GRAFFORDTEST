@@ -396,6 +396,39 @@
     return loadPersistedPortoneRedirectResult(orderNo);
   }
 
+  async function resolvePaidRedirectResponse(redirectResult, orderNo) {
+    if (!redirectResult || !redirectResult.paymentId) {
+      return { paid: false };
+    }
+    var paymentId = orderNo || redirectResult.paymentId;
+    if (!redirectResult.code) {
+      return { paid: true, response: redirectResult };
+    }
+    var statusData = null;
+    try {
+      statusData = await lookupPortonePaymentStatus(paymentId);
+    } catch (_e) {
+      statusData = null;
+    }
+    if (statusData && (statusData.ok === true || statusData.status === "PAID")) {
+      return {
+        paid: true,
+        response: {
+          paymentId: paymentId,
+          txId: redirectResult.txId || null,
+          paymentToken: redirectResult.paymentToken || null,
+        },
+      };
+    }
+    return {
+      paid: false,
+      message:
+        (statusData && (statusData.error || statusData.failureReason)) ||
+        redirectResult.message ||
+        "",
+    };
+  }
+
   async function lookupPortonePaymentStatus(orderNo, expectedAmount) {
     var verifyRes = await fetch("/api/payment-confirm", {
       method: "POST",
@@ -984,10 +1017,21 @@
     markPaymentFinalizeInProgress(orderNo);
 
     if (!response || response.code) {
-      clearPaymentFinalizeInProgress(orderNo);
-      clearPaymentDeparture(orderNo);
-      showError(messages.cancelled || "결제가 취소되었습니다");
-      return false;
+      var paidRedirect = await resolvePaidRedirectResponse(
+        Object.assign({ paymentId: orderNo }, response || {}),
+        orderNo,
+      );
+      if (!paidRedirect.paid) {
+        clearPaymentFinalizeInProgress(orderNo);
+        clearPaymentDeparture(orderNo);
+        showError(
+          paidRedirect.message ||
+            messages.cancelled ||
+            "결제가 취소되었습니다",
+        );
+        return false;
+      }
+      response = paidRedirect.response;
     }
 
     var verifiedPgTid = null;
@@ -1011,28 +1055,49 @@
       var verifyRes = verifyOutcome.verifyRes;
       var verifyData = verifyOutcome.verifyData;
       if (!verifyRes.ok || !verifyData.ok) {
-        var verifyErrMsg = verifyData.error || verifyData.message || "";
-        if (verifyData.expected != null && verifyData.actual != null) {
-          if (messages.amountMismatchFormat) {
-            verifyErrMsg += messages.amountMismatchFormat
-              .replace("{expected}", String(verifyData.expected))
-              .replace("{actual}", String(verifyData.actual));
-          } else {
-            verifyErrMsg +=
-              "\n(결제 금액: 예상 " +
-              verifyData.expected +
-              "원 / 실제 " +
-              verifyData.actual +
-              "원)";
-          }
-        }
-        showError(
-          (messages.verifyFailed ||
-            "결제 검증에 실패했습니다. 결제가 정상적으로 이루어졌다면 고객센터로 문의해 주세요.\n") +
-            verifyErrMsg,
+        var retryOutcome = await verifyPortonePaymentWithRetry(
+          { paymentId: response.paymentId || orderNo },
+          showPageLoading,
+          messages,
         );
-        clearPaymentFinalizeInProgress(orderNo);
-        return false;
+        if (
+          retryOutcome.verifyRes &&
+          retryOutcome.verifyRes.ok &&
+          retryOutcome.verifyData &&
+          retryOutcome.verifyData.ok
+        ) {
+          verifyRes = retryOutcome.verifyRes;
+          verifyData = retryOutcome.verifyData;
+        } else if (
+          retryOutcome.verifyData &&
+          retryOutcome.verifyData.reservation
+        ) {
+          verifyRes = { ok: true };
+          verifyData = retryOutcome.verifyData;
+        } else {
+          var verifyErrMsg = verifyData.error || verifyData.message || "";
+          if (verifyData.expected != null && verifyData.actual != null) {
+            if (messages.amountMismatchFormat) {
+              verifyErrMsg += messages.amountMismatchFormat
+                .replace("{expected}", String(verifyData.expected))
+                .replace("{actual}", String(verifyData.actual));
+            } else {
+              verifyErrMsg +=
+                "\n(결제 금액: 예상 " +
+                verifyData.expected +
+                "원 / 실제 " +
+                verifyData.actual +
+                "원)";
+            }
+          }
+          showError(
+            (messages.verifyFailed ||
+              "결제 검증에 실패했습니다. 결제가 정상적으로 이루어졌다면 고객센터로 문의해 주세요.\n") +
+              verifyErrMsg,
+          );
+          clearPaymentFinalizeInProgress(orderNo);
+          return false;
+        }
       }
       verifiedPgTid = verifyData.pgTid || null;
       if (verifyData && verifyData.reservation) {
@@ -1069,68 +1134,98 @@
     }
 
     var fetchedCancelToken = preSavedCancelToken;
-    var saveData;
-    try {
-      showPageLoading(messages.savingReservation || "예약 정보를 저장하는 중입니다...");
-      var saveRes = await fetch(reservationsApiUrl(), {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          reservationNumber: orderNo,
-          guestName: guestName,
-          contact: contact,
-          email: email,
-          guestRequest: guestRequest,
-          roomType: room,
-          checkIn: checkIn,
-          checkOut: checkOut,
-          stayNights: stayNights,
-          extraGuests: extraGuests,
-          totalAmount: finalAmount,
-          paymentMethod: verifiedPayMethod,
-          pgPayProvider: verifiedPgPayProvider,
-          guestCount: guestCount,
-          pgTid: verifiedPgTid,
-          bookingToken: bookingToken,
-          bookingLocale: bookingLocale,
-          pricingBreakdown: pricingBreakdown,
-        }),
-      });
-      saveData = await saveRes.json();
-
-      if (saveData && saveData.unavailable) {
-        resetPaymentGuard();
-        clearPaymentFinalizeInProgress(orderNo);
-        if (global.GraffordBookingToken) {
-          global.GraffordBookingToken.showUnavailableModal();
-        }
-        return false;
-      }
-
-      if (saveRes.status !== 409 && (!saveRes.ok || !saveData.ok)) {
-        showError(
-          (messages.saveFailed ||
-            "결제는 완료되었으나 예약 저장에 실패했습니다.\n고객센터로 문의해 주세요.\n(결제번호: ") +
-            orderNo +
-            ")\n" +
-            (saveData.error || ""),
-        );
-        clearPaymentFinalizeInProgress(orderNo);
-        return false;
-      }
+    var saveData = {
+      ok: true,
+      cancelToken: preSavedCancelToken,
+      createdAtIso:
+        verifiedReservation && verifiedReservation.bookingCreatedAtIso
+          ? verifiedReservation.bookingCreatedAtIso
+          : "",
+    };
+    if (verifiedReservation && verifiedReservation.orderNo) {
       fetchedCancelToken =
-        (saveData && saveData.cancelToken) || fetchedCancelToken;
-    } catch (e) {
-      showError(
-        (messages.saveNetworkError ||
-          "결제는 완료되었으나 예약 저장 중 오류가 발생했습니다.\n고객센터로 문의해 주세요.\n(결제번호: ") +
-          orderNo +
-          ")\n(" +
-          (e && e.message ? e.message : String(e)) +
-          ")",
-      );
-      clearPaymentFinalizeInProgress(orderNo);
-      return false;
+        verifiedReservation.cancelToken || fetchedCancelToken;
+    } else {
+      try {
+        showPageLoading(
+          messages.savingReservation || "예약 정보를 저장하는 중입니다...",
+        );
+        var saveRes = await fetch(reservationsApiUrl(), {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            reservationNumber: orderNo,
+            guestName: guestName,
+            contact: contact,
+            email: email,
+            guestRequest: guestRequest,
+            roomType: room,
+            checkIn: checkIn,
+            checkOut: checkOut,
+            stayNights: stayNights,
+            extraGuests: extraGuests,
+            totalAmount: finalAmount,
+            paymentMethod: verifiedPayMethod,
+            pgPayProvider: verifiedPgPayProvider,
+            guestCount: guestCount,
+            pgTid: verifiedPgTid,
+            bookingToken: bookingToken,
+            bookingLocale: bookingLocale,
+            pricingBreakdown: pricingBreakdown,
+          }),
+        });
+        saveData = await saveRes.json();
+
+        if (saveData && saveData.unavailable) {
+          resetPaymentGuard();
+          clearPaymentFinalizeInProgress(orderNo);
+          if (global.GraffordBookingToken) {
+            global.GraffordBookingToken.showUnavailableModal();
+          }
+          return false;
+        }
+
+        if (saveRes.status !== 409 && (!saveRes.ok || !saveData.ok)) {
+          var paidAfterSaveFail = await lookupPortonePaymentStatus(orderNo);
+          if (
+            paidAfterSaveFail &&
+            (paidAfterSaveFail.ok || paidAfterSaveFail.status === "PAID")
+          ) {
+            saveData = { ok: true, cancelToken: fetchedCancelToken };
+          } else {
+            showError(
+              (messages.saveFailed ||
+                "결제는 완료되었으나 예약 저장에 실패했습니다.\n고객센터로 문의해 주세요.\n(결제번호: ") +
+                orderNo +
+                ")\n" +
+                (saveData.error || ""),
+            );
+            clearPaymentFinalizeInProgress(orderNo);
+            return false;
+          }
+        }
+        fetchedCancelToken =
+          (saveData && saveData.cancelToken) || fetchedCancelToken;
+      } catch (e) {
+        var paidAfterSaveError = await lookupPortonePaymentStatus(orderNo);
+        if (
+          paidAfterSaveError &&
+          (paidAfterSaveError.ok || paidAfterSaveError.status === "PAID")
+        ) {
+          saveData = { ok: true, cancelToken: fetchedCancelToken };
+        } else {
+          showError(
+            (messages.saveNetworkError ||
+              "결제는 완료되었으나 예약 저장 중 오류가 발생했습니다.\n고객센터로 문의해 주세요.\n(결제번호: ") +
+              orderNo +
+              ")\n(" +
+              (e && e.message ? e.message : String(e)) +
+              ")",
+          );
+          clearPaymentFinalizeInProgress(orderNo);
+          return false;
+        }
+      }
     }
 
     clearPaymentFinalizeInProgress(orderNo);
@@ -1212,6 +1307,7 @@
     clearPortoneDepartureStarted: clearPortoneDepartureStarted,
     isPortoneDepartureRecent: isPortoneDepartureRecent,
     finalizePortoneCheckout: finalizePortoneCheckout,
+    resolvePaidRedirectResponse: resolvePaidRedirectResponse,
     mapIamportCallbackToPortoneResult: mapIamportCallbackToPortoneResult,
     resolvePortoneRedirectResult: resolvePortoneRedirectResult,
     persistPortoneRedirectResult: persistPortoneRedirectResult,
